@@ -1,0 +1,47 @@
+name: Hook Netlify
+on:
+  push:
+    branches:
+      - develop
+env:
+  CI: ''
+jobs:
+  testing:
+    runs-on: ubuntu-latest
+    name: 'Build test'
+    steps:
+      - name: checkout@v2
+        uses: actions/checkout@v2
+
+      - name: Use Node.js 12.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+
+      - name: Cache node_modules 🚀
+        uses: actions/cache@v1
+        with:
+          path: node_modules
+          key: ${{runner.OS}}-build-${{hashFiles('**/yarn.lock')}}
+          restore-keys: |
+            ${{ runner.OS }}-build-${{ runner.OS }}-
+      - name: Install and Build
+        run: |
+          yarn install
+          yarn run build
+
+  deploy:
+    runs-on: ubuntu-latest
+    name: 'Deploy to Netlify'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v1
+
+      - name: Deploy to netlify
+        uses: netlify/actions/cli@master
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN}}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        with:
+          args: deploy --dir=build --prod
+          secrets: '["NETLIFY_AUTH_TOKEN", "NETLIFY_SITE_ID"]'
