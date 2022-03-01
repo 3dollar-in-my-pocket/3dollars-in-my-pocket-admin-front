@@ -4,15 +4,18 @@ import { useRecoilState } from 'recoil';
 import Routes from 'routes';
 import { IsLoginState } from 'stores/AuthState';
 import { AuthApi } from 'apis';
+import { useHistory } from 'react-router-dom';
 
 const App = () => {
   const [, setIsLoginState] = useRecoilState(IsLoginState);
+  const history = useHistory();
   useEffect(async () => {
     try {
-      await AuthApi.getMyInfo();
+      await AuthApi.getAdminInfo();
       setIsLoginState(true);
     } catch (error) {
       setIsLoginState(false);
+      history.push('/');
     }
   }, []);
 
