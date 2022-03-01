@@ -43,8 +43,12 @@ const GoogleCallback = () => {
         setIsLoginState(true);
         history.push('/home');
       } catch (error) {
-        alert(error.response.data.message);
-        history.pushState('/');
+        if (!error.response) {
+          alert('서버 연결중 에러가 발생하였습니다\n잠시후 다시 시도해주세요');
+        } else {
+          alert(error.response.data.message);
+        }
+        history.push('/');
       }
     }
   }, []);
