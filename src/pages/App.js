@@ -1,9 +1,10 @@
 import './App.css';
+import Routes from 'routes';
 
 function App() {
   return (
     <div className="App">
-      <h1>가슴속 3천원 어드민 프론트</h1>
+      <Routes />
     </div>
   );
 }
