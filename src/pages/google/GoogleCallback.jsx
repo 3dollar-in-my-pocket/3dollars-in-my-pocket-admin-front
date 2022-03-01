@@ -41,7 +41,7 @@ const GoogleCallback = () => {
 
         LocalStorageService.set('AUTH_TOKEN', data.data.token);
         setIsLoginState(true);
-        history.push('/home');
+        history.push('/user/advertisement');
       } catch (error) {
         if (!error.response) {
           alert('서버 연결중 에러가 발생하였습니다\n잠시후 다시 시도해주세요');
