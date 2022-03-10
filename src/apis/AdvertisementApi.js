@@ -9,13 +9,13 @@ export default {
   },
   getAdvertisements: async (page, size) => {
     return await axios.get(
-      `${AUTH_KEY.apiUrl}/admin/v1/advertisements?page=${page}&size=${size}`,
+      `${AUTH_KEY.apiUrl}/admin/v1/user/advertisements?page=${page}&size=${size}`,
       HttpService.withBearer(LocalStorageService.get('AUTH_TOKEN'))
     );
   },
   updateAdvertisement: async (advertisementId, req) => {
     await axios.get(
-      `${AUTH_KEY.apiUrl}/admin/v1/advertisements/${advertisementId}`,
+      `${AUTH_KEY.apiUrl}/admin/v1/user/advertisements/${advertisementId}`,
       req,
       HttpService.withBearer(LocalStorageService.get('AUTH_TOKEN'))
     );

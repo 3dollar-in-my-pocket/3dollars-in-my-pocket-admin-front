@@ -9,7 +9,7 @@ export default {
   },
   getAdminInfo: async () => {
     return await axios.get(
-      `${AUTH_KEY.apiUrl}/admin/v1/admin/me`,
+      `${AUTH_KEY.apiUrl}/admin/v1/account/admin/my-info`,
       HttpService.withBearer(LocalStorageService.get('AUTH_TOKEN'))
     );
   },
