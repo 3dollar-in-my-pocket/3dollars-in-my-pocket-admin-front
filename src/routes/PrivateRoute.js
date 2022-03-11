@@ -1,10 +1,16 @@
+import { AuthApi } from 'apis';
 import React from 'react';
 import { Redirect, Route } from 'react-router-dom';
-import { useRecoilState } from 'recoil';
-import { IsLoginState } from 'stores/AuthState';
 
 const PrivateRoute = ({ component: Component, ...rest }) => {
-  const [isLoggedIn] = useRecoilState(IsLoginState);
+  const isLoggedIn = async () => {
+    try {
+      await AuthApi.getAdminInfo();
+      return true;
+    } catch (error) {
+      return false;
+    }
+  };
 
   return (
     <Route

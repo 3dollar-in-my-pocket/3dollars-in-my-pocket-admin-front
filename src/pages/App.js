@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useRecoilState } from 'recoil';
 import Routes from 'routes';
-import { IsLoginState } from 'stores/AuthState';
+import { IsLoginState } from 'stores';
 import { AuthApi } from 'apis';
 import { useHistory } from 'react-router-dom';
 import Navbar from 'components/navbar/Navbar';

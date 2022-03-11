@@ -90,7 +90,7 @@ const Advertisement = () => {
 
   useEffect(() => {
     fetchAdvertisement();
-  }, [page]);
+  }, [page, modalOpen]);
 
   const fetchAdvertisement = async () => {
     try {
