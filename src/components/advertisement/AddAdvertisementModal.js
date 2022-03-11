@@ -32,9 +32,9 @@ const AddModal = styled.div`
 `;
 
 const AddAdvertisementModal = ({ modalOpen, setModalOpen }) => {
-  const [title, onChangeTitle] = useInput('');
-  const [subTitle, onChangeSubTitle] = useInput('');
-  const [linkUrl, onChangeLinkUrl] = useInput('');
+  const [title, onChangeTitle] = useInput(null);
+  const [subTitle, onChangeSubTitle] = useInput(null);
+  const [linkUrl, onChangeLinkUrl] = useInput(null);
   const [startDateTime, onChangeStartDateTime] = useInput(
     toDateTime(new Date())
   );
@@ -43,8 +43,8 @@ const AddAdvertisementModal = ({ modalOpen, setModalOpen }) => {
   const [position, onChangePosition] = useInput('');
 
   const [imageUrl, , setImageUrl] = useInput('');
-  const [bgColor, onChangeBgColor] = useInput('');
-  const [fontColor, onChangeFontColor] = useInput('');
+  const [bgColor, onChangeBgColor] = useInput(null);
+  const [fontColor, onChangeFontColor] = useInput(null);
 
   const handleClose = () => {
     setModalOpen(false);
