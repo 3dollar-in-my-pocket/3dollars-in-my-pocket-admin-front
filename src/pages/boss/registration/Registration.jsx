@@ -3,7 +3,27 @@ import styled from 'styled-components';
 import { RegistrationApi } from 'apis';
 
 const Wrapper = styled.div`
-  height: 80vh;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  width: 100vw;
+`;
+
+const Item = styled.div`
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  margin: 20px;
+  border: 1px solid black;
+  padding: 16px;
+`;
+
+const Button = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 8px;
+  font-size: 16px;
 `;
 
 const Registration = () => {
@@ -12,7 +32,7 @@ const Registration = () => {
     {
       registrationId: '',
       boss: {
-        socialType: 'KAKAO',
+        socialType: '',
         name: '',
         businessNumber: '',
       },
@@ -22,7 +42,7 @@ const Registration = () => {
         contactsNumber: '',
         certificationPhotoUrl: '',
       },
-      createdAt: '2022-04-11T22:17:26',
+      createdAt: '',
     },
   ]);
 
@@ -79,7 +99,7 @@ const Registration = () => {
       <table>
         {registrations.map((registration) => {
           return (
-            <div>
+            <Item>
               <h3>가입자 정보 {registration.registrationId}</h3>
               <div>
                 <th>소셜정보</th>
@@ -115,19 +135,19 @@ const Registration = () => {
                 <th>가게 신청 일자</th>
                 <td>{registration.createdAt}</td>
               </div>
-              <button
+              <Button
                 onClick={() => onClickApproveBtn(registration.registrationId)}
                 type="button"
               >
                 승인하기
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={() => onClickRejectBtn(registration.registrationId)}
                 type="button"
               >
                 반려하기
-              </button>
-            </div>
+              </Button>
+            </Item>
           );
         })}
       </table>
