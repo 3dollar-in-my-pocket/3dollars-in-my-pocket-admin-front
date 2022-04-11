@@ -35,6 +35,7 @@ const linkList = [
   { link: '/user/advertisement', name: '유저 - 광고 관리' },
   // { link: '/user/faq', name: '유저 - FAQ 관리' },
   { link: '/boss/registration', name: '사장님 - 가입 신청 관리' },
+  { link: '/admin/mypage', name: '관리자 - 마이페이지' },
 ];
 
 export default function Navbar() {
