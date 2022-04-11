@@ -38,7 +38,7 @@ const Registration = () => {
       },
       store: {
         name: '',
-        categoriesIds: [],
+        categories: [],
         contactsNumber: '',
         certificationPhotoUrl: '',
       },
@@ -130,6 +130,10 @@ const Registration = () => {
                     src={registration.store.certificationPhotoUrl}
                   />
                 </td>
+              </div>
+              <div>
+                <th>가게 카테고리</th>
+                <td>{registration.store.categories.join(', ')}</td>
               </div>
               <div>
                 <th>가게 신청 일자</th>

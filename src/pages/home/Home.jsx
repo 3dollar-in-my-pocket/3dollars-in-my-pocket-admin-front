@@ -24,10 +24,6 @@ const HomeText = styled.p`
   }
 `;
 
-const HomeIcon = styled.i`
-  margin: 40px;
-`;
-
 const LoginButton = styled.a`
   display: flex;
   justify-content: space-between;
@@ -73,7 +69,6 @@ const Home = () => {
   return (
     <Wrapper>
       <Title>가슴속 3천원 어드민 페이지</Title>
-      <HomeIcon className="far fa-grin fa-7x" />
       <HomeText>
         아래의 구글 버튼을 통해 로그인 후, 서비스를 이용하실 수 있습니다
       </HomeText>
