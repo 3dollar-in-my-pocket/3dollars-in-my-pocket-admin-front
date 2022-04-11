@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { AUTH_KEY } from 'constants/authkey';
+import { AUTH_TOKEN } from 'constants/authtoken';
 import HttpService from 'services/HttpService';
 import LocalStorageService from 'services/LocalStorageService';
 
@@ -10,7 +11,7 @@ export default {
   getAdminInfo: async () => {
     return await axios.get(
       `${AUTH_KEY.apiUrl}/admin/v1/account/admin/my-info`,
-      HttpService.withBearer(LocalStorageService.get('AUTH_TOKEN'))
+      HttpService.withBearer(LocalStorageService.get(AUTH_TOKEN))
     );
   },
 };

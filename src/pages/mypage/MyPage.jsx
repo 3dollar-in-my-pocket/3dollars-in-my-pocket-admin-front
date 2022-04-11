@@ -5,6 +5,7 @@ import Button from '@material-ui/core/Button';
 import { useHistory } from 'react-router-dom';
 import localStorageService from 'services/LocalStorageService';
 import { AuthApi } from 'apis';
+import { AUTH_TOKEN } from 'constants/authtoken';
 
 const useStyles = makeStyles((theme) => ({
   large: {
@@ -72,7 +73,7 @@ const MyPage = () => {
   }, []);
 
   const onClickLogoutButton = () => {
-    localStorageService.delete('AUTH_TOKEN');
+    localStorageService.delete(AUTH_TOKEN);
     alert('로그아웃 되었습니다');
     history.push('/');
   };

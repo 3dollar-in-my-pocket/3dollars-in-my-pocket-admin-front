@@ -7,6 +7,7 @@ import LocalStorageService from 'services/LocalStorageService';
 import { AuthApi } from 'apis';
 import { useRecoilState } from 'recoil';
 import { IsLoginState } from 'stores/AuthState';
+import { AUTH_TOKEN } from 'constants/authtoken';
 
 async function getAccessToken(code) {
   const { data } = await axios.post(GOOGLE_TOKEN_URL, {
@@ -39,7 +40,7 @@ const GoogleCallback = () => {
           socialType: 'GOOGLE',
         });
 
-        LocalStorageService.set('AUTH_TOKEN', data.data.token);
+        LocalStorageService.set(AUTH_TOKEN, data.data.token);
         setIsLoginState(true);
         history.push('/user/advertisement');
       } catch (error) {
