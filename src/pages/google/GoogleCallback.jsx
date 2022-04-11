@@ -37,7 +37,7 @@ const GoogleCallback = () => {
         const { data } = await AuthApi.login(LoginRequest(accessToken, 'GOOGLE'));
         LocalStorageService.set(AUTH_TOKEN, data.data.token);
         setIsLoginState(true);
-        history.push('/user/advertisement');
+        history.push('/boss/registration');
       } catch (error) {
         if (!error.response) {
           alert('서버 연결중 에러가 발생하였습니다\n잠시후 다시 시도해주세요');
