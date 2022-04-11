@@ -1,4 +1,4 @@
-export default {
+export const LocalStorageService = {
   set: (key, value) => {
     localStorage.setItem(key, value);
   },

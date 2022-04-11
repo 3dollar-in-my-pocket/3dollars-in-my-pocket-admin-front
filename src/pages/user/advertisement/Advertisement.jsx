@@ -6,7 +6,7 @@ import { AdvertisementApi } from 'apis';
 import AddAdvertisementModal from 'components/advertisement/AddAdvertisementModal';
 import { useRecoilState } from 'recoil';
 import { AdvertisementsState, AdvertisementTotalCounts } from 'stores';
-import { AdvertisementsWithPageResponse } from 'apis/dto/response/AdvertisementsResponse';
+import { AdvertisementsWithPageResponse } from 'apis/dto/response';
 
 const Wrapper = styled.div`
   height: 80vh;

@@ -9,6 +9,8 @@
     "src/stores/*.js",
     "src/hooks/*.js",
     "src/routes/*.js",
-    "src/components/*.js"
+    "src/components/*.js",
+    "src/services/*.js",
+    "src/constants/*.js"
   ]
 }

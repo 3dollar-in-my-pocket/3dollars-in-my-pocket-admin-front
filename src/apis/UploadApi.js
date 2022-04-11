@@ -1,8 +1,6 @@
 import axios from 'axios';
-import { AUTH_KEY } from 'constants/authkey';
-import LocalStorageService from 'services/LocalStorageService';
-import HttpService from 'services/HttpService';
-import { AUTH_TOKEN } from 'constants/authtoken';
+import { AUTH_KEY, AUTH_TOKEN } from 'constants';
+import { LocalStorageService, HttpService } from 'services';
 
 export default {
   upload: async (req) => {

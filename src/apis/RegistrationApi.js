@@ -1,8 +1,6 @@
 import axios from 'axios';
-import { AUTH_KEY } from 'constants/authkey';
-import { AUTH_TOKEN } from 'constants/authtoken';
-import HttpService from 'services/HttpService';
-import LocalStorageService from 'services/LocalStorageService';
+import { AUTH_KEY, AUTH_TOKEN } from 'constants';
+import { HttpService, LocalStorageService } from 'services';
 
 export default {
   getRegistrations: async () => {

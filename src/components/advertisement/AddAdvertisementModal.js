@@ -1,9 +1,10 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Button, Modal, TextField, InputLabel, Select, MenuItem, Avatar } from '@material-ui/core';
-import { useInput } from 'hooks/useInput';
+import { useInput } from 'hooks';
 import { toDateTime } from 'utils';
 import { AdvertisementApi, UploadApi } from 'apis';
+import { AddAdvertisementRequest } from 'apis/dto/request';
 
 const Paper = styled.div`
   position: absolute;
@@ -57,18 +58,20 @@ const AddAdvertisementModal = ({ modalOpen, setModalOpen }) => {
 
   const onClickAddAdvertisementButton = async () => {
     try {
-      await AdvertisementApi.addAdvertisement({
-        bgColor,
-        fontColor,
-        imageUrl,
-        linkUrl,
-        platform,
-        position,
-        startDateTime: toDateTime(new Date(startDateTime)),
-        endDateTime: toDateTime(new Date(endDateTime)),
-        subTitle,
-        title,
-      });
+      await AdvertisementApi.addAdvertisement(
+        AddAdvertisementRequest(
+          bgColor,
+          fontColor,
+          imageUrl,
+          linkUrl,
+          platform,
+          position,
+          startDateTime,
+          endDateTime,
+          subTitle,
+          title
+        )
+      );
       alert('광고를 추가하였습니다');
       setModalOpen(false);
     } catch (error) {

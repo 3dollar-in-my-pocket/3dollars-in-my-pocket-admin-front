@@ -3,12 +3,12 @@ import styled from 'styled-components';
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import { useHistory } from 'react-router-dom';
-import localStorageService from 'services/LocalStorageService';
+import { LocalStorageService } from 'services';
 import { AuthApi } from 'apis';
-import { AUTH_TOKEN } from 'constants/authtoken';
+import { AUTH_TOKEN } from 'constants';
 import { useRecoilState } from 'recoil';
 import { MyAdminInfoState } from 'stores';
-import { MyAdminInfoResponse } from 'apis/dto/response/MyAdminInfoResponse';
+import { MyAdminInfoResponse } from 'apis/dto/response';
 
 const useStyles = makeStyles((theme) => ({
   large: {
@@ -70,7 +70,7 @@ const MyPage = () => {
   }, []);
 
   const onClickLogoutButton = () => {
-    localStorageService.delete(AUTH_TOKEN);
+    LocalStorageService.delete(AUTH_TOKEN);
     alert('로그아웃 되었습니다');
     history.push('/');
   };

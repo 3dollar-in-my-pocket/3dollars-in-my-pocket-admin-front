@@ -1,7 +1,7 @@
 import React from 'react';
 import { AiOutlineArrowRight } from 'react-icons/ai';
 import styled from 'styled-components';
-import { GOOGLE_AUTH_URL } from 'constants/google';
+import { GOOGLE_AUTH_URL } from 'constants';
 import { GoogleButton } from 'components';
 
 const Wrapper = styled.div`

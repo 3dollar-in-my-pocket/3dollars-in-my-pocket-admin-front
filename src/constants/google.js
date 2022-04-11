@@ -1,5 +1,5 @@
-import { AUTH_KEY } from 'constants/authkey';
 import qs from 'qs';
+import { AUTH_KEY } from './authkey';
 
 export const GOOGLE_AUTH_QUERY = qs.stringify({
   scope: 'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile',
