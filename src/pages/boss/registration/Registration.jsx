@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { RegistrationApi } from 'apis';
 import { useRecoilState } from 'recoil';
 import { RegistrationsState } from 'stores';
-import { RegistrationResponse } from 'apis/response/RegistrationResponse';
+import { RegistrationResponse } from 'apis/dto/response/RegistrationResponse';
 
 const Wrapper = styled.div`
   display: flex;

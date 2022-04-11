@@ -8,7 +8,7 @@ import { AuthApi } from 'apis';
 import { AUTH_TOKEN } from 'constants/authtoken';
 import { useRecoilState } from 'recoil';
 import { MyAdminInfoState } from 'stores';
-import { MyAdminInfoResponse } from 'apis/response/MyAdminInfoResponse';
+import { MyAdminInfoResponse } from 'apis/dto/response/MyAdminInfoResponse';
 
 const useStyles = makeStyles((theme) => ({
   large: {
