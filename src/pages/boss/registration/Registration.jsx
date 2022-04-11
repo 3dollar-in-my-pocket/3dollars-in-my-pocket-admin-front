@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { RegistrationApi } from 'apis';
+import { useRecoilState } from 'recoil';
+import { RegistrationsState } from 'stores';
+import { RegistrationResponse } from 'apis/response/RegistrationResponse';
 
 const Wrapper = styled.div`
   display: flex;
@@ -28,23 +31,7 @@ const Button = styled.button`
 
 const Registration = () => {
   const [isChanged, setChanged] = useState(false);
-  const [registrations, setRegistrations] = useState([
-    {
-      registrationId: '',
-      boss: {
-        socialType: '',
-        name: '',
-        businessNumber: '',
-      },
-      store: {
-        name: '',
-        categories: [],
-        contactsNumber: '',
-        certificationPhotoUrl: '',
-      },
-      createdAt: '',
-    },
-  ]);
+  const [registrations, setRegistrations] = useRecoilState(RegistrationsState);
 
   const onClickApproveBtn = async (registrationId) => {
     if (!window.confirm('정말 승인하시겠습니다? ')) {
@@ -83,7 +70,7 @@ const Registration = () => {
   useEffect(async () => {
     try {
       const response = await RegistrationApi.getRegistrations();
-      setRegistrations(response.data.data);
+      setRegistrations(response.data.data.map((registration) => RegistrationResponse(registration)));
     } catch (error) {
       if (!error.response) {
         alert('서버 연결중 에러가 발생하였습니다\n잠시후 다시 시도해주세요');
@@ -125,10 +112,7 @@ const Registration = () => {
               <div>
                 <th>가게 인증 사진</th>
                 <td>
-                  <img
-                    width="200px"
-                    src={registration.store.certificationPhotoUrl}
-                  />
+                  <img width="200px" src={registration.store.certificationPhotoUrl} />
                 </td>
               </div>
               <div>
@@ -139,16 +123,10 @@ const Registration = () => {
                 <th>가게 신청 일자</th>
                 <td>{registration.createdAt}</td>
               </div>
-              <Button
-                onClick={() => onClickApproveBtn(registration.registrationId)}
-                type="button"
-              >
+              <Button onClick={() => onClickApproveBtn(registration.registrationId)} type="button">
                 승인하기
               </Button>
-              <Button
-                onClick={() => onClickRejectBtn(registration.registrationId)}
-                type="button"
-              >
+              <Button onClick={() => onClickRejectBtn(registration.registrationId)} type="button">
                 반려하기
               </Button>
             </Item>

@@ -69,9 +69,7 @@ const Home = () => {
   return (
     <Wrapper>
       <Title>가슴속 3천원 어드민 페이지</Title>
-      <HomeText>
-        아래의 구글 버튼을 통해 로그인 후, 서비스를 이용하실 수 있습니다
-      </HomeText>
+      <HomeText>아래의 구글 버튼을 통해 로그인 후, 서비스를 이용하실 수 있습니다</HomeText>
       <LoginButton href={GOOGLE_AUTH_URL}>
         <GoogleButton />
         <LoginButtonText>구글 계정으로 시작하기</LoginButtonText>

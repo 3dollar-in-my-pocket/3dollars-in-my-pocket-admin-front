@@ -4,6 +4,9 @@ import { Button } from '@material-ui/core';
 import { DataGrid } from '@material-ui/data-grid';
 import { AdvertisementApi } from 'apis';
 import AddAdvertisementModal from 'components/advertisement/AddAdvertisementModal';
+import { useRecoilState } from 'recoil';
+import { AdvertisementsState, AdvertisementTotalCounts } from 'stores';
+import { AdvertisementsWithPageResponse } from 'apis/response/AdvertisementsResponse';
 
 const Wrapper = styled.div`
   height: 80vh;
@@ -82,8 +85,8 @@ const columns = [
 ];
 
 const Advertisement = () => {
-  const [advertisements, setAdvertisements] = useState([]);
-  const [totalCounts, setTotalCounts] = useState(0);
+  const [advertisements, setAdvertisements] = useRecoilState(AdvertisementsState);
+  const [totalCounts, setTotalCounts] = useRecoilState(AdvertisementTotalCounts);
   const [page, setPage] = useState(0);
   const [size] = useState(10);
   const [modalOpen, setModalOpen] = useState(false);
@@ -94,8 +97,8 @@ const Advertisement = () => {
 
   const fetchAdvertisement = async () => {
     try {
-      const { data } = await AdvertisementApi.getAdvertisements(page + 1, size);
-      const { totalCounts, contents } = data.data;
+      const response = await AdvertisementApi.getAdvertisements(page + 1, size);
+      const { totalCounts, contents } = AdvertisementsWithPageResponse(response.data.data);
       setTotalCounts(totalCounts);
       setAdvertisements(contents);
     } catch (error) {
@@ -121,10 +124,7 @@ const Advertisement = () => {
         getRowId={(row) => row.advertisementId}
         onPageChange={(newPage) => setPage(newPage)}
       />
-      <AddAdvertisementModal
-        modalOpen={modalOpen}
-        setModalOpen={setModalOpen}
-      />
+      <AddAdvertisementModal modalOpen={modalOpen} setModalOpen={setModalOpen} />
     </Wrapper>
   );
 };

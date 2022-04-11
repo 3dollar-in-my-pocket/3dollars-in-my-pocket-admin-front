@@ -1,14 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import {
-  Button,
-  Modal,
-  TextField,
-  InputLabel,
-  Select,
-  MenuItem,
-  Avatar,
-} from '@material-ui/core';
+import { Button, Modal, TextField, InputLabel, Select, MenuItem, Avatar } from '@material-ui/core';
 import { useInput } from 'hooks/useInput';
 import { toDateTime } from 'utils';
 import { AdvertisementApi, UploadApi } from 'apis';
@@ -35,9 +27,7 @@ const AddAdvertisementModal = ({ modalOpen, setModalOpen }) => {
   const [title, onChangeTitle] = useInput(null);
   const [subTitle, onChangeSubTitle] = useInput(null);
   const [linkUrl, onChangeLinkUrl] = useInput(null);
-  const [startDateTime, onChangeStartDateTime] = useInput(
-    toDateTime(new Date())
-  );
+  const [startDateTime, onChangeStartDateTime] = useInput(toDateTime(new Date()));
   const [endDateTime, onChangeendDateTime] = useInput(toDateTime(new Date()));
   const [platform, onChangePlatform] = useInput('');
   const [position, onChangePosition] = useInput('');
@@ -107,12 +97,7 @@ const AddAdvertisementModal = ({ modalOpen, setModalOpen }) => {
             }}
           />
           <h2>광고 추가</h2>
-          <TextField
-            value={title}
-            onChange={onChangeTitle}
-            label="제목"
-            variant="outlined"
-          />
+          <TextField value={title} onChange={onChangeTitle} label="제목" variant="outlined" />
           <TextField
             value={subTitle}
             onChange={onChangeSubTitle}
@@ -128,13 +113,7 @@ const AddAdvertisementModal = ({ modalOpen, setModalOpen }) => {
               Upload
             </Button>
           </label>
-          <TextField
-            value={linkUrl}
-            onChange={onChangeLinkUrl}
-            type="url"
-            label="링크 URL"
-            variant="outlined"
-          />
+          <TextField value={linkUrl} onChange={onChangeLinkUrl} type="url" label="링크 URL" variant="outlined" />
           <TextField
             value={startDateTime}
             onChange={onChangeStartDateTime}
@@ -150,40 +129,20 @@ const AddAdvertisementModal = ({ modalOpen, setModalOpen }) => {
             defaultValue="2022-01-01T00:00"
           />
           <InputLabel id="advertisement-platform">플랫폼</InputLabel>
-          <Select
-            labelId="advertisement-platform"
-            value={platform}
-            onChange={onChangePlatform}
-          >
+          <Select labelId="advertisement-platform" value={platform} onChange={onChangePlatform}>
             <MenuItem value="ALL">모든 플랫폼</MenuItem>
             <MenuItem value="AOS">AOS</MenuItem>
             <MenuItem value="IOS">IOS</MenuItem>
           </Select>
           <InputLabel id="advertisement-position">광고 위치</InputLabel>
-          <Select
-            labelId="advertisement-position"
-            value={position}
-            onChange={onChangePosition}
-          >
+          <Select labelId="advertisement-position" value={position} onChange={onChangePosition}>
             <MenuItem value="SPLASH">스플래시 배너</MenuItem>
             <MenuItem value="MAIN_PAGE_CARD">메인 페이지 가게 카드</MenuItem>
             <MenuItem value="STORE_CATEGORY_LIST">가게 카테고리</MenuItem>
             <MenuItem value="MENU_CATEGORY_BANNER">메뉴 카테고리</MenuItem>
           </Select>
-          <TextField
-            value={fontColor}
-            onChange={onChangeFontColor}
-            type="color"
-            label="폰트 색상"
-            variant="outlined"
-          />
-          <TextField
-            value={bgColor}
-            onChange={onChangeBgColor}
-            type="color"
-            label="배경 색상"
-            variant="outlined"
-          />
+          <TextField value={fontColor} onChange={onChangeFontColor} type="color" label="폰트 색상" variant="outlined" />
+          <TextField value={bgColor} onChange={onChangeBgColor} type="color" label="배경 색상" variant="outlined" />
         </AddModal>
 
         <Button color="primary" onClick={onClickAddAdvertisementButton}>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
@@ -6,6 +6,9 @@ import { useHistory } from 'react-router-dom';
 import localStorageService from 'services/LocalStorageService';
 import { AuthApi } from 'apis';
 import { AUTH_TOKEN } from 'constants/authtoken';
+import { useRecoilState } from 'recoil';
+import { MyAdminInfoState } from 'stores';
+import { MyAdminInfoResponse } from 'apis/response/MyAdminInfoResponse';
 
 const useStyles = makeStyles((theme) => ({
   large: {
@@ -50,19 +53,13 @@ const InputBox = styled.input`
 
 const MyPage = () => {
   const classes = useStyles();
-  const [admin, setAdmin] = useState({
-    email: '',
-    name: '',
-  });
+  const [admin, setAdmin] = useRecoilState(MyAdminInfoState);
   const history = useHistory();
 
   useEffect(async () => {
     try {
       const response = await AuthApi.getAdminInfo();
-      setAdmin({
-        email: response.data.data.email,
-        name: response.data.data.name,
-      });
+      setAdmin(MyAdminInfoResponse(response.data.data));
     } catch (error) {
       if (!error.response) {
         alert('서버 연결중 에러가 발생하였습니다\n잠시후 다시 시도해주세요');
@@ -83,11 +80,7 @@ const MyPage = () => {
       <h3>관리자 정보</h3>
       <InputBox type="text" placeholder="이메일" value={admin.email} />
       <InputBox type="text" placeholder="이름" value={admin.name} />
-      <Button
-        variant="contained"
-        className={classes.button}
-        onClick={onClickLogoutButton}
-      >
+      <Button variant="contained" className={classes.button} onClick={onClickLogoutButton}>
         로그아웃
       </Button>
     </Wrapper>

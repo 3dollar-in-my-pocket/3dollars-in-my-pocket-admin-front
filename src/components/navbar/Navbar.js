@@ -1,12 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import {
-  SwipeableDrawer,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-} from '@material-ui/core';
+import { SwipeableDrawer, List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core';
 import { Mail as MailIcon, Inbox as InboxIcon } from '@material-ui/icons';
 import { useHistory } from 'react-router-dom';
 
@@ -43,22 +37,11 @@ export default function Navbar() {
   const history = useHistory();
 
   const list = () => (
-    <div
-      className="left"
-      role="presentation"
-      onClick={() => setOpen(false)}
-      onKeyDown={() => setOpen(false)}
-    >
+    <div className="left" role="presentation" onClick={() => setOpen(false)} onKeyDown={() => setOpen(false)}>
       <List>
         {linkList.map((link, index) => (
-          <ListItem
-            button
-            key={link.link}
-            onClick={() => history.push(link.link)}
-          >
-            <ListItemIcon>
-              {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-            </ListItemIcon>
+          <ListItem button key={link.link} onClick={() => history.push(link.link)}>
+            <ListItemIcon>{index % 2 === 0 ? <InboxIcon /> : <MailIcon />}</ListItemIcon>
             <ListItemText primary={link.name} />
           </ListItem>
         ))}
@@ -71,12 +54,7 @@ export default function Navbar() {
       <Navigation onClick={() => setOpen(true)}>
         <Title>메뉴 보기</Title>
       </Navigation>
-      <SwipeableDrawer
-        anchor="left"
-        open={open}
-        onOpen={() => setOpen(true)}
-        onClose={() => setOpen(false)}
-      >
+      <SwipeableDrawer anchor="left" open={open} onOpen={() => setOpen(true)} onClose={() => setOpen(false)}>
         {list()}
       </SwipeableDrawer>
     </div>
