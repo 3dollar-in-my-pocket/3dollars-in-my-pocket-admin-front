@@ -1,3 +1,3 @@
-import { useInput } from './useInput';
+import { UseInput } from './UseInput';
 
-export { useInput };
+export { UseInput };

@@ -6,6 +6,7 @@ import GoogleCallback from 'pages/google/GoogleCallback';
 import Registration from 'pages/boss/registration/Registration';
 import Advertisement from 'pages/user/advertisement/Advertisement';
 import MyPage from 'pages/mypage/MyPage';
+import Faq from 'pages/user/faq/Faq';
 import PrivateRoute from './PrivateRoute';
 
 const Routes = () => {
@@ -14,11 +15,8 @@ const Routes = () => {
       <Route exact path="/" component={Home} />
       <Route exact path="/auth/google/callback" component={GoogleCallback} />
       <PrivateRoute exact path="/boss/registration" component={Registration} />
-      <PrivateRoute
-        exact
-        path="/user/advertisement"
-        component={Advertisement}
-      />
+      <PrivateRoute exact path="/user/faq" component={Faq} />
+      <PrivateRoute exact path="/user/advertisement" component={Advertisement} />
       <PrivateRoute exact path="/admin/mypage" component={MyPage} />
       <Route component={NotFound} />
     </Switch>

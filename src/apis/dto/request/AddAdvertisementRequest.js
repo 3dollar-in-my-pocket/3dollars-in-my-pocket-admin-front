@@ -1,4 +1,4 @@
-import { toDateTime } from 'utils';
+import { DateUtils } from 'utils';
 
 export const AddAdvertisementRequest = ({
   bgColor,
@@ -19,8 +19,8 @@ export const AddAdvertisementRequest = ({
     linkUrl,
     platform,
     postition,
-    startDateTime: toDateTime(new Date(startDateTime)),
-    endDateTime: toDateTime(new Date(endDateTime)),
+    startDateTime: DateUtils.toDateTime(new Date(startDateTime)),
+    endDateTime: DateUtils.toDateTime(new Date(endDateTime)),
     subTitle,
     title,
   };

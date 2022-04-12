@@ -15,10 +15,38 @@ const Wrapper = styled.div`
 const Item = styled.div`
   display: flex;
   justify-content: center;
+  align-items: center;
   flex-direction: column;
-  margin: 20px;
-  border: 1px solid black;
-  padding: 16px;
+  margin: 28px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  padding: 48px;
+`;
+
+const ItemTitle = styled.div`
+  display: flex;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: bold;
+  color: rgba(0, 0, 0, 1);
+  background-color: rgba(0, 0, 0, 0.1);
+  width: 100%;
+  padding: 8px;
+`;
+
+const ItemContent = styled.div`
+  display: flex;
+  justify-content: center;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.8);
+  white-space: pre;
+  margin: 16px;
+`;
+
+const ButtonList = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
 `;
 
 const Button = styled.button`
@@ -87,48 +115,33 @@ const Registration = () => {
         {registrations.map((registration) => {
           return (
             <Item>
-              <h3>가입자 정보 {registration.registrationId}</h3>
-              <div>
-                <th>소셜정보</th>
-                <td>{registration.boss.socialType}</td>
-              </div>
-              <div>
-                <th>사장님 성함</th>
+              <ItemTitle>소셜정보</ItemTitle>
+              <ItemContent>{registration.boss.socialType}</ItemContent>
+              <ItemTitle>사장님 성함</ItemTitle>
 
-                <td>{registration.boss.name}</td>
-              </div>
-              <div>
-                <th>사업자 번호</th>
-                <td>{registration.boss.businessNumber}</td>
-              </div>
-              <div>
-                <th>가게 이름</th>
-                <td>{registration.boss.name}</td>
-              </div>
-              <div>
-                <th>가게 연락처</th>
-                <td>{registration.store.contactsNumber}</td>
-              </div>
-              <div>
-                <th>가게 인증 사진</th>
-                <td>
-                  <img width="200px" src={registration.store.certificationPhotoUrl} />
-                </td>
-              </div>
-              <div>
-                <th>가게 카테고리</th>
-                <td>{registration.store.categories.join(', ')}</td>
-              </div>
-              <div>
-                <th>가게 신청 일자</th>
-                <td>{registration.createdAt}</td>
-              </div>
-              <Button onClick={() => onClickApproveBtn(registration.registrationId)} type="button">
-                승인하기
-              </Button>
-              <Button onClick={() => onClickRejectBtn(registration.registrationId)} type="button">
-                반려하기
-              </Button>
+              <ItemContent>{registration.boss.name}</ItemContent>
+              <ItemTitle>사업자 번호</ItemTitle>
+              <ItemContent>{registration.boss.businessNumber}</ItemContent>
+              <ItemTitle>가게 이름</ItemTitle>
+              <ItemContent>{registration.boss.name}</ItemContent>
+              <ItemTitle>가게 연락처</ItemTitle>
+              <ItemContent>{registration.store.contactsNumber}</ItemContent>
+              <ItemTitle>가게 인증 사진</ItemTitle>
+              <ItemContent>
+                <img width="200px" src={registration.store.certificationPhotoUrl} />
+              </ItemContent>
+              <ItemTitle>가게 카테고리</ItemTitle>
+              <ItemContent>{registration.store.categories.join(', ')}</ItemContent>
+              <ItemTitle>가게 신청 일자</ItemTitle>
+              <ItemContent>{registration.createdAt}</ItemContent>
+              <ButtonList>
+                <Button onClick={() => onClickApproveBtn(registration.registrationId)} type="button">
+                  승인하기
+                </Button>
+                <Button onClick={() => onClickRejectBtn(registration.registrationId)} type="button">
+                  반려하기
+                </Button>
+              </ButtonList>
             </Item>
           );
         })}

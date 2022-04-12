@@ -1,8 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Button, Modal, TextField, InputLabel, Select, MenuItem, Avatar } from '@material-ui/core';
-import { useInput } from 'hooks';
-import { toDateTime } from 'utils';
+import { UseInput } from 'hooks';
+import { DateUtils } from 'utils';
 import { AdvertisementApi, UploadApi } from 'apis';
 import { AddAdvertisementRequest } from 'apis/dto/request';
 
@@ -25,17 +25,17 @@ const AddModal = styled.div`
 `;
 
 const AddAdvertisementModal = ({ modalOpen, setModalOpen }) => {
-  const [title, onChangeTitle] = useInput(null);
-  const [subTitle, onChangeSubTitle] = useInput(null);
-  const [linkUrl, onChangeLinkUrl] = useInput(null);
-  const [startDateTime, onChangeStartDateTime] = useInput(toDateTime(new Date()));
-  const [endDateTime, onChangeendDateTime] = useInput(toDateTime(new Date()));
-  const [platform, onChangePlatform] = useInput('');
-  const [position, onChangePosition] = useInput('');
+  const [title, onChangeTitle] = UseInput(null);
+  const [subTitle, onChangeSubTitle] = UseInput(null);
+  const [linkUrl, onChangeLinkUrl] = UseInput(null);
+  const [startDateTime, onChangeStartDateTime] = UseInput(DateUtils.toDateTime(new Date()));
+  const [endDateTime, onChangeendDateTime] = UseInput(DateUtils.toDateTime(new Date()));
+  const [platform, onChangePlatform] = UseInput('');
+  const [position, onChangePosition] = UseInput('');
 
-  const [imageUrl, , setImageUrl] = useInput('');
-  const [bgColor, onChangeBgColor] = useInput(null);
-  const [fontColor, onChangeFontColor] = useInput(null);
+  const [imageUrl, , setImageUrl] = UseInput('');
+  const [bgColor, onChangeBgColor] = UseInput(null);
+  const [fontColor, onChangeFontColor] = UseInput(null);
 
   const handleClose = () => {
     setModalOpen(false);

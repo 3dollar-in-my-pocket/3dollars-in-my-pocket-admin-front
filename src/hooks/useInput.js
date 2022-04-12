@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 
-export const useInput = (initialValue = '') => {
+export const UseInput = (initialValue = '') => {
   const [value, setValue] = useState(initialValue);
   const onChange = useCallback((e) => {
     setValue(e.target.value);

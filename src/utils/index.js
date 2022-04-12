@@ -1,3 +1,3 @@
-import { toDateTime } from './dateUtils';
+import { DateUtils } from './DateUtils';
 
-export { toDateTime };
+export { DateUtils };
