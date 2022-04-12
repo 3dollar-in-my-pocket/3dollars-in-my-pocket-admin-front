@@ -27,18 +27,18 @@ const Item = styled.div`
 const ItemTitle = styled.div`
   display: flex;
   justify-content: center;
-  font-size: 20px;
+  font-size: 16px;
   font-weight: bold;
   color: rgba(0, 0, 0, 1);
-  background-color: rgba(0, 0, 0, 0.1);
   width: 100%;
-  padding: 8px;
+  padding: 4px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
 `;
 
 const ItemContent = styled.div`
   display: flex;
   justify-content: center;
-  font-size: 16px;
+  font-size: 12px;
   color: rgba(0, 0, 0, 0.8);
   white-space: pre;
   margin: 12px;
@@ -67,20 +67,17 @@ const CategoryCurrentItem = styled.button`
 `;
 
 const ButtonList = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: row;
+  width: 100%;
   margin: 12px;
 `;
 
 const Button = styled.button`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 8px;
-  font-size: 16px;
+  width: 100%;
+  margin: 8px 0;
+  font-size: 12px;
   padding: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 24px;
 `;
 
 const Faq = () => {
