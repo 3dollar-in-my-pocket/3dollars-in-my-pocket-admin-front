@@ -16,6 +16,7 @@ const Wrapper = styled.div`
 
 const Item = styled.div`
   display: flex;
+  width: 60%;
   justify-content: center;
   align-items: center;
   flex-direction: column;
@@ -26,21 +27,22 @@ const Item = styled.div`
 
 const ItemTitle = styled.div`
   display: flex;
+  width: 80%;
   justify-content: center;
   font-size: 16px;
   font-weight: bold;
   color: rgba(0, 0, 0, 1);
-  width: 100%;
   padding: 4px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.2);
 `;
 
 const ItemContent = styled.div`
   display: flex;
+  width: 80%;
   justify-content: center;
   font-size: 12px;
   color: rgba(0, 0, 0, 0.8);
-  white-space: pre;
+  white-space: pre-line;
   margin: 12px;
 `;
 
@@ -48,6 +50,7 @@ const CategoryList = styled.div`
   display: flex;
   justify-content: center;
   margin: 20px;
+  flex-wrap: wrap;
 `;
 
 const CategoryItem = styled.button`
@@ -56,6 +59,7 @@ const CategoryItem = styled.button`
   border-radius: 24px;
   background-color: rgba(0, 0, 0, 0);
   margin: 12px;
+  font-size: 12px;
 `;
 
 const CategoryCurrentItem = styled.button`
@@ -64,6 +68,7 @@ const CategoryCurrentItem = styled.button`
   border-radius: 24px;
   background-color: rgba(0, 0, 0, 0.1);
   margin: 12px;
+  font-size: 12px;
 `;
 
 const ButtonList = styled.div`
@@ -111,6 +116,7 @@ const Faq = () => {
 
   return (
     <Wrapper>
+      <h2>FAQ 관리</h2>
       <CategoryList>
         {faqCategories.map((category) => {
           if (category.category === currentCategory) {

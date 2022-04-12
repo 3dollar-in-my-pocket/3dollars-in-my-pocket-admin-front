@@ -16,6 +16,7 @@ const Item = styled.div`
   display: flex;
   justify-content: center;
   flex-direction: column;
+  width: 60%;
   border: 1px solid rgba(0, 0, 0, 0.2);
   padding: 20px 36px;
   margin: 20px;
@@ -114,7 +115,7 @@ const Registration = () => {
 
   return (
     <Wrapper>
-      <h1>사장님 가입 신청</h1>
+      <h2>사장님 가입 신청 관리</h2>
       {registrations.map((registration) => {
         return (
           <Item>
