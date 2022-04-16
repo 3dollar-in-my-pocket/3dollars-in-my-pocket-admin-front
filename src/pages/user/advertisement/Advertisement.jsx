@@ -44,6 +44,16 @@ const ItemContent = styled.div`
   margin: 12px;
 `;
 
+const LinkContent = styled.a`
+  display: flex;
+  width: 80%;
+  justify-content: center;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.8);
+  white-space: pre-line;
+  margin: 12px;
+`;
+
 const CategoryList = styled.div`
   display: flex;
   justify-content: center;
@@ -175,7 +185,7 @@ const Advertisement = () => {
               <ItemTitle>플랫폼</ItemTitle>
               <ItemContent>{advertisement.platformType}</ItemContent>
               <ItemTitle>링크 URL</ItemTitle>
-              <ItemContent>{advertisement.linkUrl}</ItemContent>
+              <LinkContent href={advertisement.linkUrl}>링크 이동</LinkContent>
               <ItemTitle>배경 색상</ItemTitle>
               <ItemContent>{advertisement.bgColor}</ItemContent>
               <ItemTitle>폰트 색상</ItemTitle>
