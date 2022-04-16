@@ -10,6 +10,8 @@ const Wrapper = styled.div`
   align-items: center;
   flex-direction: column;
   width: 100vw;
+  height 100vh;
+  overflow-y: auto;
 `;
 
 const Item = styled.div`
@@ -63,6 +65,7 @@ const ItemImage = styled.img`
 `;
 
 const Registration = () => {
+  const [size] = useState(50);
   const [isChanged, setChanged] = useState(false);
   const [registrations, setRegistrations] = useRecoilState(RegistrationsState);
 
@@ -100,10 +103,17 @@ const Registration = () => {
     }
   };
 
+  const containId = (registrationId) => {
+    return registrations.some((registration) => registration.registrationId === registrationId);
+  };
+
   useEffect(async () => {
     try {
-      const response = await RegistrationApi.getRegistrations();
-      setRegistrations(response.data.data.map((registration) => RegistrationResponse(registration)));
+      const response = await RegistrationApi.getRegistrations('', size);
+      const newCursor = response.data.data
+        .filter((registration) => !containId(registration.registrationId))
+        .map((registration) => RegistrationResponse(registration));
+      setRegistrations(registrations.concat(newCursor));
     } catch (error) {
       if (!error.response) {
         alert('서버 연결중 에러가 발생하였습니다\n잠시후 다시 시도해주세요');
@@ -118,7 +128,7 @@ const Registration = () => {
       <h2>사장님 가입 신청 관리</h2>
       {registrations.map((registration) => {
         return (
-          <Item>
+          <Item key={registration.registrationId}>
             <ItemImageLayer>
               <ItemImage src={registration.store.certificationPhotoUrl} />
             </ItemImageLayer>
