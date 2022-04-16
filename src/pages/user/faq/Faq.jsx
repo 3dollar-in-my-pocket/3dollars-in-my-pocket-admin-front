@@ -121,13 +121,15 @@ const Faq = () => {
         {faqCategories.map((category) => {
           if (category.category === currentCategory) {
             return (
-              <CategoryCurrentItem onClick={() => onClickCategoryBtn(category.category)}>
+              <CategoryCurrentItem key={category.category} onClick={() => onClickCategoryBtn(category.category)}>
                 {category.description}
               </CategoryCurrentItem>
             );
           }
           return (
-            <CategoryItem onClick={() => onClickCategoryBtn(category.category)}>{category.description}</CategoryItem>
+            <CategoryItem key={category.category} onClick={() => onClickCategoryBtn(category.category)}>
+              {category.description}
+            </CategoryItem>
           );
         })}
       </CategoryList>
@@ -135,7 +137,7 @@ const Faq = () => {
         .filter((faq) => faq.category === currentCategory || currentCategory === '')
         .map((faq) => {
           return (
-            <Item>
+            <Item key={faq.faqId}>
               <ItemTitle>질문</ItemTitle>
               <ItemContent>{faq.question}</ItemContent>
               <ItemTitle>답변</ItemTitle>

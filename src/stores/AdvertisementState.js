@@ -5,7 +5,7 @@ export const AdvertisementsState = atom({
   default: [],
 });
 
-export const AdvertisementTotalCounts = atom({
-  key: 'advertisementTotalCounts',
-  default: 0,
+export const CurrentAdvertisementCategory = atom({
+  key: 'currentAdvertisementCategory',
+  default: '',
 });

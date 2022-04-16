@@ -12,6 +12,7 @@ const AdvertismentResponse = (data) => {
     title: data.title,
     subTitle: data.subTitle,
     platformType: data.platformType,
+    imageUrl: data.imageUrl,
     positionType: data.positionType,
     linkUrl: data.linkUrl,
     bgColor: data.bgColor,
