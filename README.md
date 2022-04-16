@@ -1,5 +1,7 @@
 # 가슴속 삼천원 어드민 프론트
 
+<img src="https://github.com/3dollar-in-my-pocket/3dollars-in-my-pocket-backend/raw/develop/images/logo.png">
+
 ### 프로젝트 설명
 
 전국 붕어빵 등 길거리 음식을 파는 곳을 알려주는 [**가슴속 3천원**](https://intro.threedollars.co.kr/)

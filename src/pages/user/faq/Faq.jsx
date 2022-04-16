@@ -1,11 +1,11 @@
 import { FaqResponse } from 'apis/dto/response';
-import { FaqCategoryResponse } from 'apis/dto/response/FaqResponse';
-import FaqApi from 'apis/FaqApi';
+import styled from 'styled-components';
 import React, { useEffect } from 'react';
 import { useRecoilState } from 'recoil';
-import { FaqsState } from 'stores';
-import { CurrentFaqCategory, FaqCategoriesState } from 'stores/FaqState';
-import styled from 'styled-components';
+
+import { FaqCategoryResponse } from 'apis/dto/response/FaqResponse';
+import { FaqApi } from 'apis';
+import { FaqsState, CurrentFaqCategory, FaqCategoriesState } from 'stores';
 
 const Wrapper = styled.div`
   display: flex;
@@ -90,6 +90,14 @@ const Faq = () => {
   const [faqs, setFaqs] = useRecoilState(FaqsState);
   const [faqCategories, setFaqCategories] = useRecoilState(FaqCategoriesState);
 
+  const onClickChangeCurrentCategoryButton = (category) => {
+    if (currentCategory === category) {
+      setCurrentCategory('');
+      return;
+    }
+    setCurrentCategory(category);
+  };
+
   useEffect(async () => {
     try {
       const categoryResponse = await FaqApi.getFaqCategories();
@@ -106,14 +114,6 @@ const Faq = () => {
     }
   }, []);
 
-  const onClickCategoryBtn = (category) => {
-    if (currentCategory === category) {
-      setCurrentCategory('');
-      return;
-    }
-    setCurrentCategory(category);
-  };
-
   return (
     <Wrapper>
       <h2>FAQ 관리</h2>
@@ -121,13 +121,16 @@ const Faq = () => {
         {faqCategories.map((category) => {
           if (category.category === currentCategory) {
             return (
-              <CategoryCurrentItem key={category.category} onClick={() => onClickCategoryBtn(category.category)}>
+              <CategoryCurrentItem
+                key={category.category}
+                onClick={() => onClickChangeCurrentCategoryButton(category.category)}
+              >
                 {category.description}
               </CategoryCurrentItem>
             );
           }
           return (
-            <CategoryItem key={category.category} onClick={() => onClickCategoryBtn(category.category)}>
+            <CategoryItem key={category.category} onClick={() => onClickChangeCurrentCategoryButton(category.category)}>
               {category.description}
             </CategoryItem>
           );

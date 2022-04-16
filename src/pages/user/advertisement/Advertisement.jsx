@@ -1,8 +1,9 @@
-import AdvertisementApi from 'apis/AdvertisementApi';
 import React, { useEffect, useState } from 'react';
 import { useRecoilState } from 'recoil';
-import { AdvertisementsState, CurrentAdvertisementCategory } from 'stores';
 import styled from 'styled-components';
+
+import { AdvertisementsState, CurrentAdvertisementCategory } from 'stores';
+import { AdvertisementApi } from 'apis';
 import { AdvertisementsWithPageResponse } from 'apis/dto/response';
 
 const Wrapper = styled.div`
@@ -129,6 +130,14 @@ const Advertisement = () => {
   const [currentCategory, setCurrentCategory] = useRecoilState(CurrentAdvertisementCategory);
   const [advertisements, setAdvertisements] = useRecoilState(AdvertisementsState);
 
+  const onClickChangeCurrentCategoryButton = (category) => {
+    if (currentCategory === category) {
+      setCurrentCategory('');
+      return;
+    }
+    setCurrentCategory(category);
+  };
+
   useEffect(async () => {
     try {
       const advertisementResponse = await AdvertisementApi.getAdvertisements(page, size);
@@ -143,14 +152,6 @@ const Advertisement = () => {
     }
   }, []);
 
-  const onClickCategoryBtn = (category) => {
-    if (currentCategory === category) {
-      setCurrentCategory('');
-      return;
-    }
-    setCurrentCategory(category);
-  };
-
   return (
     <Wrapper>
       <h2>광고 관리</h2>
@@ -158,13 +159,16 @@ const Advertisement = () => {
         {advertisementCategories.map((category) => {
           if (category.category === currentCategory) {
             return (
-              <CategoryCurrentItem key={category.category} onClick={() => onClickCategoryBtn(category.category)}>
+              <CategoryCurrentItem
+                key={category.category}
+                onClick={() => onClickChangeCurrentCategoryButton(category.category)}
+              >
                 {category.description}
               </CategoryCurrentItem>
             );
           }
           return (
-            <CategoryItem key={category.category} onClick={() => onClickCategoryBtn(category.category)}>
+            <CategoryItem key={category.category} onClick={() => onClickChangeCurrentCategoryButton(category.category)}>
               {category.description}
             </CategoryItem>
           );

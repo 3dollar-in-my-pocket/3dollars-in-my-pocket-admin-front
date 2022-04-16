@@ -1,4 +1,5 @@
 import axios from 'axios';
+
 import { AUTH_TOKEN, AUTH_KEY } from 'constants';
 import { HttpService, LocalStorageService } from 'services';
 
@@ -9,6 +10,13 @@ export default {
   getAdminInfo: async () => {
     return await axios.get(
       `${AUTH_KEY.apiUrl}/admin/v1/account/admin/my-info`,
+      HttpService.withBearer(LocalStorageService.get(AUTH_TOKEN))
+    );
+  },
+  updateAdminInfo: async (req) => {
+    return await axios.put(
+      `${AUTH_KEY.apiUrl}/admin/v1/account/admin/my-info`,
+      req,
       HttpService.withBearer(LocalStorageService.get(AUTH_TOKEN))
     );
   },

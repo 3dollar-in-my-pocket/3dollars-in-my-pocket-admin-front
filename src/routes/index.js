@@ -1,5 +1,6 @@
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
+
 import Home from 'pages/home/Home';
 import NotFound from 'pages/home/404/NotFound';
 import GoogleCallback from 'pages/google/GoogleCallback';

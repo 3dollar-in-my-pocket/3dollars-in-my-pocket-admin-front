@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { useHistory } from 'react-router-dom';
+
 import { SwipeableDrawer, List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core';
 import { Mail as MailIcon, Inbox as InboxIcon } from '@material-ui/icons';
-import { useHistory } from 'react-router-dom';
 
 const Navigation = styled.div`
   display: 'flex';

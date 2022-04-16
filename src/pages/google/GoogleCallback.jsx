@@ -1,23 +1,12 @@
 import React, { useEffect } from 'react';
-import axios from 'axios';
-import { useHistory } from 'react-router-dom';
-import { AUTH_KEY, AUTH_TOKEN, GOOGLE_TOKEN_URL } from 'constants';
-import { LocalStorageService } from 'services';
-import { AuthApi } from 'apis';
 import { useRecoilState } from 'recoil';
+import { useHistory } from 'react-router-dom';
+
+import { AUTH_TOKEN } from 'constants';
+import { LocalStorageService } from 'services';
+import { AuthApi, GoogleAuthApi } from 'apis';
 import { IsLoginState } from 'stores';
 import { LoginRequest } from 'apis/dto/request';
-
-async function getAccessToken(code) {
-  const { data } = await axios.post(GOOGLE_TOKEN_URL, {
-    code,
-    clientId: AUTH_KEY.google.clientId,
-    clientSecret: AUTH_KEY.google.clientSecret,
-    grantType: 'authorization_code',
-    redirectUri: AUTH_KEY.google.redirectUri,
-  });
-  return data.access_token;
-}
 
 const GoogleCallback = () => {
   const history = useHistory();
@@ -31,7 +20,7 @@ const GoogleCallback = () => {
         return;
       }
       const params = new URLSearchParams(window.location.search);
-      const accessToken = await getAccessToken(params.get('code'));
+      const accessToken = await GoogleAuthApi.getAccessToken(params.get('code'));
 
       try {
         const { data } = await AuthApi.login(LoginRequest(accessToken, 'GOOGLE'));

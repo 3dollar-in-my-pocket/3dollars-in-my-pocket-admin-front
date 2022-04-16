@@ -1,12 +1,14 @@
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
+import { useRecoilState } from 'recoil';
+import { useHistory } from 'react-router-dom';
+
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
-import { useHistory } from 'react-router-dom';
+
 import { LocalStorageService } from 'services';
 import { AuthApi } from 'apis';
 import { AUTH_TOKEN } from 'constants';
-import { useRecoilState } from 'recoil';
 import { MyAdminInfoState } from 'stores';
 import { MyAdminInfoResponse } from 'apis/dto/response';
 
@@ -56,6 +58,34 @@ const MyPage = () => {
   const [admin, setAdmin] = useRecoilState(MyAdminInfoState);
   const history = useHistory();
 
+  const handleOnChangeName = (event) => {
+    setAdmin({
+      email: admin.email,
+      name: event.target.value,
+    });
+  };
+
+  const onClickUpdateButton = async () => {
+    try {
+      await AuthApi.updateAdminInfo({
+        name: admin.name,
+      });
+      alert('관리자 정보가 수정되었습니다');
+    } catch (error) {
+      if (!error.response) {
+        alert('서버 연결중 에러가 발생하였습니다\n잠시후 다시 시도해주세요');
+      } else {
+        alert(error.response.data.message);
+      }
+    }
+  };
+
+  const onClickLogoutButton = () => {
+    LocalStorageService.delete(AUTH_TOKEN);
+    alert('로그아웃 되었습니다');
+    history.push('/');
+  };
+
   useEffect(async () => {
     try {
       const response = await AuthApi.getAdminInfo();
@@ -69,17 +99,14 @@ const MyPage = () => {
     }
   }, []);
 
-  const onClickLogoutButton = () => {
-    LocalStorageService.delete(AUTH_TOKEN);
-    alert('로그아웃 되었습니다');
-    history.push('/');
-  };
-
   return (
     <Wrapper>
       <h3>관리자 정보</h3>
-      <InputBox type="text" placeholder="이메일" value={admin.email} />
-      <InputBox type="text" placeholder="이름" value={admin.name} />
+      <InputBox type="text" placeholder="이메일" value={admin.email} disabled />
+      <InputBox type="text" placeholder="이름" value={admin.name} onChange={handleOnChangeName} />
+      <Button variant="contained" className={classes.button} onClick={onClickUpdateButton}>
+        관리자 정보 수정
+      </Button>
       <Button variant="contained" className={classes.button} onClick={onClickLogoutButton}>
         로그아웃
       </Button>

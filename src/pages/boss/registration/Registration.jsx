@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { RegistrationApi } from 'apis';
 import { useRecoilState } from 'recoil';
+
+import { RegistrationApi } from 'apis';
 import { RegistrationsState } from 'stores';
 import { RegistrationResponse } from 'apis/dto/response';
 
@@ -69,7 +70,7 @@ const Registration = () => {
   const [isChanged, setChanged] = useState(false);
   const [registrations, setRegistrations] = useRecoilState(RegistrationsState);
 
-  const onClickApproveBtn = async (registrationId) => {
+  const onClickApproveButton = async (registrationId) => {
     if (!window.confirm('정말 승인하시겠습니다? ')) {
       return;
     }
@@ -86,7 +87,7 @@ const Registration = () => {
     }
   };
 
-  const onClickRejectBtn = async (registrationId) => {
+  const onClickRejectButton = async (registrationId) => {
     if (!window.confirm('정말 반려하시겠습니다? ')) {
       return;
     }
@@ -147,10 +148,10 @@ const Registration = () => {
             <ItemTitle>가게 신청 일자</ItemTitle>
             <ItemContent>{registration.createdAt}</ItemContent>
 
-            <Button onClick={() => onClickApproveBtn(registration.registrationId)} type="button">
+            <Button onClick={() => onClickApproveButton(registration.registrationId)} type="button">
               승인하기
             </Button>
-            <Button onClick={() => onClickRejectBtn(registration.registrationId)} type="button">
+            <Button onClick={() => onClickRejectButton(registration.registrationId)} type="button">
               반려하기
             </Button>
           </Item>

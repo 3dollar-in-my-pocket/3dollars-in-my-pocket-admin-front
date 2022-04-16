@@ -1,6 +1,7 @@
 import React from 'react';
-import { AiOutlineArrowRight } from 'react-icons/ai';
 import styled from 'styled-components';
+import { AiOutlineArrowRight } from 'react-icons/ai';
+
 import { GOOGLE_AUTH_URL } from 'constants';
 import { GoogleButton } from 'components';
 
