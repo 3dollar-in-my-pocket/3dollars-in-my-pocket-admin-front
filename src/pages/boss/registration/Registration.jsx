@@ -103,17 +103,10 @@ const Registration = () => {
     }
   };
 
-  const containId = (registrationId) => {
-    return registrations.some((registration) => registration.registrationId === registrationId);
-  };
-
   useEffect(async () => {
     try {
       const response = await RegistrationApi.getRegistrations('', size);
-      const newCursor = response.data.data
-        .filter((registration) => !containId(registration.registrationId))
-        .map((registration) => RegistrationResponse(registration));
-      setRegistrations(registrations.concat(newCursor));
+      setRegistrations(response.data.data.map((registration) => RegistrationResponse(registration)));
     } catch (error) {
       if (!error.response) {
         alert('서버 연결중 에러가 발생하였습니다\n잠시후 다시 시도해주세요');
