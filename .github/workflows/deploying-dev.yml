@@ -1,4 +1,4 @@
-name: Hook Netlify
+name: 개발환경 - 배포
 on:
   push:
     branches:
