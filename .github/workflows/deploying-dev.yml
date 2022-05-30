@@ -7,20 +7,20 @@ on:
 env:
   CI: ''
 jobs:
-  testing:
+  ci:
     runs-on: ubuntu-latest
     name: 'Build test'
     steps:
-      - name: checkout@v2
-        uses: actions/checkout@v2
+      - name: checkout@v3
+        uses: actions/checkout@v3
 
       - name: Use Node.js 14.x
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
           node-version: 14.x
 
       - name: Cache node_modules 🚀
-        uses: actions/cache@v1
+        uses: actions/cache@v3
         with:
           path: node_modules
           key: ${{runner.OS}}-build-${{hashFiles('**/yarn.lock')}}
@@ -32,11 +32,13 @@ jobs:
           yarn run build
 
   deploy:
+    needs:
+      - ci
     runs-on: ubuntu-latest
     name: 'Deploy to Netlify'
     steps:
       - name: Checkout code
-        uses: actions/checkout@v1
+        uses: actions/checkout@v3
 
       - name: Deploy to netlify
         uses: netlify/actions/cli@master

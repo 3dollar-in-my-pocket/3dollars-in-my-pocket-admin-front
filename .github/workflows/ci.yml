@@ -1,9 +1,20 @@
-name: Hook Netlify
+name: CI & SonarQube Analysis
 on:
+  pull_request:
+    branches:
+      - main
+      - develop
+    types:
+      - opened
+      - synchronize
+      - reopened
   push:
     branches:
       - main
+      - develop
   workflow_dispatch:
+  schedule:
+    - cron: '00 23 * * *' # 08:00 KST every day
 env:
   CI: ''
 jobs:
@@ -30,21 +41,3 @@ jobs:
         run: |
           yarn install
           yarn run build
-
-  deploy:
-    needs:
-      - ci
-    runs-on: ubuntu-latest
-    name: 'Deploy to Netlify'
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Deploy to netlify
-        uses: netlify/actions/cli@master
-        env:
-          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN_PROD}}
-          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID_PROD }}
-        with:
-          args: deploy --dir=build --prod
-          secrets: '["NETLIFY_AUTH_TOKEN_PROD", "NETLIFY_SITE_ID_PROD"]'
