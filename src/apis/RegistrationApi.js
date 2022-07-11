@@ -23,10 +23,12 @@ export default {
       HttpService.withBearer(LocalStorageService.get(AUTH_TOKEN))
     );
   },
-  rejectRegistration: async (registrationId) => {
+  rejectRegistration: async (registrationId, rejectReason) => {
     return await axios.put(
       `${AUTH_KEY.apiUrl}/admin/v1/boss/account/registration/${registrationId}/reject`,
-      {},
+      {
+        rejectReason,
+      },
       HttpService.withBearer(LocalStorageService.get(AUTH_TOKEN))
     );
   },

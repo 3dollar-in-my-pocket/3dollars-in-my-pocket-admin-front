@@ -85,7 +85,7 @@ const Button = styled.button`
   border-radius: 24px;
 `;
 
-const Faq = () => {
+const BossFaq = () => {
   const [currentCategory, setCurrentCategory] = useRecoilState(CurrentFaqCategory);
   const [faqs, setFaqs] = useRecoilState(FaqsState);
   const [faqCategories, setFaqCategories] = useRecoilState(FaqCategoriesState);
@@ -100,7 +100,7 @@ const Faq = () => {
 
   useEffect(async () => {
     try {
-      const categoryResponse = await FaqApi.getFaqCategories();
+      const categoryResponse = await FaqApi.getFaqCategories('BOSS_API');
       setFaqCategories(categoryResponse.data.data.map((data) => FaqCategoryResponse(data)));
 
       const faqResponse = await FaqApi.getFaqs();
@@ -164,4 +164,4 @@ const Faq = () => {
   );
 };
 
-export default Faq;
+export default BossFaq;

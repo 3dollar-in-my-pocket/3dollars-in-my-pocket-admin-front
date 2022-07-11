@@ -4,12 +4,9 @@ import { AUTH_TOKEN, AUTH_KEY } from 'constants';
 import { HttpService, LocalStorageService } from 'services';
 
 export default {
-  login: async (req) => {
-    return await axios.post(`${AUTH_KEY.apiUrl}/admin/v1/auth/login`, req);
-  },
-  getAdvertisements: async (page, size) => {
+  getAdvertisements: async (page, size, applicationType) => {
     return await axios.get(
-      `${AUTH_KEY.apiUrl}/admin/v1/user/advertisements?page=${page}&size=${size}`,
+      `${AUTH_KEY.apiUrl}/admin/v1/user/advertisements?page=${page}&size=${size}&applicationType=${applicationType}`,
       HttpService.withBearer(LocalStorageService.get(AUTH_TOKEN))
     );
   },

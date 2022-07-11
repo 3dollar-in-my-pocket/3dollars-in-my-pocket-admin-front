@@ -124,7 +124,7 @@ const advertisementCategories = [
   },
 ];
 
-const Advertisement = () => {
+const UserAdvertisement = () => {
   const [size] = useState(30);
   const [page] = useState(1);
   const [currentCategory, setCurrentCategory] = useRecoilState(CurrentAdvertisementCategory);
@@ -140,7 +140,7 @@ const Advertisement = () => {
 
   useEffect(async () => {
     try {
-      const advertisementResponse = await AdvertisementApi.getAdvertisements(page, size);
+      const advertisementResponse = await AdvertisementApi.getAdvertisements(page, size, 'USER_API');
       const { contents } = AdvertisementsWithPageResponse(advertisementResponse.data.data);
       setAdvertisements(contents);
     } catch (error) {
@@ -213,4 +213,4 @@ const Advertisement = () => {
   );
 };
 
-export default Advertisement;
+export default UserAdvertisement;
