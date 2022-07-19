@@ -103,7 +103,7 @@ const UserFaq = () => {
       const categoryResponse = await FaqApi.getFaqCategories('USER_API');
       setFaqCategories(categoryResponse.data.data.map((data) => FaqCategoryResponse(data)));
 
-      const faqResponse = await FaqApi.getFaqs();
+      const faqResponse = await FaqApi.getFaqs('USER_API');
       setFaqs(faqResponse.data.data.map((data) => FaqResponse(data)));
     } catch (error) {
       if (!error.response) {
@@ -137,7 +137,7 @@ const UserFaq = () => {
         })}
       </CategoryList>
       {faqs
-        .filter((faq) => faq.category === currentCategory || currentCategory === '')
+        .filter((faq) => faq.category.category === currentCategory || currentCategory === '')
         .map((faq) => {
           return (
             <Item key={faq.faqId}>
@@ -147,7 +147,7 @@ const UserFaq = () => {
               <ItemContent>{faq.answer}</ItemContent>
               <ItemTitle>카테고리</ItemTitle>
               <ItemContent>
-                {faqCategories.find((category) => category.category === faq.category).description}
+                {faqCategories.find((category) => category.category === faq.category.category).description}
               </ItemContent>
               <ItemTitle>생성일자</ItemTitle>
               <ItemContent>{faq.createdAt}</ItemContent>

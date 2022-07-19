@@ -1,7 +1,7 @@
 export const FaqResponse = (data) => {
   return {
     faqId: data.faqId,
-    category: data.category,
+    category: FaqCategoryResponse(data.category),
     question: data.question,
     answer: data.answer,
     createdAt: data.createdAt,

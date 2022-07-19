@@ -31,7 +31,7 @@ const linkList = [
   { link: '/user/advertisement', name: '유저 - 광고 관리 [개발중]' },
   { link: '/boss/advertisement', name: '사장님 - 광고 관리 [개발중]' },
   { link: '/user/faq', name: '유저 - FAQ 관리 [개발중]' },
-  { link: '/user/faq', name: '사장님 - FAQ 관리 [개발중]' },
+  { link: '/boss/faq', name: '사장님 - FAQ 관리 [개발중]' },
   { link: '/admin/mypage', name: '마이페이지' },
 ];
 

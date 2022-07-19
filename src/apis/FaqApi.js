@@ -23,9 +23,9 @@ export default {
       HttpService.withBearer(LocalStorageService.get(AUTH_TOKEN))
     );
   },
-  getFaqs: async () => {
+  getFaqs: async (applicationType) => {
     return await axios.get(
-      `${AUTH_KEY.apiUrl}/admin/v1/faqs`,
+      `${AUTH_KEY.apiUrl}/admin/v1/faqs?applicationType=${applicationType}`,
       HttpService.withBearer(LocalStorageService.get(AUTH_TOKEN))
     );
   },
