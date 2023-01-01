@@ -3,7 +3,4 @@ export const DateUtils = {
     date.setHours(date.getHours() + 9);
     return date.toISOString().substring(0, 19);
   },
-  toDateTimeFromStr: (dateStr) => {
-    return dateStr;
-  },
 };
