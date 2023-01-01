@@ -4,12 +4,9 @@ import { AUTH_TOKEN, AUTH_KEY } from 'constants';
 import { HttpService, LocalStorageService } from 'services';
 
 export default {
-  login: async (req) => {
-    return await axios.post(`${AUTH_KEY.apiUrl}/admin/v1/auth/login`, req);
-  },
-  getAdvertisements: async (page, size) => {
+  getAdvertisements: async (page, size, applicationType) => {
     return await axios.get(
-      `${AUTH_KEY.apiUrl}/admin/v1/user/advertisements?page=${page}&size=${size}`,
+      `${AUTH_KEY.apiUrl}/admin/v1/application/${applicationType}/advertisements?page=${page}&size=${size}`,
       HttpService.withBearer(LocalStorageService.get(AUTH_TOKEN))
     );
   },
@@ -26,5 +23,15 @@ export default {
       req,
       HttpService.withBearer(LocalStorageService.get(AUTH_TOKEN))
     );
+  },
+  getAdvertisementPositionTypes: async () => {
+    const response = await axios.get(`${AUTH_KEY.apiUrl}/admin/v1/enums`);
+    return response.data.data.AdvertisementPositionType;
+  },
+  getActivatedAdvertisementPositionTypes: async (platform, position, size, dateTime) => {
+    const response = await axios.get(
+      `${AUTH_KEY.apiUrl}/admin/v1/application/USER_API/advertiements?platform=${platform}&position=${position}&size=${size}&dateTime=${dateTime}`
+    );
+    return response.data.data;
   },
 };

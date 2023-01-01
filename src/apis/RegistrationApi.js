@@ -7,12 +7,12 @@ export default {
   getRegistrations: async (cursor, size) => {
     if (!cursor) {
       return await axios.get(
-        `${AUTH_KEY.apiUrl}/admin/v1/boss/account/registrations?size=${size}`,
+        `${AUTH_KEY.apiUrl}/admin/v2/boss/account/registrations?size=${size}`,
         HttpService.withBearer(LocalStorageService.get(AUTH_TOKEN))
       );
     }
     return await axios.get(
-      `${AUTH_KEY.apiUrl}/admin/v1/boss/account/registrations?cursor=${cursor}&size=${size}`,
+      `${AUTH_KEY.apiUrl}/admin/v2/boss/account/registrations?cursor=${cursor}&size=${size}`,
       HttpService.withBearer(LocalStorageService.get(AUTH_TOKEN))
     );
   },
@@ -23,10 +23,12 @@ export default {
       HttpService.withBearer(LocalStorageService.get(AUTH_TOKEN))
     );
   },
-  rejectRegistration: async (registrationId) => {
+  rejectRegistration: async (registrationId, rejectReason) => {
     return await axios.put(
       `${AUTH_KEY.apiUrl}/admin/v1/boss/account/registration/${registrationId}/reject`,
-      {},
+      {
+        rejectReason,
+      },
       HttpService.withBearer(LocalStorageService.get(AUTH_TOKEN))
     );
   },

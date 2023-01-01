@@ -22,7 +22,7 @@ module.exports = {
     'import/no-named-as-default': 'off',
     'import/no-unresolved': 'off',
     'react/prop-types': 'off',
-
+    'no-unused-vars': 'off',
     'no-param-reassign': 'off',
     'no-unused-expressions': 'off',
     'class-methods-use-this': ['error', { exceptMethods: ['render'] }],

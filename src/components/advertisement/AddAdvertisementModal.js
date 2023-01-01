@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 
 import { Button, Modal, TextField, InputLabel, Select, MenuItem, Avatar } from '@material-ui/core';
@@ -10,12 +10,10 @@ import { AddAdvertisementRequest } from 'apis/dto/request';
 
 const Paper = styled.div`
   position: absolute;
-  width: 500px;
-  height: 800px;
-  top: 60%;
-  left: 50%;
+  width: 80%;
+  height: 100%;
+  left: 10%;
   background-color: white;
-  transform: translate(-50%, -50%);
   border: 1px solid black;
 `;
 
@@ -26,7 +24,8 @@ const AddModal = styled.div`
   padding: 20px;
 `;
 
-const AddAdvertisementModal = ({ modalOpen, setModalOpen }) => {
+const AddAdvertisementModal = () => {
+  const [modalOpen, setModalOpen] = useState(true);
   const [title, onChangeTitle] = UseInput(null);
   const [subTitle, onChangeSubTitle] = UseInput(null);
   const [linkUrl, onChangeLinkUrl] = UseInput(null);
@@ -98,7 +97,8 @@ const AddAdvertisementModal = ({ modalOpen, setModalOpen }) => {
             alt="광고 이미지"
             src={imageUrl}
             style={{
-              width: '30%',
+              width: '10%',
+              height: '5%',
             }}
           />
           <h2>광고 추가</h2>
@@ -148,11 +148,11 @@ const AddAdvertisementModal = ({ modalOpen, setModalOpen }) => {
           </Select>
           <TextField value={fontColor} onChange={onChangeFontColor} type="color" label="폰트 색상" variant="outlined" />
           <TextField value={bgColor} onChange={onChangeBgColor} type="color" label="배경 색상" variant="outlined" />
-        </AddModal>
 
-        <Button color="primary" onClick={onClickAddAdvertisementButton}>
-          광고 추가하기
-        </Button>
+          <Button color="primary" onClick={onClickAddAdvertisementButton}>
+            광고 추가하기
+          </Button>
+        </AddModal>
       </Paper>
     </Modal>
   );

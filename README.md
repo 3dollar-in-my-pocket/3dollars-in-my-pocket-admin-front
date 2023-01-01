@@ -1,6 +1,6 @@
 # 가슴속 삼천원 어드민 프론트
 
-<img src="https://github.com/3dollar-in-my-pocket/3dollars-in-my-pocket-backend/raw/develop/images/logo.png">
+<img src="https://github.com/3dollar-in-my-pocket/3dollars-in-my-pocket-backend/raw/develop/docs/logo.png">
 
 ### 프로젝트 설명
 

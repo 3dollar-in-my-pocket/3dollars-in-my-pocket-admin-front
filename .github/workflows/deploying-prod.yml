@@ -1,8 +1,8 @@
-name: 개발환경 - 배포
+name: 운영환경 - 배포
 on:
   push:
     branches:
-      - develop
+      - main
   workflow_dispatch:
 env:
   CI: ''
@@ -43,8 +43,8 @@ jobs:
       - name: Deploy to netlify
         uses: netlify/actions/cli@master
         env:
-          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN}}
-          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN_PROD}}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID_PROD }}
         with:
           args: deploy --dir=build --prod
-          secrets: '["NETLIFY_AUTH_TOKEN", "NETLIFY_SITE_ID"]'
+          secrets: '["NETLIFY_AUTH_TOKEN_PROD", "NETLIFY_SITE_ID_PROD"]'

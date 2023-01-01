@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useRecoilState } from 'recoil';
 
-import { RegistrationApi } from 'apis';
+import { CommonApi, RegistrationApi } from 'apis';
 import { RegistrationsState } from 'stores';
 import { RegistrationResponse } from 'apis/dto/response';
 
@@ -66,9 +66,11 @@ const ItemImage = styled.img`
 `;
 
 const Registration = () => {
-  const [size] = useState(50);
+  const [size] = useState(30);
   const [isChanged, setChanged] = useState(false);
   const [registrations, setRegistrations] = useRecoilState(RegistrationsState);
+  const [rejectReasons, setRejectReasons] = useState([]);
+  const [selectedRejectReason, setSelectedRejectReason] = useState('');
 
   const onClickApproveButton = async (registrationId) => {
     if (!window.confirm('정말 승인하시겠습니다? ')) {
@@ -78,11 +80,14 @@ const Registration = () => {
       await RegistrationApi.approveRegistration(registrationId);
       alert('승인되었습니다');
       setChanged(!isChanged);
+      setSelectedRejectReason('');
     } catch (error) {
       if (!error.response) {
         alert('서버 연결중 에러가 발생하였습니다\n잠시후 다시 시도해주세요');
+        setSelectedRejectReason('');
       } else {
         alert(error.response.data.message);
+        setSelectedRejectReason('');
       }
     }
   };
@@ -92,22 +97,28 @@ const Registration = () => {
       return;
     }
     try {
-      await RegistrationApi.rejectRegistration(registrationId);
+      await RegistrationApi.rejectRegistration(registrationId, selectedRejectReason);
       alert('반려되었습니다');
       setChanged(!isChanged);
+      setSelectedRejectReason('');
     } catch (error) {
       if (!error.response) {
         alert('서버 연결중 에러가 발생하였습니다\n잠시후 다시 시도해주세요');
+        setSelectedRejectReason('');
       } else {
         alert(error.response.data.message);
+        setSelectedRejectReason('');
       }
     }
   };
 
   useEffect(async () => {
     try {
+      const { data } = await CommonApi.getEnums();
+      setRejectReasons(data.data.BoosRegistrationRejectReasonType);
+
       const response = await RegistrationApi.getRegistrations('', size);
-      setRegistrations(response.data.data.map((registration) => RegistrationResponse(registration)));
+      setRegistrations(response.data.data.contents.map((registration) => RegistrationResponse(registration)));
     } catch (error) {
       if (!error.response) {
         alert('서버 연결중 에러가 발생하였습니다\n잠시후 다시 시도해주세요');
@@ -116,6 +127,10 @@ const Registration = () => {
       }
     }
   }, [isChanged]);
+
+  const onChangeRejectReason = (value) => {
+    setSelectedRejectReason(value);
+  };
 
   return (
     <Wrapper>
@@ -137,16 +152,21 @@ const Registration = () => {
             <ItemContent>{registration.boss.businessNumber}</ItemContent>
 
             <ItemTitle>가게 이름</ItemTitle>
-            <ItemContent>{registration.boss.name}</ItemContent>
-
-            <ItemTitle>가게 연락처</ItemTitle>
-            <ItemContent>{registration.store.contactsNumber}</ItemContent>
+            <ItemContent>{registration.store.name}</ItemContent>
 
             <ItemTitle>가게 카테고리</ItemTitle>
             <ItemContent>{registration.store.categories.join(', ')}</ItemContent>
 
             <ItemTitle>가게 신청 일자</ItemTitle>
             <ItemContent>{registration.createdAt}</ItemContent>
+
+            <ItemTitle>반려 사유(반려인 경우에만 선택해주세요)</ItemTitle>
+            <select name="reaons" onChange={(e) => onChangeRejectReason(e.target.value)} value={selectedRejectReason}>
+              <option value="">반려 사유를 선택해주세요</option>
+              {rejectReasons.map((reason) => {
+                return <option value={reason.key}>{reason.description}</option>;
+              })}
+            </select>
 
             <Button onClick={() => onClickApproveButton(registration.registrationId)} type="button">
               승인하기

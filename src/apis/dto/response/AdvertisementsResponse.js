@@ -19,6 +19,8 @@ const AdvertismentResponse = (data) => {
     fontColor: data.fontColor,
     startDateTime: data.startDateTime,
     endDateTime: data.endDateTime,
+    orderType: data.orderType,
+    sortNumber: data.sortNumber,
     createdAt: data.createdAt,
     updatedAt: data.updatedAt,
   };
