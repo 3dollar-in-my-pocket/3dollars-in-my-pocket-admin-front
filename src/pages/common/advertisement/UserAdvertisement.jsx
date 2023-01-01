@@ -23,9 +23,15 @@ const UserAdvertisement = () => {
 
   const [advertisement, setAdvertisements] = useState([]);
   const [positionTypes, setPositionTypes] = useState(new Map());
+  const [platformTypes, setPlatformTypes] = useState(new Map());
 
   useEffect(async () => {
     try {
+      const platformTypes = await AdvertisementApi.getAdvertisementPlatformTypes();
+      const platformsMap = new Map();
+      platformTypes.map((platformType) => platformsMap.set(platformType.key, platformType.description));
+      setPlatformTypes(platformsMap);
+
       const positionTypes = await AdvertisementApi.getAdvertisementPositionTypes();
       const positionsMap = new Map();
       positionTypes.map((position) => positionsMap.set(position.key, position.description));
@@ -50,6 +56,7 @@ const UserAdvertisement = () => {
         <TableHead>
           <TableRow>
             <TableCell align="left">-</TableCell>
+            <TableCell align="left">플랫폼 종류</TableCell>
             <TableCell align="left">광고 위치</TableCell>
             <TableCell align="left">제목</TableCell>
             <TableCell align="left">서브 제목</TableCell>
@@ -65,6 +72,7 @@ const UserAdvertisement = () => {
           {advertisement.map((row) => (
             <TableRow key={row.advertisementId}>
               <TableCell align="left">{row.advertisementId}</TableCell>
+              <TableCell align="left">{platformTypes.get(row.platformType)}</TableCell>
               <TableCell align="left">{positionTypes.get(row.positionType)}</TableCell>
               <TableCell align="left">{row.title}</TableCell>
               <TableCell align="left">{row.subTitle}</TableCell>

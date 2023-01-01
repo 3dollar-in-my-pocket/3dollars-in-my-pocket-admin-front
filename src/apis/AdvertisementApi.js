@@ -28,6 +28,10 @@ export default {
     const response = await axios.get(`${AUTH_KEY.apiUrl}/admin/v1/enums`);
     return response.data.data.AdvertisementPositionType;
   },
+  getAdvertisementPlatformTypes: async () => {
+    const response = await axios.get(`${AUTH_KEY.apiUrl}/admin/v1/enums`);
+    return response.data.data.AdvertisementPlatformType;
+  },
   getActivatedAdvertisementPositionTypes: async (platform, position, size, dateTime) => {
     const response = await axios.get(
       `${AUTH_KEY.apiUrl}/admin/v1/application/USER_API/advertiements?platform=${platform}&position=${position}&size=${size}&dateTime=${dateTime}`
