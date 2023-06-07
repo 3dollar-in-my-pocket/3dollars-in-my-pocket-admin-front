@@ -115,7 +115,7 @@ const Registration = () => {
   useEffect(async () => {
     try {
       const { data } = await CommonApi.getEnums();
-      setRejectReasons(data.data.BoosRegistrationRejectReasonType);
+      setRejectReasons(data.data.BossRegistrationRejectReasonType);
 
       const response = await RegistrationApi.getRegistrations('', size);
       setRegistrations(response.data.data.contents.map((registration) => RegistrationResponse(registration)));

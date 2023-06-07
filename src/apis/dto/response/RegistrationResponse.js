@@ -1,4 +1,5 @@
 export const RegistrationResponse = (data) => {
+  console.log(data)
   return {
     registrationId: data.registrationId,
     boss: {
@@ -9,7 +10,6 @@ export const RegistrationResponse = (data) => {
     store: {
       name: data.store.name,
       categories: data.store.categories,
-      contactsNumber: data.store.contactsNumber,
       certificationPhotoUrl: data.store.certificationPhotoUrl,
     },
     createdAt: data.createdAt,
