@@ -15,7 +15,7 @@ export default {
   },
   updateAdminInfo: async (req) => {
     return await axios.put(
-      `${AUTH_KEY.apiUrl}/admin/v1/account/admin/me`,
+      `${AUTH_KEY.apiUrl}/admin/v1/account/admin`,
       req,
       HttpService.withBearer(LocalStorageService.get(AUTH_TOKEN))
     );
