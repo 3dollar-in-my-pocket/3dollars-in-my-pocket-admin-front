@@ -26,11 +26,11 @@ export default {
   },
   getAdvertisementPositionTypes: async () => {
     const response = await axios.get(`${AUTH_KEY.apiUrl}/admin/v1/enums`);
-    return response.data.data.AdvertisementPositionType;
+    return response.data.data.AdvertisementPosition;
   },
   getAdvertisementPlatformTypes: async () => {
     const response = await axios.get(`${AUTH_KEY.apiUrl}/admin/v1/enums`);
-    return response.data.data.AdvertisementTargetPlatformType;
+    return response.data.data.AdvertisementTargetPlatform;
   },
   getActivatedAdvertisementPositionTypes: async (platform, position, size, dateTime) => {
     const response = await axios.get(
