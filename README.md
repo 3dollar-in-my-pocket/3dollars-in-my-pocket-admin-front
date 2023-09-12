@@ -1,4 +1,4 @@
-# 가슴속 삼천원 어드민 프론트
+# 가슴속 3천원 어드민 프론트
 
 <img src="https://github.com/3dollar-in-my-pocket/3dollars-in-my-pocket-backend/raw/develop/docs/logo.png">
 
