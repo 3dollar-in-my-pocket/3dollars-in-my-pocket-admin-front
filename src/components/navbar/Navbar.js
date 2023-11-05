@@ -28,6 +28,7 @@ const Title = styled.p`
 const linkList = [
   { link: '/', name: '홈' },
   { link: '/boss/registration', name: '사장님 서비스 - 가입 신청 관리' },
+  { link: '/upload', name: '이미지 업로드하기' },
   { link: '/user/advertisement', name: '유저 서비스 - 광고 관리' },
   { link: '/admin/mypage', name: '마이페이지' },
 ];

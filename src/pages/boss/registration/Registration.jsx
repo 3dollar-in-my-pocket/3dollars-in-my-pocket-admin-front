@@ -135,48 +135,50 @@ const Registration = () => {
   return (
     <Wrapper>
       <h2>사장님 가입 신청 관리</h2>
-      {registrations.map((registration) => {
-        return (
-          <Item key={registration.registrationId}>
-            <ItemImageLayer>
-              <ItemImage src={registration.store.certificationPhotoUrl} />
-            </ItemImageLayer>
-
-            <ItemTitle>소셜정보</ItemTitle>
-            <ItemContent>{registration.boss.socialType}</ItemContent>
-
-            <ItemTitle>사장님 성함</ItemTitle>
-            <ItemContent>{registration.boss.name}</ItemContent>
-
-            <ItemTitle>사업자 번호</ItemTitle>
-            <ItemContent>{registration.boss.businessNumber}</ItemContent>
-
-            <ItemTitle>가게 이름</ItemTitle>
-            <ItemContent>{registration.store.name}</ItemContent>
-
-            <ItemTitle>가게 카테고리</ItemTitle>
-            <ItemContent>{registration.store.categories.join(', ')}</ItemContent>
-
-            <ItemTitle>가게 신청 일자</ItemTitle>
-            <ItemContent>{registration.createdAt}</ItemContent>
-
-            <ItemTitle>반려 사유(반려인 경우에만 선택해주세요)</ItemTitle>
-            <select name="reaons" onChange={(e) => onChangeRejectReason(e.target.value)} value={selectedRejectReason}>
-              <option value="">반려 사유를 선택해주세요</option>
-              {rejectReasons.map((reason) => {
-                return <option value={reason.key}>{reason.description}</option>;
-              })}
-            </select>
-
-            <Button onClick={() => onClickApproveButton(registration.registrationId)} type="button">
-              승인하기
-            </Button>
-            <Button onClick={() => onClickRejectButton(registration.registrationId)} type="button">
-              반려하기
-            </Button>
-          </Item>
-        );
-      })}
+      {registrations.length === 0 ? (<p>현재 사장님 가입 신청이 없습니다.</p>) : (
+              registrations.map((registration) => {
+                return (
+                  <Item key={registration.registrationId}>
+                    <ItemImageLayer>
+                      <ItemImage src={registration.store.certificationPhotoUrl} />
+                    </ItemImageLayer>
+        
+                    <ItemTitle>소셜정보</ItemTitle>
+                    <ItemContent>{registration.boss.socialType}</ItemContent>
+        
+                    <ItemTitle>사장님 성함</ItemTitle>
+                    <ItemContent>{registration.boss.name}</ItemContent>
+        
+                    <ItemTitle>사업자 번호</ItemTitle>
+                    <ItemContent>{registration.boss.businessNumber}</ItemContent>
+        
+                    <ItemTitle>가게 이름</ItemTitle>
+                    <ItemContent>{registration.store.name}</ItemContent>
+        
+                    <ItemTitle>가게 카테고리</ItemTitle>
+                    <ItemContent>{registration.store.categories.join(', ')}</ItemContent>
+        
+                    <ItemTitle>가게 신청 일자</ItemTitle>
+                    <ItemContent>{registration.createdAt}</ItemContent>
+        
+                    <ItemTitle>반려 사유(반려인 경우에만 선택해주세요)</ItemTitle>
+                    <select name="reaons" onChange={(e) => onChangeRejectReason(e.target.value)} value={selectedRejectReason}>
+                      <option value="">반려 사유를 선택해주세요</option>
+                      {rejectReasons.map((reason) => {
+                        return <option value={reason.key}>{reason.description}</option>;
+                      })}
+                    </select>
+        
+                    <Button onClick={() => onClickApproveButton(registration.registrationId)} type="button">
+                      승인하기
+                    </Button>
+                    <Button onClick={() => onClickRejectButton(registration.registrationId)} type="button">
+                      반려하기
+                    </Button>
+                  </Item>
+                );
+              })
+      )}
     </Wrapper>
   );
 };
