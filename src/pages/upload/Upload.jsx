@@ -1,13 +1,22 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Button from '@material-ui/core/Button';
-import { UploadApi } from 'apis';
+import Select from '@material-ui/core/Select';
+import MenuItem from '@material-ui/core/MenuItem';
+import { CommonApi, UploadApi } from 'apis';
 
 const FileUpload = () => {
   const fileInputRef = useRef(null);
   const urlTextAreaRef = useRef(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [fileImageUrl, setFileImageUrl] = useState(null);
+  const [imageTypes, setImageTypes] = useState([]);
   const [copySuccess, setCopySuccess] = useState(false);
+  const [selectedImageType, setSelectedImageType] = useState('');
+
+  const handleImageTypeChange = (e) => {
+    console.log(e.target.value)
+    setSelectedImageType(e.target.value);
+  };
 
   const handleFileUpload = () => {
     fileInputRef.current.click();
@@ -17,16 +26,16 @@ const FileUpload = () => {
     const file = e.target.files[0];
     if (file) {
       setSelectedFile(file);
-      setCopySuccess(false); // Reset the copy success state
+      setCopySuccess(false);
     }
   };
 
   const handleProcessFile = async () => {
     if (selectedFile) {
       try {
-        const response = await UploadApi.upload(selectedFile);
+        const response = await UploadApi.upload(selectedImageType, selectedFile);
         setFileImageUrl(response.data.data);
-        setCopySuccess(false); // Reset the copy success state
+        setCopySuccess(false);
       } catch (error) {
         console.error('Error uploading file:', error);
       }
@@ -47,9 +56,26 @@ const FileUpload = () => {
     setCopySuccess(false);
   };
 
+  useEffect(async () => {
+    const { data } = await CommonApi.getEnums();
+    setImageTypes(data.data.ImageFileType);
+  }, [])
+
   return (
     <div style={{ textAlign: 'center' }}>
       <h2>이미지 업로드 및 URL 복사</h2>
+     <Select
+          value={selectedImageType}
+          onChange={handleImageTypeChange}
+          style={{ marginBottom: '20px' }}
+        >
+          {imageTypes.map((type) => (
+            <MenuItem key={type.key} value={type.key}>
+              {type.description}
+            </MenuItem>
+          ))}
+        </Select>
+
       <div>
         {fileImageUrl ? (
           <>
