@@ -9,6 +9,7 @@ import UserAdvertisement from 'pages/common/advertisement/UserAdvertisement';
 import MyPage from 'pages/mypage/MyPage';
 import UserFaq from 'pages/common/faq/UserFaq';
 import BossFaq from 'pages/common/faq/BossFaq';
+import Upload from 'pages/upload/Upload';
 import AddAdvertisementModal from 'components/advertisement/AddAdvertisementModal';
 import PrivateRoute from './PrivateRoute';
 
@@ -23,6 +24,7 @@ const Routes = () => {
       <PrivateRoute exact path="/user/advertisement" component={UserAdvertisement} />
       <PrivateRoute exact path="/user/advertisement/manage" component={AddAdvertisementModal} />
       <PrivateRoute exact path="/admin/mypage" component={MyPage} />
+      <PrivateRoute exact path="/upload" component={Upload} />
       <Route component={NotFound} />
     </Switch>
   );
