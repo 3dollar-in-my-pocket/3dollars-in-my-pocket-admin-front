@@ -9,17 +9,36 @@ const CacheTools = () => {
   const [selectedCacheType, setSelectedCacheType] = useState('');
 
   const evictCaches= async () => {
-    if (selectedCacheType) {
+    if (!selectedCacheType) {
+      alert('선택된 캐시 타입이 없습니다')
+    }
+
+    if (!window.confirm('정말로 캐시를 제거하겠습니까?')) {
+      return
+    }
+
       try {
         await AdminToolsApi.evictAll(selectedCacheType);
+        alert('캐시가 제거되었습니다')
       } catch (error) {
-        console.error('Error evict caches', error);
+        if (!error.response) {
+          alert('서버 연결중 에러가 발생하였습니다\n잠시후 다시 시도해주세요');
+        } else {
+          alert(error.response.data.message);
+        }
       }
-    }
   };
 
   const handleSelectedCache = (e) => {
+    try {
     setSelectedCacheType(e.target.value)
+    } catch(error) {
+      if (!error.response) {
+        alert('서버 연결중 에러가 발생하였습니다\n잠시후 다시 시도해주세요');
+      } else {
+        alert(error.response.data.message);
+      }
+    }
   };
 
   useEffect(async () => {
