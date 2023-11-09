@@ -14,7 +14,6 @@ const FileUpload = () => {
   const [selectedImageType, setSelectedImageType] = useState('');
 
   const handleImageTypeChange = (e) => {
-    console.log(e.target.value)
     setSelectedImageType(e.target.value);
   };
 
