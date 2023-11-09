@@ -36,7 +36,11 @@ const FileUpload = () => {
         setFileImageUrl(response.data.data);
         setCopySuccess(false);
       } catch (error) {
-        console.error('Error uploading file:', error);
+        if (!error.response) {
+          alert('서버 연결중 에러가 발생하였습니다\n잠시후 다시 시도해주세요');
+        } else {
+          alert(error.response.data.message);
+        }
       }
     }
   };
@@ -56,8 +60,16 @@ const FileUpload = () => {
   };
 
   useEffect(async () => {
-    const { data } = await CommonApi.getEnums();
-    setImageTypes(data.data.ImageFileType);
+    try {
+      const { data } = await CommonApi.getEnums();
+      setImageTypes(data.data.ImageFileType);
+    } catch(error) {
+      if (!error.response) {
+        alert('서버 연결중 에러가 발생하였습니다\n잠시후 다시 시도해주세요');
+      } else {
+        alert(error.response.data.message);
+      }
+    }
   }, [])
 
   return (
