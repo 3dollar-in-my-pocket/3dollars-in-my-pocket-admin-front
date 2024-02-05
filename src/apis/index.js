@@ -6,5 +6,6 @@ import GoogleAuthApi from './GoogleAuthApi';
 import FaqApi from './FaqApi';
 import CommonApi from './CommonApi';
 import AdminToolsApi from './AdminToolsApi';
+import UserApi from './UserApi';
 
-export { AuthApi, AdvertisementApi, UploadApi, RegistrationApi, GoogleAuthApi, FaqApi, CommonApi, AdminToolsApi };
+export { AuthApi, AdvertisementApi, UploadApi, RegistrationApi, GoogleAuthApi, FaqApi, CommonApi, AdminToolsApi, UserApi };

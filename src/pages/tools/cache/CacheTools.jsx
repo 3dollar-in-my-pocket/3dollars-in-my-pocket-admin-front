@@ -8,7 +8,7 @@ const CacheTools = () => {
   const [cacheTypes, setCacheTypes] = useState([]);
   const [selectedCacheType, setSelectedCacheType] = useState('');
 
-  const evictCaches= async () => {
+  const evictCaches = async () => {
     if (!selectedCacheType) {
       alert('선택된 캐시 타입이 없습니다')
     }
@@ -17,22 +17,22 @@ const CacheTools = () => {
       return
     }
 
-      try {
-        await AdminToolsApi.evictAll(selectedCacheType);
-        alert('캐시가 제거되었습니다')
-      } catch (error) {
-        if (!error.response) {
-          alert('서버 연결중 에러가 발생하였습니다\n잠시후 다시 시도해주세요');
-        } else {
-          alert(error.response.data.message);
-        }
+    try {
+      await AdminToolsApi.evictAll(selectedCacheType);
+      alert('캐시가 제거되었습니다')
+    } catch (error) {
+      if (!error.response) {
+        alert('서버 연결중 에러가 발생하였습니다\n잠시후 다시 시도해주세요');
+      } else {
+        alert(error.response.data.message);
       }
+    }
   };
 
   const handleSelectedCache = (e) => {
     try {
-    setSelectedCacheType(e.target.value)
-    } catch(error) {
+      setSelectedCacheType(e.target.value)
+    } catch (error) {
       if (!error.response) {
         alert('서버 연결중 에러가 발생하였습니다\n잠시후 다시 시도해주세요');
       } else {
@@ -43,7 +43,6 @@ const CacheTools = () => {
 
   useEffect(async () => {
     const { data } = await CommonApi.getEnums();
-    console.log(data)
     setCacheTypes(data.data.CacheType);
   }, [])
 
@@ -51,7 +50,7 @@ const CacheTools = () => {
     <div style={{ textAlign: 'center' }}>
       <h2>캐시 전체 만료 툴</h2>
       <div>
-     <Select
+        <Select
           value={selectedCacheType.description}
           onChange={handleSelectedCache}
           style={{ marginBottom: '20px' }}
@@ -62,18 +61,18 @@ const CacheTools = () => {
             </MenuItem>
           ))}
         </Select>
-        </div>
-        <div>
-      {selectedCacheType && (
-        <Button
-          variant="contained"
-          color="secondary"
-          onClick={evictCaches}
-        >
+      </div>
+      <div>
+        {selectedCacheType && (
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={evictCaches}
+          >
             캐시 만료시키기
-        </Button>
-      )}
-    </div>
+          </Button>
+        )}
+      </div>
     </div>
   );
 };

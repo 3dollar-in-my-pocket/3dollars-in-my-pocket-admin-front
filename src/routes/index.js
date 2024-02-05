@@ -11,6 +11,7 @@ import UserFaq from 'pages/common/faq/UserFaq';
 import BossFaq from 'pages/common/faq/BossFaq';
 import Upload from 'pages/upload/Upload';
 import CacheTools from 'pages/tools/cache/CacheTools';
+import PushTools from 'pages/tools/push/PushTools';
 import AddAdvertisementModal from 'components/advertisement/AddAdvertisementModal';
 import PrivateRoute from './PrivateRoute';
 
@@ -27,6 +28,7 @@ const Routes = () => {
       <PrivateRoute exact path="/admin/mypage" component={MyPage} />
       <PrivateRoute exact path="/upload" component={Upload} />
       <PrivateRoute exact path="/tools/cache" component={CacheTools} />
+      <PrivateRoute exact path="/tools/push" component={PushTools} />
       <Route component={NotFound} />
     </Switch>
   );
