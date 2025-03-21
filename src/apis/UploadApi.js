@@ -8,7 +8,7 @@ export default {
     const formData = new FormData();
     formData.append('file', file);
     return axios.post(
-      `${AUTH_KEY.apiUrl}/admin/v1/file/${selectedImageType}`,
+      `${AUTH_KEY.apiUrl}/admin/v2/file/${selectedImageType}/upload`,
       formData,
       HttpService.withBearer(LocalStorageService.get(AUTH_TOKEN))
     );
