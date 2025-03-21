@@ -37,8 +37,8 @@ const UserAdvertisement = () => {
       positionTypes.map((position) => positionsMap.set(position.key, position.description));
       setPositionTypes(positionsMap);
 
-      const advertisementResponse = await AdvertisementApi.getAdvertisements(1, 30, 'USER_API');
-      const { contents } = AdvertisementsWithPageResponse(advertisementResponse.data.data);
+      const advertisements = await AdvertisementApi.getAdvertisements(1, 30, 'USER_API');
+      const { contents } = AdvertisementsWithPageResponse(advertisements.data.data);
 
       setAdvertisements(contents);
     } catch (error) {
