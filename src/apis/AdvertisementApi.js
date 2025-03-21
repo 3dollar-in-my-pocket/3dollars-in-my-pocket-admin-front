@@ -30,7 +30,7 @@ export default {
   },
   getAdvertisementPlatformTypes: async () => {
     const response = await axios.get(`${AUTH_KEY.apiUrl}/admin/v1/enums`);
-    return response.data.data.AdvertisementTargetPlatform;
+    return response.data.data.AdvertisementOsPlatform;
   },
   getActivatedAdvertisementPositionTypes: async (platform, position, size, dateTime) => {
     const response = await axios.get(
