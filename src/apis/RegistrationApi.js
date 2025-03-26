@@ -18,14 +18,14 @@ export default {
   },
   approveRegistration: async (registrationId) => {
     return await axios.put(
-      `${AUTH_KEY.apiUrl}/admin/v1/v3/boss-registration/${registrationId}/apply`,
+      `${AUTH_KEY.apiUrl}/admin/v3/boss-registration/${registrationId}/apply`,
       {},
       HttpService.withBearer(LocalStorageService.get(AUTH_TOKEN))
     );
   },
   rejectRegistration: async (registrationId, rejectReason) => {
     return await axios.put(
-      `${AUTH_KEY.apiUrl}/admin/v1/v3/boss-registration/${registrationId}/reject`,
+      `${AUTH_KEY.apiUrl}/admin/v3/boss-registration/${registrationId}/reject`,
       {
         rejectReason,
       },
