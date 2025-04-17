@@ -22,4 +22,27 @@ export default {
       return error.response;
     }
   },
+  createAd: async ({application, adData}) => {
+    try {
+      const response = await axiosInstance({
+        method: "POST",
+        url: `/v1/application/${application}/advertisement`,
+        data: adData,
+      });
+      return response.data;
+    } catch (error) {
+      return error.response;
+    }
+  },
+  deleteAd: async ({application, advertisementId}) => {
+    try {
+      const response = await axiosInstance({
+        method: "DELETE",
+        url: `/v1/application/${application}/advertisement/${advertisementId}`,
+      });
+      return response.data;
+    } catch (error) {
+      return error.response;
+    }
+  },
 }

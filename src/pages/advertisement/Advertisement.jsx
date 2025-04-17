@@ -2,7 +2,10 @@ import {useEffect, useState} from "react";
 import advertisementApi from "../../api/advertisementApi";
 import enumApi from "../../api/enumApi";
 import AdvertisementModal from "./AdvertisementModal";
+import AdvertisementRegisterModal from "./AdvertisementRegisterModal";
 import {formatDateTime} from "../../utils/dateUtils";
+import cacheToolApi from "../../api/cacheToolApi";
+import {toast} from "react-toastify";
 
 const Advertisement = () => {
   const [advertisementList, setAdvertisementList] = useState([]);
@@ -12,6 +15,7 @@ const Advertisement = () => {
   const [selectedAd, setSelectedAd] = useState(null);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
 
   const osPlatforms = [
     {key: "", description: "전체 플랫폼"},
@@ -19,13 +23,11 @@ const Advertisement = () => {
     {key: "IOS", description: "iOS"},
   ];
 
-  // 날짜를 yyyy-MM-dd 형식으로 변환하는 유틸
   const formatDate = (date) => {
     return date.toISOString().split("T")[0];
   };
 
   useEffect(() => {
-    // 기본값: 오늘과 일주일 후
     const today = new Date();
     const weekLater = new Date();
     weekLater.setDate(today.getDate() + 7);
@@ -33,7 +35,6 @@ const Advertisement = () => {
     setStartDate(formatDate(today));
     setEndDate(formatDate(weekLater));
 
-    // 포지션 정보 로딩
     enumApi.getEnum().then(response => {
       setPositions([{key: "", description: "전체 포지션"}, ...response.data["AdvertisementPosition"]]);
     });
@@ -65,10 +66,31 @@ const Advertisement = () => {
     return key;
   };
 
+  const refreshAdCache = async () => {
+    try {
+      const response = await cacheToolApi.evictAll('ADVERTISEMENT');
+      if (response.ok) {
+        toast.info("✅ 광고 캐시가 성공적으로 갱신되었습니다.");
+      } else {
+        toast.error("❌ 광고 캐시 갱신에 실패했습니다.");
+      }
+    } catch (error) {
+      toast.error("❌ 알 수 없는 오류로 캐시 갱신에 실패했습니다.");
+    }
+  };
+
   return (
     <div className="container py-4">
       <div className="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
         <h2 className="fw-bold">🎯 광고 관리</h2>
+        <div className="d-flex gap-2">
+          <button className="btn btn-outline-secondary" onClick={refreshAdCache}>
+            ♻️ 전체 광고 캐시 갱신
+          </button>
+          <button className="btn btn-success" onClick={() => setShowRegisterModal(true)}>
+            ➕ 광고 등록
+          </button>
+        </div>
       </div>
 
       <div className="card shadow-sm mb-4">
@@ -183,6 +205,14 @@ const Advertisement = () => {
         ad={selectedAd}
         getDescriptionFromKey={getDescriptionFromKey}
         formatDateTime={formatDateTime}
+        fetchAdvertisements={fetchAdvertisements}
+      />
+
+      <AdvertisementRegisterModal
+        show={showRegisterModal}
+        onHide={() => setShowRegisterModal(false)}
+        positions={positions}
+        fetchAdvertisements={fetchAdvertisements}
       />
     </div>
   );
