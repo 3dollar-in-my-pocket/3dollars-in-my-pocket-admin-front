@@ -95,7 +95,7 @@ const AdvertisementModal = ({show, onHide, ad, getDescriptionFromKey, formatDate
                 <p className="text-muted">{ad.subTitle}</p>
                 {ad.extraContent && (
                   <p className="mt-2">
-                    <strong>📎 추가내용:</strong> {ad.extraContent}
+                    <strong>📎 버튼:</strong> {ad.extraContent}
                   </p>
                 )}
               </div>

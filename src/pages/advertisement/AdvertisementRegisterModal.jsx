@@ -93,20 +93,18 @@ const AdvertisementRegisterModal = ({show, onHide, positions, fetchAdvertisement
               </Button>
               {currentStep === 1 ? (
                 <Button
+                  disabled={!formData.groupId || !formData.position || !formData.startDateTime || !formData.endDateTime || !formData.platform || !formData.orderType}
                   variant="primary"
                   onClick={() => {
-                    const {groupId, position, startDateTime, endDateTime} = formData;
-                    if (!groupId || !position || !startDateTime || !endDateTime) {
-                      alert("필수 입력 항목을 확인해주세요.");
-                      return;
-                    }
                     setCurrentStep(2);
                   }}
                 >
                   다음
                 </Button>
               ) : (
-                <Button variant="success" onClick={handleSubmit}>
+                <Button variant="success" onClick={handleSubmit}
+                        disabled={!formData.content.image.url || !formData.content.link.linkType || !formData.content.link.linkUrl}
+                >
                   등록
                 </Button>
               )}
@@ -122,7 +120,7 @@ function getInitialFormData() {
   return {
     groupId: null,
     description: null,
-    position: "",
+    position: null,
     platform: "ALL",
     startDateTime: null,
     endDateTime: null,
