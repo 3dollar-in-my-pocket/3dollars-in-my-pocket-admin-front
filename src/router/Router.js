@@ -9,6 +9,7 @@ import FileUploadTool from "../pages/tool/FileUploadTool";
 import GoogleCallback from "../pages/auth/google/GoogleCallback";
 import PrivateRouter from "./PrivateRouter";
 import Dashboard from "../pages/Dashboard";
+import FaqManagement from "../pages/faq/Faq";
 
 const Router = createBrowserRouter([
     {
@@ -31,12 +32,16 @@ const Router = createBrowserRouter([
               element: <PrivateRouter><Advertisement/></PrivateRouter>
             },
             {
-              path: '/manage/push-message',
-              element: <PrivateRouter><Push/></PrivateRouter>
-            },
-            {
               path: '/manage/registration',
               element: <PrivateRouter><Registration/></PrivateRouter>
+            },
+            {
+              path: '/manage/faq',
+              element: <PrivateRouter><FaqManagement/></PrivateRouter>
+            },
+            {
+              path: '/manage/push-message',
+              element: <PrivateRouter><Push/></PrivateRouter>
             },
             {
               path: '/manage/tool/cache',

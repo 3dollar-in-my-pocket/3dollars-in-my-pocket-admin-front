@@ -80,7 +80,7 @@ const Advertisement = () => {
   };
 
   return (
-    <div className="container py-4">
+    <div className="container-fluid py-4">
       <div className="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
         <h2 className="fw-bold">🎯 광고 관리</h2>
         <div className="d-flex gap-2">

@@ -71,13 +71,24 @@ const Layout = () => {
                 </li>
                 <li>
                   <Link
+                    to="/manage/faq"
+                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
+                      isActive("/manage/faq") ? "bg-primary text-white" : "text-white-50"
+                    }`}
+                  >
+                    <i className="bi bi-person-plus-fill fs-5"></i>
+                    <span className="fw-medium">FAQ 관리</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
                     to="/manage/push-message"
                     className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
                       isActive("/manage/push-message") ? "bg-primary text-white" : "text-white-50"
                     }`}
                   >
                     <i className="bi bi-bell-fill fs-5"></i>
-                    <span className="fw-medium">푸시 관리 (TBD)</span>
+                    <span className="fw-medium">푸시 발송 (TBD)</span>
                   </Link>
                 </li>
               </ul>
