@@ -10,6 +10,7 @@ import GoogleCallback from "../pages/auth/google/GoogleCallback";
 import PrivateRouter from "./PrivateRouter";
 import Dashboard from "../pages/Dashboard";
 import FaqManagement from "../pages/faq/Faq";
+import PushStatInfo from "../pages/info/PushStatInfo";
 
 const Router = createBrowserRouter([
     {
@@ -51,6 +52,15 @@ const Router = createBrowserRouter([
               path: '/manage/tool/upload',
               element: <PrivateRouter><FileUploadTool/></PrivateRouter>
             }
+          ]
+        },
+        {
+          path: '/info',
+          children: [
+            {
+              path: '/info/push-statistics',
+              element: <PrivateRouter><PushStatInfo/></PrivateRouter>
+            },
           ]
         },
         {

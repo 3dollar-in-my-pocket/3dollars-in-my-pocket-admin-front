@@ -26,7 +26,7 @@ const AdvertisementModal = ({show, onHide, ad, getDescriptionFromKey, formatDate
       });  // 광고 삭제 API 호출
       if (response.ok) {
         toast.success("✅ 광고가 삭제되었습니다.");
-        fetchAdvertisements();  // 광고 목록 갱신
+        fetchAdvertisements();
       } else {
         toast.error("❌ 광고 삭제에 실패했습니다.");
       }
@@ -101,27 +101,27 @@ const AdvertisementModal = ({show, onHide, ad, getDescriptionFromKey, formatDate
               </div>
             </div>
 
-          {ad.imageUrl && (
-            <div className="col-12">
-              <div className="bg-white rounded shadow-sm p-3 text-center">
-                <strong>📷 광고 이미지</strong>
-                <div className="mt-3">
-                  <img
-                    src={ad.imageUrl}
-                    alt={ad.title}
-                    onLoad={handleImageLoad}
-                    className="img-fluid rounded"
-                    style={{maxHeight: "300px", objectFit: "contain"}}
-                  />
-                  {imageSize.width > 0 && (
-                    <div className="text-muted mt-2 small">
-                      이미지 크기: {imageSize.width} × {imageSize.height} px
-                    </div>
-                  )}
+            {ad.imageUrl && (
+              <div className="col-12">
+                <div className="bg-white rounded shadow-sm p-3 text-center">
+                  <strong>📷 광고 이미지</strong>
+                  <div className="mt-3">
+                    <img
+                      src={ad.imageUrl}
+                      alt={ad.title}
+                      onLoad={handleImageLoad}
+                      className="img-fluid rounded"
+                      style={{maxHeight: "300px", objectFit: "contain"}}
+                    />
+                    {imageSize.width > 0 && (
+                      <div className="text-muted mt-2 small">
+                        이미지 크기: {imageSize.width} × {imageSize.height} px
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
             <div className="col-12">
               <div className="bg-white rounded shadow-sm p-3">
@@ -137,9 +137,6 @@ const AdvertisementModal = ({show, onHide, ad, getDescriptionFromKey, formatDate
           </div>
         </Modal.Body>
         <Modal.Footer className="bg-light">
-          <Button variant="secondary" onClick={onHide}>
-            닫기
-          </Button>
           <Button
             variant="danger"
             onClick={handleDelete}

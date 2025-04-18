@@ -1,23 +1,28 @@
 import {useEffect, useState} from "react";
 import RegistrationModal from "./RegistrationModal";
 import registrationApi from "../../api/registrationApi";
+import Loading from "../../components/common/Loading";
 
 const RegistrationManagement = () => {
   const [registrationList, setRegistrationList] = useState([]);
   const [selectedRegistration, setSelectedRegistration] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     fetchRegistrations();
   }, []);
 
   const fetchRegistrations = () => {
+    setIsLoading(true);
     registrationApi.listRegistrations({size: 30})
       .then((response) => {
         if (!response.ok) {
           return
         }
         setRegistrationList(response.data.contents);
-      });
+      }).finally(() => {
+      setIsLoading(false);
+    });
   };
 
   const handleRegistrationUpdate = () => {
@@ -52,7 +57,13 @@ const RegistrationManagement = () => {
           </tr>
           </thead>
           <tbody>
-          {registrationList.length === 0 ? (
+          {isLoading ? (
+            <tr>
+              <td colSpan="8" className="py-5">
+                <Loading/>
+              </td>
+            </tr>
+          ) : registrationList.length === 0 ? (
             <tr>
               <td colSpan="7" className="py-5 text-muted fs-5">
                 📭 등록된 가입 신청이 없습니다.

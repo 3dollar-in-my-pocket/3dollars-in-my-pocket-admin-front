@@ -1,6 +1,6 @@
 import React from "react";
 import {Link, Outlet, useLocation, useNavigate} from "react-router-dom";
-import {toast, ToastContainer} from "react-toastify";
+import {Bounce, toast, ToastContainer} from "react-toastify";
 import {useRecoilState} from "recoil";
 import {LoginStatus} from "../state/LoginStatus";
 import {LocalStorageService} from "../service/LocalStorageService";
@@ -42,7 +42,16 @@ const Layout = () => {
               🎯 DASHBOARD
             </Link>
 
-            <ToastContainer/>
+            <ToastContainer
+              position="top-right"
+              limit={1}
+              autoClose={2000}
+              newestOnTop={false}
+              closeOnClick
+              pauseOnHover
+              theme="colored"
+              transition={Bounce}
+            />
 
             <div className="mb-4">
               <h5 className="text-white-50 mb-3">서비스 관리</h5>
@@ -50,73 +59,82 @@ const Layout = () => {
                 <li>
                   <Link
                     to="/manage/advertisement"
-                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
-                      isActive("/manage/advertisement") ? "bg-primary text-white" : "text-white-50"
-                    }`}
+                    className={`nav-link ... ${isActive("/manage/advertisement") ? "bg-primary text-white" : "text-white-50"}`}
                   >
                     <i className="bi bi-bullseye fs-5"></i>
-                    <span className="fw-medium">광고 관리</span>
+                    <span className="fw-medium">📢 광고 관리</span>
                   </Link>
                 </li>
+
                 <li>
                   <Link
                     to="/manage/registration"
-                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
-                      isActive("/manage/registration") ? "bg-primary text-white" : "text-white-50"
-                    }`}
+                    className={`nav-link ... ${isActive("/manage/registration") ? "bg-primary text-white" : "text-white-50"}`}
                   >
-                    <i className="bi bi-person-plus-fill fs-5"></i>
-                    <span className="fw-medium">사장님 가입 신청 관리</span>
+                    <i className="bi bi-person-lines-fill fs-5"></i>
+                    <span className="fw-medium">📝 사장님 가입 신청 관리</span>
                   </Link>
                 </li>
+
                 <li>
                   <Link
                     to="/manage/faq"
-                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
-                      isActive("/manage/faq") ? "bg-primary text-white" : "text-white-50"
-                    }`}
+                    className={`nav-link ... ${isActive("/manage/faq") ? "bg-primary text-white" : "text-white-50"}`}
                   >
-                    <i className="bi bi-person-plus-fill fs-5"></i>
-                    <span className="fw-medium">FAQ 관리</span>
+                    <i className="bi bi-question-circle-fill fs-5"></i>
+                    <span className="fw-medium">❓ FAQ 관리</span>
                   </Link>
                 </li>
+
                 <li>
                   <Link
                     to="/manage/push-message"
-                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
-                      isActive("/manage/push-message") ? "bg-primary text-white" : "text-white-50"
-                    }`}
+                    className={`nav-link ... ${isActive("/manage/push-message") ? "bg-primary text-white" : "text-white-50"}`}
                   >
-                    <i className="bi bi-bell-fill fs-5"></i>
-                    <span className="fw-medium">푸시 발송 (TBD)</span>
+                    <i className="bi bi-send-fill fs-5"></i>
+                    <span className="fw-medium">📨 푸시 발송 (TBD)</span>
                   </Link>
                 </li>
               </ul>
             </div>
 
-            <div>
+            <div className="mb-4">
               <h5 className="text-white-50 mb-3">운영 툴</h5>
               <ul className="nav flex-column gap-2">
                 <li>
                   <Link
                     to="/manage/tool/cache"
-                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
-                      isActive("/manage/tool/cache") ? "bg-primary text-white" : "text-white-50"
-                    }`}
+                    className={`nav-link ... ${isActive("/manage/tool/cache") ? "bg-primary text-white" : "text-white-50"}`}
                   >
-                    <i className="bi bi-puzzle-fill fs-5"></i>
-                    <span className="fw-medium">캐시 운영 툴</span>
+                    <i className="bi bi-brush-fill fs-5"></i>
+                    <span className="fw-medium">🧹 캐시 운영 툴</span>
                   </Link>
                 </li>
+
                 <li>
                   <Link
                     to="/manage/tool/upload"
+                    className={`nav-link ... ${isActive("/manage/tool/upload") ? "bg-primary text-white" : "text-white-50"}`}
+                  >
+                    <i className="bi bi-image-fill fs-5"></i>
+                    <span className="fw-medium">🖼️ 이미지 업로드 운영 툴</span>
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            <div className="mb-4">
+              <h5 className="text-white-50 mb-3">통계</h5>
+              <ul className="nav flex-column gap-2">
+                <li>
+                  <Link
+                    to="/info/push-statistics"
                     className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
-                      isActive("/manage/tool/upload") ? "bg-primary text-white" : "text-white-50"
+                      isActive("/info/push-statistics") ? "bg-primary text-white" : "text-white-50"
                     }`}
                   >
-                    <i className="bi bi-puzzle-fill fs-5"></i>
-                    <span className="fw-medium">이미지 업로드 운영 툴</span>
+                    <i className="bi bi-bar-chart-line-fill fs-5"></i>
+                    <span className="fw-medium">푸시 발송 통계</span>
                   </Link>
                 </li>
               </ul>

@@ -6,6 +6,7 @@ import AdvertisementRegisterModal from "./AdvertisementRegisterModal";
 import {formatDateTime} from "../../utils/dateUtils";
 import cacheToolApi from "../../api/cacheToolApi";
 import {toast} from "react-toastify";
+import Loading from "../../components/common/Loading";
 
 const Advertisement = () => {
   const [advertisementList, setAdvertisementList] = useState([]);
@@ -16,6 +17,7 @@ const Advertisement = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const osPlatforms = [
     {key: "", description: "전체 플랫폼"},
@@ -40,7 +42,14 @@ const Advertisement = () => {
     });
   }, []);
 
+  useEffect(() => {
+    if (startDate && endDate) {
+      fetchAdvertisements();
+    }
+  }, [startDate, endDate, selectedPosition, selectedPlatform]);
+
   const fetchAdvertisements = () => {
+    setIsLoading(true)
     advertisementApi.listAds({
       application: "USER_API",
       page: 1,
@@ -54,6 +63,8 @@ const Advertisement = () => {
         return;
       }
       setAdvertisementList(response.data.contents);
+    }).finally(() => {
+      setIsLoading(false)
     });
   };
 
@@ -88,7 +99,7 @@ const Advertisement = () => {
             ♻️ 전체 광고 캐시 갱신
           </button>
           <button className="btn btn-success" onClick={() => setShowRegisterModal(true)}>
-            ➕ 광고 등록
+            ➕ 신규 등록
           </button>
         </div>
       </div>
@@ -168,7 +179,13 @@ const Advertisement = () => {
           </tr>
           </thead>
           <tbody>
-          {advertisementList.length === 0 ? (
+          {isLoading ? (
+            <tr>
+              <td colSpan="8" className="py-5">
+                <Loading/>
+              </td>
+            </tr>
+          ) : advertisementList.length === 0 ? (
             <tr>
               <td colSpan="8" className="py-5 text-muted fs-5">
                 📭 등록된 광고가 없습니다.

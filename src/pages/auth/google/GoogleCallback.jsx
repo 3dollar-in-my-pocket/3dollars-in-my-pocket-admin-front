@@ -6,12 +6,12 @@ import authApi from "../../../api/authApi";
 import {LocalStorageService} from "../../../service/LocalStorageService";
 import {useRecoilState} from "recoil";
 import {LoginStatus} from "../../../state/LoginStatus";
+import Loading from "../../../components/common/Loading";
 
 const GoogleCallback = () => {
   const navigate = useNavigate();
 
   const [, setIsLoginState] = useRecoilState(LoginStatus);
-
   useEffect(() => {
     auth();
 
@@ -39,9 +39,11 @@ const GoogleCallback = () => {
       }
     }
   }, []);
-  return (<>
-    <h1>Loading</h1>
-  </>);
+  return (
+    <div className="container-fluid py-4 d-flex justify-content-center align-items-center" style={{height: '80vh'}}>
+      <Loading/>
+    </div>
+  );
 };
 
 export default GoogleCallback;

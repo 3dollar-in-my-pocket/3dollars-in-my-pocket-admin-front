@@ -90,9 +90,6 @@ const FaqEditModal = ({applications, showModal, handleCloseModal, selectedApplic
       <Modal.Footer className="border-0">
         <div className="w-100 d-flex flex-column gap-2">
           <div className="d-flex justify-content-between gap-2">
-            <button className="btn btn-outline-secondary w-100" onClick={handleCloseModal}>
-              닫기
-            </button>
             {selectedFaq && (
               <button className="btn btn-outline-danger w-100" onClick={handleDelete}>
                 삭제

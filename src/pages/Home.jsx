@@ -1,6 +1,6 @@
 import React, {useEffect} from "react";
 import {GOOGLE_AUTH_URL} from "../constants/google";
-import {ToastContainer} from "react-toastify";
+import {Bounce, ToastContainer} from "react-toastify";
 
 const Home = () => {
   useEffect(() => {
@@ -14,7 +14,16 @@ const Home = () => {
         <h1 className="fw-bold mb-2 text-primary fs-3">🚀 가슴속 3천원 관리자</h1>
         <p className="text-muted mb-4">Google 계정으로 시작하세요</p>
 
-        <ToastContainer/>
+        <ToastContainer
+          position="top-right"
+          limit={1}
+          autoClose={2000}
+          newestOnTop={false}
+          closeOnClick
+          pauseOnHover
+          theme="colored"
+          transition={Bounce}
+        />
 
         <a
           href={GOOGLE_AUTH_URL}

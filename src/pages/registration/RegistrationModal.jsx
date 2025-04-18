@@ -133,9 +133,6 @@ const RegistrationModal = ({show, onHide, registration}) => {
               ❌ 거절
             </Button>
           </div>
-          <Button variant="secondary" onClick={onHide} size="lg">
-            닫기
-          </Button>
         </Modal.Footer>
       </Modal>
 

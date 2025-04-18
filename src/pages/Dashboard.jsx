@@ -46,6 +46,15 @@ const Dashboard = () => {
     },
   ];
 
+  const statTools = [
+    {
+      title: "푸시 발송 통계",
+      description: "Firebase에서 발송된 푸시 메시지의 통계를 확인할 수 있습니다.",
+      icon: "bi-graph-up-arrow",
+      route: "/info/push-statistics"
+    },
+  ];
+
   return (
     <div className="container py-4">
       <div className="mb-4 border-bottom pb-2 d-flex justify-content-between align-items-center">
@@ -84,6 +93,34 @@ const Dashboard = () => {
         <h4 className="fw-semibold">운영툴</h4>
         <div className="row g-4">
           {toolTools.map((tool, idx) => (
+            <div className="col-md-6 col-lg-4" key={idx}>
+              <div
+                className="card shadow-sm h-100 border-0 hover-shadow cursor-pointer"
+                onClick={() => navigate(tool.route)}
+                role="button"
+              >
+                <div className="card-body d-flex flex-column">
+                  <div className="mb-3">
+                    <i className={`bi ${tool.icon} fs-2 text-primary`}></i>
+                  </div>
+                  <h5 className="card-title fw-bold">{tool.title}</h5>
+                  <p className="card-text text-muted">{tool.description}</p>
+                  <div className="mt-auto text-end">
+                    <button className="btn btn-outline-primary btn-sm">
+                      바로가기 →
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-5">
+        <h4 className="fw-semibold">지표/통계</h4>
+        <div className="row g-4">
+          {statTools.map((tool, idx) => (
             <div className="col-md-6 col-lg-4" key={idx}>
               <div
                 className="card shadow-sm h-100 border-0 hover-shadow cursor-pointer"
