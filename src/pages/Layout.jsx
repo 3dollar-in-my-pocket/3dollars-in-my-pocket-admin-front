@@ -62,7 +62,7 @@ const Layout = () => {
                     className={`nav-link ... ${isActive("/manage/advertisement") ? "bg-primary text-white" : "text-white-50"}`}
                   >
                     <i className="bi bi-bullseye fs-5"></i>
-                    <span className="fw-medium">📢 광고 관리</span>
+                    <span className="fw-medium"> 광고 관리</span>
                   </Link>
                 </li>
 
@@ -72,7 +72,7 @@ const Layout = () => {
                     className={`nav-link ... ${isActive("/manage/registration") ? "bg-primary text-white" : "text-white-50"}`}
                   >
                     <i className="bi bi-person-lines-fill fs-5"></i>
-                    <span className="fw-medium">📝 사장님 가입 신청 관리</span>
+                    <span className="fw-medium"> 사장님 가입 신청 관리</span>
                   </Link>
                 </li>
 
@@ -82,7 +82,7 @@ const Layout = () => {
                     className={`nav-link ... ${isActive("/manage/faq") ? "bg-primary text-white" : "text-white-50"}`}
                   >
                     <i className="bi bi-question-circle-fill fs-5"></i>
-                    <span className="fw-medium">❓ FAQ 관리</span>
+                    <span className="fw-medium"> FAQ 관리</span>
                   </Link>
                 </li>
 
@@ -92,7 +92,7 @@ const Layout = () => {
                     className={`nav-link ... ${isActive("/manage/push-message") ? "bg-primary text-white" : "text-white-50"}`}
                   >
                     <i className="bi bi-send-fill fs-5"></i>
-                    <span className="fw-medium">📨 푸시 발송 (TBD)</span>
+                    <span className="fw-medium"> 푸시 발송 (TBD)</span>
                   </Link>
                 </li>
               </ul>
@@ -107,7 +107,7 @@ const Layout = () => {
                     className={`nav-link ... ${isActive("/manage/tool/cache") ? "bg-primary text-white" : "text-white-50"}`}
                   >
                     <i className="bi bi-brush-fill fs-5"></i>
-                    <span className="fw-medium">🧹 캐시 운영 툴</span>
+                    <span className="fw-medium"> 캐시 운영 툴</span>
                   </Link>
                 </li>
 
@@ -117,7 +117,7 @@ const Layout = () => {
                     className={`nav-link ... ${isActive("/manage/tool/upload") ? "bg-primary text-white" : "text-white-50"}`}
                   >
                     <i className="bi bi-image-fill fs-5"></i>
-                    <span className="fw-medium">🖼️ 이미지 업로드 운영 툴</span>
+                    <span className="fw-medium"> 이미지 업로드 운영 툴</span>
                   </Link>
                 </li>
               </ul>
@@ -134,7 +134,7 @@ const Layout = () => {
                     }`}
                   >
                     <i className="bi bi-bar-chart-line-fill fs-5"></i>
-                    <span className="fw-medium">푸시 발송 통계</span>
+                    <span className="fw-medium"> 푸시 발송 통계</span>
                   </Link>
                 </li>
               </ul>
