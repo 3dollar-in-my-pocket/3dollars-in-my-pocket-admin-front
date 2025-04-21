@@ -1,109 +1,110 @@
-import React, {useEffect, useState} from 'react';
-import {Alert, Button, Col, Container, Form, Row, Spinner} from 'react-bootstrap';
+import React, { useEffect, useState } from 'react';
+import { Alert, Button, Col, Container, Form, Row, Spinner, Card } from 'react-bootstrap';
 import enumApi from "../../api/enumApi";
 import cacheToolApi from "../../api/cacheToolApi";
-import {toast} from "react-toastify";
+import { toast } from "react-toastify";
 
 const CacheTools = () => {
-    const [cacheTypes, setCacheTypes] = useState([]);
-    const [selectedCacheType, setSelectedCacheType] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-    const [errorMessage, setErrorMessage] = useState('');
+  const [cacheTypes, setCacheTypes] = useState([]);
+  const [selectedCacheType, setSelectedCacheType] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
-    const evictCaches = async () => {
-        if (!selectedCacheType) {
-            setErrorMessage('캐시 타입을 선택해주세요.');
-            return;
-        }
+  const evictCaches = async () => {
+    if (!selectedCacheType) {
+      setErrorMessage('❗ 캐시 타입을 선택해주세요.');
+      return;
+    }
 
-        if (!window.confirm('정말로 캐시를 제거하겠습니까?')) {
-            return;
-        }
+    if (!window.confirm('정말로 캐시를 제거하겠습니까?')) return;
 
-        try {
-            setIsLoading(true);
-            await cacheToolApi.evictAll(selectedCacheType);
-            toast.info('캐시가 제거되었습니다');
-            setIsLoading(false);
-        } catch (error) {
-            setIsLoading(false);
-            if (!error.response) {
-                setErrorMessage('서버 연결중 에러가 발생하였습니다\n잠시후 다시 시도해주세요');
-            } else {
-                setErrorMessage(error.response.data.message || '예상치 못한 오류가 발생했습니다.');
-            }
-        }
-    };
-
-    const handleSelectedCache = (e) => {
-        setSelectedCacheType(e.target.value);
+    try {
+      setIsLoading(true);
+      const response = await cacheToolApi.evictAll(selectedCacheType);
+      if (response.ok) {
+        toast.success('✅ 캐시가 성공적으로 제거되었습니다');
+        setSelectedCacheType('');
         setErrorMessage('');
-    };
+      }
+    } catch (error) {
+      if (!error.response) {
+        setErrorMessage('서버 연결 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      } else {
+        setErrorMessage(error.response.data.message || '예상치 못한 오류가 발생했습니다.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    useEffect(() => {
-        enumApi.getEnum()
-            .then((response) => {
-                if (!response.ok) {
-                    return;
-                }
-                setCacheTypes(response.data['CacheType']);
-            });
-    }, []);
+  const handleSelectedCache = (e) => {
+    setSelectedCacheType(e.target.value);
+    setErrorMessage('');
+  };
 
-    return (
-        <Container className="py-5">
-            <Row className="justify-content-center">
-                <Col md={8} lg={6}>
-                    <div className="text-center mb-4">
-                        <h2 className="fw-bold text-primary">캐시 전체 만료 툴</h2>
-                        <p className="text-muted">선택한 캐시 타입을 만료시키는 작업을 진행합니다.</p>
-                    </div>
+  useEffect(() => {
+    enumApi.getEnum().then((response) => {
+      if (response.ok) {
+        setCacheTypes(response.data['CacheType']);
+      }
+    });
+  }, []);
 
-                    {errorMessage && (
-                        <Alert variant="danger" className="mb-4">
-                            {errorMessage}
-                        </Alert>
-                    )}
+  return (
+    <Container className="py-5">
+      <Row className="justify-content-center">
+        <Col md={8} lg={6}>
+          <Card className="p-4 shadow rounded-4">
+            <div className="text-center mb-4">
+              <h2 className="fw-bold text-danger">🧹 캐시 만료 도구</h2>
+              <p className="text-muted small">선택한 캐시 타입의 모든 항목을 만료 처리합니다.</p>
+            </div>
 
-                    <div className="mb-4">
-                        <Form.Group controlId="selectCacheType">
-                            <Form.Label className="fw-semibold">캐시 타입 선택</Form.Label>
-                            <Form.Select
-                                value={selectedCacheType}
-                                onChange={handleSelectedCache}
-                                aria-label="캐시 타입 선택"
-                                className="shadow-sm"
-                            >
-                                <option value="">캐시 타입을 선택하세요</option>
-                                {cacheTypes.map((type) => (
-                                    <option key={type.key} value={type.key}>
-                                        {type.description}
-                                    </option>
-                                ))}
-                            </Form.Select>
-                        </Form.Group>
-                    </div>
+            {errorMessage && (
+              <Alert variant="danger" className="text-center">
+                {errorMessage}
+              </Alert>
+            )}
 
-                    <div className="text-center">
-                        <Button
-                            variant="danger"
-                            onClick={evictCaches}
-                            disabled={!selectedCacheType || isLoading}
-                            className="btn-lg w-75 shadow-lg"
-                        >
-                            {isLoading ? (
-                                <>
-                                    <Spinner animation="border" size="sm" className="me-2"/> 처리 중...
-                                </>
-                            ) : (
-                                '캐시 만료시키기'
-                            )}
-                        </Button>
-                    </div>
-                </Col>
-            </Row>
-        </Container>
-    );
+            <Form.Group controlId="selectCacheType" className="mb-4">
+              <Form.Label className="fw-semibold">📦 캐시 타입 선택</Form.Label>
+              <Form.Select
+                value={selectedCacheType}
+                onChange={handleSelectedCache}
+                aria-label="캐시 타입 선택"
+                className="shadow-sm"
+              >
+                <option value="">캐시 타입을 선택하세요</option>
+                {cacheTypes.map((type) => (
+                  <option key={type.key} value={type.key}>
+                    {type.description}
+                  </option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+
+            <div className="d-grid">
+              <Button
+                variant="danger"
+                onClick={evictCaches}
+                disabled={!selectedCacheType || isLoading}
+                className="btn-lg shadow-lg"
+              >
+                {isLoading ? (
+                  <>
+                    <Spinner animation="border" size="sm" className="me-2" />
+                    처리 중...
+                  </>
+                ) : (
+                  '🗑️ 캐시 만료시키기'
+                )}
+              </Button>
+            </div>
+          </Card>
+        </Col>
+      </Row>
+    </Container>
+  );
 };
 
 export default CacheTools;
