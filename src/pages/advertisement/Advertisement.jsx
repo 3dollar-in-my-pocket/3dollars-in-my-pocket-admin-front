@@ -223,6 +223,7 @@ const Advertisement = () => {
         getDescriptionFromKey={getDescriptionFromKey}
         formatDateTime={formatDateTime}
         fetchAdvertisements={fetchAdvertisements}
+        positions={positions}
       />
 
       <AdvertisementRegisterModal

@@ -1,7 +1,14 @@
 import React from "react";
 import {Col, Form, Row} from "react-bootstrap";
 
-const BasicInfoStep = ({formData, onChange, positions, platforms}) => {
+const BasicInfoStep = ({
+  formData,
+  onChange,
+  positions,
+  platforms,
+  disablePosition = false,
+  disablePlatform = false,
+}) => {
   const handleChange = (e) => {
     const {name, value} = e.target;
     onChange(name, value);
@@ -29,7 +36,12 @@ const BasicInfoStep = ({formData, onChange, positions, platforms}) => {
         <Col md={6}>
           <Form.Group>
             <Form.Label>노출 구좌</Form.Label>
-            <Form.Select name="position" value={formData.position} onChange={handleChange}>
+            <Form.Select
+              name="position"
+              value={formData.position}
+              onChange={handleChange}
+              disabled={disablePosition}
+            >
               <option value="">선택하세요</option>
               {positions
                 .filter((pos) => pos.key !== "")
@@ -38,14 +50,18 @@ const BasicInfoStep = ({formData, onChange, positions, platforms}) => {
                     {pos.description}
                   </option>
                 ))}
-
             </Form.Select>
           </Form.Group>
         </Col>
         <Col md={6}>
           <Form.Group>
             <Form.Label>노출 대상 플랫폼</Form.Label>
-            <Form.Select name="platform" value={formData.platform} onChange={handleChange}>
+            <Form.Select
+              name="platform"
+              value={formData.platform}
+              onChange={handleChange}
+              disabled={disablePlatform}
+            >
               {platforms.map((plat) => (
                 <option key={plat.key} value={plat.key}>
                   {plat.description}
