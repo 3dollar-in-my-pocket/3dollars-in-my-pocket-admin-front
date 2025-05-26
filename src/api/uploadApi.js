@@ -7,7 +7,7 @@ export default {
       formData.append('file', file);
 
       const response = await axiosInstance.post(
-        `/v2/file/${selectedImageType}/upload`,
+        `/v2/file/${selectedImageType}`,
         formData,
         {
           headers: {
