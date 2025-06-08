@@ -4,8 +4,18 @@ import {BiCalendar, BiLinkExternal} from "react-icons/bi";
 import {HiOutlineSpeakerphone} from "react-icons/hi";
 import advertisementApi from "../../api/advertisementApi";
 import {toast} from "react-toastify";
+import AdvertisementEditModal from "./AdvertisementEditModal";
 
-const AdvertisementModal = ({show, onHide, ad, getDescriptionFromKey, formatDateTime, fetchAdvertisements}) => {
+const AdvertisementModal = ({
+                              show,
+                              onHide,
+                              ad,
+                              getDescriptionFromKey,
+                              formatDateTime,
+                              fetchAdvertisements,
+                              positions
+                            }) => {
+  const [showEdit, setShowEdit] = useState(false);
   const [imageSize, setImageSize] = useState({width: 0, height: 0});
 
   if (!ad) return null;
@@ -137,14 +147,21 @@ const AdvertisementModal = ({show, onHide, ad, getDescriptionFromKey, formatDate
           </div>
         </Modal.Body>
         <Modal.Footer className="bg-light">
-          <Button
-            variant="danger"
-            onClick={handleDelete}
-          >
+          <Button variant="primary" onClick={() => setShowEdit(true)}>
+            수정
+          </Button>
+          <Button variant="danger" onClick={handleDelete}>
             삭제
           </Button>
         </Modal.Footer>
       </Modal>
+      <AdvertisementEditModal
+        show={showEdit}
+        onHide={() => setShowEdit(false)}
+        ad={ad}
+        positions={positions}
+        fetchAdvertisements={fetchAdvertisements}
+      />
     </>
   );
 };
