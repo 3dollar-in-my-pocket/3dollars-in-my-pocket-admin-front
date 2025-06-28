@@ -24,6 +24,12 @@ const Dashboard = () => {
       route: "/manage/faq"
     },
     {
+      title: "정책 관리",
+      description: "시스템 정책을 등록하고 관리할 수 있습니다.",
+      icon: "bi-shield-fill-check",
+      route: "/manage/policy"
+    },
+    {
       title: "푸시 발송 (TBD)",
       description: "앱 사용자에게 발송할 푸시 메시지를 설정합니다.",
       icon: "bi-bell-fill",
