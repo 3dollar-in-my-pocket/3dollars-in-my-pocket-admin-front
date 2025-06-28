@@ -88,6 +88,16 @@ const Layout = () => {
 
                 <li>
                   <Link
+                    to="/manage/policy"
+                    className={`nav-link ... ${isActive("/manage/policy") ? "bg-primary text-white" : "text-white-50"}`}
+                  >
+                    <i className="bi bi-shield-fill-check fs-5"></i>
+                    <span className="fw-medium"> 정책 관리</span>
+                  </Link>
+                </li>
+
+                <li>
+                  <Link
                     to="/manage/push-message"
                     className={`nav-link ... ${isActive("/manage/push-message") ? "bg-primary text-white" : "text-white-50"}`}
                   >

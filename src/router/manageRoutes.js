@@ -2,6 +2,7 @@ import Dashboard from "../pages/Dashboard";
 import Advertisement from "../pages/advertisement/Advertisement";
 import Registration from "../pages/registration/Registration";
 import FaqManagement from "../pages/faq/Faq";
+import Policy from "../pages/policy/Policy";
 import Push from "../pages/push/Push";
 import CacheTool from "../pages/tool/CacheTool";
 import FileUploadTool from "../pages/tool/FileUploadTool";
@@ -25,6 +26,10 @@ const manageRoutes = {
     {
       path: '/manage/faq',
       element: <PrivateRouter><FaqManagement/></PrivateRouter>
+    },
+    {
+      path: '/manage/policy',
+      element: <PrivateRouter><Policy/></PrivateRouter>
     },
     {
       path: '/manage/push-message',
