@@ -87,6 +87,26 @@ export default {
             socialType: response.data.data.user.socialType,
             createdAt: response.data.data.user.createdAt
           },
+          representativeMedal: response.data.data.representativeMedal ? {
+            medalId: response.data.data.representativeMedal.medalId,
+            name: response.data.data.representativeMedal.name,
+            iconUrl: response.data.data.representativeMedal.iconUrl,
+            disableIconUrl: response.data.data.representativeMedal.disableIconUrl,
+            introduction: response.data.data.representativeMedal.introduction,
+            acquisition: response.data.data.representativeMedal.acquisition ? {
+              description: response.data.data.representativeMedal.acquisition.description
+            } : null
+          } : null,
+          medals: response.data.data.medals?.map(medal => ({
+            medalId: medal.medalId,
+            name: medal.name,
+            iconUrl: medal.iconUrl,
+            disableIconUrl: medal.disableIconUrl,
+            introduction: medal.introduction,
+            acquisition: medal.acquisition ? {
+              description: medal.acquisition.description
+            } : null
+          })) || [],
           devices: response.data.data.devices.map(device => ({
             deviceId: device.deviceId,
             os: device.osPlatform === 'AOS' ? 'Android' : device.osPlatform, // AOS -> Android 변환
@@ -94,7 +114,7 @@ export default {
             createdAt: device.createdAt,
             updatedAt: device.updatedAt,
           })) || [],
-          settings: response.data.data.setting ? createUserSettings({
+          setting: response.data.data.setting ? createUserSettings({
             enableActivitiesPush: response.data.data.setting.enableActivitiesPush,
             marketingConsent: response.data.data.setting.marketingConsent
           }) : null

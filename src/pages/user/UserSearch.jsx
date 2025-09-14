@@ -93,16 +93,8 @@ const UserSearch = () => {
 
   return (
     <div className="container-fluid py-4">
-      <div className="text-center mb-5">
-        <div className="d-inline-flex align-items-center gap-3 bg-gradient p-4 rounded-4 shadow-sm" style={{background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'}}>
-          <div className="bg-white rounded-circle p-3 shadow">
-            <i className="bi bi-people-fill fs-1 text-primary"></i>
-          </div>
-          <div className="text-white">
-            <h1 className="mb-0 fw-bold">유저 검색</h1>
-            <p className="mb-0 opacity-90">사용자 정보를 빠르게 찾아보세요</p>
-          </div>
-        </div>
+      <div className="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
+        <h2 className="fw-bold">👤 유저 검색</h2>
       </div>
 
       {/* 검색 영역 */}

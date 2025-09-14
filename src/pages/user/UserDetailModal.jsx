@@ -15,6 +15,8 @@ const UserDetailModal = ({ show, onHide, user }) => {
   const [userDetail, setUserDetail] = useState(null);
   const [devices, setDevices] = useState([]);
   const [settings, setSettings] = useState(null);
+  const [representativeMedal, setRepresentativeMedal] = useState(null);
+  const [medals, setMedals] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('basic');
   const [error, setError] = useState(null);
@@ -48,11 +50,14 @@ const UserDetailModal = ({ show, onHide, user }) => {
         return;
       }
 
-      const { user: userDetail, devices, settings } = response.data;
+      // 서버 응답 구조에 맞게 직접 데이터 추출
+      const data = response.data;
 
-      setUserDetail(userDetail);
-      setDevices(devices);
-      setSettings(settings);
+      setUserDetail(data.user);
+      setDevices(data.devices || []);
+      setSettings(data.setting);
+      setRepresentativeMedal(data.representativeMedal);
+      setMedals(data.medals || []);
     } catch (error) {
       console.error('사용자 상세 정보 조회 실패:', error);
 
@@ -70,6 +75,8 @@ const UserDetailModal = ({ show, onHide, user }) => {
     setUserDetail(null);
     setDevices([]);
     setSettings(null);
+    setRepresentativeMedal(null);
+    setMedals([]);
     setActiveTab('basic');
     setError(null);
     onHide();
@@ -192,7 +199,7 @@ const UserDetailModal = ({ show, onHide, user }) => {
                     <div className="card border-0 shadow-sm">
                       <div className="card-body p-4">
                         <div className="text-center mb-4">
-                          <h4 className="fw-bold text-dark mb-1">{userDetail?.nickname}</h4>
+                          <h4 className="fw-bold text-dark mb-1">{userDetail?.name}</h4>
                         </div>
 
                         <div className="row g-4">
@@ -355,6 +362,148 @@ const UserDetailModal = ({ show, onHide, user }) => {
                         ))}
                       </div>
                     )}
+                  </div>
+                </div>
+              </div>
+            </Tab>
+
+            {/* 메달 정보 탭 */}
+            <Tab
+              eventKey="medals"
+              title={
+                <span className="d-flex align-items-center gap-2">
+                  <i className="bi bi-award"></i>
+                  메달 정보
+                  {medals.length > 0 && (
+                    <span className="badge bg-warning rounded-pill ms-1">{medals.length}</span>
+                  )}
+                </span>
+              }
+            >
+              <div className="p-4">
+                <div className="card border-0 shadow-sm">
+                  <div className="card-header bg-light border-0 p-4">
+                    <div className="d-flex align-items-center gap-2">
+                      <div className="bg-warning bg-opacity-10 rounded-circle p-2">
+                        <i className="bi bi-award text-warning"></i>
+                      </div>
+                      <h5 className="mb-0 fw-bold text-dark">보유 메달</h5>
+                      {medals.length > 0 && (
+                        <span className="badge bg-warning ms-auto px-3 py-2 rounded-pill">
+                          총 {medals.length}개
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="card-body p-4">
+                    {/* 대표 메달 섹션 */}
+                    {representativeMedal && (
+                      <div className="mb-4">
+                        <h6 className="fw-bold text-dark mb-3 d-flex align-items-center gap-2">
+                          <i className="bi bi-star-fill text-warning"></i>
+                          대표 메달
+                        </h6>
+                        <div className="card border-warning border-2" style={{
+                          background: 'linear-gradient(135deg, #fff3cd 0%, #ffffff 100%)',
+                          borderRadius: '16px'
+                        }}>
+                          <div className="card-body p-4">
+                            <div className="d-flex align-items-center gap-3">
+                              <div className="position-relative">
+                                <img
+                                  src={representativeMedal.iconUrl}
+                                  alt={representativeMedal.name}
+                                  className="rounded-circle"
+                                  style={{ width: '60px', height: '60px', objectFit: 'cover' }}
+                                  onError={(e) => {
+                                    e.target.src = representativeMedal.disableIconUrl || '/default-medal.png';
+                                  }}
+                                />
+                                <div className="position-absolute top-0 start-100 translate-middle">
+                                  <i className="bi bi-star-fill text-warning fs-5"></i>
+                                </div>
+                              </div>
+                              <div className="flex-grow-1">
+                                <h6 className="fw-bold text-dark mb-1">{representativeMedal.name}</h6>
+                                <p className="text-muted mb-2 small">{representativeMedal.introduction}</p>
+                                {representativeMedal.acquisition?.description && (
+                                  <div className="d-flex align-items-center gap-2">
+                                    <span className="badge bg-primary bg-opacity-10 text-primary border border-primary rounded-pill px-2 py-1" style={{ fontSize: '0.7rem' }}>
+                                      <i className="bi bi-info-circle me-1"></i>
+                                      {representativeMedal.acquisition.description}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 전체 메달 목록 */}
+                    <div>
+                      <h6 className="fw-bold text-dark mb-3 d-flex align-items-center gap-2">
+                        <i className="bi bi-collection text-primary"></i>
+                        전체 보유 메달
+                      </h6>
+                      {medals.length === 0 ? (
+                        <div className="text-center py-5">
+                          <div className="bg-light rounded-circle mx-auto mb-4" style={{width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                            <i className="bi bi-award fs-1 text-secondary"></i>
+                          </div>
+                          <h5 className="text-dark mb-2">보유한 메달이 없습니다</h5>
+                          <p className="text-muted">아직 획득한 메달이 없습니다.</p>
+                        </div>
+                      ) : (
+                        <div className="row g-3">
+                          {medals.map((medal, index) => {
+                            const isRepresentative = representativeMedal?.medalId === medal.medalId;
+                            return (
+                              <div key={medal.medalId || index} className="col-md-6 col-lg-4">
+                                <div className={`card border-0 shadow-sm h-100 ${isRepresentative ? 'border-warning border-2' : ''}`} style={{
+                                  background: isRepresentative
+                                    ? 'linear-gradient(135deg, #fff3cd 0%, #ffffff 100%)'
+                                    : 'linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%)',
+                                  borderRadius: '16px'
+                                }}>
+                                  <div className="card-body p-3">
+                                    <div className="d-flex flex-column align-items-center text-center">
+                                      <div className="position-relative mb-3">
+                                        <img
+                                          src={medal.iconUrl}
+                                          alt={medal.name}
+                                          className="rounded-circle"
+                                          style={{ width: '50px', height: '50px', objectFit: 'cover' }}
+                                          onError={(e) => {
+                                            e.target.src = medal.disableIconUrl || '/default-medal.png';
+                                          }}
+                                        />
+                                        {isRepresentative && (
+                                          <div className="position-absolute top-0 start-100 translate-middle">
+                                            <i className="bi bi-star-fill text-warning"></i>
+                                          </div>
+                                        )}
+                                      </div>
+                                      <h6 className="fw-bold text-dark mb-1 small">{medal.name}</h6>
+                                      <p className="text-muted mb-2 small" style={{ fontSize: '0.75rem', lineHeight: '1.2' }}>
+                                        {medal.introduction}
+                                      </p>
+                                      {medal.acquisition?.description && (
+                                        <span className="badge bg-primary bg-opacity-10 text-primary border border-primary rounded-pill px-2 py-1" style={{ fontSize: '0.7rem' }}>
+                                          <i className="bi bi-info-circle me-1"></i>
+                                          {medal.acquisition.description}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>

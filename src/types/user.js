@@ -123,11 +123,15 @@ export const createUserSettings = ({
 export const createUserDetailResponse = ({
   user = null,
   devices = [],
-  settings = null
+  representativeMedal = null,
+  medals = [],
+  setting = null
 }) => ({
   user,
   devices,
-  settings
+  representativeMedal,
+  medals,
+  setting,
 });
 
 // Utility functions
