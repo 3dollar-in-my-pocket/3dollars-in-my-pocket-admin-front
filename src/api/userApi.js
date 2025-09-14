@@ -55,13 +55,13 @@ export default {
         });
 
         return {
+          ok: response.data.ok,
           data: searchResponse
         };
       } else {
         throw new Error('API 응답 오류');
       }
     } catch (error) {
-      console.error('사용자 검색 API 호출 실패:', error);
       return error.response;
     }
   },
@@ -90,7 +90,9 @@ export default {
           devices: response.data.data.devices.map(device => ({
             deviceId: device.deviceId,
             os: device.osPlatform === 'AOS' ? 'Android' : device.osPlatform, // AOS -> Android 변환
-            appVersion: device.appVersion
+            appVersion: device.appVersion,
+            createdAt: device.createdAt,
+            updatedAt: device.updatedAt,
           })) || [],
           settings: response.data.data.setting ? createUserSettings({
             enableActivitiesPush: response.data.data.setting.enableActivitiesPush,
@@ -99,13 +101,13 @@ export default {
         });
 
         return {
+          ok: response.data.ok,
           data: detailResponse
         };
       } else {
         throw new Error('API 응답 오류');
       }
     } catch (error) {
-      console.error('사용자 상세 정보 조회 API 호출 실패:', error);
       return error.response;
     }
   }

@@ -1,16 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import UserDetailModal from './UserDetailModal';
-import Loading from '../../components/common/Loading';
 import {
   SEARCH_TYPES,
   createUserSearchRequest,
-  createUserBasicInfo,
   getSocialTypeDisplayName,
   getSocialTypeBadgeClass,
   formatUserIds,
   validateUserSearch
 } from '../../types/user';
 import userApi from '../../api/userApi';
+import { toast } from 'react-toastify';
 
 const UserSearch = () => {
   const [searchType, setSearchType] = useState(SEARCH_TYPES.NAME);
@@ -22,12 +21,11 @@ const UserSearch = () => {
   const [hasMore, setHasMore] = useState(false);
   const [nextCursor, setNextCursor] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
-  const [totalCount, setTotalCount] = useState(0);
 
   const handleSearch = async (reset = true) => {
     const validationError = validateUserSearch(searchType, searchQuery, userIds);
     if (validationError) {
-      alert(validationError);
+      toast(validationError);
       return;
     }
 
@@ -45,22 +43,23 @@ const UserSearch = () => {
 
       // API 호출
       const response = await userApi.searchUsers(searchRequest);
-      const { users, hasMore, nextCursor: newNextCursor, totalCount } = response.data;
+      if (!response.ok) {
+        return
+      }
+      
+      const { users, hasMore, nextCursor: newNextCursor } = response.data;
 
       if (reset) {
         setUserList(users);
-        setTotalCount(totalCount);
       } else {
         setUserList(prev => [...prev, ...users]);
       }
       setHasMore(hasMore);
       setNextCursor(newNextCursor);
     } catch (error) {
-      console.error('사용자 검색 실패:', error);
-      alert('사용자 검색에 실패했습니다.');
+      toast.error('사용자 정보를 불러오는 중 오류가 발생했습니다.');
       if (reset) {
         setUserList([]);
-        setTotalCount(0);
       }
     } finally {
       setIsLoading(false);

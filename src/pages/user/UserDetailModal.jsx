@@ -1,9 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Modal, Tab, Tabs } from 'react-bootstrap';
-import Loading from '../../components/common/Loading';
 import {
-  createUserDetailInfo,
-  createUserDeviceInfo,
   getSocialTypeDisplayName,
   getSocialTypeBadgeClass,
   getOsBadgeClass,
@@ -12,6 +9,7 @@ import {
   DEVICE_OS
 } from '../../types/user';
 import userApi from '../../api/userApi';
+import { toast } from 'react-toastify';
 
 const UserDetailModal = ({ show, onHide, user }) => {
   const [userDetail, setUserDetail] = useState(null);
@@ -32,8 +30,24 @@ const UserDetailModal = ({ show, onHide, user }) => {
     setError(null);
 
     try {
-      // API 호출
       const response = await userApi.getUserDetail(user.userId);
+      if (!response.ok) {
+        return
+      }
+
+      // HTTP 상태 코드가 200-299 범위가 아닌 경우
+      if (response.status >= 400) {
+        const errorMessage = response.status === 404
+          ? '사용자 정보를 찾을 수 없습니다.'
+          : response.status === 403
+          ? '사용자 정보에 대한 접근 권한이 없습니다.'
+          : `서버 오류가 발생했습니다. (${response.status})`;
+
+        toast.error(errorMessage);
+        setError(errorMessage);
+        return;
+      }
+
       const { user: userDetail, devices, settings } = response.data;
 
       setUserDetail(userDetail);
@@ -41,7 +55,12 @@ const UserDetailModal = ({ show, onHide, user }) => {
       setSettings(settings);
     } catch (error) {
       console.error('사용자 상세 정보 조회 실패:', error);
-      setError('사용자 상세 정보를 불러오는데 실패했습니다.');
+
+      // 네트워크 오류나 기타 예외 처리
+      const errorMessage = error.response?.status
+        ? `서버 오류가 발생했습니다. (${error.response.status})`
+        : '네트워크 오류가 발생했습니다. 인터넷 연결을 확인해주세요.';
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -96,9 +115,10 @@ const UserDetailModal = ({ show, onHide, user }) => {
     <Modal
       show={show}
       onHide={handleClose}
-      size="lg"
+      size="xl"
       centered
       className="user-detail-modal"
+      style={{ maxWidth: '90vw' }}
     >
       <Modal.Header
         closeButton
@@ -107,9 +127,6 @@ const UserDetailModal = ({ show, onHide, user }) => {
       >
         <div className="w-100">
           <div className="d-flex align-items-center gap-3 text-white">
-            <div className="bg-white bg-opacity-20 rounded-circle p-3">
-              <i className="bi bi-person-circle fs-2"></i>
-            </div>
             <div>
               <Modal.Title className="mb-0 fs-3 fw-bold">
                 사용자 상세 정보
@@ -176,7 +193,6 @@ const UserDetailModal = ({ show, onHide, user }) => {
                       <div className="card-body p-4">
                         <div className="text-center mb-4">
                           <h4 className="fw-bold text-dark mb-1">{userDetail?.nickname}</h4>
-                          <p className="text-muted mb-3">사용자 기본 정보</p>
                         </div>
 
                         <div className="row g-4">
@@ -204,7 +220,7 @@ const UserDetailModal = ({ show, onHide, user }) => {
                             </div>
                           </div>
 
-                          <div className="col-12">
+                          <div className="col-md-6">
                             <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
                               <div className="bg-warning bg-opacity-10 rounded-circle p-2">
                                 <i className="bi bi-shield-lock text-warning"></i>
@@ -214,6 +230,18 @@ const UserDetailModal = ({ show, onHide, user }) => {
                                 <div>
                                   {getSocialTypeBadge(userDetail?.socialType)}
                                 </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="col-md-6">
+                            <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
+                              <div className="bg-info bg-opacity-10 rounded-circle p-2">
+                                <i className="bi bi-calendar3 text-info"></i>
+                              </div>
+                              <div>
+                                <label className="form-label fw-semibold text-muted mb-1">가입일</label>
+                                <p className="mb-0 fw-bold text-dark">{formatDateTime(userDetail?.createdAt)}</p>
                               </div>
                             </div>
                           </div>
@@ -263,25 +291,62 @@ const UserDetailModal = ({ show, onHide, user }) => {
                         <p className="text-muted">아직 등록된 디바이스 정보가 없습니다.</p>
                       </div>
                     ) : (
-                      <div className="row g-0">
+                      <div className="row g-3">
                         {devices.map((device, index) => (
-                          <div key={device.deviceId || index} className="col-12">
-                            <div className="device-item p-4 border-bottom">
-                              <div className="d-flex align-items-center justify-content-between">
-                                <div className="d-flex align-items-center gap-3">
-                                  <div className="bg-light rounded-circle p-3">
-                                    <i className={`bi ${device.os === DEVICE_OS.IOS ? 'bi-apple' : device.os === DEVICE_OS.ANDROID ? 'bi-android2' : 'bi-question-circle'} fs-4 text-primary`}></i>
+                          <div key={device.deviceId || index} className="col-md-6">
+                            <div className="card border-0 shadow-sm h-100" style={{
+                              background: 'linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%)',
+                              border: '1px solid #e9ecef',
+                              borderRadius: '16px'
+                            }}>
+                              <div className="card-body p-4">
+                                <div className="d-flex align-items-center gap-3 mb-3">
+                                  <div className="position-relative">
+                                    <div className="bg-primary bg-opacity-10 rounded-circle p-3" style={{
+                                      border: '2px solid',
+                                      borderColor: device.os === DEVICE_OS.IOS ? '#007aff' : '#34c759'
+                                    }}>
+                                      <i className={`bi ${device.os === DEVICE_OS.IOS ? 'bi-apple' : device.os === DEVICE_OS.ANDROID ? 'bi-android2' : 'bi-question-circle'} fs-3`}
+                                         style={{color: device.os === DEVICE_OS.IOS ? '#007aff' : '#34c759'}}></i>
+                                    </div>
                                   </div>
-                                  <div>
-                                    <div className="d-flex align-items-center gap-2 mb-1">
-                                      <h6 className="mb-0 fw-bold text-dark">{device.deviceId}</h6>
+                                  <div className="flex-grow-1">
+                                    <div className="d-flex align-items-center gap-2 mb-2">
+                                      <h6 className="mb-0 fw-bold text-dark">디바이스 {index + 1}</h6>
                                       {getOsBadge(device.os)}
                                     </div>
-                                    <div className="text-muted small">
-                                      <i className="bi bi-app me-1"></i>
-                                      버전:
-                                      <span className="badge bg-info ms-1">{device.appVersion}</span>
+                                    <div className="d-flex align-items-center gap-2 mb-2">
+                                      <span className="text-muted small">
+                                        앱 버전
+                                      </span>
+                                      <span className="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-2 py-1 small">
+                                        v{device.appVersion}
+                                      </span>
                                     </div>
+
+                                    {device.createdAt && (
+                                      <div className="d-flex align-items-center gap-2 mb-1">
+                                        <span className="text-muted small">
+                                          <i className="bi bi-calendar-plus me-1"></i>
+                                          최초 등록일자
+                                        </span>
+                                        <span className="text-dark small fw-medium">
+                                          {formatDateTime(device.createdAt)}
+                                        </span>
+                                      </div>
+                                    )}
+
+                                    {device.updatedAt && (
+                                      <div className="d-flex align-items-center gap-2">
+                                        <span className="text-muted small">
+                                          <i className="bi bi-clock-history me-1"></i>
+                                          마지막 접근 일자
+                                        </span>
+                                        <span className="text-dark small fw-medium">
+                                          {formatDateTime(device.updatedAt)}
+                                        </span>
+                                      </div>
+                                    )}
                                   </div>
                                 </div>
                               </div>
