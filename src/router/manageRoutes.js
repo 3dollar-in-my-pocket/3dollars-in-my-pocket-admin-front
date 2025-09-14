@@ -7,6 +7,7 @@ import Push from "../pages/push/Push";
 import UserSearch from "../pages/user/UserSearch";
 import CacheTool from "../pages/tool/CacheTool";
 import FileUploadTool from "../pages/tool/FileUploadTool";
+import Admin from "../pages/admin/Admin";
 import PrivateRouter from "./PrivateRouter";
 
 const manageRoutes = {
@@ -47,6 +48,10 @@ const manageRoutes = {
     {
       path: '/manage/tool/upload',
       element: <PrivateRouter><FileUploadTool/></PrivateRouter>
+    },
+    {
+      path: '/manage/admin',
+      element: <PrivateRouter><Admin/></PrivateRouter>
     }
   ]
 };
