@@ -2,9 +2,16 @@ import { useState } from 'react';
 import { Tab, Tabs } from 'react-bootstrap';
 import UserStoreHistory from './UserStoreHistory';
 import UserReviewHistory from './UserReviewHistory';
+import UserVisitHistory from './UserVisitHistory';
 
 const UserActivityHistory = ({ userId }) => {
   const [activeTab, setActiveTab] = useState('stores');
+  const [loadedTabs, setLoadedTabs] = useState(new Set(['stores'])); // 처음엔 첫 번째 탭만 로드
+
+  const handleTabChange = (tabKey) => {
+    setActiveTab(tabKey);
+    setLoadedTabs(prev => new Set([...prev, tabKey])); // 탭이 선택되면 로드된 탭 목록에 추가
+  };
 
   return (
     <div className="p-4">
@@ -20,7 +27,7 @@ const UserActivityHistory = ({ userId }) => {
         <div className="card-body p-0">
           <Tabs
             activeKey={activeTab}
-            onSelect={(k) => setActiveTab(k)}
+            onSelect={handleTabChange}
             className="nav-fill border-0 px-3 pt-3"
             style={{
               background: '#ffffff'
@@ -37,7 +44,16 @@ const UserActivityHistory = ({ userId }) => {
               }
             >
               <div className="pt-0">
-                <UserStoreHistory userId={userId} />
+                {loadedTabs.has('stores') ? (
+                  <UserStoreHistory userId={userId} isActive={activeTab === 'stores'} />
+                ) : (
+                  <div className="text-center py-5">
+                    <div className="spinner-border text-success" role="status">
+                      <span className="visually-hidden">Loading...</span>
+                    </div>
+                    <p className="text-muted mt-2">데이터를 불러오는 중...</p>
+                  </div>
+                )}
               </div>
             </Tab>
 
@@ -52,29 +68,40 @@ const UserActivityHistory = ({ userId }) => {
               }
             >
               <div className="pt-0">
-                <UserReviewHistory userId={userId} />
+                {loadedTabs.has('reviews') ? (
+                  <UserReviewHistory userId={userId} isActive={activeTab === 'reviews'} />
+                ) : (
+                  <div className="text-center py-5">
+                    <div className="spinner-border text-primary" role="status">
+                      <span className="visually-hidden">Loading...</span>
+                    </div>
+                    <p className="text-muted mt-2">리뷰 데이터를 불러오는 중...</p>
+                  </div>
+                )}
               </div>
             </Tab>
 
-            {/* 방문 이력 탭 (준비 중) */}
+            {/* 방문 이력 탭 */}
             <Tab
               eventKey="visits"
               title={
                 <span className="d-flex align-items-center gap-2">
                   <i className="bi bi-geo-alt"></i>
                   방문 이력
-                  <span className="badge bg-secondary rounded-pill ms-1" style={{ fontSize: '0.6rem' }}>
-                    준비중
-                  </span>
                 </span>
               }
             >
-              <div className="text-center py-5">
-                <div className="bg-light rounded-circle mx-auto mb-4" style={{width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                  <i className="bi bi-geo-alt fs-1 text-secondary"></i>
-                </div>
-                <h5 className="text-dark mb-2">방문 이력 기능 준비 중</h5>
-                <p className="text-muted">곧 방문 이력을 확인할 수 있습니다.</p>
+              <div className="pt-0">
+                {loadedTabs.has('visits') ? (
+                  <UserVisitHistory userId={userId} isActive={activeTab === 'visits'} />
+                ) : (
+                  <div className="text-center py-5">
+                    <div className="spinner-border text-warning" role="status">
+                      <span className="visually-hidden">Loading...</span>
+                    </div>
+                    <p className="text-muted mt-2">방문 이력을 불러오는 중...</p>
+                  </div>
+                )}
               </div>
             </Tab>
 

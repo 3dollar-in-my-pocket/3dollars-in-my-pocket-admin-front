@@ -197,7 +197,16 @@ const UserDetailModal = ({ show, onHide, user }) => {
               <div className="p-4">
                 <div className="row justify-content-center">
                   <div className="col-md-10">
-                    <div className="card border-0 shadow-sm">
+                    {/* 일반 정보 섹션 */}
+                    <div className="card border-0 shadow-sm mb-4">
+                      <div className="card-header bg-light border-0 p-4">
+                        <div className="d-flex align-items-center gap-2">
+                          <div className="bg-primary bg-opacity-10 rounded-circle p-2">
+                            <i className="bi bi-person-vcard text-primary"></i>
+                          </div>
+                          <h5 className="mb-0 fw-bold text-dark">일반 정보</h5>
+                        </div>
+                      </div>
                       <div className="card-body p-4">
                         <div className="text-center mb-4">
                           <h4 className="fw-bold text-dark mb-1">{userDetail?.name}</h4>
@@ -254,6 +263,65 @@ const UserDetailModal = ({ show, onHide, user }) => {
                             </div>
                           </div>
                         </div>
+                      </div>
+                    </div>
+
+                    {/* 설정 정보 섹션 */}
+                    <div className="card border-0 shadow-sm">
+                      <div className="card-header bg-light border-0 p-4">
+                        <div className="d-flex align-items-center gap-2">
+                          <div className="bg-warning bg-opacity-10 rounded-circle p-2">
+                            <i className="bi bi-gear text-warning"></i>
+                          </div>
+                          <h5 className="mb-0 fw-bold text-dark">설정 정보</h5>
+                        </div>
+                      </div>
+                      <div className="card-body p-4">
+                        {!settings ? (
+                          <div className="text-center py-4">
+                            <div className="bg-light rounded-circle mx-auto mb-3" style={{width: '60px', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                              <i className="bi bi-gear fs-3 text-secondary"></i>
+                            </div>
+                            <h6 className="text-dark mb-1">설정 정보가 없습니다</h6>
+                            <p className="text-muted small">사용자 설정 정보를 불러올 수 없습니다.</p>
+                          </div>
+                        ) : (
+                          <div className="row g-4">
+                            <div className="col-md-6">
+                              <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
+                                <div className="bg-primary bg-opacity-10 rounded-circle p-2">
+                                  <i className="bi bi-bell text-primary"></i>
+                                </div>
+                                <div className="flex-grow-1">
+                                  <label className="form-label fw-semibold text-muted mb-1">활동 알림</label>
+                                  <div>
+                                    <span className={`badge rounded-pill px-3 py-2 ${settings.enableActivitiesPush ? 'bg-success bg-opacity-10 text-success border border-success' : 'bg-secondary bg-opacity-10 text-secondary border border-secondary'}`}>
+                                      <i className={`bi ${settings.enableActivitiesPush ? 'bi-check-circle' : 'bi-x-circle'} me-1`}></i>
+                                      {settings.enableActivitiesPush ? 'ON' : 'OFF'}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="col-md-6">
+                              <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
+                                <div className="bg-info bg-opacity-10 rounded-circle p-2">
+                                  <i className="bi bi-envelope text-info"></i>
+                                </div>
+                                <div className="flex-grow-1">
+                                  <label className="form-label fw-semibold text-muted mb-1">마케팅 수신 동의</label>
+                                  <div>
+                                    <span className={`badge rounded-pill px-3 py-2 ${getMarketingConsentBadgeClass(settings.marketingConsent)} bg-opacity-10 text-dark border`}>
+                                      <i className="bi bi-shield-check me-1"></i>
+                                      {getMarketingConsentDisplayName(settings.marketingConsent)}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -510,6 +578,7 @@ const UserDetailModal = ({ show, onHide, user }) => {
               </div>
             </Tab>
 
+
             {/* 활동 이력 탭 */}
             <Tab
               eventKey="activity"
@@ -521,77 +590,6 @@ const UserDetailModal = ({ show, onHide, user }) => {
               }
             >
               <UserActivityHistory userId={user?.userId} />
-            </Tab>
-
-            {/* 설정 정보 탭 */}
-            <Tab
-              eventKey="settings"
-              title={
-                <span className="d-flex align-items-center gap-2">
-                  <i className="bi bi-gear"></i>
-                  설정 정보
-                </span>
-              }
-            >
-              <div className="p-4">
-                <div className="card border-0 shadow-sm">
-                  <div className="card-header bg-light border-0 p-4">
-                    <div className="d-flex align-items-center gap-2">
-                      <div className="bg-warning bg-opacity-10 rounded-circle p-2">
-                        <i className="bi bi-gear text-warning"></i>
-                      </div>
-                      <h5 className="mb-0 fw-bold text-dark">사용자 설정</h5>
-                    </div>
-                  </div>
-                  <div className="card-body p-4">
-                    {!settings ? (
-                      <div className="text-center py-4">
-                        <div className="bg-light rounded-circle mx-auto mb-3" style={{width: '60px', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                          <i className="bi bi-gear fs-3 text-secondary"></i>
-                        </div>
-                        <h6 className="text-dark mb-1">설정 정보가 없습니다</h6>
-                        <p className="text-muted small">사용자 설정 정보를 불러올 수 없습니다.</p>
-                      </div>
-                    ) : (
-                      <div className="row g-4">
-                        <div className="col-md-6">
-                          <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
-                            <div className="bg-primary bg-opacity-10 rounded-circle p-2">
-                              <i className="bi bi-bell text-primary"></i>
-                            </div>
-                            <div className="flex-grow-1">
-                              <label className="form-label fw-semibold text-muted mb-1">활동 알림</label>
-                              <div>
-                                <span className={`badge rounded-pill px-3 py-2 ${settings.enableActivitiesPush ? 'bg-success bg-opacity-10 text-success border border-success' : 'bg-secondary bg-opacity-10 text-secondary border border-secondary'}`}>
-                                  <i className={`bi ${settings.enableActivitiesPush ? 'bi-check-circle' : 'bi-x-circle'} me-1`}></i>
-                                  {settings.enableActivitiesPush ? 'ON' : 'OFF'}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="col-md-6">
-                          <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
-                            <div className="bg-info bg-opacity-10 rounded-circle p-2">
-                              <i className="bi bi-envelope text-info"></i>
-                            </div>
-                            <div className="flex-grow-1">
-                              <label className="form-label fw-semibold text-muted mb-1">마케팅 수신 동의</label>
-                              <div>
-                                <span className={`badge rounded-pill px-3 py-2 ${getMarketingConsentBadgeClass(settings.marketingConsent)} bg-opacity-10 text-dark border`}>
-                                  <i className="bi bi-shield-check me-1"></i>
-                                  {getMarketingConsentDisplayName(settings.marketingConsent)}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
             </Tab>
           </Tabs>
         )}

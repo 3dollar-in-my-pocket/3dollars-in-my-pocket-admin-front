@@ -3,7 +3,7 @@ import userApi from '../api/userApi';
 import storeApi from '../api/storeApi';
 import { toast } from 'react-toastify';
 
-const UserStoreHistory = ({ userId }) => {
+const UserStoreHistory = ({ userId, isActive }) => {
   const [stores, setStores] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
@@ -16,10 +16,10 @@ const UserStoreHistory = ({ userId }) => {
   const scrollContainerRef = useRef(null);
 
   useEffect(() => {
-    if (userId) {
+    if (userId && isActive) {
       fetchStores(true);
     }
-  }, [userId]);
+  }, [userId, isActive]);
 
   const fetchStores = useCallback(async (reset = false) => {
     if (isLoading) return;
@@ -143,6 +143,12 @@ const UserStoreHistory = ({ userId }) => {
     return dayMap[dayOfWeek] || dayOfWeek;
   };
 
+  const sortDaysByWeekOrder = (days) => {
+    if (!days || !Array.isArray(days)) return [];
+    const dayOrder = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
+    return days.sort((a, b) => dayOrder.indexOf(a) - dayOrder.indexOf(b));
+  };
+
   const getPaymentMethodInKorean = (method) => {
     const methodMap = {
       'CASH': '현금',
@@ -154,18 +160,30 @@ const UserStoreHistory = ({ userId }) => {
 
   return (
     <div>
-      <div className="d-flex align-items-center justify-content-between mb-4 px-4 pt-4">
-        <div className="d-flex align-items-center gap-2">
-          <div className="bg-success bg-opacity-10 rounded-circle p-2">
-            <i className="bi bi-shop text-success"></i>
+      <div className="px-4 pt-4">
+        <div className="d-flex align-items-center justify-content-between mb-4 p-4 rounded-4 shadow-sm"
+             style={{
+               background: 'linear-gradient(135deg, #e8f5e8 0%, #f8fffe 100%)',
+               border: '1px solid rgba(40, 167, 69, 0.1)'
+             }}>
+          <div className="d-flex align-items-center gap-3">
+            <div className="bg-success rounded-circle p-3 shadow-sm" style={{ background: 'linear-gradient(135deg, #28a745 0%, #20c997 100%)' }}>
+              <i className="bi bi-shop text-white fs-5"></i>
+            </div>
+            <div>
+              <h6 className="mb-0 fw-bold text-dark">제보한 가게 목록</h6>
+              <small className="text-muted">사용자가 등록한 가게 정보를 확인하세요</small>
+            </div>
           </div>
-          <h6 className="mb-0 fw-bold text-dark">제보한 가게 목록</h6>
+          {totalCount > 0 && (
+            <div className="d-flex align-items-center gap-2">
+              <span className="badge bg-success px-3 py-2 rounded-pill shadow-sm" style={{ fontSize: '0.9rem' }}>
+                <i className="bi bi-collection me-1"></i>
+                총 {totalCount}개
+              </span>
+            </div>
+          )}
         </div>
-        {totalCount > 0 && (
-          <span className="badge bg-success px-3 py-2 rounded-pill">
-            총 {totalCount}개
-          </span>
-        )}
       </div>
       <div
         className="px-4"
@@ -182,68 +200,102 @@ const UserStoreHistory = ({ userId }) => {
               <p className="text-muted">아직 제보한 가게가 없습니다.</p>
             </div>
           ) : (
-            <div>
+            <div className="row g-3">
               {stores.map((store, index) => (
-                <div key={store.storeId}>
+                <div key={store.storeId} className="col-12">
                   <div
-                    className="store-item p-3 border-bottom bg-white"
+                    className="card border-0 shadow-sm h-100"
                     style={{
                       cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                      borderLeft: '4px solid #28a745'
+                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                      borderRadius: '16px',
+                      background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
+                      border: '1px solid rgba(0,0,0,0.05)'
                     }}
                     onClick={() => handleStoreClick(store)}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = '#f8f9fa';
-                      e.currentTarget.style.transform = 'translateX(4px)';
+                      e.currentTarget.style.transform = 'translateY(-4px)';
+                      e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)';
+                      e.currentTarget.style.borderColor = '#28a745';
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = '#ffffff';
-                      e.currentTarget.style.transform = 'translateX(0)';
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                      e.currentTarget.style.borderColor = 'rgba(0,0,0,0.05)';
                     }}
                   >
-                    <div className="d-flex align-items-center justify-content-between">
-                      <div className="d-flex align-items-center gap-3 flex-grow-1">
+                    <div className="card-body p-4">
+                      <div className="d-flex align-items-start justify-content-between">
                         <div className="flex-grow-1">
-                          <div className="d-flex align-items-center gap-2 mb-2">
-                            <h6 className="mb-0 fw-bold text-dark">{store.name || '이름 없음'}</h6>
-                            {getSalesTypeBadge(store.salesType)}
-                            {getStatusBadge(store.status)}
-                            {getActivitiesStatusBadge(store.activitiesStatus)}
+                          <div className="d-flex align-items-center gap-3 mb-3">
+                            <div className="bg-success bg-opacity-10 rounded-circle p-2 shadow-sm">
+                              <i className="bi bi-shop text-success"></i>
+                            </div>
+                            <div className="flex-grow-1">
+                              <h6 className="mb-1 fw-bold text-dark">{store.name || '이름 없음'}</h6>
+                              <div className="d-flex flex-wrap align-items-center gap-2">
+                                {getSalesTypeBadge(store.salesType)}
+                                {getStatusBadge(store.status)}
+                                {getActivitiesStatusBadge(store.activitiesStatus)}
+                              </div>
+                            </div>
                           </div>
-                          <div className="text-muted small mb-2">
-                            <i className="bi bi-geo-alt me-1"></i>
-                            {store.address?.fullAddress || '주소 정보 없음'}
+
+                          <div className="mb-3">
+                            <div className="d-flex align-items-start gap-2 mb-2">
+                              <i className="bi bi-geo-alt text-muted mt-1"></i>
+                              <span className="text-muted small">{store.address?.fullAddress || '주소 정보 없음'}</span>
+                            </div>
+                            <div className="d-flex align-items-center gap-2">
+                              <i className="bi bi-star-fill text-warning"></i>
+                              <span className="text-dark fw-medium small">
+                                {store.rating ? store.rating.toFixed(1) : '0.0'}점
+                              </span>
+                            </div>
                           </div>
-                          <div className="text-muted small mb-2">
-                            <i className="bi bi-star me-1"></i>
-                            평점: {store.rating ? store.rating.toFixed(1) : '0.0'}점
-                          </div>
-                          <div className="d-flex flex-wrap gap-1">
+
+                          <div className="d-flex flex-wrap gap-2">
                             {store.categories?.slice(0, 3).map((category, idx) => (
-                              <span key={idx} className="badge bg-primary bg-opacity-10 text-primary border rounded-pill px-2 py-1 small">
+                              <span key={idx} className="badge rounded-pill px-3 py-1 small"
+                                    style={{
+                                      background: 'linear-gradient(135deg, #007bff 0%, #6610f2 100%)',
+                                      color: 'white',
+                                      border: 'none'
+                                    }}>
                                 {category?.name || '카테고리'}
                               </span>
                             ))}
                             {store.categories && store.categories.length > 3 && (
-                              <span className="badge bg-secondary bg-opacity-10 text-secondary border rounded-pill px-2 py-1 small">
-                                +{store.categories.length - 3}
+                              <span className="badge bg-light text-dark border rounded-pill px-3 py-1 small">
+                                +{store.categories.length - 3}개 더
                               </span>
                             )}
                           </div>
                         </div>
-                      </div>
-                      <div className="text-end ms-3">
-                        <button
-                          className="btn btn-outline-success btn-sm rounded-pill px-3"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleStoreClick(store);
-                          }}
-                        >
-                          <i className="bi bi-eye me-1"></i>
-                          상세보기
-                        </button>
+
+                        <div className="ms-3">
+                          <button
+                            className="btn btn-sm rounded-pill px-3 py-2 shadow-sm"
+                            style={{
+                              background: 'linear-gradient(135deg, #28a745 0%, #20c997 100%)',
+                              color: 'white',
+                              border: 'none',
+                              transition: 'all 0.2s ease'
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleStoreClick(store);
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.transform = 'scale(1.05)';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.transform = 'scale(1)';
+                            }}
+                          >
+                            <i className="bi bi-arrow-right"></i>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -346,7 +398,7 @@ const UserStoreHistory = ({ userId }) => {
                           </div>
                           <div>
                             <label className="form-label fw-semibold text-muted mb-1">운영 요일</label>
-                            <p className="mb-0 text-dark">{selectedStoreDetail?.appearanceDays?.map(day => getDayOfWeekInKorean(day)).join(', ') || '정보 없음'}</p>
+                            <p className="mb-0 text-dark">{sortDaysByWeekOrder(selectedStoreDetail?.appearanceDays || []).map(day => getDayOfWeekInKorean(day)).join(', ') || '정보 없음'}</p>
                           </div>
                         </div>
                       </div>

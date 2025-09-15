@@ -2,46 +2,46 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import userApi from '../api/userApi';
 import { toast } from 'react-toastify';
 
-const UserReviewHistory = ({ userId, isActive }) => {
-  const [reviews, setReviews] = useState([]);
+const UserVisitHistory = ({ userId, isActive }) => {
+  const [visits, setVisits] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const [cursor, setCursor] = useState(null);
   const [totalCount, setTotalCount] = useState(0);
-  const [selectedReview, setSelectedReview] = useState(null);
+  const [selectedVisit, setSelectedVisit] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const scrollContainerRef = useRef(null);
 
   useEffect(() => {
     if (userId && isActive) {
-      fetchReviews(true);
+      fetchVisits(true);
     }
   }, [userId, isActive]);
 
-  const fetchReviews = useCallback(async (reset = false) => {
+  const fetchVisits = useCallback(async (reset = false) => {
     if (isLoading) return;
 
     setIsLoading(true);
     try {
-      const response = await userApi.getUserReviews(userId, reset ? null : cursor, 20);
+      const response = await userApi.getUserVisits(userId, reset ? null : cursor, 20);
       if (!response?.ok) {
-        toast.error('리뷰 이력을 불러오는 중 오류가 발생했습니다.');
+        toast.error('방문 이력을 불러오는 중 오류가 발생했습니다.');
         return;
       }
 
       const { contents = [], cursor: newCursor = {} } = response.data || {};
 
       if (reset) {
-        setReviews(contents);
+        setVisits(contents);
       } else {
-        setReviews(prev => [...prev, ...contents]);
+        setVisits(prev => [...prev, ...contents]);
       }
 
       setHasMore(newCursor.hasMore || false);
       setCursor(newCursor.nextCursor || null);
       setTotalCount(newCursor.totalCount || 0);
     } catch (error) {
-      toast.error('리뷰 이력을 불러오는 중 오류가 발생했습니다.');
+      toast.error('방문 이력을 불러오는 중 오류가 발생했습니다.');
     } finally {
       setIsLoading(false);
     }
@@ -49,9 +49,9 @@ const UserReviewHistory = ({ userId, isActive }) => {
 
   const handleLoadMore = useCallback(() => {
     if (hasMore && !isLoading) {
-      fetchReviews(false);
+      fetchVisits(false);
     }
-  }, [hasMore, isLoading, fetchReviews]);
+  }, [hasMore, isLoading, fetchVisits]);
 
   const handleScroll = useCallback((e) => {
     const { scrollTop, scrollHeight, clientHeight } = e.target;
@@ -62,14 +62,14 @@ const UserReviewHistory = ({ userId, isActive }) => {
     }
   }, [hasMore, isLoading, handleLoadMore]);
 
-  const handleReviewClick = (review) => {
-    setSelectedReview(review);
+  const handleVisitClick = (visit) => {
+    setSelectedVisit(visit);
     setShowModal(true);
   };
 
   const handleCloseModal = () => {
     setShowModal(false);
-    setSelectedReview(null);
+    setSelectedVisit(null);
   };
 
   const getSalesTypeBadge = (salesType) => {
@@ -111,17 +111,34 @@ const UserReviewHistory = ({ userId, isActive }) => {
     );
   };
 
-  const renderStars = (rating) => {
-    const stars = [];
-    for (let i = 1; i <= 5; i++) {
-      stars.push(
-        <i
-          key={i}
-          className={`bi ${i <= rating ? 'bi-star-fill text-warning' : 'bi-star text-muted'}`}
-        ></i>
-      );
-    }
-    return stars;
+  const getVisitTypeBadge = (visitType) => {
+    if (!visitType) return null;
+    const badgeClass = visitType === 'EXISTS' ? 'bg-success' :
+                      visitType === 'NOT_EXISTS' ? 'bg-danger' : 'bg-secondary';
+    const statusText = visitType === 'EXISTS' ? '방문 성공' :
+                      visitType === 'NOT_EXISTS' ? '방문 실패' : '알 수 없음';
+    const iconClass = visitType === 'EXISTS' ? 'bi-check-circle' :
+                     visitType === 'NOT_EXISTS' ? 'bi-x-circle' : 'bi-question-circle';
+
+    return (
+      <span className={`badge ${badgeClass} bg-opacity-10 text-dark border rounded-pill px-2 py-1`}>
+        <i className={`bi ${iconClass} me-1`}></i>
+        {statusText}
+      </span>
+    );
+  };
+
+  const formatVisitDateTime = (dateTimeString) => {
+    if (!dateTimeString) return '방문 시간 없음';
+    const date = new Date(dateTimeString);
+    return date.toLocaleString('ko-KR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      weekday: 'short',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   return (
@@ -129,22 +146,22 @@ const UserReviewHistory = ({ userId, isActive }) => {
       <div className="px-4 pt-4">
         <div className="d-flex align-items-center justify-content-between mb-4 p-4 rounded-4 shadow-sm"
              style={{
-               background: 'linear-gradient(135deg, #e3f2fd 0%, #f8fffe 100%)',
-               border: '1px solid rgba(13, 110, 253, 0.1)'
+               background: 'linear-gradient(135deg, #fff3cd 0%, #f8fffe 100%)',
+               border: '1px solid rgba(255, 193, 7, 0.2)'
              }}>
           <div className="d-flex align-items-center gap-3">
-            <div className="rounded-circle p-3 shadow-sm" style={{ background: 'linear-gradient(135deg, #0d6efd 0%, #6610f2 100%)' }}>
-              <i className="bi bi-chat-square-text text-white fs-5"></i>
+            <div className="rounded-circle p-3 shadow-sm" style={{ background: 'linear-gradient(135deg, #ffc107 0%, #fd7e14 100%)' }}>
+              <i className="bi bi-geo-alt text-white fs-5"></i>
             </div>
             <div>
-              <h6 className="mb-0 fw-bold text-dark">작성한 리뷰</h6>
-              <small className="text-muted">사용자가 작성한 가게 리뷰를 확인하세요</small>
+              <h6 className="mb-0 fw-bold text-dark">방문 이력</h6>
+              <small className="text-muted">사용자의 가게 방문 기록을 확인하세요</small>
             </div>
           </div>
           {totalCount > 0 && (
             <div className="d-flex align-items-center gap-2">
-              <span className="badge bg-primary px-3 py-2 rounded-pill shadow-sm" style={{ fontSize: '0.9rem' }}>
-                <i className="bi bi-chat-dots me-1"></i>
+              <span className="badge bg-warning px-3 py-2 rounded-pill shadow-sm" style={{ fontSize: '0.9rem' }}>
+                <i className="bi bi-pin-map me-1"></i>
                 총 {totalCount}개
               </span>
             </div>
@@ -158,26 +175,26 @@ const UserReviewHistory = ({ userId, isActive }) => {
         onScroll={handleScroll}
         style={{ maxHeight: '500px', overflowY: 'auto' }}
       >
-        {reviews.length === 0 && !isLoading ? (
+        {visits.length === 0 && !isLoading ? (
           <div className="text-center py-5">
             <div className="bg-light rounded-circle mx-auto mb-4" style={{width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-              <i className="bi bi-chat-square-text fs-1 text-secondary"></i>
+              <i className="bi bi-geo-alt fs-1 text-secondary"></i>
             </div>
-            <h5 className="text-dark mb-2">작성한 리뷰가 없습니다</h5>
-            <p className="text-muted">아직 작성한 리뷰가 없습니다.</p>
+            <h5 className="text-dark mb-2">방문 이력이 없습니다</h5>
+            <p className="text-muted">아직 방문한 가게가 없습니다.</p>
           </div>
         ) : (
           <div>
-            {reviews.map((review, index) => (
-              <div key={review.reviewId}>
+            {visits.map((visit, index) => (
+              <div key={visit.visitId || index}>
                 <div
-                  className="review-item p-3 border-bottom bg-white"
+                  className="visit-item p-3 border-bottom bg-white"
                   style={{
                     cursor: 'pointer',
                     transition: 'all 0.2s ease',
-                    borderLeft: '4px solid #0d6efd'
+                    borderLeft: visit.type === 'EXISTS' ? '4px solid #28a745' : '4px solid #dc3545'
                   }}
-                  onClick={() => handleReviewClick(review)}
+                  onClick={() => handleVisitClick(visit)}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.backgroundColor = '#f8f9fa';
                     e.currentTarget.style.transform = 'translateX(4px)';
@@ -190,78 +207,52 @@ const UserReviewHistory = ({ userId, isActive }) => {
                   <div className="d-flex align-items-start gap-3">
                     <div className="flex-grow-1">
                       <div className="d-flex align-items-center gap-2 mb-2">
-                        <h6 className="mb-0 fw-bold text-dark">{review.store?.name || '가게 이름 없음'}</h6>
-                        {getSalesTypeBadge(review.store?.salesType)}
-                        {getStatusBadge(review.store?.status)}
-                        {getActivitiesStatusBadge(review.store?.activitiesStatus)}
+                        <h6 className="mb-0 fw-bold text-dark">{visit.store?.name || '가게 이름 없음'}</h6>
+                        {getVisitTypeBadge(visit.type)}
                       </div>
 
                       <div className="d-flex align-items-center gap-2 mb-2">
-                        <div className="d-flex align-items-center">
-                          {renderStars(review.rating)}
-                        </div>
-                        <span className="text-muted small">({review.rating}점)</span>
+                        <i className="bi bi-calendar3 text-muted"></i>
+                        <span className="text-dark fw-medium">{formatVisitDateTime(visit.visitAt)}</span>
                       </div>
 
                       <div className="text-muted small mb-2">
                         <i className="bi bi-geo-alt me-1"></i>
-                        {review.store?.address?.fullAddress || '주소 정보 없음'}
+                        {visit.store?.address?.fullAddress || '주소 정보 없음'}
                       </div>
 
-                      <div className="text-dark mb-2">
-                        <p className="mb-0" style={{
-                          display: '-webkit-box',
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: 'vertical',
-                          overflow: 'hidden'
-                        }}>
-                          {review.contents || '리뷰 내용이 없습니다.'}
-                        </p>
+                      <div className="d-flex align-items-center gap-2 mb-2">
+                        {getSalesTypeBadge(visit.store?.salesType)}
+                        {getStatusBadge(visit.store?.status)}
+                        {getActivitiesStatusBadge(visit.store?.activitiesStatus)}
                       </div>
 
-                      {review.images && review.images.length > 0 && (
-                        <div className="d-flex gap-1 mb-2">
-                          {review.images.slice(0, 3).map((image, idx) => (
-                            <div key={idx} className="position-relative">
-                              <img
-                                src={image.imageUrl}
-                                alt={`리뷰 이미지 ${idx + 1}`}
-                                className="rounded"
-                                style={{ width: '40px', height: '40px', objectFit: 'cover' }}
-                                onError={(e) => {
-                                  e.target.style.display = 'none';
-                                }}
-                              />
-                            </div>
-                          ))}
-                          {review.images.length > 3 && (
-                            <div className="d-flex align-items-center justify-content-center rounded bg-light"
-                                 style={{ width: '40px', height: '40px' }}>
-                              <span className="text-muted small">+{review.images.length - 3}</span>
-                            </div>
-                          )}
-                        </div>
-                      )}
+                      <div className="d-flex align-items-center gap-2 mb-2">
+                        <i className="bi bi-star text-warning"></i>
+                        <span className="text-dark small fw-medium">
+                          평점: {visit.store?.rating ? visit.store.rating.toFixed(1) : '0.0'}점
+                        </span>
+                      </div>
 
                       <div className="d-flex flex-wrap gap-1">
-                        {review.store?.categories?.slice(0, 2).map((category, idx) => (
+                        {visit.store?.categories?.slice(0, 2).map((category, idx) => (
                           <span key={idx} className="badge bg-secondary bg-opacity-10 text-secondary border rounded-pill px-2 py-1" style={{ fontSize: '0.7rem' }}>
                             {category?.name || '카테고리'}
                           </span>
                         ))}
-                        {review.store?.categories && review.store.categories.length > 2 && (
+                        {visit.store?.categories && visit.store.categories.length > 2 && (
                           <span className="badge bg-light text-muted border rounded-pill px-2 py-1" style={{ fontSize: '0.7rem' }}>
-                            +{review.store.categories.length - 2}
+                            +{visit.store.categories.length - 2}
                           </span>
                         )}
                       </div>
                     </div>
                     <div className="text-end">
                       <button
-                        className="btn btn-outline-primary btn-sm rounded-pill px-3"
+                        className="btn btn-outline-warning btn-sm rounded-pill px-3"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleReviewClick(review);
+                          handleVisitClick(visit);
                         }}
                       >
                         <i className="bi bi-eye me-1"></i>
@@ -275,43 +266,41 @@ const UserReviewHistory = ({ userId, isActive }) => {
           </div>
         )}
 
-        {isLoading && reviews.length > 0 && (
+        {isLoading && visits.length > 0 && (
           <div className="text-center p-3 bg-light">
-            <div className="spinner-border text-primary" role="status">
+            <div className="spinner-border text-warning" role="status">
               <span className="visually-hidden">Loading...</span>
             </div>
             <p className="small text-muted mt-2 mb-0">추가 데이터 로딩 중...</p>
           </div>
         )}
 
-        {isLoading && reviews.length === 0 && (
+        {isLoading && visits.length === 0 && (
           <div className="text-center py-5">
             <div className="mb-3">
-              <div className="spinner-border text-primary" style={{width: '3rem', height: '3rem'}} role="status">
+              <div className="spinner-border text-warning" style={{width: '3rem', height: '3rem'}} role="status">
                 <span className="visually-hidden">Loading...</span>
               </div>
             </div>
-            <h5 className="text-dark mb-1">리뷰를 불러오는 중...</h5>
+            <h5 className="text-dark mb-1">방문 이력을 불러오는 중...</h5>
             <p className="text-muted">잠시만 기다려주세요...</p>
           </div>
         )}
       </div>
 
-      {/* 리뷰 상세 모달 */}
-      {showModal && selectedReview && (
+      {/* 방문 이력 상세 모달 */}
+      {showModal && selectedVisit && (
         <div className="modal fade show d-block" tabIndex="-1" style={{backgroundColor: 'rgba(0,0,0,0.5)'}}>
           <div className="modal-dialog modal-lg modal-dialog-centered">
             <div className="modal-content border-0 shadow-lg">
-              <div className="modal-header border-0 pb-0" style={{ background: 'linear-gradient(135deg, #0d6efd 0%, #6610f2 100%)' }}>
+              <div className="modal-header border-0 pb-0" style={{ background: selectedVisit.type === 'EXISTS' ? 'linear-gradient(135deg, #28a745 0%, #20c997 100%)' : 'linear-gradient(135deg, #dc3545 0%, #fd7e14 100%)' }}>
                 <div className="w-100">
                   <div className="d-flex align-items-center gap-3 text-white">
                     <div>
-                      <h4 className="mb-0 fw-bold">{selectedReview?.store?.name || '가게 이름 없음'}</h4>
+                      <h4 className="mb-0 fw-bold">{selectedVisit?.store?.name || '가게 이름 없음'}</h4>
                       <div className="d-flex align-items-center gap-2 mt-2">
-                        <div className="d-flex align-items-center">
-                          {renderStars(selectedReview.rating)}
-                        </div>
-                        <span className="opacity-90">({selectedReview.rating}점)</span>
+                        <i className="bi bi-calendar3 opacity-90"></i>
+                        <span className="opacity-90">{formatVisitDateTime(selectedVisit.visitAt)}</span>
                       </div>
                     </div>
                   </div>
@@ -327,7 +316,7 @@ const UserReviewHistory = ({ userId, isActive }) => {
                       </div>
                       <div>
                         <label className="form-label fw-semibold text-muted mb-1">주소</label>
-                        <p className="mb-0 text-dark">{selectedReview?.store?.address?.fullAddress || '주소 정보 없음'}</p>
+                        <p className="mb-0 text-dark">{selectedVisit?.store?.address?.fullAddress || '주소 정보 없음'}</p>
                       </div>
                     </div>
                   </div>
@@ -338,7 +327,31 @@ const UserReviewHistory = ({ userId, isActive }) => {
                       </div>
                       <div>
                         <label className="form-label fw-semibold text-muted mb-1">가게 평점</label>
-                        <p className="mb-0 text-dark fw-bold">{selectedReview?.store?.rating ? selectedReview.store.rating.toFixed(1) : '0.0'}점</p>
+                        <p className="mb-0 text-dark fw-bold">{selectedVisit?.store?.rating ? selectedVisit.store.rating.toFixed(1) : '0.0'}점</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-md-6">
+                    <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
+                      <div className="bg-info bg-opacity-10 rounded-circle p-2">
+                        <i className="bi bi-calendar-check text-info"></i>
+                      </div>
+                      <div>
+                        <label className="form-label fw-semibold text-muted mb-1">방문 시간</label>
+                        <p className="mb-0 text-dark fw-bold">{formatVisitDateTime(selectedVisit.visitAt)}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-md-6">
+                    <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
+                      <div className={`${selectedVisit.type === 'EXISTS' ? 'bg-success' : 'bg-danger'} bg-opacity-10 rounded-circle p-2`}>
+                        <i className={`bi ${selectedVisit.type === 'EXISTS' ? 'bi-check-circle text-success' : 'bi-x-circle text-danger'}`}></i>
+                      </div>
+                      <div>
+                        <label className="form-label fw-semibold text-muted mb-1">방문 결과</label>
+                        <div>
+                          {getVisitTypeBadge(selectedVisit.type)}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -349,10 +362,10 @@ const UserReviewHistory = ({ userId, isActive }) => {
                       </div>
                       <div>
                         <label className="form-label fw-semibold text-muted mb-1">가게 상태</label>
-                        <div className="d-flex gap-2">
-                          {getSalesTypeBadge(selectedReview?.store?.salesType)}
-                          {getStatusBadge(selectedReview?.store?.status)}
-                          {getActivitiesStatusBadge(selectedReview?.store?.activitiesStatus)}
+                        <div className="d-flex gap-2 flex-wrap">
+                          {getSalesTypeBadge(selectedVisit?.store?.salesType)}
+                          {getStatusBadge(selectedVisit?.store?.status)}
+                          {getActivitiesStatusBadge(selectedVisit?.store?.activitiesStatus)}
                         </div>
                       </div>
                     </div>
@@ -360,47 +373,16 @@ const UserReviewHistory = ({ userId, isActive }) => {
                 </div>
 
                 <div className="mt-4">
-                  <h6 className="fw-bold text-dark mb-3">리뷰 내용</h6>
-                  <div className="p-3 bg-light rounded-3">
-                    <p className="mb-0 text-dark" style={{ whiteSpace: 'pre-wrap', lineHeight: '1.6' }}>
-                      {selectedReview?.contents || '리뷰 내용이 없습니다.'}
-                    </p>
-                  </div>
-                </div>
-
-                {selectedReview?.images && selectedReview.images.length > 0 && (
-                  <div className="mt-4">
-                    <h6 className="fw-bold text-dark mb-3">리뷰 이미지</h6>
-                    <div className="row g-3">
-                      {selectedReview.images.map((image, idx) => (
-                        <div key={idx} className="col-md-4">
-                          <div className="position-relative">
-                            <img
-                              src={image.imageUrl}
-                              alt={`리뷰 이미지 ${idx + 1}`}
-                              className="img-fluid rounded shadow-sm"
-                              style={{ width: '100%', height: '150px', objectFit: 'cover' }}
-                              onError={(e) => {
-                                e.target.src = '/placeholder-image.png';
-                              }}
-                            />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <div className="mt-4">
                   <h6 className="fw-bold text-dark mb-3">가게 카테고리</h6>
                   <div className="d-flex flex-wrap gap-2">
-                    {selectedReview?.store?.categories?.map((category, idx) => (
+                    {selectedVisit?.store?.categories?.map((category, idx) => (
                       <span key={idx} className="badge bg-primary bg-opacity-10 text-primary border rounded-pill px-3 py-2">
                         {category?.name || '카테고리'}
                       </span>
                     )) || <span className="text-muted">카테고리 정보 없음</span>}
                   </div>
                 </div>
+
               </div>
               <div className="modal-footer border-0 bg-light">
                 <button type="button" className="btn btn-secondary rounded-pill px-4" onClick={handleCloseModal}>
@@ -416,4 +398,4 @@ const UserReviewHistory = ({ userId, isActive }) => {
   );
 };
 
-export default UserReviewHistory;
+export default UserVisitHistory;
