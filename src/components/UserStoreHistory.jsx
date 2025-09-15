@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import userApi from '../api/userApi';
+import storeApi from '../api/storeApi';
 import { toast } from 'react-toastify';
 
 const UserStoreHistory = ({ userId }) => {
@@ -9,7 +10,9 @@ const UserStoreHistory = ({ userId }) => {
   const [cursor, setCursor] = useState(null);
   const [totalCount, setTotalCount] = useState(0);
   const [selectedStore, setSelectedStore] = useState(null);
+  const [selectedStoreDetail, setSelectedStoreDetail] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [isLoadingDetail, setIsLoadingDetail] = useState(false);
   const scrollContainerRef = useRef(null);
 
   useEffect(() => {
@@ -62,14 +65,30 @@ const UserStoreHistory = ({ userId }) => {
     }
   }, [hasMore, isLoading, handleLoadMore]);
 
-  const handleStoreClick = (store) => {
+  const handleStoreClick = async (store) => {
     setSelectedStore(store);
     setShowModal(true);
+    setIsLoadingDetail(true);
+    setSelectedStoreDetail(null);
+
+    try {
+      const response = await storeApi.getStoreDetail(store.storeId);
+      if (response?.ok) {
+        setSelectedStoreDetail(response.data);
+      } else {
+        toast.error('가게 상세 정보를 불러오는 중 오류가 발생했습니다.');
+      }
+    } catch (error) {
+      toast.error('가게 상세 정보를 불러오는 중 오류가 발생했습니다.');
+    } finally {
+      setIsLoadingDetail(false);
+    }
   };
 
   const handleCloseModal = () => {
     setShowModal(false);
     setSelectedStore(null);
+    setSelectedStoreDetail(null);
   };
 
   const getSalesTypeBadge = (salesType) => {
@@ -86,11 +105,26 @@ const UserStoreHistory = ({ userId }) => {
   const getStatusBadge = (status) => {
     if (!status) return null;
     const badgeClass = status === 'ACTIVE' ? 'bg-success' :
-                      status === 'INACTIVE' ? 'bg-danger' : 'bg-warning';
-    const statusText = status === 'ACTIVE' ? '운영중' :
-                      status === 'INACTIVE' ? '폐업' : '알 수 없음';
+                      status === 'DELETED' ? 'bg-danger' :
+                      status === 'AUTO_DELETED' ? 'bg-warning' : 'bg-secondary';
+    const statusText = status === 'ACTIVE' ? '활성화 중' :
+                      status === 'DELETED' ? '삭제됨' :
+                      status === 'AUTO_DELETED' ? '자동 삭제됨' : '알 수 없음';
     return (
       <span className={`badge ${badgeClass} bg-opacity-10 text-dark border rounded-pill px-2 py-1`}>
+        {statusText}
+      </span>
+    );
+  };
+
+  const getActivitiesStatusBadge = (activitiesStatus) => {
+    if (!activitiesStatus) return null;
+    const badgeClass = activitiesStatus === 'RECENT_ACTIVITY' ? 'bg-info' :
+                      activitiesStatus === 'NO_RECENT_ACTIVITY' ? 'bg-secondary' : 'bg-light';
+    const statusText = activitiesStatus === 'RECENT_ACTIVITY' ? '최근 활동' :
+                      activitiesStatus === 'NO_RECENT_ACTIVITY' ? '활동 없음' : '알 수 없음';
+    return (
+      <span className={`badge ${badgeClass} bg-opacity-10 text-dark border rounded-pill px-2 py-1 small`}>
         {statusText}
       </span>
     );
@@ -175,6 +209,7 @@ const UserStoreHistory = ({ userId }) => {
                             <h6 className="mb-0 fw-bold text-dark">{store.name || '이름 없음'}</h6>
                             {getSalesTypeBadge(store.salesType)}
                             {getStatusBadge(store.status)}
+                            {getActivitiesStatusBadge(store.activitiesStatus)}
                           </div>
                           <div className="text-muted small mb-2">
                             <i className="bi bi-geo-alt me-1"></i>
@@ -255,96 +290,132 @@ const UserStoreHistory = ({ userId }) => {
                 <button type="button" className="btn-close btn-close-white" onClick={handleCloseModal}></button>
               </div>
               <div className="modal-body p-4">
-                <div className="row g-4">
-                  <div className="col-md-6">
-                    <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
-                      <div className="bg-primary bg-opacity-10 rounded-circle p-2">
-                        <i className="bi bi-geo-alt text-primary"></i>
-                      </div>
-                      <div>
-                        <label className="form-label fw-semibold text-muted mb-1">주소</label>
-                        <p className="mb-0 text-dark">{selectedStore?.address?.fullAddress || '주소 정보 없음'}</p>
+                {isLoadingDetail ? (
+                  <div className="text-center py-5">
+                    <div className="mb-3">
+                      <div className="spinner-border text-success" style={{width: '3rem', height: '3rem'}} role="status">
+                        <span className="visually-hidden">Loading...</span>
                       </div>
                     </div>
+                    <h5 className="text-dark mb-1">상세 정보를 불러오는 중...</h5>
+                    <p className="text-muted">잠시만 기다려주세요...</p>
                   </div>
-                  <div className="col-md-6">
-                    <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
-                      <div className="bg-warning bg-opacity-10 rounded-circle p-2">
-                        <i className="bi bi-star text-warning"></i>
+                ) : selectedStoreDetail ? (
+                  <div>
+                    <div className="row g-4">
+                      <div className="col-md-6">
+                        <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
+                          <div className="bg-primary bg-opacity-10 rounded-circle p-2">
+                            <i className="bi bi-geo-alt text-primary"></i>
+                          </div>
+                          <div>
+                            <label className="form-label fw-semibold text-muted mb-1">주소</label>
+                            <p className="mb-0 text-dark">{selectedStoreDetail?.address?.fullAddress || '주소 정보 없음'}</p>
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <label className="form-label fw-semibold text-muted mb-1">평점</label>
-                        <p className="mb-0 text-dark fw-bold">{selectedStore?.rating ? selectedStore.rating.toFixed(1) : '0.0'}점</p>
+                      <div className="col-md-6">
+                        <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
+                          <div className="bg-warning bg-opacity-10 rounded-circle p-2">
+                            <i className="bi bi-star text-warning"></i>
+                          </div>
+                          <div>
+                            <label className="form-label fw-semibold text-muted mb-1">평점</label>
+                            <p className="mb-0 text-dark fw-bold">{selectedStoreDetail?.rating ? selectedStoreDetail.rating.toFixed(1) : '0.0'}점</p>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                  <div className="col-md-6">
-                    <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
-                      <div className="bg-success bg-opacity-10 rounded-circle p-2">
-                        <i className="bi bi-calendar3 text-success"></i>
-                      </div>
-                      <div>
-                        <label className="form-label fw-semibold text-muted mb-1">운영 요일</label>
-                        <p className="mb-0 text-dark">{selectedStore?.appearanceDays?.map(day => getDayOfWeekInKorean(day)).join(', ') || '정보 없음'}</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="col-md-6">
-                    <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
-                      <div className="bg-info bg-opacity-10 rounded-circle p-2">
-                        <i className="bi bi-clock text-info"></i>
-                      </div>
-                      <div>
-                        <label className="form-label fw-semibold text-muted mb-1">운영 시간</label>
-                        <p className="mb-0 text-dark">{selectedStore?.openingHours?.startTime || '정보 없음'} - {selectedStore?.openingHours?.endTime || '정보 없음'}</p>
-                        {selectedStore?.openingHours?.extra && (
-                          <p className="mb-0 text-muted small">{selectedStore.openingHours.extra}</p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-4">
-                  <h6 className="fw-bold text-dark mb-3">카테고리</h6>
-                  <div className="d-flex flex-wrap gap-2">
-                    {selectedStore?.categories?.map((category, idx) => (
-                      <span key={idx} className="badge bg-primary bg-opacity-10 text-primary border rounded-pill px-3 py-2">
-                        {category?.name || '카테고리'}
-                      </span>
-                    )) || <span className="text-muted">카테고리 정보 없음</span>}
-                  </div>
-                </div>
-
-                {selectedStore?.menus && selectedStore.menus.length > 0 && (
-                  <div className="mt-4">
-                    <h6 className="fw-bold text-dark mb-3">메뉴</h6>
-                    <div className="row g-3">
-                      {selectedStore.menus.map((menu, idx) => (
-                        <div key={idx} className="col-md-6">
-                          <div className="card border-0 bg-light">
-                            <div className="card-body p-3">
-                              <h6 className="mb-1 fw-bold">{menu?.name || '메뉴명 없음'}</h6>
-                              <p className="text-primary fw-bold mb-1">{menu?.price ? menu.price.toLocaleString() : '0'}원</p>
-                              <p className="text-muted small mb-0">{menu?.description || '설명 없음'}</p>
+                      <div className="col-md-6">
+                        <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
+                          <div className="bg-success bg-opacity-10 rounded-circle p-2">
+                            <i className="bi bi-shield-check text-success"></i>
+                          </div>
+                          <div>
+                            <label className="form-label fw-semibold text-muted mb-1">가게 상태</label>
+                            <div className="d-flex gap-2">
+                              {getStatusBadge(selectedStoreDetail?.status)}
+                              {getActivitiesStatusBadge(selectedStoreDetail?.activitiesStatus)}
                             </div>
                           </div>
                         </div>
-                      ))}
+                      </div>
+                      <div className="col-md-6">
+                        <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
+                          <div className="bg-success bg-opacity-10 rounded-circle p-2">
+                            <i className="bi bi-calendar3 text-success"></i>
+                          </div>
+                          <div>
+                            <label className="form-label fw-semibold text-muted mb-1">운영 요일</label>
+                            <p className="mb-0 text-dark">{selectedStoreDetail?.appearanceDays?.map(day => getDayOfWeekInKorean(day)).join(', ') || '정보 없음'}</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="col-md-6">
+                        <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
+                          <div className="bg-info bg-opacity-10 rounded-circle p-2">
+                            <i className="bi bi-clock text-info"></i>
+                          </div>
+                          <div>
+                            <label className="form-label fw-semibold text-muted mb-1">운영 시간</label>
+                            <p className="mb-0 text-dark">{selectedStoreDetail?.openingHours?.startTime || '정보 없음'} - {selectedStoreDetail?.openingHours?.endTime || '정보 없음'}</p>
+                            {selectedStoreDetail?.openingHours?.extra && (
+                              <p className="mb-0 text-muted small">{selectedStoreDetail.openingHours.extra}</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-4">
+                      <h6 className="fw-bold text-dark mb-3">카테고리</h6>
+                      <div className="d-flex flex-wrap gap-2">
+                        {selectedStoreDetail?.categories?.map((category, idx) => (
+                          <span key={idx} className="badge bg-primary bg-opacity-10 text-primary border rounded-pill px-3 py-2">
+                            {category?.name || '카테고리'}
+                          </span>
+                        )) || <span className="text-muted">카테고리 정보 없음</span>}
+                      </div>
+                    </div>
+
+                    {selectedStoreDetail?.menus && selectedStoreDetail.menus.length > 0 && (
+                      <div className="mt-4">
+                        <h6 className="fw-bold text-dark mb-3">메뉴</h6>
+                        <div className="row g-3">
+                          {selectedStoreDetail.menus.map((menu, idx) => (
+                            <div key={idx} className="col-md-6">
+                              <div className="card border-0 bg-light">
+                                <div className="card-body p-3">
+                                  <h6 className="mb-1 fw-bold">{menu?.name || '메뉴명 없음'}</h6>
+                                  <p className="text-primary fw-bold mb-1">{menu?.price ? menu.price.toLocaleString() : '0'}원</p>
+                                  <p className="text-muted small mb-0">{menu?.description || '설명 없음'}</p>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="mt-4">
+                      <h6 className="fw-bold text-dark mb-3">결제 방법</h6>
+                      <div className="d-flex flex-wrap gap-2">
+                        {selectedStoreDetail?.paymentMethods?.map((method, idx) => (
+                          <span key={idx} className="badge bg-secondary bg-opacity-10 text-secondary border rounded-pill px-3 py-2">
+                            {getPaymentMethodInKorean(method)}
+                          </span>
+                        )) || <span className="text-muted">결제 방법 정보 없음</span>}
+                      </div>
                     </div>
                   </div>
-                )}
-
-                <div className="mt-4">
-                  <h6 className="fw-bold text-dark mb-3">결제 방법</h6>
-                  <div className="d-flex flex-wrap gap-2">
-                    {selectedStore?.paymentMethods?.map((method, idx) => (
-                      <span key={idx} className="badge bg-secondary bg-opacity-10 text-secondary border rounded-pill px-3 py-2">
-                        {getPaymentMethodInKorean(method)}
-                      </span>
-                    )) || <span className="text-muted">결제 방법 정보 없음</span>}
+                ) : (
+                  <div className="text-center py-5">
+                    <div className="bg-danger bg-opacity-10 rounded-circle mx-auto mb-4" style={{width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                      <i className="bi bi-exclamation-circle fs-1 text-danger"></i>
+                    </div>
+                    <h5 className="text-dark mb-2">상세 정보를 불러올 수 없습니다</h5>
+                    <p className="text-muted">가게 정보를 다시 확인해주세요.</p>
                   </div>
-                </div>
+                )}
               </div>
               <div className="modal-footer border-0 bg-light">
                 <button type="button" className="btn btn-secondary rounded-pill px-4" onClick={handleCloseModal}>
