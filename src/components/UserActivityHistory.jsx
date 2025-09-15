@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Tab, Tabs } from 'react-bootstrap';
 import UserStoreHistory from './UserStoreHistory';
+import UserReviewHistory from './UserReviewHistory';
 
 const UserActivityHistory = ({ userId }) => {
   const [activeTab, setActiveTab] = useState('stores');
@@ -40,25 +41,18 @@ const UserActivityHistory = ({ userId }) => {
               </div>
             </Tab>
 
-            {/* 리뷰 이력 탭 (준비 중) */}
+            {/* 리뷰 이력 탭 */}
             <Tab
               eventKey="reviews"
               title={
                 <span className="d-flex align-items-center gap-2">
                   <i className="bi bi-chat-square-text"></i>
                   리뷰 이력
-                  <span className="badge bg-secondary rounded-pill ms-1" style={{ fontSize: '0.6rem' }}>
-                    준비중
-                  </span>
                 </span>
               }
             >
-              <div className="text-center py-5">
-                <div className="bg-light rounded-circle mx-auto mb-4" style={{width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                  <i className="bi bi-chat-square-text fs-1 text-secondary"></i>
-                </div>
-                <h5 className="text-dark mb-2">리뷰 이력 기능 준비 중</h5>
-                <p className="text-muted">곧 리뷰 이력을 확인할 수 있습니다.</p>
+              <div className="pt-0">
+                <UserReviewHistory userId={userId} />
               </div>
             </Tab>
 
