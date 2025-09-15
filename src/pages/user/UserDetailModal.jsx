@@ -10,6 +10,7 @@ import {
 } from '../../types/user';
 import userApi from '../../api/userApi';
 import { toast } from 'react-toastify';
+import UserActivityHistory from '../../components/UserActivityHistory';
 
 const UserDetailModal = ({ show, onHide, user }) => {
   const [userDetail, setUserDetail] = useState(null);
@@ -507,6 +508,19 @@ const UserDetailModal = ({ show, onHide, user }) => {
                   </div>
                 </div>
               </div>
+            </Tab>
+
+            {/* 활동 이력 탭 */}
+            <Tab
+              eventKey="activity"
+              title={
+                <span className="d-flex align-items-center gap-2">
+                  <i className="bi bi-activity"></i>
+                  활동 이력
+                </span>
+              }
+            >
+              <UserActivityHistory userId={user?.userId} />
             </Tab>
 
             {/* 설정 정보 탭 */}

@@ -80,6 +80,7 @@ src/
 
 ### Environment Configuration
 - Development API: `http://localhost:5100`
+- Production API: `https://dev.threedollars.co.kr` (commented)
 - Google OAuth credentials configured via environment variables
 
 ### Code Style

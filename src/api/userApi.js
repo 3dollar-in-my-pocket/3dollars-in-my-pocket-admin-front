@@ -130,5 +130,49 @@ export default {
     } catch (error) {
       return error.response;
     }
+  },
+
+  /**
+   * 사용자가 제보한 가게 목록 조회
+   * @param {string} userId - 사용자 ID
+   * @param {string} [cursor] - 페이징 커서
+   * @param {number} [size=20] - 페이지 사이즈
+   * @returns {Promise<Object>} 제보한 가게 목록
+   */
+  getUserStores: async (userId, cursor = null, size = 20) => {
+    try {
+      const params = {
+        size
+      };
+
+      if (cursor) {
+        params.cursor = cursor;
+      }
+
+      const response = await axiosInstance({
+        method: 'GET',
+        url: `/v1/user/${userId}/stores`,
+        params
+      });
+
+      if (response.data.ok) {
+        const cursor = response.data.data?.cursor || {};
+        return {
+          ok: response.data.ok,
+          data: {
+            contents: response.data.data?.contents || [],
+            cursor: {
+              hasMore: cursor.hasMore || false,
+              totalCount: cursor.totalCount || 0,
+              nextCursor: cursor.nextCursor || null
+            }
+          }
+        };
+      } else {
+        throw new Error('API 응답 오류');
+      }
+    } catch (error) {
+      return error.response;
+    }
   }
 };
