@@ -158,6 +158,18 @@ const UserStoreHistory = ({ userId, isActive }) => {
     return methodMap[method] || method;
   };
 
+     const formatDateTime = (dateString) => {
+    if (!dateString) return '없음';
+    return new Date(dateString).toLocaleString('ko-KR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+  };
+
   return (
     <div>
       <div className="px-4 pt-4">
@@ -456,6 +468,35 @@ const UserStoreHistory = ({ userId, isActive }) => {
                             {getPaymentMethodInKorean(method)}
                           </span>
                         )) || <span className="text-muted">결제 방법 정보 없음</span>}
+                      </div>
+                    </div>
+
+                    {/* 제보 이력 정보 */}
+                    <div className="mt-4">
+                      <h6 className="fw-bold text-dark mb-3">제보 이력</h6>
+                      <div className="row g-3">
+                        <div className="col-md-6">
+                          <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
+                            <div className="bg-success bg-opacity-10 rounded-circle p-2">
+                              <i className="bi bi-calendar-plus text-success"></i>
+                            </div>
+                            <div>
+                              <label className="form-label fw-semibold text-muted mb-1">제보일시</label>
+                              <p className="mb-0 fw-bold text-dark">{formatDateTime(selectedStore?.createdAt)}</p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="col-md-6">
+                          <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
+                            <div className="bg-info bg-opacity-10 rounded-circle p-2">
+                              <i className="bi bi-clock-history text-info"></i>
+                            </div>
+                            <div>
+                              <label className="form-label fw-semibold text-muted mb-1">수정일시</label>
+                              <p className="mb-0 fw-bold text-dark">{formatDateTime(selectedStore?.updatedAt)}</p>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>

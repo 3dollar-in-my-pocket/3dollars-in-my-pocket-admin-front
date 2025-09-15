@@ -124,6 +124,18 @@ const UserReviewHistory = ({ userId, isActive }) => {
     return stars;
   };
 
+    const formatDateTime = (dateString) => {
+    if (!dateString) return '없음';
+    return new Date(dateString).toLocaleString('ko-KR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+  };
+
   return (
     <div>
       <div className="px-4 pt-4">
@@ -401,6 +413,27 @@ const UserReviewHistory = ({ userId, isActive }) => {
                     )) || <span className="text-muted">카테고리 정보 없음</span>}
                   </div>
                 </div>
+              </div>
+
+                <div className="col-12">
+                        <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
+                          <div className="bg-warning bg-opacity-10 rounded-circle p-2">
+                            <i className="bi bi-calendar3 text-warning"></i>
+                          </div>
+                          <div>
+                            <label className="form-label fw-semibold text-muted mb-1">등록일시</label>
+                            <p className="mb-0 fw-bold text-dark">{formatDateTime(selectedReview.createdAt)}</p>
+                          </div>
+                        </div>
+                        <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
+                          <div className="bg-warning bg-opacity-10 rounded-circle p-2">
+                            <i className="bi bi-calendar3 text-warning"></i>
+                          </div>
+                          <div>
+                            <label className="form-label fw-semibold text-muted mb-1">수정일시</label>
+                            <p className="mb-0 fw-bold text-dark">{formatDateTime(selectedReview.updatedAt)}</p>
+                          </div>
+                        </div>
               </div>
               <div className="modal-footer border-0 bg-light">
                 <button type="button" className="btn btn-secondary rounded-pill px-4" onClick={handleCloseModal}>

@@ -3,6 +3,7 @@ import { Tab, Tabs } from 'react-bootstrap';
 import UserStoreHistory from './UserStoreHistory';
 import UserReviewHistory from './UserReviewHistory';
 import UserVisitHistory from './UserVisitHistory';
+import UserStoreImageHistory from './UserStoreImageHistory';
 
 const UserActivityHistory = ({ userId }) => {
   const [activeTab, setActiveTab] = useState('stores');
@@ -100,6 +101,30 @@ const UserActivityHistory = ({ userId }) => {
                       <span className="visually-hidden">Loading...</span>
                     </div>
                     <p className="text-muted mt-2">방문 이력을 불러오는 중...</p>
+                  </div>
+                )}
+              </div>
+            </Tab>
+
+            {/* 가게 이미지 등록 이력 탭 */}
+            <Tab
+              eventKey="images"
+              title={
+                <span className="d-flex align-items-center gap-2">
+                  <i className="bi bi-image"></i>
+                  이미지 등록 이력
+                </span>
+              }
+            >
+              <div className="pt-0">
+                {loadedTabs.has('images') ? (
+                  <UserStoreImageHistory userId={userId} isActive={activeTab === 'images'} />
+                ) : (
+                  <div className="text-center py-5">
+                    <div className="spinner-border text-info" role="status">
+                      <span className="visually-hidden">Loading...</span>
+                    </div>
+                    <p className="text-muted mt-2">이미지 등록 이력을 불러오는 중...</p>
                   </div>
                 )}
               </div>
