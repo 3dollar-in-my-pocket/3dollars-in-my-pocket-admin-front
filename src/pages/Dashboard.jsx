@@ -1,4 +1,3 @@
-import React from "react";
 import {useNavigate} from "react-router-dom";
 
 const Dashboard = () => {
@@ -35,6 +34,12 @@ const Dashboard = () => {
       icon: "bi-bell-fill",
       route: "/manage/push-message"
     },
+    {
+      title: "유저 검색",
+      description: "유저를 검색하고 상세 정보를 확인할 수 있습니다.",
+      icon: "bi-search",
+      route: "/manage/user-search"
+    },
   ];
 
   const toolTools = [
@@ -58,6 +63,15 @@ const Dashboard = () => {
       description: "Firebase에서 발송된 푸시 메시지의 통계를 확인할 수 있습니다.",
       icon: "bi-graph-up-arrow",
       route: "/info/push-statistics"
+    },
+  ];
+
+  const adminTools = [
+    {
+      title: "관리자 계정 관리",
+      description: "관리자 계정을 조회하고 신규 관리자를 등록할 수 있습니다.",
+      icon: "bi-people-fill",
+      route: "/manage/admin"
     },
   ];
 
@@ -141,6 +155,34 @@ const Dashboard = () => {
                   <p className="card-text text-muted">{tool.description}</p>
                   <div className="mt-auto text-end">
                     <button className="btn btn-outline-primary btn-sm">
+                      바로가기 →
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-5">
+        <h4 className="fw-semibold">관리자 관리</h4>
+        <div className="row g-4">
+          {adminTools.map((tool, idx) => (
+            <div className="col-md-6 col-lg-4" key={idx}>
+              <div
+                className="card shadow-sm h-100 border-0 hover-shadow cursor-pointer"
+                onClick={() => navigate(tool.route)}
+                role="button"
+              >
+                <div className="card-body d-flex flex-column">
+                  <div className="mb-3">
+                    <i className={`bi ${tool.icon} fs-2 text-success`}></i>
+                  </div>
+                  <h5 className="card-title fw-bold">{tool.title}</h5>
+                  <p className="card-text text-muted">{tool.description}</p>
+                  <div className="mt-auto text-end">
+                    <button className="btn btn-outline-success btn-sm">
                       바로가기 →
                     </button>
                   </div>
