@@ -1,22 +1,23 @@
 import { useState, useRef, useCallback } from 'react';
-import UserDetailModal from './UserDetailModal';
+import StoreDetailModal from './StoreDetailModal';
 import {
-  SEARCH_TYPES,
-  createUserSearchRequest,
-  getSocialTypeDisplayName,
-  getSocialTypeBadgeClass,
-  formatUserIds,
-  validateUserSearch
-} from '../../types/user';
-import userApi from '../../api/userApi';
+  STORE_SEARCH_TYPES,
+  getStoreStatusDisplayName,
+  getStoreStatusBadgeClass,
+  getActivitiesStatusDisplayName,
+  getActivitiesStatusBadgeClass,
+  formatRating,
+  validateStoreSearch,
+  getCategoryIcon
+} from '../../types/store';
+import storeApi from '../../api/storeApi';
 import { toast } from 'react-toastify';
 
-const UserSearch = () => {
-  const [searchType, setSearchType] = useState(SEARCH_TYPES.NAME);
+const StoreSearch = () => {
+  const [searchType, setSearchType] = useState(STORE_SEARCH_TYPES.KEYWORD);
   const [searchQuery, setSearchQuery] = useState('');
-  const [userIds, setUserIds] = useState('');
-  const [userList, setUserList] = useState([]);
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [storeList, setStoreList] = useState([]);
+  const [selectedStore, setSelectedStore] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const [nextCursor, setNextCursor] = useState(null);
@@ -35,43 +36,50 @@ const UserSearch = () => {
   }, [hasMore, isLoading]);
 
   const handleSearch = async (reset = true) => {
-    const validationError = validateUserSearch(searchType, searchQuery, userIds);
-    if (validationError) {
-      toast(validationError);
-      return;
+    if (searchType === STORE_SEARCH_TYPES.KEYWORD) {
+      const validationError = validateStoreSearch(searchType, searchQuery);
+      if (validationError) {
+        toast(validationError);
+        return;
+      }
     }
 
     setIsSearching(true);
     setIsLoading(true);
 
     try {
-      const searchRequest = createUserSearchRequest({
-        type: searchType,
-        query: searchType === SEARCH_TYPES.NAME ? searchQuery : undefined,
-        userIds: searchType === SEARCH_TYPES.USER_ID ? formatUserIds(userIds) : undefined,
-        cursor: reset ? null : nextCursor,
-        size: 30
-      });
+      let response;
 
-      const response = await userApi.searchUsers(searchRequest);
+      if (searchType === STORE_SEARCH_TYPES.KEYWORD) {
+        response = await storeApi.searchStores(
+          searchQuery,
+          reset ? null : nextCursor,
+          20
+        );
+      } else {
+        response = await storeApi.getStores(
+          reset ? null : nextCursor,
+          20
+        );
+      }
 
       if (!response.ok) {
-        return
+        return;
       }
 
-      const { users, hasMore, nextCursor: newNextCursor } = response.data;
+      const { contents, cursor } = response.data;
 
       if (reset) {
-        setUserList(users);
+        setStoreList(contents || []);
       } else {
-        setUserList(prev => [...prev, ...users]);
+        setStoreList(prev => [...prev, ...(contents || [])]);
       }
-      setHasMore(hasMore);
-      setNextCursor(newNextCursor);
+      setHasMore(cursor?.hasMore || false);
+      setNextCursor(cursor?.nextCursor || null);
     } catch (error) {
-      toast.error('사용자 정보를 불러오는 중 오류가 발생했습니다.');
+      toast.error('가게 정보를 불러오는 중 오류가 발생했습니다.');
       if (reset) {
-        setUserList([]);
+        setStoreList([]);
       }
     } finally {
       setIsLoading(false);
@@ -85,28 +93,40 @@ const UserSearch = () => {
     }
   };
 
-  const handleUserClick = (user) => {
-    setSelectedUser(user);
+  const handleStoreClick = (store) => {
+    setSelectedStore(store);
   };
 
   const handleCloseModal = () => {
-    setSelectedUser(null);
+    setSelectedStore(null);
   };
 
-  const handleUserIdInputChange = (e) => {
-    setUserIds(e.target.value);
-  };
-
-  const handleKeyDown = (e) => {
+  const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
       handleSearch(true);
     }
   };
 
+  const formatDateTime = (dateString) => {
+    if (!dateString) return '없음';
+    return new Date(dateString).toLocaleDateString('ko-KR');
+  };
+
+  const getCategoryBadges = (categories) => {
+    if (!categories || categories.length === 0) return null;
+
+    return categories.slice(0, 3).map((category, index) => (
+      <span key={category.categoryId || index} className="badge bg-info bg-opacity-10 text-info border border-info rounded-pill me-1 mb-1">
+        <i className={`bi ${getCategoryIcon(category.categoryId)} me-1`}></i>
+        {category.name}
+      </span>
+    ));
+  };
+
   return (
     <div className="container-fluid px-4 py-4">
       <div className="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
-        <h2 className="fw-bold">👤 유저 검색</h2>
+        <h2 className="fw-bold">🏪 가게 검색</h2>
       </div>
 
       {/* 검색 영역 */}
@@ -124,37 +144,31 @@ const UserSearch = () => {
                 value={searchType}
                 onChange={(e) => setSearchType(e.target.value)}
               >
-                <option value={SEARCH_TYPES.NAME}>👤 닉네임 검색</option>
-                <option value={SEARCH_TYPES.USER_ID}>🏷️ 유저 ID로 검색</option>
-
+                <option value={STORE_SEARCH_TYPES.KEYWORD}>🔍 키워드로 검색</option>
+                <option value={STORE_SEARCH_TYPES.RECENT}>📅 최신순 조회</option>
               </select>
             </div>
 
             <div className="col-lg-7 col-md-6">
               <label className="form-label fw-bold text-dark mb-3">
                 <i className="bi bi-search me-2 text-success"></i>
-                {searchType === SEARCH_TYPES.NAME ? '검색어' : '유저 ID (쉼표로 구분)'}
+                {searchType === STORE_SEARCH_TYPES.KEYWORD ? '검색어' : '조회'}
               </label>
-              {searchType === SEARCH_TYPES.NAME ? (
+              {searchType === STORE_SEARCH_TYPES.KEYWORD ? (
                 <input
                   type="text"
                   className="form-control form-control-lg border-0 shadow-sm"
                   style={{backgroundColor: '#f8f9fa', borderRadius: '12px', padding: '12px 16px'}}
-                  placeholder="🔍 닉네임을 입력하세요"
+                  placeholder="🔍 가게 이름을 입력하세요"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={handleKeyDown}
+                  onKeyPress={handleKeyPress}
                 />
               ) : (
-                <input
-                  type="text"
-                  className="form-control form-control-lg border-0 shadow-sm"
-                  style={{backgroundColor: '#f8f9fa', borderRadius: '12px', padding: '12px 16px'}}
-                  placeholder="🏷️ 1, 2, 3"
-                  value={userIds}
-                  onChange={handleUserIdInputChange}
-                  onKeyDown={handleKeyDown}
-                />
+                <div className="form-control form-control-lg border-0 shadow-sm d-flex align-items-center"
+                     style={{backgroundColor: '#f8f9fa', borderRadius: '12px', padding: '12px 16px', color: '#6c757d'}}>
+                  📅 최신순으로 가게를 조회합니다
+                </div>
               )}
             </div>
 
@@ -174,12 +188,12 @@ const UserSearch = () => {
                 {isSearching ? (
                   <>
                     <span className="spinner-border spinner-border-sm me-2"></span>
-                    검색 중...
+                    {searchType === STORE_SEARCH_TYPES.KEYWORD ? '검색 중...' : '조회 중...'}
                   </>
                 ) : (
                   <>
                     <i className="bi bi-search me-2"></i>
-                    검색하기
+                    {searchType === STORE_SEARCH_TYPES.KEYWORD ? '검색하기' : '조회하기'}
                   </>
                 )}
               </button>
@@ -204,25 +218,25 @@ const UserSearch = () => {
           onScroll={handleScroll}
           style={{ maxHeight: '80vh', overflowY: 'auto' }}
         >
-          {userList.length === 0 && !isLoading ? (
+          {storeList.length === 0 && !isLoading ? (
             <div className="text-center py-5 text-muted">
               <div className="mb-4">
                 <div className="bg-light rounded-circle mx-auto" style={{width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                  <i className="bi bi-search fs-1 text-secondary"></i>
+                  <i className="bi bi-shop fs-1 text-secondary"></i>
                 </div>
               </div>
               <h5 className="text-dark mb-2">검색 결과가 없습니다</h5>
               <p className="text-muted">다른 검색어로 시도해보세요.</p>
             </div>
-          ) : userList.length > 0 ? (
+          ) : storeList.length > 0 ? (
             <div className="row g-3 p-3">
-              {userList.map((user) => {
-                const borderColor = getSocialTypeBadgeClass(user.socialType).includes('warning') ? '#ffc107' :
-                  getSocialTypeBadgeClass(user.socialType).includes('danger') ? '#dc3545' :
-                  getSocialTypeBadgeClass(user.socialType).includes('dark') ? '#212529' : '#6c757d';
+              {storeList.map((store, index) => {
+                const borderColor = getStoreStatusBadgeClass(store.status).includes('success') ? '#198754' :
+                  getStoreStatusBadgeClass(store.status).includes('warning') ? '#ffc107' :
+                  getStoreStatusBadgeClass(store.status).includes('danger') ? '#dc3545' : '#6c757d';
 
                 return (
-                  <div key={user.userId} className="col-lg-3 col-md-4 col-sm-6 col-12">
+                  <div key={store.storeId} className="col-lg-4 col-md-6 col-12">
                     <div
                       className="card border-0 shadow-sm h-100"
                       style={{
@@ -231,7 +245,7 @@ const UserSearch = () => {
                         borderTop: `4px solid ${borderColor}`,
                         borderRadius: '12px'
                       }}
-                      onClick={() => handleUserClick(user)}
+                      onClick={() => handleStoreClick(store)}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.transform = 'translateY(-4px)';
                         e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)';
@@ -252,35 +266,66 @@ const UserSearch = () => {
                             alignItems: 'center',
                             justifyContent: 'center'
                           }}>
-                            <i className="bi bi-person fs-6" style={{ color: borderColor }}></i>
+                            <i className="bi bi-shop fs-6" style={{ color: borderColor }}></i>
                           </div>
                         </div>
-
                         <div>
                           <div className="text-center mb-2">
-                            <h6 className="mb-1 fw-bold text-dark" title={user.nickname} style={{
+                            <h6 className="mb-1 fw-bold text-dark" title={store.name} style={{
                               overflow: 'hidden',
                               textOverflow: 'ellipsis',
                               whiteSpace: 'nowrap'
-                            }}>{user.nickname}</h6>
-                            <span className={`badge rounded-pill ${getSocialTypeBadgeClass(user.socialType)} bg-opacity-10 text-dark border px-2 py-1 small`}>
-                              {getSocialTypeDisplayName(user.socialType)}
+                            }}>{store.name}</h6>
+                            <span className={`badge rounded-pill ${getStoreStatusBadgeClass(store.status)} bg-opacity-10 text-dark border px-2 py-1 small`}>
+                              <i className="bi bi-circle-fill me-1" style={{ fontSize: '0.4rem' }}></i>
+                              {getStoreStatusDisplayName(store.status)}
                             </span>
                           </div>
 
-                          <div className="text-center mb-2">
-                            <div className="text-muted small mb-1" title={user.userId} style={{
+                          <div className="d-flex justify-content-center gap-1 mb-2 flex-wrap">
+                            <span className={`badge rounded-pill ${getActivitiesStatusBadgeClass(store.activitiesStatus)} bg-opacity-10 text-dark border px-2 py-1`} style={{fontSize: '0.7rem'}}>
+                              <i className="bi bi-activity me-1"></i>
+                              {getActivitiesStatusDisplayName(store.activitiesStatus)}
+                            </span>
+                            <span className="badge bg-warning bg-opacity-10 text-warning border border-warning rounded-pill px-2 py-1" style={{fontSize: '0.7rem'}}>
+                              <i className="bi bi-star-fill me-1"></i>
+                              {formatRating(store.rating)}
+                            </span>
+                          </div>
+
+                          <div className="mb-2 text-center">
+                            <div className="text-muted small mb-1" title={store.address?.fullAddress} style={{
                               overflow: 'hidden',
                               textOverflow: 'ellipsis',
                               whiteSpace: 'nowrap'
                             }}>
-                              <i className="bi bi-hash me-1"></i>
-                              {user.userId}
+                              <i className="bi bi-geo-alt me-1"></i>
+                              {store.address?.fullAddress || '주소 정보 없음'}
                             </div>
                             <div className="text-muted small">
                               <i className="bi bi-calendar3 me-1"></i>
-                              {new Date(user.createdAt).toLocaleDateString('ko-KR')}
+                              {formatDateTime(store.createdAt)}
                             </div>
+                          </div>
+
+                          {/* 카테고리 미리보기 */}
+                          <div className="d-flex justify-content-center flex-wrap gap-1 mb-3">
+                            {store.categories?.slice(0, 2).map((category, idx) => (
+                              <span key={idx} className="badge rounded-pill px-2 py-1" style={{
+                                background: 'linear-gradient(135deg, #667eea20 0%, #764ba220 100%)',
+                                color: '#667eea',
+                                border: '1px solid #667eea40',
+                                fontSize: '0.65rem'
+                              }}>
+                                <i className={`bi ${getCategoryIcon(category.categoryId)} me-1`}></i>
+                                {category?.name}
+                              </span>
+                            ))}
+                            {store.categories && store.categories.length > 2 && (
+                              <span className="badge bg-light text-muted border rounded-pill px-2 py-1" style={{ fontSize: '0.65rem' }}>
+                                +{store.categories.length - 2}
+                              </span>
+                            )}
                           </div>
 
                           <div className="text-center">
@@ -295,7 +340,7 @@ const UserSearch = () => {
                               }}
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleUserClick(user);
+                                handleStoreClick(store);
                               }}
                               onMouseEnter={(e) => {
                                 e.currentTarget.style.transform = 'scale(1.05)';
@@ -320,38 +365,38 @@ const UserSearch = () => {
           ) : null}
 
           {/* 더 불러올 데이터가 있을 때 로딩 인디케이터 */}
-          {hasMore && userList.length > 0 && isLoading && (
+          {hasMore && storeList.length > 0 && isLoading && (
             <div className="text-center p-3 bg-light">
               <div className="spinner-border text-primary" role="status">
                 <span className="visually-hidden">Loading...</span>
               </div>
-              <p className="small text-muted mt-2 mb-0">더 많은 사용자를 불러오는 중...</p>
+              <p className="small text-muted mt-2 mb-0">더 많은 결과를 불러오는 중...</p>
             </div>
           )}
 
           {/* 로딩 인디케이터 */}
-          {isLoading && userList.length === 0 && (
+          {isLoading && storeList.length === 0 && (
             <div className="text-center py-5">
               <div className="mb-3">
                 <div className="spinner-border text-primary" style={{width: '3rem', height: '3rem'}} role="status">
                   <span className="visually-hidden">Loading...</span>
                 </div>
               </div>
-              <h5 className="text-dark mb-1">검색 중입니다</h5>
+              <h5 className="text-dark mb-1">{searchType === STORE_SEARCH_TYPES.KEYWORD ? '검색 중입니다' : '조회 중입니다'}</h5>
               <p className="text-muted">잠시만 기다려주세요...</p>
             </div>
           )}
         </div>
       </div>
 
-      {/* 사용자 상세 모달 */}
-      <UserDetailModal
-        show={!!selectedUser}
+      {/* 가게 상세 모달 */}
+      <StoreDetailModal
+        show={!!selectedStore}
         onHide={handleCloseModal}
-        user={selectedUser}
+        store={selectedStore}
       />
     </div>
   );
 };
 
-export default UserSearch;
+export default StoreSearch;

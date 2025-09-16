@@ -5,6 +5,7 @@ import FaqManagement from "../pages/faq/Faq";
 import Policy from "../pages/policy/Policy";
 import Push from "../pages/push/Push";
 import UserSearch from "../pages/user/UserSearch";
+import StoreSearch from "../pages/store/StoreSearch";
 import CacheTool from "../pages/tool/CacheTool";
 import FileUploadTool from "../pages/tool/FileUploadTool";
 import Admin from "../pages/admin/Admin";
@@ -40,6 +41,10 @@ const manageRoutes = {
     {
       path: '/manage/user-search',
       element: <PrivateRouter><UserSearch/></PrivateRouter>
+    },
+    {
+      path: '/manage/store-search',
+      element: <PrivateRouter><StoreSearch /></PrivateRouter>
     },
     {
       path: '/manage/tool/cache',
