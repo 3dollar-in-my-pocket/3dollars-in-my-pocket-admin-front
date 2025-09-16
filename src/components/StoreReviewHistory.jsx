@@ -328,7 +328,7 @@ const StoreReviewHistory = ({storeId, isActive}) => {
                     <p className="form-control-plaintext">{selectedReview.writer?.name || '익명 사용자'}</p>
                   </div>
                   <div className="col-md-6">
-                    <label className="form-label fw-bold">평점</label>
+                    <label className="form-label fw-bold">평균 평점</label>
                     <div className="d-flex align-items-center gap-2">
                       {getRatingStars(selectedReview.rating)}
                       <span className="fw-bold text-warning">{selectedReview.rating?.toFixed(1)}점</span>

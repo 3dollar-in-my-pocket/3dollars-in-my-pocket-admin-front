@@ -424,31 +424,7 @@ const UserReviewHistory = ({userId, isActive}) => {
                       </div>
                     </div>
                   </div>
-                  <div className="col-md-6">
-                    <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
-                      <div className="bg-info bg-opacity-10 rounded-circle p-2">
-                        <i className="bi bi-shield-check text-info"></i>
-                      </div>
-                      <div>
-                        <label className="form-label fw-semibold text-muted mb-1">리뷰 상태</label>
-                        <div>
-                          {getReviewStatusBadge(selectedReview?.status)}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="col-md-6">
-                    <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
-                      <div className="bg-warning bg-opacity-10 rounded-circle p-2">
-                        <i className="bi bi-star text-warning"></i>
-                      </div>
-                      <div>
-                        <label className="form-label fw-semibold text-muted mb-1">가게 평점</label>
-                        <p
-                          className="mb-0 text-dark fw-bold">{selectedReview?.store?.rating ? selectedReview.store.rating.toFixed(1) : '0.0'}점</p>
-                      </div>
-                    </div>
-                  </div>
+
                   <div className="col-md-12">
                     <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
                       <div className="bg-success bg-opacity-10 rounded-circle p-2">
@@ -462,6 +438,18 @@ const UserReviewHistory = ({userId, isActive}) => {
                           {getActivitiesStatusBadge(selectedReview?.store?.activitiesStatus)}
                         </div>
                       </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-4">
+                    <h6 className="fw-bold text-dark mb-3">가게 카테고리</h6>
+                    <div className="d-flex flex-wrap gap-2">
+                      {selectedReview?.store?.categories?.map((category, idx) => (
+                        <span key={idx}
+                              className="badge bg-primary bg-opacity-10 text-primary border rounded-pill px-3 py-2">
+                        {category?.name || '카테고리'}
+                      </span>
+                      )) || <span className="text-muted">카테고리 정보 없음</span>}
                     </div>
                   </div>
                 </div>
@@ -499,14 +487,17 @@ const UserReviewHistory = ({userId, isActive}) => {
                 )}
 
                 <div className="mt-4">
-                  <h6 className="fw-bold text-dark mb-3">가게 카테고리</h6>
-                  <div className="d-flex flex-wrap gap-2">
-                    {selectedReview?.store?.categories?.map((category, idx) => (
-                      <span key={idx}
-                            className="badge bg-primary bg-opacity-10 text-primary border rounded-pill px-3 py-2">
-                        {category?.name || '카테고리'}
-                      </span>
-                    )) || <span className="text-muted">카테고리 정보 없음</span>}
+                  <h6 className="fw-bold text-dark mb-3">리뷰 평점</h6>
+                  <div className="p-3 bg-light rounded-3">
+                    <p
+                      className="mb-0 text-dark fw-bold">{selectedReview.rating ? selectedReview.rating.toFixed(1) : '0.0'}점</p>
+                  </div>
+                </div>
+
+                <div className="col-md-6">
+                  <h6 className="fw-bold text-dark mb-3">리뷰 상태</h6>
+                  <div className="p-3 bg-light rounded-3">
+                    {getReviewStatusBadge(selectedReview?.status)}
                   </div>
                 </div>
 

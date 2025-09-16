@@ -379,8 +379,8 @@ const UserStoreHistory = ({userId, isActive}) => {
                 <div className="w-100">
                   <div className="d-flex align-items-center gap-3 text-white">
                     <div>
-                      <h4 className="mb-0 fw-bold">{selectedStore?.name || '가게 이름 없음'}</h4>
-                      <p className="mb-0 opacity-90">{selectedStore?.salesType?.description || '판매방식'} 가게</p>
+                      <h4 className="mb-0 fw-bold">가게 정보</h4>
+                      <p className="mb-0 opacity-90">{selectedStore?.name || '가게 이름 없음'}</p>
                     </div>
                   </div>
                 </div>
@@ -499,7 +499,7 @@ const UserStoreHistory = ({userId, isActive}) => {
                             <i className="bi bi-star text-warning"></i>
                           </div>
                           <div>
-                            <label className="form-label fw-semibold text-muted mb-1">평점</label>
+                            <label className="form-label fw-semibold text-muted mb-1">평균 리뷰 평점</label>
                             <p
                               className="mb-0 text-dark fw-bold">{selectedStoreDetail?.rating ? selectedStoreDetail.rating.toFixed(1) : '0.0'}점</p>
                           </div>
@@ -528,6 +528,18 @@ const UserStoreHistory = ({userId, isActive}) => {
                             <label className="form-label fw-semibold text-muted mb-1">운영 요일</label>
                             <p
                               className="mb-0 text-dark">{sortDaysByWeekOrder(selectedStoreDetail?.appearanceDays || []).map(day => getDayOfWeekInKorean(day)).join(', ') || '정보 없음'}</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="col-md-6">
+                        <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
+                          <div className="bg-info bg-opacity-10 rounded-circle p-2">
+                            <i className="bi bi-clock text-info"></i>
+                          </div>
+                          <div>
+                            <label className="form-label fw-semibold text-muted mb-1">판매 방식</label>
+                            <p
+                              className="mb-0 text-dark">{selectedStoreDetail?.salesType?.description || '판매방식'}</p>
                           </div>
                         </div>
                       </div>

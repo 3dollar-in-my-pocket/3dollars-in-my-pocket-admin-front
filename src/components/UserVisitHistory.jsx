@@ -331,7 +331,7 @@ const UserVisitHistory = ({userId, isActive}) => {
                         <i className="bi bi-star text-warning"></i>
                       </div>
                       <div>
-                        <label className="form-label fw-semibold text-muted mb-1">가게 평점</label>
+                        <label className="form-label fw-semibold text-muted mb-1">가게 평균 평점</label>
                         <p
                           className="mb-0 text-dark fw-bold">{selectedVisit?.store?.rating ? selectedVisit.store.rating.toFixed(1) : '0.0'}점</p>
                       </div>

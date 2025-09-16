@@ -361,7 +361,7 @@ const StoreDetailModal = ({show, onHide, store}) => {
                                 <i className="bi bi-star text-warning"></i>
                               </div>
                               <div>
-                                <label className="form-label fw-semibold text-muted mb-1">평점</label>
+                                <label className="form-label fw-semibold text-muted mb-1">평균 평점</label>
                                 <p
                                   className="mb-0 fw-bold text-dark">{formatRating(storeDetail?.rating || store.rating)}</p>
                               </div>
