@@ -1,10 +1,9 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import userApi from '../api/userApi';
-import storeApi from '../api/storeApi';
-import { toast } from 'react-toastify';
+import {useCallback, useEffect, useRef, useState} from 'react';
+import {toast} from 'react-toastify';
 import {getActivitiesStatusDisplayName, getStoreStatusBadgeClass, getStoreStatusDisplayName} from "../types/store";
+import reviewApi from "../api/reviewApi";
 
-const UserReviewHistory = ({ userId, isActive }) => {
+const UserReviewHistory = ({userId, isActive}) => {
   const [reviews, setReviews] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
@@ -26,13 +25,13 @@ const UserReviewHistory = ({ userId, isActive }) => {
 
     setIsLoading(true);
     try {
-      const response = await userApi.getUserReviews(userId, reset ? null : cursor, 20);
+      const response = await reviewApi.getUserReviews(userId, reset ? null : cursor, 20);
       if (!response?.ok) {
         toast.error('리뷰 이력을 불러오는 중 오류가 발생했습니다.');
         return;
       }
 
-      const { contents = [], cursor: newCursor = {} } = response.data || {};
+      const {contents = [], cursor: newCursor = {}} = response.data || {};
 
       if (reset) {
         setReviews(contents);
@@ -57,7 +56,7 @@ const UserReviewHistory = ({ userId, isActive }) => {
   }, [hasMore, isLoading, fetchReviews]);
 
   const handleScroll = useCallback((e) => {
-    const { scrollTop, scrollHeight, clientHeight } = e.target;
+    const {scrollTop, scrollHeight, clientHeight} = e.target;
     const isScrolledToBottom = scrollHeight - scrollTop <= clientHeight + 100;
 
     if (isScrolledToBottom && hasMore && !isLoading) {
@@ -78,7 +77,7 @@ const UserReviewHistory = ({ userId, isActive }) => {
   const getSalesTypeBadge = (salesType) => {
     if (!salesType) return null;
     const badgeClass = salesType.type === 'ROAD' ? 'bg-success' :
-                      salesType.type === 'STORE' ? 'bg-primary' : 'bg-secondary';
+      salesType.type === 'STORE' ? 'bg-primary' : 'bg-secondary';
     return (
       <span className={`badge ${badgeClass} bg-opacity-10 text-dark border rounded-pill px-2 py-1 small`}>
         {salesType.description || salesType.type}
@@ -167,7 +166,7 @@ const UserReviewHistory = ({ userId, isActive }) => {
     return stars;
   };
 
-    const formatDateTime = (dateString) => {
+  const formatDateTime = (dateString) => {
     if (!dateString) return '없음';
     return new Date(dateString).toLocaleString('ko-KR', {
       year: 'numeric',
@@ -185,7 +184,7 @@ const UserReviewHistory = ({ userId, isActive }) => {
     if (!window.confirm('정말로 이 리뷰를 삭제하시겠습니까?')) return;
     setIsDeleting(true);
     try {
-      const response = await storeApi.blindStoreReview(selectedReview.reviewId);
+      const response = await reviewApi.blindStoreReview(selectedReview.reviewId);
       if (response.status >= 400) {
         toast.error('리뷰 삭제에 실패했습니다.');
         setIsDeleting(false);
@@ -210,7 +209,8 @@ const UserReviewHistory = ({ userId, isActive }) => {
                border: '1px solid rgba(13, 110, 253, 0.1)'
              }}>
           <div className="d-flex align-items-center gap-3">
-            <div className="rounded-circle p-3 shadow-sm" style={{ background: 'linear-gradient(135deg, #0d6efd 0%, #6610f2 100%)' }}>
+            <div className="rounded-circle p-3 shadow-sm"
+                 style={{background: 'linear-gradient(135deg, #0d6efd 0%, #6610f2 100%)'}}>
               <i className="bi bi-chat-square-text text-white fs-5"></i>
             </div>
             <div>
@@ -220,7 +220,7 @@ const UserReviewHistory = ({ userId, isActive }) => {
           </div>
           {totalCount > 0 && (
             <div className="d-flex align-items-center gap-2">
-              <span className="badge bg-primary px-3 py-2 rounded-pill shadow-sm" style={{ fontSize: '0.9rem' }}>
+              <span className="badge bg-primary px-3 py-2 rounded-pill shadow-sm" style={{fontSize: '0.9rem'}}>
                 <i className="bi bi-chat-dots me-1"></i>
                 총 {totalCount}개
               </span>
@@ -233,11 +233,17 @@ const UserReviewHistory = ({ userId, isActive }) => {
         className="px-4"
         ref={scrollContainerRef}
         onScroll={handleScroll}
-        style={{ maxHeight: '500px', overflowY: 'auto' }}
+        style={{maxHeight: '500px', overflowY: 'auto'}}
       >
         {reviews.length === 0 && !isLoading ? (
           <div className="text-center py-5">
-            <div className="bg-light rounded-circle mx-auto mb-4" style={{width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+            <div className="bg-light rounded-circle mx-auto mb-4" style={{
+              width: '80px',
+              height: '80px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
               <i className="bi bi-chat-square-text fs-1 text-secondary"></i>
             </div>
             <h5 className="text-dark mb-2">작성한 리뷰가 없습니다</h5>
@@ -304,7 +310,7 @@ const UserReviewHistory = ({ userId, isActive }) => {
                                 src={image.imageUrl}
                                 alt={`리뷰 이미지 ${idx + 1}`}
                                 className="rounded"
-                                style={{ width: '40px', height: '40px', objectFit: 'cover' }}
+                                style={{width: '40px', height: '40px', objectFit: 'cover'}}
                                 onError={(e) => {
                                   e.target.style.display = 'none';
                                 }}
@@ -313,7 +319,7 @@ const UserReviewHistory = ({ userId, isActive }) => {
                           ))}
                           {review.images.length > 3 && (
                             <div className="d-flex align-items-center justify-content-center rounded bg-light"
-                                 style={{ width: '40px', height: '40px' }}>
+                                 style={{width: '40px', height: '40px'}}>
                               <span className="text-muted small">+{review.images.length - 3}</span>
                             </div>
                           )}
@@ -322,12 +328,15 @@ const UserReviewHistory = ({ userId, isActive }) => {
 
                       <div className="d-flex flex-wrap gap-1 mb-2">
                         {review.store?.categories?.slice(0, 2).map((category, idx) => (
-                          <span key={idx} className="badge bg-secondary bg-opacity-10 text-secondary border rounded-pill px-2 py-1" style={{ fontSize: '0.7rem' }}>
+                          <span key={idx}
+                                className="badge bg-secondary bg-opacity-10 text-secondary border rounded-pill px-2 py-1"
+                                style={{fontSize: '0.7rem'}}>
                             {category?.name || '카테고리'}
                           </span>
                         ))}
                         {review.store?.categories && review.store.categories.length > 2 && (
-                          <span className="badge bg-light text-muted border rounded-pill px-2 py-1" style={{ fontSize: '0.7rem' }}>
+                          <span className="badge bg-light text-muted border rounded-pill px-2 py-1"
+                                style={{fontSize: '0.7rem'}}>
                             +{review.store.categories.length - 2}
                           </span>
                         )}
@@ -385,7 +394,8 @@ const UserReviewHistory = ({ userId, isActive }) => {
         <div className="modal fade show d-block" tabIndex="-1" style={{backgroundColor: 'rgba(0,0,0,0.5)'}}>
           <div className="modal-dialog modal-lg modal-dialog-centered">
             <div className="modal-content border-0 shadow-lg">
-              <div className="modal-header border-0 pb-0" style={{ background: 'linear-gradient(135deg, #0d6efd 0%, #6610f2 100%)' }}>
+              <div className="modal-header border-0 pb-0"
+                   style={{background: 'linear-gradient(135deg, #0d6efd 0%, #6610f2 100%)'}}>
                 <div className="w-100">
                   <div className="d-flex align-items-center gap-3 text-white">
                     <div>
@@ -434,7 +444,8 @@ const UserReviewHistory = ({ userId, isActive }) => {
                       </div>
                       <div>
                         <label className="form-label fw-semibold text-muted mb-1">가게 평점</label>
-                        <p className="mb-0 text-dark fw-bold">{selectedReview?.store?.rating ? selectedReview.store.rating.toFixed(1) : '0.0'}점</p>
+                        <p
+                          className="mb-0 text-dark fw-bold">{selectedReview?.store?.rating ? selectedReview.store.rating.toFixed(1) : '0.0'}점</p>
                       </div>
                     </div>
                   </div>
@@ -458,7 +469,7 @@ const UserReviewHistory = ({ userId, isActive }) => {
                 <div className="mt-4">
                   <h6 className="fw-bold text-dark mb-3">리뷰 내용</h6>
                   <div className="p-3 bg-light rounded-3">
-                    <p className="mb-0 text-dark" style={{ whiteSpace: 'pre-wrap', lineHeight: '1.6' }}>
+                    <p className="mb-0 text-dark" style={{whiteSpace: 'pre-wrap', lineHeight: '1.6'}}>
                       {selectedReview?.contents || '리뷰 내용이 없습니다.'}
                     </p>
                   </div>
@@ -475,7 +486,7 @@ const UserReviewHistory = ({ userId, isActive }) => {
                               src={image.imageUrl}
                               alt={`리뷰 이미지 ${idx + 1}`}
                               className="img-fluid rounded shadow-sm"
-                              style={{ width: '100%', height: '150px', objectFit: 'cover' }}
+                              style={{width: '100%', height: '150px', objectFit: 'cover'}}
                               onError={(e) => {
                                 e.target.src = '/placeholder-image.png';
                               }}
@@ -491,7 +502,8 @@ const UserReviewHistory = ({ userId, isActive }) => {
                   <h6 className="fw-bold text-dark mb-3">가게 카테고리</h6>
                   <div className="d-flex flex-wrap gap-2">
                     {selectedReview?.store?.categories?.map((category, idx) => (
-                      <span key={idx} className="badge bg-primary bg-opacity-10 text-primary border rounded-pill px-3 py-2">
+                      <span key={idx}
+                            className="badge bg-primary bg-opacity-10 text-primary border rounded-pill px-3 py-2">
                         {category?.name || '카테고리'}
                       </span>
                     )) || <span className="text-muted">카테고리 정보 없음</span>}
@@ -527,7 +539,8 @@ const UserReviewHistory = ({ userId, isActive }) => {
                 </div>
               </div>
               <div className="modal-footer border-0 bg-light">
-                <button type="button" className="btn btn-secondary rounded-pill px-4" onClick={handleCloseModal} disabled={isDeleting}>
+                <button type="button" className="btn btn-secondary rounded-pill px-4" onClick={handleCloseModal}
+                        disabled={isDeleting}>
                   <i className="bi bi-x-lg me-2"></i>
                   닫기
                 </button>

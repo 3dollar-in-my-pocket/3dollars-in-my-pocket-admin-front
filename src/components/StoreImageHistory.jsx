@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import storeApi from '../api/storeApi';
-import { toast } from 'react-toastify';
+import {useCallback, useEffect, useRef, useState} from 'react';
+import {toast} from 'react-toastify';
+import storeImageApi from "../api/storeImageApi";
 
-const StoreImageHistory = ({ storeId, isActive }) => {
+const StoreImageHistory = ({storeId, isActive}) => {
   const [images, setImages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
@@ -23,13 +23,13 @@ const StoreImageHistory = ({ storeId, isActive }) => {
 
     setIsLoading(true);
     try {
-      const response = await storeApi.getStoreImages(storeId, reset ? null : cursor, 20);
+      const response = await storeImageApi.getStoreImages(storeId, reset ? null : cursor, 20);
       if (!response?.ok) {
         toast.error('이미지 목록을 불러오는 중 오류가 발생했습니다.');
         return;
       }
 
-      const { contents = [], cursor: newCursor = {} } = response.data || {};
+      const {contents = [], cursor: newCursor = {}} = response.data || {};
 
       if (reset) {
         setImages(contents);
@@ -103,11 +103,17 @@ const StoreImageHistory = ({ storeId, isActive }) => {
       <div
         ref={scrollContainerRef}
         className="image-container"
-        style={{ maxHeight: '600px', overflowY: 'auto' }}
+        style={{maxHeight: '600px', overflowY: 'auto'}}
       >
         {images.length === 0 && !isLoading ? (
           <div className="text-center py-5">
-            <div className="bg-light rounded-circle mx-auto mb-4" style={{width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+            <div className="bg-light rounded-circle mx-auto mb-4" style={{
+              width: '80px',
+              height: '80px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
               <i className="bi bi-image fs-1 text-secondary"></i>
             </div>
             <h5 className="text-dark mb-2">등록된 이미지가 없습니다</h5>
@@ -177,18 +183,22 @@ const StoreImageHistory = ({ storeId, isActive }) => {
                         </div>
                       </div>
                       <div className="flex-grow-1">
-                        <h6 className="fw-bold text-dark mb-1" style={{ fontSize: '0.9rem' }}>
+                        <h6 className="fw-bold text-dark mb-1" style={{fontSize: '0.9rem'}}>
                           {image.writer?.name || '익명 사용자'}
                         </h6>
                         <div className="d-flex gap-1 flex-wrap">
                           {image.writer?.userId && (
-                            <span className="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-2 py-1" style={{ fontSize: '0.7rem' }}>
+                            <span
+                              className="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-2 py-1"
+                              style={{fontSize: '0.7rem'}}>
                               <i className="bi bi-person me-1"></i>
                               ID: {image.writer.userId}
                             </span>
                           )}
                           {image.writer?.socialType && (
-                            <span className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-2 py-1" style={{ fontSize: '0.7rem' }}>
+                            <span
+                              className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-2 py-1"
+                              style={{fontSize: '0.7rem'}}>
                               <i className="bi bi-share me-1"></i>
                               {image.writer.socialType}
                             </span>
@@ -198,13 +208,13 @@ const StoreImageHistory = ({ storeId, isActive }) => {
                     </div>
 
                     <div className="d-flex justify-content-between align-items-center">
-                      <span className="text-muted" style={{ fontSize: '0.8rem' }}>
+                      <span className="text-muted" style={{fontSize: '0.8rem'}}>
                         <i className="bi bi-clock me-1"></i>
                         {formatDateTime(image.createdAt)}
                       </span>
                       <button
                         className="btn btn-outline-info btn-sm rounded-pill px-2 py-1"
-                        style={{ fontSize: '0.7rem' }}
+                        style={{fontSize: '0.7rem'}}
                         onClick={(e) => {
                           e.stopPropagation();
                           handleImageClick(image);
@@ -261,7 +271,7 @@ const StoreImageHistory = ({ storeId, isActive }) => {
       {showModal && selectedImage && (
         <div
           className="modal fade show"
-          style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}
+          style={{display: 'block', backgroundColor: 'rgba(0,0,0,0.5)'}}
           onClick={handleCloseModal}
         >
           <div className="modal-dialog modal-lg modal-dialog-centered" onClick={(e) => e.stopPropagation()}>
@@ -282,7 +292,7 @@ const StoreImageHistory = ({ storeId, isActive }) => {
                   src={selectedImage.imageUrl || selectedImage.url}
                   alt="Store"
                   className="img-fluid"
-                  style={{ maxHeight: '500px', width: 'auto' }}
+                  style={{maxHeight: '500px', width: 'auto'}}
                 />
               </div>
               <div className="modal-footer">
@@ -294,7 +304,9 @@ const StoreImageHistory = ({ storeId, isActive }) => {
                         등록자: {selectedImage.writer?.name || '익명 사용자'}
                       </small>
                       {selectedImage.writer?.socialType && (
-                        <span className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-2 py-1" style={{ fontSize: '0.7rem' }}>
+                        <span
+                          className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-2 py-1"
+                          style={{fontSize: '0.7rem'}}>
                           {selectedImage.writer.socialType}
                         </span>
                       )}

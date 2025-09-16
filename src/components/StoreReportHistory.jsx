@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import storeApi from '../api/storeApi';
 import { toast } from 'react-toastify';
+import storeReportApi from "../api/storeReportApi";
 
 const StoreReportHistory = ({ storeId, isActive }) => {
   const [reports, setReports] = useState([]);
@@ -23,7 +24,7 @@ const StoreReportHistory = ({ storeId, isActive }) => {
 
     setIsLoading(true);
     try {
-      const response = await storeApi.getStoreReports(storeId, reset ? null : cursor, 20);
+      const response = await storeReportApi.getStoreReports(storeId, reset ? null : cursor, 20);
       if (!response?.ok) {
         toast.error('신고 이력을 불러오는 중 오류가 발생했습니다.');
         return;

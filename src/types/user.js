@@ -5,13 +5,13 @@ export const SOCIAL_TYPES = {
   KAKAO: 'KAKAO',
   GOOGLE: 'GOOGLE',
   APPLE: 'APPLE',
+  NAVER: 'NAVER',
   ANONYMOUS: null
 };
 
 // Device OS types
 export const DEVICE_OS = {
   IOS: 'IOS',
-  ANDROID: 'Android',
   AOS: 'Android', // API에서 AOS로 오는 경우 Android로 매핑
   UNKNOWN: 'UNKNOWN'
 };
@@ -167,7 +167,7 @@ export const getOsBadgeClass = (os) => {
   switch (os) {
     case DEVICE_OS.IOS:
       return 'bg-primary';
-    case DEVICE_OS.ANDROID:
+    case DEVICE_OS.AOS:
       return 'bg-success';
     default:
       return 'bg-secondary';

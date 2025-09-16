@@ -1,7 +1,7 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
-import userApi from '../api/userApi';
 import {toast} from 'react-toastify';
 import {getActivitiesStatusDisplayName, getStoreStatusBadgeClass, getStoreStatusDisplayName} from "../types/store";
+import visitApi from "../api/visitApi";
 
 const UserVisitHistory = ({userId, isActive}) => {
   const [visits, setVisits] = useState([]);
@@ -24,7 +24,7 @@ const UserVisitHistory = ({userId, isActive}) => {
 
     setIsLoading(true);
     try {
-      const response = await userApi.getUserVisits(userId, reset ? null : cursor, 20);
+      const response = await visitApi.getUserVisits(userId, reset ? null : cursor, 20);
       if (!response?.ok) {
         toast.error('방문 이력을 불러오는 중 오류가 발생했습니다.');
         return;
@@ -75,8 +75,7 @@ const UserVisitHistory = ({userId, isActive}) => {
 
   const getSalesTypeBadge = (salesType) => {
     if (!salesType) return null;
-    const badgeClass = salesType.type === 'ROAD' ? 'bg-success' :
-      salesType.type === 'STORE' ? 'bg-primary' : 'bg-secondary';
+    const badgeClass = 'bg-info';
     return (
       <span className={`badge ${badgeClass} bg-opacity-10 text-dark border rounded-pill px-2 py-1 small`}>
         {salesType.description || salesType.type}

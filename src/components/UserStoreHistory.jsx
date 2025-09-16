@@ -1,5 +1,4 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
-import userApi from '../api/userApi';
 import storeApi from '../api/storeApi';
 import {toast} from 'react-toastify';
 import {getActivitiesStatusDisplayName, getStoreStatusBadgeClass, getStoreStatusDisplayName} from "../types/store";
@@ -28,7 +27,7 @@ const UserStoreHistory = ({userId, isActive}) => {
 
     setIsLoading(true);
     try {
-      const response = await userApi.getUserStores(userId, reset ? null : cursor, 20);
+      const response = await storeApi.getUserStores(userId, reset ? null : cursor, 20);
       if (!response?.ok) {
         toast.error('제보한 가게 이력을 불러오는 중 오류가 발생했습니다.');
         return;

@@ -3,8 +3,8 @@
 // Store status types
 export const STORE_STATUS = {
   ACTIVE: 'ACTIVE',
-  INACTIVE: 'INACTIVE',
-  DELETED: 'DELETED'
+  DELETED: 'DELETED',
+  AUTO_DELETED: 'AUTO_DELETED',
 };
 
 // Store activities status types
@@ -16,7 +16,9 @@ export const ACTIVITIES_STATUS = {
 // Sales type
 export const SALES_TYPE = {
   ROAD: 'ROAD',
-  STORE: 'STORE'
+  STORE: 'STORE',
+  CONVENIENCE_STORE: 'CONVENIENCE_STORE',
+  FOOD_TRUCK: 'FOOD_TRUCK'
 };
 
 // Open status
@@ -28,7 +30,7 @@ export const OPEN_STATUS = {
 // Writer type
 export const WRITER_TYPE = {
   USER: 'USER',
-  ADMIN: 'ADMIN'
+  STORE: 'STORE'
 };
 
 // Search types
@@ -214,8 +216,8 @@ export const getStoreStatusDisplayName = (status) => {
   switch (status) {
     case STORE_STATUS.ACTIVE:
       return '활성된 가게';
-    case STORE_STATUS.INACTIVE:
-      return '비활성된 가게';
+    case STORE_STATUS.AUTO_DELETED:
+      return '자동 삭제된 가게';
     case STORE_STATUS.DELETED:
       return '삭제된 가게';
     default:
@@ -227,8 +229,8 @@ export const getStoreStatusBadgeClass = (status) => {
   switch (status) {
     case STORE_STATUS.ACTIVE:
       return 'bg-success';
-    case STORE_STATUS.INACTIVE:
-      return 'bg-warning';
+    case STORE_STATUS.AUTO_DELETED:
+      return 'bg-danger';
     case STORE_STATUS.DELETED:
       return 'bg-danger';
     default:
@@ -334,9 +336,9 @@ export const getOpenStatusBadgeClass = (openStatus) => {
 export const getWriterTypeDisplayName = (writerType) => {
   switch (writerType) {
     case WRITER_TYPE.USER:
-      return '일반 사용자';
-    case WRITER_TYPE.ADMIN:
-      return '관리자';
+      return '손님';
+    case WRITER_TYPE.STORE:
+      return '사장님';
     default:
       return '알 수 없음';
   }
@@ -346,7 +348,7 @@ export const getWriterTypeBadgeClass = (writerType) => {
   switch (writerType) {
     case WRITER_TYPE.USER:
       return 'bg-primary';
-    case WRITER_TYPE.ADMIN:
+    case WRITER_TYPE.STORE:
       return 'bg-danger';
     default:
       return 'bg-secondary';
