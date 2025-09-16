@@ -266,7 +266,7 @@ const UserStoreHistory = ({ userId, isActive }) => {
                             </div>
                           </div>
 
-                          <div className="d-flex flex-wrap gap-2">
+                          <div className="d-flex flex-wrap gap-2 mb-2">
                             {store.categories?.slice(0, 3).map((category, idx) => (
                               <span key={idx} className="badge rounded-pill px-3 py-1 small"
                                     style={{
@@ -283,6 +283,13 @@ const UserStoreHistory = ({ userId, isActive }) => {
                               </span>
                             )}
                           </div>
+
+                          {store.createdAt && (
+                            <div className="d-flex align-items-center gap-2 text-muted small">
+                              <i className="bi bi-clock me-1"></i>
+                              제보일: {formatDateTime(store.createdAt)}
+                            </div>
+                          )}
                         </div>
 
                         <div className="ms-3">

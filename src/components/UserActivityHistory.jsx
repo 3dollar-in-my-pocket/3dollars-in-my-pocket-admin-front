@@ -4,6 +4,7 @@ import UserStoreHistory from './UserStoreHistory';
 import UserReviewHistory from './UserReviewHistory';
 import UserVisitHistory from './UserVisitHistory';
 import UserStoreImageHistory from './UserStoreImageHistory';
+import UserStoreReportHistory from './UserStoreReportHistory';
 
 const UserActivityHistory = ({ userId }) => {
   const [activeTab, setActiveTab] = useState('stores');
@@ -125,6 +126,30 @@ const UserActivityHistory = ({ userId }) => {
                       <span className="visually-hidden">Loading...</span>
                     </div>
                     <p className="text-muted mt-2">이미지 등록 이력을 불러오는 중...</p>
+                  </div>
+                )}
+              </div>
+            </Tab>
+
+            {/* 가게 신고 이력 탭 */}
+            <Tab
+              eventKey="reports"
+              title={
+                <span className="d-flex align-items-center gap-2">
+                  <i className="bi bi-shield-exclamation"></i>
+                  가게 신고 이력
+                </span>
+              }
+            >
+              <div className="pt-0">
+                {loadedTabs.has('reports') ? (
+                  <UserStoreReportHistory userId={userId} isActive={activeTab === 'reports'} />
+                ) : (
+                  <div className="text-center py-5">
+                    <div className="spinner-border text-danger" role="status">
+                      <span className="visually-hidden">Loading...</span>
+                    </div>
+                    <p className="text-muted mt-2">신고 이력을 불러오는 중...</p>
                   </div>
                 )}
               </div>

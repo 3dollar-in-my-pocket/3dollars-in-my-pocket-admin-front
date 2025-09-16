@@ -255,7 +255,7 @@ const UserReviewHistory = ({ userId, isActive }) => {
                         </div>
                       )}
 
-                      <div className="d-flex flex-wrap gap-1">
+                      <div className="d-flex flex-wrap gap-1 mb-2">
                         {review.store?.categories?.slice(0, 2).map((category, idx) => (
                           <span key={idx} className="badge bg-secondary bg-opacity-10 text-secondary border rounded-pill px-2 py-1" style={{ fontSize: '0.7rem' }}>
                             {category?.name || '카테고리'}
@@ -267,6 +267,13 @@ const UserReviewHistory = ({ userId, isActive }) => {
                           </span>
                         )}
                       </div>
+
+                      {review.createdAt && (
+                        <div className="d-flex align-items-center gap-2 text-muted small">
+                          <i className="bi bi-clock me-1"></i>
+                          작성일: {formatDateTime(review.createdAt)}
+                        </div>
+                      )}
                     </div>
                     <div className="text-end">
                       <button

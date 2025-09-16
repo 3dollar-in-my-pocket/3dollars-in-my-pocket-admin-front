@@ -94,7 +94,8 @@ export default {
             disableIconUrl: response.data.data.representativeMedal.disableIconUrl,
             introduction: response.data.data.representativeMedal.introduction,
             acquisition: response.data.data.representativeMedal.acquisition ? {
-              description: response.data.data.representativeMedal.acquisition.description
+              description: response.data.data.representativeMedal.acquisition.description,
+              createdAt: response.data.data.representativeMedal.acquisition.createdAt
             } : null
           } : null,
           medals: response.data.data.medals?.map(medal => ({
@@ -104,7 +105,8 @@ export default {
             disableIconUrl: medal.disableIconUrl,
             introduction: medal.introduction,
             acquisition: medal.acquisition ? {
-              description: medal.acquisition.description
+              description: medal.acquisition.description,
+              createdAt: medal.acquisition.createdAt
             } : null
           })) || [],
           devices: response.data.data.devices.map(device => ({
@@ -186,7 +188,8 @@ export default {
   getUserReviews: async (userId, cursor = null, size = 20) => {
     try {
       const params = {
-        size
+        size,
+        includes: 'STORE',
       };
 
       if (cursor) {
@@ -230,7 +233,8 @@ export default {
   getUserVisits: async (userId, cursor = null, size = 20) => {
     try {
       const params = {
-        size
+        size,
+        includes: 'STORE',
       };
 
       if (cursor) {
@@ -274,7 +278,8 @@ export default {
   getUserStoreImages: async (userId, cursor = null, size = 20) => {
     try {
       const params = {
-        size
+        size,
+        includes: 'STORE',
       };
 
       if (cursor) {
@@ -284,6 +289,51 @@ export default {
       const response = await axiosInstance({
         method: 'GET',
         url: `/v1/user/${userId}/store-images`,
+        params
+      });
+
+      if (response.data.ok) {
+        const cursor = response.data.data?.cursor || {};
+        return {
+          ok: response.data.ok,
+          data: {
+            contents: response.data.data?.contents || [],
+            cursor: {
+              hasMore: cursor.hasMore || false,
+              totalCount: cursor.totalCount || 0,
+              nextCursor: cursor.nextCursor || null
+            }
+          }
+        };
+      } else {
+        throw new Error('API 응답 오류');
+      }
+    } catch (error) {
+      return error.response;
+    }
+  },
+
+  /**
+   * 사용자의 가게 신고 이력 조회
+   * @param {string} userId - 사용자 ID
+   * @param {string} [cursor] - 페이징 커서
+   * @param {number} [size=20] - 페이지 사이즈
+   * @returns {Promise<Object>} 사용자 가게 신고 이력
+   */
+  getUserStoreReports: async (userId, cursor = null, size = 20) => {
+    try {
+      const params = {
+        size,
+        includes: 'STORE',
+      };
+
+      if (cursor) {
+        params.cursor = cursor;
+      }
+
+      const response = await axiosInstance({
+        method: 'GET',
+        url: `/v1/user/${userId}/store-reports`,
         params
       });
 
