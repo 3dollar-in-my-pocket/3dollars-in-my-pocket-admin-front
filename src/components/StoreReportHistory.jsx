@@ -120,8 +120,6 @@ const StoreReportHistory = ({ storeId, isActive }) => {
     <div className="p-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div className="d-flex align-items-center gap-2">
-          <i className="bi bi-shield-exclamation text-danger fs-5"></i>
-          <h6 className="mb-0 fw-bold text-dark">신고 이력</h6>
           {totalCount > 0 && (
             <span className="badge bg-danger rounded-pill">
               총 {totalCount.toLocaleString()}개

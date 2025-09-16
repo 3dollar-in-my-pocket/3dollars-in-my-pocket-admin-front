@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import StoreDetailModal from './StoreDetailModal';
 import {
   STORE_SEARCH_TYPES,
@@ -24,17 +24,6 @@ const StoreSearch = () => {
   const [isSearching, setIsSearching] = useState(false);
   const scrollContainerRef = useRef(null);
 
-  // Auto-load recent stores on component mount
-  useEffect(() => {
-    if (searchType === STORE_SEARCH_TYPES.RECENT) {
-      handleSearch(true);
-    }
-  }, [searchType]);
-
-  // Auto-switch to recent stores on page load
-  useEffect(() => {
-    setSearchType(STORE_SEARCH_TYPES.RECENT);
-  }, []);
 
   // Infinite scroll handler
   const handleScroll = useCallback((e) => {
@@ -135,7 +124,7 @@ const StoreSearch = () => {
   };
 
   return (
-    <div className="container-xl py-4">
+    <div className="container-fluid px-4 py-4">
       <div className="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
         <h2 className="fw-bold">🏪 가게 검색</h2>
       </div>
@@ -227,7 +216,7 @@ const StoreSearch = () => {
           className="card-body p-0"
           ref={scrollContainerRef}
           onScroll={handleScroll}
-          style={{ maxHeight: '70vh', overflowY: 'auto' }}
+          style={{ maxHeight: '80vh', overflowY: 'auto' }}
         >
           {storeList.length === 0 && !isLoading ? (
             <div className="text-center py-5 text-muted">

@@ -98,8 +98,6 @@ const StoreReviewHistory = ({ storeId, isActive }) => {
     <div className="p-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div className="d-flex align-items-center gap-2">
-          <i className="bi bi-chat-square-text text-primary fs-5"></i>
-          <h6 className="mb-0 fw-bold text-dark">리뷰 목록</h6>
           {totalCount > 0 && (
             <span className="badge bg-primary rounded-pill">
               {totalCount.toLocaleString()}개

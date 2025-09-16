@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import UserDetailModal from './UserDetailModal';
 import {
   SEARCH_TYPES,
@@ -23,17 +23,6 @@ const UserSearch = () => {
   const [isSearching, setIsSearching] = useState(false);
   const scrollContainerRef = useRef(null);
 
-  // Auto-load recent users on component mount
-  useEffect(() => {
-    if (searchType === SEARCH_TYPES.RECENT) {
-      handleSearch(true);
-    }
-  }, [searchType]);
-
-  // Auto-switch to recent users on page load
-  useEffect(() => {
-    setSearchType(SEARCH_TYPES.RECENT);
-  }, []);
 
   // Infinite scroll handler
   const handleScroll = useCallback((e) => {
@@ -46,39 +35,25 @@ const UserSearch = () => {
   }, [hasMore, isLoading]);
 
   const handleSearch = async (reset = true) => {
-    // Skip validation for RECENT search type
-    if (searchType !== SEARCH_TYPES.RECENT) {
-      const validationError = validateUserSearch(searchType, searchQuery, userIds);
-      if (validationError) {
-        toast(validationError);
-        return;
-      }
+    const validationError = validateUserSearch(searchType, searchQuery, userIds);
+    if (validationError) {
+      toast(validationError);
+      return;
     }
 
     setIsSearching(true);
     setIsLoading(true);
 
     try {
-      let response;
+      const searchRequest = createUserSearchRequest({
+        type: searchType,
+        query: searchType === SEARCH_TYPES.NAME ? searchQuery : undefined,
+        userIds: searchType === SEARCH_TYPES.USER_ID ? formatUserIds(userIds) : undefined,
+        cursor: reset ? null : nextCursor,
+        size: 30
+      });
 
-      if (searchType === SEARCH_TYPES.RECENT) {
-        // Call GET /v1/users for recent users
-        response = await userApi.getUsers(
-          reset ? null : nextCursor,
-          20
-        );
-      } else {
-        // Use existing search API for name and userId search
-        const searchRequest = createUserSearchRequest({
-          type: searchType,
-          query: searchType === SEARCH_TYPES.NAME ? searchQuery : undefined,
-          userIds: searchType === SEARCH_TYPES.USER_ID ? formatUserIds(userIds) : undefined,
-          cursor: reset ? null : nextCursor,
-          size: 30
-        });
-
-        response = await userApi.searchUsers(searchRequest);
-      }
+      const response = await userApi.searchUsers(searchRequest);
 
       if (!response.ok) {
         return
@@ -129,7 +104,7 @@ const UserSearch = () => {
   };
 
   return (
-    <div className="container-xl py-4">
+    <div className="container-fluid px-4 py-4">
       <div className="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
         <h2 className="fw-bold">👤 유저 검색</h2>
       </div>
@@ -149,7 +124,6 @@ const UserSearch = () => {
                 value={searchType}
                 onChange={(e) => setSearchType(e.target.value)}
               >
-                <option value={SEARCH_TYPES.RECENT}>📅 최신순 조회</option>
                 <option value={SEARCH_TYPES.NAME}>👤 닉네임 검색</option>
                 <option value={SEARCH_TYPES.USER_ID}>🏷️ 유저 ID로 검색</option>
 
@@ -159,8 +133,7 @@ const UserSearch = () => {
             <div className="col-lg-7 col-md-6">
               <label className="form-label fw-bold text-dark mb-3">
                 <i className="bi bi-search me-2 text-success"></i>
-                {searchType === SEARCH_TYPES.NAME ? '검색어' :
-                 searchType === SEARCH_TYPES.USER_ID ? '유저 ID (쉼표로 구분)' : '조회'}
+                {searchType === SEARCH_TYPES.NAME ? '검색어' : '유저 ID (쉼표로 구분)'}
               </label>
               {searchType === SEARCH_TYPES.NAME ? (
                 <input
@@ -172,7 +145,7 @@ const UserSearch = () => {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={handleKeyDown}
                 />
-              ) : searchType === SEARCH_TYPES.USER_ID ? (
+              ) : (
                 <input
                   type="text"
                   className="form-control form-control-lg border-0 shadow-sm"
@@ -182,11 +155,6 @@ const UserSearch = () => {
                   onChange={handleUserIdInputChange}
                   onKeyDown={handleKeyDown}
                 />
-              ) : (
-                <div className="form-control form-control-lg border-0 shadow-sm d-flex align-items-center"
-                     style={{backgroundColor: '#f8f9fa', borderRadius: '12px', padding: '12px 16px', color: '#6c757d'}}>
-                  📅 최신순으로 사용자를 조회합니다
-                </div>
               )}
             </div>
 
@@ -206,12 +174,12 @@ const UserSearch = () => {
                 {isSearching ? (
                   <>
                     <span className="spinner-border spinner-border-sm me-2"></span>
-                    {searchType === SEARCH_TYPES.RECENT ? '조회 중...' : '검색 중...'}
+                    검색 중...
                   </>
                 ) : (
                   <>
                     <i className="bi bi-search me-2"></i>
-                    {searchType === SEARCH_TYPES.RECENT ? '조회하기' : '검색하기'}
+                    검색하기
                   </>
                 )}
               </button>
@@ -234,7 +202,7 @@ const UserSearch = () => {
           className="card-body p-0"
           ref={scrollContainerRef}
           onScroll={handleScroll}
-          style={{ maxHeight: '70vh', overflowY: 'auto' }}
+          style={{ maxHeight: '80vh', overflowY: 'auto' }}
         >
           {userList.length === 0 && !isLoading ? (
             <div className="text-center py-5 text-muted">
@@ -369,7 +337,7 @@ const UserSearch = () => {
                   <span className="visually-hidden">Loading...</span>
                 </div>
               </div>
-              <h5 className="text-dark mb-1">{searchType === SEARCH_TYPES.RECENT ? '조회 중입니다' : '검색 중입니다'}</h5>
+              <h5 className="text-dark mb-1">검색 중입니다</h5>
               <p className="text-muted">잠시만 기다려주세요...</p>
             </div>
           )}
