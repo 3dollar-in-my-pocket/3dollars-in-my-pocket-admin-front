@@ -178,7 +178,7 @@ const StoreReportHistory = ({ storeId, isActive }) => {
                     <div className="d-flex align-items-start gap-3">
                       <div className="flex-shrink-0">
                         <div className="bg-danger bg-opacity-10 rounded-circle p-2">
-                          <i className="bi bi-person-x-fill text-danger fs-5"></i>
+                          <i className="bi bi-exclamation-triangle text-danger fs-5"></i>
                         </div>
                       </div>
                       <div className="flex-grow-1">
@@ -193,7 +193,7 @@ const StoreReportHistory = ({ storeId, isActive }) => {
                             </div>
                             {report.reporter?.userId && (
                               <span className="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-2 py-1">
-                                <i className="bi bi-person me-1"></i>
+                                <i className="bi bi-hash me-1"></i>
                                 신고자 ID: {report.reporter.userId}
                               </span>
                             )}

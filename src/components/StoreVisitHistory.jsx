@@ -134,7 +134,7 @@ const StoreVisitHistory = ({ storeId, isActive }) => {
                     <div className="d-flex align-items-start gap-3">
                       <div className="flex-shrink-0">
                         <div className="bg-warning bg-opacity-10 rounded-circle p-2">
-                          <i className="bi bi-person-check-fill text-warning fs-5"></i>
+                          <i className="bi bi-geo-alt text-warning fs-5"></i>
                         </div>
                       </div>
                       <div className="flex-grow-1">
@@ -149,8 +149,8 @@ const StoreVisitHistory = ({ storeId, isActive }) => {
                             <div className="d-flex align-items-center gap-2">
                               {visit.visitor?.userId && (
                                 <span className="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-2 py-1">
-                                  <i className="bi bi-person me-1"></i>
-                                  ID: {visit.visitor.userId}
+                                  <i className="bi bi-hash me-1"></i>
+                                  {visit.visitor.userId}
                                 </span>
                               )}
                               {visit.visitor?.socialType && (

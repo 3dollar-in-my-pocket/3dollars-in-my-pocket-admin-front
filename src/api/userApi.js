@@ -7,9 +7,55 @@ import {
 
 export default {
   /**
+   * 최신순 사용자 목록 조회
+   * @param {string} [cursor] - 페이징 커서
+   * @param {number} [size=20] - 페이지 사이즈
+   * @returns {Promise<Object>} 사용자 목록
+   */
+  getUsers: async (cursor = null, size = 20) => {
+    try {
+      const params = { size };
+
+      if (cursor) {
+        params.cursor = cursor;
+      }
+
+      const response = await axiosInstance({
+        method: 'GET',
+        url: '/v1/users',
+        params
+      });
+
+      // API 응답 구조에 맞게 변환
+      if (response.data.ok) {
+        const searchResponse = createUserSearchResponse({
+          users: response.data.data.contents.map(user => ({
+            userId: user.userId,
+            nickname: user.name,
+            socialType: user.socialType,
+            createdAt: user.createdAt
+          })) || [],
+          hasMore: response.data.data.cursor.hasMore || false,
+          nextCursor: response.data.data.cursor.nextCursor || null,
+          totalCount: response.data.data.contents.length || 0
+        });
+
+        return {
+          ok: response.data.ok,
+          data: searchResponse
+        };
+      } else {
+        throw new Error('API 응답 오류');
+      }
+    } catch (error) {
+      return error.response;
+    }
+  },
+
+  /**
    * 사용자 검색
    * @param {Object} searchRequest - 검색 요청 객체
-   * @param {string} searchRequest.type - 검색 타입 ('name' | 'userId')
+   * @param {string} searchRequest.type - 검색 타입 ('name' | 'userId' | 'recent')
    * @param {string} [searchRequest.query] - 이름 검색 시 검색어
    * @param {Array<string>} [searchRequest.userIds] - 유저 ID 검색 시 ID 목록
    * @param {string} [searchRequest.cursor] - 페이징 커서

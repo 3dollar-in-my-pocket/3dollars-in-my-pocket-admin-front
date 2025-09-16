@@ -26,7 +26,8 @@ export const MARKETING_CONSENT = {
 // Search types
 export const SEARCH_TYPES = {
   NAME: 'name',
-  USER_ID: 'userId'
+  USER_ID: 'userId',
+  RECENT: 'recent'
 };
 
 // User search request interface
@@ -224,6 +225,8 @@ export const validateUserSearch = (searchType, searchQuery, userIds) => {
       return '유저 ID를 입력해주세요.';
     }
   }
+
+  // RECENT type doesn't need validation
 
   return null;
 };

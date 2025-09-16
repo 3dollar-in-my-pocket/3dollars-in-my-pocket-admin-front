@@ -102,7 +102,7 @@ const StoreReviewHistory = ({ storeId, isActive }) => {
           <h6 className="mb-0 fw-bold text-dark">리뷰 목록</h6>
           {totalCount > 0 && (
             <span className="badge bg-primary rounded-pill">
-              총 {totalCount.toLocaleString()}개
+              {totalCount.toLocaleString()}개
             </span>
           )}
         </div>
@@ -153,12 +153,7 @@ const StoreReviewHistory = ({ storeId, isActive }) => {
                   }}
                 >
                   <div className="card-body p-4">
-                    <div className="d-flex align-items-start gap-3">
-                      <div className="flex-shrink-0">
-                        <div className="bg-primary bg-opacity-10 rounded-circle p-2">
-                          <i className="bi bi-person-fill text-primary fs-5"></i>
-                        </div>
-                      </div>
+                    <div className="d-flex align-items-start">
                       <div className="flex-grow-1">
                         <div className="d-flex justify-content-between align-items-start mb-2">
                           <div>
@@ -226,10 +221,6 @@ const StoreReviewHistory = ({ storeId, isActive }) => {
                                 </div>
                               ))}
                             </div>
-                            <small className="text-muted">
-                              <i className="bi bi-image me-1"></i>
-                              총 {review.images.length}개의 이미지
-                            </small>
                           </div>
                         )}
 
@@ -237,8 +228,8 @@ const StoreReviewHistory = ({ storeId, isActive }) => {
                           <div className="d-flex align-items-center gap-2">
                             {review.writer?.userId && (
                               <span className="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-2 py-1">
-                                <i className="bi bi-person me-1"></i>
-                                ID: {review.writer.userId}
+                                <i className="bi bi-hash me-1"></i>
+                                {review.writer.userId}
                               </span>
                             )}
                             {review.writer?.socialType && (
@@ -390,8 +381,8 @@ const StoreReviewHistory = ({ storeId, isActive }) => {
                     <label className="form-label fw-bold">작성자 정보</label>
                     <div className="d-flex gap-2 flex-wrap">
                       <span className="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-3 py-2">
-                        <i className="bi bi-person me-1"></i>
-                        ID: {selectedReview.writer?.userId || '없음'}
+                        <i className="bi bi-hash me-1"></i>
+                        {selectedReview.writer?.userId || '없음'}
                       </span>
                       <span className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-3 py-2">
                         <i className="bi bi-share me-1"></i>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import StoreDetailModal from './StoreDetailModal';
 import {
   STORE_SEARCH_TYPES,
@@ -22,6 +22,29 @@ const StoreSearch = () => {
   const [hasMore, setHasMore] = useState(false);
   const [nextCursor, setNextCursor] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
+  const scrollContainerRef = useRef(null);
+
+  // Auto-load recent stores on component mount
+  useEffect(() => {
+    if (searchType === STORE_SEARCH_TYPES.RECENT) {
+      handleSearch(true);
+    }
+  }, [searchType]);
+
+  // Auto-switch to recent stores on page load
+  useEffect(() => {
+    setSearchType(STORE_SEARCH_TYPES.RECENT);
+  }, []);
+
+  // Infinite scroll handler
+  const handleScroll = useCallback((e) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.target;
+    const isScrolledToBottom = scrollHeight - scrollTop <= clientHeight + 100;
+
+    if (isScrolledToBottom && hasMore && !isLoading) {
+      handleLoadMore();
+    }
+  }, [hasMore, isLoading]);
 
   const handleSearch = async (reset = true) => {
     if (searchType === STORE_SEARCH_TYPES.KEYWORD) {
@@ -112,7 +135,7 @@ const StoreSearch = () => {
   };
 
   return (
-    <div className="container-fluid py-4">
+    <div className="container-xl py-4">
       <div className="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
         <h2 className="fw-bold">🏪 가게 검색</h2>
       </div>
@@ -120,8 +143,8 @@ const StoreSearch = () => {
       {/* 검색 영역 */}
       <div className="card border-0 shadow-lg mb-5">
         <div className="card-body p-4">
-          <div className="row g-4">
-            <div className="col-md-3">
+          <div className="row g-3">
+            <div className="col-lg-2 col-md-3">
               <label className="form-label fw-bold text-dark mb-3">
                 <i className="bi bi-funnel-fill me-2 text-primary"></i>
                 검색 방식
@@ -137,7 +160,7 @@ const StoreSearch = () => {
               </select>
             </div>
 
-            <div className="col-md-6">
+            <div className="col-lg-7 col-md-6">
               <label className="form-label fw-bold text-dark mb-3">
                 <i className="bi bi-search me-2 text-success"></i>
                 {searchType === STORE_SEARCH_TYPES.KEYWORD ? '검색어' : '조회'}
@@ -160,7 +183,7 @@ const StoreSearch = () => {
               )}
             </div>
 
-            <div className="col-md-3 d-flex align-items-end">
+            <div className="col-lg-3 col-md-3 d-flex align-items-end">
               <button
                 className="btn btn-lg w-100 border-0 shadow-sm"
                 style={{
@@ -200,7 +223,12 @@ const StoreSearch = () => {
             <h4 className="mb-0 fw-bold text-dark">검색 결과</h4>
           </div>
         </div>
-        <div className="card-body p-0">
+        <div
+          className="card-body p-0"
+          ref={scrollContainerRef}
+          onScroll={handleScroll}
+          style={{ maxHeight: '70vh', overflowY: 'auto' }}
+        >
           {storeList.length === 0 && !isLoading ? (
             <div className="text-center py-5 text-muted">
               <div className="mb-4">
@@ -346,32 +374,13 @@ const StoreSearch = () => {
             </div>
           ) : null}
 
-          {/* 더보기 버튼 */}
-          {hasMore && storeList.length > 0 && (
-            <div className="text-center p-4 bg-light">
-              <button
-                className="btn btn-lg px-4 py-2 border-0 shadow-sm"
-                style={{
-                  background: 'linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%)',
-                  borderRadius: '25px',
-                  color: '#333',
-                  fontWeight: '600'
-                }}
-                onClick={handleLoadMore}
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <span className="spinner-border spinner-border-sm me-2" role="status"></span>
-                    로딩 중...
-                  </>
-                ) : (
-                  <>
-                    <i className="bi bi-arrow-down-circle me-2"></i>
-                    더 많은 결과 보기
-                  </>
-                )}
-              </button>
+          {/* 더 불러올 데이터가 있을 때 로딩 인디케이터 */}
+          {hasMore && storeList.length > 0 && isLoading && (
+            <div className="text-center p-3 bg-light">
+              <div className="spinner-border text-primary" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+              <p className="small text-muted mt-2 mb-0">더 많은 결과를 불러오는 중...</p>
             </div>
           )}
 
