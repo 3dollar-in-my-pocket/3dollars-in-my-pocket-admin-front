@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import userApi from '../api/userApi';
+import storeApi from '../api/storeApi';
 import { toast } from 'react-toastify';
+import {getActivitiesStatusDisplayName, getStoreStatusBadgeClass, getStoreStatusDisplayName} from "../types/store";
 
 const UserReviewHistory = ({ userId, isActive }) => {
   const [reviews, setReviews] = useState([]);
@@ -10,6 +12,7 @@ const UserReviewHistory = ({ userId, isActive }) => {
   const [totalCount, setTotalCount] = useState(0);
   const [selectedReview, setSelectedReview] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const scrollContainerRef = useRef(null);
 
   useEffect(() => {
@@ -85,12 +88,8 @@ const UserReviewHistory = ({ userId, isActive }) => {
 
   const getStatusBadge = (status) => {
     if (!status) return null;
-    const badgeClass = status === 'ACTIVE' ? 'bg-success' :
-                      status === 'DELETED' ? 'bg-danger' :
-                      status === 'AUTO_DELETED' ? 'bg-warning' : 'bg-secondary';
-    const statusText = status === 'ACTIVE' ? '활성화 중' :
-                      status === 'DELETED' ? '삭제됨' :
-                      status === 'AUTO_DELETED' ? '자동 삭제됨' : '알 수 없음';
+    const badgeClass = getStoreStatusBadgeClass(status);
+    const statusText = getStoreStatusDisplayName(status);
     return (
       <span className={`badge ${badgeClass} bg-opacity-10 text-dark border rounded-pill px-2 py-1 small`}>
         {statusText}
@@ -98,14 +97,58 @@ const UserReviewHistory = ({ userId, isActive }) => {
     );
   };
 
-  const getActivitiesStatusBadge = (activitiesStatus) => {
-    if (!activitiesStatus) return null;
-    const badgeClass = activitiesStatus === 'RECENT_ACTIVITY' ? 'bg-info' :
-                      activitiesStatus === 'NO_RECENT_ACTIVITY' ? 'bg-secondary' : 'bg-light';
-    const statusText = activitiesStatus === 'RECENT_ACTIVITY' ? '최근 활동' :
-                      activitiesStatus === 'NO_RECENT_ACTIVITY' ? '활동 없음' : '알 수 없음';
+  const getStoreStatusBadge = (status) => {
+    if (!status) return null;
+    const badgeClass = getStoreStatusBadgeClass(status);
+    const statusText = getStoreStatusDisplayName(status)
     return (
       <span className={`badge ${badgeClass} bg-opacity-10 text-dark border rounded-pill px-2 py-1 small`}>
+        {statusText}
+      </span>
+    );
+  }
+
+  const getActivitiesStatusBadge = (activitiesStatus) => {
+    if (!activitiesStatus) return null;
+    const badgeClass = getStoreStatusBadgeClass(activitiesStatus);
+    const statusText = getActivitiesStatusDisplayName(activitiesStatus);
+    return (
+      <span className={`badge ${badgeClass} bg-opacity-10 text-dark border rounded-pill px-2 py-1 small`}>
+        {statusText}
+      </span>
+    );
+  };
+
+  const getReviewStatusBadge = (status) => {
+    if (!status) return null;
+
+    let badgeClass, statusText, iconClass;
+
+    switch (status) {
+      case 'POSTED':
+        badgeClass = 'bg-success';
+        statusText = '활성화된 리뷰';
+        iconClass = 'bi-check-circle';
+        break;
+      case 'FILTERED':
+        badgeClass = 'bg-warning';
+        statusText = '블라인드된 리뷰';
+        iconClass = 'bi-eye-slash';
+        break;
+      case 'DELETED':
+        badgeClass = 'bg-danger';
+        statusText = '삭제된 리뷰';
+        iconClass = 'bi-x-circle';
+        break;
+      default:
+        badgeClass = 'bg-secondary';
+        statusText = '알 수 없음';
+        iconClass = 'bi-question-circle';
+    }
+
+    return (
+      <span className={`badge ${badgeClass} bg-opacity-10 text-dark border rounded-pill px-2 py-1 small`}>
+        <i className={`bi ${iconClass} me-1`}></i>
         {statusText}
       </span>
     );
@@ -134,6 +177,28 @@ const UserReviewHistory = ({ userId, isActive }) => {
       minute: '2-digit',
       second: '2-digit'
     });
+  };
+
+  // 리뷰 삭제 핸들러
+  const handleDeleteReview = async () => {
+    if (!selectedReview) return;
+    if (!window.confirm('정말로 이 리뷰를 삭제하시겠습니까?')) return;
+    setIsDeleting(true);
+    try {
+      const response = await storeApi.blindStoreReview(selectedReview.reviewId);
+      if (response.status >= 400) {
+        toast.error('리뷰 삭제에 실패했습니다.');
+        setIsDeleting(false);
+        return;
+      }
+      toast.success('리뷰가 성공적으로 삭제되었습니다.');
+      handleCloseModal();
+      fetchReviews(true);
+    } catch (error) {
+      toast.error('리뷰 삭제 중 오류가 발생했습니다.');
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   return (
@@ -203,9 +268,9 @@ const UserReviewHistory = ({ userId, isActive }) => {
                     <div className="flex-grow-1">
                       <div className="d-flex align-items-center gap-2 mb-2">
                         <h6 className="mb-0 fw-bold text-dark">{review.store?.name || '가게 이름 없음'}</h6>
+                        {getReviewStatusBadge(review.status)}
                         {getSalesTypeBadge(review.store?.salesType)}
-                        {getStatusBadge(review.store?.status)}
-                        {getActivitiesStatusBadge(review.store?.activitiesStatus)}
+                        {getStoreStatusBadge(review.store?.status)}
                       </div>
 
                       <div className="d-flex align-items-center gap-2 mb-2">
@@ -315,7 +380,6 @@ const UserReviewHistory = ({ userId, isActive }) => {
           </div>
         )}
       </div>
-
       {/* 리뷰 상세 모달 */}
       {showModal && selectedReview && (
         <div className="modal fade show d-block" tabIndex="-1" style={{backgroundColor: 'rgba(0,0,0,0.5)'}}>
@@ -347,6 +411,19 @@ const UserReviewHistory = ({ userId, isActive }) => {
                       <div>
                         <label className="form-label fw-semibold text-muted mb-1">주소</label>
                         <p className="mb-0 text-dark">{selectedReview?.store?.address?.fullAddress || '주소 정보 없음'}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-md-6">
+                    <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
+                      <div className="bg-info bg-opacity-10 rounded-circle p-2">
+                        <i className="bi bi-shield-check text-info"></i>
+                      </div>
+                      <div>
+                        <label className="form-label fw-semibold text-muted mb-1">리뷰 상태</label>
+                        <div>
+                          {getReviewStatusBadge(selectedReview?.status)}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -420,32 +497,57 @@ const UserReviewHistory = ({ userId, isActive }) => {
                     )) || <span className="text-muted">카테고리 정보 없음</span>}
                   </div>
                 </div>
-              </div>
 
-                <div className="col-12">
-                        <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
-                          <div className="bg-warning bg-opacity-10 rounded-circle p-2">
-                            <i className="bi bi-calendar3 text-warning"></i>
-                          </div>
-                          <div>
-                            <label className="form-label fw-semibold text-muted mb-1">등록일시</label>
-                            <p className="mb-0 fw-bold text-dark">{formatDateTime(selectedReview.createdAt)}</p>
-                          </div>
+                <div className="mt-4">
+                  <h6 className="fw-bold text-dark mb-3">리뷰 등록/수정 일시</h6>
+                  <div className="row g-3">
+                    <div className="col-md-6">
+                      <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
+                        <div className="bg-warning bg-opacity-10 rounded-circle p-2">
+                          <i className="bi bi-calendar3 text-warning"></i>
                         </div>
-                        <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
-                          <div className="bg-warning bg-opacity-10 rounded-circle p-2">
-                            <i className="bi bi-calendar3 text-warning"></i>
-                          </div>
-                          <div>
-                            <label className="form-label fw-semibold text-muted mb-1">수정일시</label>
-                            <p className="mb-0 fw-bold text-dark">{formatDateTime(selectedReview.updatedAt)}</p>
-                          </div>
+                        <div>
+                          <label className="form-label fw-semibold text-muted mb-1">등록일시</label>
+                          <p className="mb-0 fw-bold text-dark">{formatDateTime(selectedReview.createdAt)}</p>
                         </div>
+                      </div>
+                    </div>
+                    <div className="col-md-6">
+                      <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
+                        <div className="bg-info bg-opacity-10 rounded-circle p-2">
+                          <i className="bi bi-clock-history text-info"></i>
+                        </div>
+                        <div>
+                          <label className="form-label fw-semibold text-muted mb-1">수정일시</label>
+                          <p className="mb-0 fw-bold text-dark">{formatDateTime(selectedReview.updatedAt)}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
               <div className="modal-footer border-0 bg-light">
-                <button type="button" className="btn btn-secondary rounded-pill px-4" onClick={handleCloseModal}>
+                <button type="button" className="btn btn-secondary rounded-pill px-4" onClick={handleCloseModal} disabled={isDeleting}>
                   <i className="bi bi-x-lg me-2"></i>
                   닫기
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-danger rounded-pill px-4 ms-2"
+                  onClick={handleDeleteReview}
+                  disabled={isDeleting || selectedReview?.status !== 'POSTED'}
+                >
+                  {isDeleting ? (
+                    <span>
+                      <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                      블라인드 중...
+                    </span>
+                  ) : (
+                    <span>
+                      <i className="bi bi-eye-slash me-2"></i>
+                      리뷰 블라인드
+                    </span>
+                  )}
                 </button>
               </div>
             </div>
@@ -457,3 +559,4 @@ const UserReviewHistory = ({ userId, isActive }) => {
 };
 
 export default UserReviewHistory;
+

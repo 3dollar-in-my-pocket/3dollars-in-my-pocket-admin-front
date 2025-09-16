@@ -261,5 +261,39 @@ export default {
     } catch (error) {
       return error.response;
     }
+  },
+
+  /**
+   * 가게 이미지 삭제
+   * @param {string} imageId - 삭제할 이미지 ID
+   * @returns {Promise<Object>} 삭제 결과
+   */
+  deleteStoreImage: async (imageId) => {
+    try {
+      const response = await axiosInstance({
+        method: 'DELETE',
+        url: `/v1/store-image/${imageId}`
+      });
+      return response;
+    } catch (error) {
+      return error.response;
+    }
+  },
+
+  /**
+   * 리뷰 블라인드
+   * @param {string} reviewId - 삭제할 리뷰 ID
+   * @returns {Promise<Object>} 삭제 결과
+   */
+  blindStoreReview: async (reviewId) => {
+    try {
+      const response = await axiosInstance({
+        method: 'PUT',
+        url: `/v1/store-review/${reviewId}/blind`
+      });
+      return response;
+    } catch (error) {
+      return error.response;
+    }
   }
 };

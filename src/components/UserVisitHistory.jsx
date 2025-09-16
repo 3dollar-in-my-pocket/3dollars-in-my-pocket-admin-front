@@ -1,8 +1,9 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import {useCallback, useEffect, useRef, useState} from 'react';
 import userApi from '../api/userApi';
-import { toast } from 'react-toastify';
+import {toast} from 'react-toastify';
+import {getActivitiesStatusDisplayName, getStoreStatusBadgeClass, getStoreStatusDisplayName} from "../types/store";
 
-const UserVisitHistory = ({ userId, isActive }) => {
+const UserVisitHistory = ({userId, isActive}) => {
   const [visits, setVisits] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
@@ -29,7 +30,7 @@ const UserVisitHistory = ({ userId, isActive }) => {
         return;
       }
 
-      const { contents = [], cursor: newCursor = {} } = response.data || {};
+      const {contents = [], cursor: newCursor = {}} = response.data || {};
 
       if (reset) {
         setVisits(contents);
@@ -54,7 +55,7 @@ const UserVisitHistory = ({ userId, isActive }) => {
   }, [hasMore, isLoading, fetchVisits]);
 
   const handleScroll = useCallback((e) => {
-    const { scrollTop, scrollHeight, clientHeight } = e.target;
+    const {scrollTop, scrollHeight, clientHeight} = e.target;
     const isScrolledToBottom = scrollHeight - scrollTop <= clientHeight + 100;
 
     if (isScrolledToBottom && hasMore && !isLoading) {
@@ -75,7 +76,7 @@ const UserVisitHistory = ({ userId, isActive }) => {
   const getSalesTypeBadge = (salesType) => {
     if (!salesType) return null;
     const badgeClass = salesType.type === 'ROAD' ? 'bg-success' :
-                      salesType.type === 'STORE' ? 'bg-primary' : 'bg-secondary';
+      salesType.type === 'STORE' ? 'bg-primary' : 'bg-secondary';
     return (
       <span className={`badge ${badgeClass} bg-opacity-10 text-dark border rounded-pill px-2 py-1 small`}>
         {salesType.description || salesType.type}
@@ -85,12 +86,8 @@ const UserVisitHistory = ({ userId, isActive }) => {
 
   const getStatusBadge = (status) => {
     if (!status) return null;
-    const badgeClass = status === 'ACTIVE' ? 'bg-success' :
-                      status === 'DELETED' ? 'bg-danger' :
-                      status === 'AUTO_DELETED' ? 'bg-warning' : 'bg-secondary';
-    const statusText = status === 'ACTIVE' ? '활성화 중' :
-                      status === 'DELETED' ? '삭제됨' :
-                      status === 'AUTO_DELETED' ? '자동 삭제됨' : '알 수 없음';
+    const badgeClass = getStoreStatusBadgeClass(status);
+    const statusText = getStoreStatusDisplayName(status);
     return (
       <span className={`badge ${badgeClass} bg-opacity-10 text-dark border rounded-pill px-2 py-1 small`}>
         {statusText}
@@ -100,10 +97,8 @@ const UserVisitHistory = ({ userId, isActive }) => {
 
   const getActivitiesStatusBadge = (activitiesStatus) => {
     if (!activitiesStatus) return null;
-    const badgeClass = activitiesStatus === 'RECENT_ACTIVITY' ? 'bg-info' :
-                      activitiesStatus === 'NO_RECENT_ACTIVITY' ? 'bg-secondary' : 'bg-light';
-    const statusText = activitiesStatus === 'RECENT_ACTIVITY' ? '최근 활동' :
-                      activitiesStatus === 'NO_RECENT_ACTIVITY' ? '활동 없음' : '알 수 없음';
+    const badgeClass = getStoreStatusBadgeClass(activitiesStatus);
+    const statusText = getActivitiesStatusDisplayName(activitiesStatus);
     return (
       <span className={`badge ${badgeClass} bg-opacity-10 text-dark border rounded-pill px-2 py-1 small`}>
         {statusText}
@@ -114,11 +109,11 @@ const UserVisitHistory = ({ userId, isActive }) => {
   const getVisitTypeBadge = (visitType) => {
     if (!visitType) return null;
     const badgeClass = visitType === 'EXISTS' ? 'bg-success' :
-                      visitType === 'NOT_EXISTS' ? 'bg-danger' : 'bg-secondary';
+      visitType === 'NOT_EXISTS' ? 'bg-danger' : 'bg-secondary';
     const statusText = visitType === 'EXISTS' ? '방문 성공' :
-                      visitType === 'NOT_EXISTS' ? '방문 실패' : '알 수 없음';
+      visitType === 'NOT_EXISTS' ? '방문 실패' : '알 수 없음';
     const iconClass = visitType === 'EXISTS' ? 'bi-check-circle' :
-                     visitType === 'NOT_EXISTS' ? 'bi-x-circle' : 'bi-question-circle';
+      visitType === 'NOT_EXISTS' ? 'bi-x-circle' : 'bi-question-circle';
 
     return (
       <span className={`badge ${badgeClass} bg-opacity-10 text-dark border rounded-pill px-2 py-1`}>
@@ -150,7 +145,8 @@ const UserVisitHistory = ({ userId, isActive }) => {
                border: '1px solid rgba(255, 193, 7, 0.2)'
              }}>
           <div className="d-flex align-items-center gap-3">
-            <div className="rounded-circle p-3 shadow-sm" style={{ background: 'linear-gradient(135deg, #ffc107 0%, #fd7e14 100%)' }}>
+            <div className="rounded-circle p-3 shadow-sm"
+                 style={{background: 'linear-gradient(135deg, #ffc107 0%, #fd7e14 100%)'}}>
               <i className="bi bi-geo-alt text-white fs-5"></i>
             </div>
             <div>
@@ -160,7 +156,7 @@ const UserVisitHistory = ({ userId, isActive }) => {
           </div>
           {totalCount > 0 && (
             <div className="d-flex align-items-center gap-2">
-              <span className="badge bg-warning px-3 py-2 rounded-pill shadow-sm" style={{ fontSize: '0.9rem' }}>
+              <span className="badge bg-warning px-3 py-2 rounded-pill shadow-sm" style={{fontSize: '0.9rem'}}>
                 <i className="bi bi-pin-map me-1"></i>
                 총 {totalCount}개
               </span>
@@ -173,11 +169,17 @@ const UserVisitHistory = ({ userId, isActive }) => {
         className="px-4"
         ref={scrollContainerRef}
         onScroll={handleScroll}
-        style={{ maxHeight: '500px', overflowY: 'auto' }}
+        style={{maxHeight: '500px', overflowY: 'auto'}}
       >
         {visits.length === 0 && !isLoading ? (
           <div className="text-center py-5">
-            <div className="bg-light rounded-circle mx-auto mb-4" style={{width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+            <div className="bg-light rounded-circle mx-auto mb-4" style={{
+              width: '80px',
+              height: '80px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
               <i className="bi bi-geo-alt fs-1 text-secondary"></i>
             </div>
             <h5 className="text-dark mb-2">방문 이력이 없습니다</h5>
@@ -236,12 +238,15 @@ const UserVisitHistory = ({ userId, isActive }) => {
 
                       <div className="d-flex flex-wrap gap-1">
                         {visit.store?.categories?.slice(0, 2).map((category, idx) => (
-                          <span key={idx} className="badge bg-secondary bg-opacity-10 text-secondary border rounded-pill px-2 py-1" style={{ fontSize: '0.7rem' }}>
+                          <span key={idx}
+                                className="badge bg-secondary bg-opacity-10 text-secondary border rounded-pill px-2 py-1"
+                                style={{fontSize: '0.7rem'}}>
                             {category?.name || '카테고리'}
                           </span>
                         ))}
                         {visit.store?.categories && visit.store.categories.length > 2 && (
-                          <span className="badge bg-light text-muted border rounded-pill px-2 py-1" style={{ fontSize: '0.7rem' }}>
+                          <span className="badge bg-light text-muted border rounded-pill px-2 py-1"
+                                style={{fontSize: '0.7rem'}}>
                             +{visit.store.categories.length - 2}
                           </span>
                         )}
@@ -293,7 +298,8 @@ const UserVisitHistory = ({ userId, isActive }) => {
         <div className="modal fade show d-block" tabIndex="-1" style={{backgroundColor: 'rgba(0,0,0,0.5)'}}>
           <div className="modal-dialog modal-lg modal-dialog-centered">
             <div className="modal-content border-0 shadow-lg">
-              <div className="modal-header border-0 pb-0" style={{ background: selectedVisit.type === 'EXISTS' ? 'linear-gradient(135deg, #28a745 0%, #20c997 100%)' : 'linear-gradient(135deg, #dc3545 0%, #fd7e14 100%)' }}>
+              <div className="modal-header border-0 pb-0"
+                   style={{background: selectedVisit.type === 'EXISTS' ? 'linear-gradient(135deg, #28a745 0%, #20c997 100%)' : 'linear-gradient(135deg, #dc3545 0%, #fd7e14 100%)'}}>
                 <div className="w-100">
                   <div className="d-flex align-items-center gap-3 text-white">
                     <div>
@@ -327,7 +333,8 @@ const UserVisitHistory = ({ userId, isActive }) => {
                       </div>
                       <div>
                         <label className="form-label fw-semibold text-muted mb-1">가게 평점</label>
-                        <p className="mb-0 text-dark fw-bold">{selectedVisit?.store?.rating ? selectedVisit.store.rating.toFixed(1) : '0.0'}점</p>
+                        <p
+                          className="mb-0 text-dark fw-bold">{selectedVisit?.store?.rating ? selectedVisit.store.rating.toFixed(1) : '0.0'}점</p>
                       </div>
                     </div>
                   </div>
@@ -344,8 +351,10 @@ const UserVisitHistory = ({ userId, isActive }) => {
                   </div>
                   <div className="col-md-6">
                     <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
-                      <div className={`${selectedVisit.type === 'EXISTS' ? 'bg-success' : 'bg-danger'} bg-opacity-10 rounded-circle p-2`}>
-                        <i className={`bi ${selectedVisit.type === 'EXISTS' ? 'bi-check-circle text-success' : 'bi-x-circle text-danger'}`}></i>
+                      <div
+                        className={`${selectedVisit.type === 'EXISTS' ? 'bg-success' : 'bg-danger'} bg-opacity-10 rounded-circle p-2`}>
+                        <i
+                          className={`bi ${selectedVisit.type === 'EXISTS' ? 'bi-check-circle text-success' : 'bi-x-circle text-danger'}`}></i>
                       </div>
                       <div>
                         <label className="form-label fw-semibold text-muted mb-1">방문 결과</label>
@@ -376,7 +385,8 @@ const UserVisitHistory = ({ userId, isActive }) => {
                   <h6 className="fw-bold text-dark mb-3">가게 카테고리</h6>
                   <div className="d-flex flex-wrap gap-2">
                     {selectedVisit?.store?.categories?.map((category, idx) => (
-                      <span key={idx} className="badge bg-primary bg-opacity-10 text-primary border rounded-pill px-3 py-2">
+                      <span key={idx}
+                            className="badge bg-primary bg-opacity-10 text-primary border rounded-pill px-3 py-2">
                         {category?.name || '카테고리'}
                       </span>
                     )) || <span className="text-muted">카테고리 정보 없음</span>}

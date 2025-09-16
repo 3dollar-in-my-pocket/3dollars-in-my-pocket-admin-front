@@ -213,11 +213,11 @@ export const createStoreSearchResponse = ({
 export const getStoreStatusDisplayName = (status) => {
   switch (status) {
     case STORE_STATUS.ACTIVE:
-      return '활성';
+      return '활성된 가게';
     case STORE_STATUS.INACTIVE:
-      return '비활성';
+      return '비활성된 가게';
     case STORE_STATUS.DELETED:
-      return '삭제됨';
+      return '삭제된 가게';
     default:
       return '알 수 없음';
   }
@@ -239,11 +239,11 @@ export const getStoreStatusBadgeClass = (status) => {
 export const getActivitiesStatusDisplayName = (activitiesStatus) => {
   switch (activitiesStatus) {
     case ACTIVITIES_STATUS.RECENT_ACTIVITY:
-      return '최근 활동 있음';
+      return '최근 활동 있는 가게';
     case ACTIVITIES_STATUS.NO_RECENT_ACTIVITY:
-      return '최근 활동 없음';
+      return '최근 활동 없는 가게';
     default:
-      return '최근 활동 알 수 없음';
+      return '최근 활동 알 수 없는 가게';
   }
 };
 

@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import {useCallback, useEffect, useRef, useState} from 'react';
 import userApi from '../api/userApi';
 import storeApi from '../api/storeApi';
-import { toast } from 'react-toastify';
+import {toast} from 'react-toastify';
+import {getActivitiesStatusDisplayName, getStoreStatusBadgeClass, getStoreStatusDisplayName} from "../types/store";
 
-const UserStoreHistory = ({ userId, isActive }) => {
+const UserStoreHistory = ({userId, isActive}) => {
   const [stores, setStores] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
@@ -33,7 +34,7 @@ const UserStoreHistory = ({ userId, isActive }) => {
         return;
       }
 
-      const { contents = [], cursor: newCursor = {} } = response.data || {};
+      const {contents = [], cursor: newCursor = {}} = response.data || {};
 
       if (reset) {
         setStores(contents);
@@ -58,7 +59,7 @@ const UserStoreHistory = ({ userId, isActive }) => {
   }, [hasMore, isLoading, fetchStores]);
 
   const handleScroll = useCallback((e) => {
-    const { scrollTop, scrollHeight, clientHeight } = e.target;
+    const {scrollTop, scrollHeight, clientHeight} = e.target;
     const isScrolledToBottom = scrollHeight - scrollTop <= clientHeight + 100;
 
     if (isScrolledToBottom && hasMore && !isLoading) {
@@ -118,7 +119,7 @@ const UserStoreHistory = ({ userId, isActive }) => {
   const getSalesTypeBadge = (salesType) => {
     if (!salesType) return null;
     const badgeClass = salesType.type === 'ROAD' ? 'bg-success' :
-                      salesType.type === 'STORE' ? 'bg-primary' : 'bg-secondary';
+      salesType.type === 'STORE' ? 'bg-primary' : 'bg-secondary';
     return (
       <span className={`badge ${badgeClass} bg-opacity-10 text-dark border rounded-pill px-2 py-1`}>
         {salesType.description || salesType.type}
@@ -128,12 +129,8 @@ const UserStoreHistory = ({ userId, isActive }) => {
 
   const getStatusBadge = (status) => {
     if (!status) return null;
-    const badgeClass = status === 'ACTIVE' ? 'bg-success' :
-                      status === 'DELETED' ? 'bg-danger' :
-                      status === 'AUTO_DELETED' ? 'bg-warning' : 'bg-secondary';
-    const statusText = status === 'ACTIVE' ? '활성화 중' :
-                      status === 'DELETED' ? '삭제됨' :
-                      status === 'AUTO_DELETED' ? '자동 삭제됨' : '알 수 없음';
+    const badgeClass = getStoreStatusBadgeClass(status);
+    const statusText = getStoreStatusDisplayName(status);
     return (
       <span className={`badge ${badgeClass} bg-opacity-10 text-dark border rounded-pill px-2 py-1`}>
         {statusText}
@@ -143,10 +140,8 @@ const UserStoreHistory = ({ userId, isActive }) => {
 
   const getActivitiesStatusBadge = (activitiesStatus) => {
     if (!activitiesStatus) return null;
-    const badgeClass = activitiesStatus === 'RECENT_ACTIVITY' ? 'bg-info' :
-                      activitiesStatus === 'NO_RECENT_ACTIVITY' ? 'bg-secondary' : 'bg-light';
-    const statusText = activitiesStatus === 'RECENT_ACTIVITY' ? '최근 활동' :
-                      activitiesStatus === 'NO_RECENT_ACTIVITY' ? '활동 없음' : '알 수 없음';
+    const badgeClass = getStoreStatusBadgeClass(activitiesStatus);
+    const statusText = getActivitiesStatusDisplayName(activitiesStatus);
     return (
       <span className={`badge ${badgeClass} bg-opacity-10 text-dark border rounded-pill px-2 py-1 small`}>
         {statusText}
@@ -182,7 +177,7 @@ const UserStoreHistory = ({ userId, isActive }) => {
     return methodMap[method] || method;
   };
 
-     const formatDateTime = (dateString) => {
+  const formatDateTime = (dateString) => {
     if (!dateString) return '없음';
     return new Date(dateString).toLocaleString('ko-KR', {
       year: 'numeric',
@@ -203,7 +198,8 @@ const UserStoreHistory = ({ userId, isActive }) => {
                border: '1px solid rgba(40, 167, 69, 0.1)'
              }}>
           <div className="d-flex align-items-center gap-3">
-            <div className="bg-success rounded-circle p-3 shadow-sm" style={{ background: 'linear-gradient(135deg, #28a745 0%, #20c997 100%)' }}>
+            <div className="bg-success rounded-circle p-3 shadow-sm"
+                 style={{background: 'linear-gradient(135deg, #28a745 0%, #20c997 100%)'}}>
               <i className="bi bi-shop text-white fs-5"></i>
             </div>
             <div>
@@ -213,7 +209,7 @@ const UserStoreHistory = ({ userId, isActive }) => {
           </div>
           {totalCount > 0 && (
             <div className="d-flex align-items-center gap-2">
-              <span className="badge bg-success px-3 py-2 rounded-pill shadow-sm" style={{ fontSize: '0.9rem' }}>
+              <span className="badge bg-success px-3 py-2 rounded-pill shadow-sm" style={{fontSize: '0.9rem'}}>
                 <i className="bi bi-collection me-1"></i>
                 총 {totalCount}개
               </span>
@@ -225,126 +221,132 @@ const UserStoreHistory = ({ userId, isActive }) => {
         className="px-4"
         ref={scrollContainerRef}
         onScroll={handleScroll}
-        style={{ maxHeight: '500px', overflowY: 'auto' }}
+        style={{maxHeight: '500px', overflowY: 'auto'}}
       >
-          {stores.length === 0 && !isLoading ? (
-            <div className="text-center py-5">
-              <div className="bg-light rounded-circle mx-auto mb-4" style={{width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                <i className="bi bi-shop fs-1 text-secondary"></i>
-              </div>
-              <h5 className="text-dark mb-2">제보한 가게가 없습니다</h5>
-              <p className="text-muted">아직 제보한 가게가 없습니다.</p>
+        {stores.length === 0 && !isLoading ? (
+          <div className="text-center py-5">
+            <div className="bg-light rounded-circle mx-auto mb-4" style={{
+              width: '80px',
+              height: '80px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <i className="bi bi-shop fs-1 text-secondary"></i>
             </div>
-          ) : (
-            <div className="row g-3">
-              {stores.map((store, index) => (
-                <div key={store.storeId} className="col-12">
-                  <div
-                    className="card border-0 shadow-sm h-100"
-                    style={{
-                      cursor: 'pointer',
-                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                      borderRadius: '16px',
-                      background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
-                      border: '1px solid rgba(0,0,0,0.05)'
-                    }}
-                    onClick={() => handleStoreClick(store)}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'translateY(-4px)';
-                      e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)';
-                      e.currentTarget.style.borderColor = '#28a745';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-                      e.currentTarget.style.borderColor = 'rgba(0,0,0,0.05)';
-                    }}
-                  >
-                    <div className="card-body p-4">
-                      <div className="d-flex align-items-start justify-content-between">
-                        <div className="flex-grow-1">
-                          <div className="d-flex align-items-center gap-3 mb-3">
-                            <div className="bg-success bg-opacity-10 rounded-circle p-2 shadow-sm">
-                              <i className="bi bi-shop text-success"></i>
-                            </div>
-                            <div className="flex-grow-1">
-                              <h6 className="mb-1 fw-bold text-dark">{store.name || '이름 없음'}</h6>
-                              <div className="d-flex flex-wrap align-items-center gap-2">
-                                {getSalesTypeBadge(store.salesType)}
-                                {getStatusBadge(store.status)}
-                                {getActivitiesStatusBadge(store.activitiesStatus)}
-                              </div>
+            <h5 className="text-dark mb-2">제보한 가게가 없습니다</h5>
+            <p className="text-muted">아직 제보한 가게가 없습니다.</p>
+          </div>
+        ) : (
+          <div className="row g-3">
+            {stores.map((store, index) => (
+              <div key={store.storeId} className="col-12">
+                <div
+                  className="card border-0 shadow-sm h-100"
+                  style={{
+                    cursor: 'pointer',
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    borderRadius: '16px',
+                    background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
+                    border: '1px solid rgba(0,0,0,0.05)'
+                  }}
+                  onClick={() => handleStoreClick(store)}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-4px)';
+                    e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)';
+                    e.currentTarget.style.borderColor = '#28a745';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                    e.currentTarget.style.borderColor = 'rgba(0,0,0,0.05)';
+                  }}
+                >
+                  <div className="card-body p-4">
+                    <div className="d-flex align-items-start justify-content-between">
+                      <div className="flex-grow-1">
+                        <div className="d-flex align-items-center gap-3 mb-3">
+                          <div className="bg-success bg-opacity-10 rounded-circle p-2 shadow-sm">
+                            <i className="bi bi-shop text-success"></i>
+                          </div>
+                          <div className="flex-grow-1">
+                            <h6 className="mb-1 fw-bold text-dark">{store.name || '이름 없음'}</h6>
+                            <div className="d-flex flex-wrap align-items-center gap-2">
+                              {getSalesTypeBadge(store.salesType)}
+                              {getStatusBadge(store.status)}
+                              {getActivitiesStatusBadge(store.activitiesStatus)}
                             </div>
                           </div>
+                        </div>
 
-                          <div className="mb-3">
-                            <div className="d-flex align-items-start gap-2 mb-2">
-                              <i className="bi bi-geo-alt text-muted mt-1"></i>
-                              <span className="text-muted small">{store.address?.fullAddress || '주소 정보 없음'}</span>
-                            </div>
-                            <div className="d-flex align-items-center gap-2">
-                              <i className="bi bi-star-fill text-warning"></i>
-                              <span className="text-dark fw-medium small">
+                        <div className="mb-3">
+                          <div className="d-flex align-items-start gap-2 mb-2">
+                            <i className="bi bi-geo-alt text-muted mt-1"></i>
+                            <span className="text-muted small">{store.address?.fullAddress || '주소 정보 없음'}</span>
+                          </div>
+                          <div className="d-flex align-items-center gap-2">
+                            <i className="bi bi-star-fill text-warning"></i>
+                            <span className="text-dark fw-medium small">
                                 {store.rating ? store.rating.toFixed(1) : '0.0'}점
                               </span>
-                            </div>
                           </div>
+                        </div>
 
-                          <div className="d-flex flex-wrap gap-2 mb-2">
-                            {store.categories?.slice(0, 3).map((category, idx) => (
-                              <span key={idx} className="badge rounded-pill px-3 py-1 small"
-                                    style={{
-                                      background: 'linear-gradient(135deg, #007bff 0%, #6610f2 100%)',
-                                      color: 'white',
-                                      border: 'none'
-                                    }}>
+                        <div className="d-flex flex-wrap gap-2 mb-2">
+                          {store.categories?.slice(0, 3).map((category, idx) => (
+                            <span key={idx} className="badge rounded-pill px-3 py-1 small"
+                                  style={{
+                                    background: 'linear-gradient(135deg, #007bff 0%, #6610f2 100%)',
+                                    color: 'white',
+                                    border: 'none'
+                                  }}>
                                 {category?.name || '카테고리'}
                               </span>
-                            ))}
-                            {store.categories && store.categories.length > 3 && (
-                              <span className="badge bg-light text-dark border rounded-pill px-3 py-1 small">
+                          ))}
+                          {store.categories && store.categories.length > 3 && (
+                            <span className="badge bg-light text-dark border rounded-pill px-3 py-1 small">
                                 +{store.categories.length - 3}개 더
                               </span>
-                            )}
-                          </div>
-
-                          {store.createdAt && (
-                            <div className="d-flex align-items-center gap-2 text-muted small">
-                              <i className="bi bi-clock me-1"></i>
-                              제보일: {formatDateTime(store.createdAt)}
-                            </div>
                           )}
                         </div>
 
-                        <div className="ms-3">
-                          <button
-                            className="btn btn-sm rounded-pill px-3 py-2 shadow-sm"
-                            style={{
-                              background: 'linear-gradient(135deg, #28a745 0%, #20c997 100%)',
-                              color: 'white',
-                              border: 'none',
-                              transition: 'all 0.2s ease'
-                            }}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleStoreClick(store);
-                            }}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.transform = 'scale(1.05)';
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.transform = 'scale(1)';
-                            }}
-                          >
-                            <i className="bi bi-arrow-right"></i>
-                          </button>
-                        </div>
+                        {store.createdAt && (
+                          <div className="d-flex align-items-center gap-2 text-muted small">
+                            <i className="bi bi-clock me-1"></i>
+                            제보일: {formatDateTime(store.createdAt)}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="ms-3">
+                        <button
+                          className="btn btn-sm rounded-pill px-3 py-2 shadow-sm"
+                          style={{
+                            background: 'linear-gradient(135deg, #28a745 0%, #20c997 100%)',
+                            color: 'white',
+                            border: 'none',
+                            transition: 'all 0.2s ease'
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleStoreClick(store);
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'scale(1.05)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'scale(1)';
+                          }}
+                        >
+                          <i className="bi bi-arrow-right"></i>
+                        </button>
                       </div>
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
+          </div>
         )}
 
         {isLoading && stores.length > 0 && (
@@ -373,7 +375,8 @@ const UserStoreHistory = ({ userId, isActive }) => {
         <div className="modal fade show d-block" tabIndex="-1" style={{backgroundColor: 'rgba(0,0,0,0.5)'}}>
           <div className="modal-dialog modal-lg modal-dialog-centered">
             <div className="modal-content border-0 shadow-lg">
-              <div className="modal-header border-0 pb-0" style={{ background: 'linear-gradient(135deg, #28a745 0%, #20c997 100%)' }}>
+              <div className="modal-header border-0 pb-0"
+                   style={{background: 'linear-gradient(135deg, #28a745 0%, #20c997 100%)'}}>
                 <div className="w-100">
                   <div className="d-flex align-items-center gap-3 text-white">
                     <div>
@@ -388,7 +391,8 @@ const UserStoreHistory = ({ userId, isActive }) => {
                 {isLoadingDetail ? (
                   <div className="text-center py-5">
                     <div className="mb-3">
-                      <div className="spinner-border text-success" style={{width: '3rem', height: '3rem'}} role="status">
+                      <div className="spinner-border text-success" style={{width: '3rem', height: '3rem'}}
+                           role="status">
                         <span className="visually-hidden">Loading...</span>
                       </div>
                     </div>
@@ -412,10 +416,16 @@ const UserStoreHistory = ({ userId, isActive }) => {
                               borderRadius: '12px'
                             }}>
                               <div className="card-body p-3 text-center">
-                                <div className="bg-primary bg-opacity-10 rounded-circle mx-auto mb-2" style={{width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                                <div className="bg-primary bg-opacity-10 rounded-circle mx-auto mb-2" style={{
+                                  width: '40px',
+                                  height: '40px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center'
+                                }}>
                                   <i className="bi bi-chat-square-text text-primary"></i>
                                 </div>
-                                <div className="fw-bold text-primary" style={{ fontSize: '1.5rem' }}>
+                                <div className="fw-bold text-primary" style={{fontSize: '1.5rem'}}>
                                   {selectedStoreDetail.metadata.reviewCount?.toLocaleString() || '0'}
                                 </div>
                                 <div className="text-muted small">리뷰</div>
@@ -429,10 +439,16 @@ const UserStoreHistory = ({ userId, isActive }) => {
                               borderRadius: '12px'
                             }}>
                               <div className="card-body p-3 text-center">
-                                <div className="bg-success bg-opacity-10 rounded-circle mx-auto mb-2" style={{width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                                <div className="bg-success bg-opacity-10 rounded-circle mx-auto mb-2" style={{
+                                  width: '40px',
+                                  height: '40px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center'
+                                }}>
                                   <i className="bi bi-heart text-success"></i>
                                 </div>
-                                <div className="fw-bold text-success" style={{ fontSize: '1.5rem' }}>
+                                <div className="fw-bold text-success" style={{fontSize: '1.5rem'}}>
                                   {selectedStoreDetail.metadata.subscriberCount?.toLocaleString() || '0'}
                                 </div>
                                 <div className="text-muted small">구독자</div>
@@ -446,10 +462,16 @@ const UserStoreHistory = ({ userId, isActive }) => {
                               borderRadius: '12px'
                             }}>
                               <div className="card-body p-3 text-center">
-                                <div className="bg-danger bg-opacity-10 rounded-circle mx-auto mb-2" style={{width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                                <div className="bg-danger bg-opacity-10 rounded-circle mx-auto mb-2" style={{
+                                  width: '40px',
+                                  height: '40px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center'
+                                }}>
                                   <i className="bi bi-shield-exclamation text-danger"></i>
                                 </div>
-                                <div className="fw-bold text-danger" style={{ fontSize: '1.5rem' }}>
+                                <div className="fw-bold text-danger" style={{fontSize: '1.5rem'}}>
                                   {selectedStoreDetail.metadata.reportCount?.toLocaleString() || '0'}
                                 </div>
                                 <div className="text-muted small">신고</div>
@@ -479,7 +501,8 @@ const UserStoreHistory = ({ userId, isActive }) => {
                           </div>
                           <div>
                             <label className="form-label fw-semibold text-muted mb-1">평점</label>
-                            <p className="mb-0 text-dark fw-bold">{selectedStoreDetail?.rating ? selectedStoreDetail.rating.toFixed(1) : '0.0'}점</p>
+                            <p
+                              className="mb-0 text-dark fw-bold">{selectedStoreDetail?.rating ? selectedStoreDetail.rating.toFixed(1) : '0.0'}점</p>
                           </div>
                         </div>
                       </div>
@@ -504,7 +527,8 @@ const UserStoreHistory = ({ userId, isActive }) => {
                           </div>
                           <div>
                             <label className="form-label fw-semibold text-muted mb-1">운영 요일</label>
-                            <p className="mb-0 text-dark">{sortDaysByWeekOrder(selectedStoreDetail?.appearanceDays || []).map(day => getDayOfWeekInKorean(day)).join(', ') || '정보 없음'}</p>
+                            <p
+                              className="mb-0 text-dark">{sortDaysByWeekOrder(selectedStoreDetail?.appearanceDays || []).map(day => getDayOfWeekInKorean(day)).join(', ') || '정보 없음'}</p>
                           </div>
                         </div>
                       </div>
@@ -515,7 +539,8 @@ const UserStoreHistory = ({ userId, isActive }) => {
                           </div>
                           <div>
                             <label className="form-label fw-semibold text-muted mb-1">운영 시간</label>
-                            <p className="mb-0 text-dark">{selectedStoreDetail?.openingHours?.startTime || '정보 없음'} - {selectedStoreDetail?.openingHours?.endTime || '정보 없음'}</p>
+                            <p
+                              className="mb-0 text-dark">{selectedStoreDetail?.openingHours?.startTime || '정보 없음'} - {selectedStoreDetail?.openingHours?.endTime || '정보 없음'}</p>
                             {selectedStoreDetail?.openingHours?.extra && (
                               <p className="mb-0 text-muted small">{selectedStoreDetail.openingHours.extra}</p>
                             )}
@@ -528,7 +553,8 @@ const UserStoreHistory = ({ userId, isActive }) => {
                       <h6 className="fw-bold text-dark mb-3">카테고리</h6>
                       <div className="d-flex flex-wrap gap-2">
                         {selectedStoreDetail?.categories?.map((category, idx) => (
-                          <span key={idx} className="badge bg-primary bg-opacity-10 text-primary border rounded-pill px-3 py-2">
+                          <span key={idx}
+                                className="badge bg-primary bg-opacity-10 text-primary border rounded-pill px-3 py-2">
                             {category?.name || '카테고리'}
                           </span>
                         )) || <span className="text-muted">카테고리 정보 없음</span>}
@@ -544,7 +570,8 @@ const UserStoreHistory = ({ userId, isActive }) => {
                               <div className="card border-0 bg-light">
                                 <div className="card-body p-3">
                                   <h6 className="mb-1 fw-bold">{menu?.name || '메뉴명 없음'}</h6>
-                                  <p className="text-primary fw-bold mb-1">{menu?.price ? menu.price.toLocaleString() : '0'}원</p>
+                                  <p
+                                    className="text-primary fw-bold mb-1">{menu?.price ? menu.price.toLocaleString() : '0'}원</p>
                                   <p className="text-muted small mb-0">{menu?.description || '설명 없음'}</p>
                                 </div>
                               </div>
@@ -558,7 +585,8 @@ const UserStoreHistory = ({ userId, isActive }) => {
                       <h6 className="fw-bold text-dark mb-3">결제 방법</h6>
                       <div className="d-flex flex-wrap gap-2">
                         {selectedStoreDetail?.paymentMethods?.map((method, idx) => (
-                          <span key={idx} className="badge bg-secondary bg-opacity-10 text-secondary border rounded-pill px-3 py-2">
+                          <span key={idx}
+                                className="badge bg-secondary bg-opacity-10 text-secondary border rounded-pill px-3 py-2">
                             {getPaymentMethodInKorean(method)}
                           </span>
                         )) || <span className="text-muted">결제 방법 정보 없음</span>}
@@ -596,7 +624,13 @@ const UserStoreHistory = ({ userId, isActive }) => {
                   </div>
                 ) : (
                   <div className="text-center py-5">
-                    <div className="bg-danger bg-opacity-10 rounded-circle mx-auto mb-4" style={{width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                    <div className="bg-danger bg-opacity-10 rounded-circle mx-auto mb-4" style={{
+                      width: '80px',
+                      height: '80px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
                       <i className="bi bi-exclamation-circle fs-1 text-danger"></i>
                     </div>
                     <h5 className="text-dark mb-2">상세 정보를 불러올 수 없습니다</h5>
@@ -605,7 +639,8 @@ const UserStoreHistory = ({ userId, isActive }) => {
                 )}
               </div>
               <div className="modal-footer border-0 bg-light">
-                <button type="button" className="btn btn-secondary rounded-pill px-4" onClick={handleCloseModal} disabled={isDeleting}>
+                <button type="button" className="btn btn-secondary rounded-pill px-4" onClick={handleCloseModal}
+                        disabled={isDeleting}>
                   <i className="bi bi-x-lg me-2"></i>
                   닫기
                 </button>
