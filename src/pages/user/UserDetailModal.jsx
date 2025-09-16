@@ -1,13 +1,12 @@
 import {useEffect, useState} from 'react';
 import {Modal, Tab, Tabs} from 'react-bootstrap';
 import {
-  DEVICE_OS,
   getMarketingConsentBadgeClass,
   getMarketingConsentDisplayName,
-  getOsBadgeClass,
   getSocialTypeBadgeClass,
   getSocialTypeDisplayName
 } from '../../types/user';
+import {DEVICE_OS, getOsBadgeClass,} from '../../types/device';
 import userApi from '../../api/userApi';
 import {toast} from 'react-toastify';
 import ActivityHistory from '../../components/ActivityHistory';

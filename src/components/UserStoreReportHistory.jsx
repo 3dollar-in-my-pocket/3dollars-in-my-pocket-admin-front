@@ -1,5 +1,6 @@
 import {useCallback, useEffect, useState} from 'react';
 import storeReportApi from "../api/storeReportApi";
+import {getReportReasonBadgeClass} from "../types/report";
 
 const UserStoreReportHistory = ({userId, isActive}) => {
   const [reports, setReports] = useState([]);
@@ -22,25 +23,20 @@ const UserStoreReportHistory = ({userId, isActive}) => {
 
   const formatAddress = (address) => {
     if (!address) return '주소 없음';
-    return address.fullAddress || '주소 정보 없음';
+    return address.fullAddress || '주소 없음';
   };
 
   const getReasonBadge = (reason) => {
     if (!reason) return null;
 
-    const reasonTypes = {
-      'NOSTORE': {text: '없어진 가게', color: 'danger'},
-      'WRONGINFO': {text: '잘못된 정보', color: 'warning'},
-      'INAPPROPRIATE': {text: '부적절한 내용', color: 'secondary'}
-    };
-
-    const reasonInfo = reasonTypes[reason.type] || {text: reason.description || '기타', color: 'info'};
+    const reasonText = reason.description
+    const reportBadgeClass = getReportReasonBadgeClass(reason.type)
 
     return (
       <span
-        className={`badge bg-${reasonInfo.color} bg-opacity-10 text-${reasonInfo.color} border border-${reasonInfo.color} rounded-pill px-2 py-1`}
+        className={`badge bg-${reportBadgeClass} bg-opacity-10 text-${reportBadgeClass} border border-${reportBadgeClass} rounded-pill px-2 py-1`}
         style={{fontSize: '0.7rem'}}>
-        {reasonInfo.text}
+        {reasonText}
       </span>
     );
   };

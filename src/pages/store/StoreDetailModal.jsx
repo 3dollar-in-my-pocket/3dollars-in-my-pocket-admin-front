@@ -401,7 +401,7 @@ const StoreDetailModal = ({show, onHide, store}) => {
                                 <i className="bi bi-clock-history text-secondary"></i>
                               </div>
                               <div>
-                                <label className="form-label fw-semibold text-muted mb-1">수정일</label>
+                                <label className="form-label fw-semibold text-muted mb-1">마지막 수정일</label>
                                 <p
                                   className="mb-0 fw-bold text-dark">{formatDateTime(storeDetail?.updatedAt || store.updatedAt)}</p>
                               </div>

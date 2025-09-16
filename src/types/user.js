@@ -9,13 +9,6 @@ export const SOCIAL_TYPES = {
   ANONYMOUS: null
 };
 
-// Device OS types
-export const DEVICE_OS = {
-  IOS: 'IOS',
-  AOS: 'Android', // API에서 AOS로 오는 경우 Android로 매핑
-  UNKNOWN: 'UNKNOWN'
-};
-
 // Marketing consent types
 export const MARKETING_CONSENT = {
   APPROVE: 'APPROVE',
@@ -31,12 +24,12 @@ export const SEARCH_TYPES = {
 
 // User search request interface
 export const createUserSearchRequest = ({
-  type = SEARCH_TYPES.NAME,
-  query = '',
-  userIds = [],
-  cursor = null,
-  size = 20
-}) => ({
+                                          type = SEARCH_TYPES.NAME,
+                                          query = '',
+                                          userIds = [],
+                                          cursor = null,
+                                          size = 20
+                                        }) => ({
   type,
   query: type === SEARCH_TYPES.NAME ? query : undefined,
   userIds: type === SEARCH_TYPES.USER_ID ? userIds : undefined,
@@ -44,66 +37,13 @@ export const createUserSearchRequest = ({
   size
 });
 
-// User basic info interface
-export const createUserBasicInfo = ({
-  userId = '',
-  nickname = '',
-  socialType = null,
-  createdAt = null
-}) => ({
-  userId,
-  nickname,
-  socialType,
-  createdAt
-});
-
-// User detail info interface
-export const createUserDetailInfo = ({
-  userId = '',
-  nickname = '',
-  socialType = null,
-  createdAt = null,
-  lastLoginAt = null,
-  email = null,
-  phoneNumber = null,
-  isActive = true,
-  totalOrders = 0,
-  totalAmount = 0
-}) => ({
-  userId,
-  nickname,
-  socialType,
-  createdAt,
-  lastLoginAt,
-  email,
-  phoneNumber,
-  isActive,
-  totalOrders,
-  totalAmount
-});
-
-// User device info interface
-export const createUserDeviceInfo = ({
-  deviceId = '',
-  os = DEVICE_OS.UNKNOWN,
-  appVersion = '',
-  lastUsedAt = null,
-  isActive = true
-}) => ({
-  deviceId,
-  os,
-  appVersion,
-  lastUsedAt,
-  isActive
-});
-
 // Search response interface
 export const createUserSearchResponse = ({
-  users = [],
-  hasMore = false,
-  nextCursor = null,
-  totalCount = 0
-}) => ({
+                                           users = [],
+                                           hasMore = false,
+                                           nextCursor = null,
+                                           totalCount = 0
+                                         }) => ({
   users,
   hasMore,
   nextCursor,
@@ -112,21 +52,21 @@ export const createUserSearchResponse = ({
 
 // User settings interface
 export const createUserSettings = ({
-  enableActivitiesPush = false,
-  marketingConsent = MARKETING_CONSENT.UNVERIFIED
-}) => ({
+                                     enableActivitiesPush = false,
+                                     marketingConsent = MARKETING_CONSENT.UNVERIFIED
+                                   }) => ({
   enableActivitiesPush,
   marketingConsent
 });
 
 // User detail response interface
 export const createUserDetailResponse = ({
-  user = null,
-  devices = [],
-  representativeMedal = null,
-  medals = [],
-  setting = null
-}) => ({
+                                           user = null,
+                                           devices = [],
+                                           representativeMedal = null,
+                                           medals = [],
+                                           setting = null
+                                         }) => ({
   user,
   devices,
   representativeMedal,
@@ -143,10 +83,12 @@ export const getSocialTypeDisplayName = (socialType) => {
       return 'GOOGLE';
     case SOCIAL_TYPES.APPLE:
       return 'APPLE';
+    case SOCIAL_TYPES.NAVER:
+      return 'NAVER';
     case SOCIAL_TYPES.ANONYMOUS:
       return '익명 가입';
     default:
-      return '익명 가입';
+      return '알 수 없음';
   }
 };
 
@@ -158,16 +100,7 @@ export const getSocialTypeBadgeClass = (socialType) => {
       return 'bg-danger';
     case SOCIAL_TYPES.APPLE:
       return 'bg-dark';
-    default:
-      return 'bg-secondary';
-  }
-};
-
-export const getOsBadgeClass = (os) => {
-  switch (os) {
-    case DEVICE_OS.IOS:
-      return 'bg-primary';
-    case DEVICE_OS.AOS:
+    case SOCIAL_TYPES.NAVER:
       return 'bg-success';
     default:
       return 'bg-secondary';

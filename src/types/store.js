@@ -39,178 +39,6 @@ export const STORE_SEARCH_TYPES = {
   RECENT: 'recent'
 };
 
-// Store search request interface
-export const createStoreSearchRequest = ({
-  keyword = '',
-  cursor = null,
-  size = 20
-}) => ({
-  keyword,
-  cursor,
-  size
-});
-
-// Store basic info interface
-export const createStoreBasicInfo = ({
-  storeId = 0,
-  name = '',
-  rating = 0.0,
-  location = null,
-  address = null,
-  categories = [],
-  status = STORE_STATUS.ACTIVE,
-  activitiesStatus = ACTIVITIES_STATUS.NO_RECENT_ACTIVITY,
-  createdAt = null,
-  updatedAt = null
-}) => ({
-  storeId,
-  name,
-  rating,
-  location,
-  address,
-  categories,
-  status,
-  activitiesStatus,
-  createdAt,
-  updatedAt
-});
-
-// Store owner interface
-export const createStoreOwner = ({
-  writerId = null,
-  writerType = WRITER_TYPE.USER,
-  name = ''
-}) => ({
-  writerId,
-  writerType,
-  name
-});
-
-// Store sales type interface
-export const createStoreSalesType = ({
-  type = SALES_TYPE.ROAD,
-  description = ''
-}) => ({
-  type,
-  description
-});
-
-// Store open status interface
-export const createStoreOpenStatus = ({
-  status = OPEN_STATUS.CLOSED,
-  isOpening = false
-}) => ({
-  status,
-  isOpening
-});
-
-// Store metadata interface
-export const createStoreMetadata = ({
-  reviewCount = 0,
-  subscriberCount = 0,
-  reportCount = 0
-}) => ({
-  reviewCount,
-  subscriberCount,
-  reportCount
-});
-
-// Store menu interface
-export const createStoreMenu = ({
-  name = '',
-  description = '',
-  category = null
-}) => ({
-  name,
-  description,
-  category
-});
-
-// Store detail info interface
-export const createStoreDetailInfo = ({
-  storeId = 0,
-  name = '',
-  owner = null,
-  salesType = null,
-  rating = 0.0,
-  location = null,
-  address = null,
-  categories = [],
-  appearanceDays = [],
-  paymentMethods = [],
-  menus = [],
-  status = STORE_STATUS.ACTIVE,
-  activitiesStatus = ACTIVITIES_STATUS.NO_RECENT_ACTIVITY,
-  openStatus = null,
-  metadata = null,
-  createdAt = null,
-  updatedAt = null
-}) => ({
-  storeId,
-  name,
-  owner,
-  salesType,
-  rating,
-  location,
-  address,
-  categories,
-  appearanceDays,
-  paymentMethods,
-  menus,
-  status,
-  activitiesStatus,
-  openStatus,
-  metadata,
-  createdAt,
-  updatedAt
-});
-
-// Store location interface
-export const createStoreLocation = ({
-  latitude = 0.0,
-  longitude = 0.0
-}) => ({
-  latitude,
-  longitude
-});
-
-// Store address interface
-export const createStoreAddress = ({
-  fullAddress = ''
-}) => ({
-  fullAddress
-});
-
-// Store category interface
-export const createStoreCategory = ({
-  categoryId = '',
-  name = '',
-  description = '',
-  imageUrl = '',
-  classification = null,
-  isNew = false
-}) => ({
-  categoryId,
-  name,
-  description,
-  imageUrl,
-  classification,
-  isNew
-});
-
-// Store search response interface
-export const createStoreSearchResponse = ({
-  stores = [],
-  hasMore = false,
-  nextCursor = null,
-  totalCount = 0
-}) => ({
-  stores,
-  hasMore,
-  nextCursor,
-  totalCount
-});
-
 // Utility functions
 export const getStoreStatusDisplayName = (status) => {
   switch (status) {
@@ -261,8 +89,8 @@ export const getActivitiesStatusBadgeClass = (activitiesStatus) => {
 };
 
 export const formatRating = (rating) => {
-  if (!rating || rating === 0) {
-    return '평점 없음';
+  if (!rating || rating <= 0) {
+    return '아직 리뷰가 없어요';
   }
   return `${rating.toFixed(1)}점`;
 };
@@ -330,17 +158,6 @@ export const getOpenStatusBadgeClass = (openStatus) => {
       return 'bg-secondary';
     default:
       return 'bg-secondary';
-  }
-};
-
-export const getWriterTypeDisplayName = (writerType) => {
-  switch (writerType) {
-    case WRITER_TYPE.USER:
-      return '손님';
-    case WRITER_TYPE.STORE:
-      return '사장님';
-    default:
-      return '알 수 없음';
   }
 };
 

@@ -229,22 +229,6 @@ const StoreReviewHistory = ({storeId, isActive}) => {
                         )}
 
                         <div className="d-flex justify-content-between align-items-center">
-                          <div className="d-flex align-items-center gap-2">
-                            {review.writer?.userId && (
-                              <span
-                                className="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-2 py-1">
-                                <i className="bi bi-hash me-1"></i>
-                                {review.writer.userId}
-                              </span>
-                            )}
-                            {review.writer?.socialType && (
-                              <span
-                                className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-2 py-1">
-                                <i className="bi bi-share me-1"></i>
-                                {review.writer.socialType}
-                              </span>
-                            )}
-                          </div>
                           <button
                             className="btn btn-outline-primary btn-sm rounded-pill px-3"
                             onClick={(e) => {

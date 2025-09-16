@@ -1,17 +1,17 @@
-import { useState, useRef, useCallback } from 'react';
+import {useCallback, useRef, useState} from 'react';
 import StoreDetailModal from './StoreDetailModal';
 import {
-  STORE_SEARCH_TYPES,
-  getStoreStatusDisplayName,
-  getStoreStatusBadgeClass,
-  getActivitiesStatusDisplayName,
-  getActivitiesStatusBadgeClass,
   formatRating,
-  validateStoreSearch,
-  getCategoryIcon
+  getActivitiesStatusBadgeClass,
+  getActivitiesStatusDisplayName,
+  getCategoryIcon,
+  getStoreStatusBadgeClass,
+  getStoreStatusDisplayName,
+  STORE_SEARCH_TYPES,
+  validateStoreSearch
 } from '../../types/store';
 import storeApi from '../../api/storeApi';
-import { toast } from 'react-toastify';
+import {toast} from 'react-toastify';
 
 const StoreSearch = () => {
   const [searchType, setSearchType] = useState(STORE_SEARCH_TYPES.KEYWORD);
@@ -27,7 +27,7 @@ const StoreSearch = () => {
 
   // Infinite scroll handler
   const handleScroll = useCallback((e) => {
-    const { scrollTop, scrollHeight, clientHeight } = e.target;
+    const {scrollTop, scrollHeight, clientHeight} = e.target;
     const isScrolledToBottom = scrollHeight - scrollTop <= clientHeight + 100;
 
     if (isScrolledToBottom && hasMore && !isLoading) {
@@ -67,7 +67,7 @@ const StoreSearch = () => {
         return;
       }
 
-      const { contents, cursor } = response.data;
+      const {contents, cursor} = response.data;
 
       if (reset) {
         setStoreList(contents || []);
@@ -116,7 +116,8 @@ const StoreSearch = () => {
     if (!categories || categories.length === 0) return null;
 
     return categories.slice(0, 3).map((category, index) => (
-      <span key={category.categoryId || index} className="badge bg-info bg-opacity-10 text-info border border-info rounded-pill me-1 mb-1">
+      <span key={category.categoryId || index}
+            className="badge bg-info bg-opacity-10 text-info border border-info rounded-pill me-1 mb-1">
         <i className={`bi ${getCategoryIcon(category.categoryId)} me-1`}></i>
         {category.name}
       </span>
@@ -144,8 +145,8 @@ const StoreSearch = () => {
                 value={searchType}
                 onChange={(e) => setSearchType(e.target.value)}
               >
-                <option value={STORE_SEARCH_TYPES.KEYWORD}>🔍 키워드로 검색</option>
-                <option value={STORE_SEARCH_TYPES.RECENT}>📅 최신순 조회</option>
+                <option value={STORE_SEARCH_TYPES.KEYWORD}>키워드 검색</option>
+                <option value={STORE_SEARCH_TYPES.RECENT}>최신순 조회</option>
               </select>
             </div>
 
@@ -167,7 +168,7 @@ const StoreSearch = () => {
               ) : (
                 <div className="form-control form-control-lg border-0 shadow-sm d-flex align-items-center"
                      style={{backgroundColor: '#f8f9fa', borderRadius: '12px', padding: '12px 16px', color: '#6c757d'}}>
-                  📅 최신순으로 가게를 조회합니다
+                  최신순으로 가게를 조회합니다
                 </div>
               )}
             </div>
@@ -216,12 +217,18 @@ const StoreSearch = () => {
           className="card-body p-0"
           ref={scrollContainerRef}
           onScroll={handleScroll}
-          style={{ maxHeight: '80vh', overflowY: 'auto' }}
+          style={{maxHeight: '80vh', overflowY: 'auto'}}
         >
           {storeList.length === 0 && !isLoading ? (
             <div className="text-center py-5 text-muted">
               <div className="mb-4">
-                <div className="bg-light rounded-circle mx-auto" style={{width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                <div className="bg-light rounded-circle mx-auto" style={{
+                  width: '80px',
+                  height: '80px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
                   <i className="bi bi-shop fs-1 text-secondary"></i>
                 </div>
               </div>
@@ -233,7 +240,7 @@ const StoreSearch = () => {
               {storeList.map((store, index) => {
                 const borderColor = getStoreStatusBadgeClass(store.status).includes('success') ? '#198754' :
                   getStoreStatusBadgeClass(store.status).includes('warning') ? '#ffc107' :
-                  getStoreStatusBadgeClass(store.status).includes('danger') ? '#dc3545' : '#6c757d';
+                    getStoreStatusBadgeClass(store.status).includes('danger') ? '#dc3545' : '#6c757d';
 
                 return (
                   <div key={store.storeId} className="col-lg-4 col-md-6 col-12">
@@ -266,7 +273,7 @@ const StoreSearch = () => {
                             alignItems: 'center',
                             justifyContent: 'center'
                           }}>
-                            <i className="bi bi-shop fs-6" style={{ color: borderColor }}></i>
+                            <i className="bi bi-shop fs-6" style={{color: borderColor}}></i>
                           </div>
                         </div>
                         <div>
@@ -276,18 +283,23 @@ const StoreSearch = () => {
                               textOverflow: 'ellipsis',
                               whiteSpace: 'nowrap'
                             }}>{store.name}</h6>
-                            <span className={`badge rounded-pill ${getStoreStatusBadgeClass(store.status)} bg-opacity-10 text-dark border px-2 py-1 small`}>
-                              <i className="bi bi-circle-fill me-1" style={{ fontSize: '0.4rem' }}></i>
+                            <span
+                              className={`badge rounded-pill ${getStoreStatusBadgeClass(store.status)} bg-opacity-10 text-dark border px-2 py-1 small`}>
+                              <i className="bi bi-circle-fill me-1" style={{fontSize: '0.4rem'}}></i>
                               {getStoreStatusDisplayName(store.status)}
                             </span>
                           </div>
 
                           <div className="d-flex justify-content-center gap-1 mb-2 flex-wrap">
-                            <span className={`badge rounded-pill ${getActivitiesStatusBadgeClass(store.activitiesStatus)} bg-opacity-10 text-dark border px-2 py-1`} style={{fontSize: '0.7rem'}}>
+                            <span
+                              className={`badge rounded-pill ${getActivitiesStatusBadgeClass(store.activitiesStatus)} bg-opacity-10 text-dark border px-2 py-1`}
+                              style={{fontSize: '0.7rem'}}>
                               <i className="bi bi-activity me-1"></i>
                               {getActivitiesStatusDisplayName(store.activitiesStatus)}
                             </span>
-                            <span className="badge bg-warning bg-opacity-10 text-warning border border-warning rounded-pill px-2 py-1" style={{fontSize: '0.7rem'}}>
+                            <span
+                              className="badge bg-warning bg-opacity-10 text-warning border border-warning rounded-pill px-2 py-1"
+                              style={{fontSize: '0.7rem'}}>
                               <i className="bi bi-star-fill me-1"></i>
                               {formatRating(store.rating)}
                             </span>
@@ -322,7 +334,8 @@ const StoreSearch = () => {
                               </span>
                             ))}
                             {store.categories && store.categories.length > 2 && (
-                              <span className="badge bg-light text-muted border rounded-pill px-2 py-1" style={{ fontSize: '0.65rem' }}>
+                              <span className="badge bg-light text-muted border rounded-pill px-2 py-1"
+                                    style={{fontSize: '0.65rem'}}>
                                 +{store.categories.length - 2}
                               </span>
                             )}

@@ -76,7 +76,7 @@ const UserStoreImageHistory = ({userId, isActive}) => {
   const getImageStatusBadge = (status) => {
     if (!status) return null;
     const badgeClass = status === 'ACTIVE' ? 'bg-success' : 'bg-secondary';
-    const statusText = status === 'ACTIVE' ? '활성' : '비활성';
+    const statusText = status === 'ACTIVE' ? '노출중인 이미지' : '삭제된 이미지';
     return (
       <span className={`badge ${badgeClass} bg-opacity-10 text-dark border rounded-pill px-2 py-1`}>
         {statusText}
@@ -86,12 +86,8 @@ const UserStoreImageHistory = ({userId, isActive}) => {
 
   const getStoreStatusBadge = (status) => {
     if (!status) return null;
-    const badgeClass = status === 'ACTIVE' ? 'bg-success' :
-      status === 'DELETED' ? 'bg-danger' :
-        status === 'AUTO_DELETED' ? 'bg-warning' : 'bg-secondary';
-    const statusText = status === 'ACTIVE' ? '운영 중' :
-      status === 'DELETED' ? '삭제됨' :
-        status === 'AUTO_DELETED' ? '자동 삭제됨' : '알 수 없음';
+    const badgeClass = status === 'ACTIVE' ? 'bg-info' : 'bg-warning';
+    const statusText = status === 'ACTIVE' ? '운영 중인 가게' : '삭제된 가게'
     return (
       <span className={`badge ${badgeClass} bg-opacity-10 text-dark border rounded-pill px-2 py-1`}>
         {statusText}
@@ -254,6 +250,7 @@ const UserStoreImageHistory = ({userId, isActive}) => {
                         <h6 className="mb-1 fw-bold text-dark">{storeImage.store?.name || '가게명 없음'}</h6>
                         <div className="d-flex flex-wrap align-items-center gap-1 mb-2">
                           {getSalesTypeBadge(storeImage.store?.salesType)}
+                          {getImageStatusBadge(storeImage.status)}
                           {getStoreStatusBadge(storeImage.store?.status)}
                         </div>
                       </div>

@@ -551,7 +551,7 @@ const UserStoreHistory = ({userId, isActive}) => {
                           <div>
                             <label className="form-label fw-semibold text-muted mb-1">운영 시간</label>
                             <p
-                              className="mb-0 text-dark">{selectedStoreDetail?.openingHours?.startTime || '정보 없음'} - {selectedStoreDetail?.openingHours?.endTime || '정보 없음'}</p>
+                              className="mb-0 text-dark">{selectedStoreDetail?.openingHours?.startTime || '미정'} - {selectedStoreDetail?.openingHours?.endTime || '미정'}</p>
                             {selectedStoreDetail?.openingHours?.extra && (
                               <p className="mb-0 text-muted small">{selectedStoreDetail.openingHours.extra}</p>
                             )}
@@ -582,8 +582,9 @@ const UserStoreHistory = ({userId, isActive}) => {
                                 <div className="card-body p-3">
                                   <h6 className="mb-1 fw-bold">{menu?.name || '메뉴명 없음'}</h6>
                                   <p
-                                    className="text-primary fw-bold mb-1">{menu?.price ? menu.price.toLocaleString() : '0'}원</p>
-                                  <p className="text-muted small mb-0">{menu?.description || '설명 없음'}</p>
+                                    className="text-primary fw-bold mb-1">{menu?.count ? menu.count.toLocaleString() : '0'}개 {menu?.price ? menu.price.toLocaleString() : '0'}원</p>
+                                  <p
+                                    className="text-muted small mb-0">{menu?.description ? menu.description : '설명 없음'}</p>
                                 </div>
                               </div>
                             </div>

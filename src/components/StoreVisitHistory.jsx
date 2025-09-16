@@ -154,22 +154,6 @@ const StoreVisitHistory = ({storeId, isActive}) => {
                             <div className="d-flex align-items-center gap-2 mb-2">
                               {getVisitTypeBadge(visit.visitType)}
                             </div>
-                            <div className="d-flex align-items-center gap-2">
-                              {visit.visitor?.userId && (
-                                <span
-                                  className="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-2 py-1">
-                                  <i className="bi bi-hash me-1"></i>
-                                  {visit.visitor.userId}
-                                </span>
-                              )}
-                              {visit.visitor?.socialType && (
-                                <span
-                                  className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-2 py-1">
-                                  <i className="bi bi-share me-1"></i>
-                                  {visit.visitor.socialType}
-                                </span>
-                              )}
-                            </div>
                           </div>
                           <div className="text-end">
                             <div className="mb-1">

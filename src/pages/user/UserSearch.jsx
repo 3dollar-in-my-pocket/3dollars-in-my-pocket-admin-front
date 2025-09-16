@@ -124,8 +124,8 @@ const UserSearch = () => {
                 value={searchType}
                 onChange={(e) => setSearchType(e.target.value)}
               >
-                <option value={SEARCH_TYPES.NAME}>👤 닉네임 검색</option>
-                <option value={SEARCH_TYPES.USER_ID}>🏷️ 유저 ID로 검색</option>
+                <option value={SEARCH_TYPES.NAME}>닉네임 검색</option>
+                <option value={SEARCH_TYPES.USER_ID}>유저 ID</option>
 
               </select>
             </div>
@@ -140,7 +140,7 @@ const UserSearch = () => {
                   type="text"
                   className="form-control form-control-lg border-0 shadow-sm"
                   style={{backgroundColor: '#f8f9fa', borderRadius: '12px', padding: '12px 16px'}}
-                  placeholder="🔍 닉네임을 입력하세요"
+                  placeholder="닉네임을 입력하세요"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={handleKeyDown}
@@ -150,7 +150,7 @@ const UserSearch = () => {
                   type="text"
                   className="form-control form-control-lg border-0 shadow-sm"
                   style={{backgroundColor: '#f8f9fa', borderRadius: '12px', padding: '12px 16px'}}
-                  placeholder="🏷️ 1, 2, 3"
+                  placeholder="1, 2, 3"
                   value={userIds}
                   onChange={handleUserIdInputChange}
                   onKeyDown={handleKeyDown}

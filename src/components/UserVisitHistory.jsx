@@ -1,6 +1,7 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
 import {toast} from 'react-toastify';
 import {getActivitiesStatusDisplayName, getStoreStatusBadgeClass, getStoreStatusDisplayName} from "../types/store";
+import {getVisitIconClass, getVisitTypeBatchClass, getVisitTypeDisplayName} from "../types/visit";
 import visitApi from "../api/visitApi";
 
 const UserVisitHistory = ({userId, isActive}) => {
@@ -107,12 +108,9 @@ const UserVisitHistory = ({userId, isActive}) => {
 
   const getVisitTypeBadge = (visitType) => {
     if (!visitType) return null;
-    const badgeClass = visitType === 'EXISTS' ? 'bg-success' :
-      visitType === 'NOT_EXISTS' ? 'bg-danger' : 'bg-secondary';
-    const statusText = visitType === 'EXISTS' ? '방문 성공' :
-      visitType === 'NOT_EXISTS' ? '방문 실패' : '알 수 없음';
-    const iconClass = visitType === 'EXISTS' ? 'bi-check-circle' :
-      visitType === 'NOT_EXISTS' ? 'bi-x-circle' : 'bi-question-circle';
+    const badgeClass = getVisitTypeBatchClass(visitType);
+    const statusText = getVisitTypeDisplayName(visitType)
+    const iconClass = getVisitIconClass(visitType);
 
     return (
       <span className={`badge ${badgeClass} bg-opacity-10 text-dark border rounded-pill px-2 py-1`}>
