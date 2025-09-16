@@ -8,7 +8,7 @@ export default {
    * @param {number} [size=20] - 페이지 사이즈
    * @returns {Promise<Object>} 가게 검색 결과
    */
-  searchStores: async (keyword, cursor = null, size = 20) => {
+  searchStores: async (keyword, cursor = null, size = 30) => {
     try {
       const params = {
         keyword,
@@ -44,7 +44,7 @@ export default {
    * @param {number} [size=20] - 페이지 사이즈
    * @returns {Promise<Object>} 가게 목록
    */
-  getStores: async (cursor = null, size = 20) => {
+  getStores: async (cursor = null, size = 30) => {
     try {
       const params = {
         size

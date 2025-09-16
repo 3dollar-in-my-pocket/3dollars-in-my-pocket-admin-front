@@ -240,131 +240,132 @@ const StoreSearch = () => {
               <p className="text-muted">다른 검색어로 시도해보세요.</p>
             </div>
           ) : storeList.length > 0 ? (
-            <div className="row g-0">
+            <div className="row g-3 p-3">
               {storeList.map((store, index) => {
                 const borderColor = getStoreStatusBadgeClass(store.status).includes('success') ? '#198754' :
                   getStoreStatusBadgeClass(store.status).includes('warning') ? '#ffc107' :
                   getStoreStatusBadgeClass(store.status).includes('danger') ? '#dc3545' : '#6c757d';
 
                 return (
-                  <div key={store.storeId} className="col-12">
+                  <div key={store.storeId} className="col-lg-4 col-md-6 col-12">
                     <div
-                      className="store-item p-4 border-bottom bg-white"
+                      className="card border-0 shadow-sm h-100"
                       style={{
                         cursor: 'pointer',
                         transition: 'all 0.2s ease',
-                        borderLeft: `4px solid ${borderColor}`
+                        borderTop: `4px solid ${borderColor}`,
+                        borderRadius: '12px'
                       }}
                       onClick={() => handleStoreClick(store)}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = '#f8f9fa';
-                        e.currentTarget.style.transform = 'translateX(4px)';
+                        e.currentTarget.style.transform = 'translateY(-4px)';
+                        e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)';
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = '#ffffff';
-                        e.currentTarget.style.transform = 'translateX(0)';
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
                       }}
                     >
-                      <div className="d-flex align-items-center justify-content-between">
-                        <div className="d-flex align-items-center gap-3">
-                          <div className="flex-shrink-0">
-                            <div className="rounded-circle p-3 shadow-sm" style={{
-                              background: `linear-gradient(135deg, ${borderColor}20 0%, ${borderColor}10 100%)`,
-                              border: `2px solid ${borderColor}40`
-                            }}>
-                              <i className="bi bi-shop fs-5" style={{ color: borderColor }}></i>
-                            </div>
-                          </div>
-                          <div className="flex-grow-1">
-                            <div className="d-flex align-items-center gap-2 mb-2">
-                              <h6 className="mb-0 fw-bold text-dark">{store.name}</h6>
-                              <span className={`badge rounded-pill ${getStoreStatusBadgeClass(store.status)} bg-opacity-10 text-dark border px-2 py-1`}>
-                                <i className="bi bi-circle-fill me-1" style={{ fontSize: '0.5rem' }}></i>
-                                {getStoreStatusDisplayName(store.status)}
-                              </span>
-                            </div>
-
-                            <div className="d-flex align-items-center gap-2 mb-2">
-                              <span className={`badge rounded-pill ${getActivitiesStatusBadgeClass(store.activitiesStatus)} bg-opacity-10 text-dark border px-2 py-1 small`}>
-                                <i className="bi bi-activity me-1"></i>
-                                {getActivitiesStatusDisplayName(store.activitiesStatus)}
-                              </span>
-                              <span className="badge bg-warning bg-opacity-10 text-warning border border-warning rounded-pill px-2 py-1 small">
-                                <i className="bi bi-star-fill me-1"></i>
-                                {formatRating(store.rating)}
-                              </span>
-                              {store.categories && store.categories.length > 0 && (
-                                <span className="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-2 py-1 small">
-                                  <i className="bi bi-tags me-1"></i>
-                                  {store.categories.length}개 카테고리
-                                </span>
-                              )}
-                            </div>
-
-                            <div className="mb-2">
-                              <div className="text-muted small mb-1">
-                                <i className="bi bi-geo-alt me-1"></i>
-                                {store.address?.fullAddress || '주소 정보 없음'}
-                              </div>
-                              <div className="text-muted small">
-                                <i className="bi bi-calendar3 me-1"></i>
-                                등록일: {formatDateTime(store.createdAt)}
-                                {store.updatedAt !== store.createdAt && (
-                                  <>
-                                    <span className="mx-2">|</span>
-                                    <i className="bi bi-clock-history me-1"></i>
-                                    수정일: {formatDateTime(store.updatedAt)}
-                                  </>
-                                )}
-                              </div>
-                            </div>
-
-                            {/* 카테고리 미리보기 */}
-                            <div className="d-flex flex-wrap gap-1">
-                              {store.categories?.slice(0, 3).map((category, idx) => (
-                                <span key={idx} className="badge rounded-pill px-2 py-1" style={{
-                                  background: 'linear-gradient(135deg, #667eea20 0%, #764ba220 100%)',
-                                  color: '#667eea',
-                                  border: '1px solid #667eea40',
-                                  fontSize: '0.7rem'
-                                }}>
-                                  <i className={`bi ${getCategoryIcon(category.categoryId)} me-1`}></i>
-                                  {category?.name}
-                                </span>
-                              ))}
-                              {store.categories && store.categories.length > 3 && (
-                                <span className="badge bg-light text-muted border rounded-pill px-2 py-1" style={{ fontSize: '0.7rem' }}>
-                                  +{store.categories.length - 3}
-                                </span>
-                              )}
-                            </div>
+                      <div className="card-body p-3">
+                        <div className="text-center mb-3">
+                          <div className="rounded-circle p-2 shadow-sm mx-auto mb-2" style={{
+                            background: `linear-gradient(135deg, ${borderColor}20 0%, ${borderColor}10 100%)`,
+                            border: `2px solid ${borderColor}40`,
+                            width: '50px',
+                            height: '50px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}>
+                            <i className="bi bi-shop fs-6" style={{ color: borderColor }}></i>
                           </div>
                         </div>
-                        <div className="text-end ms-3">
-                          <button
-                            className="btn btn-sm rounded-pill px-3 py-2 shadow-sm"
-                            style={{
-                              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                              color: 'white',
-                              border: 'none',
-                              transition: 'all 0.2s ease'
-                            }}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleStoreClick(store);
-                            }}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.transform = 'scale(1.05)';
-                              e.currentTarget.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.3)';
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.transform = 'scale(1)';
-                              e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-                            }}
-                          >
-                            <i className="bi bi-arrow-right me-1"></i>
-                            상세보기
-                          </button>
+                        <div>
+                          <div className="text-center mb-2">
+                            <h6 className="mb-1 fw-bold text-dark" title={store.name} style={{
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap'
+                            }}>{store.name}</h6>
+                            <span className={`badge rounded-pill ${getStoreStatusBadgeClass(store.status)} bg-opacity-10 text-dark border px-2 py-1 small`}>
+                              <i className="bi bi-circle-fill me-1" style={{ fontSize: '0.4rem' }}></i>
+                              {getStoreStatusDisplayName(store.status)}
+                            </span>
+                          </div>
+
+                          <div className="d-flex justify-content-center gap-1 mb-2 flex-wrap">
+                            <span className={`badge rounded-pill ${getActivitiesStatusBadgeClass(store.activitiesStatus)} bg-opacity-10 text-dark border px-2 py-1`} style={{fontSize: '0.7rem'}}>
+                              <i className="bi bi-activity me-1"></i>
+                              {getActivitiesStatusDisplayName(store.activitiesStatus)}
+                            </span>
+                            <span className="badge bg-warning bg-opacity-10 text-warning border border-warning rounded-pill px-2 py-1" style={{fontSize: '0.7rem'}}>
+                              <i className="bi bi-star-fill me-1"></i>
+                              {formatRating(store.rating)}
+                            </span>
+                          </div>
+
+                          <div className="mb-2 text-center">
+                            <div className="text-muted small mb-1" title={store.address?.fullAddress} style={{
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap'
+                            }}>
+                              <i className="bi bi-geo-alt me-1"></i>
+                              {store.address?.fullAddress || '주소 정보 없음'}
+                            </div>
+                            <div className="text-muted small">
+                              <i className="bi bi-calendar3 me-1"></i>
+                              {formatDateTime(store.createdAt)}
+                            </div>
+                          </div>
+
+                          {/* 카테고리 미리보기 */}
+                          <div className="d-flex justify-content-center flex-wrap gap-1 mb-3">
+                            {store.categories?.slice(0, 2).map((category, idx) => (
+                              <span key={idx} className="badge rounded-pill px-2 py-1" style={{
+                                background: 'linear-gradient(135deg, #667eea20 0%, #764ba220 100%)',
+                                color: '#667eea',
+                                border: '1px solid #667eea40',
+                                fontSize: '0.65rem'
+                              }}>
+                                <i className={`bi ${getCategoryIcon(category.categoryId)} me-1`}></i>
+                                {category?.name}
+                              </span>
+                            ))}
+                            {store.categories && store.categories.length > 2 && (
+                              <span className="badge bg-light text-muted border rounded-pill px-2 py-1" style={{ fontSize: '0.65rem' }}>
+                                +{store.categories.length - 2}
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="text-center">
+                            <button
+                              className="btn btn-sm rounded-pill px-3 py-2 shadow-sm"
+                              style={{
+                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                color: 'white',
+                                border: 'none',
+                                transition: 'all 0.2s ease',
+                                fontSize: '0.8rem'
+                              }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleStoreClick(store);
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.transform = 'scale(1.05)';
+                                e.currentTarget.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.3)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = 'scale(1)';
+                                e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                              }}
+                            >
+                              <i className="bi bi-eye me-1"></i>
+                              상세보기
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>

@@ -74,7 +74,7 @@ const UserSearch = () => {
           query: searchType === SEARCH_TYPES.NAME ? searchQuery : undefined,
           userIds: searchType === SEARCH_TYPES.USER_ID ? formatUserIds(userIds) : undefined,
           cursor: reset ? null : nextCursor,
-          size: 20
+          size: 30
         });
 
         response = await userApi.searchUsers(searchRequest);
@@ -122,7 +122,7 @@ const UserSearch = () => {
     setUserIds(e.target.value);
   };
 
-  const handleKeyPress = (e) => {
+  const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
       handleSearch(true);
     }
@@ -152,6 +152,7 @@ const UserSearch = () => {
                 <option value={SEARCH_TYPES.RECENT}>📅 최신순 조회</option>
                 <option value={SEARCH_TYPES.NAME}>👤 닉네임 검색</option>
                 <option value={SEARCH_TYPES.USER_ID}>🏷️ 유저 ID로 검색</option>
+
               </select>
             </div>
 
@@ -169,7 +170,7 @@ const UserSearch = () => {
                   placeholder="🔍 닉네임을 입력하세요"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyPress={handleKeyPress}
+                  onKeyDown={handleKeyDown}
                 />
               ) : searchType === SEARCH_TYPES.USER_ID ? (
                 <input
@@ -179,7 +180,7 @@ const UserSearch = () => {
                   placeholder="🏷️ 1, 2, 3"
                   value={userIds}
                   onChange={handleUserIdInputChange}
-                  onKeyPress={handleKeyPress}
+                  onKeyDown={handleKeyDown}
                 />
               ) : (
                 <div className="form-control form-control-lg border-0 shadow-sm d-flex align-items-center"
@@ -246,61 +247,101 @@ const UserSearch = () => {
               <p className="text-muted">다른 검색어로 시도해보세요.</p>
             </div>
           ) : userList.length > 0 ? (
-            <div className="row g-0">
-              {userList.map((user, index) => {
+            <div className="row g-3 p-3">
+              {userList.map((user) => {
                 const borderColor = getSocialTypeBadgeClass(user.socialType).includes('warning') ? '#ffc107' :
                   getSocialTypeBadgeClass(user.socialType).includes('danger') ? '#dc3545' :
                   getSocialTypeBadgeClass(user.socialType).includes('dark') ? '#212529' : '#6c757d';
 
                 return (
-                  <div key={user.userId} className="col-12">
+                  <div key={user.userId} className="col-lg-3 col-md-4 col-sm-6 col-12">
                     <div
-                      className="user-item p-4 border-bottom bg-white"
+                      className="card border-0 shadow-sm h-100"
                       style={{
                         cursor: 'pointer',
                         transition: 'all 0.2s ease',
-                        borderLeft: `4px solid ${borderColor}`
+                        borderTop: `4px solid ${borderColor}`,
+                        borderRadius: '12px'
                       }}
                       onClick={() => handleUserClick(user)}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = '#f8f9fa';
-                        e.currentTarget.style.transform = 'translateX(4px)';
+                        e.currentTarget.style.transform = 'translateY(-4px)';
+                        e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)';
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = '#ffffff';
-                        e.currentTarget.style.transform = 'translateX(0)';
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
                       }}
                     >
-                      <div className="d-flex align-items-center justify-content-between">
-                        <div className="d-flex align-items-center gap-3">
-                          <div>
-                            <div className="d-flex align-items-center gap-2 mb-1">
-                              <h6 className="mb-0 fw-bold text-dark">{user.nickname}</h6>
-                              <span className={`badge rounded-pill ${getSocialTypeBadgeClass(user.socialType)} bg-opacity-10 text-dark border`}>
-                                {getSocialTypeDisplayName(user.socialType)}
-                              </span>
-                            </div>
-                            <div className="text-muted small">
+                      <div className="card-body p-3">
+                        <div className="text-center mb-3">
+                          <div className="rounded-circle p-2 shadow-sm mx-auto mb-2" style={{
+                            background: `linear-gradient(135deg, ${borderColor}20 0%, ${borderColor}10 100%)`,
+                            border: `2px solid ${borderColor}40`,
+                            width: '50px',
+                            height: '50px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}>
+                            <i className="bi bi-person fs-6" style={{ color: borderColor }}></i>
+                          </div>
+                        </div>
+
+                        <div>
+                          <div className="text-center mb-2">
+                            <h6 className="mb-1 fw-bold text-dark" title={user.nickname} style={{
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap'
+                            }}>{user.nickname}</h6>
+                            <span className={`badge rounded-pill ${getSocialTypeBadgeClass(user.socialType)} bg-opacity-10 text-dark border px-2 py-1 small`}>
+                              {getSocialTypeDisplayName(user.socialType)}
+                            </span>
+                          </div>
+
+                          <div className="text-center mb-2">
+                            <div className="text-muted small mb-1" title={user.userId} style={{
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap'
+                            }}>
                               <i className="bi bi-hash me-1"></i>
-                              ID: {user.userId}
+                              {user.userId}
                             </div>
                             <div className="text-muted small">
                               <i className="bi bi-calendar3 me-1"></i>
-                              가입일: {new Date(user.createdAt).toLocaleDateString('ko-KR')}
+                              {new Date(user.createdAt).toLocaleDateString('ko-KR')}
                             </div>
                           </div>
-                        </div>
-                        <div className="text-end">
-                          <button
-                            className="btn btn-outline-primary btn-sm rounded-pill px-3"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleUserClick(user);
-                            }}
-                          >
-                            <i className="bi bi-eye me-1"></i>
-                            상세보기
-                          </button>
+
+                          <div className="text-center">
+                            <button
+                              className="btn btn-sm rounded-pill px-3 py-2 shadow-sm"
+                              style={{
+                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                color: 'white',
+                                border: 'none',
+                                transition: 'all 0.2s ease',
+                                fontSize: '0.8rem'
+                              }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleUserClick(user);
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.transform = 'scale(1.05)';
+                                e.currentTarget.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.3)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = 'scale(1)';
+                                e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                              }}
+                            >
+                              <i className="bi bi-eye me-1"></i>
+                              상세보기
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>

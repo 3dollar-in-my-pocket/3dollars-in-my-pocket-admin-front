@@ -12,7 +12,7 @@ export default {
    * @param {number} [size=20] - 페이지 사이즈
    * @returns {Promise<Object>} 사용자 목록
    */
-  getUsers: async (cursor = null, size = 20) => {
+  getUsers: async (cursor = null, size = 30) => {
     try {
       const params = { size };
 
@@ -65,6 +65,7 @@ export default {
   searchUsers: async (searchRequest) => {
     try {
       const params = {};
+
 
       // 이름으로 검색하는 경우
       if (searchRequest.type === 'name' && searchRequest.query) {
