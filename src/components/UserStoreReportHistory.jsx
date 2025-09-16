@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
-import userApi from '../api/userApi';
-import { toast } from 'react-toastify';
+import {useCallback, useEffect, useState} from 'react';
+import storeReportApi from "../api/storeReportApi";
+import {getReportReasonBadgeClass} from "../types/report";
 
-const UserStoreReportHistory = ({ userId, isActive }) => {
+const UserStoreReportHistory = ({userId, isActive}) => {
   const [reports, setReports] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -23,23 +23,20 @@ const UserStoreReportHistory = ({ userId, isActive }) => {
 
   const formatAddress = (address) => {
     if (!address) return '주소 없음';
-    return address.fullAddress || '주소 정보 없음';
+    return address.fullAddress || '주소 없음';
   };
 
   const getReasonBadge = (reason) => {
     if (!reason) return null;
 
-    const reasonTypes = {
-      'NOSTORE': { text: '없어진 가게', color: 'danger' },
-      'WRONGINFO': { text: '잘못된 정보', color: 'warning' },
-      'INAPPROPRIATE': { text: '부적절한 내용', color: 'secondary' }
-    };
-
-    const reasonInfo = reasonTypes[reason.type] || { text: reason.description || '기타', color: 'info' };
+    const reasonText = reason.description
+    const reportBadgeClass = getReportReasonBadgeClass(reason.type)
 
     return (
-      <span className={`badge bg-${reasonInfo.color} bg-opacity-10 text-${reasonInfo.color} border border-${reasonInfo.color} rounded-pill px-2 py-1`} style={{ fontSize: '0.7rem' }}>
-        {reasonInfo.text}
+      <span
+        className={`badge bg-${reportBadgeClass} bg-opacity-10 text-${reportBadgeClass} border border-${reportBadgeClass} rounded-pill px-2 py-1`}
+        style={{fontSize: '0.7rem'}}>
+        {reasonText}
       </span>
     );
   };
@@ -53,24 +50,14 @@ const UserStoreReportHistory = ({ userId, isActive }) => {
     setError(null);
 
     try {
-      const response = await userApi.getUserStoreReports(
+      const response = await storeReportApi.getUserStoreReports(
         userId,
         isLoadMore ? cursor : null,
         20
       );
 
       if (!response.ok) {
-        if (response.status >= 400) {
-          const errorMessage = response.status === 404
-            ? '신고 이력 정보를 찾을 수 없습니다.'
-            : response.status === 403
-            ? '신고 이력 정보에 대한 접근 권한이 없습니다.'
-            : `서버 오류가 발생했습니다. (${response.status})`;
-
-          toast.error(errorMessage);
-          setError(errorMessage);
-          return;
-        }
+        return;
       }
 
       const data = response.data;
@@ -84,12 +71,6 @@ const UserStoreReportHistory = ({ userId, isActive }) => {
 
       setCursor(data.cursor?.nextCursor || null);
       setHasMore(data.cursor?.hasMore || false);
-    } catch (error) {
-      console.error('신고 이력 조회 실패:', error);
-      const errorMessage = error.response?.status
-        ? `서버 오류가 발생했습니다. (${error.response.status})`
-        : '네트워크 오류가 발생했습니다. 인터넷 연결을 확인해주세요.';
-      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -109,7 +90,8 @@ const UserStoreReportHistory = ({ userId, isActive }) => {
     return (
       <div className="text-center py-5">
         <div className="mb-4">
-          <div className="bg-danger bg-opacity-10 rounded-circle mx-auto" style={{width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+          <div className="bg-danger bg-opacity-10 rounded-circle mx-auto"
+               style={{width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
             <i className="bi bi-exclamation-circle fs-1 text-danger"></i>
           </div>
         </div>
@@ -148,7 +130,8 @@ const UserStoreReportHistory = ({ userId, isActive }) => {
   if (reports.length === 0) {
     return (
       <div className="text-center py-5">
-        <div className="bg-light rounded-circle mx-auto mb-4" style={{width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+        <div className="bg-light rounded-circle mx-auto mb-4"
+             style={{width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
           <i className="bi bi-shield-exclamation fs-1 text-secondary"></i>
         </div>
         <h5 className="text-dark mb-2">신고한 가게가 없습니다</h5>
@@ -218,12 +201,15 @@ const UserStoreReportHistory = ({ userId, isActive }) => {
                             </span>
                             <div className="d-flex gap-1">
                               {report.store.categories.slice(0, 3).map((category, catIndex) => (
-                                <span key={catIndex} className="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-2 py-1" style={{ fontSize: '0.7rem' }}>
+                                <span key={catIndex}
+                                      className="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-2 py-1"
+                                      style={{fontSize: '0.7rem'}}>
                                   {category.name}
                                 </span>
                               ))}
                               {report.store.categories.length > 3 && (
-                                <span className="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-2 py-1" style={{ fontSize: '0.7rem' }}>
+                                <span className="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-2 py-1"
+                                      style={{fontSize: '0.7rem'}}>
                                   +{report.store.categories.length - 3}개
                                 </span>
                               )}

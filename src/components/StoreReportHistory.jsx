@@ -1,8 +1,9 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import storeApi from '../api/storeApi';
-import { toast } from 'react-toastify';
+import {useCallback, useEffect, useRef, useState} from 'react';
+import {toast} from 'react-toastify';
+import storeReportApi from "../api/storeReportApi";
+import {getReportReasonBadgeClass} from "../types/report";
 
-const StoreReportHistory = ({ storeId, isActive }) => {
+const StoreReportHistory = ({storeId, isActive}) => {
   const [reports, setReports] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
@@ -23,13 +24,13 @@ const StoreReportHistory = ({ storeId, isActive }) => {
 
     setIsLoading(true);
     try {
-      const response = await storeApi.getStoreReports(storeId, reset ? null : cursor, 20);
+      const response = await storeReportApi.getStoreReports(storeId, reset ? null : cursor, 20);
       if (!response?.ok) {
         toast.error('신고 이력을 불러오는 중 오류가 발생했습니다.');
         return;
       }
 
-      const { contents = [], cursor: newCursor = {} } = response.data || {};
+      const {contents = [], cursor: newCursor = {}} = response.data || {};
 
       if (reset) {
         setReports(contents);
@@ -64,40 +65,14 @@ const StoreReportHistory = ({ storeId, isActive }) => {
     });
   };
 
-  const getReportTypeBadge = (type) => {
-    const typeMap = {
-      'INAPPROPRIATE_CONTENT': { text: '부적절한 내용', class: 'bg-danger' },
-      'WRONG_INFORMATION': { text: '잘못된 정보', class: 'bg-warning' },
-      'COPYRIGHT_VIOLATION': { text: '저작권 침해', class: 'bg-info' },
-      'SPAM': { text: '스팸', class: 'bg-secondary' },
-      'NOSTORE': { text: '없어진 가게', class: 'bg-warning' },
-      'OTHER': { text: '기타', class: 'bg-dark' }
-    };
-
-    const reportType = typeMap[type] || { text: type || '알 수 없음', class: 'bg-secondary' };
+  const getReportTypeBadge = (reason) => {
+    const reasonText = reason.description
+    const reportBadgeClass = getReportReasonBadgeClass(reason.type)
 
     return (
-      <span className={`badge ${reportType.class} bg-opacity-10 text-dark border rounded-pill px-2 py-1`}>
+      <span className={`badge ${reportBadgeClass} bg-opacity-10 text-dark border rounded-pill px-2 py-1`}>
         <i className="bi bi-flag me-1"></i>
-        {reportType.text}
-      </span>
-    );
-  };
-
-  const getStatusBadge = (status) => {
-    const statusMap = {
-      'PENDING': { text: '대기중', class: 'bg-warning', icon: 'bi-clock' },
-      'PROCESSING': { text: '처리중', class: 'bg-info', icon: 'bi-gear' },
-      'COMPLETED': { text: '완료', class: 'bg-success', icon: 'bi-check-circle' },
-      'REJECTED': { text: '거부', class: 'bg-danger', icon: 'bi-x-circle' }
-    };
-
-    const reportStatus = statusMap[status] || { text: status || '알 수 없음', class: 'bg-secondary', icon: 'bi-question-circle' };
-
-    return (
-      <span className={`badge ${reportStatus.class} bg-opacity-10 text-dark border rounded-pill px-2 py-1`}>
-        <i className={`bi ${reportStatus.icon} me-1`}></i>
-        {reportStatus.text}
+        {reasonText}
       </span>
     );
   };
@@ -141,11 +116,17 @@ const StoreReportHistory = ({ storeId, isActive }) => {
       <div
         ref={scrollContainerRef}
         className="report-container"
-        style={{ maxHeight: '600px', overflowY: 'auto' }}
+        style={{maxHeight: '600px', overflowY: 'auto'}}
       >
         {reports.length === 0 && !isLoading ? (
           <div className="text-center py-5">
-            <div className="bg-light rounded-circle mx-auto mb-4" style={{width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+            <div className="bg-light rounded-circle mx-auto mb-4" style={{
+              width: '80px',
+              height: '80px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
               <i className="bi bi-shield-exclamation fs-1 text-secondary"></i>
             </div>
             <h5 className="text-dark mb-2">신고 이력이 없습니다</h5>
@@ -186,15 +167,8 @@ const StoreReportHistory = ({ storeId, isActive }) => {
                               {report.reporter?.name || '익명 신고자'}
                             </h6>
                             <div className="d-flex align-items-center gap-2 mb-2">
-                              {getReportTypeBadge(report.reason?.type)}
-                              {getStatusBadge(report.status)}
+                              {getReportTypeBadge(report.reason)}
                             </div>
-                            {report.reporter?.userId && (
-                              <span className="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-2 py-1">
-                                <i className="bi bi-hash me-1"></i>
-                                신고자 ID: {report.reporter.userId}
-                              </span>
-                            )}
                           </div>
                           <div className="text-end">
                             <span className="text-muted small">
@@ -204,30 +178,18 @@ const StoreReportHistory = ({ storeId, isActive }) => {
                           </div>
                         </div>
 
-                        {report.reason?.description && (
-                          <div className="mb-3">
-                            <label className="form-label fw-semibold text-muted mb-1 small">신고 사유</label>
-                            <p className="text-dark mb-0" style={{ lineHeight: '1.5', fontSize: '0.9rem' }}>
-                              {report.reason.description.length > 100
-                                ? `${report.reason.description.substring(0, 100)}...`
-                                : report.reason.description
-                              }
-                            </p>
-                          </div>
-                        )}
-
                         <div className="d-flex justify-content-between align-items-center">
                           <div className="d-flex align-items-center gap-2">
                             {report.priority && (
                               <span className={`badge rounded-pill px-2 py-1 ${
                                 report.priority === 'HIGH' ? 'bg-danger bg-opacity-10 text-danger border border-danger' :
-                                report.priority === 'MEDIUM' ? 'bg-warning bg-opacity-10 text-warning border border-warning' :
-                                'bg-secondary bg-opacity-10 text-secondary border border-secondary'
+                                  report.priority === 'MEDIUM' ? 'bg-warning bg-opacity-10 text-warning border border-warning' :
+                                    'bg-secondary bg-opacity-10 text-secondary border border-secondary'
                               }`}>
                                 <i className={`bi ${
                                   report.priority === 'HIGH' ? 'bi-exclamation-triangle' :
-                                  report.priority === 'MEDIUM' ? 'bi-exclamation-circle' :
-                                  'bi-info-circle'
+                                    report.priority === 'MEDIUM' ? 'bi-exclamation-circle' :
+                                      'bi-info-circle'
                                 } me-1`}></i>
                                 {report.priority === 'HIGH' ? '높음' : report.priority === 'MEDIUM' ? '보통' : '낮음'}
                               </span>
@@ -293,7 +255,7 @@ const StoreReportHistory = ({ storeId, isActive }) => {
       {showModal && selectedReport && (
         <div
           className="modal fade show"
-          style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}
+          style={{display: 'block', backgroundColor: 'rgba(0,0,0,0.5)'}}
           onClick={handleCloseModal}
         >
           <div className="modal-dialog modal-lg modal-dialog-centered" onClick={(e) => e.stopPropagation()}>
@@ -312,12 +274,12 @@ const StoreReportHistory = ({ storeId, isActive }) => {
               <div className="modal-body">
                 <div className="row g-3">
                   <div className="col-md-6">
-                    <label className="form-label fw-bold">신고자</label>
-                    <p className="form-control-plaintext">{selectedReport.reporter?.name || '익명 신고자'}</p>
+                    <label className="form-label fw-bold">신고자명</label>
+                    <p className="form-control-plaintext">{selectedReport.reporter?.name || '익명'}</p>
                   </div>
                   <div className="col-md-6">
-                    <label className="form-label fw-bold">신고 유형</label>
-                    <div>{getReportTypeBadge(selectedReport.reason?.type)}</div>
+                    <label className="form-label fw-bold">신고 사유</label>
+                    <p className="form-control-plaintext">{selectedReport.reason?.description || '알 수 없음'}</p>
                   </div>
                   <div className="col-md-6">
                     <label className="form-label fw-bold">신고 일시</label>
@@ -329,14 +291,6 @@ const StoreReportHistory = ({ storeId, isActive }) => {
                       <p className="mb-0">{selectedReport.reason?.description || '사유가 제공되지 않았습니다.'}</p>
                     </div>
                   </div>
-                  {selectedReport.adminResponse && (
-                    <div className="col-12">
-                      <label className="form-label fw-bold text-primary">관리자 응답</label>
-                      <div className="border rounded p-3 bg-primary bg-opacity-10">
-                        <p className="mb-0">{selectedReport.adminResponse}</p>
-                      </div>
-                    </div>
-                  )}
                 </div>
               </div>
               <div className="modal-footer">

@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import storeApi from '../api/storeApi';
-import { toast } from 'react-toastify';
+import {useCallback, useEffect, useRef, useState} from 'react';
+import {toast} from 'react-toastify';
+import reviewApi from "../api/reviewApi";
 
-const StoreReviewHistory = ({ storeId, isActive }) => {
+const StoreReviewHistory = ({storeId, isActive}) => {
   const [reviews, setReviews] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
@@ -23,13 +23,13 @@ const StoreReviewHistory = ({ storeId, isActive }) => {
 
     setIsLoading(true);
     try {
-      const response = await storeApi.getStoreReviews(storeId, reset ? null : cursor, 20);
+      const response = await reviewApi.getStoreReviews(storeId, reset ? null : cursor, 20);
       if (!response?.ok) {
         toast.error('리뷰 목록을 불러오는 중 오류가 발생했습니다.');
         return;
       }
 
-      const { contents = [], cursor: newCursor = {} } = response.data || {};
+      const {contents = [], cursor: newCursor = {}} = response.data || {};
 
       if (reset) {
         setReviews(contents);
@@ -119,11 +119,17 @@ const StoreReviewHistory = ({ storeId, isActive }) => {
       <div
         ref={scrollContainerRef}
         className="review-container"
-        style={{ maxHeight: '600px', overflowY: 'auto' }}
+        style={{maxHeight: '600px', overflowY: 'auto'}}
       >
         {reviews.length === 0 && !isLoading ? (
           <div className="text-center py-5">
-            <div className="bg-light rounded-circle mx-auto mb-4" style={{width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+            <div className="bg-light rounded-circle mx-auto mb-4" style={{
+              width: '80px',
+              height: '80px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
               <i className="bi bi-chat-square-text fs-1 text-secondary"></i>
             </div>
             <h5 className="text-dark mb-2">등록된 리뷰가 없습니다</h5>
@@ -176,7 +182,7 @@ const StoreReviewHistory = ({ storeId, isActive }) => {
                         </div>
 
                         {review.contents && (
-                          <p className="text-dark mb-3" style={{ lineHeight: '1.6' }}>
+                          <p className="text-dark mb-3" style={{lineHeight: '1.6'}}>
                             {review.contents.length > 100
                               ? `${review.contents.substring(0, 100)}...`
                               : review.contents
@@ -211,7 +217,7 @@ const StoreReviewHistory = ({ storeId, isActive }) => {
                                   {imgIndex === 2 && review.images.length > 3 && (
                                     <div
                                       className="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-dark bg-opacity-75 rounded text-white"
-                                      style={{ fontSize: '0.8rem' }}
+                                      style={{fontSize: '0.8rem'}}
                                     >
                                       +{review.images.length - 3}
                                     </div>
@@ -223,20 +229,6 @@ const StoreReviewHistory = ({ storeId, isActive }) => {
                         )}
 
                         <div className="d-flex justify-content-between align-items-center">
-                          <div className="d-flex align-items-center gap-2">
-                            {review.writer?.userId && (
-                              <span className="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-2 py-1">
-                                <i className="bi bi-hash me-1"></i>
-                                {review.writer.userId}
-                              </span>
-                            )}
-                            {review.writer?.socialType && (
-                              <span className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-2 py-1">
-                                <i className="bi bi-share me-1"></i>
-                                {review.writer.socialType}
-                              </span>
-                            )}
-                          </div>
                           <button
                             className="btn btn-outline-primary btn-sm rounded-pill px-3"
                             onClick={(e) => {
@@ -297,7 +289,7 @@ const StoreReviewHistory = ({ storeId, isActive }) => {
       {showModal && selectedReview && (
         <div
           className="modal fade show"
-          style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}
+          style={{display: 'block', backgroundColor: 'rgba(0,0,0,0.5)'}}
           onClick={() => setShowModal(false)}
         >
           <div className="modal-dialog modal-lg modal-dialog-centered" onClick={(e) => e.stopPropagation()}>
@@ -320,7 +312,7 @@ const StoreReviewHistory = ({ storeId, isActive }) => {
                     <p className="form-control-plaintext">{selectedReview.writer?.name || '익명 사용자'}</p>
                   </div>
                   <div className="col-md-6">
-                    <label className="form-label fw-bold">평점</label>
+                    <label className="form-label fw-bold">평균 평점</label>
                     <div className="d-flex align-items-center gap-2">
                       {getRatingStars(selectedReview.rating)}
                       <span className="fw-bold text-warning">{selectedReview.rating?.toFixed(1)}점</span>
@@ -382,7 +374,8 @@ const StoreReviewHistory = ({ storeId, isActive }) => {
                         <i className="bi bi-hash me-1"></i>
                         {selectedReview.writer?.userId || '없음'}
                       </span>
-                      <span className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-3 py-2">
+                      <span
+                        className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-3 py-2">
                         <i className="bi bi-share me-1"></i>
                         {selectedReview.writer?.socialType || '없음'}
                       </span>

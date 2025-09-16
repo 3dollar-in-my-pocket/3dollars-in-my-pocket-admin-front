@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import storeApi from '../api/storeApi';
-import { toast } from 'react-toastify';
+import {useCallback, useEffect, useRef, useState} from 'react';
+import {toast} from 'react-toastify';
+import visitApi from "../api/visitApi";
 
-const StoreVisitHistory = ({ storeId, isActive }) => {
+const StoreVisitHistory = ({storeId, isActive}) => {
   const [visits, setVisits] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
@@ -21,13 +21,13 @@ const StoreVisitHistory = ({ storeId, isActive }) => {
 
     setIsLoading(true);
     try {
-      const response = await storeApi.getStoreVisits(storeId, reset ? null : cursor, 20);
+      const response = await visitApi.getStoreVisits(storeId, reset ? null : cursor, 20);
       if (!response?.ok) {
         toast.error('방문 목록을 불러오는 중 오류가 발생했습니다.');
         return;
       }
 
-      const { contents = [], cursor: newCursor = {} } = response.data || {};
+      const {contents = [], cursor: newCursor = {}} = response.data || {};
 
       if (reset) {
         setVisits(contents);
@@ -64,12 +64,16 @@ const StoreVisitHistory = ({ storeId, isActive }) => {
 
   const getVisitTypeBadge = (visitType) => {
     const typeMap = {
-      'EXISTS': { text: '방문 성공', class: 'bg-success', icon: 'bi-check-circle' },
-      'NOT_EXISTS': { text: '방문 실패', class: 'bg-danger', icon: 'bi-x-circle' },
-      'UNKNOWN': { text: '확인 불가', class: 'bg-warning', icon: 'bi-question-circle' }
+      'EXISTS': {text: '방문 성공', class: 'bg-success', icon: 'bi-check-circle'},
+      'NOT_EXISTS': {text: '방문 실패', class: 'bg-danger', icon: 'bi-x-circle'},
+      'UNKNOWN': {text: '확인 불가', class: 'bg-warning', icon: 'bi-question-circle'}
     };
 
-    const visitTypeInfo = typeMap[visitType?.type] || { text: visitType?.description || '알 수 없음', class: 'bg-secondary', icon: 'bi-info-circle' };
+    const visitTypeInfo = typeMap[visitType?.type] || {
+      text: visitType?.description || '알 수 없음',
+      class: 'bg-secondary',
+      icon: 'bi-info-circle'
+    };
 
     return (
       <span className={`badge ${visitTypeInfo.class} bg-opacity-10 text-dark border rounded-pill px-2 py-1`}>
@@ -108,11 +112,17 @@ const StoreVisitHistory = ({ storeId, isActive }) => {
       <div
         ref={scrollContainerRef}
         className="visit-container"
-        style={{ maxHeight: '600px', overflowY: 'auto' }}
+        style={{maxHeight: '600px', overflowY: 'auto'}}
       >
         {visits.length === 0 && !isLoading ? (
           <div className="text-center py-5">
-            <div className="bg-light rounded-circle mx-auto mb-4" style={{width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+            <div className="bg-light rounded-circle mx-auto mb-4" style={{
+              width: '80px',
+              height: '80px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
               <i className="bi bi-geo-alt fs-1 text-secondary"></i>
             </div>
             <h5 className="text-dark mb-2">방문 기록이 없습니다</h5>
@@ -144,20 +154,6 @@ const StoreVisitHistory = ({ storeId, isActive }) => {
                             <div className="d-flex align-items-center gap-2 mb-2">
                               {getVisitTypeBadge(visit.visitType)}
                             </div>
-                            <div className="d-flex align-items-center gap-2">
-                              {visit.visitor?.userId && (
-                                <span className="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-2 py-1">
-                                  <i className="bi bi-hash me-1"></i>
-                                  {visit.visitor.userId}
-                                </span>
-                              )}
-                              {visit.visitor?.socialType && (
-                                <span className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-2 py-1">
-                                  <i className="bi bi-share me-1"></i>
-                                  {visit.visitor.socialType}
-                                </span>
-                              )}
-                            </div>
                           </div>
                           <div className="text-end">
                             <div className="mb-1">
@@ -171,7 +167,8 @@ const StoreVisitHistory = ({ storeId, isActive }) => {
 
                         {visit.device && (
                           <div className="d-flex align-items-center gap-2">
-                            <span className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-2 py-1">
+                            <span
+                              className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-2 py-1">
                               <i className="bi bi-phone me-1"></i>
                               {visit.device.os || 'Unknown'} {visit.device.version && `v${visit.device.version}`}
                             </span>
