@@ -244,5 +244,22 @@ export default {
     } catch (error) {
       return error.response;
     }
+  },
+
+  /**
+   * 가게 삭제
+   * @param {string} storeId - 삭제할 가게 ID
+   * @returns {Promise<Object>} 삭제 결과
+   */
+  deleteStore: async (storeId) => {
+    try {
+      const response = await axiosInstance({
+        method: 'DELETE',
+        url: `/v1/store/${storeId}`
+      });
+      return response;
+    } catch (error) {
+      return error.response;
+    }
   }
 };

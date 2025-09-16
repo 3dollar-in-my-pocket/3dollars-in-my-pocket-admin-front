@@ -13,6 +13,7 @@ const UserStoreHistory = ({ userId, isActive }) => {
   const [selectedStoreDetail, setSelectedStoreDetail] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const scrollContainerRef = useRef(null);
 
   useEffect(() => {
@@ -89,6 +90,29 @@ const UserStoreHistory = ({ userId, isActive }) => {
     setShowModal(false);
     setSelectedStore(null);
     setSelectedStoreDetail(null);
+  };
+
+  // 가게 삭제 핸들러
+  const handleDeleteStore = async () => {
+    if (!selectedStore) return;
+    if (!window.confirm('정말로 이 가게를 삭제하시겠습니까?')) return;
+    setIsDeleting(true);
+    try {
+      const response = await storeApi.deleteStore(selectedStore.storeId);
+      if (response.status >= 400) {
+        toast.error('가게 삭제에 실패했습니다.');
+        setIsDeleting(false);
+        return;
+      }
+      // 삭제 성공 시 목록 리로드 및 모달 닫기
+      toast.success('가게가 성공적으로 삭제되었습니다.');
+      handleCloseModal();
+      fetchStores(true);
+    } catch (error) {
+      toast.error('가게 삭제 중 오류가 발생했습니다.');
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const getSalesTypeBadge = (salesType) => {
@@ -581,9 +605,27 @@ const UserStoreHistory = ({ userId, isActive }) => {
                 )}
               </div>
               <div className="modal-footer border-0 bg-light">
-                <button type="button" className="btn btn-secondary rounded-pill px-4" onClick={handleCloseModal}>
+                <button type="button" className="btn btn-secondary rounded-pill px-4" onClick={handleCloseModal} disabled={isDeleting}>
                   <i className="bi bi-x-lg me-2"></i>
                   닫기
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-danger rounded-pill px-4 ms-2"
+                  onClick={handleDeleteStore}
+                  disabled={isDeleting || selectedStore?.status === 'DELETED' || selectedStore?.status === 'AUTO_DELETED'}
+                >
+                  {isDeleting ? (
+                    <span>
+                      <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                      삭제 중...
+                    </span>
+                  ) : (
+                    <span>
+                      <i className="bi bi-trash me-2"></i>
+                      가게 삭제
+                    </span>
+                  )}
                 </button>
               </div>
             </div>
@@ -595,3 +637,4 @@ const UserStoreHistory = ({ userId, isActive }) => {
 };
 
 export default UserStoreHistory;
+

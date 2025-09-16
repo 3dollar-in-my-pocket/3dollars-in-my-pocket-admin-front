@@ -122,6 +122,26 @@ const UserDetailModal = ({ show, onHide, user }) => {
     });
   };
 
+  // 디바이스 삭제 핸들러
+  const handleDeleteDevice = async (deviceId) => {
+    if (!window.confirm('정말로 이 디바이스를 삭제하시겠습니까?')) return;
+    setIsLoading(true);
+    try {
+      const response = await userApi.deleteDevice(deviceId);
+      if (response.status >= 400) {
+        toast.error('디바이스 삭제에 실패했습니다.');
+        return;
+      }
+      // 삭제 성공 시 상태에서 제거
+      setDevices((prev) => prev.filter((d) => d.deviceId !== deviceId));
+      toast.success('디바이스가 성공적으로 삭제되었습니다.');
+    } catch (error) {
+      toast.error('디바이스 삭제 중 오류가 발생했습니다.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   if (!show || !user) return null;
 
   return (
@@ -430,6 +450,15 @@ const UserDetailModal = ({ show, onHide, user }) => {
                                     )}
                                   </div>
                                 </div>
+                                <div className="d-flex justify-content-end">
+                                  <button
+                                    className="btn btn-outline-danger btn-sm rounded-pill px-3"
+                                    onClick={() => handleDeleteDevice(device.deviceId)}
+                                    disabled={isLoading}
+                                  >
+                                    <i className="bi bi-trash me-1"></i> 삭제
+                                  </button>
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -659,3 +688,4 @@ const UserDetailModal = ({ show, onHide, user }) => {
 };
 
 export default UserDetailModal;
+
