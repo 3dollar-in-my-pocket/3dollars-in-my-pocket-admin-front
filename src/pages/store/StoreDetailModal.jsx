@@ -1,29 +1,27 @@
-import { useState, useEffect } from 'react';
-import { Modal, Tab, Tabs } from 'react-bootstrap';
+import {useEffect, useState} from 'react';
+import {Modal, Tab, Tabs} from 'react-bootstrap';
 import {
-  getStoreStatusDisplayName,
-  getStoreStatusBadgeClass,
-  getActivitiesStatusDisplayName,
-  getActivitiesStatusBadgeClass,
-  getSalesTypeDisplayName,
-  getSalesTypeBadgeClass,
-  getOpenStatusDisplayName,
-  getOpenStatusBadgeClass,
-  getWriterTypeDisplayName,
-  getWriterTypeBadgeClass,
-  formatRating,
   formatCount,
-  getCategoryIcon
+  formatRating,
+  getActivitiesStatusBadgeClass,
+  getActivitiesStatusDisplayName,
+  getCategoryIcon,
+  getOpenStatusBadgeClass,
+  getOpenStatusDisplayName,
+  getSalesTypeBadgeClass,
+  getSalesTypeDisplayName,
+  getStoreStatusBadgeClass,
+  getStoreStatusDisplayName,
+  getWriterTypeBadgeClass
 } from '../../types/store';
 import storeApi from '../../api/storeApi';
-import { toast } from 'react-toastify';
 import ActivityHistory from '../../components/ActivityHistory';
 import StoreReviewHistory from '../../components/StoreReviewHistory';
 import StoreVisitHistory from '../../components/StoreVisitHistory';
 import StoreImageHistory from '../../components/StoreImageHistory';
 import StoreReportHistory from '../../components/StoreReportHistory';
 
-const StoreDetailModal = ({ show, onHide, store }) => {
+const StoreDetailModal = ({show, onHide, store}) => {
   const [storeDetail, setStoreDetail] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('basic');
@@ -42,19 +40,6 @@ const StoreDetailModal = ({ show, onHide, store }) => {
     try {
       const response = await storeApi.getStoreDetail(store.storeId);
       if (!response.ok) {
-        return;
-      }
-
-      // HTTP 상태 코드가 200-299 범위가 아닌 경우
-      if (response.status >= 400) {
-        const errorMessage = response.status === 404
-          ? '가게 정보를 찾을 수 없습니다.'
-          : response.status === 403
-          ? '가게 정보에 대한 접근 권한이 없습니다.'
-          : `서버 오류가 발생했습니다. (${response.status})`;
-
-        toast.error(errorMessage);
-        setError(errorMessage);
         return;
       }
 
@@ -83,7 +68,8 @@ const StoreDetailModal = ({ show, onHide, store }) => {
 
   const getStatusBadge = (status) => {
     return (
-      <span className={`badge rounded-pill px-3 py-2 ${getStoreStatusBadgeClass(status)} bg-opacity-10 text-dark border`}>
+      <span
+        className={`badge rounded-pill px-3 py-2 ${getStoreStatusBadgeClass(status)} bg-opacity-10 text-dark border`}>
         <i className="bi bi-shop me-1"></i>
         {getStoreStatusDisplayName(status)}
       </span>
@@ -92,7 +78,8 @@ const StoreDetailModal = ({ show, onHide, store }) => {
 
   const getActivitiesBadge = (activitiesStatus) => {
     return (
-      <span className={`badge rounded-pill px-3 py-2 ${getActivitiesStatusBadgeClass(activitiesStatus)} bg-opacity-10 text-dark border`}>
+      <span
+        className={`badge rounded-pill px-3 py-2 ${getActivitiesStatusBadgeClass(activitiesStatus)} bg-opacity-10 text-dark border`}>
         <i className="bi bi-activity me-1"></i>
         {getActivitiesStatusDisplayName(activitiesStatus)}
       </span>
@@ -102,7 +89,8 @@ const StoreDetailModal = ({ show, onHide, store }) => {
   const getSalesTypeBadge = (salesType) => {
     if (!salesType) return null;
     return (
-      <span className={`badge rounded-pill px-3 py-2 ${getSalesTypeBadgeClass(salesType.type)} bg-opacity-10 text-dark border`}>
+      <span
+        className={`badge rounded-pill px-3 py-2 ${getSalesTypeBadgeClass(salesType.type)} bg-opacity-10 text-dark border`}>
         <i className="bi bi-shop me-1"></i>
         {getSalesTypeDisplayName(salesType.type)}
       </span>
@@ -112,7 +100,8 @@ const StoreDetailModal = ({ show, onHide, store }) => {
   const getOpenStatusBadge = (openStatus) => {
     if (!openStatus) return null;
     return (
-      <span className={`badge rounded-pill px-3 py-2 ${getOpenStatusBadgeClass(openStatus.status)} bg-opacity-10 text-dark border`}>
+      <span
+        className={`badge rounded-pill px-3 py-2 ${getOpenStatusBadgeClass(openStatus.status)} bg-opacity-10 text-dark border`}>
         <i className={`bi ${openStatus.isOpening ? 'bi-unlock' : 'bi-lock'} me-1`}></i>
         {getOpenStatusDisplayName(openStatus.status)}
       </span>
@@ -122,7 +111,8 @@ const StoreDetailModal = ({ show, onHide, store }) => {
   const getOwnerBadge = (owner) => {
     if (!owner || !owner.name) return null;
     return (
-      <span className={`badge rounded-pill px-3 py-2 ${getWriterTypeBadgeClass(owner.writerType)} bg-opacity-10 text-dark border`}>
+      <span
+        className={`badge rounded-pill px-3 py-2 ${getWriterTypeBadgeClass(owner.writerType)} bg-opacity-10 text-dark border`}>
         <i className="bi bi-person me-1"></i>
         {owner.name}
       </span>
@@ -145,7 +135,8 @@ const StoreDetailModal = ({ show, onHide, store }) => {
     if (!categories || categories.length === 0) {
       return (
         <div className="text-center py-4">
-          <div className="bg-light rounded-circle mx-auto mb-3" style={{width: '60px', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+          <div className="bg-light rounded-circle mx-auto mb-3"
+               style={{width: '60px', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
             <i className="bi bi-tags fs-3 text-secondary"></i>
           </div>
           <h6 className="text-dark mb-1">카테고리 정보가 없습니다</h6>
@@ -170,29 +161,37 @@ const StoreDetailModal = ({ show, onHide, store }) => {
                         src={category.imageUrl}
                         alt={category.name}
                         className="rounded-circle"
-                        style={{ width: '50px', height: '50px', objectFit: 'cover' }}
+                        style={{width: '50px', height: '50px', objectFit: 'cover'}}
                         onError={(e) => {
                           e.target.style.display = 'none';
                           e.target.nextSibling.style.display = 'block';
                         }}
                       />
                     ) : null}
-                    <div className="bg-primary bg-opacity-10 rounded-circle p-3" style={{width: '50px', height: '50px', display: category.imageUrl ? 'none' : 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                    <div className="bg-primary bg-opacity-10 rounded-circle p-3" style={{
+                      width: '50px',
+                      height: '50px',
+                      display: category.imageUrl ? 'none' : 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
                       <i className={`bi ${getCategoryIcon(category.categoryId)} text-primary`}></i>
                     </div>
                   </div>
                   <h6 className="fw-bold text-dark mb-1 small">{category.name}</h6>
-                  <p className="text-muted mb-2 small" style={{ fontSize: '0.75rem', lineHeight: '1.2' }}>
+                  <p className="text-muted mb-2 small" style={{fontSize: '0.75rem', lineHeight: '1.2'}}>
                     {category.description}
                   </p>
                   {category.classification && (
-                    <span className="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-2 py-1" style={{ fontSize: '0.7rem' }}>
+                    <span className="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-2 py-1"
+                          style={{fontSize: '0.7rem'}}>
                       <i className="bi bi-tag me-1"></i>
                       {category.classification.description}
                     </span>
                   )}
                   {category.isNew && (
-                    <span className="badge bg-warning text-dark ms-1 rounded-pill px-2 py-1" style={{ fontSize: '0.7rem' }}>
+                    <span className="badge bg-warning text-dark ms-1 rounded-pill px-2 py-1"
+                          style={{fontSize: '0.7rem'}}>
                       <i className="bi bi-sparkles me-1"></i>
                       NEW
                     </span>
@@ -215,12 +214,12 @@ const StoreDetailModal = ({ show, onHide, store }) => {
       size="xl"
       centered
       className="store-detail-modal"
-      style={{ maxWidth: '90vw' }}
+      style={{maxWidth: '90vw'}}
     >
       <Modal.Header
         closeButton
         className="border-0 pb-0"
-        style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}
+        style={{background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'}}
       >
         <div className="w-100">
           <div className="d-flex align-items-center gap-3 text-white">
@@ -250,7 +249,13 @@ const StoreDetailModal = ({ show, onHide, store }) => {
         ) : error ? (
           <div className="text-center py-5 text-danger">
             <div className="mb-4">
-              <div className="bg-danger bg-opacity-10 rounded-circle mx-auto" style={{width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+              <div className="bg-danger bg-opacity-10 rounded-circle mx-auto" style={{
+                width: '80px',
+                height: '80px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
                 <i className="bi bi-exclamation-circle fs-1 text-danger"></i>
               </div>
             </div>
@@ -314,19 +319,22 @@ const StoreDetailModal = ({ show, onHide, store }) => {
                             <div className="row g-2 mt-3">
                               <div className="col-4">
                                 <div className="bg-primary bg-opacity-10 rounded p-2">
-                                  <div className="text-primary fw-bold">{formatCount(storeDetail.metadata.reviewCount)}</div>
+                                  <div
+                                    className="text-primary fw-bold">{formatCount(storeDetail.metadata.reviewCount)}</div>
                                   <div className="text-muted small">리뷰</div>
                                 </div>
                               </div>
                               <div className="col-4">
                                 <div className="bg-success bg-opacity-10 rounded p-2">
-                                  <div className="text-success fw-bold">{formatCount(storeDetail.metadata.subscriberCount)}</div>
+                                  <div
+                                    className="text-success fw-bold">{formatCount(storeDetail.metadata.subscriberCount)}</div>
                                   <div className="text-muted small">구독자</div>
                                 </div>
                               </div>
                               <div className="col-4">
                                 <div className="bg-danger bg-opacity-10 rounded p-2">
-                                  <div className="text-danger fw-bold">{formatCount(storeDetail.metadata.reportCount)}</div>
+                                  <div
+                                    className="text-danger fw-bold">{formatCount(storeDetail.metadata.reportCount)}</div>
                                   <div className="text-muted small">신고</div>
                                 </div>
                               </div>
@@ -354,7 +362,8 @@ const StoreDetailModal = ({ show, onHide, store }) => {
                               </div>
                               <div>
                                 <label className="form-label fw-semibold text-muted mb-1">평점</label>
-                                <p className="mb-0 fw-bold text-dark">{formatRating(storeDetail?.rating || store.rating)}</p>
+                                <p
+                                  className="mb-0 fw-bold text-dark">{formatRating(storeDetail?.rating || store.rating)}</p>
                               </div>
                             </div>
                           </div>
@@ -380,7 +389,8 @@ const StoreDetailModal = ({ show, onHide, store }) => {
                               </div>
                               <div>
                                 <label className="form-label fw-semibold text-muted mb-1">생성일</label>
-                                <p className="mb-0 fw-bold text-dark">{formatDateTime(storeDetail?.createdAt || store.createdAt)}</p>
+                                <p
+                                  className="mb-0 fw-bold text-dark">{formatDateTime(storeDetail?.createdAt || store.createdAt)}</p>
                               </div>
                             </div>
                           </div>
@@ -392,7 +402,8 @@ const StoreDetailModal = ({ show, onHide, store }) => {
                               </div>
                               <div>
                                 <label className="form-label fw-semibold text-muted mb-1">수정일</label>
-                                <p className="mb-0 fw-bold text-dark">{formatDateTime(storeDetail?.updatedAt || store.updatedAt)}</p>
+                                <p
+                                  className="mb-0 fw-bold text-dark">{formatDateTime(storeDetail?.updatedAt || store.updatedAt)}</p>
                               </div>
                             </div>
                           </div>
@@ -450,11 +461,18 @@ const StoreDetailModal = ({ show, onHide, store }) => {
                                             src={menu.category.imageUrl}
                                             alt={menu.category.name}
                                             className="rounded-circle"
-                                            style={{ width: '50px', height: '50px', objectFit: 'cover' }}
+                                            style={{width: '50px', height: '50px', objectFit: 'cover'}}
                                           />
                                         ) : (
-                                          <div className="bg-warning bg-opacity-10 rounded-circle p-3" style={{width: '50px', height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                                            <i className={`bi ${getCategoryIcon(menu.category?.categoryId)} text-warning`}></i>
+                                          <div className="bg-warning bg-opacity-10 rounded-circle p-3" style={{
+                                            width: '50px',
+                                            height: '50px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center'
+                                          }}>
+                                            <i
+                                              className={`bi ${getCategoryIcon(menu.category?.categoryId)} text-warning`}></i>
                                           </div>
                                         )}
                                       </div>
@@ -462,18 +480,23 @@ const StoreDetailModal = ({ show, onHide, store }) => {
                                         {menu.name || menu.category?.name || '메뉴명 없음'}
                                       </h6>
                                       {menu.description && (
-                                        <p className="text-muted mb-2 small" style={{ fontSize: '0.75rem', lineHeight: '1.2' }}>
+                                        <p className="text-muted mb-2 small"
+                                           style={{fontSize: '0.75rem', lineHeight: '1.2'}}>
                                           {menu.description}
                                         </p>
                                       )}
                                       {menu.category && (
                                         <div className="d-flex flex-column gap-1">
-                                          <span className="badge bg-warning bg-opacity-10 text-warning border border-warning rounded-pill px-2 py-1" style={{ fontSize: '0.7rem' }}>
+                                          <span
+                                            className="badge bg-warning bg-opacity-10 text-warning border border-warning rounded-pill px-2 py-1"
+                                            style={{fontSize: '0.7rem'}}>
                                             <i className="bi bi-tag me-1"></i>
                                             {menu.category.name}
                                           </span>
                                           {menu.category.classification && (
-                                            <span className="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-2 py-1" style={{ fontSize: '0.7rem' }}>
+                                            <span
+                                              className="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-2 py-1"
+                                              style={{fontSize: '0.7rem'}}>
                                               {menu.category.classification.description}
                                             </span>
                                           )}

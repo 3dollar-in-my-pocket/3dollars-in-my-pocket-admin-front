@@ -1,5 +1,4 @@
 import {useCallback, useEffect, useState} from 'react';
-import {toast} from 'react-toastify';
 import storeReportApi from "../api/storeReportApi";
 
 const UserStoreReportHistory = ({userId, isActive}) => {
@@ -62,17 +61,7 @@ const UserStoreReportHistory = ({userId, isActive}) => {
       );
 
       if (!response.ok) {
-        if (response.status >= 400) {
-          const errorMessage = response.status === 404
-            ? '신고 이력 정보를 찾을 수 없습니다.'
-            : response.status === 403
-              ? '신고 이력 정보에 대한 접근 권한이 없습니다.'
-              : `서버 오류가 발생했습니다. (${response.status})`;
-
-          toast.error(errorMessage);
-          setError(errorMessage);
-          return;
-        }
+        return;
       }
 
       const data = response.data;
@@ -86,12 +75,6 @@ const UserStoreReportHistory = ({userId, isActive}) => {
 
       setCursor(data.cursor?.nextCursor || null);
       setHasMore(data.cursor?.hasMore || false);
-    } catch (error) {
-      console.error('신고 이력 조회 실패:', error);
-      const errorMessage = error.response?.status
-        ? `서버 오류가 발생했습니다. (${error.response.status})`
-        : '네트워크 오류가 발생했습니다. 인터넷 연결을 확인해주세요.';
-      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
