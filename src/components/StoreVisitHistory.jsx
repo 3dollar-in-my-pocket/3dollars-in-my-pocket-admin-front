@@ -171,17 +171,6 @@ const StoreVisitHistory = ({ storeId, isActive }) => {
                           </div>
                         </div>
 
-                        {visit.location && (
-                          <div className="mb-2">
-                            <div className="d-flex align-items-center gap-2 text-muted small">
-                              <i className="bi bi-geo-alt"></i>
-                              <span>
-                                위도: {visit.location.latitude}, 경도: {visit.location.longitude}
-                              </span>
-                            </div>
-                          </div>
-                        )}
-
                         {visit.device && (
                           <div className="d-flex align-items-center gap-2">
                             <span className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-2 py-1">

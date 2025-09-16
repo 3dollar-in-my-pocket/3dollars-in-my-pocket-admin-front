@@ -369,11 +369,6 @@ const StoreDetailModal = ({ show, onHide, store }) => {
                                 <p className="mb-0 fw-bold text-dark">
                                   {(storeDetail?.address || store.address)?.fullAddress || '주소 정보 없음'}
                                 </p>
-                                {(storeDetail?.location || store.location) && (
-                                  <p className="mb-0 text-muted small">
-                                    위도: {(storeDetail?.location || store.location).latitude}, 경도: {(storeDetail?.location || store.location).longitude}
-                                  </p>
-                                )}
                               </div>
                             </div>
                           </div>
