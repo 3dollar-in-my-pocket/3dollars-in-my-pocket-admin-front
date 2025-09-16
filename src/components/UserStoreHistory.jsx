@@ -373,6 +373,69 @@ const UserStoreHistory = ({ userId, isActive }) => {
                   </div>
                 ) : selectedStoreDetail ? (
                   <div>
+                    {/* 가게 메타데이터 */}
+                    {selectedStoreDetail?.metadata && (
+                      <div className="mb-4">
+                        <h6 className="fw-bold text-dark mb-3 d-flex align-items-center gap-2">
+                          <i className="bi bi-graph-up text-info"></i>
+                          가게 활동 현황
+                        </h6>
+                        <div className="row g-3 mb-4">
+                          <div className="col-md-4">
+                            <div className="card border-0 h-100" style={{
+                              background: 'linear-gradient(135deg, #e3f2fd 0%, #ffffff 100%)',
+                              border: '1px solid rgba(33, 150, 243, 0.1)',
+                              borderRadius: '12px'
+                            }}>
+                              <div className="card-body p-3 text-center">
+                                <div className="bg-primary bg-opacity-10 rounded-circle mx-auto mb-2" style={{width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                                  <i className="bi bi-chat-square-text text-primary"></i>
+                                </div>
+                                <div className="fw-bold text-primary" style={{ fontSize: '1.5rem' }}>
+                                  {selectedStoreDetail.metadata.reviewCount?.toLocaleString() || '0'}
+                                </div>
+                                <div className="text-muted small">리뷰</div>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="col-md-4">
+                            <div className="card border-0 h-100" style={{
+                              background: 'linear-gradient(135deg, #e8f5e8 0%, #ffffff 100%)',
+                              border: '1px solid rgba(76, 175, 80, 0.1)',
+                              borderRadius: '12px'
+                            }}>
+                              <div className="card-body p-3 text-center">
+                                <div className="bg-success bg-opacity-10 rounded-circle mx-auto mb-2" style={{width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                                  <i className="bi bi-heart text-success"></i>
+                                </div>
+                                <div className="fw-bold text-success" style={{ fontSize: '1.5rem' }}>
+                                  {selectedStoreDetail.metadata.subscriberCount?.toLocaleString() || '0'}
+                                </div>
+                                <div className="text-muted small">구독자</div>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="col-md-4">
+                            <div className="card border-0 h-100" style={{
+                              background: 'linear-gradient(135deg, #ffebee 0%, #ffffff 100%)',
+                              border: '1px solid rgba(244, 67, 54, 0.1)',
+                              borderRadius: '12px'
+                            }}>
+                              <div className="card-body p-3 text-center">
+                                <div className="bg-danger bg-opacity-10 rounded-circle mx-auto mb-2" style={{width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                                  <i className="bi bi-shield-exclamation text-danger"></i>
+                                </div>
+                                <div className="fw-bold text-danger" style={{ fontSize: '1.5rem' }}>
+                                  {selectedStoreDetail.metadata.reportCount?.toLocaleString() || '0'}
+                                </div>
+                                <div className="text-muted small">신고</div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     <div className="row g-4">
                       <div className="col-md-6">
                         <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">

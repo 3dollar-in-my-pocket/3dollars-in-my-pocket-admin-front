@@ -127,6 +127,18 @@ const Layout = () => {
                     <span className="fw-medium">유저 검색</span>
                   </Link>
                 </li>
+
+                 <li>
+                  <Link
+                    to="/manage/store-search"
+                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
+                      isActive("/manage/store-search") ? "bg-primary text-white" : "text-white-50"
+                    }`}
+                  >
+                    <i className="bi bi-shop fs-5"></i>
+                    <span className="fw-medium">가게 검색</span>
+                  </Link>
+                </li>
               </ul>
             </div>
 

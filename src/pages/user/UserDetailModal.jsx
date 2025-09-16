@@ -10,7 +10,12 @@ import {
 } from '../../types/user';
 import userApi from '../../api/userApi';
 import { toast } from 'react-toastify';
-import UserActivityHistory from '../../components/UserActivityHistory';
+import ActivityHistory from '../../components/ActivityHistory';
+import UserStoreHistory from '../../components/UserStoreHistory';
+import UserReviewHistory from '../../components/UserReviewHistory';
+import UserVisitHistory from '../../components/UserVisitHistory';
+import UserStoreImageHistory from '../../components/UserStoreImageHistory';
+import UserStoreReportHistory from '../../components/UserStoreReportHistory';
 
 const UserDetailModal = ({ show, onHide, user }) => {
   const [userDetail, setUserDetail] = useState(null);
@@ -589,7 +594,52 @@ const UserDetailModal = ({ show, onHide, user }) => {
                 </span>
               }
             >
-              <UserActivityHistory userId={user?.userId} />
+              <ActivityHistory
+                type="user"
+                entityId={user?.userId}
+                tabs={[
+                  {
+                    key: 'stores',
+                    title: '제보한 가게 목록',
+                    icon: 'bi-shop',
+                    component: UserStoreHistory,
+                    spinnerColor: 'text-success',
+                    loadingText: '데이터를 불러오는 중...'
+                  },
+                  {
+                    key: 'reviews',
+                    title: '리뷰 이력',
+                    icon: 'bi-chat-square-text',
+                    component: UserReviewHistory,
+                    spinnerColor: 'text-primary',
+                    loadingText: '리뷰 데이터를 불러오는 중...'
+                  },
+                  {
+                    key: 'visits',
+                    title: '방문 이력',
+                    icon: 'bi-geo-alt',
+                    component: UserVisitHistory,
+                    spinnerColor: 'text-warning',
+                    loadingText: '방문 이력을 불러오는 중...'
+                  },
+                  {
+                    key: 'images',
+                    title: '이미지 등록 이력',
+                    icon: 'bi-image',
+                    component: UserStoreImageHistory,
+                    spinnerColor: 'text-info',
+                    loadingText: '이미지 등록 이력을 불러오는 중...'
+                  },
+                  {
+                    key: 'reports',
+                    title: '가게 신고 이력',
+                    icon: 'bi-shield-exclamation',
+                    component: UserStoreReportHistory,
+                    spinnerColor: 'text-danger',
+                    loadingText: '신고 이력을 불러오는 중...'
+                  }
+                ]}
+              />
             </Tab>
           </Tabs>
         )}
