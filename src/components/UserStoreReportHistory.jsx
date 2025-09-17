@@ -1,6 +1,7 @@
 import {useCallback, useEffect, useState} from 'react';
 import storeReportApi from "../api/storeReportApi";
 import {getReportReasonBadgeClass} from "../types/report";
+import {getStoreTypeDisplayName, getStoreTypeBadgeClass, getStoreTypeIcon} from "../types/store";
 
 const UserStoreReportHistory = ({userId, isActive}) => {
   const [reports, setReports] = useState([]);
@@ -37,6 +38,16 @@ const UserStoreReportHistory = ({userId, isActive}) => {
         className={`badge bg-${reportBadgeClass} bg-opacity-10 text-${reportBadgeClass} border border-${reportBadgeClass} rounded-pill px-2 py-1`}
         style={{fontSize: '0.7rem'}}>
         {reasonText}
+      </span>
+    );
+  };
+
+  const getStoreTypeBadge = (storeType) => {
+    if (!storeType) return null;
+    return (
+      <span className={`badge ${getStoreTypeBadgeClass(storeType)} text-white rounded-pill px-2 py-1 small`}>
+        <i className={`bi ${getStoreTypeIcon(storeType)} me-1`}></i>
+        {getStoreTypeDisplayName(storeType)}
       </span>
     );
   };
@@ -174,6 +185,7 @@ const UserStoreReportHistory = ({userId, isActive}) => {
                         </h6>
                         <div className="d-flex align-items-center gap-2 mb-2">
                           {getReasonBadge(report.reason)}
+                          {report.store?.storeType && getStoreTypeBadge(report.store.storeType)}
                         </div>
                       </div>
                       <span className="badge bg-light text-muted rounded-pill px-2 py-1 small">

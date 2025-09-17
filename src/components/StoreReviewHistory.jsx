@@ -1,6 +1,7 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
 import {toast} from 'react-toastify';
 import reviewApi from "../api/reviewApi";
+import {getStoreTypeDisplayName, getStoreTypeBadgeClass, getStoreTypeIcon} from "../types/store";
 
 const StoreReviewHistory = ({storeId, isActive}) => {
   const [reviews, setReviews] = useState([]);
@@ -10,6 +11,7 @@ const StoreReviewHistory = ({storeId, isActive}) => {
   const [totalCount, setTotalCount] = useState(0);
   const [selectedReview, setSelectedReview] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [isBlinding, setIsBlinding] = useState(false);
   const scrollContainerRef = useRef(null);
 
   useEffect(() => {
@@ -85,9 +87,44 @@ const StoreReviewHistory = ({storeId, isActive}) => {
     return stars;
   };
 
+  const getStoreTypeBadge = (storeType) => {
+    if (!storeType) return null;
+    return (
+      <span className={`badge ${getStoreTypeBadgeClass(storeType)} text-white rounded-pill px-2 py-1 small`}>
+        <i className={`bi ${getStoreTypeIcon(storeType)} me-1`}></i>
+        {getStoreTypeDisplayName(storeType)}
+      </span>
+    );
+  };
+
   const handleReviewClick = (review) => {
     setSelectedReview(review);
     setShowModal(true);
+  };
+
+  const handleBlindReview = async () => {
+    const confirmed = window.confirm(`정말로 이 리뷰를 블라인드 처리하시겠습니까?\n\n작성자: ${selectedReview.writer?.name || '익명 사용자'}\n내용: ${selectedReview.contents?.substring(0, 50)}...\n\n이 작업은 되돌릴 수 없습니다.`);
+
+    if (!confirmed) return;
+
+    setIsBlinding(true);
+    try {
+      const response = await reviewApi.blindStoreReview(selectedReview.reviewId);
+
+      if (response.status === 200 || response.status === 204) {
+        toast.success('리뷰가 성공적으로 블라인드 처리되었습니다.');
+        setShowModal(false);
+        // 리뷰 목록 새로고침
+        fetchReviews(true);
+      } else {
+        throw new Error('블라인드 처리 실패');
+      }
+    } catch (error) {
+      console.error('리뷰 블라인드 실패:', error);
+      toast.error('리뷰 블라인드 처리 중 오류가 발생했습니다.');
+    } finally {
+      setIsBlinding(false);
+    }
   };
 
   if (!isActive) {
@@ -161,9 +198,26 @@ const StoreReviewHistory = ({storeId, isActive}) => {
                       <div className="flex-grow-1">
                         <div className="d-flex justify-content-between align-items-start mb-2">
                           <div>
-                            <h6 className="fw-bold text-dark mb-1">
-                              {review.writer?.name || '익명 사용자'}
-                            </h6>
+                            <div className="d-flex align-items-center gap-2 mb-1">
+                              <h6 className="fw-bold text-dark mb-0">
+                                {review.writer?.name || '익명 사용자'}
+                              </h6>
+                              {/* 리뷰 상태 표시 */}
+                              <span className={`badge rounded-pill ${
+                                review.status === 'POSTED' ? 'bg-success' :
+                                review.status === 'DELETED' ? 'bg-danger' :
+                                review.status === 'FILTERED' ? 'bg-warning' : 'bg-secondary'
+                              } text-white px-2 py-1`} style={{fontSize: '0.7rem'}}>
+                                <i className={`bi ${
+                                  review.status === 'POSTED' ? 'bi-eye-fill' :
+                                  review.status === 'DELETED' ? 'bi-trash-fill' :
+                                  review.status === 'FILTERED' ? 'bi-eye-slash-fill' : 'bi-question-circle-fill'
+                                } me-1`}></i>
+                                {review.status === 'POSTED' ? '활성' :
+                                 review.status === 'DELETED' ? '삭제됨' :
+                                 review.status === 'FILTERED' ? '블라인드' : '알 수 없음'}
+                              </span>
+                            </div>
                             <div className="d-flex align-items-center gap-2 mb-2">
                               <div className="d-flex align-items-center">
                                 {getRatingStars(review.rating)}
@@ -171,6 +225,7 @@ const StoreReviewHistory = ({storeId, isActive}) => {
                                   {review.rating?.toFixed(1)}점
                                 </span>
                               </div>
+                              {review.store?.storeType && getStoreTypeBadge(review.store.storeType)}
                             </div>
                           </div>
                           <div className="text-end">
@@ -367,7 +422,7 @@ const StoreReviewHistory = ({storeId, isActive}) => {
                       </div>
                     </div>
                   )}
-                  <div className="col-12">
+                  <div className="col-md-6">
                     <label className="form-label fw-bold">작성자 정보</label>
                     <div className="d-flex gap-2 flex-wrap">
                       <span className="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-3 py-2">
@@ -381,10 +436,44 @@ const StoreReviewHistory = ({storeId, isActive}) => {
                       </span>
                     </div>
                   </div>
+                  <div className="col-md-6">
+                    <label className="form-label fw-bold">가게 타입</label>
+                    <div className="d-flex gap-2 flex-wrap">
+                      {selectedReview.store?.storeType ? (
+                        getStoreTypeBadge(selectedReview.store.storeType)
+                      ) : (
+                        <span className="text-muted">정보 없음</span>
+                      )}
+                      {selectedReview.store?.name && (
+                        <span className="badge bg-light text-dark border rounded-pill px-3 py-2">
+                          <i className="bi bi-shop me-1"></i>
+                          {selectedReview.store.name}
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div className="modal-footer">
-                <button className="btn btn-secondary" onClick={() => setShowModal(false)}>
+              <div className="modal-footer d-flex justify-content-between">
+                <button
+                  className="btn btn-danger rounded-pill px-4"
+                  onClick={handleBlindReview}
+                  disabled={isBlinding}
+                >
+                  {isBlinding ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm me-2"></span>
+                      블라인드 처리 중...
+                    </>
+                  ) : (
+                    <>
+                      <i className="bi bi-eye-slash me-2"></i>
+                      리뷰 블라인드
+                    </>
+                  )}
+                </button>
+                <button className="btn btn-secondary rounded-pill px-4" onClick={() => setShowModal(false)}>
+                  <i className="bi bi-x-lg me-2"></i>
                   닫기
                 </button>
               </div>

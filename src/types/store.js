@@ -33,6 +33,12 @@ export const WRITER_TYPE = {
   STORE: 'STORE'
 };
 
+// Store type
+export const STORE_TYPE = {
+  USER_STORE: 'USER_STORE',
+  BOSS_STORE: 'BOSS_STORE'
+};
+
 // Search types
 export const STORE_SEARCH_TYPES = {
   KEYWORD: 'keyword',
@@ -177,4 +183,37 @@ export const formatCount = (count) => {
     return `${(count / 1000).toFixed(1)}k`;
   }
   return count.toLocaleString();
+};
+
+export const getStoreTypeDisplayName = (storeType) => {
+  switch (storeType) {
+    case STORE_TYPE.USER_STORE:
+      return '유저 제보 가게';
+    case STORE_TYPE.BOSS_STORE:
+      return '사장님 가게';
+    default:
+      return '알 수 없음';
+  }
+};
+
+export const getStoreTypeBadgeClass = (storeType) => {
+  switch (storeType) {
+    case STORE_TYPE.USER_STORE:
+      return 'bg-info';
+    case STORE_TYPE.BOSS_STORE:
+      return 'bg-warning';
+    default:
+      return 'bg-secondary';
+  }
+};
+
+export const getStoreTypeIcon = (storeType) => {
+  switch (storeType) {
+    case STORE_TYPE.USER_STORE:
+      return 'bi-people-fill';
+    case STORE_TYPE.BOSS_STORE:
+      return 'bi-person-badge-fill';
+    default:
+      return 'bi-question-circle-fill';
+  }
 };

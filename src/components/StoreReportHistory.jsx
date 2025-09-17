@@ -2,6 +2,7 @@ import {useCallback, useEffect, useRef, useState} from 'react';
 import {toast} from 'react-toastify';
 import storeReportApi from "../api/storeReportApi";
 import {getReportReasonBadgeClass} from "../types/report";
+import {getStoreTypeDisplayName, getStoreTypeBadgeClass, getStoreTypeIcon} from "../types/store";
 
 const StoreReportHistory = ({storeId, isActive}) => {
   const [reports, setReports] = useState([]);
@@ -73,6 +74,16 @@ const StoreReportHistory = ({storeId, isActive}) => {
       <span className={`badge ${reportBadgeClass} bg-opacity-10 text-dark border rounded-pill px-2 py-1`}>
         <i className="bi bi-flag me-1"></i>
         {reasonText}
+      </span>
+    );
+  };
+
+  const getStoreTypeBadge = (storeType) => {
+    if (!storeType) return null;
+    return (
+      <span className={`badge ${getStoreTypeBadgeClass(storeType)} text-white rounded-pill px-2 py-1 small`}>
+        <i className={`bi ${getStoreTypeIcon(storeType)} me-1`}></i>
+        {getStoreTypeDisplayName(storeType)}
       </span>
     );
   };
@@ -168,6 +179,7 @@ const StoreReportHistory = ({storeId, isActive}) => {
                             </h6>
                             <div className="d-flex align-items-center gap-2 mb-2">
                               {getReportTypeBadge(report.reason)}
+                              {report.store?.storeType && getStoreTypeBadge(report.store.storeType)}
                             </div>
                           </div>
                           <div className="text-end">
@@ -284,6 +296,22 @@ const StoreReportHistory = ({storeId, isActive}) => {
                   <div className="col-md-6">
                     <label className="form-label fw-bold">신고 일시</label>
                     <p className="form-control-plaintext">{formatDateTime(selectedReport.createdAt)}</p>
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label fw-bold">가게 타입</label>
+                    <div className="d-flex gap-2 flex-wrap">
+                      {selectedReport.store?.storeType ? (
+                        getStoreTypeBadge(selectedReport.store.storeType)
+                      ) : (
+                        <span className="text-muted">정보 없음</span>
+                      )}
+                      {selectedReport.store?.name && (
+                        <span className="badge bg-light text-dark border rounded-pill px-3 py-2">
+                          <i className="bi bi-shop me-1"></i>
+                          {selectedReport.store.name}
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <div className="col-12">
                     <label className="form-label fw-bold">신고 사유</label>

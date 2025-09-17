@@ -1,6 +1,7 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
 import {toast} from 'react-toastify';
 import storeImageApi from "../api/storeImageApi";
+import {getStoreTypeDisplayName, getStoreTypeBadgeClass, getStoreTypeIcon} from "../types/store";
 
 const UserStoreImageHistory = ({userId, isActive}) => {
   const [storeImages, setStoreImages] = useState([]);
@@ -91,6 +92,16 @@ const UserStoreImageHistory = ({userId, isActive}) => {
     return (
       <span className={`badge ${badgeClass} bg-opacity-10 text-dark border rounded-pill px-2 py-1`}>
         {statusText}
+      </span>
+    );
+  };
+
+  const getStoreTypeBadge = (storeType) => {
+    if (!storeType) return null;
+    return (
+      <span className={`badge ${getStoreTypeBadgeClass(storeType)} text-white rounded-pill px-2 py-1 small`}>
+        <i className={`bi ${getStoreTypeIcon(storeType)} me-1`}></i>
+        {getStoreTypeDisplayName(storeType)}
       </span>
     );
   };
@@ -252,6 +263,7 @@ const UserStoreImageHistory = ({userId, isActive}) => {
                           {getSalesTypeBadge(storeImage.store?.salesType)}
                           {getImageStatusBadge(storeImage.status)}
                           {getStoreStatusBadge(storeImage.store?.status)}
+                          {storeImage.store?.storeType && getStoreTypeBadge(storeImage.store.storeType)}
                         </div>
                       </div>
                     </div>

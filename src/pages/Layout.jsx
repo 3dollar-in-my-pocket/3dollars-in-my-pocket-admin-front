@@ -56,6 +56,18 @@ const Layout = () => {
             <div className="mb-4">
               <h5 className="text-white-50 mb-3">서비스 관리</h5>
               <ul className="nav flex-column gap-2">
+              <li>
+                  <Link
+                    to="/manage/registration"
+                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
+                      isActive("/manage/registration") ? "bg-primary text-white" : "text-white-50"
+                    }`}
+                  >
+                    <i className="bi bi-person-lines-fill fs-5"></i>
+                    <span className="fw-medium">사장님 가입 신청 관리</span>
+                  </Link>
+                </li>
+
                 <li>
                   <Link
                     to="/manage/advertisement"
@@ -70,13 +82,25 @@ const Layout = () => {
 
                 <li>
                   <Link
-                    to="/manage/registration"
+                    to="/manage/user-search"
                     className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
-                      isActive("/manage/registration") ? "bg-primary text-white" : "text-white-50"
+                      isActive("/manage/user-search") ? "bg-primary text-white" : "text-white-50"
                     }`}
                   >
-                    <i className="bi bi-person-lines-fill fs-5"></i>
-                    <span className="fw-medium">사장님 가입 신청 관리</span>
+                    <i className="bi bi-search fs-5"></i>
+                    <span className="fw-medium">유저 검색 & 관리</span>
+                  </Link>
+                </li>
+
+                 <li>
+                  <Link
+                    to="/manage/store-search"
+                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
+                      isActive("/manage/store-search") ? "bg-primary text-white" : "text-white-50"
+                    }`}
+                  >
+                    <i className="bi bi-shop fs-5"></i>
+                    <span className="fw-medium">가게 검색 & 관리</span>
                   </Link>
                 </li>
 
@@ -94,6 +118,23 @@ const Layout = () => {
 
                 <li>
                   <Link
+                    to="/manage/push-message"
+                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
+                      isActive("/manage/push-message") ? "bg-primary text-white" : "text-white-50"
+                    }`}
+                  >
+                    <i className="bi bi-send-fill fs-5"></i>
+                    <span className="fw-medium">푸시 발송</span>
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            <div className="mb-4">
+              <h5 className="text-white-50 mb-3">운영 툴</h5>
+              <ul className="nav flex-column gap-2">
+                <li>
+                  <Link
                     to="/manage/policy"
                     className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
                       isActive("/manage/policy") ? "bg-primary text-white" : "text-white-50"
@@ -104,47 +145,6 @@ const Layout = () => {
                   </Link>
                 </li>
 
-                <li>
-                  <Link
-                    to="/manage/push-message"
-                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
-                      isActive("/manage/push-message") ? "bg-primary text-white" : "text-white-50"
-                    }`}
-                  >
-                    <i className="bi bi-send-fill fs-5"></i>
-                    <span className="fw-medium">푸시 발송</span>
-                  </Link>
-                </li>
-
-                <li>
-                  <Link
-                    to="/manage/user-search"
-                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
-                      isActive("/manage/user-search") ? "bg-primary text-white" : "text-white-50"
-                    }`}
-                  >
-                    <i className="bi bi-search fs-5"></i>
-                    <span className="fw-medium">유저 검색</span>
-                  </Link>
-                </li>
-
-                 <li>
-                  <Link
-                    to="/manage/store-search"
-                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
-                      isActive("/manage/store-search") ? "bg-primary text-white" : "text-white-50"
-                    }`}
-                  >
-                    <i className="bi bi-shop fs-5"></i>
-                    <span className="fw-medium">가게 검색</span>
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            <div className="mb-4">
-              <h5 className="text-white-50 mb-3">운영 툴</h5>
-              <ul className="nav flex-column gap-2">
                 <li>
                   <Link
                     to="/manage/tool/cache"

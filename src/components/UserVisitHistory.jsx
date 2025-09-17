@@ -1,6 +1,6 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
 import {toast} from 'react-toastify';
-import {getActivitiesStatusDisplayName, getStoreStatusBadgeClass, getStoreStatusDisplayName} from "../types/store";
+import {getActivitiesStatusDisplayName, getStoreStatusBadgeClass, getStoreStatusDisplayName, getStoreTypeDisplayName, getStoreTypeBadgeClass, getStoreTypeIcon} from "../types/store";
 import {getVisitIconClass, getVisitTypeBatchClass, getVisitTypeDisplayName} from "../types/visit";
 import visitApi from "../api/visitApi";
 
@@ -102,6 +102,16 @@ const UserVisitHistory = ({userId, isActive}) => {
     return (
       <span className={`badge ${badgeClass} bg-opacity-10 text-dark border rounded-pill px-2 py-1 small`}>
         {statusText}
+      </span>
+    );
+  };
+
+  const getStoreTypeBadge = (storeType) => {
+    if (!storeType) return null;
+    return (
+      <span className={`badge ${getStoreTypeBadgeClass(storeType)} text-white rounded-pill px-2 py-1 small`}>
+        <i className={`bi ${getStoreTypeIcon(storeType)} me-1`}></i>
+        {getStoreTypeDisplayName(storeType)}
       </span>
     );
   };
@@ -224,6 +234,7 @@ const UserVisitHistory = ({userId, isActive}) => {
                         {getSalesTypeBadge(visit.store?.salesType)}
                         {getStatusBadge(visit.store?.status)}
                         {getActivitiesStatusBadge(visit.store?.activitiesStatus)}
+                        {visit.store?.storeType && getStoreTypeBadge(visit.store.storeType)}
                       </div>
 
                       <div className="d-flex align-items-center gap-2 mb-2">

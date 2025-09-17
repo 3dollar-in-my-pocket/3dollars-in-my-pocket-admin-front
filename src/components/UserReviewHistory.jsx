@@ -1,6 +1,6 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
 import {toast} from 'react-toastify';
-import {getActivitiesStatusDisplayName, getStoreStatusBadgeClass, getStoreStatusDisplayName} from "../types/store";
+import {getActivitiesStatusDisplayName, getStoreStatusBadgeClass, getStoreStatusDisplayName, getStoreTypeDisplayName, getStoreTypeBadgeClass, getStoreTypeIcon} from "../types/store";
 import reviewApi from "../api/reviewApi";
 
 const UserReviewHistory = ({userId, isActive}) => {
@@ -114,6 +114,16 @@ const UserReviewHistory = ({userId, isActive}) => {
     return (
       <span className={`badge ${badgeClass} bg-opacity-10 text-dark border rounded-pill px-2 py-1 small`}>
         {statusText}
+      </span>
+    );
+  };
+
+  const getStoreTypeBadge = (storeType) => {
+    if (!storeType) return null;
+    return (
+      <span className={`badge ${getStoreTypeBadgeClass(storeType)} text-white rounded-pill px-2 py-1 small`}>
+        <i className={`bi ${getStoreTypeIcon(storeType)} me-1`}></i>
+        {getStoreTypeDisplayName(storeType)}
       </span>
     );
   };
@@ -277,6 +287,7 @@ const UserReviewHistory = ({userId, isActive}) => {
                         {getReviewStatusBadge(review.status)}
                         {getSalesTypeBadge(review.store?.salesType)}
                         {getStoreStatusBadge(review.store?.status)}
+                        {review.store?.storeType && getStoreTypeBadge(review.store.storeType)}
                       </div>
 
                       <div className="d-flex align-items-center gap-2 mb-2">

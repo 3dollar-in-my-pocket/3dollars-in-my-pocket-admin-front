@@ -1,7 +1,14 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
 import storeApi from '../api/storeApi';
 import {toast} from 'react-toastify';
-import {getActivitiesStatusDisplayName, getStoreStatusBadgeClass, getStoreStatusDisplayName} from "../types/store";
+import {
+  getActivitiesStatusDisplayName,
+  getStoreStatusBadgeClass,
+  getStoreStatusDisplayName,
+  getStoreTypeDisplayName,
+  getStoreTypeBadgeClass,
+  getStoreTypeIcon
+} from "../types/store";
 
 const UserStoreHistory = ({userId, isActive}) => {
   const [stores, setStores] = useState([]);
@@ -148,6 +155,16 @@ const UserStoreHistory = ({userId, isActive}) => {
     );
   };
 
+  const getStoreTypeBadge = (storeType) => {
+    if (!storeType) return null;
+    return (
+      <span className={`badge ${getStoreTypeBadgeClass(storeType)} text-white rounded-pill px-2 py-1 small`}>
+        <i className={`bi ${getStoreTypeIcon(storeType)} me-1`}></i>
+        {getStoreTypeDisplayName(storeType)}
+      </span>
+    );
+  };
+
   const getDayOfWeekInKorean = (dayOfWeek) => {
     const dayMap = {
       'MONDAY': '월요일',
@@ -274,6 +291,7 @@ const UserStoreHistory = ({userId, isActive}) => {
                               {getSalesTypeBadge(store.salesType)}
                               {getStatusBadge(store.status)}
                               {getActivitiesStatusBadge(store.activitiesStatus)}
+                              {getStoreTypeBadge(store.storeType)}
                             </div>
                           </div>
                         </div>
@@ -512,9 +530,10 @@ const UserStoreHistory = ({userId, isActive}) => {
                           </div>
                           <div>
                             <label className="form-label fw-semibold text-muted mb-1">가게 상태</label>
-                            <div className="d-flex gap-2">
+                            <div className="d-flex flex-wrap gap-2">
                               {getStatusBadge(selectedStoreDetail?.status)}
                               {getActivitiesStatusBadge(selectedStoreDetail?.activitiesStatus)}
+                              {getStoreTypeBadge(selectedStoreDetail?.storeType)}
                             </div>
                           </div>
                         </div>
