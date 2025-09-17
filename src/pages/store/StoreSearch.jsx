@@ -3,7 +3,6 @@ import StoreDetailModal from './StoreDetailModal';
 import { STORE_SEARCH_TYPES } from '../../types/store';
 import useSearch from '../../hooks/useSearch';
 import { storeSearchAdapter } from '../../adapters/storeSearchAdapter';
-import SearchHeader from '../../components/common/SearchHeader';
 import SearchForm from '../../components/common/SearchForm';
 import SearchResults from '../../components/common/SearchResults';
 import StoreCard from '../../components/store/StoreCard';
@@ -90,12 +89,10 @@ const StoreSearch = () => {
   );
 
   return (
-    <div className="container-fluid px-4 py-4" style={{background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)', minHeight: '100vh'}}>
-      <SearchHeader
-        title="가게 검색 & 관리"
-        description="가게를 검색하고 상세 정보를 관리하세요"
-        icon="bi-shop"
-      />
+    <div className="container-fluid px-4 py-4">
+      <div className="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <h2 className="fw-bold">가게 검색</h2>
+      </div>
 
       <SearchForm
         searchType={searchType}

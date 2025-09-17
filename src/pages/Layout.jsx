@@ -96,7 +96,7 @@ const Layout = () => {
                     onClick={closeSidebar}
                   >
                     <i className="bi bi-search fs-5"></i>
-                    <span className="fw-medium">유저 검색 & 관리</span>
+                    <span className="fw-medium">유저 검색</span>
                   </Link>
                 </li>
 
@@ -109,7 +109,20 @@ const Layout = () => {
                     onClick={closeSidebar}
                   >
                     <i className="bi bi-shop fs-5"></i>
-                    <span className="fw-medium">가게 검색 & 관리</span>
+                    <span className="fw-medium">가게 검색</span>
+                  </Link>
+                </li>
+
+                <li>
+                  <Link
+                    to="/manage/poll"
+                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
+                      isActive("/manage/poll") ? "bg-primary text-white" : "text-white-50"
+                    }`}
+                    onClick={closeSidebar}
+                  >
+                    <i className="bi bi-bar-chart-fill fs-5"></i>
+                    <span className="fw-medium">투표 관리</span>
                   </Link>
                 </li>
 
@@ -136,19 +149,6 @@ const Layout = () => {
                   >
                     <i className="bi bi-send-fill fs-5"></i>
                     <span className="fw-medium">푸시 발송</span>
-                  </Link>
-                </li>
-
-                <li>
-                  <Link
-                    to="/manage/poll"
-                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
-                      isActive("/manage/poll") ? "bg-primary text-white" : "text-white-50"
-                    }`}
-                    onClick={closeSidebar}
-                  >
-                    <i className="bi bi-bar-chart-fill fs-5"></i>
-                    <span className="fw-medium">투표 관리</span>
                   </Link>
                 </li>
               </ul>

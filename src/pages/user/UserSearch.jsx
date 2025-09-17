@@ -3,7 +3,6 @@ import UserDetailModal from './UserDetailModal';
 import { SEARCH_TYPES } from '../../types/user';
 import useSearch from '../../hooks/useSearch';
 import { userSearchAdapter } from '../../adapters/userSearchAdapter';
-import SearchHeader from '../../components/common/SearchHeader';
 import SearchForm from '../../components/common/SearchForm';
 import SearchResults from '../../components/common/SearchResults';
 import UserCard from '../../components/user/UserCard';
@@ -72,11 +71,9 @@ const UserSearch = () => {
 
   return (
     <div className="container-fluid px-4 py-4">
-      <SearchHeader
-        title="👤 유저 검색"
-        description="유저를 검색하고 상세 정보를 확인하세요"
-        icon="bi-person"
-      />
+    <div className="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <h2 className="fw-bold">유저 검색</h2>
+      </div>
 
       <SearchForm
         searchType={searchType}
