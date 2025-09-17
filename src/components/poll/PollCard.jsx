@@ -1,3 +1,10 @@
+import {
+  getWriterTypeIcon,
+  getWriterTypeTextClass,
+  getWriterTypeBgClass,
+  getWriterTypeDisplayName
+} from '../../types/common';
+
 const PollCard = ({ poll, onClick }) => {
   const formatDateTime = (dateString) => {
     if (!dateString) return '없음';
@@ -10,12 +17,6 @@ const PollCard = ({ poll, onClick }) => {
     });
   };
 
-  const isPollActive = (poll) => {
-    const now = new Date();
-    const startDate = new Date(poll.period.startDateTime);
-    const endDate = new Date(poll.period.endDateTime);
-    return now >= startDate && now < endDate;
-  };
 
   const getPollStatus = (poll) => {
     const now = new Date();
@@ -76,33 +77,6 @@ const PollCard = ({ poll, onClick }) => {
     return Math.round((ratio || 0) * 100);
   };
 
-  // 작성자 타입에 따른 아이콘 반환
-  const getWriterIcon = (writerType) => {
-    switch (writerType) {
-      case 'USER':
-        return 'bi-person';
-      case 'ADMIN':
-        return 'bi-person-badge';
-      case 'SYSTEM':
-        return 'bi-gear';
-      default:
-        return 'bi-question-circle';
-    }
-  };
-
-  // 작성자 타입에 따른 색상 반환
-  const getWriterColor = (writerType) => {
-    switch (writerType) {
-      case 'USER':
-        return 'text-primary';
-      case 'ADMIN':
-        return 'text-danger';
-      case 'SYSTEM':
-        return 'text-warning';
-      default:
-        return 'text-secondary';
-    }
-  };
 
   // 남은 시간 계산
   const getTimeRemaining = (endDateTime) => {
@@ -127,7 +101,6 @@ const PollCard = ({ poll, onClick }) => {
 
   const pollStatus = getPollStatus(poll);
   const statusConfig = getStatusConfig(pollStatus);
-  const isActive = isPollActive(poll);
   const totalVotes = getTotalVotes(poll.options);
   const timeRemaining = pollStatus === 'active' ? getTimeRemaining(poll.period.endDateTime) : null;
 
@@ -232,13 +205,8 @@ const PollCard = ({ poll, onClick }) => {
               <div className="d-flex align-items-center gap-2 flex-grow-1">
                 {poll.writer ? (
                   <>
-                    <div className={`rounded-circle p-2 ${
-                      poll.writer.writerType === 'USER' ? 'bg-primary bg-opacity-10' :
-                      poll.writer.writerType === 'ADMIN' ? 'bg-danger bg-opacity-10' :
-                      poll.writer.writerType === 'SYSTEM' ? 'bg-warning bg-opacity-10' :
-                      'bg-secondary bg-opacity-10'
-                    }`} style={{ minWidth: '36px' }}>
-                      <i className={`bi ${getWriterIcon(poll.writer.writerType)} ${getWriterColor(poll.writer.writerType)}`}></i>
+                    <div className={`rounded-circle p-2 ${getWriterTypeBgClass(poll.writer.writerType)}`} style={{ minWidth: '36px' }}>
+                      <i className={`bi ${getWriterTypeIcon(poll.writer.writerType)} ${getWriterTypeTextClass(poll.writer.writerType)}`}></i>
                     </div>
                     <div className="d-flex flex-column">
                       <span className="text-dark fw-medium" style={{
@@ -250,15 +218,8 @@ const PollCard = ({ poll, onClick }) => {
                       }}>
                         {poll.writer.name || `ID: ${poll.writer.writerId}`}
                       </span>
-                      <span className={`fw-medium ${
-                        poll.writer.writerType === 'USER' ? 'text-primary' :
-                        poll.writer.writerType === 'ADMIN' ? 'text-danger' :
-                        poll.writer.writerType === 'SYSTEM' ? 'text-warning' :
-                        'text-secondary'
-                      }`} style={{ fontSize: '0.75rem' }}>
-                        {poll.writer.writerType === 'USER' ? '사용자' :
-                         poll.writer.writerType === 'ADMIN' ? '관리자' :
-                         poll.writer.writerType === 'SYSTEM' ? '시스템' : '알 수 없음'}
+                      <span className={`fw-medium ${getWriterTypeTextClass(poll.writer.writerType)}`} style={{ fontSize: '0.75rem' }}>
+                        {getWriterTypeDisplayName(poll.writer.writerType)}
                       </span>
                     </div>
                   </>

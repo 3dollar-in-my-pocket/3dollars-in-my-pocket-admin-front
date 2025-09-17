@@ -26,6 +26,10 @@ const Layout = () => {
     navigator('/');
   };
 
+  const closeSidebar = () => {
+    setIsSidebarOpen(false);
+  };
+
   if (!isLoginState) {
     return (
       <div className="min-vh-100 bg-light px-5 py-4">
@@ -39,7 +43,7 @@ const Layout = () => {
       <div className="row min-vh-100">
         <div className={`sidebar bg-dark text-white ${isSidebarOpen ? 'sidebar-open' : ''}`}>
           <div className="d-flex flex-column h-100 p-4">
-            <Link to="/manage" className="text-white mb-4 fw-bold text-decoration-none h4">
+            <Link to="/manage" className="text-white mb-4 fw-bold text-decoration-none h4" onClick={closeSidebar}>
               🎯 DASHBOARD
             </Link>
 
@@ -63,6 +67,7 @@ const Layout = () => {
                     className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
                       isActive("/manage/registration") ? "bg-primary text-white" : "text-white-50"
                     }`}
+                    onClick={closeSidebar}
                   >
                     <i className="bi bi-person-lines-fill fs-5"></i>
                     <span className="fw-medium">사장님 가입 신청 관리</span>
@@ -75,6 +80,7 @@ const Layout = () => {
                     className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
                       isActive("/manage/advertisement") ? "bg-primary text-white" : "text-white-50"
                     }`}
+                    onClick={closeSidebar}
                   >
                     <i className="bi bi-bullseye fs-5"></i>
                     <span className="fw-medium">광고 관리</span>
@@ -87,6 +93,7 @@ const Layout = () => {
                     className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
                       isActive("/manage/user-search") ? "bg-primary text-white" : "text-white-50"
                     }`}
+                    onClick={closeSidebar}
                   >
                     <i className="bi bi-search fs-5"></i>
                     <span className="fw-medium">유저 검색 & 관리</span>
@@ -99,6 +106,7 @@ const Layout = () => {
                     className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
                       isActive("/manage/store-search") ? "bg-primary text-white" : "text-white-50"
                     }`}
+                    onClick={closeSidebar}
                   >
                     <i className="bi bi-shop fs-5"></i>
                     <span className="fw-medium">가게 검색 & 관리</span>
@@ -111,6 +119,7 @@ const Layout = () => {
                     className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
                       isActive("/manage/faq") ? "bg-primary text-white" : "text-white-50"
                     }`}
+                    onClick={closeSidebar}
                   >
                     <i className="bi bi-question-circle-fill fs-5"></i>
                     <span className="fw-medium">FAQ 관리</span>
@@ -123,6 +132,7 @@ const Layout = () => {
                     className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
                       isActive("/manage/push-message") ? "bg-primary text-white" : "text-white-50"
                     }`}
+                    onClick={closeSidebar}
                   >
                     <i className="bi bi-send-fill fs-5"></i>
                     <span className="fw-medium">푸시 발송</span>
@@ -135,6 +145,7 @@ const Layout = () => {
                     className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
                       isActive("/manage/poll") ? "bg-primary text-white" : "text-white-50"
                     }`}
+                    onClick={closeSidebar}
                   >
                     <i className="bi bi-bar-chart-fill fs-5"></i>
                     <span className="fw-medium">투표 관리</span>
@@ -152,6 +163,7 @@ const Layout = () => {
                     className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
                       isActive("/manage/policy") ? "bg-primary text-white" : "text-white-50"
                     }`}
+                    onClick={closeSidebar}
                   >
                     <i className="bi bi-shield-fill-check fs-5"></i>
                     <span className="fw-medium">정책 관리</span>
@@ -164,6 +176,7 @@ const Layout = () => {
                     className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
                       isActive("/manage/tool/cache") ? "bg-primary text-white" : "text-white-50"
                     }`}
+                    onClick={closeSidebar}
                   >
                     <i className="bi bi-brush-fill fs-5"></i>
                     <span className="fw-medium">캐시 운영 툴</span>
@@ -176,6 +189,7 @@ const Layout = () => {
                     className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
                       isActive("/manage/tool/upload") ? "bg-primary text-white" : "text-white-50"
                     }`}
+                    onClick={closeSidebar}
                   >
                     <i className="bi bi-image-fill fs-5"></i>
                     <span className="fw-medium">이미지 업로드 운영 툴</span>
@@ -193,6 +207,7 @@ const Layout = () => {
                     className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
                       isActive("/info/push-statistics") ? "bg-primary text-white" : "text-white-50"
                     }`}
+                    onClick={closeSidebar}
                   >
                     <i className="bi bi-bar-chart-line-fill fs-5"></i>
                     <span className="fw-medium"> 푸시 발송 통계</span>
@@ -210,6 +225,7 @@ const Layout = () => {
                     className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
                       isActive("/manage/admin") ? "bg-primary text-white" : "text-white-50"
                     }`}
+                    onClick={closeSidebar}
                   >
                     <i className="bi bi-people-fill fs-5"></i>
                     <span className="fw-medium">관리자 계정 관리</span>

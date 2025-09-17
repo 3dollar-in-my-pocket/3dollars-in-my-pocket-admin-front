@@ -1,6 +1,7 @@
 // Store related type definitions and constants
+import { WRITER_TYPE, getWriterTypeBadgeClass, STATUS } from './common';
 
-// Store status types
+// Store status types (using common STATUS constants)
 export const STORE_STATUS = {
   ACTIVE: 'ACTIVE',
   DELETED: 'DELETED',
@@ -27,11 +28,8 @@ export const OPEN_STATUS = {
   CLOSED: 'CLOSED'
 };
 
-// Writer type
-export const WRITER_TYPE = {
-  USER: 'USER',
-  STORE: 'STORE'
-};
+// Re-export WRITER_TYPE for backward compatibility
+export { WRITER_TYPE };
 
 // Store type
 export const STORE_TYPE = {
@@ -167,16 +165,8 @@ export const getOpenStatusBadgeClass = (openStatus) => {
   }
 };
 
-export const getWriterTypeBadgeClass = (writerType) => {
-  switch (writerType) {
-    case WRITER_TYPE.USER:
-      return 'bg-primary';
-    case WRITER_TYPE.STORE:
-      return 'bg-danger';
-    default:
-      return 'bg-secondary';
-  }
-};
+// Re-export getWriterTypeBadgeClass for backward compatibility
+export { getWriterTypeBadgeClass };
 
 export const formatCount = (count) => {
   if (count >= 1000) {

@@ -1,6 +1,8 @@
+import { PLATFORM } from './common';
+
 export const DEVICE_OS = {
-  IOS: 'IOS',
-  AOS: 'Android', // API에서 AOS로 오는 경우 Android로 매핑
+  IOS: PLATFORM.IOS,
+  AOS: PLATFORM.ANDROID, // API에서 AOS로 오는 경우 Android로 매핑
   UNKNOWN: 'UNKNOWN'
 };
 
