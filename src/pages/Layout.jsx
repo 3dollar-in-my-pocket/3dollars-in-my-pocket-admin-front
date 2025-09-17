@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from "react";
 import {Link, Outlet, useLocation, useNavigate} from "react-router-dom";
 import {Bounce, toast, ToastContainer} from "react-toastify";
 import {useRecoilState} from "recoil";
@@ -8,6 +8,7 @@ import {LocalStorageService} from "../service/LocalStorageService";
 const Layout = () => {
   const location = useLocation();
   const isActive = (path) => location.pathname === path;
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const [isLoginState, setIsLoginState] = useRecoilState(LoginStatus);
   const navigator = useNavigate();
@@ -36,7 +37,7 @@ const Layout = () => {
   return (
     <div className="container-fluid h-100">
       <div className="row min-vh-100">
-        <div className="col-md-3 col-lg-2 p-0 bg-dark text-white">
+        <div className={`sidebar bg-dark text-white ${isSidebarOpen ? 'sidebar-open' : ''}`}>
           <div className="d-flex flex-column h-100 p-4">
             <Link to="/manage" className="text-white mb-4 fw-bold text-decoration-none h4">
               🎯 DASHBOARD
@@ -218,9 +219,28 @@ const Layout = () => {
           </div>
         </div>
 
-        <main className="col-md-9 col-lg-10 bg-light px-5 py-4">
-          <div className="bg-white rounded shadow-sm p-4">
-            <Outlet/>
+        {isSidebarOpen && (
+          <div
+            className="sidebar-backdrop d-md-none"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
+
+        <main className="main-content bg-light">
+          <div className="mobile-header d-md-none bg-white shadow-sm p-3 d-flex justify-content-between align-items-center">
+            <button
+              className="btn btn-outline-dark border-0"
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            >
+              <i className="bi bi-list fs-4"></i>
+            </button>
+            <h5 className="mb-0 fw-bold text-primary">Admin Dashboard</h5>
+          </div>
+
+          <div className="content-wrapper p-4">
+            <div className="bg-white rounded shadow-sm p-4">
+              <Outlet/>
+            </div>
           </div>
         </main>
       </div>

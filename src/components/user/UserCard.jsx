@@ -16,27 +16,29 @@ const UserCard = ({ user, onClick }) => {
   const borderColor = getBorderColor();
 
   return (
-    <div className="col-lg-3 col-md-4 col-sm-6 col-12">
+    <div className="col-lg-3 col-md-4 col-sm-6 col-12 mb-3">
       <ItemCard
         item={user}
         onClick={onClick}
         borderColor={borderColor}
         style={{
           borderTop: `4px solid ${borderColor}`,
-          borderRadius: '12px'
+          borderRadius: '12px',
+          height: '100%',
+          minHeight: '280px'
         }}
       >
         <div className="text-center mb-3">
           <div className="rounded-circle p-2 shadow-sm mx-auto mb-2" style={{
             background: `linear-gradient(135deg, ${borderColor}20 0%, ${borderColor}10 100%)`,
             border: `2px solid ${borderColor}40`,
-            width: '50px',
-            height: '50px',
+            width: '60px',
+            height: '60px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center'
           }}>
-            <i className="bi bi-person fs-6" style={{ color: borderColor }}></i>
+            <i className="bi bi-person fs-4" style={{ color: borderColor }}></i>
           </div>
         </div>
 
@@ -52,18 +54,27 @@ const UserCard = ({ user, onClick }) => {
             </span>
           </div>
 
-          <div className="text-center mb-2">
-            <div className="text-muted small mb-1" title={user.userId} style={{
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap'
-            }}>
-              <i className="bi bi-hash me-1"></i>
-              {user.userId}
-            </div>
-            <div className="text-muted small">
-              <i className="bi bi-calendar3 me-1"></i>
-              {new Date(user.createdAt).toLocaleDateString('ko-KR')}
+          <div className="text-center mb-3">
+            <div className="row g-1">
+              <div className="col-12">
+                <div className="text-muted small mb-1 d-flex align-items-center justify-content-center" title={user.userId}>
+                  <i className="bi bi-hash me-1"></i>
+                  <span style={{
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    maxWidth: '120px'
+                  }}>
+                    {user.userId}
+                  </span>
+                </div>
+              </div>
+              <div className="col-12">
+                <div className="text-muted small d-flex align-items-center justify-content-center">
+                  <i className="bi bi-calendar3 me-1"></i>
+                  {new Date(user.createdAt).toLocaleDateString('ko-KR')}
+                </div>
+              </div>
             </div>
           </div>
 
