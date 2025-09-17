@@ -128,6 +128,18 @@ const Layout = () => {
                     <span className="fw-medium">푸시 발송</span>
                   </Link>
                 </li>
+
+                <li>
+                  <Link
+                    to="/manage/poll"
+                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
+                      isActive("/manage/poll") ? "bg-primary text-white" : "text-white-50"
+                    }`}
+                  >
+                    <i className="bi bi-bar-chart-fill fs-5"></i>
+                    <span className="fw-medium">투표 관리</span>
+                  </Link>
+                </li>
               </ul>
             </div>
 

@@ -174,3 +174,33 @@
     margin-bottom: 1rem;
   }
 }
+
+/* Poll card animations */
+@keyframes ping {
+  75%, 100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+.animate-ping {
+  animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/* Poll status indicators */
+.poll-active {
+  position: relative;
+}
+
+.poll-active::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, #28a745, #20c997);
+  border-radius: 18px;
+  z-index: -1;
+  opacity: 0.1;
+}
