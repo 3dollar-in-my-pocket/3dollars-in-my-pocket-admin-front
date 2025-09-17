@@ -262,7 +262,7 @@ const Layout = () => {
             >
               <i className="bi bi-list fs-4"></i>
             </button>
-            <h5 className="mb-0 fw-bold text-primary">Admin Dashboard</h5>
+            <h5 className="mb-0 fw-bold text-primary">Dashboard</h5>
           </div>
 
           <div className="content-wrapper p-4">

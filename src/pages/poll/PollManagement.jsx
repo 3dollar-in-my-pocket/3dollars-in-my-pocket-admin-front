@@ -201,12 +201,6 @@ const PollManagement = () => {
                 </div>
                 <h5 className="mb-0 fw-bold text-dark">투표 목록</h5>
               </div>
-              {polls.length > 0 && (
-                <span className="badge bg-success px-3 py-2 rounded-pill">
-                  총 {polls.length}개
-                  {hasMore && '+'}
-                </span>
-              )}
             </div>
           </div>
           <div

@@ -4,26 +4,6 @@ export const WRITER_TYPE = {
   STORE: 'STORE',
 };
 
-// General status constants
-export const STATUS = {
-  ACTIVE: 'ACTIVE',
-  DELETED: 'DELETED',
-  AUTO_DELETED: 'AUTO_DELETED',
-  PENDING: 'PENDING',
-  APPROVED: 'APPROVED',
-  REJECTED: 'REJECTED',
-  SUCCESS: 'SUCCESS',
-  FAILED: 'FAILED',
-  ERROR: 'ERROR'
-};
-
-// Platform constants
-export const PLATFORM = {
-  AOS: 'AOS',
-  IOS: 'IOS',
-  ANDROID: 'Android'
-};
-
 // Writer type display names
 export const getWriterTypeDisplayName = (writerType) => {
   switch (writerType) {

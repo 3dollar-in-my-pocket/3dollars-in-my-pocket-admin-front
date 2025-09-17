@@ -1,5 +1,5 @@
 // Store related type definitions and constants
-import { WRITER_TYPE, getWriterTypeBadgeClass, STATUS } from './common';
+import { WRITER_TYPE, getWriterTypeBadgeClass } from './common';
 
 // Store status types (using common STATUS constants)
 export const STORE_STATUS = {
@@ -46,11 +46,11 @@ export const STORE_SEARCH_TYPES = {
 // Utility functions
 export const getStoreStatusDisplayName = (status) => {
   switch (status) {
-    case STORE_STATUS.ACTIVE:
+    case 'ACTIVE':
       return '활성된 가게';
-    case STORE_STATUS.AUTO_DELETED:
+    case 'AUTO_DELETED':
       return '자동 삭제된 가게';
-    case STORE_STATUS.DELETED:
+    case 'DELETED':
       return '삭제된 가게';
     default:
       return '알 수 없음';

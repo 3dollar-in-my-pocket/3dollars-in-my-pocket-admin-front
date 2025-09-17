@@ -28,7 +28,8 @@ const StoreSearch = () => {
   } = useSearch({
     validateSearch: storeSearchAdapter.validateSearch,
     searchFunction: storeSearchAdapter.searchFunction,
-    errorMessage: storeSearchAdapter.errorMessage
+    errorMessage: storeSearchAdapter.errorMessage,
+    autoSearchTypes: [STORE_SEARCH_TYPES.RECENT]
   });
 
   // 초기 검색 타입 설정
