@@ -11,7 +11,7 @@ const PollManagement = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(false);
-  const [cursor, setCursor] = useState(null);
+  const cursorRef = useRef(null);
   const scrollContainerRef = useRef(null);
 
   // 카테고리 목록 조회
@@ -39,19 +39,22 @@ const PollManagement = () => {
   const fetchPolls = useCallback(async (category, isLoadMore = false) => {
     if (!category) return;
 
+    const currentCursor = isLoadMore ? cursorRef.current : null;
+
     if (isLoadMore) {
       setIsLoadingMore(true);
     } else {
       setIsLoading(true);
       setPolls([]);
-      setCursor(null);
+      cursorRef.current = null;
+      setHasMore(false);
     }
 
     try {
       const response = await pollApi.getPolls(
         category,
         30,
-        isLoadMore ? cursor : null
+        currentCursor
       );
 
       if (response.ok) {
@@ -67,7 +70,9 @@ const PollManagement = () => {
 
         // 다음 페이지 커서 설정 (마지막 아이템의 pollId 사용)
         if (response.data.cursor.hasMore && newPolls.length > 0) {
-          setCursor(newPolls[newPolls.length - 1].pollId);
+          cursorRef.current = newPolls[newPolls.length - 1].pollId;
+        } else {
+          cursorRef.current = null;
         }
       }
     } catch (error) {
@@ -77,14 +82,14 @@ const PollManagement = () => {
       setIsLoading(false);
       setIsLoadingMore(false);
     }
-  }, [cursor]);
+  }, []);
 
   // 카테고리 변경 시 투표 목록 새로 조회
   useEffect(() => {
     if (selectedCategory) {
       fetchPolls(selectedCategory);
     }
-  }, [selectedCategory, fetchPolls]);
+  }, [selectedCategory]);
 
   // 무한 스크롤 처리
   const handleScroll = useCallback(() => {
@@ -97,7 +102,7 @@ const PollManagement = () => {
     if (scrollHeight - scrollTop - clientHeight < threshold) {
       fetchPolls(selectedCategory, true);
     }
-  }, [selectedCategory, fetchPolls, isLoadingMore, hasMore]);
+  }, [selectedCategory, isLoadingMore, hasMore]);
 
   // 스크롤 이벤트 등록
   useEffect(() => {
