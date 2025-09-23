@@ -90,16 +90,20 @@
 /* Desktop styles */
 @media (min-width: 768px) {
   .sidebar {
-    position: relative;
+    position: fixed;
+    top: 0;
+    left: 0;
     transform: translateX(0);
-    width: 25%;
-    min-width: 250px;
-    max-width: 300px;
+    width: 280px;
+    height: 100vh;
+    z-index: 1000;
+    overflow-y: auto;
   }
 
   .main-content {
     flex: 1;
-    margin-left: 0;
+    margin-left: 280px;
+    width: calc(100% - 280px);
   }
 
   .mobile-header {
