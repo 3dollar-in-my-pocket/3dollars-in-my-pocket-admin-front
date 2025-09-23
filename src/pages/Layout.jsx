@@ -47,16 +47,6 @@ const Layout = () => {
               🎯 DASHBOARD
             </Link>
 
-            <ToastContainer
-              position="top-right"
-              limit={1}
-              autoClose={2000}
-              newestOnTop={false}
-              closeOnClick
-              pauseOnHover
-              theme="colored"
-              transition={Bounce}
-            />
 
             <div className="mb-4">
               <h5 className="text-white-50 mb-3">서비스 관리</h5>
@@ -272,6 +262,18 @@ const Layout = () => {
           </div>
         </main>
       </div>
+
+      <ToastContainer
+        position="top-right"
+        limit={1}
+        autoClose={2000}
+        newestOnTop={false}
+        closeOnClick
+        pauseOnHover
+        theme="colored"
+        transition={Bounce}
+        style={{ zIndex: 9999 }}
+      />
     </div>
   );
 };
