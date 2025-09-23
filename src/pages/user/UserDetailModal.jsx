@@ -38,18 +38,27 @@ const UserDetailModal = ({show, onHide, user}) => {
     setError(null);
 
     try {
-      const response = await userApi.getUserDetail(user.userId);
-      if (!response.ok) {
+      const [userResponse, devicesResponse] = await Promise.all([
+        userApi.getUserDetail(user.userId),
+        deviceApi.getUserDevices(user.userId)
+      ]);
+
+      if (!userResponse.ok) {
         return
       }
 
-      const data = response.data;
+      const userData = userResponse.data;
 
-      setUserDetail(data.user);
-      setDevices(data.devices || []);
-      setSettings(data.setting);
-      setRepresentativeMedal(data.representativeMedal);
-      setMedals(data.medals || []);
+      setUserDetail(userData.user);
+      setSettings(userData.setting);
+      setRepresentativeMedal(userData.representativeMedal);
+      setMedals(userData.medals || []);
+
+      if (devicesResponse.ok) {
+        setDevices(devicesResponse.data || []);
+      } else {
+        setDevices([]);
+      }
     } finally {
       setIsLoading(false);
     }
