@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import StoreDetailModal from './StoreDetailModal';
 import { STORE_SEARCH_TYPES } from '../../types/store';
 import useSearch from '../../hooks/useSearch';
@@ -23,18 +23,27 @@ const StoreSearch = () => {
     handleItemClick: handleStoreClick,
     handleCloseModal,
     handleKeyPress,
-    handleScroll
+    handleScroll,
+    resetSearch
   } = useSearch({
     validateSearch: storeSearchAdapter.validateSearch,
     searchFunction: storeSearchAdapter.searchFunction,
     errorMessage: storeSearchAdapter.errorMessage,
-    autoSearchTypes: [STORE_SEARCH_TYPES.RECENT]
+    autoSearchTypes: [] // 자동 검색 비활성화
   });
 
   // 초기 검색 타입 설정
   useEffect(() => {
     setSearchType(storeSearchAdapter.defaultSearchType);
   }, [setSearchType]);
+
+  // 검색 타입 변경 핸들러
+  const handleSearchTypeChange = useCallback((newSearchType) => {
+    if (searchType !== newSearchType) {
+      resetSearch(); // 이전 검색 결과 초기화
+      setSearchType(newSearchType);
+    }
+  }, [searchType, setSearchType, resetSearch]);
 
   const renderCustomInputs = ({ searchType, searchQuery, handleSearchQueryChange, onKeyPress }) => {
     if (searchType === STORE_SEARCH_TYPES.KEYWORD) {
@@ -96,7 +105,7 @@ const StoreSearch = () => {
 
       <SearchForm
         searchType={searchType}
-        setSearchType={setSearchType}
+        setSearchType={handleSearchTypeChange}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         searchOptions={storeSearchAdapter.searchOptions}

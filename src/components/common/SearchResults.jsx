@@ -78,19 +78,8 @@ const SearchResults = ({
             </div>
             <div>
               <h4 className="mb-0 fw-bold text-dark">{title}</h4>
-              {results.length > 0 && (
-                <small className="text-muted">총 {results.length}개의 결과가 검색되었습니다</small>
-              )}
             </div>
           </div>
-          {results.length > 0 && (
-            <div className="d-flex align-items-center gap-2">
-              <span className="badge bg-primary bg-opacity-10 text-primary border border-primary rounded-pill px-3 py-2">
-                <i className="bi bi-list me-1"></i>
-                {results.length}개
-              </span>
-            </div>
-          )}
         </div>
       </div>
 

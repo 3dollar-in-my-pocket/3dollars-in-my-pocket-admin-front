@@ -18,9 +18,21 @@ export const useSearch = ({
   const [nextCursor, setNextCursor] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
   const scrollContainerRef = useRef(null);
+  const isLoadingMore = useRef(false);
+  const lastScrollTime = useRef(0);
 
   // 검색 실행
   const handleSearch = useCallback(async (reset = true) => {
+    // 더보기 요청인데 이미 로딩중이면 중복 요청 방지
+    if (!reset && (isLoading || isLoadingMore.current)) {
+      return;
+    }
+
+    // 더보기 요청인데 더 이상 데이터가 없으면 요청 차단
+    if (!reset && (!hasMore || !nextCursor)) {
+      return;
+    }
+
     // 검증 함수가 있으면 검증 실행
     if (validateSearch) {
       const validationError = validateSearch(searchType, searchQuery, additionalParams);
@@ -30,6 +42,9 @@ export const useSearch = ({
       }
     }
 
+    if (!reset) {
+      isLoadingMore.current = true;
+    }
     setIsSearching(true);
     setIsLoading(true);
 
@@ -54,19 +69,21 @@ export const useSearch = ({
         setResults(prev => [...prev, ...(newResults || [])]);
       }
 
-      setHasMore(newHasMore || false);
+      setHasMore(Boolean(newHasMore));
       setNextCursor(newNextCursor || null);
     } catch (error) {
-      console.error('Search error:', error);
       toast.error(errorMessage);
       if (reset) {
         setResults([]);
+        setHasMore(false);
+        setNextCursor(null);
       }
     } finally {
       setIsLoading(false);
       setIsSearching(false);
+      isLoadingMore.current = false;
     }
-  }, [searchType, searchQuery, additionalParams, nextCursor, validateSearch, searchFunction, errorMessage]);
+  }, [searchType, searchQuery, additionalParams, nextCursor, hasMore, validateSearch, searchFunction, errorMessage, isLoading]);
 
   // 더 보기
   const handleLoadMore = useCallback(() => {
@@ -84,13 +101,25 @@ export const useSearch = ({
 
   // 무한 스크롤 핸들러
   const handleScroll = useCallback((e) => {
-    const { scrollTop, scrollHeight, clientHeight } = e.target;
-    const isScrolledToBottom = scrollHeight - scrollTop <= clientHeight + 100;
+    const now = Date.now();
 
-    if (isScrolledToBottom && hasMore && !isLoading) {
-      handleLoadMore();
+    // 디바운싱 - 300ms 이내 중복 호출 방지
+    if (now - lastScrollTime.current < 300) {
+      return;
     }
-  }, [hasMore, isLoading, handleLoadMore]);
+
+    const { scrollTop, scrollHeight, clientHeight } = e.target;
+
+    // 스크롤이 하단 80% 지점에 도달했을 때 다음 페이지 로드
+    const scrollPercentage = (scrollTop + clientHeight) / scrollHeight;
+    const shouldLoadMore = scrollPercentage >= 0.8;
+
+    // 더 엄격한 조건 체크
+    if (shouldLoadMore && hasMore && !isLoading && !isLoadingMore.current && nextCursor) {
+      lastScrollTime.current = now;
+      handleSearch(false);
+    }
+  }, [hasMore, isLoading, handleSearch, nextCursor]);
 
   // 아이템 선택
   const handleItemClick = useCallback((item) => {
@@ -118,6 +147,8 @@ export const useSearch = ({
     setHasMore(false);
     setNextCursor(null);
     setIsSearching(false);
+    isLoadingMore.current = false;
+    lastScrollTime.current = 0;
     if (resetFunction) {
       resetFunction();
     }

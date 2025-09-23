@@ -18,12 +18,20 @@ export const storeSearchAdapter = {
 
     const { contents, cursor: responseCursor } = response.data;
 
+    // 페이징 종료 조건: nextCursor가 없거나 결과가 비어있으면 더 이상 데이터 없음
+    const hasMore = Boolean(
+      responseCursor?.nextCursor &&
+      contents &&
+      contents.length > 0 &&
+      responseCursor.hasMore !== false
+    );
+
     return {
       ok: true,
       data: {
         results: contents || [],
-        hasMore: responseCursor?.hasMore || false,
-        nextCursor: responseCursor?.nextCursor || null
+        hasMore,
+        nextCursor: hasMore ? responseCursor.nextCursor : null
       }
     };
   },
