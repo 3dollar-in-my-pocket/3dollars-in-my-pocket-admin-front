@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+The project targets both desktop and mobile users. As such, your prompts
+should encourage responsive design and component re‑use so that the same
+codebase can adapt gracefully across form factors.
+
 ## Development Commands
 
 ### Package Manager
@@ -88,3 +92,32 @@ src/
 - Max line length: 120 characters
 - JSX files use `.jsx` extension, JavaScript files use `.js`
 - Korean language used for user-facing messages and error handling
+
+## 💡 REACT BEST PRACTICES
+### 📝 Component Design Principles
+- Single Responsibility: One component, one purpose
+- Composition over Inheritance: Prefer composition patterns
+- Props Interface Design: Clear, typed prop interfaces
+- Custom Hooks: Extract reusable logic
+- Error Boundaries: Graceful error handling
+- Accessibility: ARIA labels, semantic HTML
+
+### 🎯 Performance Optimization
+- React.memo: Prevent unnecessary re-renders
+- useMemo/useCallback: Memoize expensive operations
+- Code Splitting: Lazy load components
+- Virtual Scrolling: Handle large lists efficiently
+- Bundle Analysis: Optimize bundle size
+- Image Optimization: Lazy loading, WebP format
+
+
+### React Security Checklist:
+
+- XSS prevention (DOMPurify)
+- CSRF protection
+- Secure authentication
+- Input validation
+- Safe dangerouslySetInnerHTML usage
+- Secure API communication
+- Environment variable protection
+- Content Security Policy

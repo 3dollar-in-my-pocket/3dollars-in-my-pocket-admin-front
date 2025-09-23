@@ -1,8 +1,9 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
 import {toast} from 'react-toastify';
 import storeImageApi from "../api/storeImageApi";
+import {getStoreTypeDisplayName, getStoreTypeBadgeClass, getStoreTypeIcon} from "../types/store";
 
-const StoreImageHistory = ({storeId, isActive}) => {
+const StoreImageHistory = ({storeId, isActive, onAuthorClick}) => {
   const [images, setImages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
@@ -10,6 +11,7 @@ const StoreImageHistory = ({storeId, isActive}) => {
   const [totalCount, setTotalCount] = useState(0);
   const [selectedImage, setSelectedImage] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const scrollContainerRef = useRef(null);
 
   useEffect(() => {
@@ -72,6 +74,42 @@ const StoreImageHistory = ({storeId, isActive}) => {
   const handleCloseModal = () => {
     setSelectedImage(null);
     setShowModal(false);
+    setIsDeleting(false);
+  };
+
+  const getStoreTypeBadge = (storeType) => {
+    if (!storeType) return null;
+    return (
+      <span className={`badge ${getStoreTypeBadgeClass(storeType)} text-white rounded-pill px-2 py-1 small`}>
+        <i className={`bi ${getStoreTypeIcon(storeType)} me-1`}></i>
+        {getStoreTypeDisplayName(storeType)}
+      </span>
+    );
+  };
+
+  const handleDeleteImage = async () => {
+    const confirmed = window.confirm(`정말로 이 이미지를 삭제하시겠습니까?\n\n등록자: ${selectedImage.writer?.name || '익명 사용자'}\n등록일: ${formatDateTime(selectedImage.createdAt)}\n\n이 작업은 되돌릴 수 없습니다.`);
+
+    if (!confirmed) return;
+
+    setIsDeleting(true);
+    try {
+      const response = await storeImageApi.deleteStoreImage(selectedImage.imageId);
+
+      if (response.status === 200 || response.status === 204) {
+        toast.success('이미지가 성공적으로 삭제되었습니다.');
+        handleCloseModal();
+        // 이미지 목록 새로고침
+        fetchImages(true);
+      } else {
+        throw new Error('삭제 실패');
+      }
+    } catch (error) {
+      console.error('이미지 삭제 실패:', error);
+      toast.error('이미지 삭제 중 오류가 발생했습니다.');
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   if (!isActive) {
@@ -183,9 +221,56 @@ const StoreImageHistory = ({storeId, isActive}) => {
                         </div>
                       </div>
                       <div className="flex-grow-1">
-                        <h6 className="fw-bold text-dark mb-1" style={{fontSize: '0.9rem'}}>
-                          {image.writer?.name || '익명 사용자'}
-                        </h6>
+                        <div className="d-flex align-items-center gap-2 mb-1">
+                          <div
+                            className={`d-flex align-items-center gap-1 ${image.writer && onAuthorClick ? 'clickable-author' : ''}`}
+                            style={{
+                              cursor: image.writer && onAuthorClick ? 'pointer' : 'default',
+                              padding: '3px 6px',
+                              borderRadius: '5px',
+                              transition: 'all 0.2s ease',
+                              backgroundColor: 'transparent'
+                            }}
+                            onClick={(e) => {
+                              if (image.writer && onAuthorClick) {
+                                e.stopPropagation();
+                                onAuthorClick(image.writer);
+                              }
+                            }}
+                            onMouseEnter={(e) => {
+                              if (image.writer && onAuthorClick) {
+                                e.currentTarget.style.backgroundColor = 'rgba(13, 110, 253, 0.1)';
+                                e.currentTarget.style.transform = 'scale(1.02)';
+                              }
+                            }}
+                            onMouseLeave={(e) => {
+                              if (image.writer && onAuthorClick) {
+                                e.currentTarget.style.backgroundColor = 'transparent';
+                                e.currentTarget.style.transform = 'scale(1)';
+                              }
+                            }}
+                          >
+                            <span className="text-muted small">등록자:</span>
+                            <h6 className={`fw-bold mb-0 ${image.writer && onAuthorClick ? 'text-primary' : 'text-dark'}`} style={{ fontSize: '0.9rem' }}>
+                              {image.writer?.name || '익명 사용자'}
+                            </h6>
+                            {image.writer && onAuthorClick && (
+                              <i className="bi bi-box-arrow-up-right text-primary" style={{ fontSize: '0.6rem' }}></i>
+                            )}
+                          </div>
+                          {/* 이미지 상태 표시 */}
+                          <span className={`badge rounded-pill ${
+                            image.status === 'ACTIVE' ? 'bg-success' :
+                            image.status === 'INACTIVE' ? 'bg-danger' : 'bg-secondary'
+                          } text-white px-2 py-1`} style={{fontSize: '0.65rem'}}>
+                            <i className={`bi ${
+                              image.status === 'ACTIVE' ? 'bi-image-fill' :
+                              image.status === 'INACTIVE' ? 'bi-image-alt' : 'bi-question-circle-fill'
+                            } me-1`}></i>
+                            {image.status === 'ACTIVE' ? '활성' :
+                             image.status === 'INACTIVE' ? '비활성' : '알 수 없음'}
+                          </span>
+                        </div>
                         <div className="d-flex gap-1 flex-wrap">
                           {image.writer?.userId && (
                             <span
@@ -203,6 +288,7 @@ const StoreImageHistory = ({storeId, isActive}) => {
                               {image.writer.socialType}
                             </span>
                           )}
+                          {image.store?.storeType && getStoreTypeBadge(image.store.storeType)}
                         </div>
                       </div>
                     </div>
@@ -295,8 +381,25 @@ const StoreImageHistory = ({storeId, isActive}) => {
                   style={{maxHeight: '500px', width: 'auto'}}
                 />
               </div>
-              <div className="modal-footer">
-                <div className="flex-grow-1 text-start">
+              <div className="modal-footer d-flex justify-content-between">
+                <button
+                  className="btn btn-danger rounded-pill px-4"
+                  onClick={handleDeleteImage}
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm me-2"></span>
+                      삭제 중...
+                    </>
+                  ) : (
+                    <>
+                      <i className="bi bi-trash me-2"></i>
+                      이미지 삭제
+                    </>
+                  )}
+                </button>
+                <div className="flex-grow-1 px-3">
                   <div className="d-flex flex-column gap-1">
                     <div className="d-flex gap-2 align-items-center">
                       <small className="text-muted">
@@ -321,9 +424,21 @@ const StoreImageHistory = ({storeId, isActive}) => {
                         크기: {selectedImage.width} × {selectedImage.height}px
                       </small>
                     )}
+                    {selectedImage.store?.storeType && (
+                      <div className="mt-1">
+                        {getStoreTypeBadge(selectedImage.store.storeType)}
+                        {selectedImage.store?.name && (
+                          <span className="badge bg-light text-dark border rounded-pill px-2 py-1 ms-1" style={{fontSize: '0.7rem'}}>
+                            <i className="bi bi-shop me-1"></i>
+                            {selectedImage.store.name}
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
-                <button className="btn btn-secondary" onClick={handleCloseModal}>
+                <button className="btn btn-secondary rounded-pill px-4" onClick={handleCloseModal}>
+                  <i className="bi bi-x-lg me-2"></i>
                   닫기
                 </button>
               </div>

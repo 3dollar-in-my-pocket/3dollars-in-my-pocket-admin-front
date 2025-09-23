@@ -1,13 +1,31 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Tab, Tabs } from 'react-bootstrap';
 
 const ActivityHistory = ({
   type, // 'user' or 'store'
   entityId, // userId or storeId
-  tabs = [] // 탭 설정 배열
+  tabs = [], // 탭 설정 배열
+  initialActiveTab = null, // 초기 활성 탭
+  onAuthorClick = null, // 작성자 클릭 핸들러
+  onStoreClick = null // 가게 클릭 핸들러
 }) => {
-  const [activeTab, setActiveTab] = useState(tabs.length > 0 ? tabs[0].key : '');
-  const [loadedTabs, setLoadedTabs] = useState(new Set(tabs.length > 0 ? [tabs[0].key] : []));
+  const getInitialTab = () => {
+    if (initialActiveTab && tabs.find(tab => tab.key === initialActiveTab)) {
+      return initialActiveTab;
+    }
+    return tabs.length > 0 ? tabs[0].key : '';
+  };
+
+  const [activeTab, setActiveTab] = useState(getInitialTab());
+  const [loadedTabs, setLoadedTabs] = useState(new Set(getInitialTab() ? [getInitialTab()] : []));
+
+  useEffect(() => {
+    const newActiveTab = getInitialTab();
+    if (newActiveTab && newActiveTab !== activeTab) {
+      setActiveTab(newActiveTab);
+      setLoadedTabs(prev => new Set([...prev, newActiveTab]));
+    }
+  }, [initialActiveTab]);
 
   const handleTabChange = (tabKey) => {
     setActiveTab(tabKey);
@@ -77,6 +95,8 @@ const ActivityHistory = ({
                     <tab.component
                       {...(type === 'user' ? { userId: entityId } : { storeId: entityId })}
                       isActive={activeTab === tab.key}
+                      onAuthorClick={onAuthorClick}
+                      onStoreClick={onStoreClick}
                     />
                   ) : (
                     <div className="text-center py-5">

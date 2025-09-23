@@ -2,8 +2,9 @@ import {useCallback, useEffect, useRef, useState} from 'react';
 import {toast} from 'react-toastify';
 import storeReportApi from "../api/storeReportApi";
 import {getReportReasonBadgeClass} from "../types/report";
+import {getStoreTypeDisplayName, getStoreTypeBadgeClass, getStoreTypeIcon} from "../types/store";
 
-const StoreReportHistory = ({storeId, isActive}) => {
+const StoreReportHistory = ({storeId, isActive, onAuthorClick}) => {
   const [reports, setReports] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
@@ -73,6 +74,16 @@ const StoreReportHistory = ({storeId, isActive}) => {
       <span className={`badge ${reportBadgeClass} bg-opacity-10 text-dark border rounded-pill px-2 py-1`}>
         <i className="bi bi-flag me-1"></i>
         {reasonText}
+      </span>
+    );
+  };
+
+  const getStoreTypeBadge = (storeType) => {
+    if (!storeType) return null;
+    return (
+      <span className={`badge ${getStoreTypeBadgeClass(storeType)} text-white rounded-pill px-2 py-1 small`}>
+        <i className={`bi ${getStoreTypeIcon(storeType)} me-1`}></i>
+        {getStoreTypeDisplayName(storeType)}
       </span>
     );
   };
@@ -163,11 +174,50 @@ const StoreReportHistory = ({storeId, isActive}) => {
                       <div className="flex-grow-1">
                         <div className="d-flex justify-content-between align-items-start mb-3">
                           <div>
-                            <h6 className="fw-bold text-dark mb-2">
-                              {report.reporter?.name || '익명 신고자'}
-                            </h6>
+                            <div className="d-flex align-items-center gap-2 mb-2">
+                              <div className="bg-danger bg-opacity-10 rounded-circle p-1">
+                                <i className="bi bi-person-fill text-danger" style={{ fontSize: '0.8rem' }}></i>
+                              </div>
+                              <div
+                                className={`d-flex align-items-center gap-1 ${report.reporter && onAuthorClick ? 'clickable-author' : ''}`}
+                                style={{
+                                  cursor: report.reporter && onAuthorClick ? 'pointer' : 'default',
+                                  padding: '3px 6px',
+                                  borderRadius: '5px',
+                                  transition: 'all 0.2s ease',
+                                  backgroundColor: 'transparent'
+                                }}
+                                onClick={(e) => {
+                                  if (report.reporter && onAuthorClick) {
+                                    e.stopPropagation();
+                                    onAuthorClick(report.reporter);
+                                  }
+                                }}
+                                onMouseEnter={(e) => {
+                                  if (report.reporter && onAuthorClick) {
+                                    e.currentTarget.style.backgroundColor = 'rgba(13, 110, 253, 0.1)';
+                                    e.currentTarget.style.transform = 'scale(1.02)';
+                                  }
+                                }}
+                                onMouseLeave={(e) => {
+                                  if (report.reporter && onAuthorClick) {
+                                    e.currentTarget.style.backgroundColor = 'transparent';
+                                    e.currentTarget.style.transform = 'scale(1)';
+                                  }
+                                }}
+                              >
+                                <span className="text-muted small">신고자:</span>
+                                <h6 className={`fw-bold mb-0 ${report.reporter && onAuthorClick ? 'text-primary' : 'text-dark'}`}>
+                                  {report.reporter?.name || '익명 신고자'}
+                                </h6>
+                                {report.reporter && onAuthorClick && (
+                                  <i className="bi bi-box-arrow-up-right text-primary" style={{ fontSize: '0.7rem' }}></i>
+                                )}
+                              </div>
+                            </div>
                             <div className="d-flex align-items-center gap-2 mb-2">
                               {getReportTypeBadge(report.reason)}
+                              {report.store?.storeType && getStoreTypeBadge(report.store.storeType)}
                             </div>
                           </div>
                           <div className="text-end">
@@ -284,6 +334,22 @@ const StoreReportHistory = ({storeId, isActive}) => {
                   <div className="col-md-6">
                     <label className="form-label fw-bold">신고 일시</label>
                     <p className="form-control-plaintext">{formatDateTime(selectedReport.createdAt)}</p>
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label fw-bold">가게 타입</label>
+                    <div className="d-flex gap-2 flex-wrap">
+                      {selectedReport.store?.storeType ? (
+                        getStoreTypeBadge(selectedReport.store.storeType)
+                      ) : (
+                        <span className="text-muted">정보 없음</span>
+                      )}
+                      {selectedReport.store?.name && (
+                        <span className="badge bg-light text-dark border rounded-pill px-3 py-2">
+                          <i className="bi bi-shop me-1"></i>
+                          {selectedReport.store.name}
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <div className="col-12">
                     <label className="form-label fw-bold">신고 사유</label>

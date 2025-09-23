@@ -12,20 +12,27 @@ import {
   getSalesTypeDisplayName,
   getStoreStatusBadgeClass,
   getStoreStatusDisplayName,
+  getStoreTypeDisplayName,
+  getStoreTypeBadgeClass,
+  getStoreTypeIcon,
   getWriterTypeBadgeClass
 } from '../../types/store';
+import { WRITER_TYPE } from '../../types/common';
 import storeApi from '../../api/storeApi';
 import ActivityHistory from '../../components/ActivityHistory';
 import StoreReviewHistory from '../../components/StoreReviewHistory';
 import StoreVisitHistory from '../../components/StoreVisitHistory';
 import StoreImageHistory from '../../components/StoreImageHistory';
 import StoreReportHistory from '../../components/StoreReportHistory';
+import {toast} from 'react-toastify';
 
-const StoreDetailModal = ({show, onHide, store}) => {
+const StoreDetailModal = ({show, onHide, store, onAuthorClick}) => {
   const [storeDetail, setStoreDetail] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('basic');
   const [error, setError] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [activitySubTab, setActivitySubTab] = useState(null);
 
   useEffect(() => {
     if (show && store) {
@@ -63,7 +70,46 @@ const StoreDetailModal = ({show, onHide, store}) => {
     setStoreDetail(null);
     setActiveTab('basic');
     setError(null);
+    setIsDeleting(false);
+    setActivitySubTab(null);
     onHide();
+  };
+
+  const handleReviewClick = () => {
+    setActiveTab('activity');
+    setActivitySubTab('reviews');
+  };
+
+  const handleReportClick = () => {
+    setActiveTab('activity');
+    setActivitySubTab('reports');
+  };
+
+  const handleDeleteStore = async () => {
+    const confirmed = window.confirm(`정말로 "${store.name}" 가게를 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.`);
+
+    if (!confirmed) return;
+
+    setIsDeleting(true);
+    try {
+      const response = await storeApi.deleteStore(store.storeId);
+
+      if (response.status === 200 || response.status === 204) {
+        toast.success('가게가 성공적으로 삭제되었습니다.');
+        handleClose();
+        // 부모 컴포넌트에 삭제 완료를 알려 목록을 새로고침할 수 있도록 함
+        if (window.location.reload) {
+          setTimeout(() => window.location.reload(), 1000);
+        }
+      } else {
+        throw new Error('삭제 실패');
+      }
+    } catch (error) {
+      console.error('가게 삭제 실패:', error);
+      toast.error('가게 삭제 중 오류가 발생했습니다.');
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const getStatusBadge = (status) => {
@@ -109,12 +155,67 @@ const StoreDetailModal = ({show, onHide, store}) => {
   };
 
   const getOwnerBadge = (owner) => {
-    if (!owner || !owner.name) return null;
+    // USER 타입이 아니거나 정보가 없으면 UI를 표시하지 않음
+    if (!owner || !owner.name || owner.writerType !== WRITER_TYPE.USER) {
+      return null;
+    }
+
+    // USER 타입인 경우에만 클릭 가능
+    const isClickable = onAuthorClick;
+
+    return (
+      <div className="d-flex align-items-center gap-2">
+        <div className="bg-success bg-opacity-10 rounded-circle p-1">
+          <i className="bi bi-person-fill text-success" style={{ fontSize: '0.9rem' }}></i>
+        </div>
+        <div
+          className={`d-flex align-items-center gap-1 ${isClickable ? 'clickable-author' : ''}`}
+          style={{
+            cursor: isClickable ? 'pointer' : 'default',
+            padding: '4px 8px',
+            borderRadius: '6px',
+            transition: 'all 0.2s ease',
+            backgroundColor: 'transparent'
+          }}
+          onClick={(e) => {
+            if (isClickable) {
+              e.stopPropagation();
+              onAuthorClick(owner);
+            }
+          }}
+          onMouseEnter={(e) => {
+            if (isClickable) {
+              e.currentTarget.style.backgroundColor = 'rgba(13, 110, 253, 0.1)';
+              e.currentTarget.style.transform = 'scale(1.02)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (isClickable) {
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.transform = 'scale(1)';
+            }
+          }}
+        >
+          <span className="text-muted small">가게 제보자:</span>
+          <span className={`badge rounded-pill px-3 py-2 ${getWriterTypeBadgeClass(owner.writerType)} bg-opacity-10 ${isClickable ? 'text-primary' : 'text-dark'} border`}>
+            <i className="bi bi-shop me-1"></i>
+            {owner.name}
+          </span>
+          {isClickable && (
+            <i className="bi bi-box-arrow-up-right text-primary" style={{ fontSize: '0.7rem' }}></i>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const getStoreTypeBadge = (storeType) => {
+    if (!storeType) return null;
     return (
       <span
-        className={`badge rounded-pill px-3 py-2 ${getWriterTypeBadgeClass(owner.writerType)} bg-opacity-10 text-dark border`}>
-        <i className="bi bi-person me-1"></i>
-        {owner.name}
+        className={`badge rounded-pill px-3 py-2 ${getStoreTypeBadgeClass(storeType)} text-white border`}>
+        <i className={`bi ${getStoreTypeIcon(storeType)} me-1`}></i>
+        {getStoreTypeDisplayName(storeType)}
       </span>
     );
   };
@@ -214,21 +315,43 @@ const StoreDetailModal = ({show, onHide, store}) => {
       size="xl"
       centered
       className="store-detail-modal"
-      style={{maxWidth: '90vw'}}
+      style={{maxWidth: '95vw'}}
+      dialogClassName="modal-90w"
     >
       <Modal.Header
         closeButton
-        className="border-0 pb-0"
-        style={{background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'}}
+        className="border-0 pb-0 position-relative overflow-hidden"
+        style={{
+          background: 'linear-gradient(135deg, #fff3e0 0%, #ffecb3 100%)',
+          borderTopLeftRadius: '20px',
+          borderTopRightRadius: '20px',
+          zIndex: 1
+        }}
       >
-        <div className="w-100">
-          <div className="d-flex align-items-center gap-3 text-white">
-            <div>
-              <Modal.Title className="mb-0 fs-3 fw-bold">
-                가게 상세 정보
-              </Modal.Title>
-              <p className="mb-0 opacity-90">
-                {store.name}의 상세 정보를 확인하세요
+        {/* 배경 패턴 */}
+        <div className="position-absolute top-0 start-0 w-100 h-100 opacity-10" style={{
+          backgroundImage: 'radial-gradient(circle at 20% 50%, white 2px, transparent 2px), radial-gradient(circle at 70% 20%, white 1px, transparent 1px)',
+          backgroundSize: '20px 20px, 15px 15px',
+          pointerEvents: 'none',
+          zIndex: -1
+        }}></div>
+        <div className="w-100 position-relative" style={{paddingRight: '60px'}}>
+          <div className="d-flex align-items-center gap-4">
+            <div className="bg-orange bg-opacity-20 rounded-circle p-3 shadow-lg" style={{background: 'rgba(255, 152, 0, 0.2)'}}>
+              <i className="bi bi-shop fs-3" style={{color: '#212529'}}></i>
+            </div>
+            <div className="flex-grow-1">
+              <div className="d-flex flex-column flex-lg-row align-items-start align-items-lg-center gap-2 mb-2">
+                <Modal.Title className="mb-0 fs-2 fw-bold" style={{color: '#212529'}}>
+                  가게 상세 정보
+                </Modal.Title>
+                <div className="bg-orange bg-opacity-20 rounded-pill px-3 py-1" style={{background: 'rgba(255, 152, 0, 0.2)', border: '1px solid rgba(255, 152, 0, 0.3)'}}>
+                  <small className="fw-semibold" style={{color: '#212529'}}>#{store.storeId}</small>
+                </div>
+              </div>
+              <p className="mb-0 fs-6" style={{color: '#495057'}}>
+                <i className="bi bi-geo-alt me-2"></i>
+                {store.name}의 상세 정보를 확인하고 관리하세요
               </p>
             </div>
           </div>
@@ -275,16 +398,19 @@ const StoreDetailModal = ({show, onHide, store}) => {
             onSelect={(k) => setActiveTab(k)}
             className="nav-fill border-0"
             style={{
-              background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)'
+              background: 'linear-gradient(135deg, rgba(255, 107, 107, 0.05) 0%, rgba(255, 167, 38, 0.05) 100%)',
+              borderBottom: '3px solid rgba(255, 107, 107, 0.15)'
             }}
           >
             {/* 기본 정보 탭 */}
             <Tab
               eventKey="basic"
               title={
-                <span className="d-flex align-items-center gap-2">
-                  <i className="bi bi-shop"></i>
-                  기본 정보
+                <span className="d-flex align-items-center gap-2 px-3 py-2">
+                  <div className="rounded-circle p-1" style={{background: 'rgba(220, 53, 69, 0.2)'}}>
+                    <i className="bi bi-shop" style={{color: '#dc3545'}}></i>
+                  </div>
+                  <span className="fw-bold" style={{color: '#dc3545'}}>기본 정보</span>
                 </span>
               }
             >
@@ -309,6 +435,7 @@ const StoreDetailModal = ({show, onHide, store}) => {
                             {getActivitiesBadge(storeDetail?.activitiesStatus || store.activitiesStatus)}
                             {getSalesTypeBadge(storeDetail?.salesType)}
                             {getOpenStatusBadge(storeDetail?.openStatus)}
+                            {getStoreTypeBadge(storeDetail?.storeType || store.storeType)}
                           </div>
                           {storeDetail?.owner && (
                             <div className="d-flex justify-content-center gap-2 mb-3">
@@ -318,10 +445,24 @@ const StoreDetailModal = ({show, onHide, store}) => {
                           {storeDetail?.metadata && (
                             <div className="row g-2 mt-3">
                               <div className="col-4">
-                                <div className="bg-primary bg-opacity-10 rounded p-2">
-                                  <div
-                                    className="text-primary fw-bold">{formatCount(storeDetail.metadata.reviewCount)}</div>
-                                  <div className="text-muted small">리뷰</div>
+                                <div
+                                  className="bg-primary bg-opacity-10 rounded p-2 position-relative"
+                                  style={{cursor: 'pointer', transition: 'all 0.2s ease'}}
+                                  onClick={handleReviewClick}
+                                  onMouseEnter={(e) => {
+                                    e.currentTarget.style.transform = 'scale(1.05)';
+                                    e.currentTarget.style.boxShadow = '0 4px 15px rgba(13, 110, 253, 0.2)';
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    e.currentTarget.style.transform = 'scale(1)';
+                                    e.currentTarget.style.boxShadow = 'none';
+                                  }}
+                                >
+                                  <div className="text-primary fw-bold">{formatCount(storeDetail.metadata.reviewCount)}</div>
+                                  <div className="text-muted small d-flex align-items-center justify-content-between">
+                                    <span>리뷰</span>
+                                    <i className="bi bi-arrow-right text-primary" style={{fontSize: '0.7rem'}}></i>
+                                  </div>
                                 </div>
                               </div>
                               <div className="col-4">
@@ -332,10 +473,24 @@ const StoreDetailModal = ({show, onHide, store}) => {
                                 </div>
                               </div>
                               <div className="col-4">
-                                <div className="bg-danger bg-opacity-10 rounded p-2">
-                                  <div
-                                    className="text-danger fw-bold">{formatCount(storeDetail.metadata.reportCount)}</div>
-                                  <div className="text-muted small">신고</div>
+                                <div
+                                  className="bg-danger bg-opacity-10 rounded p-2 position-relative"
+                                  style={{cursor: 'pointer', transition: 'all 0.2s ease'}}
+                                  onClick={handleReportClick}
+                                  onMouseEnter={(e) => {
+                                    e.currentTarget.style.transform = 'scale(1.05)';
+                                    e.currentTarget.style.boxShadow = '0 4px 15px rgba(220, 53, 69, 0.2)';
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    e.currentTarget.style.transform = 'scale(1)';
+                                    e.currentTarget.style.boxShadow = 'none';
+                                  }}
+                                >
+                                  <div className="text-danger fw-bold">{formatCount(storeDetail.metadata.reportCount)}</div>
+                                  <div className="text-muted small d-flex align-items-center justify-content-between">
+                                    <span>신고</span>
+                                    <i className="bi bi-arrow-right text-danger" style={{fontSize: '0.7rem'}}></i>
+                                  </div>
                                 </div>
                               </div>
                             </div>
@@ -520,15 +675,19 @@ const StoreDetailModal = ({show, onHide, store}) => {
             <Tab
               eventKey="activity"
               title={
-                <span className="d-flex align-items-center gap-2">
-                  <i className="bi bi-activity"></i>
-                  가게 활동
+                <span className="d-flex align-items-center gap-2 px-3 py-2">
+                  <div className="rounded-circle p-1" style={{background: 'rgba(255, 152, 0, 0.2)'}}>
+                    <i className="bi bi-activity" style={{color: '#ff9800'}}></i>
+                  </div>
+                  <span className="fw-bold" style={{color: '#ff9800'}}>가게 활동</span>
                 </span>
               }
             >
               <ActivityHistory
                 type="store"
                 entityId={store?.storeId}
+                initialActiveTab={activitySubTab}
+                onAuthorClick={onAuthorClick}
                 tabs={[
                   {
                     key: 'reviews',
@@ -569,10 +728,55 @@ const StoreDetailModal = ({show, onHide, store}) => {
         )}
       </Modal.Body>
 
-      <Modal.Footer className="border-0 bg-light">
+      <Modal.Footer className="border-0 d-flex justify-content-between p-4" style={{
+        background: 'linear-gradient(135deg, rgba(255, 107, 107, 0.05) 0%, rgba(255, 167, 38, 0.05) 100%)',
+        borderBottomLeftRadius: '20px',
+        borderBottomRightRadius: '20px'
+      }}>
         <button
-          className="btn btn-secondary rounded-pill px-4"
+          className="btn btn-danger rounded-pill px-4 py-2 shadow-sm"
+          onClick={handleDeleteStore}
+          disabled={isDeleting}
+          style={{
+            transition: 'all 0.3s ease',
+            fontWeight: '600'
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.transform = 'translateY(-2px)';
+            e.target.style.boxShadow = '0 8px 20px rgba(220, 53, 69, 0.3)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.transform = 'translateY(0)';
+            e.target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+          }}
+        >
+          {isDeleting ? (
+            <>
+              <span className="spinner-border spinner-border-sm me-2"></span>
+              삭제 중...
+            </>
+          ) : (
+            <>
+              <i className="bi bi-trash me-2"></i>
+              가게 삭제
+            </>
+          )}
+        </button>
+        <button
+          className="btn btn-secondary rounded-pill px-4 py-2 shadow-sm"
           onClick={handleClose}
+          style={{
+            transition: 'all 0.3s ease',
+            fontWeight: '600'
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.transform = 'translateY(-2px)';
+            e.target.style.boxShadow = '0 8px 20px rgba(108, 117, 125, 0.3)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.transform = 'translateY(0)';
+            e.target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+          }}
         >
           <i className="bi bi-x-lg me-2"></i>
           닫기

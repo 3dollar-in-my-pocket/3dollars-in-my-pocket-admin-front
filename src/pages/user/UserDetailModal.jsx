@@ -17,7 +17,7 @@ import UserStoreImageHistory from '../../components/UserStoreImageHistory';
 import UserStoreReportHistory from '../../components/UserStoreReportHistory';
 import deviceApi from "../../api/deviceApi";
 
-const UserDetailModal = ({show, onHide, user}) => {
+const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
   const [userDetail, setUserDetail] = useState(null);
   const [devices, setDevices] = useState([]);
   const [settings, setSettings] = useState(null);
@@ -38,18 +38,27 @@ const UserDetailModal = ({show, onHide, user}) => {
     setError(null);
 
     try {
-      const response = await userApi.getUserDetail(user.userId);
-      if (!response.ok) {
+      const [userResponse, devicesResponse] = await Promise.all([
+        userApi.getUserDetail(user.userId),
+        deviceApi.getUserDevices(user.userId)
+      ]);
+
+      if (!userResponse.ok) {
         return
       }
 
-      const data = response.data;
+      const userData = userResponse.data;
 
-      setUserDetail(data.user);
-      setDevices(data.devices || []);
-      setSettings(data.setting);
-      setRepresentativeMedal(data.representativeMedal);
-      setMedals(data.medals || []);
+      setUserDetail(userData.user);
+      setSettings(userData.setting);
+      setRepresentativeMedal(userData.representativeMedal);
+      setMedals(userData.medals || []);
+
+      if (devicesResponse.ok) {
+        setDevices(devicesResponse.data || []);
+      } else {
+        setDevices([]);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -128,7 +137,7 @@ const UserDetailModal = ({show, onHide, user}) => {
       size="xl"
       centered
       className="user-detail-modal"
-      style={{maxWidth: '90vw'}}
+      fullscreen="md-down"
     >
       <Modal.Header
         closeButton
@@ -138,10 +147,10 @@ const UserDetailModal = ({show, onHide, user}) => {
         <div className="w-100">
           <div className="d-flex align-items-center gap-3 text-white">
             <div>
-              <Modal.Title className="mb-0 fs-3 fw-bold">
+              <Modal.Title className="mb-0 fs-4 fs-md-3 fw-bold">
                 사용자 상세 정보
               </Modal.Title>
-              <p className="mb-0 opacity-90">
+              <p className="mb-0 opacity-90 small">
                 {user.nickname}님의 정보를 확인하세요
               </p>
             </div>
@@ -196,15 +205,16 @@ const UserDetailModal = ({show, onHide, user}) => {
             <Tab
               eventKey="basic"
               title={
-                <span className="d-flex align-items-center gap-2">
+                <span className="d-flex align-items-center gap-1 gap-md-2">
                   <i className="bi bi-person-vcard"></i>
-                  기본 정보
+                  <span className="d-none d-sm-inline">기본 정보</span>
+                  <span className="d-sm-none">기본</span>
                 </span>
               }
             >
-              <div className="p-4">
+              <div className="p-2 p-md-4">
                 <div className="row justify-content-center">
-                  <div className="col-md-10">
+                  <div className="col-12 col-md-10">
                     {/* 일반 정보 섹션 */}
                     <div className="card border-0 shadow-sm mb-4">
                       <div className="card-header bg-light border-0 p-4">
@@ -220,38 +230,44 @@ const UserDetailModal = ({show, onHide, user}) => {
                           <h4 className="fw-bold text-dark mb-1">{userDetail?.name}</h4>
                         </div>
 
-                        <div className="row g-4">
-                          <div className="col-md-6">
-                            <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
+                        <div className="row g-3 g-md-4">
+                          <div className="col-12 col-md-6">
+                            <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-2 gap-sm-3 p-3 bg-light rounded-3">
                               <div className="bg-primary bg-opacity-10 rounded-circle p-2">
                                 <i className="bi bi-hash text-primary"></i>
                               </div>
-                              <div>
-                                <label className="form-label fw-semibold text-muted mb-1">유저 ID</label>
-                                <p className="mb-0 fw-bold text-dark">{userDetail?.userId}</p>
+                              <div className="flex-grow-1">
+                                <label className="form-label fw-semibold text-muted mb-1 small">유저 ID</label>
+                                <p className="mb-0 fw-bold text-dark" style={{
+                                  fontSize: '0.9rem',
+                                  wordBreak: 'break-all'
+                                }}>{userDetail?.userId}</p>
                               </div>
                             </div>
                           </div>
 
-                          <div className="col-md-6">
-                            <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
+                          <div className="col-12 col-md-6">
+                            <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-2 gap-sm-3 p-3 bg-light rounded-3">
                               <div className="bg-success bg-opacity-10 rounded-circle p-2">
                                 <i className="bi bi-person-badge text-success"></i>
                               </div>
-                              <div>
-                                <label className="form-label fw-semibold text-muted mb-1">닉네임</label>
-                                <p className="mb-0 fw-bold text-dark">{userDetail?.nickname}</p>
+                              <div className="flex-grow-1">
+                                <label className="form-label fw-semibold text-muted mb-1 small">닉네임</label>
+                                <p className="mb-0 fw-bold text-dark" style={{
+                                  fontSize: '0.9rem',
+                                  wordBreak: 'break-all'
+                                }}>{userDetail?.nickname}</p>
                               </div>
                             </div>
                           </div>
 
-                          <div className="col-md-6">
-                            <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
+                          <div className="col-12 col-md-6">
+                            <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-2 gap-sm-3 p-3 bg-light rounded-3">
                               <div className="bg-warning bg-opacity-10 rounded-circle p-2">
                                 <i className="bi bi-shield-lock text-warning"></i>
                               </div>
                               <div className="flex-grow-1">
-                                <label className="form-label fw-semibold text-muted mb-2">소셜 가입 방식</label>
+                                <label className="form-label fw-semibold text-muted mb-2 small">소셜 가입 방식</label>
                                 <div>
                                   {getSocialTypeBadge(userDetail?.socialType)}
                                 </div>
@@ -259,14 +275,17 @@ const UserDetailModal = ({show, onHide, user}) => {
                             </div>
                           </div>
 
-                          <div className="col-md-6">
-                            <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
+                          <div className="col-12 col-md-6">
+                            <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-2 gap-sm-3 p-3 bg-light rounded-3">
                               <div className="bg-info bg-opacity-10 rounded-circle p-2">
                                 <i className="bi bi-calendar3 text-info"></i>
                               </div>
-                              <div>
-                                <label className="form-label fw-semibold text-muted mb-1">가입일</label>
-                                <p className="mb-0 fw-bold text-dark">{formatDateTime(userDetail?.createdAt)}</p>
+                              <div className="flex-grow-1">
+                                <label className="form-label fw-semibold text-muted mb-1 small">가입일</label>
+                                <p className="mb-0 fw-bold text-dark" style={{
+                                  fontSize: '0.85rem',
+                                  wordBreak: 'break-all'
+                                }}>{formatDateTime(userDetail?.createdAt)}</p>
                               </div>
                             </div>
                           </div>
@@ -300,17 +319,18 @@ const UserDetailModal = ({show, onHide, user}) => {
                             <p className="text-muted small">사용자 설정 정보를 불러올 수 없습니다.</p>
                           </div>
                         ) : (
-                          <div className="row g-4">
-                            <div className="col-md-6">
-                              <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
+                          <div className="row g-3 g-md-4">
+                            <div className="col-12 col-md-6">
+                              <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-2 gap-sm-3 p-3 bg-light rounded-3">
                                 <div className="bg-primary bg-opacity-10 rounded-circle p-2">
                                   <i className="bi bi-bell text-primary"></i>
                                 </div>
                                 <div className="flex-grow-1">
-                                  <label className="form-label fw-semibold text-muted mb-1">활동 알림</label>
+                                  <label className="form-label fw-semibold text-muted mb-1 small">활동 알림</label>
                                   <div>
                                     <span
-                                      className={`badge rounded-pill px-3 py-2 ${settings.enableActivitiesPush ? 'bg-success bg-opacity-10 text-success border border-success' : 'bg-secondary bg-opacity-10 text-secondary border border-secondary'}`}>
+                                      className={`badge rounded-pill px-2 px-md-3 py-1 py-md-2 ${settings.enableActivitiesPush ? 'bg-success bg-opacity-10 text-success border border-success' : 'bg-secondary bg-opacity-10 text-secondary border border-secondary'}`}
+                                      style={{fontSize: '0.75rem'}}>
                                       <i
                                         className={`bi ${settings.enableActivitiesPush ? 'bi-check-circle' : 'bi-x-circle'} me-1`}></i>
                                       {settings.enableActivitiesPush ? 'ON' : 'OFF'}
@@ -320,16 +340,17 @@ const UserDetailModal = ({show, onHide, user}) => {
                               </div>
                             </div>
 
-                            <div className="col-md-6">
-                              <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
+                            <div className="col-12 col-md-6">
+                              <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-2 gap-sm-3 p-3 bg-light rounded-3">
                                 <div className="bg-info bg-opacity-10 rounded-circle p-2">
                                   <i className="bi bi-envelope text-info"></i>
                                 </div>
                                 <div className="flex-grow-1">
-                                  <label className="form-label fw-semibold text-muted mb-1">마케팅 수신 동의</label>
+                                  <label className="form-label fw-semibold text-muted mb-1 small">마케팅 수신 동의</label>
                                   <div>
                                     <span
-                                      className={`badge rounded-pill px-3 py-2 ${getMarketingConsentBadgeClass(settings.marketingConsent)} bg-opacity-10 text-dark border`}>
+                                      className={`badge rounded-pill px-2 px-md-3 py-1 py-md-2 ${getMarketingConsentBadgeClass(settings.marketingConsent)} bg-opacity-10 text-dark border`}
+                                      style={{fontSize: '0.75rem'}}>
                                       <i className="bi bi-shield-check me-1"></i>
                                       {getMarketingConsentDisplayName(settings.marketingConsent)}
                                     </span>
@@ -350,16 +371,17 @@ const UserDetailModal = ({show, onHide, user}) => {
             <Tab
               eventKey="devices"
               title={
-                <span className="d-flex align-items-center gap-2">
+                <span className="d-flex align-items-center gap-1 gap-md-2">
                   <i className="bi bi-phone"></i>
-                  디바이스 정보
+                  <span className="d-none d-sm-inline">디바이스 정보</span>
+                  <span className="d-sm-none">기기</span>
                   {devices.length > 0 && (
                     <span className="badge bg-info rounded-pill ms-1">{devices.length}</span>
                   )}
                 </span>
               }
             >
-              <div className="p-4">
+              <div className="p-2 p-md-4">
                 <div className="card border-0 shadow-sm">
                   <div className="card-header bg-light border-0 p-4">
                     <div className="d-flex align-items-center gap-2">
@@ -392,7 +414,7 @@ const UserDetailModal = ({show, onHide, user}) => {
                     ) : (
                       <div className="row g-3">
                         {devices.map((device, index) => (
-                          <div key={device.deviceId || index} className="col-md-6">
+                          <div key={device.deviceId || index} className="col-12 col-md-6">
                             <div className="card border-0 shadow-sm h-100" style={{
                               background: 'linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%)',
                               border: '1px solid #e9ecef',
@@ -474,16 +496,17 @@ const UserDetailModal = ({show, onHide, user}) => {
             <Tab
               eventKey="medals"
               title={
-                <span className="d-flex align-items-center gap-2">
+                <span className="d-flex align-items-center gap-1 gap-md-2">
                   <i className="bi bi-award"></i>
-                  메달 정보
+                  <span className="d-none d-sm-inline">메달 정보</span>
+                  <span className="d-sm-none">메달</span>
                   {medals.length > 0 && (
                     <span className="badge bg-warning rounded-pill ms-1">{medals.length}</span>
                   )}
                 </span>
               }
             >
-              <div className="p-4">
+              <div className="p-2 p-md-4">
                 <div className="card border-0 shadow-sm">
                   <div className="card-header bg-light border-0 p-4">
                     <div className="d-flex align-items-center gap-2">
@@ -571,7 +594,7 @@ const UserDetailModal = ({show, onHide, user}) => {
                           {medals.map((medal, index) => {
                             const isRepresentative = representativeMedal?.medalId === medal.medalId;
                             return (
-                              <div key={medal.medalId || index} className="col-md-6 col-lg-4">
+                              <div key={medal.medalId || index} className="col-12 col-sm-6 col-md-4 col-lg-3">
                                 <div
                                   className={`card border-0 shadow-sm h-100 ${isRepresentative ? 'border-warning border-2' : ''}`}
                                   style={{
@@ -630,15 +653,17 @@ const UserDetailModal = ({show, onHide, user}) => {
             <Tab
               eventKey="activity"
               title={
-                <span className="d-flex align-items-center gap-2">
+                <span className="d-flex align-items-center gap-1 gap-md-2">
                   <i className="bi bi-activity"></i>
-                  활동 이력
+                  <span className="d-none d-sm-inline">활동 이력</span>
+                  <span className="d-sm-none">활동</span>
                 </span>
               }
             >
               <ActivityHistory
                 type="user"
                 entityId={user?.userId}
+                onStoreClick={onStoreClick}
                 tabs={[
                   {
                     key: 'stores',

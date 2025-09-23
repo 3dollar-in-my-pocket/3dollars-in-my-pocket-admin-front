@@ -106,13 +106,6 @@ export default {
               createdAt: medal.acquisition.createdAt
             } : null
           })) || [],
-          devices: response.data.data.devices.map(device => ({
-            deviceId: device.deviceId,
-            os: device.osPlatform === 'AOS' ? 'Android' : device.osPlatform, // AOS -> Android 변환
-            appVersion: device.appVersion,
-            createdAt: device.createdAt,
-            updatedAt: device.updatedAt,
-          })) || [],
           setting: response.data.data.setting ? createUserSettings({
             enableActivitiesPush: response.data.data.setting.enableActivitiesPush,
             marketingConsent: response.data.data.setting.marketingConsent

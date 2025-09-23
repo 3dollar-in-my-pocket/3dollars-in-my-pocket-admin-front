@@ -9,6 +9,7 @@ import StoreSearch from "../pages/store/StoreSearch";
 import CacheTool from "../pages/tool/CacheTool";
 import FileUploadTool from "../pages/tool/FileUploadTool";
 import Admin from "../pages/admin/Admin";
+import PollManagement from "../pages/poll/PollManagement";
 import PrivateRouter from "./PrivateRouter";
 
 const manageRoutes = {
@@ -57,6 +58,10 @@ const manageRoutes = {
     {
       path: '/manage/admin',
       element: <PrivateRouter><Admin/></PrivateRouter>
+    },
+    {
+      path: '/manage/poll',
+      element: <PrivateRouter><PollManagement/></PrivateRouter>
     }
   ]
 };

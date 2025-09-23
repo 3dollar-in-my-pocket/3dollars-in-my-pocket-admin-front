@@ -5,28 +5,22 @@ const Dashboard = () => {
 
   const serviceTools = [
     {
+      title: "사장님 가입 신청",
+      description: "신규 가입 요청을 검토하고 승인할 수 있습니다.",
+      icon: "bi-person-plus-fill",
+      route: "/manage/registration"
+    },    
+    {
       title: "광고 관리",
       description: "등록된 광고를 확인하고 관리할 수 있습니다.",
       icon: "bi-bullseye",
       route: "/manage/advertisement"
     },
     {
-      title: "사장님 가입 신청",
-      description: "신규 가입 요청을 검토하고 승인할 수 있습니다.",
-      icon: "bi-person-plus-fill",
-      route: "/manage/registration"
-    },
-    {
       title: "FAQ 관리",
       description: "FAQ를 추가, 수정 및 삭제할 수 있습니다.",
       icon: "bi-question-circle-fill",
       route: "/manage/faq"
-    },
-    {
-      title: "정책 관리",
-      description: "시스템 정책을 등록하고 관리할 수 있습니다.",
-      icon: "bi-shield-fill-check",
-      route: "/manage/policy"
     },
     {
       title: "푸시 발송 (TBD)",
@@ -40,9 +34,21 @@ const Dashboard = () => {
       icon: "bi-search",
       route: "/manage/user-search"
     },
+        {
+      title: "가게 검색",
+      description: "가게를 검색하고 상세 정보를 확인할 수 있습니다.",
+      icon: "bi-search",
+      route: "/manage/boss-search"
+    },
   ];
 
   const toolTools = [
+    {
+      title: "정책 관리",
+      description: "시스템 정책을 등록하고 관리할 수 있습니다.",
+      icon: "bi-shield-fill-check",
+      route: "/manage/policy"
+    },
     {
       title: "캐시 운영툴",
       description: "서버 캐시를 수동으로 초기화할 수 있습니다.",

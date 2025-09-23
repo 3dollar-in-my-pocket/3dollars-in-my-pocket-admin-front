@@ -2,7 +2,7 @@ import {useCallback, useEffect, useRef, useState} from 'react';
 import {toast} from 'react-toastify';
 import visitApi from "../api/visitApi";
 
-const StoreVisitHistory = ({storeId, isActive}) => {
+const StoreVisitHistory = ({storeId, isActive, onAuthorClick}) => {
   const [visits, setVisits] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
@@ -148,9 +148,47 @@ const StoreVisitHistory = ({storeId, isActive}) => {
                       <div className="flex-grow-1">
                         <div className="d-flex justify-content-between align-items-start mb-3">
                           <div>
-                            <h6 className="fw-bold text-dark mb-2">
-                              {visit.visitor?.name || '익명 사용자'}
-                            </h6>
+                            <div className="d-flex align-items-center gap-2 mb-2">
+                              <div className="bg-warning bg-opacity-10 rounded-circle p-1">
+                                <i className="bi bi-person-fill text-warning" style={{ fontSize: '0.8rem' }}></i>
+                              </div>
+                              <div
+                                className={`d-flex align-items-center gap-1 ${visit.visitor && onAuthorClick ? 'clickable-author' : ''}`}
+                                style={{
+                                  cursor: visit.visitor && onAuthorClick ? 'pointer' : 'default',
+                                  padding: '3px 6px',
+                                  borderRadius: '5px',
+                                  transition: 'all 0.2s ease',
+                                  backgroundColor: 'transparent'
+                                }}
+                                onClick={(e) => {
+                                  if (visit.visitor && onAuthorClick) {
+                                    e.stopPropagation();
+                                    onAuthorClick(visit.visitor);
+                                  }
+                                }}
+                                onMouseEnter={(e) => {
+                                  if (visit.visitor && onAuthorClick) {
+                                    e.currentTarget.style.backgroundColor = 'rgba(13, 110, 253, 0.1)';
+                                    e.currentTarget.style.transform = 'scale(1.02)';
+                                  }
+                                }}
+                                onMouseLeave={(e) => {
+                                  if (visit.visitor && onAuthorClick) {
+                                    e.currentTarget.style.backgroundColor = 'transparent';
+                                    e.currentTarget.style.transform = 'scale(1)';
+                                  }
+                                }}
+                              >
+                                <span className="text-muted small">방문자:</span>
+                                <h6 className={`fw-bold mb-0 ${visit.visitor && onAuthorClick ? 'text-primary' : 'text-dark'}`}>
+                                  {visit.visitor?.name || '익명 사용자'}
+                                </h6>
+                                {visit.visitor && onAuthorClick && (
+                                  <i className="bi bi-box-arrow-up-right text-primary" style={{ fontSize: '0.7rem' }}></i>
+                                )}
+                              </div>
+                            </div>
                             <div className="d-flex align-items-center gap-2 mb-2">
                               {getVisitTypeBadge(visit.visitType)}
                             </div>

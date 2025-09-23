@@ -1,10 +1,10 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
 import {toast} from 'react-toastify';
-import {getActivitiesStatusDisplayName, getStoreStatusBadgeClass, getStoreStatusDisplayName} from "../types/store";
+import {getActivitiesStatusDisplayName, getStoreStatusBadgeClass, getStoreStatusDisplayName, getStoreTypeDisplayName, getStoreTypeBadgeClass, getStoreTypeIcon} from "../types/store";
 import {getVisitIconClass, getVisitTypeBatchClass, getVisitTypeDisplayName} from "../types/visit";
 import visitApi from "../api/visitApi";
 
-const UserVisitHistory = ({userId, isActive}) => {
+const UserVisitHistory = ({userId, isActive, onStoreClick}) => {
   const [visits, setVisits] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
@@ -102,6 +102,16 @@ const UserVisitHistory = ({userId, isActive}) => {
     return (
       <span className={`badge ${badgeClass} bg-opacity-10 text-dark border rounded-pill px-2 py-1 small`}>
         {statusText}
+      </span>
+    );
+  };
+
+  const getStoreTypeBadge = (storeType) => {
+    if (!storeType) return null;
+    return (
+      <span className={`badge ${getStoreTypeBadgeClass(storeType)} text-white rounded-pill px-2 py-1 small`}>
+        <i className={`bi ${getStoreTypeIcon(storeType)} me-1`}></i>
+        {getStoreTypeDisplayName(storeType)}
       </span>
     );
   };
@@ -206,7 +216,32 @@ const UserVisitHistory = ({userId, isActive}) => {
                   <div className="d-flex align-items-start gap-3">
                     <div className="flex-grow-1">
                       <div className="d-flex align-items-center gap-2 mb-2">
-                        <h6 className="mb-0 fw-bold text-dark">{visit.store?.name || '가게 이름 없음'}</h6>
+                        <div
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (visit.store && onStoreClick) {
+                              onStoreClick(visit.store);
+                            }
+                          }}
+                          className="clickable-store d-flex align-items-center gap-1"
+                          style={{
+                            cursor: 'pointer',
+                            padding: '2px 4px',
+                            borderRadius: '4px',
+                            transition: 'all 0.2s ease'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#f8f9fa';
+                            e.currentTarget.style.transform = 'translateY(-1px)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'transparent';
+                            e.currentTarget.style.transform = 'translateY(0)';
+                          }}
+                        >
+                          <h6 className="mb-0 fw-bold text-primary">{visit.store?.name || '가게 이름 없음'}</h6>
+                          <i className="bi bi-box-arrow-up-right text-primary" style={{ fontSize: '0.7rem' }}></i>
+                        </div>
                         {getVisitTypeBadge(visit.type)}
                       </div>
 
@@ -224,6 +259,7 @@ const UserVisitHistory = ({userId, isActive}) => {
                         {getSalesTypeBadge(visit.store?.salesType)}
                         {getStatusBadge(visit.store?.status)}
                         {getActivitiesStatusBadge(visit.store?.activitiesStatus)}
+                        {visit.store?.storeType && getStoreTypeBadge(visit.store.storeType)}
                       </div>
 
                       <div className="d-flex align-items-center gap-2 mb-2">

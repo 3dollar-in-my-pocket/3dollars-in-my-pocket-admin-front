@@ -62,13 +62,11 @@ export const createUserSettings = ({
 // User detail response interface
 export const createUserDetailResponse = ({
                                            user = null,
-                                           devices = [],
                                            representativeMedal = null,
                                            medals = [],
                                            setting = null
                                          }) => ({
   user,
-  devices,
   representativeMedal,
   medals,
   setting,

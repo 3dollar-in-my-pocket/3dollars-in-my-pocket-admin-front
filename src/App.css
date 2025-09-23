@@ -66,3 +66,145 @@
   white-space: nowrap;
   -webkit-overflow-scrolling: touch;
 }
+
+/* Mobile Sidebar Styles */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 280px;
+  height: 100vh;
+  z-index: 1050;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease-in-out;
+}
+
+.sidebar.sidebar-open {
+  transform: translateX(0);
+}
+
+.main-content {
+  transition: margin-left 0.3s ease-in-out;
+}
+
+/* Desktop styles */
+@media (min-width: 768px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    transform: translateX(0);
+    width: 280px;
+    height: 100vh;
+    z-index: 1000;
+    overflow-y: auto;
+  }
+
+  .main-content {
+    flex: 1;
+    margin-left: 280px;
+    width: calc(100% - 280px);
+  }
+
+  .mobile-header {
+    display: none !important;
+  }
+}
+
+/* Backdrop for mobile sidebar */
+.sidebar-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1040;
+}
+
+@media (max-width: 767px) {
+  .main-content {
+    width: 100%;
+  }
+
+  .content-wrapper {
+    padding-top: 1rem !important;
+  }
+
+  /* Mobile user detail modal styles */
+  .user-detail-modal .modal-dialog {
+    margin: 0;
+    max-width: 100%;
+    height: 100vh;
+  }
+
+  .user-detail-modal .modal-content {
+    height: 100vh;
+    border-radius: 0;
+  }
+
+  .user-detail-modal .modal-body {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .user-detail-modal .nav-tabs .nav-link {
+    font-size: 0.8rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  /* Card responsive improvements */
+  .card-body {
+    padding: 1rem !important;
+  }
+
+  .card-header {
+    padding: 1rem !important;
+  }
+
+  /* Better touch targets for mobile */
+  .btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+
+  /* Improve text readability on mobile */
+  .text-muted.small {
+    font-size: 0.8rem !important;
+  }
+
+  /* Better spacing for mobile cards */
+  .col-12 .card {
+    margin-bottom: 1rem;
+  }
+}
+
+/* Poll card animations */
+@keyframes ping {
+  75%, 100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+.animate-ping {
+  animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/* Poll status indicators */
+.poll-active {
+  position: relative;
+}
+
+.poll-active::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, #28a745, #20c997);
+  border-radius: 18px;
+  z-index: -1;
+  opacity: 0.1;
+}
