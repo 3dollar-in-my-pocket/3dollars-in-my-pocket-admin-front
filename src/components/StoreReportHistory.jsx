@@ -4,7 +4,7 @@ import storeReportApi from "../api/storeReportApi";
 import {getReportReasonBadgeClass} from "../types/report";
 import {getStoreTypeDisplayName, getStoreTypeBadgeClass, getStoreTypeIcon} from "../types/store";
 
-const StoreReportHistory = ({storeId, isActive}) => {
+const StoreReportHistory = ({storeId, isActive, onAuthorClick}) => {
   const [reports, setReports] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
@@ -174,9 +174,47 @@ const StoreReportHistory = ({storeId, isActive}) => {
                       <div className="flex-grow-1">
                         <div className="d-flex justify-content-between align-items-start mb-3">
                           <div>
-                            <h6 className="fw-bold text-dark mb-2">
-                              {report.reporter?.name || '익명 신고자'}
-                            </h6>
+                            <div className="d-flex align-items-center gap-2 mb-2">
+                              <div className="bg-danger bg-opacity-10 rounded-circle p-1">
+                                <i className="bi bi-person-fill text-danger" style={{ fontSize: '0.8rem' }}></i>
+                              </div>
+                              <div
+                                className={`d-flex align-items-center gap-1 ${report.reporter && onAuthorClick ? 'clickable-author' : ''}`}
+                                style={{
+                                  cursor: report.reporter && onAuthorClick ? 'pointer' : 'default',
+                                  padding: '3px 6px',
+                                  borderRadius: '5px',
+                                  transition: 'all 0.2s ease',
+                                  backgroundColor: 'transparent'
+                                }}
+                                onClick={(e) => {
+                                  if (report.reporter && onAuthorClick) {
+                                    e.stopPropagation();
+                                    onAuthorClick(report.reporter);
+                                  }
+                                }}
+                                onMouseEnter={(e) => {
+                                  if (report.reporter && onAuthorClick) {
+                                    e.currentTarget.style.backgroundColor = 'rgba(13, 110, 253, 0.1)';
+                                    e.currentTarget.style.transform = 'scale(1.02)';
+                                  }
+                                }}
+                                onMouseLeave={(e) => {
+                                  if (report.reporter && onAuthorClick) {
+                                    e.currentTarget.style.backgroundColor = 'transparent';
+                                    e.currentTarget.style.transform = 'scale(1)';
+                                  }
+                                }}
+                              >
+                                <span className="text-muted small">신고자:</span>
+                                <h6 className={`fw-bold mb-0 ${report.reporter && onAuthorClick ? 'text-primary' : 'text-dark'}`}>
+                                  {report.reporter?.name || '익명 신고자'}
+                                </h6>
+                                {report.reporter && onAuthorClick && (
+                                  <i className="bi bi-box-arrow-up-right text-primary" style={{ fontSize: '0.7rem' }}></i>
+                                )}
+                              </div>
+                            </div>
                             <div className="d-flex align-items-center gap-2 mb-2">
                               {getReportTypeBadge(report.reason)}
                               {report.store?.storeType && getStoreTypeBadge(report.store.storeType)}

@@ -5,7 +5,7 @@ import {
   getWriterTypeDisplayName
 } from '../../types/common';
 
-const PollCard = ({ poll, onClick }) => {
+const PollCard = ({ poll, onClick, onAuthorClick }) => {
   const formatDateTime = (dateString) => {
     if (!dateString) return '없음';
     return new Date(dateString).toLocaleString('ko-KR', {
@@ -202,7 +202,31 @@ const PollCard = ({ poll, onClick }) => {
           {/* 작성자 정보 */}
           <div className="mb-3" style={{ marginTop: '36px' }}>
             <div className="d-flex align-items-start justify-content-between gap-3">
-              <div className="d-flex align-items-center gap-2 flex-grow-1">
+              <div
+                className={`d-flex align-items-center gap-2 flex-grow-1 ${poll.writer && onAuthorClick ? 'cursor-pointer' : ''}`}
+                style={{
+                  cursor: poll.writer && onAuthorClick ? 'pointer' : 'default',
+                  borderRadius: '8px',
+                  padding: '4px',
+                  transition: 'background-color 0.2s ease'
+                }}
+                onClick={(e) => {
+                  if (poll.writer && onAuthorClick) {
+                    e.stopPropagation();
+                    onAuthorClick(poll.writer);
+                  }
+                }}
+                onMouseEnter={(e) => {
+                  if (poll.writer && onAuthorClick) {
+                    e.currentTarget.style.backgroundColor = 'rgba(0, 123, 255, 0.1)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (poll.writer && onAuthorClick) {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }
+                }}
+              >
                 {poll.writer ? (
                   <>
                     <div className={`rounded-circle p-2 ${getWriterTypeBgClass(poll.writer.writerType)}`} style={{ minWidth: '36px' }}>
@@ -222,6 +246,11 @@ const PollCard = ({ poll, onClick }) => {
                         {getWriterTypeDisplayName(poll.writer.writerType)}
                       </span>
                     </div>
+                    {onAuthorClick && (
+                      <div className="ms-auto">
+                        <i className="bi bi-box-arrow-up-right text-primary" style={{ fontSize: '0.8rem' }}></i>
+                      </div>
+                    )}
                   </>
                 ) : (
                   <>

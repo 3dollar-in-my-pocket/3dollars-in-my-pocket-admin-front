@@ -17,6 +17,7 @@ import {
   getStoreTypeIcon,
   getWriterTypeBadgeClass
 } from '../../types/store';
+import { WRITER_TYPE } from '../../types/common';
 import storeApi from '../../api/storeApi';
 import ActivityHistory from '../../components/ActivityHistory';
 import StoreReviewHistory from '../../components/StoreReviewHistory';
@@ -25,7 +26,7 @@ import StoreImageHistory from '../../components/StoreImageHistory';
 import StoreReportHistory from '../../components/StoreReportHistory';
 import {toast} from 'react-toastify';
 
-const StoreDetailModal = ({show, onHide, store}) => {
+const StoreDetailModal = ({show, onHide, store, onAuthorClick}) => {
   const [storeDetail, setStoreDetail] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('basic');
@@ -154,13 +155,57 @@ const StoreDetailModal = ({show, onHide, store}) => {
   };
 
   const getOwnerBadge = (owner) => {
-    if (!owner || !owner.name) return null;
+    // USER 타입이 아니거나 정보가 없으면 UI를 표시하지 않음
+    if (!owner || !owner.name || owner.writerType !== WRITER_TYPE.USER) {
+      return null;
+    }
+
+    // USER 타입인 경우에만 클릭 가능
+    const isClickable = onAuthorClick;
+
     return (
-      <span
-        className={`badge rounded-pill px-3 py-2 ${getWriterTypeBadgeClass(owner.writerType)} bg-opacity-10 text-dark border`}>
-        <i className="bi bi-person me-1"></i>
-        {owner.name}
-      </span>
+      <div className="d-flex align-items-center gap-2">
+        <div className="bg-success bg-opacity-10 rounded-circle p-1">
+          <i className="bi bi-person-fill text-success" style={{ fontSize: '0.9rem' }}></i>
+        </div>
+        <div
+          className={`d-flex align-items-center gap-1 ${isClickable ? 'clickable-author' : ''}`}
+          style={{
+            cursor: isClickable ? 'pointer' : 'default',
+            padding: '4px 8px',
+            borderRadius: '6px',
+            transition: 'all 0.2s ease',
+            backgroundColor: 'transparent'
+          }}
+          onClick={(e) => {
+            if (isClickable) {
+              e.stopPropagation();
+              onAuthorClick(owner);
+            }
+          }}
+          onMouseEnter={(e) => {
+            if (isClickable) {
+              e.currentTarget.style.backgroundColor = 'rgba(13, 110, 253, 0.1)';
+              e.currentTarget.style.transform = 'scale(1.02)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (isClickable) {
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.transform = 'scale(1)';
+            }
+          }}
+        >
+          <span className="text-muted small">가게 제보자:</span>
+          <span className={`badge rounded-pill px-3 py-2 ${getWriterTypeBadgeClass(owner.writerType)} bg-opacity-10 ${isClickable ? 'text-primary' : 'text-dark'} border`}>
+            <i className="bi bi-shop me-1"></i>
+            {owner.name}
+          </span>
+          {isClickable && (
+            <i className="bi bi-box-arrow-up-right text-primary" style={{ fontSize: '0.7rem' }}></i>
+          )}
+        </div>
+      </div>
     );
   };
 
@@ -642,6 +687,7 @@ const StoreDetailModal = ({show, onHide, store}) => {
                 type="store"
                 entityId={store?.storeId}
                 initialActiveTab={activitySubTab}
+                onAuthorClick={onAuthorClick}
                 tabs={[
                   {
                     key: 'reviews',

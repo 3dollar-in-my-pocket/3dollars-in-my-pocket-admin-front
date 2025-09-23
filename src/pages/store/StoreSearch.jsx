@@ -1,5 +1,6 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 import StoreDetailModal from './StoreDetailModal';
+import UserDetailModal from '../user/UserDetailModal';
 import { STORE_SEARCH_TYPES } from '../../types/store';
 import useSearch from '../../hooks/useSearch';
 import { storeSearchAdapter } from '../../adapters/storeSearchAdapter';
@@ -8,6 +9,8 @@ import SearchResults from '../../components/common/SearchResults';
 import StoreCard from '../../components/store/StoreCard';
 
 const StoreSearch = () => {
+  const [selectedUser, setSelectedUser] = useState(null);
+
   const {
     searchQuery,
     setSearchQuery,
@@ -97,6 +100,26 @@ const StoreSearch = () => {
     <StoreCard key={store.storeId} store={store} onClick={handleStoreClick} />
   );
 
+  // 작성자 클릭 핸들러
+  const handleAuthorClick = (writer) => {
+    // writer, owner, visitor, reporter 등 다양한 객체 구조 지원
+    const userId = writer.userId || writer.writerId || writer.id;
+    const userName = writer.name || writer.nickname;
+
+    if (userId) {
+      const userForModal = {
+        userId: userId,
+        nickname: userName || `ID: ${userId}`
+      };
+      setSelectedUser(userForModal);
+    }
+  };
+
+  // 유저 모달 닫기 핸들러
+  const handleCloseUserModal = () => {
+    setSelectedUser(null);
+  };
+
   return (
     <div className="container-fluid px-4 py-4">
       <div className="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
@@ -132,6 +155,14 @@ const StoreSearch = () => {
         show={!!selectedStore}
         onHide={handleCloseModal}
         store={selectedStore}
+        onAuthorClick={handleAuthorClick}
+      />
+
+      {/* 유저 상세 모달 */}
+      <UserDetailModal
+        show={!!selectedUser}
+        onHide={handleCloseUserModal}
+        user={selectedUser}
       />
     </div>
   );

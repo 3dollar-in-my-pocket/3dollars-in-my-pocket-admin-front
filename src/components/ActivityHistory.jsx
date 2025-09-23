@@ -5,7 +5,8 @@ const ActivityHistory = ({
   type, // 'user' or 'store'
   entityId, // userId or storeId
   tabs = [], // 탭 설정 배열
-  initialActiveTab = null // 초기 활성 탭
+  initialActiveTab = null, // 초기 활성 탭
+  onAuthorClick = null // 작성자 클릭 핸들러
 }) => {
   const getInitialTab = () => {
     if (initialActiveTab && tabs.find(tab => tab.key === initialActiveTab)) {
@@ -93,6 +94,7 @@ const ActivityHistory = ({
                     <tab.component
                       {...(type === 'user' ? { userId: entityId } : { storeId: entityId })}
                       isActive={activeTab === tab.key}
+                      onAuthorClick={onAuthorClick}
                     />
                   ) : (
                     <div className="text-center py-5">

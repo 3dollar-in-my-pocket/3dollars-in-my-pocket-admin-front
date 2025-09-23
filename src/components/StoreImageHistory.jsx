@@ -3,7 +3,7 @@ import {toast} from 'react-toastify';
 import storeImageApi from "../api/storeImageApi";
 import {getStoreTypeDisplayName, getStoreTypeBadgeClass, getStoreTypeIcon} from "../types/store";
 
-const StoreImageHistory = ({storeId, isActive}) => {
+const StoreImageHistory = ({storeId, isActive, onAuthorClick}) => {
   const [images, setImages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
@@ -222,9 +222,42 @@ const StoreImageHistory = ({storeId, isActive}) => {
                       </div>
                       <div className="flex-grow-1">
                         <div className="d-flex align-items-center gap-2 mb-1">
-                          <h6 className="fw-bold text-dark mb-0" style={{fontSize: '0.9rem'}}>
-                            {image.writer?.name || '익명 사용자'}
-                          </h6>
+                          <div
+                            className={`d-flex align-items-center gap-1 ${image.writer && onAuthorClick ? 'clickable-author' : ''}`}
+                            style={{
+                              cursor: image.writer && onAuthorClick ? 'pointer' : 'default',
+                              padding: '3px 6px',
+                              borderRadius: '5px',
+                              transition: 'all 0.2s ease',
+                              backgroundColor: 'transparent'
+                            }}
+                            onClick={(e) => {
+                              if (image.writer && onAuthorClick) {
+                                e.stopPropagation();
+                                onAuthorClick(image.writer);
+                              }
+                            }}
+                            onMouseEnter={(e) => {
+                              if (image.writer && onAuthorClick) {
+                                e.currentTarget.style.backgroundColor = 'rgba(13, 110, 253, 0.1)';
+                                e.currentTarget.style.transform = 'scale(1.02)';
+                              }
+                            }}
+                            onMouseLeave={(e) => {
+                              if (image.writer && onAuthorClick) {
+                                e.currentTarget.style.backgroundColor = 'transparent';
+                                e.currentTarget.style.transform = 'scale(1)';
+                              }
+                            }}
+                          >
+                            <span className="text-muted small">등록자:</span>
+                            <h6 className={`fw-bold mb-0 ${image.writer && onAuthorClick ? 'text-primary' : 'text-dark'}`} style={{ fontSize: '0.9rem' }}>
+                              {image.writer?.name || '익명 사용자'}
+                            </h6>
+                            {image.writer && onAuthorClick && (
+                              <i className="bi bi-box-arrow-up-right text-primary" style={{ fontSize: '0.6rem' }}></i>
+                            )}
+                          </div>
                           {/* 이미지 상태 표시 */}
                           <span className={`badge rounded-pill ${
                             image.status === 'ACTIVE' ? 'bg-success' :

@@ -3,7 +3,7 @@ import {toast} from 'react-toastify';
 import reviewApi from "../api/reviewApi";
 import {getStoreTypeDisplayName, getStoreTypeBadgeClass, getStoreTypeIcon} from "../types/store";
 
-const StoreReviewHistory = ({storeId, isActive}) => {
+const StoreReviewHistory = ({storeId, isActive, onAuthorClick}) => {
   const [reviews, setReviews] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
@@ -199,9 +199,47 @@ const StoreReviewHistory = ({storeId, isActive}) => {
                         <div className="d-flex justify-content-between align-items-start mb-2">
                           <div>
                             <div className="d-flex align-items-center gap-2 mb-1">
-                              <h6 className="fw-bold text-dark mb-0">
-                                {review.writer?.name || '익명 사용자'}
-                              </h6>
+                              <div className="d-flex align-items-center gap-2">
+                                <div className="bg-primary bg-opacity-10 rounded-circle p-1">
+                                  <i className="bi bi-person-fill text-primary" style={{ fontSize: '0.8rem' }}></i>
+                                </div>
+                                <div
+                                  className={`d-flex align-items-center gap-1 ${review.writer && onAuthorClick ? 'clickable-author' : ''}`}
+                                  style={{
+                                    cursor: review.writer && onAuthorClick ? 'pointer' : 'default',
+                                    padding: '4px 8px',
+                                    borderRadius: '6px',
+                                    transition: 'all 0.2s ease',
+                                    backgroundColor: 'transparent'
+                                  }}
+                                  onClick={(e) => {
+                                    if (review.writer && onAuthorClick) {
+                                      e.stopPropagation();
+                                      onAuthorClick(review.writer);
+                                    }
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    if (review.writer && onAuthorClick) {
+                                      e.currentTarget.style.backgroundColor = 'rgba(13, 110, 253, 0.1)';
+                                      e.currentTarget.style.transform = 'scale(1.02)';
+                                    }
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    if (review.writer && onAuthorClick) {
+                                      e.currentTarget.style.backgroundColor = 'transparent';
+                                      e.currentTarget.style.transform = 'scale(1)';
+                                    }
+                                  }}
+                                >
+                                  <span className="text-muted small">작성자:</span>
+                                  <h6 className={`fw-bold mb-0 ${review.writer && onAuthorClick ? 'text-primary' : 'text-dark'}`}>
+                                    {review.writer?.name || '익명 사용자'}
+                                  </h6>
+                                  {review.writer && onAuthorClick && (
+                                    <i className="bi bi-box-arrow-up-right text-primary" style={{ fontSize: '0.7rem' }}></i>
+                                  )}
+                                </div>
+                              </div>
                               {/* 리뷰 상태 표시 */}
                               <span className={`badge rounded-pill ${
                                 review.status === 'POSTED' ? 'bg-success' :

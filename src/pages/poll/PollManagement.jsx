@@ -3,6 +3,7 @@ import { toast } from 'react-toastify';
 import pollApi from '../../api/pollApi';
 import SearchHeader from '../../components/common/SearchHeader';
 import PollCard from '../../components/poll/PollCard';
+import UserDetailModal from '../user/UserDetailModal';
 
 const PollManagement = () => {
   const [categories, setCategories] = useState([]);
@@ -11,6 +12,7 @@ const PollManagement = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
   const cursorRef = useRef(null);
   const scrollContainerRef = useRef(null);
 
@@ -115,6 +117,23 @@ const PollManagement = () => {
 
   // 투표 상세보기 (일단 로그만 출력)
   const handlePollClick = (poll) => {
+  };
+
+  // 작성자 클릭 핸들러
+  const handleAuthorClick = (writer) => {
+    if (writer && writer.writerId) {
+      // 유저 검색에서 사용하는 user 객체 형태로 변환
+      const userForModal = {
+        userId: writer.writerId,
+        nickname: writer.name || `ID: ${writer.writerId}`
+      };
+      setSelectedUser(userForModal);
+    }
+  };
+
+  // 모달 닫기 핸들러
+  const handleCloseModal = () => {
+    setSelectedUser(null);
   };
 
   return (
@@ -240,6 +259,7 @@ const PollManagement = () => {
                       key={poll.pollId}
                       poll={poll}
                       onClick={handlePollClick}
+                      onAuthorClick={handleAuthorClick}
                     />
                   ))}
                 </div>
@@ -268,6 +288,13 @@ const PollManagement = () => {
           </div>
         </div>
       )}
+
+      {/* 유저 상세 모달 */}
+      <UserDetailModal
+        show={!!selectedUser}
+        onHide={handleCloseModal}
+        user={selectedUser}
+      />
     </div>
   );
 };
