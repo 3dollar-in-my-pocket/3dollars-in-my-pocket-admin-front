@@ -1,5 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import UserDetailModal from './UserDetailModal';
+import StoreDetailModal from '../store/StoreDetailModal';
 import { SEARCH_TYPES } from '../../types/user';
 import useSearch from '../../hooks/useSearch';
 import { userSearchAdapter } from '../../adapters/userSearchAdapter';
@@ -8,6 +9,8 @@ import SearchResults from '../../components/common/SearchResults';
 import UserCard from '../../components/user/UserCard';
 
 const UserSearch = () => {
+  const [selectedStore, setSelectedStore] = useState(null);
+
   const {
     searchQuery,
     setSearchQuery,
@@ -69,6 +72,18 @@ const UserSearch = () => {
     <UserCard key={user.userId} user={user} onClick={handleUserClick} />
   );
 
+  // 가게 클릭 핸들러
+  const handleStoreClick = (store) => {
+    if (store && store.storeId) {
+      setSelectedStore(store);
+    }
+  };
+
+  // 가게 모달 닫기 핸들러
+  const handleCloseStoreModal = () => {
+    setSelectedStore(null);
+  };
+
   return (
     <div className="container-fluid px-4 py-4">
     <div className="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
@@ -105,6 +120,14 @@ const UserSearch = () => {
         show={!!selectedUser}
         onHide={handleCloseModal}
         user={selectedUser}
+        onStoreClick={handleStoreClick}
+      />
+
+      {/* 가게 상세 모달 */}
+      <StoreDetailModal
+        show={!!selectedStore}
+        onHide={handleCloseStoreModal}
+        store={selectedStore}
       />
     </div>
   );

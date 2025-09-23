@@ -3,7 +3,7 @@ import storeReportApi from "../api/storeReportApi";
 import {getReportReasonBadgeClass} from "../types/report";
 import {getStoreTypeDisplayName, getStoreTypeBadgeClass, getStoreTypeIcon} from "../types/store";
 
-const UserStoreReportHistory = ({userId, isActive}) => {
+const UserStoreReportHistory = ({userId, isActive, onStoreClick}) => {
   const [reports, setReports] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -180,9 +180,35 @@ const UserStoreReportHistory = ({userId, isActive}) => {
                   <div className="flex-grow-1">
                     <div className="d-flex justify-content-between align-items-start mb-2">
                       <div>
-                        <h6 className="fw-bold text-dark mb-1">
-                          {report.store?.name || '가게 정보 없음'}
-                        </h6>
+                        <div
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (report.store && onStoreClick) {
+                              onStoreClick(report.store);
+                            }
+                          }}
+                          className="clickable-store d-flex align-items-center gap-1 mb-1"
+                          style={{
+                            cursor: 'pointer',
+                            padding: '2px 4px',
+                            borderRadius: '4px',
+                            transition: 'all 0.2s ease',
+                            width: 'fit-content'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#f8f9fa';
+                            e.currentTarget.style.transform = 'translateY(-1px)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'transparent';
+                            e.currentTarget.style.transform = 'translateY(0)';
+                          }}
+                        >
+                          <h6 className="fw-bold text-primary mb-0">
+                            {report.store?.name || '가게 정보 없음'}
+                          </h6>
+                          <i className="bi bi-box-arrow-up-right text-primary" style={{ fontSize: '0.7rem' }}></i>
+                        </div>
                         <div className="d-flex align-items-center gap-2 mb-2">
                           {getReasonBadge(report.reason)}
                           {report.store?.storeType && getStoreTypeBadge(report.store.storeType)}

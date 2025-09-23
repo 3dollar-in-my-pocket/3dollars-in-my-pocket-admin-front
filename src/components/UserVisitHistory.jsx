@@ -4,7 +4,7 @@ import {getActivitiesStatusDisplayName, getStoreStatusBadgeClass, getStoreStatus
 import {getVisitIconClass, getVisitTypeBatchClass, getVisitTypeDisplayName} from "../types/visit";
 import visitApi from "../api/visitApi";
 
-const UserVisitHistory = ({userId, isActive}) => {
+const UserVisitHistory = ({userId, isActive, onStoreClick}) => {
   const [visits, setVisits] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
@@ -216,7 +216,32 @@ const UserVisitHistory = ({userId, isActive}) => {
                   <div className="d-flex align-items-start gap-3">
                     <div className="flex-grow-1">
                       <div className="d-flex align-items-center gap-2 mb-2">
-                        <h6 className="mb-0 fw-bold text-dark">{visit.store?.name || '가게 이름 없음'}</h6>
+                        <div
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (visit.store && onStoreClick) {
+                              onStoreClick(visit.store);
+                            }
+                          }}
+                          className="clickable-store d-flex align-items-center gap-1"
+                          style={{
+                            cursor: 'pointer',
+                            padding: '2px 4px',
+                            borderRadius: '4px',
+                            transition: 'all 0.2s ease'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#f8f9fa';
+                            e.currentTarget.style.transform = 'translateY(-1px)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'transparent';
+                            e.currentTarget.style.transform = 'translateY(0)';
+                          }}
+                        >
+                          <h6 className="mb-0 fw-bold text-primary">{visit.store?.name || '가게 이름 없음'}</h6>
+                          <i className="bi bi-box-arrow-up-right text-primary" style={{ fontSize: '0.7rem' }}></i>
+                        </div>
                         {getVisitTypeBadge(visit.type)}
                       </div>
 

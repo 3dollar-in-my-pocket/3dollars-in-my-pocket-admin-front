@@ -17,7 +17,7 @@ import UserStoreImageHistory from '../../components/UserStoreImageHistory';
 import UserStoreReportHistory from '../../components/UserStoreReportHistory';
 import deviceApi from "../../api/deviceApi";
 
-const UserDetailModal = ({show, onHide, user}) => {
+const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
   const [userDetail, setUserDetail] = useState(null);
   const [devices, setDevices] = useState([]);
   const [settings, setSettings] = useState(null);
@@ -663,6 +663,7 @@ const UserDetailModal = ({show, onHide, user}) => {
               <ActivityHistory
                 type="user"
                 entityId={user?.userId}
+                onStoreClick={onStoreClick}
                 tabs={[
                   {
                     key: 'stores',

@@ -3,7 +3,7 @@ import {toast} from 'react-toastify';
 import storeImageApi from "../api/storeImageApi";
 import {getStoreTypeDisplayName, getStoreTypeBadgeClass, getStoreTypeIcon} from "../types/store";
 
-const UserStoreImageHistory = ({userId, isActive}) => {
+const UserStoreImageHistory = ({userId, isActive, onStoreClick}) => {
   const [storeImages, setStoreImages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
@@ -258,7 +258,33 @@ const UserStoreImageHistory = ({userId, isActive}) => {
                   <div className="card-body p-3">
                     <div className="d-flex align-items-start justify-content-between mb-2">
                       <div className="flex-grow-1">
-                        <h6 className="mb-1 fw-bold text-dark">{storeImage.store?.name || '가게명 없음'}</h6>
+                        <div
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (storeImage.store && onStoreClick) {
+                              onStoreClick(storeImage.store);
+                            }
+                          }}
+                          className="clickable-store d-flex align-items-center gap-1 mb-1"
+                          style={{
+                            cursor: 'pointer',
+                            padding: '2px 4px',
+                            borderRadius: '4px',
+                            transition: 'all 0.2s ease',
+                            width: 'fit-content'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#f8f9fa';
+                            e.currentTarget.style.transform = 'translateY(-1px)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'transparent';
+                            e.currentTarget.style.transform = 'translateY(0)';
+                          }}
+                        >
+                          <h6 className="mb-0 fw-bold text-primary">{storeImage.store?.name || '가게명 없음'}</h6>
+                          <i className="bi bi-box-arrow-up-right text-primary" style={{ fontSize: '0.6rem' }}></i>
+                        </div>
                         <div className="d-flex flex-wrap align-items-center gap-1 mb-2">
                           {getSalesTypeBadge(storeImage.store?.salesType)}
                           {getImageStatusBadge(storeImage.status)}

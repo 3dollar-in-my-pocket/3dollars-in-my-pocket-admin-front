@@ -3,7 +3,7 @@ import {toast} from 'react-toastify';
 import {getActivitiesStatusDisplayName, getStoreStatusBadgeClass, getStoreStatusDisplayName, getStoreTypeDisplayName, getStoreTypeBadgeClass, getStoreTypeIcon} from "../types/store";
 import reviewApi from "../api/reviewApi";
 
-const UserReviewHistory = ({userId, isActive}) => {
+const UserReviewHistory = ({userId, isActive, onStoreClick}) => {
   const [reviews, setReviews] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
@@ -283,7 +283,32 @@ const UserReviewHistory = ({userId, isActive}) => {
                   <div className="d-flex align-items-start gap-3">
                     <div className="flex-grow-1">
                       <div className="d-flex align-items-center gap-2 mb-2">
-                        <h6 className="mb-0 fw-bold text-dark">{review.store?.name || '가게 이름 없음'}</h6>
+                        <div
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (review.store && onStoreClick) {
+                              onStoreClick(review.store);
+                            }
+                          }}
+                          className="clickable-store d-flex align-items-center gap-1"
+                          style={{
+                            cursor: 'pointer',
+                            padding: '2px 4px',
+                            borderRadius: '4px',
+                            transition: 'all 0.2s ease'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#f8f9fa';
+                            e.currentTarget.style.transform = 'translateY(-1px)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'transparent';
+                            e.currentTarget.style.transform = 'translateY(0)';
+                          }}
+                        >
+                          <h6 className="mb-0 fw-bold text-primary">{review.store?.name || '가게 이름 없음'}</h6>
+                          <i className="bi bi-box-arrow-up-right text-primary" style={{ fontSize: '0.7rem' }}></i>
+                        </div>
                         {getReviewStatusBadge(review.status)}
                         {getSalesTypeBadge(review.store?.salesType)}
                         {getStoreStatusBadge(review.store?.status)}
