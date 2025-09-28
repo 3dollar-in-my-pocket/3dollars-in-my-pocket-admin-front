@@ -164,56 +164,139 @@ const Advertisement = () => {
         </div>
       </div>
 
-      <div className="table-responsive">
-        <table className="table table-bordered align-middle text-center">
-          <thead className="table-dark">
-          <tr>
-            <th>ID</th>
-            <th>구좌</th>
-            <th>플랫폼</th>
-            <th>설명</th>
-            <th>시작일</th>
-            <th>종료일</th>
-            <th>제목</th>
-            <th>상세</th>
-          </tr>
-          </thead>
-          <tbody>
-          {isLoading ? (
+      {/* 모바일 카드 레이아웃 (768px 미만) */}
+      <div className="d-block d-md-none">
+        {isLoading ? (
+          <div className="text-center py-5">
+            <Loading/>
+          </div>
+        ) : advertisementList.length === 0 ? (
+          <div className="text-center py-5">
+            <div className="bg-light rounded-circle mx-auto mb-3" style={{width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+              <i className="bi bi-megaphone fs-1 text-secondary"></i>
+            </div>
+            <h5 className="text-muted">등록된 광고가 없습니다</h5>
+            <p className="text-muted small">새로운 광고를 등록해보세요.</p>
+          </div>
+        ) : (
+          <div className="row g-2">
+            {advertisementList.map((info) => (
+              <div key={info.advertisementId} className="col-12">
+                <div className="card shadow-sm h-100">
+                  <div className="card-body p-3">
+                    <div className="d-flex justify-content-between align-items-start mb-2">
+                      <span className="badge bg-primary">
+                        ID: {info.advertisementId}
+                      </span>
+                      <button
+                        className="btn btn-outline-primary btn-sm"
+                        onClick={() => setSelectedAd(info)}
+                        style={{fontSize: '0.75rem', padding: '4px 8px'}}
+                      >
+                        <i className="bi bi-eye me-1"></i>상세
+                      </button>
+                    </div>
+
+                    <h6 className="card-title mb-2 fw-bold" style={{fontSize: '0.95rem', lineHeight: '1.3'}}>
+                      {info.title}
+                    </h6>
+
+                    <div className="row g-1 mb-2">
+                      <div className="col-6">
+                        <small className="text-muted d-block" style={{fontSize: '0.7rem'}}>구좌</small>
+                        <span className="badge bg-secondary" style={{fontSize: '0.65rem'}}>
+                          {getDescriptionFromKey(info.positionType, "position")}
+                        </span>
+                      </div>
+                      <div className="col-6">
+                        <small className="text-muted d-block" style={{fontSize: '0.7rem'}}>플랫폼</small>
+                        <span className="badge bg-info" style={{fontSize: '0.65rem'}}>
+                          {getDescriptionFromKey(info.platformType, "platform")}
+                        </span>
+                      </div>
+                    </div>
+
+                    {info.description && (
+                      <p className="card-text text-muted mb-2" style={{fontSize: '0.8rem', lineHeight: '1.3'}}>
+                        {info.description.length > 50 ? info.description.substring(0, 50) + '...' : info.description}
+                      </p>
+                    )}
+
+                    <div className="d-flex justify-content-between align-items-center">
+                      <div>
+                        <small className="text-muted d-block" style={{fontSize: '0.65rem'}}>시작일</small>
+                        <small className="fw-semibold" style={{fontSize: '0.7rem'}}>
+                          {formatDateTime(info.startDateTime).split(' ')[0]}
+                        </small>
+                      </div>
+                      <div className="text-end">
+                        <small className="text-muted d-block" style={{fontSize: '0.65rem'}}>종료일</small>
+                        <small className="fw-semibold" style={{fontSize: '0.7rem'}}>
+                          {formatDateTime(info.endDateTime).split(' ')[0]}
+                        </small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* 데스크톱 테이블 레이아웃 (768px 이상) */}
+      <div className="d-none d-md-block">
+        <div className="table-responsive">
+          <table className="table table-bordered align-middle text-center">
+            <thead className="table-dark">
             <tr>
-              <td colSpan="8" className="py-5">
-                <Loading/>
-              </td>
+              <th>ID</th>
+              <th>구좌</th>
+              <th>플랫폼</th>
+              <th>설명</th>
+              <th>시작일</th>
+              <th>종료일</th>
+              <th>제목</th>
+              <th>상세</th>
             </tr>
-          ) : advertisementList.length === 0 ? (
-            <tr>
-              <td colSpan="8" className="py-5 text-muted fs-5">
-                📭 등록된 광고가 없습니다.
-              </td>
-            </tr>
-          ) : (
-            advertisementList.map((info) => (
-              <tr key={info.advertisementId}>
-                <td>{info.advertisementId}</td>
-                <td>{getDescriptionFromKey(info.positionType, "position")}</td>
-                <td>{getDescriptionFromKey(info.platformType, "platform")}</td>
-                <td>{info.description || '-'}</td>
-                <td>{formatDateTime(info.startDateTime)}</td>
-                <td>{formatDateTime(info.endDateTime)}</td>
-                <td className="text-start">{info.title}</td>
-                <td>
-                  <button
-                    className="btn btn-outline-primary btn-sm"
-                    onClick={() => setSelectedAd(info)}
-                  >
-                    상세 보기
-                  </button>
+            </thead>
+            <tbody>
+            {isLoading ? (
+              <tr>
+                <td colSpan="8" className="py-5">
+                  <Loading/>
                 </td>
               </tr>
-            ))
-          )}
-          </tbody>
-        </table>
+            ) : advertisementList.length === 0 ? (
+              <tr>
+                <td colSpan="8" className="py-5 text-muted fs-5">
+                  📭 등록된 광고가 없습니다.
+                </td>
+              </tr>
+            ) : (
+              advertisementList.map((info) => (
+                <tr key={info.advertisementId}>
+                  <td>{info.advertisementId}</td>
+                  <td>{getDescriptionFromKey(info.positionType, "position")}</td>
+                  <td>{getDescriptionFromKey(info.platformType, "platform")}</td>
+                  <td>{info.description || '-'}</td>
+                  <td>{formatDateTime(info.startDateTime)}</td>
+                  <td>{formatDateTime(info.endDateTime)}</td>
+                  <td className="text-start">{info.title}</td>
+                  <td>
+                    <button
+                      className="btn btn-outline-primary btn-sm"
+                      onClick={() => setSelectedAd(info)}
+                    >
+                      상세 보기
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <AdvertisementModal
