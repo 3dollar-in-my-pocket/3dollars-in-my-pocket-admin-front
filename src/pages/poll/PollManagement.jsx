@@ -68,18 +68,29 @@ const PollManagement = () => {
           setPolls(newPolls);
         }
 
+        // 서버에서 제공하는 hasMore와 nextCursor 값 사용
         setHasMore(response.data.cursor.hasMore);
 
-        // 다음 페이지 커서 설정 (마지막 아이템의 pollId 사용)
-        if (response.data.cursor.hasMore && newPolls.length > 0) {
-          cursorRef.current = newPolls[newPolls.length - 1].pollId;
+        // 서버에서 제공하는 nextCursor 값을 그대로 사용
+        if (response.data.cursor.hasMore && response.data.cursor.nextCursor) {
+          cursorRef.current = response.data.cursor.nextCursor;
         } else {
           cursorRef.current = null;
         }
       }
     } catch (error) {
       console.error('투표 목록 조회 실패:', error);
-      toast.error('투표 목록을 불러오는데 실패했습니다.');
+      const errorMessage = isLoadMore
+        ? '추가 투표를 불러오는데 실패했습니다.'
+        : '투표 목록을 불러오는데 실패했습니다.';
+      toast.error(errorMessage);
+
+      // 더보기 실패 시 hasMore 상태 유지하여 재시도 가능하도록 함
+      if (!isLoadMore) {
+        setPolls([]);
+        setHasMore(false);
+        cursorRef.current = null;
+      }
     } finally {
       setIsLoading(false);
       setIsLoadingMore(false);
@@ -93,18 +104,25 @@ const PollManagement = () => {
     }
   }, [selectedCategory]);
 
-  // 무한 스크롤 처리
+  // 무한 스크롤 처리 (디바운싱 추가)
+  const lastScrollTime = useRef(0);
   const handleScroll = useCallback(() => {
     const container = scrollContainerRef.current;
-    if (!container || isLoadingMore || !hasMore) return;
+    if (!container || isLoadingMore || !hasMore || !cursorRef.current) return;
+
+    const now = Date.now();
+    // 300ms 디바운싱으로 중복 호출 방지
+    if (now - lastScrollTime.current < 300) return;
 
     const { scrollTop, scrollHeight, clientHeight } = container;
     const threshold = 100; // 하단에서 100px 전에 로딩 시작
 
+    // 스크롤이 하단 근처에 도달했을 때만 더보기 실행
     if (scrollHeight - scrollTop - clientHeight < threshold) {
+      lastScrollTime.current = now;
       fetchPolls(selectedCategory, true);
     }
-  }, [selectedCategory, isLoadingMore, hasMore]);
+  }, [selectedCategory, isLoadingMore, hasMore, fetchPolls]);
 
   // 스크롤 이벤트 등록
   useEffect(() => {
@@ -264,13 +282,26 @@ const PollManagement = () => {
                   ))}
                 </div>
 
-                {/* 더 불러오기 로딩 */}
-                {isLoadingMore && (
+                {/* 더보기 버튼 및 로딩 상태 */}
+                {hasMore && (
                   <div className="text-center py-4">
-                    <div className="spinner-border text-primary" role="status">
-                      <span className="visually-hidden">Loading...</span>
-                    </div>
-                    <p className="mt-2 text-muted small">더 많은 투표를 불러오는 중...</p>
+                    {isLoadingMore ? (
+                      <div>
+                        <div className="spinner-border text-primary" role="status">
+                          <span className="visually-hidden">Loading...</span>
+                        </div>
+                        <p className="mt-2 text-muted small">더 많은 투표를 불러오는 중...</p>
+                      </div>
+                    ) : (
+                      <button
+                        className="btn btn-outline-primary rounded-pill px-4 py-2"
+                        onClick={() => fetchPolls(selectedCategory, true)}
+                        disabled={!cursorRef.current}
+                      >
+                        <i className="bi bi-plus-circle me-2"></i>
+                        더 많은 투표 보기
+                      </button>
+                    )}
                   </div>
                 )}
 
@@ -279,7 +310,7 @@ const PollManagement = () => {
                   <div className="text-center py-4">
                     <div className="text-muted">
                       <i className="bi bi-check-circle me-2"></i>
-                      모든 투표를 불러왔습니다.
+                      모든 투표를 불러왔습니다. (총 {polls.length}개)
                     </div>
                   </div>
                 )}
