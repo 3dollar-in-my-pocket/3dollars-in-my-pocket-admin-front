@@ -32,6 +32,37 @@ const RegistrationManagement = () => {
 
   return (
     <div className="container-fluid py-4">
+      <style>{`
+        .cert-image-responsive {
+          height: 80px !important;
+        }
+        .cert-placeholder-responsive {
+          height: 80px !important;
+        }
+        @media (min-width: 768px) {
+          .cert-image-responsive {
+            height: 120px !important;
+          }
+          .cert-placeholder-responsive {
+            height: 120px !important;
+          }
+        }
+        @media (min-width: 992px) {
+          .cert-image-responsive {
+            height: 140px !important;
+          }
+          .cert-placeholder-responsive {
+            height: 140px !important;
+          }
+        }
+        .cert-image-responsive {
+          transition: transform 0.2s ease;
+          cursor: pointer;
+        }
+        .cert-image-responsive:hover {
+          transform: scale(1.02);
+        }
+      `}</style>
       <div className="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
         <h2 className="fw-bold">📝 가입 신청 관리</h2>
       </div>
@@ -88,6 +119,52 @@ const RegistrationManagement = () => {
                         <span className="d-inline d-sm-none">상세</span>
                       </button>
                     </div>
+
+                    {/* 인증 사진 */}
+                    {reg.store.certificationPhotoUrl && (
+                      <div className="mb-2 mb-md-3 position-relative">
+                        <img
+                          src={reg.store.certificationPhotoUrl}
+                          alt={`${reg.store.name} 인증 사진`}
+                          className="img-fluid rounded cert-image-responsive"
+                          style={{
+                            width: '100%',
+                            height: '80px',
+                            objectFit: 'contain',
+                            border: '1px solid #e9ecef',
+                            backgroundColor: '#f8f9fa'
+                          }}
+                          onClick={() => setSelectedRegistration(reg)}
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextElementSibling.style.display = 'flex';
+                          }}
+                        />
+                        <div
+                          className="d-none position-absolute top-0 start-0 w-100 h-100 align-items-center justify-content-center bg-light rounded border cert-placeholder-responsive"
+                        >
+                          <div className="text-center text-muted">
+                            <i className="bi bi-image fs-3 mb-1"></i>
+                            <div style={{fontSize: '0.7rem'}}>이미지 로드 실패</div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 인증 사진이 없는 경우 플레이스홀더 */}
+                    {!reg.store.certificationPhotoUrl && (
+                      <div className="mb-2 mb-md-3">
+                        <div
+                          className="d-flex align-items-center justify-content-center bg-light rounded border cert-placeholder-responsive"
+                          style={{ height: '80px' }}
+                        >
+                          <div className="text-center text-muted">
+                            <i className="bi bi-shield-check fs-4 mb-1"></i>
+                            <div style={{fontSize: '0.7rem'}}>인증 사진 없음</div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
 
                     <div className="mb-2 mb-md-3">
                       <small className="text-muted d-block" style={{fontSize: '0.75rem'}}>가게명</small>
