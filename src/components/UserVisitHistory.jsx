@@ -247,7 +247,7 @@ const UserVisitHistory = ({userId, isActive, onStoreClick}) => {
 
                       <div className="d-flex align-items-center gap-2 mb-2">
                         <i className="bi bi-calendar3 text-muted"></i>
-                        <span className="text-dark fw-medium">{formatVisitDateTime(visit.visitAt)}</span>
+                        <span className="text-dark fw-medium">{formatVisitDateTime(visit.visitDateTime)}</span>
                       </div>
 
                       <div className="text-muted small mb-2">
@@ -339,7 +339,7 @@ const UserVisitHistory = ({userId, isActive, onStoreClick}) => {
                       <h4 className="mb-0 fw-bold">{selectedVisit?.store?.name || '가게 이름 없음'}</h4>
                       <div className="d-flex align-items-center gap-2 mt-2">
                         <i className="bi bi-calendar3 opacity-90"></i>
-                        <span className="opacity-90">{formatVisitDateTime(selectedVisit.visitAt)}</span>
+                        <span className="opacity-90">{formatVisitDateTime(selectedVisit.visitDateTime)}</span>
                       </div>
                     </div>
                   </div>
@@ -378,7 +378,7 @@ const UserVisitHistory = ({userId, isActive, onStoreClick}) => {
                       </div>
                       <div>
                         <label className="form-label fw-semibold text-muted mb-1">방문 시간</label>
-                        <p className="mb-0 text-dark fw-bold">{formatVisitDateTime(selectedVisit.visitAt)}</p>
+                        <p className="mb-0 text-dark fw-bold">{formatVisitDateTime(selectedVisit.visitDateTime)}</p>
                       </div>
                     </div>
                   </div>

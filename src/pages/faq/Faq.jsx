@@ -62,9 +62,18 @@ const FaqManagement = () => {
 
   return (
     <div className="container-fluid py-4">
-      <div className="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+      {/* 데스크톱 헤더 */}
+      <div className="d-none d-md-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
         <h2 className="fw-bold">🎯 FAQ 관리</h2>
         <button className="btn btn-success" onClick={() => handleShowModal()}>
+          <i className="bi bi-plus-circle me-2"></i> 신규 등록
+        </button>
+      </div>
+
+      {/* 모바일 헤더 */}
+      <div className="d-md-none mb-4 border-bottom pb-3">
+        <h2 className="fw-bold mb-3">🎯 FAQ 관리</h2>
+        <button className="btn btn-success w-100" onClick={() => handleShowModal()}>
           <i className="bi bi-plus-circle me-2"></i> 신규 등록
         </button>
       </div>

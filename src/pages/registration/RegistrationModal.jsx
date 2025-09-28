@@ -108,7 +108,12 @@ const RegistrationModal = ({show, onHide, registration}) => {
                   src={store.certificationPhotoUrl}
                   alt="인증 사진"
                   className="img-fluid rounded shadow-sm mt-2"
-                  style={{maxHeight: "300px"}}
+                  style={{
+                    maxHeight: "300px",
+                    objectFit: "contain",
+                    backgroundColor: '#f8f9fa',
+                    border: '1px solid #e9ecef'
+                  }}
                 />
               </li>
             </ul>

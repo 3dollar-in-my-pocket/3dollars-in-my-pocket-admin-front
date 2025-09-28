@@ -46,11 +46,11 @@ export const storeSearchAdapter = {
 
   // 검색 옵션
   searchOptions: [
-    { value: STORE_SEARCH_TYPES.KEYWORD, label: '키워드 검색' },
-    { value: STORE_SEARCH_TYPES.RECENT, label: '최신순 조회' }
+    { value: STORE_SEARCH_TYPES.RECENT, label: '최신순 조회' },
+    { value: STORE_SEARCH_TYPES.KEYWORD, label: '키워드 검색' }
   ],
 
   // 기본 설정
-  defaultSearchType: STORE_SEARCH_TYPES.KEYWORD,
+  defaultSearchType: STORE_SEARCH_TYPES.RECENT,
   errorMessage: '가게 정보를 불러오는 중 오류가 발생했습니다.'
 };

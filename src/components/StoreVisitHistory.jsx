@@ -197,7 +197,7 @@ const StoreVisitHistory = ({storeId, isActive, onAuthorClick}) => {
                             <div className="mb-1">
                               <span className="text-muted small">
                                 <i className="bi bi-calendar me-1"></i>
-                                방문일: {formatDateTime(visit.visitAt)}
+                                방문일: {formatDateTime(visit.visitDateTime)}
                               </span>
                             </div>
                           </div>

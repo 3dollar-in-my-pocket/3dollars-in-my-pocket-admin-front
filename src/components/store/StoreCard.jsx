@@ -11,7 +11,7 @@ import {
 } from '../../types/store';
 import ItemCard from '../common/ItemCard';
 
-const StoreCard = ({ store, onClick }) => {
+const StoreCard = ({ store, onClick, onDelete, isDeleted = false }) => {
   const formatDateTime = (dateString) => {
     if (!dateString) return '없음';
     return new Date(dateString).toLocaleDateString('ko-KR');
@@ -31,8 +31,13 @@ const StoreCard = ({ store, onClick }) => {
     <div className="col-lg-4 col-md-6 col-12">
       <ItemCard
         item={store}
-        onClick={onClick}
+        onClick={isDeleted ? undefined : onClick}
         borderColor={borderColor}
+        style={isDeleted ? {
+          opacity: 0.6,
+          filter: 'grayscale(50%)',
+          position: 'relative'
+        } : {}}
       >
         <div className="text-center mb-3">
           <div className="rounded-circle p-2 shadow-sm mx-auto mb-2" style={{
@@ -47,6 +52,62 @@ const StoreCard = ({ store, onClick }) => {
             <i className="bi bi-shop fs-6" style={{color: borderColor}}></i>
           </div>
         </div>
+
+        {/* 삭제 버튼 (삭제되지 않은 가게에만 표시) */}
+        {!isDeleted && onDelete && (
+          <div className="position-absolute" style={{
+            top: '8px',
+            right: '8px',
+            zIndex: 10
+          }}>
+            <button
+              className="btn btn-danger btn-sm rounded-circle"
+              style={{
+                width: '28px',
+                height: '28px',
+                padding: '0',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '0.7rem',
+                opacity: 0.8,
+                transition: 'all 0.2s ease'
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(store);
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.opacity = '1';
+                e.currentTarget.style.transform = 'scale(1.1)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.opacity = '0.8';
+                e.currentTarget.style.transform = 'scale(1)';
+              }}
+              title="가게 삭제"
+            >
+              <i className="bi bi-trash"></i>
+            </button>
+          </div>
+        )}
+
+        {isDeleted && (
+          <div className="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style={{
+            background: 'rgba(220, 53, 69, 0.1)',
+            backdropFilter: 'blur(1px)',
+            zIndex: 10,
+            borderRadius: '15px'
+          }}>
+            <div className="text-center">
+              <div className="bg-danger rounded-circle p-3 mb-2 mx-auto" style={{width: '60px', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                <i className="bi bi-trash text-white fs-4"></i>
+              </div>
+              <h6 className="text-danger fw-bold mb-1">삭제된 가게</h6>
+              <p className="text-muted small mb-0">이 가게는 삭제되었습니다</p>
+            </div>
+          </div>
+        )}
 
         <div>
           <div className="text-center mb-2">
@@ -149,27 +210,37 @@ const StoreCard = ({ store, onClick }) => {
             <button
               className="btn btn-sm rounded-pill px-3 py-2 shadow-sm"
               style={{
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                background: isDeleted
+                  ? 'linear-gradient(135deg, #6c757d 0%, #495057 100%)'
+                  : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                 color: 'white',
                 border: 'none',
                 transition: 'all 0.2s ease',
-                fontSize: '0.8rem'
+                fontSize: '0.8rem',
+                cursor: isDeleted ? 'not-allowed' : 'pointer'
               }}
               onClick={(e) => {
                 e.stopPropagation();
-                onClick(store);
+                if (!isDeleted) {
+                  onClick(store);
+                }
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'scale(1.05)';
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.3)';
+                if (!isDeleted) {
+                  e.currentTarget.style.transform = 'scale(1.05)';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.3)';
+                }
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'scale(1)';
-                e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                if (!isDeleted) {
+                  e.currentTarget.style.transform = 'scale(1)';
+                  e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                }
               }}
+              disabled={isDeleted}
             >
-              <i className="bi bi-eye me-1"></i>
-              상세보기
+              <i className={`bi ${isDeleted ? 'bi-trash' : 'bi-eye'} me-1`}></i>
+              {isDeleted ? '삭제됨' : '상세보기'}
             </button>
           </div>
         </div>
