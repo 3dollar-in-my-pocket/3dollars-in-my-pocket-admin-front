@@ -27,7 +27,8 @@ const StoreSearch = () => {
     handleCloseModal,
     handleKeyPress,
     handleScroll,
-    resetSearch
+    resetSearch,
+    setResults
   } = useSearch({
     validateSearch: storeSearchAdapter.validateSearch,
     searchFunction: storeSearchAdapter.searchFunction,
@@ -97,7 +98,12 @@ const StoreSearch = () => {
   };
 
   const renderStoreCard = (store) => (
-    <StoreCard key={store.storeId} store={store} onClick={handleStoreClick} />
+    <StoreCard
+      key={store.storeId}
+      store={store}
+      onClick={handleStoreClick}
+      isDeleted={store.isDeleted}
+    />
   );
 
   // 작성자 클릭 핸들러
@@ -119,6 +125,19 @@ const StoreSearch = () => {
   const handleCloseUserModal = () => {
     setSelectedUser(null);
   };
+
+  // 가게 삭제 핸들러
+  const handleStoreDeleted = useCallback((deletedStoreId) => {
+    // 결과 목록에서 해당 가게를 삭제 상태로 표시
+    const updatedResults = storeList.map(store =>
+      store.storeId === deletedStoreId
+        ? { ...store, isDeleted: true }
+        : store
+    );
+
+    // setResults를 사용하여 상태 업데이트
+    setResults(updatedResults);
+  }, [storeList, setResults]);
 
   return (
     <div className="container-fluid px-4 py-4">
@@ -156,6 +175,7 @@ const StoreSearch = () => {
         onHide={handleCloseModal}
         store={selectedStore}
         onAuthorClick={handleAuthorClick}
+        onStoreDeleted={handleStoreDeleted}
       />
 
       {/* 유저 상세 모달 */}

@@ -26,7 +26,7 @@ import StoreImageHistory from '../../components/StoreImageHistory';
 import StoreReportHistory from '../../components/StoreReportHistory';
 import {toast} from 'react-toastify';
 
-const StoreDetailModal = ({show, onHide, store, onAuthorClick}) => {
+const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) => {
   const [storeDetail, setStoreDetail] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('basic');
@@ -97,9 +97,9 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick}) => {
       if (response.status === 200 || response.status === 204) {
         toast.success('가게가 성공적으로 삭제되었습니다.');
         handleClose();
-        // 부모 컴포넌트에 삭제 완료를 알려 목록을 새로고침할 수 있도록 함
-        if (window.location.reload) {
-          setTimeout(() => window.location.reload(), 1000);
+        // 부모 컴포넌트에 삭제 완료를 알려 목록에서 해당 가게를 제거하도록 함
+        if (onStoreDeleted) {
+          onStoreDeleted(store.storeId);
         }
       } else {
         throw new Error('삭제 실패');
