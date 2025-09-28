@@ -92,6 +92,16 @@ const Advertisement = () => {
 
   return (
     <div className="container-fluid py-4">
+      <style>{`
+        @media (min-width: 768px) {
+          .ad-image-responsive {
+            height: 200px !important;
+          }
+          .ad-placeholder-responsive {
+            height: 200px !important;
+          }
+        }
+      `}</style>
       <div className="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
         <h2 className="fw-bold">🎯 광고 관리</h2>
         <div className="d-flex gap-2">
@@ -164,8 +174,8 @@ const Advertisement = () => {
         </div>
       </div>
 
-      {/* 모바일 카드 레이아웃 (768px 미만) */}
-      <div className="d-block d-md-none">
+      {/* 카드 레이아웃 (모든 화면) */}
+      <div>
         {isLoading ? (
           <div className="text-center py-5">
             <Loading/>
@@ -179,60 +189,112 @@ const Advertisement = () => {
             <p className="text-muted small">새로운 광고를 등록해보세요.</p>
           </div>
         ) : (
-          <div className="row g-2">
+          <div className="row g-2 g-md-3">
             {advertisementList.map((info) => (
-              <div key={info.advertisementId} className="col-12">
+              <div key={info.advertisementId} className="col-12 col-md-6 col-lg-4">
                 <div className="card shadow-sm h-100">
-                  <div className="card-body p-3">
-                    <div className="d-flex justify-content-between align-items-start mb-2">
-                      <span className="badge bg-primary">
+                  <div className="card-body p-3 p-md-4">
+                    <div className="d-flex justify-content-between align-items-start mb-2 mb-md-3">
+                      <span className="badge bg-primary" style={{fontSize: '0.75rem'}}>
                         ID: {info.advertisementId}
                       </span>
                       <button
                         className="btn btn-outline-primary btn-sm"
                         onClick={() => setSelectedAd(info)}
-                        style={{fontSize: '0.75rem', padding: '4px 8px'}}
+                        style={{fontSize: '0.8rem', padding: '6px 12px'}}
                       >
-                        <i className="bi bi-eye me-1"></i>상세
+                        <i className="bi bi-eye me-1"></i>
+                        <span className="d-none d-sm-inline">상세 보기</span>
+                        <span className="d-inline d-sm-none">상세</span>
                       </button>
                     </div>
 
-                    <h6 className="card-title mb-2 fw-bold" style={{fontSize: '0.95rem', lineHeight: '1.3'}}>
+                    {/* 광고 이미지 */}
+                    {info.imageUrl && (
+                      <div className="mb-2 mb-md-3 position-relative">
+                        <img
+                          src={info.imageUrl}
+                          alt={info.title}
+                          className="img-fluid rounded ad-image-responsive"
+                          style={{
+                            width: '100%',
+                            height: '140px',
+                            objectFit: 'contain',
+                            border: '1px solid #e9ecef',
+                            backgroundColor: '#f8f9fa',
+                            ...(info.imageWidth && info.imageHeight && {
+                              aspectRatio: `${info.imageWidth} / ${info.imageHeight}`
+                            })
+                          }}
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextElementSibling.style.display = 'flex';
+                          }}
+                        />
+                        <div
+                          className="d-none position-absolute top-0 start-0 w-100 h-100 align-items-center justify-content-center bg-light rounded border ad-placeholder-responsive"
+                        >
+                          <div className="text-center text-muted">
+                            <i className="bi bi-image fs-1 mb-2"></i>
+                            <div style={{fontSize: '0.75rem'}}>이미지를 불러올 수 없습니다</div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 이미지가 없는 경우 플레이스홀더 */}
+                    {!info.imageUrl && (
+                      <div className="mb-2 mb-md-3">
+                        <div
+                          className="d-flex align-items-center justify-content-center bg-light rounded border ad-placeholder-responsive"
+                          style={{ height: '140px' }}
+                        >
+                          <div className="text-center text-muted">
+                            <i className="bi bi-image fs-2 mb-2"></i>
+                            <div style={{fontSize: '0.75rem'}}>이미지 없음</div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    <h6 className="card-title mb-2 mb-md-3 fw-bold" style={{fontSize: '1rem', lineHeight: '1.3'}}>
                       {info.title}
                     </h6>
 
-                    <div className="row g-1 mb-2">
+                    <div className="row g-1 g-md-2 mb-2 mb-md-3">
                       <div className="col-6">
-                        <small className="text-muted d-block" style={{fontSize: '0.7rem'}}>구좌</small>
-                        <span className="badge bg-secondary" style={{fontSize: '0.65rem'}}>
+                        <small className="text-muted d-block" style={{fontSize: '0.75rem'}}>구좌</small>
+                        <span className="badge bg-secondary" style={{fontSize: '0.7rem'}}>
                           {getDescriptionFromKey(info.positionType, "position")}
                         </span>
                       </div>
                       <div className="col-6">
-                        <small className="text-muted d-block" style={{fontSize: '0.7rem'}}>플랫폼</small>
-                        <span className="badge bg-info" style={{fontSize: '0.65rem'}}>
+                        <small className="text-muted d-block" style={{fontSize: '0.75rem'}}>플랫폼</small>
+                        <span className="badge bg-info" style={{fontSize: '0.7rem'}}>
                           {getDescriptionFromKey(info.platformType, "platform")}
                         </span>
                       </div>
                     </div>
 
                     {info.description && (
-                      <p className="card-text text-muted mb-2" style={{fontSize: '0.8rem', lineHeight: '1.3'}}>
-                        {info.description.length > 50 ? info.description.substring(0, 50) + '...' : info.description}
+                      <p className="card-text text-muted mb-2 mb-md-3" style={{fontSize: '0.85rem', lineHeight: '1.4'}}>
+                        {info.description.length > 80 ? info.description.substring(0, 80) + '...' : info.description}
                       </p>
                     )}
 
                     <div className="d-flex justify-content-between align-items-center">
                       <div>
-                        <small className="text-muted d-block" style={{fontSize: '0.65rem'}}>시작일</small>
-                        <small className="fw-semibold" style={{fontSize: '0.7rem'}}>
-                          {formatDateTime(info.startDateTime).split(' ')[0]}
+                        <small className="text-muted d-block" style={{fontSize: '0.7rem'}}>시작일</small>
+                        <small className="fw-semibold" style={{fontSize: '0.75rem'}}>
+                          <span className="d-none d-md-inline">{formatDateTime(info.startDateTime)}</span>
+                          <span className="d-inline d-md-none">{formatDateTime(info.startDateTime).split(' ')[0]}</span>
                         </small>
                       </div>
                       <div className="text-end">
-                        <small className="text-muted d-block" style={{fontSize: '0.65rem'}}>종료일</small>
-                        <small className="fw-semibold" style={{fontSize: '0.7rem'}}>
-                          {formatDateTime(info.endDateTime).split(' ')[0]}
+                        <small className="text-muted d-block" style={{fontSize: '0.7rem'}}>종료일</small>
+                        <small className="fw-semibold" style={{fontSize: '0.75rem'}}>
+                          <span className="d-none d-md-inline">{formatDateTime(info.endDateTime)}</span>
+                          <span className="d-inline d-md-none">{formatDateTime(info.endDateTime).split(' ')[0]}</span>
                         </small>
                       </div>
                     </div>
@@ -244,60 +306,6 @@ const Advertisement = () => {
         )}
       </div>
 
-      {/* 데스크톱 테이블 레이아웃 (768px 이상) */}
-      <div className="d-none d-md-block">
-        <div className="table-responsive">
-          <table className="table table-bordered align-middle text-center">
-            <thead className="table-dark">
-            <tr>
-              <th>ID</th>
-              <th>구좌</th>
-              <th>플랫폼</th>
-              <th>설명</th>
-              <th>시작일</th>
-              <th>종료일</th>
-              <th>제목</th>
-              <th>상세</th>
-            </tr>
-            </thead>
-            <tbody>
-            {isLoading ? (
-              <tr>
-                <td colSpan="8" className="py-5">
-                  <Loading/>
-                </td>
-              </tr>
-            ) : advertisementList.length === 0 ? (
-              <tr>
-                <td colSpan="8" className="py-5 text-muted fs-5">
-                  📭 등록된 광고가 없습니다.
-                </td>
-              </tr>
-            ) : (
-              advertisementList.map((info) => (
-                <tr key={info.advertisementId}>
-                  <td>{info.advertisementId}</td>
-                  <td>{getDescriptionFromKey(info.positionType, "position")}</td>
-                  <td>{getDescriptionFromKey(info.platformType, "platform")}</td>
-                  <td>{info.description || '-'}</td>
-                  <td>{formatDateTime(info.startDateTime)}</td>
-                  <td>{formatDateTime(info.endDateTime)}</td>
-                  <td className="text-start">{info.title}</td>
-                  <td>
-                    <button
-                      className="btn btn-outline-primary btn-sm"
-                      onClick={() => setSelectedAd(info)}
-                    >
-                      상세 보기
-                    </button>
-                  </td>
-                </tr>
-              ))
-            )}
-            </tbody>
-          </table>
-        </div>
-      </div>
 
       <AdvertisementModal
         show={!!selectedAd}

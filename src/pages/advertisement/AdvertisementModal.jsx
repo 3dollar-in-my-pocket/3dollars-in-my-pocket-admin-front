@@ -121,13 +121,21 @@ const AdvertisementModal = ({
                       alt={ad.title}
                       onLoad={handleImageLoad}
                       className="img-fluid rounded"
-                      style={{maxHeight: "300px", objectFit: "contain"}}
+                      style={{
+                        maxHeight: "300px",
+                        objectFit: "contain",
+                        ...(ad.imageWidth && ad.imageHeight && {
+                          aspectRatio: `${ad.imageWidth} / ${ad.imageHeight}`
+                        })
+                      }}
                     />
-                    {imageSize.width > 0 && (
-                      <div className="text-muted mt-2 small">
-                        이미지 크기: {imageSize.width} × {imageSize.height} px
-                      </div>
-                    )}
+                    <div className="text-muted mt-2 small">
+                      {ad.imageWidth && ad.imageHeight ? (
+                        <span>서버 이미지 크기: {ad.imageWidth} × {ad.imageHeight} px</span>
+                      ) : imageSize.width > 0 ? (
+                        <span>이미지 크기: {imageSize.width} × {imageSize.height} px</span>
+                      ) : null}
+                    </div>
                   </div>
                 </div>
               </div>
