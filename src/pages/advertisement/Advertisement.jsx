@@ -102,13 +102,27 @@ const Advertisement = () => {
           }
         }
       `}</style>
-      <div className="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
+      {/* 데스크톱 헤더 */}
+      <div className="d-none d-md-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
         <h2 className="fw-bold">🎯 광고 관리</h2>
         <div className="d-flex gap-2">
           <button className="btn btn-outline-secondary" onClick={refreshAdCache}>
             ♻️ 전체 광고 캐시 갱신
           </button>
           <button className="btn btn-success" onClick={() => setShowRegisterModal(true)}>
+            ➕ 신규 등록
+          </button>
+        </div>
+      </div>
+
+      {/* 모바일 헤더 */}
+      <div className="d-md-none mb-4 border-bottom pb-3">
+        <h2 className="fw-bold mb-3">🎯 광고 관리</h2>
+        <div className="d-flex flex-column gap-2">
+          <button className="btn btn-outline-secondary w-100" onClick={refreshAdCache}>
+            ♻️ 전체 광고 캐시 갱신
+          </button>
+          <button className="btn btn-success w-100" onClick={() => setShowRegisterModal(true)}>
             ➕ 신규 등록
           </button>
         </div>
