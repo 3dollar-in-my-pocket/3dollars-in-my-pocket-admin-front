@@ -20,6 +20,7 @@ export const useSearch = ({
   const scrollContainerRef = useRef(null);
   const isLoadingMore = useRef(false);
   const lastScrollTime = useRef(0);
+  const hasAutoSearched = useRef(false);
 
   // 검색 실행
   const handleSearch = useCallback(async (reset = true) => {
@@ -83,7 +84,7 @@ export const useSearch = ({
       setIsSearching(false);
       isLoadingMore.current = false;
     }
-  }, [searchType, searchQuery, additionalParams, nextCursor, hasMore, validateSearch, searchFunction, errorMessage, isLoading]);
+  }, [searchType, searchQuery, additionalParams, nextCursor, hasMore, validateSearch, searchFunction, errorMessage]);
 
   // 더 보기
   const handleLoadMore = useCallback(() => {
@@ -95,9 +96,19 @@ export const useSearch = ({
   // searchType 변경 시 자동 검색 (autoSearchTypes에 포함된 타입인 경우)
   useEffect(() => {
     if (searchType && autoSearchTypes.includes(searchType)) {
-      handleSearch(true);
+      // 중복 자동 검색 방지
+      const searchKey = `${searchType}-${autoSearchTypes.join(',')}`;
+      if (!hasAutoSearched.current || hasAutoSearched.current !== searchKey) {
+        hasAutoSearched.current = searchKey;
+        handleSearch(true);
+      }
     }
-  }, [searchType, autoSearchTypes, handleSearch]);
+  }, [searchType, autoSearchTypes]); // handleSearch 제거로 무한루프 방지
+
+  // searchType이나 autoSearchTypes가 변경되면 자동검색 플래그 리셋
+  useEffect(() => {
+    hasAutoSearched.current = false;
+  }, [searchType]);
 
   // 무한 스크롤 핸들러
   const handleScroll = useCallback((e) => {
@@ -110,16 +121,16 @@ export const useSearch = ({
 
     const { scrollTop, scrollHeight, clientHeight } = e.target;
 
-    // 스크롤이 하단 80% 지점에 도달했을 때 다음 페이지 로드
+    // 스크롤이 하단 95% 지점에 도달했을 때 다음 페이지 로드 (더 보수적으로 변경)
     const scrollPercentage = (scrollTop + clientHeight) / scrollHeight;
-    const shouldLoadMore = scrollPercentage >= 0.8;
+    const shouldLoadMore = scrollPercentage >= 0.95;
 
     // 더 엄격한 조건 체크
     if (shouldLoadMore && hasMore && !isLoading && !isLoadingMore.current && nextCursor) {
       lastScrollTime.current = now;
       handleSearch(false);
     }
-  }, [hasMore, isLoading, handleSearch, nextCursor]);
+  }, [hasMore, isLoading, nextCursor, handleSearch]);
 
   // 아이템 선택
   const handleItemClick = useCallback((item) => {

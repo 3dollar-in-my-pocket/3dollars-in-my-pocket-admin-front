@@ -33,7 +33,7 @@ const StoreSearch = () => {
     validateSearch: storeSearchAdapter.validateSearch,
     searchFunction: storeSearchAdapter.searchFunction,
     errorMessage: storeSearchAdapter.errorMessage,
-    autoSearchTypes: [] // 자동 검색 비활성화
+    autoSearchTypes: [STORE_SEARCH_TYPES.RECENT] // 최신순 조회시 자동 검색
   });
 
   // 초기 검색 타입 설정
