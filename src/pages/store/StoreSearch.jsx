@@ -4,7 +4,6 @@ import UserDetailModal from '../user/UserDetailModal';
 import { STORE_SEARCH_TYPES } from '../../types/store';
 import useSearch from '../../hooks/useSearch';
 import { storeSearchAdapter } from '../../adapters/storeSearchAdapter';
-import SearchForm from '../../components/common/SearchForm';
 import SearchResults from '../../components/common/SearchResults';
 import StoreCard from '../../components/store/StoreCard';
 import storeApi from '../../api/storeApi';
@@ -27,7 +26,6 @@ const StoreSearch = () => {
     handleSearch,
     handleItemClick: handleStoreClick,
     handleCloseModal,
-    handleKeyPress,
     handleScroll,
     resetSearch,
     setResults
@@ -58,12 +56,6 @@ const StoreSearch = () => {
     }
   }, [searchQuery, searchType, setSearchType, resetSearch, handleSearch]);
 
-  // 키보드 이벤트 핸들러 (Enter 키 처리)
-  const handleKeyPressCustom = useCallback((e) => {
-    if (e.key === 'Enter') {
-      handleSearchSubmit();
-    }
-  }, [handleSearchSubmit]);
 
   const renderStoreCard = (store) => (
     <StoreCard
@@ -139,17 +131,17 @@ const StoreSearch = () => {
   }, [storeList, setResults]);
 
   return (
-    <div className="container-fluid px-4 py-4">
-      <div className="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
-        <h2 className="fw-bold">가게 검색</h2>
+    <div className="container-fluid px-2 px-md-4 py-3 py-md-4">
+      <div className="d-flex justify-content-between align-items-center mb-3 mb-md-4 pb-2 border-bottom">
+        <h2 className="fw-bold fs-4 fs-md-2">가게 검색</h2>
       </div>
 
       {/* 단순화된 검색 폼 */}
-      <div className="card border-0 shadow-sm mb-4">
-        <div className="card-body p-4">
-          <div className="row align-items-end">
-            <div className="col-12 col-md-8 col-lg-9 mb-3 mb-md-0">
-              <label htmlFor="searchInput" className="form-label fw-semibold text-muted mb-2">
+      <div className="card border-0 shadow-sm mb-3 mb-md-4">
+        <div className="card-body p-3 p-md-4">
+          <div className="row align-items-end g-2 g-md-3">
+            <div className="col-12 col-md-8 col-lg-9 mb-2 mb-md-0">
+              <label htmlFor="searchInput" className="form-label fw-semibold text-muted mb-2 d-none d-md-block">
                 <i className="bi bi-search me-2"></i>
                 가게 검색
               </label>
@@ -159,19 +151,23 @@ const StoreSearch = () => {
                 className="form-control form-control-lg border-0 shadow-sm"
                 style={{
                   backgroundColor: '#f8f9fa',
-                  borderRadius: '15px',
-                  padding: '15px 20px',
+                  borderRadius: '12px',
+                  padding: '12px 16px',
                   border: '2px solid transparent',
                   transition: 'all 0.3s ease',
-                  fontSize: '16px'
+                  fontSize: '15px'
                 }}
-                placeholder="🔍 가게 이름을 입력하세요 (비워두면 최신순으로 조회)"
+                placeholder="🔍 가게 이름 입력 (비워두면 최신순)"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyPress={handleKeyPressCustom}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSearchSubmit();
+                  }
+                }}
                 onFocus={(e) => {
                   e.target.style.border = '2px solid #667eea';
-                  e.target.style.boxShadow = '0 0 20px rgba(102, 126, 234, 0.3)';
+                  e.target.style.boxShadow = '0 0 15px rgba(102, 126, 234, 0.3)';
                   e.target.style.backgroundColor = '#ffffff';
                 }}
                 onBlur={(e) => {
@@ -183,20 +179,21 @@ const StoreSearch = () => {
             </div>
             <div className="col-12 col-md-4 col-lg-3">
               <button
-                className="btn btn-primary btn-lg w-100 rounded-pill py-3 shadow-sm"
+                className="btn btn-primary btn-lg w-100 rounded-pill shadow-sm"
                 onClick={handleSearchSubmit}
                 disabled={isSearching}
                 style={{
                   background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                   border: 'none',
                   fontWeight: '600',
-                  fontSize: '16px',
+                  fontSize: '14px',
+                  padding: '12px 16px',
                   transition: 'all 0.3s ease'
                 }}
                 onMouseEnter={(e) => {
                   if (!isSearching) {
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.boxShadow = '0 8px 25px rgba(102, 126, 234, 0.4)';
+                    e.currentTarget.style.transform = 'translateY(-1px)';
+                    e.currentTarget.style.boxShadow = '0 6px 20px rgba(102, 126, 234, 0.4)';
                   }
                 }}
                 onMouseLeave={(e) => {
@@ -207,12 +204,14 @@ const StoreSearch = () => {
                 {isSearching ? (
                   <>
                     <span className="spinner-border spinner-border-sm me-2"></span>
-                    검색 중...
+                    <span className="d-none d-sm-inline">검색 중...</span>
+                    <span className="d-inline d-sm-none">검색중</span>
                   </>
                 ) : (
                   <>
                     <i className="bi bi-search me-2"></i>
-                    검색
+                    <span className="d-none d-sm-inline">검색</span>
+                    <span className="d-inline d-sm-none">검색</span>
                   </>
                 )}
               </button>
@@ -220,13 +219,21 @@ const StoreSearch = () => {
           </div>
 
           {/* 현재 검색 상태 표시 */}
-          <div className="mt-3">
-            <small className="text-muted d-flex align-items-center">
+          <div className="mt-2 mt-md-3">
+            <small className="text-muted d-flex align-items-center" style={{ fontSize: '0.75rem' }}>
               <i className={`bi ${searchQuery.trim() ? 'bi-search' : 'bi-clock-history'} me-2`}></i>
-              {searchQuery.trim()
-                ? `키워드 검색: "${searchQuery.trim()}"`
-                : '최신순으로 가게를 조회합니다'
-              }
+              <span className="d-none d-md-inline">
+                {searchQuery.trim()
+                  ? `키워드 검색: "${searchQuery.trim()}"`
+                  : '최신순으로 가게를 조회합니다'
+                }
+              </span>
+              <span className="d-inline d-md-none">
+                {searchQuery.trim()
+                  ? `키워드: "${searchQuery.trim()}"`
+                  : '최신순 조회'
+                }
+              </span>
             </small>
           </div>
         </div>
