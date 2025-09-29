@@ -256,6 +256,7 @@ const Advertisement = () => {
               {advertisementList.map((info) => (
                 <div key={info.advertisementId} className="col-12 col-md-6 col-xl-4">
                   <div className="card shadow-sm h-100 border-0" style={{transition: 'all 0.3s ease', cursor: 'pointer'}}
+                       onClick={() => setSelectedAd(info)}
                        onMouseEnter={(e) => {
                          e.currentTarget.style.transform = 'translateY(-4px)';
                          e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)';
@@ -277,7 +278,10 @@ const Advertisement = () => {
                         </div>
                         <button
                           className="btn btn-outline-primary btn-sm"
-                          onClick={() => setSelectedAd(info)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedAd(info);
+                          }}
                           style={{fontSize: '0.75rem', padding: '8px 16px', borderRadius: '20px'}}
                         >
                           <i className="bi bi-eye me-1"></i>

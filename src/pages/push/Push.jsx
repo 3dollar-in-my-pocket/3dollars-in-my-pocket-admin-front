@@ -72,14 +72,146 @@ const PushManage = () => {
         <h2 className="fw-bold mb-0">📣 푸시 발송</h2>
       </div>
 
-      <Row>
-        <Col md={6} className="mb-4 mb-md-0">
-          <Card className="shadow-sm p-3 p-md-4 push-form-card">
-            <Card.Body>
-              {/* 데스크톱 헤더 */}
-              <h3 className="fw-bold mb-4 d-none d-md-block">📣 푸시 발송</h3>
+      <div className="row h-100">
+        {/* Mobile Preview */}
+        <div className="col-12 col-lg-5 d-flex justify-content-center align-items-center mb-4 mb-lg-0">
+          <div
+            style={{
+              width: "300px",
+              height: "550px",
+              backgroundColor: "#000",
+              borderRadius: "25px",
+              padding: "8px",
+              boxShadow: "0 12px 30px rgba(0, 0, 0, 0.3)",
+              position: "relative"
+            }}
+          >
+            {/* Phone Screen */}
+            <div
+              style={{
+                width: "100%",
+                height: "100%",
+                backgroundColor: "#1a1a1a",
+                borderRadius: "18px",
+                overflow: "hidden",
+                position: "relative"
+              }}
+            >
+              {/* Status Bar */}
+              <div
+                style={{
+                  height: "30px",
+                  backgroundColor: "#000",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "0 15px",
+                  fontSize: "12px",
+                  color: "#fff",
+                  fontWeight: "500"
+                }}
+              >
+                <span>9:41</span>
+                <span>🔋 100%</span>
+              </div>
 
-              <Form>
+              {/* Notification Area */}
+              <div
+                style={{
+                  backgroundColor: "#2c2c2e",
+                  margin: "10px",
+                  borderRadius: "12px",
+                  padding: "15px",
+                  border: "1px solid #3a3a3c",
+                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)"
+                }}
+              >
+                {/* App Icon and Name */}
+                <div className="d-flex align-items-center mb-2">
+                  <div
+                    style={{
+                      width: "24px",
+                      height: "24px",
+                      backgroundColor: "#007AFF",
+                      borderRadius: "6px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginRight: "8px"
+                    }}
+                  >
+                    <span style={{color: "white", fontSize: "12px", fontWeight: "bold"}}>3</span>
+                  </div>
+                  <span style={{color: "#fff", fontSize: "13px", fontWeight: "500"}}>
+                    가슴속 3천원
+                  </span>
+                  <span style={{color: "#8e8e93", fontSize: "12px", marginLeft: "auto"}}>
+                    지금
+                  </span>
+                </div>
+
+                {/* Notification Content */}
+                <div style={{color: "#fff"}}>
+                  <div style={{
+                    fontSize: "15px",
+                    fontWeight: "600",
+                    marginBottom: "4px",
+                    lineHeight: "1.3"
+                  }}>
+                    {title || "푸시 제목이 여기에 표시됩니다"}
+                  </div>
+                  <div style={{
+                    fontSize: "14px",
+                    color: "#d1d1d6",
+                    lineHeight: "1.4"
+                  }}>
+                    {body || "푸시 메시지 내용이 여기에 표시됩니다. 사용자가 입력한 내용을 실시간으로 확인할 수 있습니다."}
+                  </div>
+                  {path && (
+                    <div style={{
+                      fontSize: "12px",
+                      color: "#007AFF",
+                      marginTop: "8px",
+                      padding: "4px 8px",
+                      backgroundColor: "rgba(0, 122, 255, 0.1)",
+                      borderRadius: "4px",
+                      display: "inline-block"
+                    }}>
+                      📱 {path}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Background Apps */}
+              <div style={{
+                position: "absolute",
+                bottom: "20px",
+                left: "50%",
+                transform: "translateX(-50%)",
+                color: "#8e8e93",
+                fontSize: "11px",
+                textAlign: "center"
+              }}>
+                탭하여 앱에서 보기
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Edit Form */}
+        <div className="col-12 col-lg-7">
+          <Card className="shadow-sm h-100">
+            <Card.Body className="d-flex flex-column">
+              <div className="d-flex align-items-center justify-content-between mb-4">
+                <h3 className="fw-bold text-dark mb-0 d-none d-md-block">📣 푸시 발송</h3>
+                <h5 className="fw-bold text-primary mb-0">
+                  <i className="bi bi-pencil-square me-2"></i>
+                  푸시 내용 편집
+                </h5>
+              </div>
+
+              <Form className="flex-grow-1 d-flex flex-column">
                 <Form.Group className="mb-3">
                   <Form.Label className="fw-semibold">
                     <i className="bi bi-people me-2"></i>사용자 ID (쉼표로 구분)
@@ -89,7 +221,6 @@ const PushManage = () => {
                     placeholder="예: user1, user2, user3"
                     value={accountIdsInput}
                     onChange={(e) => setAccountIdsInput(e.target.value)}
-                    size="lg"
                     className="border-2"
                   />
                   <Form.Text className="text-muted small">
@@ -106,7 +237,6 @@ const PushManage = () => {
                     placeholder="푸시 제목을 입력하세요"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    size="lg"
                     className="border-2"
                     maxLength={50}
                   />
@@ -125,7 +255,6 @@ const PushManage = () => {
                     placeholder="푸시 메시지 내용을 입력하세요"
                     value={body}
                     onChange={(e) => setBody(e.target.value)}
-                    size="lg"
                     className="border-2"
                     maxLength={200}
                   />
@@ -143,7 +272,6 @@ const PushManage = () => {
                     placeholder="/home, /event 등"
                     value={path}
                     onChange={(e) => setPath(e.target.value)}
-                    size="lg"
                     className="border-2"
                   />
                   <Form.Text className="text-muted small">
@@ -156,7 +284,7 @@ const PushManage = () => {
                     variant="primary"
                     size="lg"
                     onClick={sendPush}
-                    disabled={loading}
+                    disabled={loading || !title || !body || !accountIdsInput.trim()}
                     className="py-3 fw-bold"
                   >
                     {loading ? (
@@ -172,95 +300,29 @@ const PushManage = () => {
                     )}
                   </Button>
                 </div>
-              </Form>
 
-              {result && (
-                <Alert variant={result.type} className="mt-4 mb-0">
-                  {result.message}
-                </Alert>
-              )}
-            </Card.Body>
-          </Card>
-        </Col>
-
-        <Col md={6}>
-          <Card className="shadow-sm p-3 p-md-4">
-            <Card.Body>
-              <h3 className="fw-bold mb-4 text-center text-md-start">
-                <i className="bi bi-phone me-2"></i>푸시 알림 미리보기
-              </h3>
-              <div
-                className="push-preview-phone mobile-full-width"
-                style={{
-                  width: "350px",
-                  height: "600px",
-                  backgroundColor: "#fff",
-                  borderRadius: "30px",
-                  boxShadow: "0 8px 16px rgba(0, 0, 0, 0.1)",
-                  overflow: "hidden",
-                  position: "relative",
-                  margin: "0 auto",
-                  paddingTop: "30px",
-                  paddingBottom: "20px",
-                }}
-              >
-                <div
-                  style={{
-                    height: "50px",
-                    backgroundColor: "#f0f0f0",
-                    borderBottom: "1px solid #ddd",
-                    padding: "10px 15px",
-                    fontSize: "14px",
-                    color: "#333",
-                    fontWeight: "bold",
-                    textAlign: "center",
-                  }}
-                >
-                  푸시 알림
-                </div>
-
-                <div
-                  style={{
-                    padding: "20px",
-                    fontSize: "20px",
-                    fontWeight: "bold",
-                    color: "#333",
-                    marginBottom: "10px",
-                    textAlign: "center",
-                  }}
-                >
-                  {title || "푸시 제목"}
-                </div>
-
-                <div
-                  style={{
-                    padding: "0 20px",
-                    fontSize: "16px",
-                    color: "#555",
-                    textAlign: "center",
-                    marginBottom: "20px",
-                  }}
-                >
-                  {body || "푸시 내용이 여기에 들어갑니다."}
-                </div>
-
-                {path && (
-                  <div
-                    style={{
-                      fontSize: "14px",
-                      color: "#007aff",
-                      textAlign: "center",
-                      textDecoration: "underline",
-                    }}
-                  >
-                    {path}
-                  </div>
+                {result && (
+                  <Alert variant={result.type} className="mt-3 mb-0">
+                    {result.message}
+                  </Alert>
                 )}
-              </div>
+
+                <div className="bg-light rounded-3 p-3 mt-auto">
+                  <h6 className="fw-semibold text-secondary mb-2">
+                    <i className="bi bi-lightbulb me-1"></i>미리보기 가이드
+                  </h6>
+                  <ul className="small text-muted mb-0 ps-3">
+                    <li>왼쪽에서 실시간으로 푸시 알림 모습을 확인할 수 있습니다</li>
+                    <li>제목은 최대 50자, 내용은 최대 200자까지 입력 가능합니다</li>
+                    <li>이동 경로는 앱 내 특정 화면으로 이동할 때 사용됩니다</li>
+                  </ul>
+                </div>
+              </Form>
             </Card.Body>
           </Card>
-        </Col>
-      </Row>
+        </div>
+      </div>
+
     </Container>
   );
 };
