@@ -255,8 +255,8 @@ const Layout = () => {
             <h5 className="mb-0 fw-bold text-primary">Dashboard</h5>
           </div>
 
-          <div className="content-wrapper p-4">
-            <div className="bg-white rounded shadow-sm p-4">
+          <div className="content-wrapper p-2 p-md-4">
+            <div className="bg-white rounded shadow-sm p-2 p-md-4">
               <Outlet/>
             </div>
           </div>

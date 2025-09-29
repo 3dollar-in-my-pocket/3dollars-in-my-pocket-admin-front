@@ -139,8 +139,8 @@ const Policy = () => {
   };
 
   return (<div className="container-fluid py-4">
-    <div className="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
-      <h2 className="fw-bold">🛡️ 정책 관리</h2>
+    <div className="d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center mb-4 border-bottom pb-2 gap-2">
+      <h2 className="fw-bold mb-2 mb-md-0">🛡️ 정책 관리</h2>
       <button
         className="btn btn-success"
         onClick={() => setShowRegisterModal(true)}
@@ -153,7 +153,7 @@ const Policy = () => {
     <div className="card shadow-sm mb-4">
       <div className="card-body">
         <div className="row g-3 align-items-end">
-          <div className="col-md-4">
+          <div className="col-12 col-md-4 mb-3 mb-md-0">
             <label className="form-label">카테고리</label>
             <select
               className="form-select"
@@ -165,10 +165,10 @@ const Policy = () => {
               </option>))}
             </select>
           </div>
-          <div className="col-md-8">
+          <div className="col-12 col-md-8">
             <div className="d-flex justify-content-end gap-2">
               <button
-                className="btn btn-outline-secondary"
+                className="btn btn-outline-secondary w-100 w-md-auto"
                 onClick={() => {
                   setSelectedCategory("");
                   resetPagination();
@@ -183,8 +183,57 @@ const Policy = () => {
       </div>
     </div>
 
-    {/* 정책 목록 테이블 */}
-    <div className="table-responsive">
+    {/* 정책 목록 - 모바일 카드 뷰와 테이블 뷰 */}
+    <div className="d-block d-md-none">
+      {/* 모바일 카드 뷰 */}
+      {isLoading ? (
+        <div className="text-center py-5">
+          <Loading/>
+        </div>
+      ) : policyList.length === 0 ? (
+        <div className="text-center py-5 text-muted fs-5">
+          📋 등록된 정책이 없습니다.
+        </div>
+      ) : (
+        <div className="row g-3">
+          {policyList.map((policy) => (
+            <div key={policy.policyId} className="col-12">
+              <div className="card shadow-sm">
+                <div className="card-body">
+                  <div className="row mb-2">
+                    <div className="col-6">
+                      <small className="text-muted">카테고리</small>
+                      <div className="fw-bold">
+                        {getDescriptionFromKey(policy.categoryId, "category")}
+                      </div>
+                    </div>
+                    <div className="col-6">
+                      <small className="text-muted">값</small>
+                      <div className="fw-bold text-truncate">{policy.value}</div>
+                    </div>
+                  </div>
+                  <div className="mb-3">
+                    <small className="text-muted">설명</small>
+                    <div className="text-truncate" title={policy.description}>
+                      {policy.description}
+                    </div>
+                  </div>
+                  <button
+                    className="btn btn-outline-primary btn-sm w-100"
+                    onClick={() => setSelectedPolicy(policy)}
+                  >
+                    상세 보기
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+
+    {/* 데스크톱 테이블 뷰 */}
+    <div className="d-none d-md-block table-responsive">
       <table className="table table-bordered align-middle text-center">
         <thead className="table-dark">
         <tr>
@@ -196,11 +245,11 @@ const Policy = () => {
         </thead>
         <tbody>
         {isLoading ? (<tr>
-          <td colSpan={7} className="py-5">
+          <td colSpan={4} className="py-5">
             <Loading/>
           </td>
         </tr>) : policyList.length === 0 ? (<tr>
-          <td colSpan={7} className="py-5 text-muted fs-5">
+          <td colSpan={4} className="py-5 text-muted fs-5">
             📋 등록된 정책이 없습니다.
           </td>
         </tr>) : (policyList.map((policy) => (<tr key={policy.policyId}>
@@ -226,16 +275,16 @@ const Policy = () => {
 
     {/* 하단 페이징 */}
     <div className="d-flex justify-content-center mt-4">
-      <div className="d-flex gap-2">
+      <div className="d-flex flex-column flex-sm-row gap-2 w-100">
         <button
-          className="btn btn-outline-primary"
+          className="btn btn-outline-primary flex-fill"
           onClick={handlePreviousPage}
           disabled={!hasPrevious}
         >
           ← 이전 페이지
         </button>
         <button
-          className="btn btn-outline-primary"
+          className="btn btn-outline-primary flex-fill"
           onClick={handleNextPage}
           disabled={!hasMore}
         >

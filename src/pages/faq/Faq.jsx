@@ -110,9 +110,10 @@ const FilterSection = ({
                          fetchFaqs,
                        }) => (
   <div className="card shadow-sm mb-4 rounded-3">
-    <div className="card-body row g-3 align-items-end">
-      <div className="col-md-4">
-        <label className="form-label fw-semibold text-secondary">서비스</label>
+    <div className="card-body">
+      <div className="row g-3">
+        <div className="col-12 col-md-4">
+          <label className="form-label fw-semibold text-secondary">서비스</label>
         <select
           className="form-select"
           value={selectedApplication}
@@ -127,8 +128,8 @@ const FilterSection = ({
         </select>
       </div>
 
-      <div className="col-md-4">
-        <label className="form-label fw-semibold text-secondary">FAQ 카테고리</label>
+        <div className="col-12 col-md-4">
+          <label className="form-label fw-semibold text-secondary">FAQ 카테고리</label>
         <select
           className="form-select"
           value={selectedFaqCategory}
@@ -144,13 +145,16 @@ const FilterSection = ({
         </select>
       </div>
 
-      <div className="col-md-2">
-        <button
-          className="btn btn-primary w-100"
-          onClick={fetchFaqs}
-        >
-          <i className="bi bi-search me-1"></i> 조회
-        </button>
+        <div className="col-12 col-md-4">
+          <div className="d-flex align-items-end h-100">
+            <button
+              className="btn btn-primary w-100"
+              onClick={fetchFaqs}
+            >
+              <i className="bi bi-search me-1"></i> 조회
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -174,37 +178,80 @@ const FaqTable = ({ faqs, onEdit, isLoading }) => {
   }
 
   return (
-    <div className="table-responsive">
-      <table className="table table-bordered align-middle text-center table-hover">
-        <thead className="table-dark">
-        <tr>
-          <th style={{ width: "180px" }}>카테고리</th>
-          <th style={{ width: "500px" }}>질문</th>
-          <th>답변 요약</th>
-          <th style={{ width: "120px" }}>관리</th>
-        </tr>
-        </thead>
-        <tbody>
-        {faqs.map((faq) => (
-          <tr key={faq.faqId}>
-            <td>{faq.category.description}</td>
-            <td className="text-start">{faq.question}</td>
-            <td className="text-start text-truncate" style={{ maxWidth: "300px" }}>
-              {faq.answer}
-            </td>
-            <td>
-              <button
-                className="btn btn-outline-primary btn-sm"
-                onClick={() => onEdit(faq)}
-              >
-                상세보기
-              </button>
-            </td>
+    <>
+      {/* 모바일 카드 뷰 */}
+      <div className="d-block d-md-none">
+        <div className="row g-3">
+          {faqs.map((faq) => (
+            <div key={faq.faqId} className="col-12">
+              <div className="card shadow-sm">
+                <div className="card-body">
+                  <div className="row mb-2">
+                    <div className="col-12">
+                      <small className="text-muted">카테고리</small>
+                      <div className="fw-bold text-primary">
+                        {faq.category.description}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mb-3">
+                    <small className="text-muted">질문</small>
+                    <div className="fw-semibold" style={{lineHeight: '1.4'}}>
+                      {faq.question}
+                    </div>
+                  </div>
+                  <div className="mb-3">
+                    <small className="text-muted">답변 요약</small>
+                    <div className="text-truncate" title={faq.answer} style={{maxHeight: '40px'}}>
+                      {faq.answer}
+                    </div>
+                  </div>
+                  <button
+                    className="btn btn-outline-primary btn-sm w-100"
+                    onClick={() => onEdit(faq)}
+                  >
+                    상세보기
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 데스크톱 테이블 뷰 */}
+      <div className="d-none d-md-block table-responsive">
+        <table className="table table-bordered align-middle text-center table-hover">
+          <thead className="table-dark">
+          <tr>
+            <th style={{ width: "180px" }}>카테고리</th>
+            <th style={{ width: "500px" }}>질문</th>
+            <th>답변 요약</th>
+            <th style={{ width: "120px" }}>관리</th>
           </tr>
-        ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+          {faqs.map((faq) => (
+            <tr key={faq.faqId}>
+              <td>{faq.category.description}</td>
+              <td className="text-start">{faq.question}</td>
+              <td className="text-start text-truncate" style={{ maxWidth: "300px" }}>
+                {faq.answer}
+              </td>
+              <td>
+                <button
+                  className="btn btn-outline-primary btn-sm"
+                  onClick={() => onEdit(faq)}
+                >
+                  상세보기
+                </button>
+              </td>
+            </tr>
+          ))}
+          </tbody>
+        </table>
+      </div>
+    </>
   );
 };
 

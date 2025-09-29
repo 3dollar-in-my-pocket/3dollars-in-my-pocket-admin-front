@@ -77,6 +77,8 @@
   z-index: 1050;
   transform: translateX(-100%);
   transition: transform 0.3s ease-in-out;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .sidebar.sidebar-open {
@@ -128,7 +130,13 @@
   }
 
   .content-wrapper {
-    padding-top: 1rem !important;
+    padding: 0.5rem !important;
+  }
+
+  /* 컨테이너 폭 최적화 */
+  .container-fluid {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
   }
 
   /* Mobile user detail modal styles */

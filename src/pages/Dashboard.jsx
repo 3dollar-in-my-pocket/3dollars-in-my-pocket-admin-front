@@ -38,7 +38,7 @@ const Dashboard = () => {
       title: "가게 검색",
       description: "가게를 검색하고 상세 정보를 확인할 수 있습니다.",
       icon: "bi-search",
-      route: "/manage/boss-search"
+      route: "/manage/store-search"
     },
   ];
 

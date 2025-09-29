@@ -73,7 +73,7 @@ const PolicyModal = ({show, onHide, policy, categories, policies, onRefresh, onD
   if (!policy) return null;
 
   return (
-    <Modal show={show} onHide={onHide} size="lg" centered>
+    <Modal show={show} onHide={onHide} size="lg" centered fullscreen="md-down">
       <Modal.Header closeButton className="bg-primary text-white">
         <Modal.Title>
           {isEditMode ? "정책 수정" : "정책 상세 정보"}
@@ -82,18 +82,18 @@ const PolicyModal = ({show, onHide, policy, categories, policies, onRefresh, onD
       <Modal.Body>
         <Form>
           <div className="row mb-3">
-            <div className="col-md-6">
+            <div className="col-12 col-md-6 mb-3 mb-md-0">
               <Form.Group>
                 <Form.Label>정책 ID</Form.Label>
-                <Form.Control 
-                  type="text" 
-                  value={policy.policyId} 
-                  disabled 
+                <Form.Control
+                  type="text"
+                  value={policy.policyId}
+                  disabled
                   className="bg-light"
                 />
               </Form.Group>
             </div>
-            <div className="col-md-6">
+            <div className="col-12 col-md-6">
               <Form.Group>
                 <Form.Label>값 <span className="text-danger">*</span></Form.Label>
                 <Form.Control
@@ -117,24 +117,24 @@ const PolicyModal = ({show, onHide, policy, categories, policies, onRefresh, onD
           {!isEditMode && (
             <>
               <div className="row mb-3">
-                <div className="col-md-6">
+                <div className="col-12 col-md-6 mb-3 mb-md-0">
                   <Form.Group>
                     <Form.Label>등록일</Form.Label>
-                    <Form.Control 
-                      type="text" 
-                      value={formatDateTime(policy.createdAt)} 
-                      disabled 
+                    <Form.Control
+                      type="text"
+                      value={formatDateTime(policy.createdAt)}
+                      disabled
                       className="bg-light"
                     />
                   </Form.Group>
                 </div>
-                <div className="col-md-6">
+                <div className="col-12 col-md-6">
                   <Form.Group>
                     <Form.Label>수정일</Form.Label>
-                    <Form.Control 
-                      type="text" 
-                      value={formatDateTime(policy.updatedAt)} 
-                      disabled 
+                    <Form.Control
+                      type="text"
+                      value={formatDateTime(policy.updatedAt)}
+                      disabled
                       className="bg-light"
                     />
                   </Form.Group>
@@ -144,42 +144,46 @@ const PolicyModal = ({show, onHide, policy, categories, policies, onRefresh, onD
           )}
         </Form>
       </Modal.Body>
-      <Modal.Footer>
+      <Modal.Footer className="d-flex flex-column flex-sm-row gap-2">
         {isEditMode ? (
           <>
-            <Button 
-              variant="secondary" 
+            <Button
+              variant="secondary"
               onClick={handleCancel}
               disabled={isLoading}
+              className="w-100 w-sm-auto"
             >
               취소
             </Button>
-            <Button 
-              variant="success" 
+            <Button
+              variant="success"
               onClick={handleSave}
               disabled={isLoading}
+              className="w-100 w-sm-auto"
             >
               {isLoading ? "저장중..." : "저장"}
             </Button>
           </>
         ) : (
           <>
-            <Button 
-              variant="danger" 
+            <Button
+              variant="danger"
               onClick={handleDelete}
-              className="me-auto"
+              className="w-100 w-sm-auto order-sm-1 me-sm-auto"
             >
               🗑️ 삭제
             </Button>
-            <Button 
-              variant="secondary" 
+            <Button
+              variant="secondary"
               onClick={onHide}
+              className="w-100 w-sm-auto order-sm-2"
             >
               닫기
             </Button>
-            <Button 
-              variant="primary" 
+            <Button
+              variant="primary"
               onClick={handleEdit}
+              className="w-100 w-sm-auto order-sm-3"
             >
               ✏️ 수정
             </Button>

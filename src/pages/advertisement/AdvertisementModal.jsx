@@ -5,6 +5,7 @@ import {HiOutlineSpeakerphone} from "react-icons/hi";
 import advertisementApi from "../../api/advertisementApi";
 import {toast} from "react-toastify";
 import AdvertisementEditModal from "./AdvertisementEditModal";
+import AdTimer from "../../components/common/AdTimer";
 
 const AdvertisementModal = ({
                               show,
@@ -81,19 +82,32 @@ const AdvertisementModal = ({
                   <div className="col-md-6 mb-2">
                     <strong>설명:</strong> {ad.description || "-"}
                   </div>
-                  <div className="col-md-6 mb-2">
-                    <strong>
-                      <BiCalendar className="me-1"/>
-                      시작일:
-                    </strong>{" "}
-                    {formatDateTime(ad.startDateTime)}
-                  </div>
-                  <div className="col-md-6 mb-2">
-                    <strong>
-                      <BiCalendar className="me-1"/>
-                      종료일:
-                    </strong>{" "}
-                    {formatDateTime(ad.endDateTime)}
+                  <div className="col-12 mb-3">
+                    {/* 광고 상태 및 타이머 */}
+                    <div className="border rounded p-3 bg-light">
+                      <h6 className="fw-bold mb-2">📅 광고 상태</h6>
+                      <AdTimer
+                        startDateTime={ad.startDateTime}
+                        endDateTime={ad.endDateTime}
+                        className="mb-3"
+                      />
+                      <div className="row">
+                        <div className="col-md-6">
+                          <strong>
+                            <BiCalendar className="me-1"/>
+                            시작일:
+                          </strong>{" "}
+                          {formatDateTime(ad.startDateTime)}
+                        </div>
+                        <div className="col-md-6">
+                          <strong>
+                            <BiCalendar className="me-1"/>
+                            종료일:
+                          </strong>{" "}
+                          {formatDateTime(ad.endDateTime)}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -141,26 +155,64 @@ const AdvertisementModal = ({
               </div>
             )}
 
-            <div className="col-12">
-              <div className="bg-white rounded shadow-sm p-3">
-                <strong>
-                  <BiLinkExternal className="me-1"/>
-                  링크:
-                </strong>{" "}
-                <a href={ad.linkUrl} target="_blank" rel="noopener noreferrer">
-                  {ad.linkUrl}
-                </a>
+            {/* 링크 섹션 */}
+            <div className="bg-white p-4">
+              <div className="d-flex align-items-center mb-3">
+                <div className="bg-danger-subtle rounded-circle p-2 me-3">
+                  <BiLinkExternal className="text-danger fs-5"/>
+                </div>
+                <h5 className="mb-0 text-danger fw-bold">링크 정보</h5>
+              </div>
+              <div className="bg-light rounded p-3">
+                <small className="text-muted d-block mb-1">
+                  <i className="bi bi-link-45deg me-1"></i>대상 URL
+                </small>
+                <div className="d-flex align-items-center gap-2">
+                  <span className="fw-bold text-break">{ad.linkUrl}</span>
+                  <a
+                    href={ad.linkUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-outline-primary btn-sm"
+                  >
+                    <i className="bi bi-box-arrow-up-right me-1"></i>
+                    열기
+                  </a>
+                </div>
               </div>
             </div>
           </div>
         </Modal.Body>
-        <Modal.Footer className="bg-light">
-          <Button variant="primary" onClick={() => setShowEdit(true)}>
-            수정
-          </Button>
-          <Button variant="danger" onClick={handleDelete}>
-            삭제
-          </Button>
+        <Modal.Footer className="border-0 bg-light p-4">
+          <div className="d-flex w-100 gap-2 flex-column flex-sm-row">
+            <Button
+              variant="outline-danger"
+              onClick={handleDelete}
+              className="flex-fill d-flex align-items-center justify-content-center gap-2"
+              style={{padding: '12px 24px'}}
+            >
+              <i className="bi bi-trash"></i>
+              삭제
+            </Button>
+            <Button
+              variant="outline-secondary"
+              onClick={onHide}
+              className="flex-fill d-flex align-items-center justify-content-center gap-2"
+              style={{padding: '12px 24px'}}
+            >
+              <i className="bi bi-x-lg"></i>
+              닫기
+            </Button>
+            <Button
+              variant="primary"
+              onClick={() => setShowEdit(true)}
+              className="flex-fill d-flex align-items-center justify-content-center gap-2"
+              style={{padding: '12px 24px'}}
+            >
+              <i className="bi bi-pencil"></i>
+              수정
+            </Button>
+          </div>
         </Modal.Footer>
       </Modal>
       <AdvertisementEditModal
