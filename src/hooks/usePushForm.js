@@ -111,28 +111,28 @@ export const usePushForm = () => {
       return; // 중복 선택 방지
     }
 
-    const newIds = addUserToTarget(formData.accountIdsInput, userId);
+    const newIds = addUserToTarget(formData.accountIdsInput, userId.toString());
     updateFormData("accountIdsInput", newIds);
 
     // 선택된 사용자 목록에 추가 (중복 방지)
-    if (nickname && !selectedUsers.find(user => user.id === userId)) {
-      setSelectedUsers(prev => [...prev, { id: userId, nickname }]);
+    if (nickname && !selectedUsers.find(user => user.id.toString() === userId.toString())) {
+      setSelectedUsers(prev => [...prev, { id: userId.toString(), nickname }]);
     }
   };
 
   // 대상에서 사용자 제거
   const handleRemoveUser = (userId) => {
-    const newIds = removeUserFromTarget(formData.accountIdsInput, userId);
+    const newIds = removeUserFromTarget(formData.accountIdsInput, userId.toString());
     updateFormData("accountIdsInput", newIds);
 
     // 선택된 사용자 목록에서도 제거
-    setSelectedUsers(prev => prev.filter(user => user.id !== userId));
+    setSelectedUsers(prev => prev.filter(user => user.id.toString() !== userId.toString()));
   };
 
   // 사용자가 선택되어 있는지 확인
   const isUserSelected = (userId) => {
     const currentIds = parseAccountIds(formData.accountIdsInput);
-    return currentIds.includes(userId);
+    return currentIds.includes(userId.toString());
   };
 
   // 이미지 업로드

@@ -29,9 +29,10 @@ export const formatAccountIds = (accountIds) => {
  */
 export const addUserToTarget = (currentIds, newUserId) => {
   const currentArray = parseAccountIds(currentIds);
+  const userIdStr = newUserId.toString();
 
-  if (!currentArray.includes(newUserId)) {
-    const newArray = [...currentArray, newUserId];
+  if (!currentArray.includes(userIdStr)) {
+    const newArray = [...currentArray, userIdStr];
     return formatAccountIds(newArray);
   }
 
@@ -46,7 +47,8 @@ export const addUserToTarget = (currentIds, newUserId) => {
  */
 export const removeUserFromTarget = (currentIds, userIdToRemove) => {
   const currentArray = parseAccountIds(currentIds);
-  const newArray = currentArray.filter(id => id !== userIdToRemove);
+  const userIdStr = userIdToRemove.toString();
+  const newArray = currentArray.filter(id => id !== userIdStr);
   return formatAccountIds(newArray);
 };
 
@@ -58,7 +60,7 @@ export const removeUserFromTarget = (currentIds, userIdToRemove) => {
  */
 export const isUserInTarget = (currentIds, userId) => {
   const currentArray = parseAccountIds(currentIds);
-  return currentArray.includes(userId);
+  return currentArray.includes(userId.toString());
 };
 
 /**

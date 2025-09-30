@@ -1,6 +1,6 @@
 import { getPushTypeStyles } from "../../utils/pushUtils";
 
-const PushPreview = ({ title, body, path, pushType }) => {
+const PushPreview = ({ title, body, path, pushType, imageUrl }) => {
   const styles = getPushTypeStyles(pushType);
 
   return (
@@ -82,6 +82,26 @@ const PushPreview = ({ title, body, path, pushType }) => {
 
             {/* Notification Content */}
             <div style={{color: "#fff"}}>
+              {/* Image Section */}
+              {imageUrl && (
+                <div style={{
+                  marginBottom: "12px",
+                  borderRadius: "8px",
+                  overflow: "hidden"
+                }}>
+                  <img
+                    src={imageUrl}
+                    alt="푸시 이미지"
+                    style={{
+                      width: "100%",
+                      height: "120px",
+                      objectFit: "cover",
+                      display: "block"
+                    }}
+                  />
+                </div>
+              )}
+
               <div style={{
                 fontSize: "15px",
                 fontWeight: "600",
