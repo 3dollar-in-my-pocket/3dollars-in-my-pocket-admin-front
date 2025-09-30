@@ -65,7 +65,7 @@ const FaqEditModal = ({applications, showModal, handleCloseModal, selectedApplic
   };
 
   return (
-    <Modal show={showModal} onHide={handleCloseModal} size="lg" centered>
+    <Modal show={showModal} onHide={handleCloseModal} size="lg" centered fullscreen="md-down">
       <Modal.Header closeButton className="border-0">
         <Modal.Title>{selectedFaq ? "FAQ 수정" : "FAQ 신규 등록"}</Modal.Title>
       </Modal.Header>
@@ -88,16 +88,14 @@ const FaqEditModal = ({applications, showModal, handleCloseModal, selectedApplic
       </Modal.Body>
 
       <Modal.Footer className="border-0">
-        <div className="w-100 d-flex flex-column gap-2">
-          <div className="d-flex justify-content-between gap-2">
-            {selectedFaq && (
-              <button className="btn btn-outline-danger w-100" onClick={handleDelete}>
-                삭제
-              </button>
-            )}
-          </div>
+        <div className="w-100 d-flex flex-column flex-sm-row gap-2">
+          {selectedFaq && (
+            <button className="btn btn-outline-danger w-100 w-sm-auto order-sm-1" onClick={handleDelete}>
+              삭제
+            </button>
+          )}
           <button
-            className="btn btn-primary w-100"
+            className="btn btn-primary w-100 w-sm-auto order-sm-2 ms-sm-auto"
             onClick={handleSave}
             disabled={!editedFaq.category || !editedFaq.question?.trim() || !editedFaq.answer?.trim() || (!selectedFaq && !editedFaq.application)}
           >
@@ -113,7 +111,7 @@ const ApplicationSelect = ({applications, selectedApplication, handleChange, faq
   const selectedAppDescription = applications.find((a) => a.type === selectedApplication)?.description || selectedApplication;
 
   return (
-    <div className="col-md-6">
+    <div className="col-12 col-md-6 mb-3 mb-md-0">
       <label className="form-label fw-semibold">서비스</label>
       {faq ? (
         <input
@@ -142,7 +140,7 @@ const ApplicationSelect = ({applications, selectedApplication, handleChange, faq
 };
 
 const CategorySelect = ({selectedCategory, handleChange, faqCategories}) => (
-  <div className="col-md-6">
+  <div className="col-12 col-md-6">
     <label className="form-label fw-semibold">카테고리</label>
     <select
       name="category"

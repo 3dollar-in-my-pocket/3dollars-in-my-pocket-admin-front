@@ -104,7 +104,7 @@ const PolicyRegisterModal = ({show, onHide, categories, policies, onRefresh}) =>
   };
 
   return (
-    <Modal show={show} onHide={handleClose} size="lg" centered backdrop={isLoading ? "static" : true}>
+    <Modal show={show} onHide={handleClose} size="lg" centered fullscreen="md-down" backdrop={isLoading ? "static" : true}>
       <Modal.Header closeButton className="bg-success text-white">
         <Modal.Title>
           ➕ 신규 정책 등록
@@ -113,7 +113,7 @@ const PolicyRegisterModal = ({show, onHide, categories, policies, onRefresh}) =>
       <Modal.Body>
         <Form>
           <div className="row mb-3">
-            <div className="col-md-6">
+            <div className="col-12 col-md-6 mb-3 mb-md-0">
               <Form.Group>
                 <Form.Label>카테고리 <span className="text-danger">*</span></Form.Label>
                 <Form.Select
@@ -134,7 +134,7 @@ const PolicyRegisterModal = ({show, onHide, categories, policies, onRefresh}) =>
                 </Form.Control.Feedback>
               </Form.Group>
             </div>
-            <div className="col-md-6">
+            <div className="col-12 col-md-6">
               <Form.Group>
                 <Form.Label>
                   정책 <span className="text-danger">*</span>
@@ -150,9 +150,9 @@ const PolicyRegisterModal = ({show, onHide, categories, policies, onRefresh}) =>
                   isInvalid={!formData.policyId && formData.policyId !== ""}
                 >
                   <option value="">
-                    {!formData.categoryId 
-                      ? "먼저 카테고리를 선택하세요" 
-                      : filteredPolicies.length === 0 
+                    {!formData.categoryId
+                      ? "먼저 카테고리를 선택하세요"
+                      : filteredPolicies.length === 0
                         ? "선택 가능한 정책이 없습니다"
                         : "정책을 선택하세요"
                     }
@@ -209,21 +209,21 @@ const PolicyRegisterModal = ({show, onHide, categories, policies, onRefresh}) =>
           <div className="bg-light p-3 rounded mb-3">
             <h6 className="mb-2">입력 정보 미리보기</h6>
             <div className="row">
-              <div className="col-md-6">
+              <div className="col-12 col-md-6 mb-2 mb-md-0">
                 <small className="text-muted">카테고리:</small>
                 <div className="fw-bold">
-                  {formData.categoryId ? 
+                  {formData.categoryId ?
                     categories.find(cat => cat.key === formData.categoryId)?.description || formData.categoryId
                     : "-"
                   }
                 </div>
               </div>
-              <div className="col-md-6">
+              <div className="col-12 col-md-6">
                 <small className="text-muted">정책:</small>
                 <div className="fw-bold">
-                  {!formData.categoryId 
+                  {!formData.categoryId
                     ? "카테고리 선택 필요"
-                    : formData.policyId 
+                    : formData.policyId
                       ? filteredPolicies.find(policy => policy.policyId === formData.policyId)?.description || formData.policyId
                       : "-"
                   }
@@ -237,18 +237,20 @@ const PolicyRegisterModal = ({show, onHide, categories, policies, onRefresh}) =>
           </div>
         </Form>
       </Modal.Body>
-      <Modal.Footer>
-        <Button 
-          variant="secondary" 
+      <Modal.Footer className="d-flex flex-column flex-sm-row gap-2">
+        <Button
+          variant="secondary"
           onClick={handleClose}
           disabled={isLoading}
+          className="w-100 w-sm-auto"
         >
           취소
         </Button>
-        <Button 
-          variant="success" 
+        <Button
+          variant="success"
           onClick={handleSubmit}
           disabled={isLoading || !formData.categoryId || !formData.policyId || !formData.value.trim()}
+          className="w-100 w-sm-auto"
         >
           {isLoading ? (
             <>
