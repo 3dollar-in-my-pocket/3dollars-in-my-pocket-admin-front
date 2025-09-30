@@ -2,8 +2,11 @@ import {Alert, Button, Card, Container, Form, Modal, Nav, Tab} from "react-boots
 import { usePushForm } from "../../hooks/usePushForm";
 import PushPreview from "../../components/push/PushPreview";
 import UserSearch from "../../components/push/UserSearch";
+import { useNavigate } from "react-router-dom";
 
 const PushManage = () => {
+  const navigate = useNavigate();
+
   const {
     formData,
     searchState,
@@ -52,7 +55,18 @@ const PushManage = () => {
 
       {/* 모바일 헤더 */}
       <div className="d-md-none mb-4 border-bottom pb-3">
-        <h2 className="fw-bold mb-0">📣 푸시 발송</h2>
+        <div className="d-flex align-items-center justify-content-between">
+          <h2 className="fw-bold mb-0">📣 푸시 발송</h2>
+          <Button
+            variant="outline-primary"
+            size="sm"
+            onClick={() => navigate('/info/push-statistics')}
+            className="d-flex align-items-center gap-1"
+          >
+            <i className="bi bi-graph-up"></i>
+            통계
+          </Button>
+        </div>
       </div>
 
       <div className="row h-100">
@@ -70,6 +84,15 @@ const PushManage = () => {
             <Card.Body className="d-flex flex-column">
               <div className="d-flex align-items-center justify-content-between mb-4">
                 <h3 className="fw-bold text-dark mb-0 d-none d-md-block">📣 푸시 발송</h3>
+                <Button
+                  variant="outline-primary"
+                  size="sm"
+                  onClick={() => navigate('/info/push-statistics')}
+                  className="d-flex align-items-center gap-1"
+                >
+                  <i className="bi bi-graph-up"></i>
+                  <span className="d-none d-sm-inline">푸시 통계</span>
+                </Button>
               </div>
 
               <Form className="flex-grow-1 d-flex flex-column">
