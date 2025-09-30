@@ -142,7 +142,7 @@ export const usePushForm = () => {
     setUiState(prev => ({ ...prev, uploading: true }));
 
     try {
-      const response = await uploadApi.uploadImage("ADVERTISEMENT_IMAGE", file);
+      const response = await uploadApi.uploadImage("PUSH_IMAGE", file);
 
       if (response.ok) {
         updateFormData("imageUrl", response.data);
