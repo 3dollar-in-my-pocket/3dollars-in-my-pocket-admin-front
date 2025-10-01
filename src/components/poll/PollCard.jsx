@@ -5,7 +5,7 @@ import {
   getWriterTypeDisplayName
 } from '../../types/common';
 
-const PollCard = ({ poll, onClick, onAuthorClick }) => {
+const PollCard = ({ poll, onClick, onAuthorClick, onDelete }) => {
   const formatDateTime = (dateString) => {
     if (!dateString) return '없음';
     return new Date(dateString).toLocaleString('ko-KR', {
@@ -134,6 +134,47 @@ const PollCard = ({ poll, onClick, onAuthorClick }) => {
           }
         }}
       >
+        {/* 삭제 버튼 */}
+        {onDelete && (
+          <div className="position-absolute" style={{
+            top: '8px',
+            right: '8px',
+            zIndex: 11
+          }}>
+            <button
+              className="btn btn-sm btn-outline-danger rounded-circle p-1"
+              style={{
+                width: '32px',
+                height: '32px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                border: '2px solid #dc3545',
+                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                backdropFilter: 'blur(10px)',
+                transition: 'all 0.2s ease'
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(poll);
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.backgroundColor = '#dc3545';
+                e.target.style.color = 'white';
+                e.target.style.transform = 'scale(1.1)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.95)';
+                e.target.style.color = '#dc3545';
+                e.target.style.transform = 'scale(1)';
+              }}
+              title="투표 삭제"
+            >
+              <i className="bi bi-trash" style={{ fontSize: '0.75rem' }}></i>
+            </button>
+          </div>
+        )}
+
         {/* 상태 배지 */}
         <div className="position-absolute" style={{
           top: '8px',

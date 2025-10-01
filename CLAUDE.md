@@ -129,6 +129,8 @@ src/
 
 ### 📜 더보기 기반 페이지네이션
 
+GET /api?cursor={{cursor}}&size=20
+
 ```json
 {
     "contents": [{}], // 현재 페이지 내의 아이템 목록

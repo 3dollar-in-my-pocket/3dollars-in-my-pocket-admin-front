@@ -154,6 +154,55 @@ const PollManagement = () => {
     setSelectedUser(null);
   };
 
+  // 투표 삭제 핸들러
+  const handleDeletePoll = async (poll) => {
+    const confirmed = window.confirm(
+      `정말로 "${poll.content.title}" 투표를 삭제하시겠습니까?\n\n` +
+      `투표 기간: ${formatDateTime(poll.period.startDateTime)} ~ ${formatDateTime(poll.period.endDateTime)}\n` +
+      `현재 참여자: ${getTotalVotes(poll.options)}명\n\n` +
+      `이 작업은 되돌릴 수 없습니다.`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      const response = await pollApi.deletePoll(poll.pollId);
+
+      if (response.status === 200 || response.status === 204) {
+        toast.success('투표가 성공적으로 삭제되었습니다.');
+        // 현재 카테고리의 투표 목록을 새로 조회
+        fetchPolls(selectedCategory);
+      } else {
+        throw new Error('삭제 실패');
+      }
+    } catch (error) {
+      console.error('투표 삭제 실패:', error);
+      const errorMessage = error.response?.status === 404
+        ? '투표를 찾을 수 없습니다. 이미 삭제되었을 수 있습니다.'
+        : error.response?.status === 403
+        ? '투표 삭제 권한이 없습니다.'
+        : '투표 삭제 중 오류가 발생했습니다.';
+      toast.error(errorMessage);
+    }
+  };
+
+  // 투표 총 참여자 수 계산 (확인 메시지용)
+  const getTotalVotes = (options) => {
+    return options.reduce((total, option) => total + (option.count || 0), 0);
+  };
+
+  // 날짜 포맷팅 (확인 메시지용)
+  const formatDateTime = (dateString) => {
+    if (!dateString) return '없음';
+    return new Date(dateString).toLocaleString('ko-KR', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
   return (
     <div className="container-fluid px-2 px-md-4 py-3 py-md-4">
       <div className="d-flex justify-content-between align-items-center mb-3 mb-md-4 pb-2 border-bottom">
@@ -284,6 +333,7 @@ const PollManagement = () => {
                       poll={poll}
                       onClick={handlePollClick}
                       onAuthorClick={handleAuthorClick}
+                      onDelete={handleDeletePoll}
                     />
                   ))}
                 </div>

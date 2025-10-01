@@ -159,4 +159,101 @@ export default {
       return error.response;
     }
   },
+
+  /**
+   * 가게 소식 목록 조회
+   * @param {string} storeId - 가게 ID
+   * @param {string} [cursor] - 페이징 커서
+   * @param {number} [limit=20] - 페이지 사이즈
+   * @returns {Promise<Object>} 가게 소식 목록
+   */
+  getStorePosts: async (storeId, cursor = null, limit = 20) => {
+    try {
+      const params = {
+        limit
+      };
+
+      if (cursor) {
+        params.cursor = cursor;
+      }
+
+      const response = await axiosInstance({
+        method: 'GET',
+        url: `/v1/store/${storeId}/posts`,
+        params
+      });
+
+      if (response.data.ok) {
+        return {
+          ok: response.data.ok,
+          data: response.data.data
+        };
+      } else {
+        throw new Error('API 응답 오류');
+      }
+    } catch (error) {
+      return error.response;
+    }
+  },
+
+  /**
+   * 가게 메시지 목록 조회
+   * @param {string} storeId - 가게 ID
+   * @param {string} [cursor] - 페이징 커서
+   * @param {number} [limit=20] - 페이지 사이즈
+   * @returns {Promise<Object>} 가게 메시지 목록
+   */
+  getStoreMessages: async (storeId, cursor = null, limit = 20) => {
+    try {
+      const params = {
+        limit
+      };
+
+      if (cursor) {
+        params.cursor = cursor;
+      }
+
+      const response = await axiosInstance({
+        method: 'GET',
+        url: `/v1/store/${storeId}/messages`,
+        params
+      });
+
+      if (response.data.ok) {
+        return {
+          ok: response.data.ok,
+          data: response.data.data
+        };
+      } else {
+        throw new Error('API 응답 오류');
+      }
+    } catch (error) {
+      return error.response;
+    }
+  },
+
+  /**
+   * 가게 설정 정보 조회
+   * @param {string} storeId - 가게 ID
+   * @returns {Promise<Object>} 가게 설정 정보
+   */
+  getStorePreference: async (storeId) => {
+    try {
+      const response = await axiosInstance({
+        method: 'GET',
+        url: `/v1/store/${storeId}/preference`
+      });
+
+      if (response.data.ok) {
+        return {
+          ok: response.data.ok,
+          data: response.data.data
+        };
+      } else {
+        throw new Error('API 응답 오류');
+      }
+    } catch (error) {
+      return error.response;
+    }
+  },
 };
