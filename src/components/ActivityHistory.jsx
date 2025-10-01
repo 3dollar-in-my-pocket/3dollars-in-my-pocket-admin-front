@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Tab, Tabs } from 'react-bootstrap';
-import { toast } from 'react-toastify';
-import { getFeatureUnsupportedMessage } from '../types/store';
+import '../styles/mobile-tabs.css';
 
 const ActivityHistory = ({
   type, // 'user' or 'store'
@@ -64,9 +63,9 @@ const ActivityHistory = ({
   }
 
   return (
-    <div className="p-4">
+    <div className="p-1 p-sm-2 p-md-4">
       <div className="card border-0 shadow-sm">
-        <div className="card-header bg-light border-0 p-4">
+        <div className="card-header bg-light border-0 p-2 p-sm-3 p-md-4">
           <div className="d-flex align-items-center gap-2">
             <div className="bg-info bg-opacity-10 rounded-circle p-2">
               <i className={`bi ${getIcon()} text-info`}></i>
@@ -78,9 +77,11 @@ const ActivityHistory = ({
           <Tabs
             activeKey={activeTab}
             onSelect={handleTabChange}
-            className="nav-fill border-0 px-3 pt-3"
+            className="nav-fill border-0 px-1 px-sm-2 px-md-3 pt-2 pt-md-3 mobile-sub-tabs"
             style={{
-              background: '#ffffff'
+              background: '#ffffff',
+              overflowX: 'auto',
+              flexWrap: 'nowrap'
             }}
           >
             {tabs.map((tab) => (
@@ -89,16 +90,35 @@ const ActivityHistory = ({
                 eventKey={tab.key}
                 disabled={tab.isSupported === false}
                 title={
-                  <span className={`d-flex align-items-center gap-2 ${tab.isSupported === false ? 'text-muted' : ''}`}>
-                    <i className={`bi ${tab.icon}`}></i>
-                    {tab.title}
+                  <span className={`d-flex align-items-center gap-1 gap-md-2 px-1 py-2 ${tab.isSupported === false ? 'text-muted' : ''}`} style={{
+                    fontSize: window.innerWidth <= 768 ? '0.8rem' : '0.9rem',
+                    whiteSpace: 'nowrap',
+                    minWidth: 'fit-content'
+                  }}>
+                    <i className={`bi ${tab.icon}`} style={{fontSize: '0.85rem'}}></i>
+                    <span className="fw-medium d-none d-sm-inline">{tab.title}</span>
+                    <span className="fw-medium d-sm-none">{tab.title.length > 4 ? tab.title.substring(0, 3) + '...' : tab.title}</span>
                     {tab.isSupported === false && (
-                      <span className="badge bg-secondary bg-opacity-50 rounded-pill ms-1" style={{ fontSize: '0.6rem' }}>
-                        미지원
+                      <span className="badge bg-secondary bg-opacity-50 rounded-pill ms-1" style={{
+                        fontSize: '0.6rem',
+                        minWidth: '0.8rem',
+                        height: '0.8rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}>
+                        X
                       </span>
                     )}
                     {tab.showBadge && tab.isSupported !== false && (
-                      <span className="badge bg-secondary rounded-pill ms-1" style={{ fontSize: '0.6rem' }}>
+                      <span className="badge bg-secondary rounded-pill ms-1" style={{
+                        fontSize: '0.6rem',
+                        minWidth: '0.8rem',
+                        height: '0.8rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}>
                         {tab.badgeText || '준비중'}
                       </span>
                     )}

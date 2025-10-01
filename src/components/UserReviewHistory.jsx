@@ -212,8 +212,8 @@ const UserReviewHistory = ({userId, isActive, onStoreClick}) => {
 
   return (
     <div>
-      <div className="px-4 pt-4">
-        <div className="d-flex align-items-center justify-content-between mb-4 p-4 rounded-4 shadow-sm"
+      <div className="px-2 px-sm-3 px-md-4 pt-2 pt-md-4">
+        <div className="d-flex align-items-center justify-content-between mb-3 mb-md-4 p-2 p-sm-3 p-md-4 rounded-4 shadow-sm"
              style={{
                background: 'linear-gradient(135deg, #e3f2fd 0%, #f8fffe 100%)',
                border: '1px solid rgba(13, 110, 253, 0.1)'
@@ -240,7 +240,7 @@ const UserReviewHistory = ({userId, isActive, onStoreClick}) => {
       </div>
 
       <div
-        className="px-4"
+        className="px-2 px-sm-3 px-md-4"
         ref={scrollContainerRef}
         onScroll={handleScroll}
         style={{maxHeight: '500px', overflowY: 'auto'}}
@@ -282,7 +282,7 @@ const UserReviewHistory = ({userId, isActive, onStoreClick}) => {
                 >
                   <div className="d-flex align-items-start gap-3">
                     <div className="flex-grow-1">
-                      <div className="d-flex align-items-center gap-2 mb-2">
+                      <div className="d-flex align-items-start gap-2 mb-2 flex-wrap">
                         <div
                           onClick={(e) => {
                             e.stopPropagation();
@@ -295,7 +295,9 @@ const UserReviewHistory = ({userId, isActive, onStoreClick}) => {
                             cursor: 'pointer',
                             padding: '2px 4px',
                             borderRadius: '4px',
-                            transition: 'all 0.2s ease'
+                            transition: 'all 0.2s ease',
+                            minWidth: 'fit-content',
+                            flexShrink: 0
                           }}
                           onMouseEnter={(e) => {
                             e.currentTarget.style.backgroundColor = '#f8f9fa';
@@ -306,13 +308,22 @@ const UserReviewHistory = ({userId, isActive, onStoreClick}) => {
                             e.currentTarget.style.transform = 'translateY(0)';
                           }}
                         >
-                          <h6 className="mb-0 fw-bold text-primary">{review.store?.name || '가게 이름 없음'}</h6>
+                          <h6 className="mb-0 fw-bold text-primary" style={{
+                            wordBreak: 'break-word',
+                            whiteSpace: 'normal',
+                            lineHeight: '1.3',
+                            maxWidth: window.innerWidth <= 768 ? '150px' : '200px'
+                          }}>
+                            {review.store?.name || '가게 이름 없음'}
+                          </h6>
                           <i className="bi bi-box-arrow-up-right text-primary" style={{ fontSize: '0.7rem' }}></i>
                         </div>
-                        {getReviewStatusBadge(review.status)}
-                        {getSalesTypeBadge(review.store?.salesType)}
-                        {getStoreStatusBadge(review.store?.status)}
-                        {review.store?.storeType && getStoreTypeBadge(review.store.storeType)}
+                        <div className="d-flex gap-1 flex-wrap">
+                          {getReviewStatusBadge(review.status)}
+                          {getSalesTypeBadge(review.store?.salesType)}
+                          {getStoreStatusBadge(review.store?.status)}
+                          {review.store?.storeType && getStoreTypeBadge(review.store.storeType)}
+                        </div>
                       </div>
 
                       <div className="d-flex align-items-center gap-2 mb-2">

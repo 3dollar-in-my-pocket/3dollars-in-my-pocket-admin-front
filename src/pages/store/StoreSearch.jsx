@@ -6,11 +6,10 @@ import useSearch from '../../hooks/useSearch';
 import { storeSearchAdapter } from '../../adapters/storeSearchAdapter';
 import SearchResults from '../../components/common/SearchResults';
 import StoreCard from '../../components/store/StoreCard';
-import storeApi from '../../api/storeApi';
-import { toast } from 'react-toastify';
 
 const StoreSearch = () => {
   const [selectedUser, setSelectedUser] = useState(null);
+  const [isComposing, setIsComposing] = useState(false);
 
   const {
     searchQuery,
@@ -131,9 +130,14 @@ const StoreSearch = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
+                  if (e.key === 'Enter' && !isComposing) {
                     handleSearchSubmit();
                   }
+                }}
+                onCompositionStart={() => setIsComposing(true)}
+                onCompositionEnd={(e) => {
+                  setIsComposing(false);
+                  setSearchQuery(e.target.value);
                 }}
                 onFocus={(e) => {
                   e.target.style.border = '2px solid #667eea';

@@ -1,5 +1,6 @@
 import {useEffect, useState} from 'react';
 import {Modal, Tab, Tabs} from 'react-bootstrap';
+import '../../styles/mobile-tabs.css';
 import {
   formatCount,
   formatRating,
@@ -16,13 +17,9 @@ import {
   getStoreTypeBadgeClass,
   getStoreTypeIcon,
   getWriterTypeBadgeClass,
-  STORE_TYPE,
-  isPostsSupported,
-  isMessagesSupported,
   isVisitsSupported,
   isImagesSupported,
-  isReportsSupported,
-  getFeatureUnsupportedMessage
+  isReportsSupported
 } from '../../types/store';
 import { WRITER_TYPE } from '../../types/common';
 import storeApi from '../../api/storeApi';
@@ -299,18 +296,6 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
     });
   };
 
-  const getDayDisplayName = (day) => {
-    const dayMap = {
-      'MONDAY': '월',
-      'TUESDAY': '화',
-      'WEDNESDAY': '수',
-      'THURSDAY': '목',
-      'FRIDAY': '금',
-      'SATURDAY': '토',
-      'SUNDAY': '일'
-    };
-    return dayMap[day] || day;
-  };
 
   const formatAppearanceDays = (days) => {
     if (!days || days.length === 0) return '정보 없음';
@@ -437,8 +422,8 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
       size="xl"
       centered
       className="store-detail-modal"
-      style={{maxWidth: '95vw'}}
-      dialogClassName="modal-90w"
+      style={{maxWidth: '98vw'}}
+      dialogClassName="modal-95w"
     >
       <Modal.Header
         closeButton
@@ -531,29 +516,36 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
           <Tabs
             activeKey={activeTab}
             onSelect={handleTabSelect}
-            className="nav-fill border-0 custom-tabs"
+            className="nav-fill border-0 custom-tabs mobile-optimized-tabs"
             style={{
               background: '#f8f9fa',
-              borderBottom: '1px solid #e9ecef'
+              borderBottom: '1px solid #e9ecef',
+              overflowX: 'auto',
+              flexWrap: 'nowrap'
             }}
           >
             {/* 기본 정보 탭 */}
             <Tab
               eventKey="basic"
               title={
-                <span className="d-flex align-items-center gap-2 px-2 py-2">
-                  <i className="bi bi-shop fs-6"></i>
-                  <span className="fw-semibold">기본 정보</span>
+                <span className="d-flex align-items-center gap-1 gap-md-2 px-1 py-2" style={{
+                  fontSize: window.innerWidth <= 768 ? '0.85rem' : '1rem',
+                  whiteSpace: 'nowrap',
+                  minWidth: 'fit-content'
+                }}>
+                  <i className="bi bi-shop" style={{fontSize: '0.9rem'}}></i>
+                  <span className="fw-medium d-none d-sm-inline">기본 정보</span>
+                  <span className="fw-medium d-sm-none">기본</span>
                 </span>
               }
             >
               <div className="p-0">
-                <div className="container-fluid p-4">
+                <div className="container-fluid p-1 p-sm-2 p-md-4">
                   {/* 핵심 정보 카드 */}
                   <div className="row mb-4">
                     <div className="col-12">
                       <div className="card border-0 shadow-sm" style={{borderRadius: '12px'}}>
-                        <div className="card-body p-4">
+                        <div className="card-body p-2 p-sm-3 p-md-4">
                           <div className="row align-items-center">
                             <div className="col-lg-8">
                               <div className="d-flex align-items-center gap-3 mb-3">
@@ -625,13 +617,13 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
                   <div className="row mb-4">
                     <div className="col-12">
                       <div className="card border-0 shadow-sm" style={{borderRadius: '12px'}}>
-                        <div className="card-header bg-white border-0 p-4">
+                        <div className="card-header bg-white border-0 p-2 p-sm-3 p-md-4">
                           <h6 className="mb-0 fw-bold text-dark d-flex align-items-center gap-2">
                             <i className="bi bi-info-circle text-primary"></i>
                             상세 정보
                           </h6>
                         </div>
-                        <div className="card-body p-4">
+                        <div className="card-body p-2 p-sm-3 p-md-4">
                           <div className="row g-4">
                           <div className="col-md-6">
                             <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
@@ -749,7 +741,7 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
                   <div className="row mb-4">
                     <div className="col-12">
                       <div className="card border-0 shadow-sm" style={{borderRadius: '12px'}}>
-                        <div className="card-header bg-white border-0 p-4">
+                        <div className="card-header bg-white border-0 p-2 p-sm-3 p-md-4">
                           <h6 className="mb-0 fw-bold text-dark d-flex align-items-center gap-2">
                             <i className="bi bi-tags text-info"></i>
                             카테고리 정보
@@ -760,7 +752,7 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
                             )}
                           </h6>
                         </div>
-                        <div className="card-body p-4">
+                        <div className="card-body p-2 p-sm-3 p-md-4">
                           {getCategoryList(storeDetail?.categories || store.categories)}
                         </div>
                       </div>
@@ -772,7 +764,7 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
                     <div className="row mb-4">
                       <div className="col-12">
                         <div className="card border-0 shadow-sm" style={{borderRadius: '12px'}}>
-                          <div className="card-header bg-white border-0 p-4">
+                          <div className="card-header bg-white border-0 p-2 p-sm-3 p-md-4">
                             <h6 className="mb-0 fw-bold text-dark d-flex align-items-center gap-2">
                               <i className="bi bi-menu-button-wide text-warning"></i>
                               메뉴 정보
@@ -781,7 +773,7 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
                               </span>
                             </h6>
                           </div>
-                          <div className="card-body p-4">
+                          <div className="card-body p-2 p-sm-3 p-md-4">
                             <div className="row g-3">
                               {storeDetail.menus.map((menu, index) => (
                                 <div key={index} className="col-md-6 col-lg-4">
@@ -858,12 +850,24 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
               eventKey="settings"
               disabled={(storeDetail?.storeType !== 'BOSS_STORE' && store?.storeType !== 'BOSS_STORE')}
               title={
-                <span className={`d-flex align-items-center gap-2 px-2 py-2 ${(storeDetail?.storeType !== 'BOSS_STORE' && store?.storeType !== 'BOSS_STORE') ? 'text-muted' : ''}`}>
-                  <i className="bi bi-gear fs-6"></i>
-                  <span className="fw-semibold">가게 설정</span>
+                <span className={`d-flex align-items-center gap-1 gap-md-2 px-1 py-2 ${(storeDetail?.storeType !== 'BOSS_STORE' && store?.storeType !== 'BOSS_STORE') ? 'text-muted' : ''}`} style={{
+                  fontSize: window.innerWidth <= 768 ? '0.85rem' : '1rem',
+                  whiteSpace: 'nowrap',
+                  minWidth: 'fit-content'
+                }}>
+                  <i className="bi bi-gear" style={{fontSize: '0.9rem'}}></i>
+                  <span className="fw-medium d-none d-sm-inline">가게 설정</span>
+                  <span className="fw-medium d-sm-none">설정</span>
                   {(storeDetail?.storeType !== 'BOSS_STORE' && store?.storeType !== 'BOSS_STORE') && (
-                    <span className="badge bg-secondary bg-opacity-50 rounded-pill ms-1" style={{ fontSize: '0.6rem' }}>
-                      미지원
+                    <span className="badge bg-secondary bg-opacity-50 rounded-pill ms-1" style={{
+                      fontSize: '0.6rem',
+                      minWidth: '1rem',
+                      height: '1rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      X
                     </span>
                   )}
                 </span>
@@ -894,9 +898,14 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
             <Tab
               eventKey="customer-activity"
               title={
-                <span className="d-flex align-items-center gap-2 px-2 py-2">
-                  <i className="bi bi-people fs-6"></i>
-                  <span className="fw-semibold">고객 활동</span>
+                <span className="d-flex align-items-center gap-1 gap-md-2 px-1 py-2" style={{
+                  fontSize: window.innerWidth <= 768 ? '0.85rem' : '1rem',
+                  whiteSpace: 'nowrap',
+                  minWidth: 'fit-content'
+                }}>
+                  <i className="bi bi-people" style={{fontSize: '0.9rem'}}></i>
+                  <span className="fw-medium d-none d-sm-inline">고객 활동</span>
+                  <span className="fw-medium d-sm-none">고객</span>
                 </span>
               }
             >
@@ -914,12 +923,24 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
               eventKey="owner-activity"
               disabled={(storeDetail?.storeType !== 'BOSS_STORE' && store?.storeType !== 'BOSS_STORE')}
               title={
-                <span className={`d-flex align-items-center gap-2 px-2 py-2 ${(storeDetail?.storeType !== 'BOSS_STORE' && store?.storeType !== 'BOSS_STORE') ? 'text-muted' : ''}`}>
-                  <i className="bi bi-person-badge fs-6"></i>
-                  <span className="fw-semibold">사장님 활동</span>
+                <span className={`d-flex align-items-center gap-1 gap-md-2 px-1 py-2 ${(storeDetail?.storeType !== 'BOSS_STORE' && store?.storeType !== 'BOSS_STORE') ? 'text-muted' : ''}`} style={{
+                  fontSize: window.innerWidth <= 768 ? '0.85rem' : '1rem',
+                  whiteSpace: 'nowrap',
+                  minWidth: 'fit-content'
+                }}>
+                  <i className="bi bi-person-badge" style={{fontSize: '0.9rem'}}></i>
+                  <span className="fw-medium d-none d-sm-inline">사장님 활동</span>
+                  <span className="fw-medium d-sm-none">사장</span>
                   {(storeDetail?.storeType !== 'BOSS_STORE' && store?.storeType !== 'BOSS_STORE') && (
-                    <span className="badge bg-secondary bg-opacity-50 rounded-pill ms-1" style={{ fontSize: '0.6rem' }}>
-                      미지원
+                    <span className="badge bg-secondary bg-opacity-50 rounded-pill ms-1" style={{
+                      fontSize: '0.6rem',
+                      minWidth: '1rem',
+                      height: '1rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      X
                     </span>
                   )}
                 </span>
