@@ -6,9 +6,10 @@ export default {
    * @param {string} keyword - 검색 키워드
    * @param {string} [cursor] - 페이징 커서
    * @param {number} [size=20] - 페이지 사이즈
+   * @param {Array<string>} [targetStores] - 필터링할 가게 타입 (USER_STORE, BOSS_STORE)
    * @returns {Promise<Object>} 가게 검색 결과
    */
-  searchStores: async (keyword, cursor = null, size = 30) => {
+  searchStores: async (keyword, cursor = null, size = 30, targetStores = null) => {
     try {
       const params = {
         keyword,
@@ -17,6 +18,10 @@ export default {
 
       if (cursor) {
         params.cursor = cursor;
+      }
+
+      if (targetStores && targetStores.length > 0) {
+        params.targetStores = targetStores.join(',');
       }
 
       const response = await axiosInstance({
@@ -42,9 +47,10 @@ export default {
    * 가게 목록 조회 (최신순)
    * @param {string} [cursor] - 페이징 커서
    * @param {number} [size=20] - 페이지 사이즈
+   * @param {Array<string>} [targetStores] - 필터링할 가게 타입 (USER_STORE, BOSS_STORE)
    * @returns {Promise<Object>} 가게 목록
    */
-  getStores: async (cursor = null, size = 30) => {
+  getStores: async (cursor = null, size = 30, targetStores = null) => {
     try {
       const params = {
         size
@@ -52,6 +58,10 @@ export default {
 
       if (cursor) {
         params.cursor = cursor;
+      }
+
+      if (targetStores && targetStores.length > 0) {
+        params.targetStores = targetStores.join(',');
       }
 
       const response = await axiosInstance({
