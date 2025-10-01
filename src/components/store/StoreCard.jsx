@@ -11,7 +11,7 @@ import {
 } from '../../types/store';
 import ItemCard from '../common/ItemCard';
 
-const StoreCard = ({ store, onClick, onDelete, isDeleted = false }) => {
+const StoreCard = ({ store, onClick, isDeleted = false }) => {
   const formatDateTime = (dateString) => {
     if (!dateString) return '없음';
     return new Date(dateString).toLocaleDateString('ko-KR');
@@ -53,44 +53,6 @@ const StoreCard = ({ store, onClick, onDelete, isDeleted = false }) => {
           </div>
         </div>
 
-        {/* 삭제 버튼 (삭제되지 않은 가게에만 표시) */}
-        {!isDeleted && onDelete && (
-          <div className="position-absolute" style={{
-            top: '8px',
-            right: '8px',
-            zIndex: 10
-          }}>
-            <button
-              className="btn btn-danger btn-sm rounded-circle"
-              style={{
-                width: '28px',
-                height: '28px',
-                padding: '0',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '0.7rem',
-                opacity: 0.8,
-                transition: 'all 0.2s ease'
-              }}
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete(store);
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.opacity = '1';
-                e.currentTarget.style.transform = 'scale(1.1)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.opacity = '0.8';
-                e.currentTarget.style.transform = 'scale(1)';
-              }}
-              title="가게 삭제"
-            >
-              <i className="bi bi-trash"></i>
-            </button>
-          </div>
-        )}
 
         {isDeleted && (
           <div className="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style={{

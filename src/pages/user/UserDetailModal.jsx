@@ -1,5 +1,6 @@
 import {useEffect, useState} from 'react';
 import {Modal, Tab, Tabs} from 'react-bootstrap';
+import '../../styles/mobile-tabs.css';
 import {
   getMarketingConsentBadgeClass,
   getMarketingConsentDisplayName,
@@ -138,6 +139,8 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
       centered
       className="user-detail-modal"
       fullscreen="md-down"
+      style={{maxWidth: '98vw'}}
+      dialogClassName="modal-95w"
     >
       <Modal.Header
         closeButton
@@ -196,28 +199,34 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
           <Tabs
             activeKey={activeTab}
             onSelect={(k) => setActiveTab(k)}
-            className="nav-fill border-0"
+            className="nav-fill border-0 mobile-optimized-tabs"
             style={{
-              background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)'
+              background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
+              overflowX: 'auto',
+              flexWrap: 'nowrap'
             }}
           >
             {/* 기본 정보 탭 */}
             <Tab
               eventKey="basic"
               title={
-                <span className="d-flex align-items-center gap-1 gap-md-2">
-                  <i className="bi bi-person-vcard"></i>
-                  <span className="d-none d-sm-inline">기본 정보</span>
-                  <span className="d-sm-none">기본</span>
+                <span className="d-flex align-items-center gap-1 gap-md-2 px-1 py-2" style={{
+                  fontSize: window.innerWidth <= 768 ? '0.85rem' : '1rem',
+                  whiteSpace: 'nowrap',
+                  minWidth: 'fit-content'
+                }}>
+                  <i className="bi bi-person-vcard" style={{fontSize: '0.9rem'}}></i>
+                  <span className="d-none d-sm-inline fw-medium">기본 정보</span>
+                  <span className="d-sm-none fw-medium">기본</span>
                 </span>
               }
             >
-              <div className="p-2 p-md-4">
+              <div className="p-1 p-sm-2 p-md-4">
                 <div className="row justify-content-center">
                   <div className="col-12 col-md-10">
                     {/* 일반 정보 섹션 */}
                     <div className="card border-0 shadow-sm mb-4">
-                      <div className="card-header bg-light border-0 p-4">
+                      <div className="card-header bg-light border-0 p-2 p-sm-3 p-md-4">
                         <div className="d-flex align-items-center gap-2">
                           <div className="bg-primary bg-opacity-10 rounded-circle p-2">
                             <i className="bi bi-person-vcard text-primary"></i>
@@ -225,7 +234,7 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
                           <h5 className="mb-0 fw-bold text-dark">일반 정보</h5>
                         </div>
                       </div>
-                      <div className="card-body p-4">
+                      <div className="card-body p-2 p-sm-3 p-md-4">
                         <div className="text-center mb-4">
                           <h4 className="fw-bold text-dark mb-1">{userDetail?.name}</h4>
                         </div>
@@ -295,7 +304,7 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
 
                     {/* 설정 정보 섹션 */}
                     <div className="card border-0 shadow-sm">
-                      <div className="card-header bg-light border-0 p-4">
+                      <div className="card-header bg-light border-0 p-2 p-sm-3 p-md-4">
                         <div className="d-flex align-items-center gap-2">
                           <div className="bg-warning bg-opacity-10 rounded-circle p-2">
                             <i className="bi bi-gear text-warning"></i>
@@ -303,7 +312,7 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
                           <h5 className="mb-0 fw-bold text-dark">설정 정보</h5>
                         </div>
                       </div>
-                      <div className="card-body p-4">
+                      <div className="card-body p-2 p-sm-3 p-md-4">
                         {!settings ? (
                           <div className="text-center py-4">
                             <div className="bg-light rounded-circle mx-auto mb-3" style={{
@@ -371,17 +380,28 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
             <Tab
               eventKey="devices"
               title={
-                <span className="d-flex align-items-center gap-1 gap-md-2">
-                  <i className="bi bi-phone"></i>
-                  <span className="d-none d-sm-inline">디바이스 정보</span>
-                  <span className="d-sm-none">기기</span>
+                <span className="d-flex align-items-center gap-1 gap-md-2 px-1 py-2" style={{
+                  fontSize: window.innerWidth <= 768 ? '0.85rem' : '1rem',
+                  whiteSpace: 'nowrap',
+                  minWidth: 'fit-content'
+                }}>
+                  <i className="bi bi-phone" style={{fontSize: '0.9rem'}}></i>
+                  <span className="d-none d-sm-inline fw-medium">디바이스 정보</span>
+                  <span className="d-sm-none fw-medium">기기</span>
                   {devices.length > 0 && (
-                    <span className="badge bg-info rounded-pill ms-1">{devices.length}</span>
+                    <span className="badge bg-info rounded-pill ms-1" style={{
+                      fontSize: '0.7rem',
+                      minWidth: '1.2rem',
+                      height: '1.2rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>{devices.length}</span>
                   )}
                 </span>
               }
             >
-              <div className="p-2 p-md-4">
+              <div className="p-1 p-sm-2 p-md-4">
                 <div className="card border-0 shadow-sm">
                   <div className="card-header bg-light border-0 p-4">
                     <div className="d-flex align-items-center gap-2">
@@ -420,7 +440,7 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
                               border: '1px solid #e9ecef',
                               borderRadius: '16px'
                             }}>
-                              <div className="card-body p-4">
+                              <div className="card-body p-2 p-sm-3 p-md-4">
                                 <div className="d-flex align-items-center gap-3 mb-3">
                                   <div className="position-relative">
                                     <div className="bg-primary bg-opacity-10 rounded-circle p-3" style={{
@@ -496,17 +516,28 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
             <Tab
               eventKey="medals"
               title={
-                <span className="d-flex align-items-center gap-1 gap-md-2">
-                  <i className="bi bi-award"></i>
-                  <span className="d-none d-sm-inline">메달 정보</span>
-                  <span className="d-sm-none">메달</span>
+                <span className="d-flex align-items-center gap-1 gap-md-2 px-1 py-2" style={{
+                  fontSize: window.innerWidth <= 768 ? '0.85rem' : '1rem',
+                  whiteSpace: 'nowrap',
+                  minWidth: 'fit-content'
+                }}>
+                  <i className="bi bi-award" style={{fontSize: '0.9rem'}}></i>
+                  <span className="d-none d-sm-inline fw-medium">메달 정보</span>
+                  <span className="d-sm-none fw-medium">메달</span>
                   {medals.length > 0 && (
-                    <span className="badge bg-warning rounded-pill ms-1">{medals.length}</span>
+                    <span className="badge bg-warning rounded-pill ms-1" style={{
+                      fontSize: '0.7rem',
+                      minWidth: '1.2rem',
+                      height: '1.2rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>{medals.length}</span>
                   )}
                 </span>
               }
             >
-              <div className="p-2 p-md-4">
+              <div className="p-1 p-sm-2 p-md-4">
                 <div className="card border-0 shadow-sm">
                   <div className="card-header bg-light border-0 p-4">
                     <div className="d-flex align-items-center gap-2">
@@ -533,7 +564,7 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
                           background: 'linear-gradient(135deg, #fff3cd 0%, #ffffff 100%)',
                           borderRadius: '16px'
                         }}>
-                          <div className="card-body p-4">
+                          <div className="card-body p-2 p-sm-3 p-md-4">
                             <div className="d-flex align-items-center gap-3">
                               <div className="position-relative">
                                 <img
@@ -653,10 +684,14 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
             <Tab
               eventKey="activity"
               title={
-                <span className="d-flex align-items-center gap-1 gap-md-2">
-                  <i className="bi bi-activity"></i>
-                  <span className="d-none d-sm-inline">활동 이력</span>
-                  <span className="d-sm-none">활동</span>
+                <span className="d-flex align-items-center gap-1 gap-md-2 px-1 py-2" style={{
+                  fontSize: window.innerWidth <= 768 ? '0.85rem' : '1rem',
+                  whiteSpace: 'nowrap',
+                  minWidth: 'fit-content'
+                }}>
+                  <i className="bi bi-activity" style={{fontSize: '0.9rem'}}></i>
+                  <span className="d-none d-sm-inline fw-medium">활동 이력</span>
+                  <span className="d-sm-none fw-medium">활동</span>
                 </span>
               }
             >

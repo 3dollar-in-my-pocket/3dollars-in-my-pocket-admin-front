@@ -207,3 +207,33 @@ export const getStoreTypeIcon = (storeType) => {
       return 'bi-question-circle-fill';
   }
 };
+
+// 가게 기능 지원 여부 체크 함수들 (확장 가능)
+export const isPostsSupported = (storeType) => {
+  const supportedTypes = [STORE_TYPE.BOSS_STORE];
+  return supportedTypes.includes(storeType);
+};
+
+export const isMessagesSupported = (storeType) => {
+  const supportedTypes = [STORE_TYPE.BOSS_STORE];
+  return supportedTypes.includes(storeType);
+};
+
+export const isVisitsSupported = (storeType) => {
+  const supportedTypes = [STORE_TYPE.USER_STORE];
+  return supportedTypes.includes(storeType);
+};
+
+export const isImagesSupported = (storeType) => {
+  const supportedTypes = [STORE_TYPE.USER_STORE];
+  return supportedTypes.includes(storeType);
+};
+
+export const isReportsSupported = (storeType) => {
+  const supportedTypes = [STORE_TYPE.USER_STORE];
+  return supportedTypes.includes(storeType);
+};
+
+export const getFeatureUnsupportedMessage = (featureName, supportedStoreTypeName = '사장님 가게') => {
+  return `${featureName} 기능은 ${supportedStoreTypeName}에서만 지원하고 있습니다.`;
+};

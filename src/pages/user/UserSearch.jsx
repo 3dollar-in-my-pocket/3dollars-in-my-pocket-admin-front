@@ -51,6 +51,9 @@ const UserSearch = () => {
           value={searchQuery}
           onChange={handleSearchQueryChange}
           onKeyPress={onKeyPress}
+          onCompositionEnd={(e) => {
+            setSearchQuery(e.target.value);
+          }}
         />
       );
     } else {
@@ -63,6 +66,9 @@ const UserSearch = () => {
           value={additionalParams.userIds || ''}
           onChange={(e) => handleAdditionalParamChange('userIds', e.target.value)}
           onKeyPress={onKeyPress}
+          onCompositionEnd={(e) => {
+            handleAdditionalParamChange('userIds', e.target.value);
+          }}
         />
       );
     }

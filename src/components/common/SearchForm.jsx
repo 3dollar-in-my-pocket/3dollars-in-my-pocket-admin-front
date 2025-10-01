@@ -1,3 +1,4 @@
+
 const SearchForm = ({
   searchType,
   setSearchType,
@@ -99,6 +100,9 @@ const SearchForm = ({
                 value={searchQuery}
                 onChange={handleSearchQueryChange}
                 onKeyPress={onKeyPress}
+                onCompositionEnd={(e) => {
+                  setSearchQuery(e.target.value);
+                }}
                 onFocus={(e) => {
                   e.target.style.border = '2px solid #667eea';
                   e.target.style.boxShadow = '0 0 20px rgba(102, 126, 234, 0.3)';

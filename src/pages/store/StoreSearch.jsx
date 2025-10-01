@@ -6,11 +6,10 @@ import useSearch from '../../hooks/useSearch';
 import { storeSearchAdapter } from '../../adapters/storeSearchAdapter';
 import SearchResults from '../../components/common/SearchResults';
 import StoreCard from '../../components/store/StoreCard';
-import storeApi from '../../api/storeApi';
-import { toast } from 'react-toastify';
 
 const StoreSearch = () => {
   const [selectedUser, setSelectedUser] = useState(null);
+  const [isComposing, setIsComposing] = useState(false);
 
   const {
     searchQuery,
@@ -62,7 +61,6 @@ const StoreSearch = () => {
       key={store.storeId}
       store={store}
       onClick={handleStoreClick}
-      onDelete={handleStoreDelete}
       isDeleted={store.isDeleted}
     />
   );
@@ -87,35 +85,6 @@ const StoreSearch = () => {
     setSelectedUser(null);
   };
 
-  // 가게 삭제 핸들러 (목록에서 직접 삭제)
-  const handleStoreDelete = useCallback(async (store) => {
-    const confirmed = window.confirm(
-      `정말로 "${store.name}" 가게를 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.`
-    );
-
-    if (!confirmed) return;
-
-    try {
-      const response = await storeApi.deleteStore(store.storeId);
-
-      if (response.status === 200 || response.status === 204) {
-        toast.success(`"${store.name}" 가게가 성공적으로 삭제되었습니다.`);
-
-        // 목록에서 해당 가게를 삭제 상태로 표시
-        const updatedResults = storeList.map(s =>
-          s.storeId === store.storeId
-            ? { ...s, isDeleted: true }
-            : s
-        );
-        setResults(updatedResults);
-      } else {
-        throw new Error('삭제 실패');
-      }
-    } catch (error) {
-      console.error('가게 삭제 실패:', error);
-      toast.error(`"${store.name}" 가게 삭제 중 오류가 발생했습니다.`);
-    }
-  }, [storeList, setResults]);
 
   // 가게 삭제 핸들러 (모달에서 삭제 후 목록 업데이트)
   const handleStoreDeleted = useCallback((deletedStoreId) => {
@@ -161,9 +130,14 @@ const StoreSearch = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
+                  if (e.key === 'Enter' && !isComposing) {
                     handleSearchSubmit();
                   }
+                }}
+                onCompositionStart={() => setIsComposing(true)}
+                onCompositionEnd={(e) => {
+                  setIsComposing(false);
+                  setSearchQuery(e.target.value);
                 }}
                 onFocus={(e) => {
                   e.target.style.border = '2px solid #667eea';

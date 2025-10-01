@@ -30,6 +30,17 @@ const pollApi = {
       console.error('투표 목록 조회 실패:', error);
       throw error;
     }
+  },
+
+  // 투표 삭제
+  deletePoll: async (pollId) => {
+    try {
+      const response = await apiBase.delete(`/v1/poll/${pollId}`);
+      return response;
+    } catch (error) {
+      console.error('투표 삭제 실패:', error);
+      throw error;
+    }
   }
 };
 
