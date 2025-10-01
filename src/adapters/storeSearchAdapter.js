@@ -3,13 +3,13 @@ import { STORE_SEARCH_TYPES, validateStoreSearch } from '../types/store';
 
 export const storeSearchAdapter = {
   // 검색 함수
-  searchFunction: async ({ searchType, searchQuery, cursor }) => {
+  searchFunction: async ({ searchType, searchQuery, cursor, targetStores }) => {
     let response;
 
     if (searchType === STORE_SEARCH_TYPES.KEYWORD) {
-      response = await storeApi.searchStores(searchQuery, cursor, 20);
+      response = await storeApi.searchStores(searchQuery, cursor, 20, targetStores);
     } else {
-      response = await storeApi.getStores(cursor, 20);
+      response = await storeApi.getStores(cursor, 20, targetStores);
     }
 
     if (!response.ok) {

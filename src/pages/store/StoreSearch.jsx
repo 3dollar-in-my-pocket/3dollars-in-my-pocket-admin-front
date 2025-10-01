@@ -1,7 +1,7 @@
 import { useEffect, useCallback, useState } from 'react';
 import StoreDetailModal from './StoreDetailModal';
 import UserDetailModal from '../user/UserDetailModal';
-import { STORE_SEARCH_TYPES } from '../../types/store';
+import { STORE_SEARCH_TYPES, STORE_TYPE } from '../../types/store';
 import useSearch from '../../hooks/useSearch';
 import { storeSearchAdapter } from '../../adapters/storeSearchAdapter';
 import SearchResults from '../../components/common/SearchResults';
@@ -10,6 +10,7 @@ import StoreCard from '../../components/store/StoreCard';
 const StoreSearch = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [isComposing, setIsComposing] = useState(false);
+  const [selectedStoreTypes, setSelectedStoreTypes] = useState([]);
 
   const {
     searchQuery,
@@ -30,7 +31,10 @@ const StoreSearch = () => {
     setResults
   } = useSearch({
     validateSearch: storeSearchAdapter.validateSearch,
-    searchFunction: storeSearchAdapter.searchFunction,
+    searchFunction: (params) => storeSearchAdapter.searchFunction({
+      ...params,
+      targetStores: selectedStoreTypes.length > 0 ? selectedStoreTypes : null
+    }),
     errorMessage: storeSearchAdapter.errorMessage,
     autoSearchTypes: [STORE_SEARCH_TYPES.RECENT] // 최신순 조회시 자동 검색
   });
@@ -39,6 +43,17 @@ const StoreSearch = () => {
   useEffect(() => {
     setSearchType(STORE_SEARCH_TYPES.RECENT);
   }, [setSearchType]);
+
+  // 가게 타입 필터 변경 핸들러
+  const handleStoreTypeToggle = useCallback((storeType) => {
+    setSelectedStoreTypes(prev => {
+      if (prev.includes(storeType)) {
+        return prev.filter(type => type !== storeType);
+      } else {
+        return [...prev, storeType];
+      }
+    });
+  }, []);
 
   // 검색 실행 핸들러 (키워드 입력 여부에 따라 검색 타입 자동 결정)
   const handleSearchSubmit = useCallback(() => {
@@ -54,6 +69,14 @@ const StoreSearch = () => {
       handleSearch(true);
     }
   }, [searchQuery, searchType, setSearchType, resetSearch, handleSearch]);
+
+  // 가게 타입 필터가 변경되면 검색 재실행
+  useEffect(() => {
+    if (searchType) {
+      resetSearch();
+      handleSearch(true);
+    }
+  }, [selectedStoreTypes]);
 
 
   const renderStoreCard = (store) => (
@@ -192,6 +215,66 @@ const StoreSearch = () => {
             </div>
           </div>
 
+          {/* 가게 타입 필터 */}
+          <div className="mt-3 pt-3 border-top">
+            <div className="d-flex flex-wrap align-items-center gap-2">
+              <small className="text-muted fw-semibold me-3">
+                <i className="bi bi-funnel me-1"></i>
+                가게 종류:
+              </small>
+              <button
+                type="button"
+                className={`btn btn-sm rounded-pill ${
+                  selectedStoreTypes.includes(STORE_TYPE.USER_STORE)
+                    ? 'btn-info text-white'
+                    : 'btn-outline-info'
+                }`}
+                onClick={() => handleStoreTypeToggle(STORE_TYPE.USER_STORE)}
+                style={{
+                  fontSize: '0.75rem',
+                  padding: '4px 12px',
+                  border: '1px solid #17a2b8',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <i className="bi bi-people-fill me-1"></i>
+                일반 가게
+              </button>
+              <button
+                type="button"
+                className={`btn btn-sm rounded-pill ${
+                  selectedStoreTypes.includes(STORE_TYPE.BOSS_STORE)
+                    ? 'btn-warning text-dark'
+                    : 'btn-outline-warning'
+                }`}
+                onClick={() => handleStoreTypeToggle(STORE_TYPE.BOSS_STORE)}
+                style={{
+                  fontSize: '0.75rem',
+                  padding: '4px 12px',
+                  border: '1px solid #ffc107',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <i className="bi bi-person-badge-fill me-1"></i>
+                사장님 직영점
+              </button>
+              {selectedStoreTypes.length > 0 && (
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-secondary rounded-pill"
+                  onClick={() => setSelectedStoreTypes([])}
+                  style={{
+                    fontSize: '0.75rem',
+                    padding: '4px 8px'
+                  }}
+                >
+                  <i className="bi bi-x-circle me-1"></i>
+                  전체
+                </button>
+              )}
+            </div>
+          </div>
+
           {/* 현재 검색 상태 표시 */}
           <div className="mt-2 mt-md-3">
             <small className="text-muted d-flex align-items-center" style={{ fontSize: '0.75rem' }}>
@@ -201,12 +284,24 @@ const StoreSearch = () => {
                   ? `키워드 검색: "${searchQuery.trim()}"`
                   : '최신순으로 가게를 조회합니다'
                 }
+                {selectedStoreTypes.length > 0 && (
+                  <span className="ms-2 text-primary">
+                    | 필터: {selectedStoreTypes.map(type =>
+                      type === STORE_TYPE.USER_STORE ? '일반' : '사장님'
+                    ).join(', ')}
+                  </span>
+                )}
               </span>
               <span className="d-inline d-md-none">
                 {searchQuery.trim()
                   ? `키워드: "${searchQuery.trim()}"`
                   : '최신순 조회'
                 }
+                {selectedStoreTypes.length > 0 && (
+                  <span className="ms-1 text-primary">
+                    | {selectedStoreTypes.length}개 필터
+                  </span>
+                )}
               </span>
             </small>
           </div>
