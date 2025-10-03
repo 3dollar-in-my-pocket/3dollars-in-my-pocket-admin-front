@@ -9,7 +9,28 @@ const Dashboard = () => {
       description: "신규 가입 요청을 검토하고 승인할 수 있습니다.",
       icon: "bi-person-plus-fill",
       route: "/manage/registration"
-    },    
+    },
+    {
+      title: "유저 관리",
+      description: "유저를 검색하고 상세 정보를 확인할 수 있습니다.",
+      icon: "bi-search",
+      route: "/manage/user-search"
+    },
+    {
+      title: "가게 관리",
+      description: "가게를 검색하고 상세 정보를 확인할 수 있습니다.",
+      icon: "bi-search",
+      route: "/manage/store-search"
+    },
+    {
+      title: "투표 관리",
+      description: "가게를 검색하고 상세 정보를 확인할 수 있습니다.",
+      icon: "bi-search",
+      route: "/manage/poll"
+    },
+  ];
+
+  const contentTools = [
     {
       title: "광고 관리",
       description: "등록된 광고를 확인하고 관리할 수 있습니다.",
@@ -22,27 +43,15 @@ const Dashboard = () => {
       icon: "bi-question-circle-fill",
       route: "/manage/faq"
     },
+  ];
+
+  const toolTools = [
     {
-      title: "푸시 발송 (TBD)",
+      title: "푸시 발송",
       description: "앱 사용자에게 발송할 푸시 메시지를 설정합니다.",
       icon: "bi-bell-fill",
       route: "/manage/push-message"
     },
-    {
-      title: "유저 검색",
-      description: "유저를 검색하고 상세 정보를 확인할 수 있습니다.",
-      icon: "bi-search",
-      route: "/manage/user-search"
-    },
-        {
-      title: "가게 검색",
-      description: "가게를 검색하고 상세 정보를 확인할 수 있습니다.",
-      icon: "bi-search",
-      route: "/manage/store-search"
-    },
-  ];
-
-  const toolTools = [
     {
       title: "정책 관리",
       description: "시스템 정책을 등록하고 관리할 수 있습니다.",
@@ -50,13 +59,13 @@ const Dashboard = () => {
       route: "/manage/policy"
     },
     {
-      title: "캐시 운영툴",
+      title: "캐시 툴",
       description: "서버 캐시를 수동으로 초기화할 수 있습니다.",
       icon: "bi-puzzle-fill",
       route: "/manage/tool/cache"
     },
     {
-      title: "이미지 업로드 운영툴",
+      title: "이미지 업로드 툴",
       description: "운영용 이미지를 직접 업로드합니다.",
       icon: "bi-image",
       route: "/manage/tool/upload"
@@ -91,6 +100,34 @@ const Dashboard = () => {
         <h4 className="fw-semibold">서비스 관리</h4>
         <div className="row g-4">
           {serviceTools.map((tool, idx) => (
+            <div className="col-md-6 col-lg-4" key={idx}>
+              <div
+                className="card shadow-sm h-100 border-0 hover-shadow cursor-pointer"
+                onClick={() => navigate(tool.route)}
+                role="button"
+              >
+                <div className="card-body d-flex flex-column">
+                  <div className="mb-3">
+                    <i className={`bi ${tool.icon} fs-2 text-primary`}></i>
+                  </div>
+                  <h5 className="card-title fw-bold">{tool.title}</h5>
+                  <p className="card-text text-muted">{tool.description}</p>
+                  <div className="mt-auto text-end">
+                    <button className="btn btn-outline-primary btn-sm">
+                      바로가기 →
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="mb-4">
+        <h4 className="fw-semibold">컨텐츠 관리</h4>
+        <div className="row g-4">
+          {contentTools.map((tool, idx) => (
             <div className="col-md-6 col-lg-4" key={idx}>
               <div
                 className="card shadow-sm h-100 border-0 hover-shadow cursor-pointer"

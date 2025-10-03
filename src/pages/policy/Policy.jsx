@@ -140,7 +140,7 @@ const Policy = () => {
 
   return (<div className="container-fluid py-4">
     <div className="d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center mb-4 border-bottom pb-2 gap-2">
-      <h2 className="fw-bold mb-2 mb-md-0">🛡️ 정책 관리</h2>
+      <h2 className="fw-bold mb-2 mb-md-0">🛡️ 정책 설정</h2>
       <button
         className="btn btn-success"
         onClick={() => setShowRegisterModal(true)}
