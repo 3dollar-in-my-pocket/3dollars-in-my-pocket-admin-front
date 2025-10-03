@@ -51,7 +51,7 @@ const Layout = () => {
             <div className="mb-4">
               <h5 className="text-white-50 mb-3">서비스 관리</h5>
               <ul className="nav flex-column gap-2">
-              <li>
+                <li>
                   <Link
                     to="/manage/registration"
                     className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
@@ -63,20 +63,6 @@ const Layout = () => {
                     <span className="fw-medium">사장님 가입 신청 관리</span>
                   </Link>
                 </li>
-
-                <li>
-                  <Link
-                    to="/manage/advertisement"
-                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
-                      isActive("/manage/advertisement") ? "bg-primary text-white" : "text-white-50"
-                    }`}
-                    onClick={closeSidebar}
-                  >
-                    <i className="bi bi-bullseye fs-5"></i>
-                    <span className="fw-medium">광고 관리</span>
-                  </Link>
-                </li>
-
                 <li>
                   <Link
                     to="/manage/user-search"
@@ -90,7 +76,7 @@ const Layout = () => {
                   </Link>
                 </li>
 
-                 <li>
+                <li>
                   <Link
                     to="/manage/store-search"
                     className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
@@ -115,7 +101,26 @@ const Layout = () => {
                     <span className="fw-medium">투표 관리</span>
                   </Link>
                 </li>
+              </ul>
+            </div>
 
+
+            <div className="mb-4">
+              <h5 className="text-white-50 mb-3">컨텐츠 관리</h5>
+              <ul className="nav flex-column gap-2">
+                <li>
+                  <Link
+                    to="/manage/advertisement"
+                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
+                      isActive("/manage/advertisement") ? "bg-primary text-white" : "text-white-50"
+                    }`}
+                    onClick={closeSidebar}
+                  >
+                    <i className="bi bi-bullseye fs-5"></i>
+                    <span className="fw-medium">광고 관리</span>
+                  </Link>
+                </li>
+                <ul className="nav flex-column gap-2"></ul>
                 <li>
                   <Link
                     to="/manage/faq"
@@ -128,7 +133,12 @@ const Layout = () => {
                     <span className="fw-medium">FAQ 관리</span>
                   </Link>
                 </li>
+              </ul>
+            </div>
 
+            <div className="mb-4">
+              <h5 className="text-white-50 mb-3">운영 툴</h5>
+              <ul className="nav flex-column gap-2">
                 <li>
                   <Link
                     to="/manage/push-message"
@@ -141,12 +151,7 @@ const Layout = () => {
                     <span className="fw-medium">푸시 발송</span>
                   </Link>
                 </li>
-              </ul>
-            </div>
 
-            <div className="mb-4">
-              <h5 className="text-white-50 mb-3">운영 툴</h5>
-              <ul className="nav flex-column gap-2">
                 <li>
                   <Link
                     to="/manage/policy"
@@ -169,7 +174,7 @@ const Layout = () => {
                     onClick={closeSidebar}
                   >
                     <i className="bi bi-brush-fill fs-5"></i>
-                    <span className="fw-medium">캐시 운영 툴</span>
+                    <span className="fw-medium">캐시 툴</span>
                   </Link>
                 </li>
 
@@ -182,7 +187,7 @@ const Layout = () => {
                     onClick={closeSidebar}
                   >
                     <i className="bi bi-image-fill fs-5"></i>
-                    <span className="fw-medium">이미지 업로드 운영 툴</span>
+                    <span className="fw-medium">이미지 업로드 툴</span>
                   </Link>
                 </li>
               </ul>
@@ -245,7 +250,8 @@ const Layout = () => {
         )}
 
         <main className="main-content bg-light">
-          <div className="mobile-header d-md-none bg-white shadow-sm p-3 d-flex justify-content-between align-items-center">
+          <div
+            className="mobile-header d-md-none bg-white shadow-sm p-3 d-flex justify-content-between align-items-center">
             <button
               className="btn btn-outline-dark border-0"
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -272,7 +278,7 @@ const Layout = () => {
         pauseOnHover
         theme="colored"
         transition={Bounce}
-        style={{ zIndex: 9999 }}
+        style={{zIndex: 9999}}
       />
     </div>
   );

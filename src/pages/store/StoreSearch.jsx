@@ -125,7 +125,7 @@ const StoreSearch = () => {
   return (
     <div className="container-fluid px-2 px-md-4 py-3 py-md-4">
       <div className="d-flex justify-content-between align-items-center mb-3 mb-md-4 pb-2 border-bottom">
-        <h2 className="fw-bold fs-4 fs-md-2">가게 검색</h2>
+        <h2 className="fw-bold">가게 검색</h2>
       </div>
 
       {/* 단순화된 검색 폼 */}
