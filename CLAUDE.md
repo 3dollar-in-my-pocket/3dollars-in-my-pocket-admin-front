@@ -2,7 +2,7 @@
 
 이 문서는 Claude Code (claude.ai/code)가 이 저장소에서 코드를 다룰 때 참고할 가이드입니다.
 
-본 프로젝트는 **데스크톱과 모바일 사용자** 모두를 대상으로 하며, 반응형 디자인과 컴포넌트 재사용을 적극 권장합니다. 동일한 코드베이스로 다양한 기기 환경을 유연하게 지원할 수 있어야 합니다.
+본 프로젝트는 **TypeScript 기반**의 React 애플리케이션으로, **데스크톱과 모바일 사용자** 모두를 대상으로 하며, 반응형 디자인과 컴포넌트 재사용을 적극 권장합니다. 동일한 코드베이스로 다양한 기기 환경을 유연하게 지원할 수 있어야 합니다.
 
 ---
 
@@ -15,13 +15,16 @@
 ### 핵심 명령어
 
 - `yarn start` - 개발 서버 실행
-- `yarn build` - 프로덕션 빌드 생성
+- `yarn build` - 프로덕션 빌드 생성 (TypeScript 컴파일 포함)
 - `yarn test` - react-scripts 기반 테스트 실행
+- `yarn outdated` - 패키지 업데이트 상태 확인
+- `yarn upgrade` - 패키지 업데이트
 
 ### CI/CD
 
-- GitHub Actions에서 Node.js 16.x 사용
+- GitHub Actions에서 Node.js 22.x+ 사용 권장
 - CI 실행 시 `yarn install && yarn run build` 수행
+- TypeScript 컴파일 검증 포함
 
 ---
 
@@ -29,43 +32,46 @@
 
 ### 기술 스택
 
-- **프론트엔드 프레임워크**: React 18.3.1 + React Router DOM 6.11.0
-- **상태 관리**: Recoil 0.7.7 (`src/state/LoginStatus.js`)
-- **UI 프레임워크**: React Bootstrap 2.10.3 + Bootstrap 5.3.3 + Bootstrap Icons
-- **HTTP 클라이언트**: Axios 1.7.4 (커스텀 인터셉터 포함)
+- **언어**: TypeScript 5.9.3 (JavaScript에서 마이그레이션 완료)
+- **프론트엔드 프레임워크**: React 18.3.1 + React Router DOM 6.30.1
+- **상태 관리**: Recoil 0.7.7 (`src/state/LoginStatus.ts`)
+- **UI 프레임워크**: React Bootstrap 2.10.10 + Bootstrap 5.3.8 + Bootstrap Icons 1.13.1
+- **HTTP 클라이언트**: Axios 1.12.2 (커스텀 인터셉터 포함)
 - **알림 시스템**: React Toastify 11.0.5
 - **인증**: Google OAuth 연동
+- **환경 설정**: dotenv 17.2.3
 
 ### 디렉토리 구조
 
 ```
 src/
-├── api/           # API layer with service modules
-├── components/    # Reusable React components
+├── api/           # API layer with service modules (.ts)
+├── components/    # Reusable React components (.tsx)
 ├── constants/     # Application constants (Google auth config)
-├── pages/         # Page components organized by feature
-├── router/        # React Router configuration and route definitions
-├── service/       # Business logic services (LocalStorage)
-├── state/         # Recoil state atoms
-├── types/         # Type definitions
-└── utils/         # Utility functions
+├── pages/         # Page components organized by feature (.tsx)
+├── router/        # React Router configuration and route definitions (.ts/.tsx)
+├── service/       # Business logic services (LocalStorage) (.ts)
+├── state/         # Recoil state atoms (.ts)
+├── types/         # TypeScript type definitions (.ts)
+├── utils/         # Utility functions (.ts)
+└── hooks/         # Custom React hooks (.ts)
 ```
 
 ### 주요 아키텍처 패턴
 
 #### 라우팅 구조
 
-- `src/router/Router.js`에서 `createBrowserRouter` 사용
+- `src/router/Router.ts`에서 `createBrowserRouter` 사용
 - 라우트 그룹 분리:
-    - `manageRoutes.js` - `/manage/*` 관리 페이지
-    - `infoRoutes.js` - 정보 페이지
-    - `authRoutes.js` - 인증 관련 플로우
+    - `manageRoutes.ts` - `/manage/*` 관리 페이지
+    - `infoRoutes.ts` - 정보 페이지
+    - `authRoutes.ts` - 인증 관련 플로우
 - 관리 페이지는 `PrivateRouter`로 보호
 - 공통 레이아웃 컴포넌트로 일관된 UI 유지
 
 #### API 연동
 
-- 중앙 API 설정: `src/api/apiBase.js`
+- 중앙 API 설정: `src/api/apiBase.ts`
 - Axios 인스턴스에서 `baseURL` 환경변수 사용
 - 요청 인터셉터: LocalStorage에서 토큰 가져와 헤더에 추가
 - 응답 인터셉터: 공통 에러 처리 (한국어 메시지)
@@ -100,9 +106,18 @@ src/
 
 ## 코드 스타일
 
+### TypeScript
+
+- **파일 확장자**:
+  - React 컴포넌트: `.tsx`
+  - 일반 TypeScript: `.ts`
+- **타입 정의**: `src/types/` 디렉토리에 모듈별로 정리
+- **tsconfig.json**: React 개발에 최적화된 설정
+
+### 일반 규칙
+
 - EditorConfig: 2칸 들여쓰기, LF, UTF-8
 - 최대 줄 길이: 120자
-- JSX: `.jsx`, JS: `.js`
 - 사용자 메시지 및 에러: 한국어 사용
 
 ---
@@ -182,7 +197,6 @@ GET /api?cursor={{cursor}}&size=20
 
 ### UI/UX 가이드
 
-8. UI/UX 가이드
 - 버튼, 입력창, 모달 → 재사용 가능한 컴포넌트
 - 반응형 원칙
 - 로딩 상태 관리
