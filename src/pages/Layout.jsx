@@ -212,7 +212,7 @@ const Layout = () => {
             </div>
 
             <div className="mb-4">
-              <h5 className="text-white-50 mb-3">관리자 관리</h5>
+              <h5 className="text-white-50 mb-3">관리자</h5>
               <ul className="nav flex-column gap-2">
                 <li>
                   <Link
@@ -223,7 +223,7 @@ const Layout = () => {
                     onClick={closeSidebar}
                   >
                     <i className="bi bi-people-fill fs-5"></i>
-                    <span className="fw-medium">관리자 계정 관리</span>
+                    <span className="fw-medium">관리자 관리</span>
                   </Link>
                 </li>
               </ul>

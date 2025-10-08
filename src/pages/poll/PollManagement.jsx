@@ -205,8 +205,8 @@ const PollManagement = () => {
 
   return (
     <div className="container-fluid px-2 px-md-4 py-3 py-md-4">
-      <div className="d-flex justify-content-between align-items-center mb-3 mb-md-4 pb-2 border-bottom">
-        <h2 className="fw-bold fs-3 fs-md-2">투표 관리</h2>
+       <div className="d-flex justify-content-between align-items-center mb-3 mb-md-4 pb-2 border-bottom">
+        <h2 className="fw-bold">투표 관리</h2>
       </div>
 
       {/* 카테고리 선택 */}
