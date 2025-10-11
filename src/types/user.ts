@@ -209,6 +209,9 @@ export const validateUserSearch = (searchType: SearchType, searchQuery: string, 
     if (formattedUserIds.length === 0) {
       return '유저 ID를 입력해주세요.';
     }
+    if (formattedUserIds.length > 50) {
+      return '유저 ID는 최대 50개까지 조회 가능합니다.';
+    }
   }
 
   return null;
