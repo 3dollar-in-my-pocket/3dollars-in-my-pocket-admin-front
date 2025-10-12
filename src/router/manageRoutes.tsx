@@ -6,6 +6,8 @@ import Policy from "../pages/policy/Policy";
 import Push from "../pages/push/Push";
 import UserSearch from "../pages/user/UserSearch";
 import StoreSearch from "../pages/store/StoreSearch";
+import ReviewManagement from "../pages/review/ReviewManagement";
+import StoreMessageManagement from "../pages/storeMessage/StoreMessageManagement";
 import CacheTool from "../pages/tool/CacheTool";
 import FileUploadTool from "../pages/tool/FileUploadTool";
 import Admin from "../pages/admin/Admin";
@@ -48,6 +50,14 @@ const manageRoutes = {
       element: <PrivateRouter><StoreSearch /></PrivateRouter>
     },
     {
+      path: '/manage/review',
+      element: <PrivateRouter><ReviewManagement /></PrivateRouter>
+    },
+    {
+      path: '/manage/store-message',
+      element: <PrivateRouter><StoreMessageManagement /></PrivateRouter>
+    },
+    {
       path: '/manage/tool/cache',
       element: <PrivateRouter><CacheTool/></PrivateRouter>
     },
@@ -66,4 +76,4 @@ const manageRoutes = {
   ]
 };
 
-export default manageRoutes; 
+export default manageRoutes;
