@@ -64,13 +64,16 @@ const ContentInfoStep = ({formData, onChange}) => {
     setIsUploading(true);
     try {
       const response = await uploadApi.uploadImage('ADVERTISEMENT_IMAGE', file);
-      if (response.data && response.data.url) {
-        handleImageChange('url', response.data.url);
+
+      if (response.ok && response.data) {
+        handleImageChange('url', response.data);
         toast.success("이미지가 업로드되었습니다!");
       } else {
-        toast.error("이미지 업로드에 실패했습니다.");
+        const errorMsg = response?.message || "이미지 업로드에 실패했습니다.";
+        toast.error(errorMsg);
       }
     } catch (error) {
+      console.error('Upload error:', error);
       toast.error("이미지 업로드 중 오류가 발생했습니다.");
     } finally {
       setIsUploading(false);
@@ -259,7 +262,7 @@ const ContentInfoStep = ({formData, onChange}) => {
           <Form.Label>배경 색상</Form.Label>
           <Form.Control
             type="color"
-            value={content.backgroundColor}
+            value={content.backgroundColor || "#FFFFFF"}
             onChange={(e) => handleContentChange("backgroundColor", e.target.value)}
           />
         </Form.Group>

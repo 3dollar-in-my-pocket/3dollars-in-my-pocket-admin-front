@@ -22,7 +22,7 @@ const AdvertisementContentEditModal = ({show, onHide, ad, fetchAdvertisements}) 
         subTitleFontColor: ad.subTitleFontColor || "#969696",
         extraContent: ad.extraContent || "",
         extraContentFontColor: ad.extraContentFontColor || "#000000",
-        backgroundColor: ad.backgroundColor || "#FFFFFF",
+        backgroundColor: ad.backgroundColor && ad.backgroundColor.trim() !== "" ? ad.backgroundColor : "#FFFFFF",
         imageUrl: ad.imageUrl || "",
         imageWidth: ad.imageWidth || "",
         imageHeight: ad.imageHeight || "",
@@ -54,13 +54,16 @@ const AdvertisementContentEditModal = ({show, onHide, ad, fetchAdvertisements}) 
     setIsUploading(true);
     try {
       const response = await uploadApi.uploadImage('ADVERTISEMENT_IMAGE', file);
-      if (response.data && response.data.url) {
-        handleChange('imageUrl', response.data.url);
+
+      if (response.ok && response.data) {
+        handleChange('imageUrl', response.data);
         toast.success("이미지가 업로드되었습니다!");
       } else {
-        toast.error("이미지 업로드에 실패했습니다.");
+        const errorMsg = response?.message || "이미지 업로드에 실패했습니다.";
+        toast.error(errorMsg);
       }
     } catch (error) {
+      console.error('Upload error:', error);
       toast.error("이미지 업로드 중 오류가 발생했습니다.");
     } finally {
       setIsUploading(false);
