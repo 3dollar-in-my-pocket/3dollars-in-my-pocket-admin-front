@@ -33,11 +33,12 @@
 ### 기술 스택
 
 - **언어**: TypeScript 5.9.3 (JavaScript에서 마이그레이션 완료)
-- **프론트엔드 프레임워크**: React 18.3.1 + React Router DOM 6.30.1
+- **프론트엔드 프레임워크**: React 18.3.1 + React Router DOM 6.11.0
 - **상태 관리**: Recoil 0.7.7 (`src/state/LoginStatus.ts`)
-- **UI 프레임워크**: React Bootstrap 2.10.10 + Bootstrap 5.3.8 + Bootstrap Icons 1.13.1
-- **HTTP 클라이언트**: Axios 1.12.2 (커스텀 인터셉터 포함)
+- **UI 프레임워크**: React Bootstrap 2.10.3 + Bootstrap 5.3.3 + Bootstrap Icons 1.10.3
+- **HTTP 클라이언트**: Axios 1.7.4 (커스텀 인터셉터 포함)
 - **알림 시스템**: React Toastify 11.0.5
+- **유틸리티**: clsx 2.1.1, qs 6.14.0
 - **인증**: Google OAuth 연동
 - **환경 설정**: dotenv 17.2.3
 
@@ -45,29 +46,37 @@
 
 ```
 src/
-├── api/           # API layer with service modules (.ts)
-├── components/    # Reusable React components (.tsx)
-├── constants/     # Application constants (Google auth config)
-├── pages/         # Page components organized by feature (.tsx)
-├── router/        # React Router configuration and route definitions (.ts/.tsx)
-├── service/       # Business logic services (LocalStorage) (.ts)
-├── state/         # Recoil state atoms (.ts)
-├── types/         # TypeScript type definitions (.ts)
-├── utils/         # Utility functions (.ts)
-└── hooks/         # Custom React hooks (.ts)
+├── adapters/      # 데이터 변환 어댑터
+├── api/           # API 레이어 - 기능별 서비스 모듈 (.ts)
+│   ├── apiBase.ts        # Axios 인스턴스 + 인터셉터 설정
+├── components/    # 재사용 가능한 React 컴포넌트 (.tsx)
+├── constants/     # 애플리케이션 상수
+├── hooks/         # 커스텀 React 훅 (.ts)
+├── pages/         # 기능별 페이지 컴포넌트 (.tsx)
+├── router/        # React Router 설정 및 라우트 정의 (.ts/.tsx)
+│   ├── Router.tsx        # 메인 라우터 설정
+│   ├── PrivateRouter.tsx # 인증 라우트 가드
+│   ├── manageRoutes.tsx  # /manage/* 관리 페이지
+│   ├── authRoutes.tsx    # 인증 관련 라우트
+│   └── infoRoutes.tsx    # 정보 페이지 라우트
+├── service/       # 비즈니스 로직 서비스 (.ts)
+├── state/         # Recoil 상태 관리 (.ts)
+├── styles/        # 스타일 파일
+├── types/         # TypeScript 타입 정의 (.ts)
+├── utils/         # 유틸리티 함수 (.ts)
 ```
 
 ### 주요 아키텍처 패턴
 
 #### 라우팅 구조
 
-- `src/router/Router.ts`에서 `createBrowserRouter` 사용
+- `src/router/Router.tsx`에서 `createBrowserRouter` 사용
 - 라우트 그룹 분리:
-    - `manageRoutes.ts` - `/manage/*` 관리 페이지
-    - `infoRoutes.ts` - 정보 페이지
-    - `authRoutes.ts` - 인증 관련 플로우
+    - `manageRoutes.tsx` - `/manage/*` 관리 페이지
+    - `infoRoutes.tsx` - 정보 페이지
+    - `authRoutes.tsx` - 인증 관련 플로우
 - 관리 페이지는 `PrivateRouter`로 보호
-- 공통 레이아웃 컴포넌트로 일관된 UI 유지
+- 공통 레이아웃 컴포넌트(`Layout.tsx`)로 일관된 UI 유지
 
 #### API 연동
 
@@ -94,13 +103,18 @@ src/
 
 ## 주요 기능 영역
 
-- **광고 관리**: 다단계 폼 기반 광고 등록/수정
-- **유저 관리**: 유저 검색 및 상세 정보/메달 관리
-- **FAQ 관리**: FAQ 생성 및 편집
-- **정책 설정**: 정책 설정 툴
-- **푸시 알림**: 푸시 메시지 관리
-- **회원 관리**: 사용자 가입 관리
-- **관리자 도구**: 캐시 관리, 파일 업로드 등
+- **광고 관리** (`/manage/advertisement`): 다단계 폼 기반 광고 등록/수정
+- **유저 관리** (`/manage/user`): 유저 검색 및 상세 정보 조회, 리뷰/방문/신고 이력 관리
+- **스토어 관리** (`/manage/store`): 스토어 검색 및 상세 정보, 이미지/메시지/게시물/리뷰/방문/신고 이력 관리
+- **FAQ 관리** (`/manage/faq`): FAQ 생성 및 편집
+- **정책 관리** (`/manage/policy`): 정책 설정 및 수정
+- **푸시 알림** (`/manage/push`): 푸시 메시지 타겟팅 및 발송 관리
+- **투표 관리** (`/manage/poll`): 투표 생성 및 관리
+- **회원 가입 관리** (`/manage/registration`): 사용자 가입 요청 승인/거부
+- **관리자 관리** (`/manage/admin`): 관리자 계정 관리 및 등록
+- **관리 도구** (`/manage/tool/*`): 캐시 관리, 파일 업로드 등
+- **대시보드** (`/manage/dashboard`): 통계 및 현황 대시보드
+- **푸시 통계 정보** (`/info/push-stat`): 푸시 발송 통계
 
 ---
 
@@ -112,7 +126,11 @@ src/
   - React 컴포넌트: `.tsx`
   - 일반 TypeScript: `.ts`
 - **타입 정의**: `src/types/` 디렉토리에 모듈별로 정리
+  - `api.ts` - API 공통 타입 (CursorResponse 등)
+  - `common.ts` - 공통 타입
 - **tsconfig.json**: React 개발에 최적화된 설정
+  - `baseUrl: "src"` + path alias `@/*` 설정
+  - `strict: false`, `noImplicitAny: false` (점진적 타입 강화)
 
 ### 일반 규칙
 

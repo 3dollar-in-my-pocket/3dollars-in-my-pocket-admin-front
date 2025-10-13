@@ -9,48 +9,78 @@ export default {
     try {
       const params: any = {};
 
-
       // 이름으로 검색하는 경우
       if (searchRequest.type === 'name' && searchRequest.query) {
         params.name = searchRequest.query;
+
+        if (searchRequest.cursor) {
+          params.cursor = searchRequest.cursor;
+        }
+
+        const response = await axiosInstance({
+          method: 'GET',
+          url: '/v1/search/users',
+          params
+        });
+
+        // API 응답 구조에 맞게 변환
+        if (response.data.ok) {
+          const searchResponse = createUserSearchResponse({
+            users: response.data.data.contents.map(user => ({
+              userId: user.userId,
+              nickname: user.name,
+              socialType: user.socialType,
+              createdAt: user.createdAt
+            })) || [],
+            hasMore: response.data.data.cursor.hasMore || false,
+            nextCursor: response.data.data.cursor.nextCursor || null,
+            totalCount: response.data.data.contents.length || 0
+          });
+
+          return {
+            ok: response.data.ok,
+            data: searchResponse
+          };
+        } else {
+          throw new Error('API 응답 오류');
+        }
       }
 
       // 유저 ID로 검색하는 경우 (쉼표로 구분된 여러 ID 지원)
       if (searchRequest.type === 'userId' && searchRequest.userIds && searchRequest.userIds.length > 0) {
         params.userIds = searchRequest.userIds.join(',');
-      }
 
-      if (searchRequest.cursor) {
-        params.cursor = searchRequest.cursor;
-      }
-
-      const response = await axiosInstance({
-        method: 'GET',
-        url: '/v1/search/users',
-        params
-      });
-
-      // API 응답 구조에 맞게 변환
-      if (response.data.ok) {
-        const searchResponse = createUserSearchResponse({
-          users: response.data.data.contents.map(user => ({
-            userId: user.userId,
-            nickname: user.name,
-            socialType: user.socialType,
-            createdAt: user.createdAt
-          })) || [],
-          hasMore: response.data.data.cursor.hasMore || false,
-          nextCursor: response.data.data.cursor.nextCursor || null,
-          totalCount: response.data.data.contents.length || 0
+        const response = await axiosInstance({
+          method: 'GET',
+          url: '/v1/users',
+          params
         });
 
-        return {
-          ok: response.data.ok,
-          data: searchResponse
-        };
-      } else {
-        throw new Error('API 응답 오류');
+        // API 응답 구조에 맞게 변환 (커서 기반 페이지네이션 없음)
+        if (response.data.ok) {
+          const searchResponse = createUserSearchResponse({
+            users: response.data.data.contents.map(user => ({
+              userId: user.userId,
+              nickname: user.name,
+              socialType: user.socialType,
+              createdAt: user.createdAt,
+              updatedAt: user.updatedAt
+            })) || [],
+            hasMore: false, // ID 목록 조회는 페이지네이션 없음
+            nextCursor: null,
+            totalCount: response.data.data.contents.length || 0
+          });
+
+          return {
+            ok: response.data.ok,
+            data: searchResponse
+          };
+        } else {
+          throw new Error('API 응답 오류');
+        }
       }
+
+      throw new Error('검색 타입이 올바르지 않습니다.');
     } catch (error: any) {
       return error.response;
     }

@@ -91,6 +91,32 @@ const Layout = () => {
 
                 <li>
                   <Link
+                    to="/manage/review"
+                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
+                      isActive("/manage/review") ? "bg-primary text-white" : "text-white-50"
+                    }`}
+                    onClick={closeSidebar}
+                  >
+                    <i className="bi bi-chat-square-text fs-5"></i>
+                    <span className="fw-medium">리뷰 관리</span>
+                  </Link>
+                </li>
+
+                <li>
+                  <Link
+                    to="/manage/store-message"
+                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
+                      isActive("/manage/store-message") ? "bg-primary text-white" : "text-white-50"
+                    }`}
+                    onClick={closeSidebar}
+                  >
+                    <i className="bi bi-chat-left-text fs-5"></i>
+                    <span className="fw-medium">가게 메시지 관리</span>
+                  </Link>
+                </li>
+
+                <li>
+                  <Link
                     to="/manage/poll"
                     className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
                       isActive("/manage/poll") ? "bg-primary text-white" : "text-white-50"
