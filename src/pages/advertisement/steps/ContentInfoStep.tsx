@@ -1,8 +1,13 @@
-import React from "react";
-import {Col, Form, Row} from "react-bootstrap";
+import React, { useState } from "react";
+import {Button, Col, Form, Row} from "react-bootstrap";
+import {toast} from "react-toastify";
+import uploadApi from "../../../api/uploadApi";
+import AdPreview from "../../../components/advertisement/AdPreview";
+import { isFieldAvailable } from "../../../constants/advertisementSpecs";
 
 const ContentInfoStep = ({formData, onChange}) => {
   const content = formData.content;
+  const [isUploading, setIsUploading] = useState(false);
 
   const handleContentChange = (field, value) => {
     onChange((prev) => ({
@@ -40,20 +45,108 @@ const ContentInfoStep = ({formData, onChange}) => {
     }));
   };
 
-  const isImageAndLinkOnly = ["LOADING", "SPLASH", "STORE_MARKER", "MENU_CATEGORY_ICON"].includes(formData.position); // 타입 체크
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // 파일 크기 검증 (10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("파일 크기는 10MB 이하여야 합니다.");
+      return;
+    }
+
+    // 이미지 파일 타입 검증
+    if (!file.type.startsWith('image/')) {
+      toast.error("이미지 파일만 업로드 가능합니다.");
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const response = await uploadApi.uploadImage('ADVERTISEMENT_IMAGE', file);
+      if (response.data && response.data.url) {
+        handleImageChange('url', response.data.url);
+        toast.success("이미지가 업로드되었습니다!");
+      } else {
+        toast.error("이미지 업로드에 실패했습니다.");
+      }
+    } catch (error) {
+      toast.error("이미지 업로드 중 오류가 발생했습니다.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  // 구좌별 필드 표시 여부 확인
+  const showTitle = isFieldAvailable(formData.position, 'title');
+  const showSubTitle = isFieldAvailable(formData.position, 'subTitle');
+  const showExtraContent = isFieldAvailable(formData.position, 'extraContent');
+  const showBackgroundColor = isFieldAvailable(formData.position, 'backgroundColor');
+  const showLink = isFieldAvailable(formData.position, 'link');
 
   return (
     <>
       <h5 className="text-primary mb-3">2. 콘텐츠 정보</h5>
 
+      {/* 미리보기 섹션 */}
+      {formData.position && (
+        <div className="mb-4 p-3 bg-light rounded">
+          <h6 className="text-info mb-3">
+            <i className="bi bi-eye me-2"></i>미리보기
+          </h6>
+          <div className="bg-white rounded p-3">
+            <AdPreview
+              positionType={formData.position}
+              imageUrl={content.image.url}
+              title={content.title}
+              subTitle={content.subTitle}
+              extraContent={content.extraContent}
+              titleFontColor={content.titleFontColor}
+              subTitleFontColor={content.subTitleFontColor}
+              extraContentFontColor={content.extraContentFontColor}
+              backgroundColor={content.backgroundColor}
+            />
+          </div>
+        </div>
+      )}
+
       <Form.Group className="mb-3">
-        <Form.Label>광고 이미지 URL</Form.Label>
-        <Form.Control
-          type="text"
-          value={content.image.url}
-          onChange={(e) => handleImageChange("url", e.target.value)}
-          placeholder="ex) https://example.com/image.jpg"
-        />
+        <Form.Label>광고 이미지</Form.Label>
+        <div className="d-flex gap-2">
+          <Form.Control
+            type="text"
+            value={content.image.url}
+            onChange={(e) => handleImageChange("url", e.target.value)}
+            placeholder="이미지 URL 또는 업로드 버튼 사용"
+          />
+          <div className="position-relative">
+            <Button
+              variant="primary"
+              disabled={isUploading}
+              onClick={() => document.getElementById('image-upload-input').click()}
+            >
+              {isUploading ? (
+                <>
+                  <span className="spinner-border spinner-border-sm me-1" />
+                  업로드 중...
+                </>
+              ) : (
+                <>
+                  <i className="bi bi-upload me-1"></i>
+                  파일 선택
+                </>
+              )}
+            </Button>
+            <input
+              id="image-upload-input"
+              type="file"
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={handleImageUpload}
+            />
+          </div>
+        </div>
+        <small className="text-muted">이미지 URL을 직접 입력하거나 파일을 업로드하세요 (최대 10MB)</small>
       </Form.Group>
 
       {(
@@ -83,7 +176,7 @@ const ContentInfoStep = ({formData, onChange}) => {
         </Row>
       )}
 
-      {!isImageAndLinkOnly && (
+      {showTitle && (
         <Row className="mb-3">
           <Col md={6}>
             <Form.Group>
@@ -109,7 +202,7 @@ const ContentInfoStep = ({formData, onChange}) => {
         </Row>
       )}
 
-      {!isImageAndLinkOnly && (
+      {showSubTitle && (
         <Row className="mb-3">
           <Col md={6}>
             <Form.Group>
@@ -135,7 +228,7 @@ const ContentInfoStep = ({formData, onChange}) => {
         </Row>
       )}
 
-      {!isImageAndLinkOnly && (
+      {showExtraContent && (
         <Row className="mb-3">
           <Col md={6}>
             <Form.Group>
@@ -161,7 +254,7 @@ const ContentInfoStep = ({formData, onChange}) => {
         </Row>
       )}
 
-      {!isImageAndLinkOnly && (
+      {showBackgroundColor && (
         <Form.Group className="mb-3">
           <Form.Label>배경 색상</Form.Label>
           <Form.Control
@@ -172,38 +265,40 @@ const ContentInfoStep = ({formData, onChange}) => {
         </Form.Group>
       )}
 
-      <Row className="mb-3">
-        <Col md={6}>
-          <Form.Group>
-            <Form.Label>클릭 시 이동할 링크 유형</Form.Label>
-            <Form.Select
-              value={content.link.linkType}
-              onChange={(e) => handleLinkChange("linkType", e.target.value)}
-            >
-              <option value="">선택하세요</option>
-              <option value="APP_SCHEME">앱 딥링크</option>
-              <option value="WEB">웹 링크</option>
-            </Form.Select>
-          </Form.Group>
-        </Col>
-        {content.link.linkType && (
+      {showLink && (
+        <Row className="mb-3">
           <Col md={6}>
             <Form.Group>
-              <Form.Label>이동할 링크 주소</Form.Label>
-              <Form.Control
-                type="text"
-                value={content.link.linkUrl || ""}
-                onChange={(e) => handleLinkChange("linkUrl", e.target.value)}
-                placeholder={
-                  content.link.linkType === 'WEB'
-                    ? "https://example.com"
-                    : "/home"
-                }
-              />
+              <Form.Label>클릭 시 이동할 링크 유형</Form.Label>
+              <Form.Select
+                value={content.link.linkType}
+                onChange={(e) => handleLinkChange("linkType", e.target.value)}
+              >
+                <option value="">선택하세요</option>
+                <option value="APP_SCHEME">앱 딥링크</option>
+                <option value="WEB">웹 링크</option>
+              </Form.Select>
             </Form.Group>
           </Col>
-        )}
-      </Row>
+          {content.link.linkType && (
+            <Col md={6}>
+              <Form.Group>
+                <Form.Label>이동할 링크 주소</Form.Label>
+                <Form.Control
+                  type="text"
+                  value={content.link.linkUrl || ""}
+                  onChange={(e) => handleLinkChange("linkUrl", e.target.value)}
+                  placeholder={
+                    content.link.linkType === 'WEB'
+                      ? "https://example.com"
+                      : "/home"
+                  }
+                />
+              </Form.Group>
+            </Col>
+          )}
+        </Row>
+      )}
     </>
   );
 };

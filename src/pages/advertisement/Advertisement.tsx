@@ -350,9 +350,9 @@ const Advertisement = () => {
                       </div>
 
                       <div className="row g-2 mb-3">
-                        <div className="col-6">
+                        <div className="col-12">
                           <div className="bg-light rounded p-2 text-center">
-                            <small className="text-muted d-block" style={{fontSize: '0.7rem'}}>
+                            <small className="text-muted d-block mb-2" style={{fontSize: '0.7rem'}}>
                               <i className="bi bi-geo-alt me-1"></i>구좌
                             </small>
                             <span className="badge bg-secondary-subtle text-secondary" style={{fontSize: '0.7rem'}}>
@@ -360,14 +360,25 @@ const Advertisement = () => {
                             </span>
                           </div>
                         </div>
-                        <div className="col-6">
-                          <div className="bg-light rounded p-2 text-center">
-                            <small className="text-muted d-block" style={{fontSize: '0.7rem'}}>
-                              <i className="bi bi-phone me-1"></i>플랫폼
+                        <div className="col-12">
+                          <div className="bg-light rounded p-2">
+                            <small className="text-muted d-block mb-2 text-center" style={{fontSize: '0.7rem'}}>
+                              <i className="bi bi-phone me-1"></i>노출 플랫폼
                             </small>
-                            <span className="badge bg-info-subtle text-info" style={{fontSize: '0.7rem'}}>
-                              {getDescriptionFromKey(info.platformType, "platform")}
-                            </span>
+                            <div className="d-flex justify-content-center gap-2">
+                              <div className={`d-flex align-items-center gap-1 px-2 py-1 rounded ${info.platformType === 'ALL' || info.platformType === 'AOS' ? 'bg-success-subtle' : 'bg-secondary-subtle'}`}>
+                                <i className={`bi bi-android2 ${info.platformType === 'ALL' || info.platformType === 'AOS' ? 'text-success' : 'text-secondary'}`} style={{fontSize: '1rem'}}></i>
+                                <small className={`fw-semibold ${info.platformType === 'ALL' || info.platformType === 'AOS' ? 'text-success' : 'text-secondary'}`} style={{fontSize: '0.7rem'}}>
+                                  Android
+                                </small>
+                              </div>
+                              <div className={`d-flex align-items-center gap-1 px-2 py-1 rounded ${info.platformType === 'ALL' || info.platformType === 'IOS' ? 'bg-primary-subtle' : 'bg-secondary-subtle'}`}>
+                                <i className={`bi bi-apple ${info.platformType === 'ALL' || info.platformType === 'IOS' ? 'text-primary' : 'text-secondary'}`} style={{fontSize: '1rem'}}></i>
+                                <small className={`fw-semibold ${info.platformType === 'ALL' || info.platformType === 'IOS' ? 'text-primary' : 'text-secondary'}`} style={{fontSize: '0.7rem'}}>
+                                  iOS
+                                </small>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>

@@ -64,10 +64,10 @@ const AdvertisementEditModal = ({show, onHide, ad, positions, fetchAdvertisement
 
   return (
     <Modal show={show} onHide={onHide} size="xl" centered fullscreen="lg-down">
-      <Modal.Header closeButton className="border-0" style={{background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'}}>
+      <Modal.Header closeButton className="border-0" style={{background: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)'}}>
         <Modal.Title className="text-white d-flex align-items-center gap-2">
-          <i className="bi bi-pencil-square"></i>
-          광고 수정
+          <i className="bi bi-gear"></i>
+          광고 기본 정보 수정
         </Modal.Title>
       </Modal.Header>
       <Modal.Body className="p-0">
@@ -110,10 +110,18 @@ const AdvertisementEditModal = ({show, onHide, ad, positions, fetchAdvertisement
           {/* 수정 폼 섹션 */}
           <div className="bg-white p-4">
             <div className="d-flex align-items-center mb-4">
-              <div className="bg-warning-subtle rounded-circle p-2 me-3">
-                <i className="bi bi-gear text-warning fs-5"></i>
+              <div className="bg-success-subtle rounded-circle p-2 me-3">
+                <i className="bi bi-sliders text-success fs-5"></i>
               </div>
-              <h5 className="mb-0 text-warning fw-bold">수정 가능 항목</h5>
+              <h5 className="mb-0 text-success fw-bold">기본 설정 수정</h5>
+            </div>
+            <div className="alert alert-info d-flex align-items-center mb-4" role="alert">
+              <i className="bi bi-info-circle me-2 fs-5"></i>
+              <div>
+                <strong>기본 정보 수정 영역</strong>
+                <br/>
+                <small>캠페인 ID, 노출 일정, 플랫폼, 노출 순서 등 기본 설정을 변경할 수 있습니다. 광고의 이미지, 제목, 링크 등 컨텐츠를 수정하려면 "컨텐츠 수정" 버튼을 사용해주세요.</small>
+              </div>
             </div>
             <Form>
               <BasicInfoStep
