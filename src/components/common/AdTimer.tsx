@@ -41,22 +41,19 @@ const AdTimer = ({ startDateTime, endDateTime, className = "" }) => {
 
   return (
     <div className={`d-flex flex-column ${className}`}>
-      <div className="d-flex align-items-center justify-content-center gap-2 mb-1">
-        <span className={`badge ${status.badgeClass} d-flex align-items-center gap-1`} style={{ fontSize: '0.75rem' }}>
-          <span>{getTimerIcon()}</span>
-          {status.label}
-        </span>
-        {status.status !== 'ended' && (
-          <small className="text-muted" style={{ fontSize: '0.7rem' }}>
-            {status.status === 'scheduled' ? '시작까지' : '종료까지'}
-          </small>
-        )}
-      </div>
+      {status.status !== 'active' && (
+        <div className="d-flex align-items-center justify-content-center gap-2 mb-2">
+          <span className={`badge ${status.badgeClass} d-flex align-items-center gap-1`} style={{ fontSize: '0.75rem' }}>
+            <span>{getTimerIcon()}</span>
+            {status.label}
+          </span>
+        </div>
+      )}
       <div className="text-center">
         <div
-          className="fw-bold px-2 py-1 rounded"
+          className="fw-bold px-3 py-2 rounded"
           style={{
-            fontSize: '0.9rem',
+            fontSize: '0.85rem',
             color: status.status === 'ended' ? '#6c757d' : '#0d6efd',
             backgroundColor: status.status === 'ended' ? '#f8f9fa' : '#e7f3ff',
             border: `1px solid ${status.status === 'ended' ? '#dee2e6' : '#b6d7ff'}`

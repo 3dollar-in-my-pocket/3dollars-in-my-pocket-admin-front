@@ -37,9 +37,23 @@ export default {
   updateAd: async ({application, advertisementId, adData}: any) => {
     try {
       const response = await axiosInstance({
-        method: "PUT",
+        method: "PATCH",
         url: `/v1/application/${application}/advertisement/${advertisementId}`,
         data: adData,
+      });
+      return response.data;
+    } catch (error: any) {
+      return error.response;
+    }
+  },
+  updateAdContent: async ({application, advertisementId, contentData}: any) => {
+    try {
+      const response = await axiosInstance({
+        method: "PATCH",
+        url: `/v1/application/${application}/advertisement/${advertisementId}`,
+        data: {
+          content: contentData
+        },
       });
       return response.data;
     } catch (error: any) {
