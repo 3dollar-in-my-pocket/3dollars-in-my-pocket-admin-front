@@ -119,7 +119,7 @@ export const AD_POSITION_SPECS: Record<string, AdPositionSpec> = {
     excludedFields: ['extraContent', 'extraContentFontColor'],
     previewConfig: {
       containerWidth: 924,
-      containerHeight: 254,
+      containerHeight: 200,
       imageWidth: 200,
       imageHeight: 200,
       layout: 'category-banner'

@@ -1,5 +1,6 @@
 import React from 'react';
 import { getAdPositionSpec } from '../../constants/advertisementSpecs';
+import './AdPreview.css';
 
 interface AdPreviewProps {
   positionType: string;
@@ -35,7 +36,7 @@ const AdPreview: React.FC<AdPreviewProps> = ({
 
   if (!spec) {
     return (
-      <div className="text-center text-muted p-4">
+      <div className="ad-preview-error text-center text-muted p-4">
         <i className="bi bi-exclamation-circle fs-1 mb-2"></i>
         <div>구좌 정보를 찾을 수 없습니다</div>
       </div>
@@ -51,102 +52,93 @@ const AdPreview: React.FC<AdPreviewProps> = ({
   if (imageWidth && imageHeight) {
     const apiRatio = imageWidth / imageHeight;
 
-    // 카드 영역에 맞는 적정 크기 (300px 기준)
-    const targetSize = 300;
+    // 컨테이너 너비를 기준으로 최대 크기 계산 (여백 고려)
+    const maxContainerWidth = previewConfig.containerWidth || 320;
+    const maxImageWidth = Math.min(maxContainerWidth - 32, 300); // 여백 32px 고려
+    const targetSize = maxImageWidth;
 
     if (apiRatio > 1) {
       // 가로가 더 긴 이미지
-      displayWidth = targetSize;
-      displayHeight = targetSize / apiRatio;
+      displayWidth = Math.min(targetSize, maxContainerWidth - 32);
+      displayHeight = displayWidth / apiRatio;
     } else {
       // 세로가 더 긴 이미지 또는 정사각형
       displayHeight = targetSize;
       displayWidth = targetSize * apiRatio;
+
+      // 너비가 컨테이너를 초과하지 않도록 제한
+      if (displayWidth > maxContainerWidth - 32) {
+        displayWidth = maxContainerWidth - 32;
+        displayHeight = displayWidth / apiRatio;
+      }
     }
   }
+
+  // 컨테이너 너비도 반응형으로 제한
+  const maxContainerWidth = Math.min(previewConfig.containerWidth || 320, 360);
+  const maxContainerHeight = previewConfig.containerHeight;
 
   // 가게 카드뷰 레이아웃
   if (previewConfig.layout === 'card') {
     return (
       <div className="d-flex justify-content-center">
-        <div
-          className="position-relative rounded shadow-sm overflow-hidden"
-          style={{
-            width: `${previewConfig.containerWidth}px`,
-            height: `${previewConfig.containerHeight}px`,
-            backgroundColor: backgroundColor
-          }}
-        >
-          {/* 상단 광고 배지 */}
-          <div className="position-absolute top-0 start-0 m-2">
-            <span className="badge bg-danger" style={{ fontSize: '0.6rem', padding: '2px 6px' }}>
-              광고
-            </span>
-          </div>
-
-          {/* 이미지 영역 */}
+        <div className="ad-preview-device-frame">
           <div
-            className="d-flex align-items-center justify-content-center"
+            className="ad-preview-card"
             style={{
-              width: `${displayWidth}px`,
-              height: `${displayHeight}px`,
-              margin: '0 auto',
-              backgroundColor: '#f8f9fa'
+              width: '100%',
+              maxWidth: `${maxContainerWidth}px`,
+              minHeight: `${maxContainerHeight}px`,
+              backgroundColor: backgroundColor
             }}
           >
-            {imageUrl ? (
-              <img
-                src={imageUrl}
-                alt="광고 이미지"
-                className="img-fluid"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover'
-                }}
-                onError={(e: any) => {
-                  e.target.style.display = 'none';
-                  e.target.parentElement.innerHTML = '<div class="text-center text-danger"><i class="bi bi-exclamation-triangle" style="font-size: 2rem;"></i><div style="font-size: 0.6rem;">이미지 로드 실패</div></div>';
-                }}
-              />
-            ) : (
-              <div className="text-center text-muted">
-                <i className="bi bi-image" style={{ fontSize: '2rem' }}></i>
-                <div style={{ fontSize: '0.6rem' }}>이미지 없음</div>
-              </div>
-            )}
-          </div>
-
-          {/* 텍스트 영역 */}
-          <div className="p-3">
-            <div
-              className="fw-bold mb-1"
-              style={{
-                fontSize: '0.85rem',
-                color: titleFontColor,
-                lineHeight: '1.2',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                display: '-webkit-box',
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical'
-              }}
-            >
-              {title || '광고 제목을 입력하세요'}
+            {/* 상단 광고 배지 */}
+            <div className="ad-preview-badge">
+              <span className="badge bg-danger">광고</span>
             </div>
+
+            {/* 이미지 영역 */}
             <div
+              className="ad-preview-image-container"
               style={{
-                fontSize: '0.7rem',
-                color: subTitleFontColor,
-                lineHeight: '1.2',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                display: '-webkit-box',
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical'
+                width: '100%',
+                maxWidth: `${displayWidth}px`,
+                height: `${displayHeight}px`,
+                margin: '0 auto'
               }}
             >
-              {subTitle || '광고 부제목을 입력하세요'}
+              {imageUrl ? (
+                <img
+                  src={imageUrl}
+                  alt="광고 이미지"
+                  className="ad-preview-image"
+                  onError={(e: any) => {
+                    e.target.style.display = 'none';
+                    e.target.parentElement.innerHTML = '<div class="ad-preview-error-message"><i class="bi bi-exclamation-triangle"></i><div>이미지 로드 실패</div></div>';
+                  }}
+                />
+              ) : (
+                <div className="ad-preview-placeholder">
+                  <i className="bi bi-image"></i>
+                  <div>이미지 없음</div>
+                </div>
+              )}
+            </div>
+
+            {/* 텍스트 영역 */}
+            <div className="ad-preview-text-area">
+              <div
+                className="ad-preview-title"
+                style={{ color: titleFontColor }}
+              >
+                {title || '광고 제목을 입력하세요'}
+              </div>
+              <div
+                className="ad-preview-subtitle"
+                style={{ color: subTitleFontColor }}
+              >
+                {subTitle || '광고 부제목을 입력하세요'}
+              </div>
             </div>
           </div>
         </div>
@@ -158,79 +150,57 @@ const AdPreview: React.FC<AdPreviewProps> = ({
   if (previewConfig.layout === 'list') {
     return (
       <div className="d-flex justify-content-center">
-        <div
-          className="d-flex align-items-center rounded shadow-sm overflow-hidden p-2"
-          style={{
-            width: `${previewConfig.containerWidth}px`,
-            height: `${previewConfig.containerHeight}px`,
-            backgroundColor: backgroundColor
-          }}
-        >
-          {/* 이미지 영역 */}
+        <div className="ad-preview-device-frame">
           <div
-            className="flex-shrink-0 rounded overflow-hidden d-flex align-items-center justify-content-center"
+            className="ad-preview-list"
             style={{
-              width: `${displayWidth}px`,
-              height: `${displayHeight}px`,
-              backgroundColor: '#f8f9fa'
+              width: '100%',
+              maxWidth: `${maxContainerWidth}px`,
+              minHeight: `${maxContainerHeight}px`,
+              backgroundColor: backgroundColor
             }}
           >
-            {imageUrl ? (
-              <img
-                src={imageUrl}
-                alt="광고 이미지"
-                className="img-fluid"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover'
-                }}
-              />
-            ) : (
-              <div className="text-center text-muted">
-                <i className="bi bi-image" style={{ fontSize: '1.5rem' }}></i>
+            {/* 이미지 영역 */}
+            <div
+              className="ad-preview-list-image"
+              style={{
+                width: `${Math.min(displayWidth, 100)}px`,
+                height: `${Math.min(displayHeight, 100)}px`,
+                flexShrink: 0
+              }}
+            >
+              {imageUrl ? (
+                <img
+                  src={imageUrl}
+                  alt="광고 이미지"
+                  className="ad-preview-image"
+                />
+              ) : (
+                <div className="ad-preview-placeholder">
+                  <i className="bi bi-image"></i>
+                </div>
+              )}
+            </div>
+
+            {/* 텍스트 영역 */}
+            <div className="ad-preview-list-text">
+              {/* 광고 배지 */}
+              <div className="ad-preview-badge-small">
+                <span className="badge bg-danger">광고</span>
               </div>
-            )}
-          </div>
 
-          {/* 텍스트 영역 */}
-          <div className="flex-grow-1 ms-2 position-relative">
-            {/* 광고 배지 */}
-            <div className="position-absolute top-0 end-0">
-              <span className="badge bg-danger" style={{ fontSize: '0.5rem', padding: '1px 4px' }}>
-                광고
-              </span>
-            </div>
-
-            <div
-              className="fw-bold mb-1"
-              style={{
-                fontSize: '0.75rem',
-                color: titleFontColor,
-                lineHeight: '1.2',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                display: '-webkit-box',
-                WebkitLineClamp: 1,
-                WebkitBoxOrient: 'vertical',
-                paddingRight: '30px'
-              }}
-            >
-              {title || '광고 제목'}
-            </div>
-            <div
-              style={{
-                fontSize: '0.65rem',
-                color: subTitleFontColor,
-                lineHeight: '1.2',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                display: '-webkit-box',
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical'
-              }}
-            >
-              {subTitle || '광고 부제목'}
+              <div
+                className="ad-preview-list-title"
+                style={{ color: titleFontColor }}
+              >
+                {title || '광고 제목'}
+              </div>
+              <div
+                className="ad-preview-list-subtitle"
+                style={{ color: subTitleFontColor }}
+              >
+                {subTitle || '광고 부제목'}
+              </div>
             </div>
           </div>
         </div>
@@ -240,58 +210,48 @@ const AdPreview: React.FC<AdPreviewProps> = ({
 
   // 카테고리 아이콘 레이아웃
   if (previewConfig.layout === 'category-icon') {
+    const iconSize = Math.min(displayWidth, 80); // 아이콘 최대 크기 제한
     return (
       <div className="d-flex justify-content-center">
-        <div
-          className="text-center"
-          style={{
-            width: `${previewConfig.containerWidth}px`
-          }}
-        >
-          {/* 아이콘 이미지 */}
+        <div className="ad-preview-device-frame">
           <div
-            className="rounded d-flex align-items-center justify-content-center mx-auto mb-2"
+            className="ad-preview-category-icon"
             style={{
-              width: `${displayWidth}px`,
-              height: `${displayHeight}px`,
-              backgroundColor: '#f8f9fa',
-              overflow: 'hidden'
+              width: '100%',
+              maxWidth: `${Math.min(maxContainerWidth, 100)}px`
             }}
           >
-            {imageUrl ? (
-              <img
-                src={imageUrl}
-                alt="카테고리 아이콘"
-                className="img-fluid"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover'
-                }}
-                onError={(e: any) => {
-                  e.target.style.display = 'none';
-                  e.target.parentElement.innerHTML = '<div class="text-center text-danger"><i class="bi bi-exclamation-triangle" style="font-size: 2rem;"></i></div>';
-                }}
-              />
-            ) : (
-              <div className="text-center text-muted">
-                <i className="bi bi-image" style={{ fontSize: '2rem' }}></i>
-              </div>
-            )}
-          </div>
-          {/* 타이틀 */}
-          <div
-            className="fw-normal text-center"
-            style={{
-              fontSize: '0.7rem',
-              color: titleFontColor,
-              lineHeight: '1.2',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap'
-            }}
-          >
-            {title || '광고광고광고'}
+            {/* 아이콘 이미지 */}
+            <div
+              className="ad-preview-icon-image"
+              style={{
+                width: `${iconSize}px`,
+                height: `${iconSize}px`
+              }}
+            >
+              {imageUrl ? (
+                <img
+                  src={imageUrl}
+                  alt="카테고리 아이콘"
+                  className="ad-preview-image"
+                  onError={(e: any) => {
+                    e.target.style.display = 'none';
+                    e.target.parentElement.innerHTML = '<div class="ad-preview-error-message"><i class="bi bi-exclamation-triangle"></i></div>';
+                  }}
+                />
+              ) : (
+                <div className="ad-preview-placeholder">
+                  <i className="bi bi-image"></i>
+                </div>
+              )}
+            </div>
+            {/* 타이틀 */}
+            <div
+              className="ad-preview-icon-title"
+              style={{ color: titleFontColor }}
+            >
+              {title || '광고광고광고'}
+            </div>
           </div>
         </div>
       </div>
@@ -300,64 +260,58 @@ const AdPreview: React.FC<AdPreviewProps> = ({
 
   // 카테고리 배너 레이아웃
   if (previewConfig.layout === 'category-banner') {
+    const bannerImageWidth = Math.min(displayWidth, 280); // 배너 이미지 최대 크기 증가
+    const bannerImageHeight = Math.min(displayHeight, 280);
     return (
       <div className="d-flex justify-content-center">
-        <div
-          className="d-flex align-items-center rounded shadow-sm overflow-hidden p-3"
-          style={{
-            width: `${previewConfig.containerWidth}px`,
-            height: `${previewConfig.containerHeight}px`,
-            backgroundColor: backgroundColor || '#000000'
-          }}
-        >
-          {/* 텍스트 영역 (좌측) */}
-          <div className="flex-grow-1 me-3">
-            <div
-              className="fw-bold mb-2"
-              style={{
-                fontSize: '1.2rem',
-                color: titleFontColor,
-                lineHeight: '1.3'
-              }}
-            >
-              {title || '📢 광고문의 📢'}
-            </div>
-            <div
-              style={{
-                fontSize: '0.9rem',
-                color: subTitleFontColor,
-                lineHeight: '1.4'
-              }}
-            >
-              {subTitle || '여기에 광고를 하고 싶으시다면? 여기에 광고를 하고 싶으시다면?'}
-            </div>
-          </div>
-
-          {/* 이미지 영역 (우측) */}
+        <div className="ad-preview-device-frame">
           <div
-            className="flex-shrink-0 rounded overflow-hidden d-flex align-items-center justify-content-center"
+            className="ad-preview-banner"
             style={{
-              width: `${displayWidth}px`,
-              height: `${displayHeight}px`,
-              backgroundColor: '#f8f9fa'
+              width: '100%',
+              maxWidth: `${maxContainerWidth}px`,
+              minHeight: `${maxContainerHeight}px`,
+              backgroundColor: backgroundColor || '#000000'
             }}
           >
-            {imageUrl ? (
-              <img
-                src={imageUrl}
-                alt="배너 이미지"
-                className="img-fluid"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'contain'
-                }}
-              />
-            ) : (
-              <div className="text-center text-muted">
-                <i className="bi bi-image" style={{ fontSize: '3rem' }}></i>
+            {/* 이미지 영역 (상단) */}
+            <div
+              className="ad-preview-banner-image"
+              style={{
+                width: `${bannerImageWidth}px`,
+                height: `${bannerImageHeight}px`,
+                margin: '0 auto'
+              }}
+            >
+              {imageUrl ? (
+                <img
+                  src={imageUrl}
+                  alt="배너 이미지"
+                  className="ad-preview-image"
+                  style={{ objectFit: 'contain' }}
+                />
+              ) : (
+                <div className="ad-preview-placeholder">
+                  <i className="bi bi-image"></i>
+                </div>
+              )}
+            </div>
+
+            {/* 텍스트 영역 (하단) */}
+            <div className="ad-preview-banner-text">
+              <div
+                className="ad-preview-banner-title"
+                style={{ color: titleFontColor }}
+              >
+                {title || '📢 광고문의 📢'}
               </div>
-            )}
+              <div
+                className="ad-preview-banner-subtitle"
+                style={{ color: subTitleFontColor }}
+              >
+                {subTitle || '여기에 광고를 하고 싶으시다면? 여기에 광고를 하고 싶으시다면?'}
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -368,44 +322,40 @@ const AdPreview: React.FC<AdPreviewProps> = ({
   if (previewConfig.layout === 'image-only' || previewConfig.layout === 'splash') {
     return (
       <div className="d-flex justify-content-center">
-        <div
-          className="position-relative rounded shadow-sm overflow-hidden d-flex align-items-center justify-content-center"
-          style={{
-            width: `${displayWidth}px`,
-            height: `${displayHeight}px`,
-            backgroundColor: '#f8f9fa'
-          }}
-        >
-          {imageUrl ? (
-            <img
-              src={imageUrl}
-              alt="광고 이미지"
-              className="img-fluid"
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover'
-              }}
-              onError={(e: any) => {
-                e.target.style.display = 'none';
-                e.target.parentElement.innerHTML = '<div class="text-center text-danger"><i class="bi bi-exclamation-triangle" style="font-size: 3rem;"></i><div style="font-size: 0.8rem;">이미지 로드 실패</div></div>';
-              }}
-            />
-          ) : (
-            <div className="text-center text-muted">
-              <i className="bi bi-image" style={{ fontSize: '3rem' }}></i>
-              <div style={{ fontSize: '0.8rem' }}>이미지를 업로드하세요</div>
-            </div>
-          )}
+        <div className="ad-preview-device-frame">
+          <div
+            className="ad-preview-image-only"
+            style={{
+              width: '100%',
+              maxWidth: `${displayWidth}px`,
+              height: 'auto',
+              minHeight: `${displayHeight}px`
+            }}
+          >
+            {imageUrl ? (
+              <img
+                src={imageUrl}
+                alt="광고 이미지"
+                className="ad-preview-image"
+                onError={(e: any) => {
+                  e.target.style.display = 'none';
+                  e.target.parentElement.innerHTML = '<div class="ad-preview-error-message"><i class="bi bi-exclamation-triangle"></i><div>이미지 로드 실패</div></div>';
+                }}
+              />
+            ) : (
+              <div className="ad-preview-placeholder">
+                <i className="bi bi-image"></i>
+                <div>이미지를 업로드하세요</div>
+              </div>
+            )}
 
-          {/* 광고 배지 (좌상단) */}
-          {previewConfig.layout === 'splash' && (
-            <div className="position-absolute top-0 start-0 m-3">
-              <span className="badge bg-danger" style={{ fontSize: '0.7rem', padding: '4px 8px' }}>
-                광고
-              </span>
-            </div>
-          )}
+            {/* 광고 배지 (좌상단) */}
+            {previewConfig.layout === 'splash' && (
+              <div className="ad-preview-badge">
+                <span className="badge bg-danger">광고</span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     );
@@ -415,87 +365,65 @@ const AdPreview: React.FC<AdPreviewProps> = ({
   if (previewConfig.layout === 'marker-popup') {
     return (
       <div className="d-flex justify-content-center">
-        <div
-          className="rounded shadow-sm overflow-hidden"
-          style={{
-            width: `${previewConfig.containerWidth}px`,
-            backgroundColor: backgroundColor
-          }}
-        >
-          {/* 이미지 영역 */}
+        <div className="ad-preview-device-frame">
           <div
-            className="d-flex align-items-center justify-content-center"
+            className="ad-preview-popup"
             style={{
-              width: `${displayWidth}px`,
-              height: `${displayHeight}px`,
-              backgroundColor: '#f8f9fa'
+              width: '100%',
+              maxWidth: `${maxContainerWidth}px`,
+              backgroundColor: backgroundColor
             }}
           >
-            {imageUrl ? (
-              <img
-                src={imageUrl}
-                alt="팝업 이미지"
-                className="img-fluid"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover'
-                }}
-              />
-            ) : (
-              <div className="text-center text-muted">
-                <i className="bi bi-image" style={{ fontSize: '2.5rem' }}></i>
-                <div style={{ fontSize: '0.7rem' }}>이미지 없음</div>
-              </div>
-            )}
-          </div>
-
-          {/* 텍스트 영역 */}
-          <div className="p-3">
+            {/* 이미지 영역 */}
             <div
-              className="fw-bold mb-2"
+              className="ad-preview-image-container"
               style={{
-                fontSize: '0.9rem',
-                color: titleFontColor,
-                lineHeight: '1.3',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                display: '-webkit-box',
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical'
+                width: '100%',
+                maxWidth: `${displayWidth}px`,
+                height: `${displayHeight}px`,
+                margin: '0 auto'
               }}
             >
-              {title || '광고 제목을 입력하세요'}
-            </div>
-            <div
-              className="mb-3"
-              style={{
-                fontSize: '0.75rem',
-                color: subTitleFontColor,
-                lineHeight: '1.4',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                display: '-webkit-box',
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical'
-              }}
-            >
-              {subTitle || '광고 부제목을 입력하세요'}
+              {imageUrl ? (
+                <img
+                  src={imageUrl}
+                  alt="팝업 이미지"
+                  className="ad-preview-image"
+                />
+              ) : (
+                <div className="ad-preview-placeholder">
+                  <i className="bi bi-image"></i>
+                  <div>이미지 없음</div>
+                </div>
+              )}
             </div>
 
-            {/* 버튼 */}
-            <div className="d-flex justify-content-end">
+            {/* 텍스트 영역 */}
+            <div className="ad-preview-popup-text">
               <div
-                className="px-3 py-2 rounded"
-                style={{
-                  fontSize: '0.75rem',
-                  color: extraContentFontColor,
-                  backgroundColor: 'rgba(0, 0, 0, 0.05)',
-                  border: `1px solid ${extraContentFontColor}`,
-                  fontWeight: '500'
-                }}
+                className="ad-preview-popup-title"
+                style={{ color: titleFontColor }}
               >
-                {extraContent || '자세히 보기 >'}
+                {title || '광고 제목을 입력하세요'}
+              </div>
+              <div
+                className="ad-preview-popup-subtitle"
+                style={{ color: subTitleFontColor }}
+              >
+                {subTitle || '광고 부제목을 입력하세요'}
+              </div>
+
+              {/* 버튼 */}
+              <div className="ad-preview-popup-button-wrapper">
+                <div
+                  className="ad-preview-popup-button"
+                  style={{
+                    color: extraContentFontColor,
+                    borderColor: extraContentFontColor
+                  }}
+                >
+                  {extraContent || '자세히 보기 >'}
+                </div>
               </div>
             </div>
           </div>
@@ -508,87 +436,65 @@ const AdPreview: React.FC<AdPreviewProps> = ({
   if (previewConfig.layout === 'poll-card') {
     return (
       <div className="d-flex justify-content-center">
-        <div
-          className="rounded shadow-sm overflow-hidden"
-          style={{
-            width: `${previewConfig.containerWidth}px`,
-            backgroundColor: backgroundColor
-          }}
-        >
-          {/* 이미지 영역 */}
+        <div className="ad-preview-device-frame">
           <div
-            className="d-flex align-items-center justify-content-center"
+            className="ad-preview-poll-card"
             style={{
-              width: `${displayWidth}px`,
-              height: `${displayHeight}px`,
-              backgroundColor: '#f8f9fa'
+              width: '100%',
+              maxWidth: `${maxContainerWidth}px`,
+              backgroundColor: backgroundColor
             }}
           >
-            {imageUrl ? (
-              <img
-                src={imageUrl}
-                alt="투표 카드 이미지"
-                className="img-fluid"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover'
-                }}
-              />
-            ) : (
-              <div className="text-center text-muted">
-                <i className="bi bi-image" style={{ fontSize: '3rem' }}></i>
-                <div style={{ fontSize: '0.8rem' }}>이미지 없음</div>
-              </div>
-            )}
-          </div>
-
-          {/* 텍스트 영역 */}
-          <div className="p-3">
+            {/* 이미지 영역 */}
             <div
-              className="fw-bold mb-2"
+              className="ad-preview-image-container"
               style={{
-                fontSize: '1rem',
-                color: titleFontColor,
-                lineHeight: '1.3',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                display: '-webkit-box',
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical'
+                width: '100%',
+                maxWidth: `${displayWidth}px`,
+                height: `${displayHeight}px`,
+                margin: '0 auto'
               }}
             >
-              {title || '투표 광고 제목을 입력하세요'}
-            </div>
-            <div
-              className="mb-3"
-              style={{
-                fontSize: '0.85rem',
-                color: subTitleFontColor,
-                lineHeight: '1.4',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                display: '-webkit-box',
-                WebkitLineClamp: 3,
-                WebkitBoxOrient: 'vertical'
-              }}
-            >
-              {subTitle || '투표 광고 부제목을 입력하세요'}
+              {imageUrl ? (
+                <img
+                  src={imageUrl}
+                  alt="투표 카드 이미지"
+                  className="ad-preview-image"
+                />
+              ) : (
+                <div className="ad-preview-placeholder">
+                  <i className="bi bi-image"></i>
+                  <div>이미지 없음</div>
+                </div>
+              )}
             </div>
 
-            {/* 버튼 */}
-            <div className="d-grid">
+            {/* 텍스트 영역 */}
+            <div className="ad-preview-poll-text">
               <div
-                className="text-center px-3 py-2 rounded"
-                style={{
-                  fontSize: '0.85rem',
-                  color: extraContentFontColor,
-                  backgroundColor: 'rgba(0, 0, 0, 0.05)',
-                  border: `2px solid ${extraContentFontColor}`,
-                  fontWeight: '600'
-                }}
+                className="ad-preview-poll-title"
+                style={{ color: titleFontColor }}
               >
-                {extraContent || '자세히 보기 >'}
+                {title || '투표 광고 제목을 입력하세요'}
+              </div>
+              <div
+                className="ad-preview-poll-subtitle"
+                style={{ color: subTitleFontColor }}
+              >
+                {subTitle || '투표 광고 부제목을 입력하세요'}
+              </div>
+
+              {/* 버튼 */}
+              <div className="ad-preview-poll-button-wrapper">
+                <div
+                  className="ad-preview-poll-button"
+                  style={{
+                    color: extraContentFontColor,
+                    borderColor: extraContentFontColor
+                  }}
+                >
+                  {extraContent || '자세히 보기 >'}
+                </div>
               </div>
             </div>
           </div>
