@@ -124,7 +124,7 @@ const StoreMessageManagement = () => {
       <div className="d-flex justify-content-between align-items-center mb-3 mb-md-4 pb-2 border-bottom">
         <h2 className="fw-bold">
           <i className="bi bi-chat-left-text text-primary me-2"></i>
-          가게 메시지 관리
+          가게 메시지 발송 이력
         </h2>
         <button
           className="btn btn-outline-primary btn-sm rounded-pill px-3"
@@ -182,90 +182,88 @@ const StoreMessageManagement = () => {
             <p className="text-muted">아직 등록된 메시지가 없습니다.</p>
           </div>
         ) : (
-          <div className="row g-2">
+          <div className="row g-3">
             {messages.map((message) => (
-              <div key={message.messageId} className="col-12 col-md-6">
+              <div key={message.messageId} className="col-12 col-lg-6">
+                {/* iOS 푸시 알림 스타일 */}
                 <div
                   className="card border-0 shadow-sm h-100"
                   style={{
                     cursor: 'pointer',
                     transition: 'all 0.2s ease',
-                    background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)'
+                    background: 'rgba(255, 255, 255, 0.95)',
+                    backdropFilter: 'blur(20px)',
+                    borderRadius: '16px'
                   }}
                   onClick={() => handleMessageClick(message)}
                   onMouseEnter={(e: any) => {
                     e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.1)';
+                    e.currentTarget.style.boxShadow = '0 12px 30px rgba(0,0,0,0.15)';
                   }}
                   onMouseLeave={(e: any) => {
                     e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+                    e.currentTarget.style.boxShadow = '0 4px 15px rgba(0,0,0,0.08)';
                   }}
                 >
-                  <div className="card-body p-3">
-                    {/* 가게 정보 */}
-                    {message.store && (
-                      <div className="d-flex align-items-center gap-1 mb-2">
-                        <div
-                          className="d-flex align-items-center gap-1 clickable-author flex-grow-1"
-                          style={{
-                            cursor: 'pointer',
-                            padding: '2px 4px',
-                            borderRadius: '6px',
-                            transition: 'all 0.2s ease',
-                            backgroundColor: 'transparent'
-                          }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleStoreClick(message.store);
-                          }}
-                          onMouseEnter={(e: any) => {
-                            e.currentTarget.style.backgroundColor = 'rgba(25, 135, 84, 0.1)';
-                          }}
-                          onMouseLeave={(e: any) => {
-                            e.currentTarget.style.backgroundColor = 'transparent';
-                          }}
-                        >
-                          <div className="bg-success bg-opacity-10 rounded-circle p-1">
-                            <i className="bi bi-shop text-success" style={{ fontSize: '0.7rem' }}></i>
-                          </div>
-                          <span className="text-success fw-bold text-truncate" style={{ fontSize: '0.75rem' }}>
-                            {message.store.name}
-                          </span>
-                          <i className="bi bi-box-arrow-up-right text-success" style={{ fontSize: '0.6rem' }}></i>
-                        </div>
-
-                        {/* 가게 타입 - 작게 */}
-                        {message.store?.storeType && (
-                          <span className={`badge ${getStoreTypeBadgeClass(message.store.storeType as any)} text-white rounded-pill px-2 py-1`} style={{ fontSize: '0.6rem' }}>
-                            <i className={`bi ${getStoreTypeIcon(message.store.storeType as any)} me-1`}></i>
-                            {getStoreTypeDisplayName(message.store.storeType as any)}
-                          </span>
-                        )}
+                  <div className="card-body p-3 p-md-4">
+                    {/* 시간 */}
+                    <div className="d-flex align-items-center justify-content-end mb-3">
+                      <div className="text-muted" style={{ fontSize: '0.75rem' }}>
+                        {formatDateTime(message.createdAt).split(' ').slice(1).join(' ')}
                       </div>
-                    )}
+                    </div>
 
-                    {/* 메시지 내용 */}
+                    {/* 알림 제목 */}
+                    <div className="mb-2">
+                      <h6 className="fw-bold text-dark mb-0" style={{ fontSize: '1rem', lineHeight: '1.4' }}>
+                        {message.store?.name || '가게'}의 메시지가 도착했어요 📩
+                      </h6>
+                    </div>
+
+                    {/* 알림 내용 */}
                     {message.body && (
-                      <p className="text-dark mb-3" style={{
-                        lineHeight: '1.5',
-                        fontSize: '0.95rem',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        display: '-webkit-box',
-                        WebkitLineClamp: 4,
-                        WebkitBoxOrient: 'vertical',
-                        minHeight: '90px'
-                      }}>
+                      <p
+                        className="text-dark mb-0"
+                        style={{
+                          fontSize: '0.9rem',
+                          lineHeight: '1.5',
+                          opacity: 0.85,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          display: '-webkit-box',
+                          WebkitLineClamp: 3,
+                          WebkitBoxOrient: 'vertical'
+                        }}
+                      >
                         {message.body}
                       </p>
                     )}
 
-                    {/* 날짜 */}
-                    <div className="text-muted" style={{ fontSize: '0.75rem' }}>
-                      <i className="bi bi-clock me-1"></i>
-                      {formatDateTime(message.createdAt)}
-                    </div>
+                    {/* 가게 타입 배지 - 하단 */}
+                    {message.store?.storeType && (
+                      <div className="mt-3 pt-2 border-top">
+                        <div className="d-flex align-items-center gap-2">
+                          <span
+                            className={`badge ${getStoreTypeBadgeClass(message.store.storeType as any)} text-white rounded-pill px-2 py-1`}
+                            style={{ fontSize: '0.65rem' }}
+                          >
+                            <i className={`bi ${getStoreTypeIcon(message.store.storeType as any)} me-1`}></i>
+                            {getStoreTypeDisplayName(message.store.storeType as any)}
+                          </span>
+                          <div
+                            className="text-success"
+                            style={{ fontSize: '0.75rem', cursor: 'pointer' }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleStoreClick(message.store);
+                            }}
+                          >
+                            <i className="bi bi-shop me-1"></i>
+                            가게 정보 보기
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

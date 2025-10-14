@@ -98,7 +98,7 @@ const AdvertisementEditModal = ({show, onHide, ad, positions, fetchAdvertisement
                   </div>
                   <div className="col-6">
                     <div className="text-center p-2 bg-white rounded border">
-                      <small className="text-muted d-block">그룹 ID</small>
+                      <small className="text-muted d-block">캠페인</small>
                       <strong>{ad.groupId}</strong>
                     </div>
                   </div>

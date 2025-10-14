@@ -4,6 +4,8 @@ import { getAdPositionSpec } from '../../constants/advertisementSpecs';
 interface AdPreviewProps {
   positionType: string;
   imageUrl?: string;
+  imageWidth?: number;
+  imageHeight?: number;
   title?: string;
   subTitle?: string;
   extraContent?: string;
@@ -19,6 +21,8 @@ interface AdPreviewProps {
 const AdPreview: React.FC<AdPreviewProps> = ({
   positionType,
   imageUrl,
+  imageWidth,
+  imageHeight,
   title,
   subTitle,
   extraContent,
@@ -39,6 +43,27 @@ const AdPreview: React.FC<AdPreviewProps> = ({
   }
 
   const { previewConfig } = spec;
+
+  // API 응답의 imageWidth, imageHeight 비율 기반으로 표시 크기 계산
+  let displayWidth = previewConfig.imageWidth;
+  let displayHeight = previewConfig.imageHeight;
+
+  if (imageWidth && imageHeight) {
+    const apiRatio = imageWidth / imageHeight;
+
+    // 카드 영역에 맞는 적정 크기 (300px 기준)
+    const targetSize = 300;
+
+    if (apiRatio > 1) {
+      // 가로가 더 긴 이미지
+      displayWidth = targetSize;
+      displayHeight = targetSize / apiRatio;
+    } else {
+      // 세로가 더 긴 이미지 또는 정사각형
+      displayHeight = targetSize;
+      displayWidth = targetSize * apiRatio;
+    }
+  }
 
   // 가게 카드뷰 레이아웃
   if (previewConfig.layout === 'card') {
@@ -63,8 +88,8 @@ const AdPreview: React.FC<AdPreviewProps> = ({
           <div
             className="d-flex align-items-center justify-content-center"
             style={{
-              width: `${previewConfig.imageWidth}px`,
-              height: `${previewConfig.imageHeight}px`,
+              width: `${displayWidth}px`,
+              height: `${displayHeight}px`,
               margin: '0 auto',
               backgroundColor: '#f8f9fa'
             }}
@@ -75,9 +100,13 @@ const AdPreview: React.FC<AdPreviewProps> = ({
                 alt="광고 이미지"
                 className="img-fluid"
                 style={{
-                  maxWidth: '100%',
-                  maxHeight: '100%',
-                  objectFit: 'contain'
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover'
+                }}
+                onError={(e: any) => {
+                  e.target.style.display = 'none';
+                  e.target.parentElement.innerHTML = '<div class="text-center text-danger"><i class="bi bi-exclamation-triangle" style="font-size: 2rem;"></i><div style="font-size: 0.6rem;">이미지 로드 실패</div></div>';
                 }}
               />
             ) : (
@@ -141,8 +170,8 @@ const AdPreview: React.FC<AdPreviewProps> = ({
           <div
             className="flex-shrink-0 rounded overflow-hidden d-flex align-items-center justify-content-center"
             style={{
-              width: `${previewConfig.imageWidth}px`,
-              height: `${previewConfig.imageHeight}px`,
+              width: `${displayWidth}px`,
+              height: `${displayHeight}px`,
               backgroundColor: '#f8f9fa'
             }}
           >
@@ -223,8 +252,8 @@ const AdPreview: React.FC<AdPreviewProps> = ({
           <div
             className="rounded d-flex align-items-center justify-content-center mx-auto mb-2"
             style={{
-              width: `${previewConfig.imageWidth}px`,
-              height: `${previewConfig.imageHeight}px`,
+              width: `${displayWidth}px`,
+              height: `${displayHeight}px`,
               backgroundColor: '#f8f9fa',
               overflow: 'hidden'
             }}
@@ -235,9 +264,13 @@ const AdPreview: React.FC<AdPreviewProps> = ({
                 alt="카테고리 아이콘"
                 className="img-fluid"
                 style={{
-                  maxWidth: '100%',
-                  maxHeight: '100%',
-                  objectFit: 'contain'
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover'
+                }}
+                onError={(e: any) => {
+                  e.target.style.display = 'none';
+                  e.target.parentElement.innerHTML = '<div class="text-center text-danger"><i class="bi bi-exclamation-triangle" style="font-size: 2rem;"></i></div>';
                 }}
               />
             ) : (
@@ -304,8 +337,8 @@ const AdPreview: React.FC<AdPreviewProps> = ({
           <div
             className="flex-shrink-0 rounded overflow-hidden d-flex align-items-center justify-content-center"
             style={{
-              width: `${previewConfig.imageWidth}px`,
-              height: `${previewConfig.imageHeight}px`,
+              width: `${displayWidth}px`,
+              height: `${displayHeight}px`,
               backgroundColor: '#f8f9fa'
             }}
           >
@@ -338,8 +371,8 @@ const AdPreview: React.FC<AdPreviewProps> = ({
         <div
           className="position-relative rounded shadow-sm overflow-hidden d-flex align-items-center justify-content-center"
           style={{
-            width: `${previewConfig.containerWidth}px`,
-            height: `${previewConfig.containerHeight}px`,
+            width: `${displayWidth}px`,
+            height: `${displayHeight}px`,
             backgroundColor: '#f8f9fa'
           }}
         >
@@ -349,9 +382,13 @@ const AdPreview: React.FC<AdPreviewProps> = ({
               alt="광고 이미지"
               className="img-fluid"
               style={{
-                maxWidth: '100%',
-                maxHeight: '100%',
-                objectFit: previewConfig.layout === 'splash' ? 'cover' : 'contain'
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover'
+              }}
+              onError={(e: any) => {
+                e.target.style.display = 'none';
+                e.target.parentElement.innerHTML = '<div class="text-center text-danger"><i class="bi bi-exclamation-triangle" style="font-size: 3rem;"></i><div style="font-size: 0.8rem;">이미지 로드 실패</div></div>';
               }}
             />
           ) : (
@@ -389,8 +426,8 @@ const AdPreview: React.FC<AdPreviewProps> = ({
           <div
             className="d-flex align-items-center justify-content-center"
             style={{
-              width: '100%',
-              height: `${previewConfig.imageHeight}px`,
+              width: `${displayWidth}px`,
+              height: `${displayHeight}px`,
               backgroundColor: '#f8f9fa'
             }}
           >
@@ -482,8 +519,8 @@ const AdPreview: React.FC<AdPreviewProps> = ({
           <div
             className="d-flex align-items-center justify-content-center"
             style={{
-              width: '100%',
-              height: `${previewConfig.imageHeight}px`,
+              width: `${displayWidth}px`,
+              height: `${displayHeight}px`,
               backgroundColor: '#f8f9fa'
             }}
           >

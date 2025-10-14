@@ -58,20 +58,17 @@ const PushPreview = ({ title, body, path, pushType, imageUrl }) => {
           >
             {/* App Icon and Name */}
             <div className="d-flex align-items-center mb-2">
-              <div
+              <img
+                src="/favicon.ico"
+                alt="가슴속 3천원"
                 style={{
                   width: "24px",
                   height: "24px",
-                  backgroundColor: "#007AFF",
                   borderRadius: "6px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  marginRight: "8px"
+                  marginRight: "8px",
+                  objectFit: "cover"
                 }}
-              >
-                <span style={{color: "white", fontSize: "12px", fontWeight: "bold"}}>3</span>
-              </div>
+              />
               <span style={{color: "#fff", fontSize: "13px", fontWeight: "500"}}>
                 가슴속 3천원{styles.appNameSuffix}
               </span>

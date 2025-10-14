@@ -28,10 +28,10 @@ export const AD_POSITION_SPECS: Record<string, AdPositionSpec> = {
     optionalFields: ['imageWidth', 'imageHeight', 'titleFontColor', 'subTitleFontColor'],
     excludedFields: ['extraContent', 'extraContentFontColor'],
     previewConfig: {
-      containerWidth: 176,
-      containerHeight: 304,
-      imageWidth: 88,
-      imageHeight: 152,
+      containerWidth: 264,
+      containerHeight: 456,
+      imageWidth: 132,
+      imageHeight: 228,
       layout: 'card'
     }
   },
@@ -43,10 +43,10 @@ export const AD_POSITION_SPECS: Record<string, AdPositionSpec> = {
     optionalFields: ['imageWidth', 'imageHeight', 'titleFontColor', 'subTitleFontColor'],
     excludedFields: ['extraContent', 'extraContentFontColor'],
     previewConfig: {
-      containerWidth: 200,
-      containerHeight: 200,
-      imageWidth: 90,
-      imageHeight: 90,
+      containerWidth: 500,
+      containerHeight: 140,
+      imageWidth: 120,
+      imageHeight: 120,
       layout: 'list'
     }
   },
@@ -88,10 +88,10 @@ export const AD_POSITION_SPECS: Record<string, AdPositionSpec> = {
     optionalFields: ['imageWidth', 'imageHeight'],
     excludedFields: ['link', 'title', 'subTitle', 'titleFontColor', 'subTitleFontColor', 'extraContent', 'extraContentFontColor', 'backgroundColor'],
     previewConfig: {
-      containerWidth: 100,
-      containerHeight: 100,
-      imageWidth: 50,
-      imageHeight: 50,
+      containerWidth: 150,
+      containerHeight: 150,
+      imageWidth: 120,
+      imageHeight: 120,
       layout: 'image-only'
     }
   },
@@ -103,10 +103,10 @@ export const AD_POSITION_SPECS: Record<string, AdPositionSpec> = {
     optionalFields: ['imageWidth', 'imageHeight', 'titleFontColor'],
     excludedFields: ['subTitle', 'subTitleFontColor', 'extraContent', 'extraContentFontColor', 'backgroundColor'],
     previewConfig: {
-      containerWidth: 104,
-      containerHeight: 130,
-      imageWidth: 104,
-      imageHeight: 104,
+      containerWidth: 156,
+      containerHeight: 195,
+      imageWidth: 156,
+      imageHeight: 156,
       layout: 'category-icon'
     }
   },
@@ -148,10 +148,10 @@ export const AD_POSITION_SPECS: Record<string, AdPositionSpec> = {
     optionalFields: ['imageWidth', 'imageHeight', 'titleFontColor', 'subTitleFontColor', 'extraContentFontColor', 'backgroundColor'],
     excludedFields: [],
     previewConfig: {
-      containerWidth: 280,
-      containerHeight: 360,
-      imageWidth: 280,
-      imageHeight: 180,
+      containerWidth: 420,
+      containerHeight: 540,
+      imageWidth: 420,
+      imageHeight: 270,
       layout: 'marker-popup'
     }
   }

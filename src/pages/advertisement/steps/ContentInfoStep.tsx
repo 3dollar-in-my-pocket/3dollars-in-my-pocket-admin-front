@@ -127,6 +127,7 @@ const ContentInfoStep = ({formData, onChange}) => {
               variant="primary"
               disabled={isUploading}
               onClick={() => document.getElementById('image-upload-input').click()}
+              style={{ minWidth: '130px', whiteSpace: 'nowrap' }}
             >
               {isUploading ? (
                 <>
@@ -136,7 +137,7 @@ const ContentInfoStep = ({formData, onChange}) => {
               ) : (
                 <>
                   <i className="bi bi-upload me-1"></i>
-                  파일 선택
+                  파일 업로드
                 </>
               )}
             </Button>
