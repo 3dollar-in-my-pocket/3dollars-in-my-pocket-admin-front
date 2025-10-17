@@ -25,7 +25,7 @@ export default {
           url: `/v3/boss-registration/${id}/apply`,
         }
       );
-      return await response.data.data;
+      return await response.data;
     } catch (error: any) {
       return error.response;
     }

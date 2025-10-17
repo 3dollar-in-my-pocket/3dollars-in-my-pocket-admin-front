@@ -9,6 +9,7 @@ const RegistrationModal = ({show, onHide, registration}) => {
   const [selectedRejectReason, setSelectedRejectReason] = useState("");
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [showApproveModal, setShowApproveModal] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     enumApi.getEnum().then(response => {
@@ -25,15 +26,20 @@ const RegistrationModal = ({show, onHide, registration}) => {
   const {boss, store, createdAt} = registration;
 
   const handleApprove = async () => {
-    await registrationApi.approveRegistration({id: registration.registrationId})
-      .then(response => {
-        if (!response.ok) {
-          return
-        }
-        toast.info("가입 신청이 승인되었습니다.");
-        onHide();
-        setShowRejectModal(false);
-      });
+    setIsProcessing(true);
+    try {
+      const response = await registrationApi.approveRegistration({id: registration.registrationId});
+      console.log(response);
+
+      if (!response.ok) {
+        return;
+      }
+      toast.info("가입 신청이 승인되었습니다.");
+      setShowApproveModal(false);
+      onHide();
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleReject = () => {
@@ -46,17 +52,21 @@ const RegistrationModal = ({show, onHide, registration}) => {
       return;
     }
 
-    registrationApi.denyRegistration({
-      id: registration.registrationId,
-      rejectReason: selectedRejectReason,
-    }).then(response => {
+    setIsProcessing(true);
+    try {
+      const response = await registrationApi.denyRegistration({
+        id: registration.registrationId,
+        rejectReason: selectedRejectReason,
+      });
       if (!response.ok) {
-        return
+        return;
       }
       toast.info("가입 신청이 거절되었습니다.");
-      onHide();
       setShowRejectModal(false);
-    });
+      onHide();
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const confirmApprove = () => {
@@ -65,7 +75,6 @@ const RegistrationModal = ({show, onHide, registration}) => {
 
   const handleConfirmApprove = async () => {
     await handleApprove();
-    setShowApproveModal(false);
   };
 
   const formatDate = (dateStr) => new Date(dateStr).toLocaleString("ko-KR");
@@ -131,10 +140,21 @@ const RegistrationModal = ({show, onHide, registration}) => {
 
         <Modal.Footer>
           <div className="me-auto">
-            <Button variant="success" onClick={confirmApprove} className="me-2" size="lg">
+            <Button
+              variant="success"
+              onClick={confirmApprove}
+              className="me-2"
+              size="lg"
+              disabled={isProcessing}
+            >
               ✅ 승인
             </Button>
-            <Button variant="danger" onClick={handleReject} size="lg">
+            <Button
+              variant="danger"
+              onClick={handleReject}
+              size="lg"
+              disabled={isProcessing}
+            >
               ❌ 거절
             </Button>
           </div>
@@ -161,14 +181,19 @@ const RegistrationModal = ({show, onHide, registration}) => {
           </Form.Select>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowRejectModal(false)} size="lg">
+          <Button
+            variant="secondary"
+            onClick={() => setShowRejectModal(false)}
+            size="lg"
+            disabled={isProcessing}
+          >
             취소
           </Button>
           <Button
             variant="danger"
             onClick={handleConfirmReject}
             size="lg"
-            disabled={!selectedRejectReason}
+            disabled={!selectedRejectReason || isProcessing}
           >
             거절 확정
           </Button>
@@ -183,10 +208,20 @@ const RegistrationModal = ({show, onHide, registration}) => {
           <p>정말로 이 가입 신청을 승인하시겠습니까?</p>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowApproveModal(false)} size="lg">
+          <Button
+            variant="secondary"
+            onClick={() => setShowApproveModal(false)}
+            size="lg"
+            disabled={isProcessing}
+          >
             취소
           </Button>
-          <Button variant="success" onClick={handleConfirmApprove} size="lg">
+          <Button
+            variant="success"
+            onClick={handleConfirmApprove}
+            size="lg"
+            disabled={isProcessing}
+          >
             승인 확정
           </Button>
         </Modal.Footer>
