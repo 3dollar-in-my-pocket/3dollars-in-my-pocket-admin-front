@@ -175,7 +175,7 @@ const AdvertisementContentEditModal = ({show, onHide, ad, fetchAdvertisements}) 
                   </div>
                   <div className="col-6">
                     <div className="text-center p-2 bg-white rounded border">
-                      <small className="text-muted d-block">그룹 ID</small>
+                      <small className="text-muted d-block">캠페인</small>
                       <strong>{ad.groupId}</strong>
                     </div>
                   </div>
@@ -236,6 +236,7 @@ const AdvertisementContentEditModal = ({show, onHide, ad, fetchAdvertisements}) 
                       variant="primary"
                       disabled={isUploading}
                       onClick={() => document.getElementById('content-edit-image-upload').click()}
+                      style={{ minWidth: '130px', whiteSpace: 'nowrap' }}
                     >
                       {isUploading ? (
                         <>
@@ -245,7 +246,7 @@ const AdvertisementContentEditModal = ({show, onHide, ad, fetchAdvertisements}) 
                       ) : (
                         <>
                           <i className="bi bi-upload me-1"></i>
-                          파일 선택
+                          파일 업로드
                         </>
                       )}
                     </Button>

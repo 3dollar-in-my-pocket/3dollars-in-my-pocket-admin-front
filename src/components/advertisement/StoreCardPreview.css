@@ -1,0 +1,309 @@
+/* 가게 카드 미리보기 컴포넌트 스타일 */
+
+/* 기본 애니메이션 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -468px 0;
+  }
+  100% {
+    background-position: 468px 0;
+  }
+}
+
+/* 디바이스 프레임 */
+.store-card-preview-device-frame {
+  position: relative;
+  animation: fadeIn 0.4s ease-out;
+  max-width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+/* 가게 카드 */
+.store-card-preview-card {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  background-color: #ffffff;
+  transition: all 0.3s ease;
+  width: 180px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-sizing: border-box;
+  margin: 0 auto;
+}
+
+.store-card-preview-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+/* 이미지 컨테이너 */
+.store-card-preview-image-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  overflow: hidden;
+  position: relative;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.store-card-preview-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+  display: block;
+}
+
+.store-card-preview-image:hover {
+  transform: scale(1.05);
+}
+
+/* 플레이스홀더 */
+.store-card-preview-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #94a3b8;
+  text-align: center;
+  padding: 16px;
+  width: 100%;
+  height: 100%;
+  animation: shimmer 2s infinite linear;
+  background: linear-gradient(
+    to right,
+    #f8f9fa 0%,
+    #e9ecef 20%,
+    #f8f9fa 40%,
+    #f8f9fa 100%
+  );
+  background-size: 800px 104px;
+}
+
+.store-card-preview-placeholder i {
+  font-size: 2.5rem;
+}
+
+.store-card-preview-placeholder div {
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+
+/* 에러 메시지 */
+.store-card-preview-error-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: #dc3545;
+  text-align: center;
+  width: 100%;
+  height: 100%;
+  padding: 16px;
+}
+
+.store-card-preview-error-message i {
+  font-size: 2rem;
+}
+
+.store-card-preview-error-message div {
+  font-size: 0.6rem;
+}
+
+/* 가게 정보 영역 */
+.store-card-preview-info {
+  padding: 12px;
+}
+
+/* 카테고리 */
+.store-card-preview-category {
+  font-size: 0.65rem;
+  color: #6b7280;
+  font-weight: 500;
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 가게 이름 */
+.store-card-preview-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1f2937;
+  line-height: 1.3;
+  margin-bottom: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  min-height: 2.4em;
+}
+
+/* 평점 영역 */
+.store-card-preview-rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+}
+
+.store-card-preview-star {
+  color: #fbbf24;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+}
+
+.store-card-preview-rating-value {
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.store-card-preview-review-count {
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+/* 모바일 최적화 */
+@media (max-width: 768px) {
+  .store-card-preview-device-frame {
+    max-width: 100%;
+  }
+
+  .store-card-preview-card {
+    width: 160px;
+  }
+
+  .store-card-preview-image-container {
+    width: 140px !important;
+    height: 140px !important;
+  }
+
+  .store-card-preview-info {
+    padding: 10px;
+  }
+
+  .store-card-preview-name {
+    font-size: 0.85rem;
+  }
+
+  .store-card-preview-category {
+    font-size: 0.6rem;
+  }
+
+  .store-card-preview-rating {
+    font-size: 0.7rem;
+  }
+
+  .store-card-preview-star {
+    font-size: 0.75rem;
+  }
+}
+
+/* 작은 모바일 디바이스 */
+@media (max-width: 480px) {
+  .store-card-preview-card {
+    width: 140px;
+  }
+
+  .store-card-preview-image-container {
+    width: 120px !important;
+    height: 120px !important;
+  }
+
+  .store-card-preview-info {
+    padding: 8px;
+  }
+
+  .store-card-preview-name {
+    font-size: 0.8rem;
+    min-height: 2.2em;
+  }
+
+  .store-card-preview-category {
+    font-size: 0.55rem;
+  }
+
+  .store-card-preview-rating {
+    font-size: 0.65rem;
+  }
+
+  .store-card-preview-placeholder i {
+    font-size: 2rem;
+  }
+
+  .store-card-preview-placeholder div {
+    font-size: 0.65rem;
+  }
+}
+
+/* 다크모드 지원 (선택사항) */
+@media (prefers-color-scheme: dark) {
+  .store-card-preview-card {
+    background-color: #1f2937;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  .store-card-preview-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  }
+
+  .store-card-preview-name {
+    color: #f9fafb;
+  }
+
+  .store-card-preview-category {
+    color: #9ca3af;
+  }
+
+  .store-card-preview-rating-value {
+    color: #f9fafb;
+  }
+
+  .store-card-preview-placeholder {
+    color: #94a3b8;
+    background: linear-gradient(
+      to right,
+      #1e293b 0%,
+      #334155 20%,
+      #1e293b 40%,
+      #1e293b 100%
+    );
+  }
+
+  .store-card-preview-image-container {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  }
+}
+
+/* 프린트 최적화 */
+@media print {
+  .store-card-preview-device-frame {
+    border: none;
+  }
+
+  .store-card-preview-card {
+    box-shadow: none;
+    border: 1px solid #e5e7eb;
+  }
+}

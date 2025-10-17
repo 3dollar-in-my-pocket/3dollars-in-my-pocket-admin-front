@@ -8,6 +8,7 @@ import cacheToolApi from "../../api/cacheToolApi";
 import {toast} from "react-toastify";
 import Loading from "../../components/common/Loading";
 import AdTimer from "../../components/common/AdTimer";
+import AdPreview from "../../components/advertisement/AdPreview";
 
 const Advertisement = () => {
   const [advertisementList, setAdvertisementList] = useState([]);
@@ -91,15 +92,46 @@ const Advertisement = () => {
     }
   };
 
+  // 구좌별 미리보기 스케일 - 모든 구좌 동일하게 적용
+  const getPreviewScale = (positionType) => {
+    return 1; // imageWidth, imageHeight 비율 기반으로 이미 계산되므로 스케일 1로 통일
+  };
+
   return (
     <div className="container-fluid py-4">
       <style>{`
-        @media (min-width: 768px) {
-          .ad-image-responsive {
-            height: 200px !important;
+        /* 광고 미리보기 컨테이너 */
+        .ad-preview-container {
+          min-height: 250px;
+          max-height: 600px;
+        }
+
+        .ad-preview-wrapper {
+          max-width: 100%;
+          max-height: 100%;
+        }
+
+        /* 모바일 환경 */
+        @media (max-width: 767px) {
+          .ad-preview-container {
+            min-height: 200px;
+            max-height: 500px;
           }
-          .ad-placeholder-responsive {
-            height: 200px !important;
+        }
+
+        /* 태블릿 이상 */
+        @media (min-width: 768px) {
+          .ad-preview-container {
+            min-height: 280px;
+            max-height: 580px;
+          }
+        }
+
+        /* 데스크탑 */
+        @media (min-width: 1200px) {
+          .ad-preview-container {
+            min-height: 300px;
+            max-height: 600px;
           }
         }
       `}</style>
@@ -273,7 +305,7 @@ const Advertisement = () => {
                             {info.advertisementId}
                           </span>
                           <small className="text-muted">
-                            Group: {info.groupId || '-'}
+                            캠페인: {info.groupId || '-'}
                           </small>
                         </div>
                         <button
@@ -290,53 +322,51 @@ const Advertisement = () => {
                         </button>
                       </div>
 
-                    {/* 광고 이미지 */}
-                    {info.imageUrl && (
-                      <div className="mb-2 mb-md-3 position-relative">
-                        <img
-                          src={info.imageUrl}
-                          alt={info.title}
-                          className="img-fluid rounded ad-image-responsive"
-                          style={{
-                            width: '100%',
-                            height: '140px',
-                            objectFit: 'contain',
-                            border: '1px solid #e9ecef',
-                            backgroundColor: '#f8f9fa',
-                            ...(info.imageWidth && info.imageHeight && {
-                              aspectRatio: `${info.imageWidth} / ${info.imageHeight}`
-                            })
-                          }}
-                          onError={(e: any) => {
-                            e.target.style.display = 'none';
-                            e.target.nextElementSibling.style.display = 'flex';
-                          }}
-                        />
-                        <div
-                          className="d-none position-absolute top-0 start-0 w-100 h-100 align-items-center justify-content-center bg-light rounded border ad-placeholder-responsive"
-                        >
-                          <div className="text-center text-muted">
-                            <i className="bi bi-image fs-1 mb-2"></i>
-                            <div style={{fontSize: '0.75rem'}}>이미지를 불러올 수 없습니다</div>
-                          </div>
+                    {/* 광고 미리보기 */}
+                    <div
+                      className="mb-2 mb-md-3 bg-light rounded border d-flex align-items-start justify-content-center position-relative ad-preview-container"
+                      style={{
+                        overflow: 'auto',
+                        padding: '1rem'
+                      }}
+                    >
+                      <div
+                        className="ad-preview-wrapper"
+                        style={{
+                          display: 'flex',
+                          alignItems: 'flex-start',
+                          justifyContent: 'center',
+                          maxWidth: '100%',
+                          width: '100%'
+                        }}
+                      >
+                        <div style={{
+                          transform: `scale(${getPreviewScale(info.positionType)})`,
+                          transformOrigin: 'top center',
+                          maxWidth: '100%'
+                        }}>
+                          <AdPreview
+                            positionType={info.positionType}
+                            imageUrl={info.imageUrl}
+                            imageWidth={info.imageWidth}
+                            imageHeight={info.imageHeight}
+                            title={info.title}
+                            subTitle={info.subTitle}
+                            extraContent={info.extraContent}
+                            titleFontColor={info.titleFontColor}
+                            subTitleFontColor={info.subTitleFontColor}
+                            extraContentFontColor={info.extraContentFontColor}
+                            backgroundColor={info.backgroundColor}
+                          />
                         </div>
                       </div>
-                    )}
-
-                    {/* 이미지가 없는 경우 플레이스홀더 */}
-                    {!info.imageUrl && (
-                      <div className="mb-2 mb-md-3">
-                        <div
-                          className="d-flex align-items-center justify-content-center bg-light rounded border ad-placeholder-responsive"
-                          style={{ height: '140px' }}
-                        >
-                          <div className="text-center text-muted">
-                            <i className="bi bi-image fs-2 mb-2"></i>
-                            <div style={{fontSize: '0.75rem'}}>이미지 없음</div>
-                          </div>
-                        </div>
+                      {/* 구좌 타입 표시 */}
+                      <div className="position-absolute top-0 end-0 m-2">
+                        <span className="badge bg-secondary" style={{ fontSize: '0.6rem', opacity: 0.7 }}>
+                          {getDescriptionFromKey(info.positionType, "position")}
+                        </span>
                       </div>
-                    )}
+                    </div>
 
                       <div className="mb-3">
                         <h6 className="card-title mb-1 fw-bold" style={{fontSize: '1.1rem', lineHeight: '1.3', color: '#2c3e50'}}>
@@ -366,18 +396,22 @@ const Advertisement = () => {
                               <i className="bi bi-phone me-1"></i>노출 플랫폼
                             </small>
                             <div className="d-flex justify-content-center gap-2">
-                              <div className={`d-flex align-items-center gap-1 px-2 py-1 rounded ${info.platformType === 'ALL' || info.platformType === 'AOS' ? 'bg-success-subtle' : 'bg-secondary-subtle'}`}>
-                                <i className={`bi bi-android2 ${info.platformType === 'ALL' || info.platformType === 'AOS' ? 'text-success' : 'text-secondary'}`} style={{fontSize: '1rem'}}></i>
-                                <small className={`fw-semibold ${info.platformType === 'ALL' || info.platformType === 'AOS' ? 'text-success' : 'text-secondary'}`} style={{fontSize: '0.7rem'}}>
-                                  Android
-                                </small>
-                              </div>
-                              <div className={`d-flex align-items-center gap-1 px-2 py-1 rounded ${info.platformType === 'ALL' || info.platformType === 'IOS' ? 'bg-primary-subtle' : 'bg-secondary-subtle'}`}>
-                                <i className={`bi bi-apple ${info.platformType === 'ALL' || info.platformType === 'IOS' ? 'text-primary' : 'text-secondary'}`} style={{fontSize: '1rem'}}></i>
-                                <small className={`fw-semibold ${info.platformType === 'ALL' || info.platformType === 'IOS' ? 'text-primary' : 'text-secondary'}`} style={{fontSize: '0.7rem'}}>
-                                  iOS
-                                </small>
-                              </div>
+                              {(info.platformType === 'ALL' || info.platformType === 'AOS') && (
+                                <div className="d-flex align-items-center gap-1 px-2 py-1 rounded bg-success-subtle">
+                                  <i className="bi bi-android2 text-success" style={{fontSize: '1rem'}}></i>
+                                  <small className="fw-semibold text-success" style={{fontSize: '0.7rem'}}>
+                                    Android
+                                  </small>
+                                </div>
+                              )}
+                              {(info.platformType === 'ALL' || info.platformType === 'IOS') && (
+                                <div className="d-flex align-items-center gap-1 px-2 py-1 rounded bg-primary-subtle">
+                                  <i className="bi bi-apple text-primary" style={{fontSize: '1rem'}}></i>
+                                  <small className="fw-semibold text-primary" style={{fontSize: '0.7rem'}}>
+                                    iOS
+                                  </small>
+                                </div>
+                              )}
                             </div>
                           </div>
                         </div>

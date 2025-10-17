@@ -30,7 +30,7 @@ const BasicInfoStep = ({
               <Form.Group>
                 <Form.Label className="fw-semibold">
                   <i className="bi bi-hash me-1"></i>
-                  캠페인 ID (Group Id) <span className="text-danger">*</span>
+                  캠페인 ID <span className="text-danger">*</span>
                 </Form.Label>
                 <Form.Control
                   name="groupId"
@@ -115,20 +115,62 @@ const BasicInfoStep = ({
                   <i className="bi bi-phone me-1"></i>
                   노출 대상 플랫폼 <span className="text-danger">*</span>
                 </Form.Label>
-                <Form.Select
-                  name="platform"
-                  value={formData.platform || ""}
-                  onChange={handleChange}
-                  disabled={disablePlatform}
-                  className="form-select-lg"
-                  style={{borderRadius: '8px'}}
-                >
-                  {platforms.map((plat) => (
-                    <option key={plat.key} value={plat.key}>
-                      {plat.description}
-                    </option>
-                  ))}
-                </Form.Select>
+                <div className="d-flex gap-2 flex-wrap">
+                  <button
+                    type="button"
+                    className={`btn flex-fill ${formData.platform === 'ALL' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                    onClick={() => !disablePlatform && onChange('platform', 'ALL')}
+                    disabled={disablePlatform}
+                    style={{
+                      minHeight: '60px',
+                      borderRadius: '8px',
+                      transition: 'all 0.3s ease',
+                    }}
+                  >
+                    <div className="d-flex flex-column align-items-center gap-1">
+                      <div className="d-flex gap-2">
+                        <i className="bi bi-android2" style={{fontSize: '1.2rem'}}></i>
+                        <i className="bi bi-apple" style={{fontSize: '1.2rem'}}></i>
+                      </div>
+                      <span className="fw-semibold">전체 플랫폼</span>
+                      <small style={{fontSize: '0.7rem'}}>ALL</small>
+                    </div>
+                  </button>
+                  <button
+                    type="button"
+                    className={`btn flex-fill ${formData.platform === 'AOS' ? 'btn-success' : 'btn-outline-secondary'}`}
+                    onClick={() => !disablePlatform && onChange('platform', 'AOS')}
+                    disabled={disablePlatform}
+                    style={{
+                      minHeight: '60px',
+                      borderRadius: '8px',
+                      transition: 'all 0.3s ease',
+                    }}
+                  >
+                    <div className="d-flex flex-column align-items-center gap-1">
+                      <i className="bi bi-android2" style={{fontSize: '1.5rem'}}></i>
+                      <span className="fw-semibold">안드로이드</span>
+                      <small style={{fontSize: '0.7rem'}}>AOS</small>
+                    </div>
+                  </button>
+                  <button
+                    type="button"
+                    className={`btn flex-fill ${formData.platform === 'IOS' ? 'btn-info' : 'btn-outline-secondary'}`}
+                    onClick={() => !disablePlatform && onChange('platform', 'IOS')}
+                    disabled={disablePlatform}
+                    style={{
+                      minHeight: '60px',
+                      borderRadius: '8px',
+                      transition: 'all 0.3s ease',
+                    }}
+                  >
+                    <div className="d-flex flex-column align-items-center gap-1">
+                      <i className="bi bi-apple" style={{fontSize: '1.5rem'}}></i>
+                      <span className="fw-semibold">iOS</span>
+                      <small style={{fontSize: '0.7rem'}}>IOS</small>
+                    </div>
+                  </button>
+                </div>
                 <Form.Text className="text-muted">
                   광고가 노출될 플랫폼을 선택하세요
                 </Form.Text>
@@ -212,7 +254,7 @@ const BasicInfoStep = ({
               style={{borderRadius: '8px'}}
             >
               <option value="RANDOM">🎲 랜덤 노출 - 무작위 순서로 노출</option>
-              <option value="PINNED">📌 최상단 고정 - 지정한 순서로 노출</option>
+              <option value="PINNED">📌 특정 순서 고정 - 지정한 순서로 노출</option>
             </Form.Select>
             <Form.Text className="text-muted">
               동일 구좌에 여러 광고가 있을 때의 노출 방식입니다

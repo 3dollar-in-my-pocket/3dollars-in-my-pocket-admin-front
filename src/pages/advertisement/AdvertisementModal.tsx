@@ -71,77 +71,106 @@ const AdvertisementModal = ({
         <Modal.Body className="p-0" style={{backgroundColor: '#f8f9fa'}}>
           {/* 상태 및 타이머 섹션 */}
           <div className="bg-white border-bottom px-4 py-3">
-            <div className="row align-items-center">
-              <div className="col-12 col-lg-4 text-center mb-3 mb-lg-0">
-                <AdTimer
-                  startDateTime={ad.startDateTime}
-                  endDateTime={ad.endDateTime}
-                  className=""
-                />
+            <div className="row g-3">
+              {/* 상태 타이머 */}
+              <div className="col-12">
+                <div className="bg-light rounded p-3">
+                  <AdTimer
+                    startDateTime={ad.startDateTime}
+                    endDateTime={ad.endDateTime}
+                    className="text-center"
+                  />
+                </div>
               </div>
-              <div className="col-12 col-lg-8">
+
+              {/* 기본 정보 */}
+              <div className="col-12">
                 <div className="row g-2">
-                  <div className="col-6">
-                    <div className="text-center p-2 bg-light rounded">
-                      <small className="text-muted d-block mb-1" style={{fontSize: '0.7rem'}}>그룹 ID</small>
-                      <strong className="text-primary" style={{fontSize: '0.85rem'}}>{ad.groupId}</strong>
+                  <div className="col-6 col-md-3">
+                    <div className="text-center p-3 bg-light rounded border">
+                      <small className="text-muted d-block mb-2" style={{fontSize: '0.7rem'}}>
+                        <i className="bi bi-hash me-1"></i>광고 ID
+                      </small>
+                      <strong className="text-primary" style={{fontSize: '0.9rem'}}>{ad.advertisementId}</strong>
                     </div>
                   </div>
-                  <div className="col-6">
-                    <div className="text-center p-2 bg-light rounded">
-                      <small className="text-muted d-block mb-1" style={{fontSize: '0.7rem'}}>구좌</small>
-                      <strong style={{fontSize: '0.85rem'}}>{getDescriptionFromKey(ad.positionType, "position")}</strong>
+                  <div className="col-6 col-md-3">
+                    <div className="text-center p-3 bg-light rounded border">
+                      <small className="text-muted d-block mb-2" style={{fontSize: '0.7rem'}}>
+                        <i className="bi bi-collection me-1"></i>캠페인
+                      </small>
+                      <strong className="text-primary" style={{fontSize: '0.9rem'}}>{ad.groupId}</strong>
                     </div>
                   </div>
-                  <div className="col-6">
-                    <div className="text-center p-2 bg-light rounded">
-                      <small className="text-muted d-block mb-1" style={{fontSize: '0.7rem'}}>정렬</small>
-                      <strong style={{fontSize: '0.85rem'}}>
+                  <div className="col-6 col-md-3">
+                    <div className="text-center p-3 bg-light rounded border">
+                      <small className="text-muted d-block mb-2" style={{fontSize: '0.7rem'}}>
+                        <i className="bi bi-geo-alt me-1"></i>구좌
+                      </small>
+                      <strong style={{fontSize: '0.9rem'}}>{getDescriptionFromKey(ad.positionType, "position")}</strong>
+                    </div>
+                  </div>
+                  <div className="col-6 col-md-3">
+                    <div className="text-center p-3 bg-light rounded border">
+                      <small className="text-muted d-block mb-2" style={{fontSize: '0.7rem'}}>
+                        <i className="bi bi-sort-numeric-down me-1"></i>정렬
+                      </small>
+                      <strong style={{fontSize: '0.9rem'}}>
                         {ad.orderType === "PINNED"
                           ? `고정(${ad.sortNumber ?? "미정"})`
                           : "랜덤"}
                       </strong>
                     </div>
                   </div>
-                  <div className="col-6">
-                    <div className="p-2 bg-light rounded">
-                      <small className="text-muted d-block mb-2 text-center" style={{fontSize: '0.7rem'}}>
-                        <i className="bi bi-phone me-1"></i>노출 플랫폼
-                      </small>
-                      <div className="d-flex justify-content-center gap-2">
-                        <div className={`d-flex align-items-center gap-1 px-2 py-1 rounded ${ad.platformType === 'ALL' || ad.platformType === 'AOS' ? 'bg-success-subtle' : 'bg-secondary-subtle'}`}>
-                          <i className={`bi bi-android2 ${ad.platformType === 'ALL' || ad.platformType === 'AOS' ? 'text-success' : 'text-secondary'}`} style={{fontSize: '1rem'}}></i>
-                          <small className={`fw-semibold ${ad.platformType === 'ALL' || ad.platformType === 'AOS' ? 'text-success' : 'text-secondary'}`} style={{fontSize: '0.7rem'}}>
-                            AOS
-                          </small>
-                        </div>
-                        <div className={`d-flex align-items-center gap-1 px-2 py-1 rounded ${ad.platformType === 'ALL' || ad.platformType === 'IOS' ? 'bg-primary-subtle' : 'bg-secondary-subtle'}`}>
-                          <i className={`bi bi-apple ${ad.platformType === 'ALL' || ad.platformType === 'IOS' ? 'text-primary' : 'text-secondary'}`} style={{fontSize: '1rem'}}></i>
-                          <small className={`fw-semibold ${ad.platformType === 'ALL' || ad.platformType === 'IOS' ? 'text-primary' : 'text-secondary'}`} style={{fontSize: '0.7rem'}}>
-                            iOS
-                          </small>
-                        </div>
+                </div>
+              </div>
+
+              {/* 플랫폼 정보 */}
+              <div className="col-12">
+                <div className="p-3 bg-light rounded border">
+                  <small className="text-muted d-block mb-3 text-center fw-semibold" style={{fontSize: '0.75rem'}}>
+                    <i className="bi bi-phone me-1"></i>노출 플랫폼
+                  </small>
+                  <div className="d-flex justify-content-center gap-3">
+                    {(ad.platformType === 'ALL' || ad.platformType === 'AOS') && (
+                      <div className="d-flex align-items-center gap-2 px-3 py-2 rounded bg-success-subtle border border-success">
+                        <i className="bi bi-android2 text-success" style={{fontSize: '1.2rem'}}></i>
+                        <small className="fw-semibold text-success" style={{fontSize: '0.85rem'}}>
+                          Android
+                        </small>
                       </div>
-                    </div>
+                    )}
+                    {(ad.platformType === 'ALL' || ad.platformType === 'IOS') && (
+                      <div className="d-flex align-items-center gap-2 px-3 py-2 rounded bg-primary-subtle border border-primary">
+                        <i className="bi bi-apple text-primary" style={{fontSize: '1.2rem'}}></i>
+                        <small className="fw-semibold text-primary" style={{fontSize: '0.85rem'}}>
+                          iOS
+                        </small>
+                      </div>
+                    )}
                   </div>
                 </div>
-                <div className="row g-2 mt-2">
+              </div>
+
+              {/* 일정 정보 */}
+              <div className="col-12">
+                <div className="row g-2">
                   <div className="col-6">
-                    <div className="text-center p-2 bg-success-subtle rounded">
-                      <small className="text-success d-block" style={{fontSize: '0.7rem'}}>
-                        <BiCalendar className="me-1"/>시작일
+                    <div className="text-center p-3 bg-success-subtle rounded border border-success">
+                      <small className="text-success d-block mb-2 fw-semibold" style={{fontSize: '0.75rem'}}>
+                        <BiCalendar className="me-1"/>시작일시
                       </small>
-                      <strong className="text-success" style={{fontSize: '0.8rem'}}>
+                      <strong className="text-success d-block" style={{fontSize: '0.85rem'}}>
                         {formatDateTime(ad.startDateTime)}
                       </strong>
                     </div>
                   </div>
                   <div className="col-6">
-                    <div className="text-center p-2 bg-danger-subtle rounded">
-                      <small className="text-danger d-block" style={{fontSize: '0.7rem'}}>
-                        <BiCalendar className="me-1"/>종료일
+                    <div className="text-center p-3 bg-danger-subtle rounded border border-danger">
+                      <small className="text-danger d-block mb-2 fw-semibold" style={{fontSize: '0.75rem'}}>
+                        <BiCalendar className="me-1"/>종료일시
                       </small>
-                      <strong className="text-danger" style={{fontSize: '0.8rem'}}>
+                      <strong className="text-danger d-block" style={{fontSize: '0.85rem'}}>
                         {formatDateTime(ad.endDateTime)}
                       </strong>
                     </div>
