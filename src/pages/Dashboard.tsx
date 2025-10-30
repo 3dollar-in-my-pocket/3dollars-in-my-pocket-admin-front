@@ -43,6 +43,12 @@ const Dashboard = () => {
       icon: "bi-question-circle-fill",
       route: "/manage/faq"
     },
+    {
+      title: "메달 관리",
+      description: "앱에서 사용되는 메달 정보를 조회할 수 있습니다.",
+      icon: "bi-award-fill",
+      route: "/manage/medal"
+    },
   ];
 
   const toolTools = [

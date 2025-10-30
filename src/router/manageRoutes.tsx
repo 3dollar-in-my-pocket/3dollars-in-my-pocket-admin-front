@@ -13,6 +13,7 @@ import FileUploadTool from "../pages/tool/FileUploadTool";
 import RandomNameTool from "../pages/tool/RandomNameTool";
 import Admin from "../pages/admin/Admin";
 import PollManagement from "../pages/poll/PollManagement";
+import MedalManagement from "../pages/medal/MedalManagement";
 import PrivateRouter from "./PrivateRouter";
 
 const manageRoutes = {
@@ -33,6 +34,10 @@ const manageRoutes = {
     {
       path: '/manage/faq',
       element: <PrivateRouter><FaqManagement/></PrivateRouter>
+    },
+    {
+      path: '/manage/medal',
+      element: <PrivateRouter><MedalManagement/></PrivateRouter>
     },
     {
       path: '/manage/policy',

@@ -17,7 +17,6 @@ const RandomNameTool = () => {
 
       if (response.ok) {
         setRandomNames(response.data.contents);
-        toast.success('유저 랜덤 이름 풀을 조회했습니다');
       } else {
         setErrorMessage(response.data?.message || '데이터 조회에 실패했습니다.');
       }

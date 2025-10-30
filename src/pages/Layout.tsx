@@ -159,6 +159,18 @@ const Layout = () => {
                     <span className="fw-medium">FAQ 관리</span>
                   </Link>
                 </li>
+                <li>
+                  <Link
+                    to="/manage/medal"
+                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
+                      isActive("/manage/medal") ? "bg-primary text-white" : "text-white-50"
+                    }`}
+                    onClick={closeSidebar}
+                  >
+                    <i className="bi bi-award-fill fs-5"></i>
+                    <span className="fw-medium">메달 관리</span>
+                  </Link>
+                </li>
               </ul>
             </div>
 
