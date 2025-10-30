@@ -216,3 +216,19 @@ export const validateUserSearch = (searchType: SearchType, searchQuery: string, 
 
   return null;
 };
+
+// Random name types
+export interface RandomNameItem {
+  prefix: string;
+  sequence: number;
+}
+
+export interface RandomNameResponse {
+  contents: RandomNameItem[];
+}
+
+export const createRandomNameResponse = ({
+  contents = []
+}: Partial<RandomNameResponse>): RandomNameResponse => ({
+  contents
+});

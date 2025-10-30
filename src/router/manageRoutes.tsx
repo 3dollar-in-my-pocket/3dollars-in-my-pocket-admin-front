@@ -10,6 +10,7 @@ import ReviewManagement from "../pages/review/ReviewManagement";
 import StoreMessageManagement from "../pages/storeMessage/StoreMessageManagement";
 import CacheTool from "../pages/tool/CacheTool";
 import FileUploadTool from "../pages/tool/FileUploadTool";
+import RandomNameTool from "../pages/tool/RandomNameTool";
 import Admin from "../pages/admin/Admin";
 import PollManagement from "../pages/poll/PollManagement";
 import PrivateRouter from "./PrivateRouter";
@@ -64,6 +65,10 @@ const manageRoutes = {
     {
       path: '/manage/tool/upload',
       element: <PrivateRouter><FileUploadTool/></PrivateRouter>
+    },
+    {
+      path: '/manage/tool/random-name',
+      element: <PrivateRouter><RandomNameTool/></PrivateRouter>
     },
     {
       path: '/manage/admin',
