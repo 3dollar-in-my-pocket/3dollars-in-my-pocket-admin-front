@@ -3,6 +3,7 @@ import registrationApi from "../../api/registrationApi";
 import {useEffect, useState} from "react";
 import enumApi from "../../api/enumApi";
 import {toast} from "react-toastify";
+import { getOsPlatformDisplayName, getOsPlatformBadgeClass, getOsPlatformIcon } from "../../types/registration";
 
 const RegistrationModal = ({show, onHide, registration}) => {
   const [rejectReasons, setRejectReasons] = useState([]);
@@ -23,7 +24,7 @@ const RegistrationModal = ({show, onHide, registration}) => {
 
   if (!registration) return null;
 
-  const {boss, store, createdAt} = registration;
+  const {boss, store, context, createdAt} = registration;
 
   const handleApprove = async () => {
     setIsProcessing(true);
@@ -131,9 +132,28 @@ const RegistrationModal = ({show, onHide, registration}) => {
           <section>
             <h6 className="fw-bold border-bottom pb-2 mb-3">🕒 신청 정보</h6>
             <ul className="list-unstyled ps-1">
-              <li>
+              <li className="mb-2">
                 <strong>신청일:</strong> {formatDate(createdAt)}
               </li>
+              {context && (
+                <>
+                  <li className="mb-2">
+                    <strong>OS:</strong>{' '}
+                    <span className={`badge ${getOsPlatformBadgeClass(context.osPlatform)} ms-2`}>
+                      <i className={`bi ${getOsPlatformIcon(context.osPlatform)} me-1`}></i>
+                      {getOsPlatformDisplayName(context.osPlatform)}
+                    </span>
+                  </li>
+                  {context.appVersion && (
+                    <li>
+                      <strong>앱 버전:</strong>{' '}
+                      <span className="badge bg-dark ms-2" style={{fontFamily: 'monospace'}}>
+                        v{context.appVersion}
+                      </span>
+                    </li>
+                  )}
+                </>
+              )}
             </ul>
           </section>
         </Modal.Body>
