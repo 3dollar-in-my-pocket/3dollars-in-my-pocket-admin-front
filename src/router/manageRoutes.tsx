@@ -10,8 +10,10 @@ import ReviewManagement from "../pages/review/ReviewManagement";
 import StoreMessageManagement from "../pages/storeMessage/StoreMessageManagement";
 import CacheTool from "../pages/tool/CacheTool";
 import FileUploadTool from "../pages/tool/FileUploadTool";
+import RandomNameTool from "../pages/tool/RandomNameTool";
 import Admin from "../pages/admin/Admin";
 import PollManagement from "../pages/poll/PollManagement";
+import MedalManagement from "../pages/medal/MedalManagement";
 import PrivateRouter from "./PrivateRouter";
 
 const manageRoutes = {
@@ -32,6 +34,10 @@ const manageRoutes = {
     {
       path: '/manage/faq',
       element: <PrivateRouter><FaqManagement/></PrivateRouter>
+    },
+    {
+      path: '/manage/medal',
+      element: <PrivateRouter><MedalManagement/></PrivateRouter>
     },
     {
       path: '/manage/policy',
@@ -64,6 +70,10 @@ const manageRoutes = {
     {
       path: '/manage/tool/upload',
       element: <PrivateRouter><FileUploadTool/></PrivateRouter>
+    },
+    {
+      path: '/manage/tool/random-name',
+      element: <PrivateRouter><RandomNameTool/></PrivateRouter>
     },
     {
       path: '/manage/admin',

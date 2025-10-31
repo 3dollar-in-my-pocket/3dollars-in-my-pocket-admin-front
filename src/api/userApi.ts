@@ -1,5 +1,5 @@
 import axiosInstance from './apiBase';
-import { createUserDetailResponse, createUserSearchResponse, createUserSettings, UserSearchRequest } from '../types/user';
+import { createUserDetailResponse, createUserSearchResponse, createUserSettings, UserSearchRequest, createRandomNameResponse } from '../types/user';
 
 export default {
   /**
@@ -138,6 +138,35 @@ export default {
         return {
           ok: response.data.ok,
           data: detailResponse
+        };
+      } else {
+        throw new Error('API 응답 오류');
+      }
+    } catch (error: any) {
+      return error.response;
+    }
+  },
+
+  /**
+   * 유저 랜덤 이름 풀 조회
+   * @returns {Promise<Object>} 랜덤 이름 목록
+   */
+  getRandomNames: async (): Promise<any> => {
+    try {
+      const response = await axiosInstance({
+        method: 'GET',
+        url: '/v1/user/random-names'
+      });
+
+      // API 응답 구조에 맞게 변환
+      if (response.data.ok) {
+        const randomNameResponse = createRandomNameResponse({
+          contents: response.data.data.contents || []
+        });
+
+        return {
+          ok: response.data.ok,
+          data: randomNameResponse
         };
       } else {
         throw new Error('API 응답 오류');

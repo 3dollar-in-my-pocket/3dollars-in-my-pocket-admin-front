@@ -2,6 +2,7 @@ import {useEffect, useState} from "react";
 import RegistrationModal from "./RegistrationModal";
 import registrationApi from "../../api/registrationApi";
 import Loading from "../../components/common/Loading";
+import { getOsPlatformDisplayName, getOsPlatformBadgeClass, getOsPlatformIcon } from "../../types/registration";
 
 const RegistrationManagement = () => {
   const [registrationList, setRegistrationList] = useState([]);
@@ -195,6 +196,23 @@ const RegistrationManagement = () => {
                         )}
                       </div>
                     </div>
+
+                    {reg.context && (
+                      <div className="mb-2 mb-md-3">
+                        <small className="text-muted d-block" style={{fontSize: '0.75rem'}}>신청 환경</small>
+                        <div className="d-flex flex-wrap gap-1">
+                          <span className={`badge ${getOsPlatformBadgeClass(reg.context.osPlatform)}`} style={{fontSize: '0.65rem'}}>
+                            <i className={`bi ${getOsPlatformIcon(reg.context.osPlatform)} me-1`}></i>
+                            {getOsPlatformDisplayName(reg.context.osPlatform)}
+                          </span>
+                          {reg.context.appVersion && (
+                            <span className="badge bg-dark" style={{fontSize: '0.65rem', fontFamily: 'monospace'}}>
+                              v{reg.context.appVersion}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    )}
 
                     <div className="d-flex justify-content-between align-items-center">
                       <div>
