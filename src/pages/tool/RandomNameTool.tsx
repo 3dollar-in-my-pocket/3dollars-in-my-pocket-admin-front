@@ -85,7 +85,7 @@ const RandomNameTool = () => {
         <Col md={10} lg={10}>
           <Card className="p-4 shadow rounded-4">
             <div className="text-center mb-4">
-              <h2 className="fw-bold text-primary">유저 랜덤 이름 관리</h2>
+              <h2 className="fw-bold text-primary">랜덤 닉네임 관리</h2>
               <p className="text-muted small">유저에게 할당되는 랜덤 닉네임의 현황을 확인할 수 있습니다.</p>
             </div>
 
