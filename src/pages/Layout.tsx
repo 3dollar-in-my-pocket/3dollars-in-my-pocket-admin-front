@@ -127,6 +127,18 @@ const Layout = () => {
                     <span className="fw-medium">투표 관리</span>
                   </Link>
                 </li>
+                <li>
+                  <Link
+                    to="/manage/tool/random-name"
+                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
+                      isActive("/manage/tool/random-name") ? "bg-primary text-white" : "text-white-50"
+                    }`}
+                    onClick={closeSidebar}
+                  >
+                    <i className="bi bi-person-badge fs-5"></i>
+                    <span className="fw-medium">랜덤 닉네임 관리</span>
+                  </Link>
+                </li>
               </ul>
             </div>
 
@@ -228,25 +240,36 @@ const Layout = () => {
                     <span className="fw-medium">이미지 업로드 툴</span>
                   </Link>
                 </li>
-
-                <li>
-                  <Link
-                    to="/manage/tool/random-name"
-                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
-                      isActive("/manage/tool/random-name") ? "bg-primary text-white" : "text-white-50"
-                    }`}
-                    onClick={closeSidebar}
-                  >
-                    <i className="bi bi-person-badge fs-5"></i>
-                    <span className="fw-medium">유저 랜덤 이름 풀</span>
-                  </Link>
-                </li>
               </ul>
             </div>
 
             <div className="mb-4">
               <h5 className="text-white-50 mb-3">통계</h5>
               <ul className="nav flex-column gap-2">
+                <li>
+                  <Link
+                    to="/info/service-statistics"
+                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
+                      isActive("/info/service-statistics") ? "bg-primary text-white" : "text-white-50"
+                    }`}
+                    onClick={closeSidebar}
+                  >
+                    <i className="bi bi-graph-up fs-5"></i>
+                    <span className="fw-medium">서비스 통계</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/info/ad-statistics"
+                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
+                      isActive("/info/ad-statistics") ? "bg-primary text-white" : "text-white-50"
+                    }`}
+                    onClick={closeSidebar}
+                  >
+                    <i className="bi bi-badge-ad fs-5"></i>
+                    <span className="fw-medium">광고 통계</span>
+                  </Link>
+                </li>
                 <li>
                   <Link
                     to="/info/push-statistics"
@@ -256,7 +279,25 @@ const Layout = () => {
                     onClick={closeSidebar}
                   >
                     <i className="bi bi-bar-chart-line-fill fs-5"></i>
-                    <span className="fw-medium"> 푸시 발송 통계</span>
+                    <span className="fw-medium">푸시 통계</span>
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            <div className="mb-4">
+              <h5 className="text-white-50 mb-3">기타</h5>
+              <ul className="nav flex-column gap-2">
+                <li>
+                  <Link
+                    to="/info/etc-link"
+                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
+                      isActive("/info/etc-link") ? "bg-primary text-white" : "text-white-50"
+                    }`}
+                    onClick={closeSidebar}
+                  >
+                    <i className="bi bi-link-45deg fs-5"></i>
+                    <span className="fw-medium">기타 링크</span>
                   </Link>
                 </li>
               </ul>
