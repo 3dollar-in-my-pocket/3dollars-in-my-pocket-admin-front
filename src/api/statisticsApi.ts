@@ -1,0 +1,24 @@
+import axiosInstance from "./apiBase";
+import { DailyStatisticsResponse } from "../types/statistics";
+
+export default {
+  getDailyStatistics: async (
+    statisticsType: string,
+    startDate: string,
+    endDate: string
+  ): Promise<DailyStatisticsResponse> => {
+    try {
+      const response = await axiosInstance({
+        method: "GET",
+        url: `/statistics-type/${statisticsType}/daily-statistics`,
+        params: {
+          startDate,
+          endDate,
+        },
+      });
+      return response.data;
+    } catch (error: any) {
+      throw error;
+    }
+  },
+};
