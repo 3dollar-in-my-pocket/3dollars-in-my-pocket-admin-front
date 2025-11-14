@@ -141,7 +141,7 @@ const StoreMessageManagement = () => {
           <div className="d-flex align-items-center gap-2">
             <i className="bi bi-info-circle text-muted"></i>
             <small className="text-muted">
-              전체 가게에 등록된 모든 메시지를 조회합니다. 스크롤하여 더 많은 메시지를 자동으로 불러옵니다.
+              전체 가게에서 발송한 모든 메시지를 조회합니다. 스크롤하여 더 많은 메시지를 자동으로 불러옵니다.
             </small>
           </div>
           {messages.length > 0 && (

@@ -23,19 +23,25 @@ const Dashboard = () => {
       route: "/manage/store-search"
     },
     {
-      title: "리뷰 관리",
-      description: "등록된 리뷰를 조회하고 관리할 수 있습니다.",
+      title: "가게 리뷰 관리",
+      description: "가게에 등록된 리뷰를 조회하고 관리할 수 있습니다.",
       icon: "bi-chat-square-text",
       route: "/manage/review"
     },
     {
-      title: "가게 메시지 관리",
+      title: "가게 쿠폰 관리",
+      description: "전체 가게에 등록된 쿠폰을 조회하고 관리할 수 있습니다.",
+      icon: "bi-ticket-perforated",
+      route: "/manage/coupon"
+    },
+    {
+      title: "가게 메시지 발송 이력",
       description: "가게에 등록된 메시지를 조회하고 관리할 수 있습니다.",
       icon: "bi-chat-left-text",
       route: "/manage/store-message"
     },
     {
-      title: "투표 관리",
+      title: "커뮤니티 투표 관리",
       description: "투표를 생성하고 관리할 수 있습니다.",
       icon: "bi-bar-chart-fill",
       route: "/manage/poll"

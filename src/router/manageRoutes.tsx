@@ -8,6 +8,7 @@ import UserSearch from "../pages/user/UserSearch";
 import StoreSearch from "../pages/store/StoreSearch";
 import ReviewManagement from "../pages/review/ReviewManagement";
 import StoreMessageManagement from "../pages/storeMessage/StoreMessageManagement";
+import CouponManagement from "../pages/coupon/CouponManagement";
 import CacheTool from "../pages/tool/CacheTool";
 import FileUploadTool from "../pages/tool/FileUploadTool";
 import RandomNameTool from "../pages/tool/RandomNameTool";
@@ -58,6 +59,10 @@ const manageRoutes = {
     {
       path: '/manage/review',
       element: <PrivateRouter><ReviewManagement /></PrivateRouter>
+    },
+    {
+      path: '/manage/coupon',
+      element: <PrivateRouter><CouponManagement /></PrivateRouter>
     },
     {
       path: '/manage/store-message',
