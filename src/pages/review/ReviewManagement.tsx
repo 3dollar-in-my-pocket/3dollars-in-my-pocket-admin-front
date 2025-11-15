@@ -359,13 +359,9 @@ const ReviewManagement = () => {
                             e.currentTarget.style.transform = 'scale(1)';
                           }}
                         >
-                          <div className="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style={{ width: '24px', height: '24px' }}>
-                            <i className="bi bi-person-fill text-primary" style={{ fontSize: '0.75rem' }}></i>
-                          </div>
                           <span className="text-primary fw-bold" style={{ fontSize: 'clamp(0.75rem, 2.5vw, 0.875rem)' }}>
                             {review.writer?.name || '익명'}
                           </span>
-                          <i className="bi bi-box-arrow-up-right text-primary d-none d-md-inline" style={{ fontSize: '0.7rem' }}></i>
                         </div>
 
                         {/* 가게 정보 - 모바일 최적화 */}
@@ -393,13 +389,9 @@ const ReviewManagement = () => {
                               e.currentTarget.style.transform = 'scale(1)';
                             }}
                           >
-                            <div className="bg-success bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style={{ width: '24px', height: '24px' }}>
-                              <i className="bi bi-shop text-success" style={{ fontSize: '0.75rem' }}></i>
-                            </div>
                             <span className="text-success fw-bold text-truncate" style={{ fontSize: 'clamp(0.75rem, 2.5vw, 0.875rem)', maxWidth: '120px' }}>
                               {review.store.name}
                             </span>
-                            <i className="bi bi-box-arrow-up-right text-success d-none d-md-inline" style={{ fontSize: '0.7rem' }}></i>
                           </div>
                         )}
                       </div>
@@ -557,7 +549,7 @@ const ReviewManagement = () => {
         )}
       </div>
 
-      {/* 리뷰 상세 모달 - 모바일 최적화 */}
+      {/* 리뷰 상세 모달 - UX 개선 */}
       {showModal && selectedReview && (
         <div
           className="modal fade show"
@@ -565,108 +557,171 @@ const ReviewManagement = () => {
           onClick={() => setShowModal(false)}
         >
           <div className="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable mx-2 mx-md-auto" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-content" style={{ borderRadius: '12px', border: 'none' }}>
-              <div className="modal-header border-bottom" style={{ background: 'linear-gradient(135deg, #667eea15 0%, #764ba215 100%)' }}>
-                <h5 className="modal-title fw-bold" style={{ fontSize: 'clamp(1rem, 4vw, 1.25rem)' }}>
-                  <i className="bi bi-chat-square-text text-primary me-2"></i>
-                  리뷰 상세 정보
-                </h5>
+            <div className="modal-content" style={{ borderRadius: '16px', border: 'none' }}>
+              {/* 헤더 - 평점 포함 */}
+              <div className="modal-header border-bottom" style={{
+                background: 'linear-gradient(135deg, #667eea15 0%, #764ba215 100%)',
+                padding: '1rem 1.5rem'
+              }}>
+                <div className="d-flex align-items-center gap-3 flex-grow-1">
+                  <h5 className="modal-title fw-bold mb-0" style={{ fontSize: 'clamp(1rem, 4vw, 1.25rem)' }}>
+                    <i className="bi bi-chat-square-text text-primary me-2"></i>
+                    리뷰 상세 정보
+                  </h5>
+                  {/* 평점 배지 - 헤더에 통합 */}
+                  <div className="d-flex align-items-center gap-1 ms-auto" style={{
+                    background: 'linear-gradient(135deg, #ffc107 0%, #ff9800 100%)',
+                    padding: '6px 12px',
+                    borderRadius: '20px',
+                    boxShadow: '0 2px 8px rgba(255,152,0,0.3)'
+                  }}>
+                    <i className="bi bi-star-fill text-white" style={{ fontSize: '0.85rem' }}></i>
+                    <span className="fw-bold text-white" style={{ fontSize: '0.95rem' }}>
+                      {selectedReview.rating?.toFixed(1)}
+                    </span>
+                  </div>
+                  {/* 상태 배지 */}
+                  {getStatusBadge(selectedReview.status)}
+                </div>
                 <button
                   type="button"
-                  className="btn-close"
+                  className="btn-close ms-3"
                   onClick={() => setShowModal(false)}
                   style={{ minWidth: '44px', minHeight: '44px' }}
                 ></button>
               </div>
-              <div className="modal-body p-2 p-md-4">
-                <div className="row g-2 g-md-3">
-                  {/* 평점 카드 - 강조 */}
-                  <div className="col-12">
-                    <div className="card border-0" style={{
-                      background: 'linear-gradient(135deg, #ffc107 0%, #ff9800 100%)',
-                      boxShadow: '0 4px 16px rgba(255,152,0,0.4)',
-                      border: '2px solid rgba(255,193,7,0.3)'
-                    }}>
-                      <div className="card-body p-2 p-md-3 text-center">
-                        <div className="d-flex align-items-center justify-content-center gap-2 mb-1">
-                          {getRatingStars(selectedReview.rating, true)}
+
+              <div className="modal-body p-3 p-md-4">
+                <div className="row g-3">
+                  {/* 작성자 카드 - 클릭 가능 */}
+                  <div className="col-12 col-md-6">
+                    <div
+                      className="card border-0 h-100"
+                      style={{
+                        background: 'linear-gradient(135deg, #e3f2fd 0%, #ffffff 100%)',
+                        cursor: selectedReview.writer?.userId ? 'pointer' : 'default',
+                        transition: 'all 0.2s ease',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+                      }}
+                      onClick={() => selectedReview.writer && handleAuthorClick(selectedReview.writer)}
+                      onMouseEnter={(e: any) => {
+                        if (selectedReview.writer?.userId) {
+                          e.currentTarget.style.transform = 'translateY(-2px)';
+                          e.currentTarget.style.boxShadow = '0 4px 12px rgba(13, 110, 253, 0.2)';
+                        }
+                      }}
+                      onMouseLeave={(e: any) => {
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
+                      }}
+                    >
+                      <div className="card-body p-3">
+                        <div className="mb-2">
+                          <div className="d-flex align-items-center gap-2 mb-1">
+                            <span className="text-muted small">작성자</span>
+                          </div>
+                          <h6 className="fw-bold text-primary mb-0" style={{ fontSize: '1.1rem' }}>
+                            {selectedReview.writer?.name || '익명 사용자'}
+                          </h6>
                         </div>
-                        <h3 className="mb-0 fw-bold text-white">{selectedReview.rating?.toFixed(1)}점</h3>
+                        <div className="d-flex gap-1 flex-wrap">
+                          <span className="badge bg-primary bg-opacity-10 text-primary border border-primary rounded-pill px-2 py-1" style={{ fontSize: '0.7rem' }}>
+                            <i className="bi bi-hash me-1"></i>
+                            {selectedReview.writer?.userId || '없음'}
+                          </span>
+                          <span className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-2 py-1" style={{ fontSize: '0.7rem' }}>
+                            <i className="bi bi-share me-1"></i>
+                            {selectedReview.writer?.socialType || '없음'}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* 작성자 & 가게 */}
+                  {/* 가게 카드 - 클릭 가능 */}
                   <div className="col-12 col-md-6">
-                    <label className="form-label fw-bold mb-1" style={{ fontSize: 'clamp(0.8rem, 2.5vw, 0.95rem)' }}>
-                      <i className="bi bi-person-fill text-primary me-1"></i>
-                      작성자
-                    </label>
-                    <p className="mb-1" style={{ fontSize: 'clamp(0.85rem, 2.5vw, 1rem)' }}>
-                      {selectedReview.writer?.name || '익명 사용자'}
-                    </p>
-                    <div className="d-flex gap-1 flex-wrap">
-                      <span className="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-2 py-1" style={{ fontSize: '0.7rem' }}>
-                        <i className="bi bi-hash me-1"></i>
-                        {selectedReview.writer?.userId || '없음'}
-                      </span>
-                      <span className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-2 py-1" style={{ fontSize: '0.7rem' }}>
-                        <i className="bi bi-share me-1"></i>
-                        {selectedReview.writer?.socialType || '없음'}
-                      </span>
+                    <div
+                      className="card border-0 h-100"
+                      style={{
+                        background: 'linear-gradient(135deg, #e8f5e9 0%, #ffffff 100%)',
+                        cursor: selectedReview.store?.storeId ? 'pointer' : 'default',
+                        transition: 'all 0.2s ease',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+                      }}
+                      onClick={() => selectedReview.store && handleStoreClick(selectedReview.store)}
+                      onMouseEnter={(e: any) => {
+                        if (selectedReview.store?.storeId) {
+                          e.currentTarget.style.transform = 'translateY(-2px)';
+                          e.currentTarget.style.boxShadow = '0 4px 12px rgba(25, 135, 84, 0.2)';
+                        }
+                      }}
+                      onMouseLeave={(e: any) => {
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
+                      }}
+                    >
+                      <div className="card-body p-3">
+                        <div className="mb-2">
+                          <div className="d-flex align-items-center gap-2 mb-1">
+                            <span className="text-muted small">가게</span>
+                          </div>
+                          <h6 className="fw-bold text-success mb-0" style={{ fontSize: '1.1rem' }}>
+                            {selectedReview.store?.name || '정보 없음'}
+                          </h6>
+                        </div>
+                        <div className="d-flex gap-1 flex-wrap">
+                          {selectedReview.store?.storeType && getStoreTypeBadge(selectedReview.store.storeType)}
+                          {selectedReview.store?.storeId && (
+                            <span className="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-2 py-1" style={{ fontSize: '0.7rem' }}>
+                              <i className="bi bi-hash me-1"></i>
+                              {selectedReview.store.storeId}
+                            </span>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="col-12 col-md-6">
-                    <label className="form-label fw-bold mb-1" style={{ fontSize: 'clamp(0.8rem, 2.5vw, 0.95rem)' }}>
-                      <i className="bi bi-shop text-success me-1"></i>
-                      가게 정보
-                    </label>
-                    <p className="mb-1" style={{ fontSize: 'clamp(0.85rem, 2.5vw, 1rem)' }}>
-                      {selectedReview.store?.name || '정보 없음'}
-                    </p>
-                    {selectedReview.store?.storeType && (
-                      <div>{getStoreTypeBadge(selectedReview.store.storeType)}</div>
-                    )}
+                  {/* 날짜 정보 - 통합 */}
+                  <div className="col-12">
+                    <div className="d-flex align-items-center gap-3 p-2 bg-light rounded-3">
+                      <div className="d-flex align-items-center gap-2 flex-grow-1">
+                        <i className="bi bi-clock text-muted"></i>
+                        <span className="text-muted small">작성일:</span>
+                        <span className="fw-semibold text-dark" style={{ fontSize: '0.9rem' }}>
+                          {formatDateTime(selectedReview.createdAt)}
+                        </span>
+                      </div>
+                      <div className="d-none d-md-flex align-items-center gap-2">
+                        <i className="bi bi-clock-history text-muted"></i>
+                        <span className="text-muted small">수정일:</span>
+                        <span className="fw-semibold text-dark" style={{ fontSize: '0.9rem' }}>
+                          {formatDateTime(selectedReview.updatedAt)}
+                        </span>
+                      </div>
+                    </div>
                   </div>
 
-                  {/* 날짜 정보 */}
-                  <div className="col-6">
-                    <label className="form-label fw-bold mb-1" style={{ fontSize: 'clamp(0.75rem, 2.5vw, 0.85rem)' }}>
-                      <i className="bi bi-calendar-plus text-muted me-1"></i>
-                      작성일
-                    </label>
-                    <p className="mb-0 text-muted" style={{ fontSize: 'clamp(0.75rem, 2vw, 0.85rem)' }}>
-                      <span className="d-none d-md-block">{formatDateTime(selectedReview.createdAt)}</span>
-                      <span className="d-block d-md-none">{new Date(selectedReview.createdAt).toLocaleDateString('ko-KR')}</span>
-                    </p>
-                  </div>
-
-                  <div className="col-6">
-                    <label className="form-label fw-bold mb-1" style={{ fontSize: 'clamp(0.75rem, 2.5vw, 0.85rem)' }}>
-                      <i className="bi bi-calendar-check text-muted me-1"></i>
-                      수정일
-                    </label>
-                    <p className="mb-0 text-muted" style={{ fontSize: 'clamp(0.75rem, 2vw, 0.85rem)' }}>
-                      <span className="d-none d-md-block">{formatDateTime(selectedReview.updatedAt)}</span>
-                      <span className="d-block d-md-none">{new Date(selectedReview.updatedAt).toLocaleDateString('ko-KR')}</span>
-                    </p>
+                  {/* 구분선 */}
+                  <div className="col-12">
+                    <hr className="my-2" />
                   </div>
 
                   {/* 리뷰 내용 */}
                   <div className="col-12">
-                    <label className="form-label fw-bold mb-2" style={{ fontSize: 'clamp(0.8rem, 2.5vw, 0.95rem)' }}>
-                      <i className="bi bi-chat-square-quote text-primary me-1"></i>
-                      리뷰 내용
-                    </label>
-                    <div className="border rounded p-2 p-md-3" style={{
+                    <div className="mb-2 d-flex align-items-center gap-2">
+                      <i className="bi bi-chat-square-quote text-primary" style={{ fontSize: '1.1rem' }}></i>
+                      <h6 className="fw-bold mb-0">리뷰 내용</h6>
+                    </div>
+                    <div className="p-3 rounded-3" style={{
                       background: 'linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%)',
-                      borderColor: '#e9ecef !important'
+                      border: '1px solid #e9ecef'
                     }}>
                       <p className="mb-0" style={{
                         whiteSpace: 'pre-wrap',
-                        lineHeight: '1.6',
-                        fontSize: 'clamp(0.85rem, 2.5vw, 1rem)'
+                        lineHeight: '1.7',
+                        fontSize: '1rem',
+                        color: '#333'
                       }}>
                         {selectedReview.contents || '내용이 없습니다.'}
                       </p>
@@ -676,41 +731,54 @@ const ReviewManagement = () => {
                   {/* 이미지 갤러리 */}
                   {selectedReview.images && selectedReview.images.length > 0 && (
                     <div className="col-12">
-                      <label className="form-label fw-bold mb-2" style={{ fontSize: 'clamp(0.8rem, 2.5vw, 0.95rem)' }}>
-                        <i className="bi bi-images text-info me-1"></i>
-                        첨부 이미지 ({selectedReview.images.length}개)
-                      </label>
+                      <div className="mb-3 d-flex align-items-center justify-content-between">
+                        <div className="d-flex align-items-center gap-2">
+                          <i className="bi bi-images text-info" style={{ fontSize: '1.1rem' }}></i>
+                          <h6 className="fw-bold mb-0">첨부 이미지</h6>
+                        </div>
+                        <span className="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-3 py-1">
+                          {selectedReview.images.length}개
+                        </span>
+                      </div>
                       <div className="row g-2">
                         {selectedReview.images.map((image, index) => (
                           <div key={index} className="col-6 col-md-4 col-lg-3">
-                            <div className="card border-0 shadow-sm h-100" style={{ overflow: 'hidden' }}>
+                            <div className="position-relative card border-0 shadow-sm h-100" style={{
+                              overflow: 'hidden',
+                              borderRadius: '12px'
+                            }}>
                               <img
                                 src={image.imageUrl}
                                 alt={`Review image ${index + 1}`}
                                 className="card-img-top"
                                 style={{
-                                  height: 'clamp(150px, 35vw, 200px)',
+                                  height: '180px',
                                   objectFit: 'cover',
                                   cursor: 'pointer',
-                                  transition: 'transform 0.2s ease'
+                                  transition: 'transform 0.3s ease'
                                 }}
                                 onClick={() => window.open(image.imageUrl, '_blank')}
                                 onMouseEnter={(e: any) => {
-                                  e.currentTarget.style.transform = 'scale(1.05)';
+                                  e.currentTarget.style.transform = 'scale(1.08)';
                                 }}
                                 onMouseLeave={(e: any) => {
                                   e.currentTarget.style.transform = 'scale(1)';
                                 }}
                                 onError={(e: any) => {
-                                  e.target.src =
-                                    'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjRjVGNUY1Ii8+CjxwYXRoIGQ9Ik0yMCAzMkMxNi42ODYzIDMyIDEzLjUwNTQgMzAuNjgzOSAxMS4yNzI3IDI4LjQ1MTNDOS4wNDAwNyAyNi4yMTg2IDcuNzI0IDIzLjAzNzYgNy43MjQgMTkuNzIzOUM3LjcyNCAxNi40MTAzIDkuMDQwMDcgMTMuMjI5MyAxMS4yNzI3IDEwLjk5NjdDMTMuNTA1NCA4Ljc2NDA0IDE2LjY4NjMgNy40NDggMjAgNy40NDhDMjMuMzEzNyA3LjQ0OCAyNi40OTQ2IDguNzY0MDQgMjguNzI3MyAxMC45OTY3QzMwLjk1OTkgMTMuMjI5MyAzMi4yNzYgMTYuNDEwMyAzMi4yNzYgMTkuNzIzOUMzMi4yNzYgMjMuMDM3NiAzMC45NTk5IDI2LjIxODYgMjguNzI3MyAyOC40NTEzQzI2LjQ5NDYgMzAuNjgzOSAyMy4zMTM3IDMyIDIwIDMyWk0yMCA5LjI0NzlDMTcuMTY1NSA5LjI0NzkgMTQuNDI3MyAxMC4zNzY0IDEyLjM2ODkgMTIuNDM0OEMxMC4zMTA1IDE0LjQ5MzIgOS4xODE5OSAxNy4yMzE0IDkuMTgxOTkgMjAuMDc1OUM5LjE4MTk5IDIyLjkyMDQgMTAuMzEwNSAyNS42NTg2IDEyLjM2ODkgMjcuNzE3QzE0LjQyNzMgMjkuNzc1MyAxNy4xNjU1IDMwLjkwMzkgMjAgMzAuOTAzOUMyMi44MzQ1IDMwLjkwMzkgMjUuNTcyNyAyOS43NzUzIDI3LjYzMTEgMjcuNzE3QzI5LjY4OTUgMjUuNjU4NiAzMC44MTggMjIuOTIwNCAzMC44MTggMjAuMDc1OUMzMC44MTggMTcuMjMxNCAyOS42ODk1IDE0LjQ5MzIgMjcuNjMxMSAxMi40MzQ4QzI1LjU3MjcgMTAuMzc2NCAyMi44MzQ1IDkuMjQ3OSAyMCA5LjI0NzlaIiBmaWxsPSIjOTk5OTk5Ii8+CjxwYXRoIGQ9Ik0yMCAyNi4yNzZDMjEuOTMzIDI2LjI3NiAyMy40NzYgMjQuNzMzIDIzLjQ3NiAyMi44QzIzLjQ3NiAyMC44NjcgMjEuOTMzIDE5LjMyNCAyMCAxOS4zMjRDMTguMDY3IDE5LjMyNCAxNi41MjQgMjAuODY3IDE2LjUyNCAyMi44QzE2LjUyNCAyNC43MzMgMTguMDY3IDI2LjI3NiAyMCAyNi4yNzZaIiBmaWxsPSIjOTk5OTk5Ii8+Cjwvc3ZnPgo=';
-                                  e.target.style.height = 'clamp(150px, 35vw, 200px)';
+                                  e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjRjVGNUY1Ii8+CjxwYXRoIGQ9Ik0yMCAzMkMxNi42ODYzIDMyIDEzLjUwNTQgMzAuNjgzOSAxMS4yNzI3IDI4LjQ1MTNDOS4wNDAwNyAyNi4yMTg2IDcuNzI0IDIzLjAzNzYgNy43MjQgMTkuNzIzOUM3LjcyNCAxNi40MTAzIDkuMDQwMDcgMTMuMjI5MyAxMS4yNzI3IDEwLjk5NjdDMTMuNTA1NCA4Ljc2NDA0IDE2LjY4NjMgNy40NDggMjAgNy40NDhDMjMuMzEzNyA3LjQ0OCAyNi40OTQ2IDguNzY0MDQgMjguNzI3MyAxMC45OTY3QzMwLjk1OTkgMTMuMjI5MyAzMi4yNzYgMTYuNDEwMyAzMi4yNzYgMTkuNzIzOUMzMi4yNzYgMjMuMDM3NiAzMC45NTk5IDI2LjIxODYgMjguNzI3MyAyOC40NTEzQzI2LjQ5NDYgMzAuNjgzOSAyMy4zMTM3IDMyIDIwIDMyWk0yMCA5LjI0NzlDMTcuMTY1NSA5LjI0NzkgMTQuNDI3MyAxMC4zNzY0IDEyLjM2ODkgMTIuNDM0OEMxMC4zMTA1IDE0LjQ5MzIgOS4xODE5OSAxNy4yMzE0IDkuMTgxOTkgMjAuMDc1OUM5LjE4MTk5IDIyLjkyMDQgMTAuMzEwNSAyNS42NTg2IDEyLjM2ODkgMjcuNzE3QzE0LjQyNzMgMjkuNzc1MyAxNy4xNjU1IDMwLjkwMzkgMjAgMzAuOTAzOUMyMi44MzQ1IDMwLjkwMzkgMjUuNTcyNyAyOS43NzUzIDI3LjYzMTEgMjcuNzE3QzI5LjY4OTUgMjUuNjU4NiAzMC44MTggMjIuOTIwNCAzMC44MTggMjAuMDc1OUMzMC44MTggMTcuMjMxNCAyOS42ODk1IDE0LjQ5MzIgMjcuNjMxMSAxMi40MzQ4QzI1LjU3MjcgMTAuMzc2NCAyMi44MzQ1IDkuMjQ3OSAyMCA5LjI0NzlaIiBmaWxsPSIjOTk5OTk5Ii8+CjxwYXRoIGQ9Ik0yMCAyNi4yNzZDMjEuOTMzIDI2LjI3NiAyMy40NzYgMjQuNzMzIDIzLjQ3NiAyMi44QzIzLjQ3NiAyMC44NjcgMjEuOTMzIDE5LjMyNCAyMCAxOS4zMjRDMTguMDY3IDE5LjMyNCAxNi41MjQgMjAuODY3IDE2LjUyNCAyMi44QzE2LjUyNCAyNC43MzMgMTguMDY3IDI2LjI3NiAyMCAyNi4yNzZaIiBmaWxsPSIjOTk5OTk5Ii8+Cjwvc3ZnPgo=';
                                   e.target.style.objectFit = 'contain';
                                   e.target.style.backgroundColor = '#f8f9fa';
                                 }}
                               />
-                              <div className="card-body p-2 d-none d-md-block">
-                                <small className="text-muted" style={{ fontSize: '0.7rem' }}>
+                              {/* 이미지 확대 힌트 */}
+                              <div className="position-absolute top-0 end-0 m-2">
+                                <div className="bg-dark bg-opacity-75 rounded-circle p-1" style={{ width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                  <i className="bi bi-arrows-fullscreen text-white" style={{ fontSize: '0.7rem' }}></i>
+                                </div>
+                              </div>
+                              <div className="card-body p-2 d-none d-md-block bg-light">
+                                <small className="text-muted d-block" style={{ fontSize: '0.7rem' }}>
+                                  <i className="bi bi-aspect-ratio me-1"></i>
                                   {image.width} × {image.height}
                                 </small>
                               </div>
@@ -722,10 +790,12 @@ const ReviewManagement = () => {
                   )}
                 </div>
               </div>
-              <div className="modal-footer border-top d-flex flex-column flex-md-row justify-content-between gap-2 p-2 p-md-3">
+
+              {/* 푸터 */}
+              <div className="modal-footer border-top d-flex flex-column flex-md-row justify-content-between gap-2 p-3">
                 <button
-                  className="btn btn-danger rounded-pill px-3 px-md-4 w-100 w-md-auto order-2 order-md-1"
-                  style={{ minHeight: '44px', fontSize: 'clamp(0.8rem, 2.5vw, 0.95rem)' }}
+                  className="btn btn-danger rounded-pill px-4 w-100 w-md-auto order-2 order-md-1"
+                  style={{ minHeight: '44px' }}
                   onClick={handleBlindReview}
                   disabled={isBlinding || selectedReview.status === 'FILTERED'}
                 >
@@ -742,8 +812,8 @@ const ReviewManagement = () => {
                   )}
                 </button>
                 <button
-                  className="btn btn-secondary rounded-pill px-3 px-md-4 w-100 w-md-auto order-1 order-md-2"
-                  style={{ minHeight: '44px', fontSize: 'clamp(0.8rem, 2.5vw, 0.95rem)' }}
+                  className="btn btn-secondary rounded-pill px-4 w-100 w-md-auto order-1 order-md-2"
+                  style={{ minHeight: '44px' }}
                   onClick={() => setShowModal(false)}
                 >
                   <i className="bi bi-x-lg me-2"></i>

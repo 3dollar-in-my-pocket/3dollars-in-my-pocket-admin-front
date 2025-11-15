@@ -115,7 +115,6 @@ const MedalManagement = () => {
 
                   <div className="text-center mb-2">
                     <h6 className="fw-bold mb-1">{medal.name}</h6>
-                    <Badge bg="info" className="mb-2">ID: {medal.medalId}</Badge>
                   </div>
 
                   <p className="text-muted small text-center mb-3" style={{ minHeight: '40px' }}>

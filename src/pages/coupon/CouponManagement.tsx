@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import couponApi from '../../api/couponApi';
-import { Coupon, getCouponStatusDisplayName, getCouponStatusBadgeClass, formatCouponDate } from '../../types/coupon';
+import { Coupon, getCouponStatusDisplayName, getCouponStatusBadgeClass, formatCouponDate, COUPON_STATUS, CouponStatus } from '../../types/coupon';
 import { getStoreTypeDisplayName, getStoreTypeBadgeClass, getStoreTypeIcon } from '../../types/store';
 import StoreDetailModal from '../store/StoreDetailModal';
 
@@ -15,15 +15,26 @@ const CouponManagement = () => {
   const [hasMore, setHasMore] = useState(false);
   const [cursor, setCursor] = useState<string | null>(null);
   const [selectedStore, setSelectedStore] = useState<any>(null);
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const [skeletonCount] = useState(3);
+  const isInitialMount = useRef(true);
 
   // 초기 데이터 로드
   useEffect(() => {
     fetchCoupons(true);
   }, []);
+
+  // 상태 필터 변경 시 재조회
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    fetchCoupons(true);
+  }, [selectedStatuses]);
 
   // Intersection Observer 설정
   useEffect(() => {
@@ -60,7 +71,8 @@ const CouponManagement = () => {
 
     setIsLoading(true);
     try {
-      const response = await couponApi.getAllStoreCoupons(reset ? null : cursor, 20);
+      const statusesToSend = selectedStatuses.length > 0 ? selectedStatuses : undefined;
+      const response = await couponApi.getAllStoreCoupons(reset ? null : cursor, 20, statusesToSend);
       if (!response?.ok) {
         toast.error('쿠폰 목록을 불러오는 중 오류가 발생했습니다.');
         return;
@@ -82,13 +94,23 @@ const CouponManagement = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [cursor, isLoading]);
+  }, [cursor, isLoading, selectedStatuses]);
 
   const handleLoadMore = useCallback(() => {
     if (hasMore && !isLoading) {
       fetchCoupons(false);
     }
   }, [hasMore, isLoading, fetchCoupons]);
+
+  const handleStatusToggle = (status: string) => {
+    setSelectedStatuses(prev => {
+      if (prev.includes(status)) {
+        return prev.filter(s => s !== status);
+      } else {
+        return [...prev, status];
+      }
+    });
+  };
 
   const calculateProgress = (issued: number, max: number): number => {
     if (max === 0) return 0;
@@ -157,7 +179,65 @@ const CouponManagement = () => {
         </div>
       </div>
 
-      <div ref={scrollContainerRef} style={{ maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' }}>
+      {/* 상태 필터 섹션 */}
+      <div className="mb-4">
+        <div className="d-flex align-items-center gap-2 flex-wrap">
+          <span className="text-muted small me-2">
+            <i className="bi bi-funnel me-1"></i>
+            쿠폰 상태:
+          </span>
+          <button
+            className={`btn btn-sm rounded-pill ${selectedStatuses.length === 0 ? 'btn-primary' : 'btn-outline-secondary'}`}
+            onClick={() => setSelectedStatuses([])}
+            disabled={isLoading}
+          >
+            <i className="bi bi-list-ul me-1"></i>
+            전체
+          </button>
+          <button
+            className={`btn btn-sm rounded-pill ${selectedStatuses.includes(COUPON_STATUS.ACTIVE) ? 'btn-success' : 'btn-outline-success'}`}
+            onClick={() => handleStatusToggle(COUPON_STATUS.ACTIVE)}
+            disabled={isLoading}
+          >
+            {selectedStatuses.includes(COUPON_STATUS.ACTIVE) ? (
+              <i className="bi bi-check-circle-fill me-1"></i>
+            ) : (
+              <i className="bi bi-circle me-1"></i>
+            )}
+            {getCouponStatusDisplayName(COUPON_STATUS.ACTIVE)}
+          </button>
+          <button
+            className={`btn btn-sm rounded-pill ${selectedStatuses.includes(COUPON_STATUS.STOPPED) ? 'btn-warning' : 'btn-outline-warning'}`}
+            onClick={() => handleStatusToggle(COUPON_STATUS.STOPPED)}
+            disabled={isLoading}
+          >
+            {selectedStatuses.includes(COUPON_STATUS.STOPPED) ? (
+              <i className="bi bi-check-circle-fill me-1"></i>
+            ) : (
+              <i className="bi bi-circle me-1"></i>
+            )}
+            {getCouponStatusDisplayName(COUPON_STATUS.STOPPED)}
+          </button>
+          <button
+            className={`btn btn-sm rounded-pill ${selectedStatuses.includes(COUPON_STATUS.ENDED) ? 'btn-secondary' : 'btn-outline-secondary'}`}
+            onClick={() => handleStatusToggle(COUPON_STATUS.ENDED)}
+            disabled={isLoading}
+          >
+            {selectedStatuses.includes(COUPON_STATUS.ENDED) ? (
+              <i className="bi bi-check-circle-fill me-1"></i>
+            ) : (
+              <i className="bi bi-circle me-1"></i>
+            )}
+            {getCouponStatusDisplayName(COUPON_STATUS.ENDED)}
+          </button>
+          <span className="text-muted small ms-2">
+            <i className="bi bi-info-circle me-1"></i>
+            복수 선택 가능
+          </span>
+        </div>
+      </div>
+
+      <div ref={scrollContainerRef} style={{ maxHeight: 'calc(100vh - 280px)', overflowY: 'auto' }}>
         <div className="row g-3">
           {isLoading && coupons.length === 0 ? (
             Array.from({ length: skeletonCount }).map((_, idx) => <SkeletonCard key={idx} />)
@@ -295,16 +375,17 @@ const CouponManagement = () => {
                       {/* 날짜 정보 */}
                       <div className="border-top pt-3">
                         <div className="row g-2">
-                          <div className="col-md-6">
-                            <div className="d-flex align-items-center gap-2 text-muted small">
-                              <i className="bi bi-calendar-event"></i>
-                              <span>유효 기간 시작: {formatCouponDate(coupon.validityPeriod.startDateTime)}</span>
-                            </div>
-                          </div>
-                          <div className="col-md-6">
-                            <div className="d-flex align-items-center gap-2 text-muted small">
-                              <i className="bi bi-calendar-x"></i>
-                              <span>유효 기간 종료: {formatCouponDate(coupon.validityPeriod.endDateTime)}</span>
+                          <div className="col-12">
+                            <div className="d-flex align-items-center gap-2 p-2 bg-white rounded-3">
+                              <div className="bg-primary bg-opacity-10 rounded-circle p-2" style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <i className="bi bi-calendar-range text-primary" style={{ fontSize: '0.9rem' }}></i>
+                              </div>
+                              <div className="d-flex align-items-center gap-2 flex-wrap">
+                                <span className="fw-semibold text-dark">유효 기간:</span>
+                                <span className="text-dark">{formatCouponDate(coupon.validityPeriod.startDateTime)}</span>
+                                <i className="bi bi-arrow-right text-muted"></i>
+                                <span className="text-dark">{formatCouponDate(coupon.validityPeriod.endDateTime)}</span>
+                              </div>
                             </div>
                           </div>
                           <div className="col-md-6">
