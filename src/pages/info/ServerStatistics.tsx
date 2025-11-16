@@ -111,6 +111,13 @@ const ServerStatistics = () => {
     return num.toLocaleString("ko-KR");
   };
 
+  const formatDateWithDay = (dateStr: string): string => {
+    const date = new Date(dateStr);
+    const days = ["일", "월", "화", "수", "목", "금", "토"];
+    const dayOfWeek = days[date.getDay()];
+    return `${dateStr} (${dayOfWeek})`;
+  };
+
   const getChartData = () => {
     return data.map((item) => ({
       date: item.date.substring(5), // MM-DD 형식으로 표시
@@ -253,7 +260,7 @@ const ServerStatistics = () => {
                 <LineChart data={getChartData()}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="date" />
-                  <YAxis />
+                  <YAxis domain={['auto', 'auto']} />
                   <Tooltip />
                   <Legend />
                   <Line type="monotone" dataKey="누적" stroke="#198754" strokeWidth={2} />
@@ -281,7 +288,7 @@ const ServerStatistics = () => {
                   <tbody>
                     {data.map((item, index) => (
                       <tr key={index}>
-                        <td>{item.date}</td>
+                        <td>{formatDateWithDay(item.date)}</td>
                         <td className="text-end">{formatNumber(item.newCount)}</td>
                         <td className="text-end">{formatNumber(item.totalCount)}</td>
                       </tr>
