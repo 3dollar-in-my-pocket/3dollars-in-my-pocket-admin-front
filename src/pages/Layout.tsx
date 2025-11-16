@@ -98,7 +98,20 @@ const Layout = () => {
                     onClick={closeSidebar}
                   >
                     <i className="bi bi-chat-square-text fs-5"></i>
-                    <span className="fw-medium">리뷰 관리</span>
+                    <span className="fw-medium">가게 리뷰 관리</span>
+                  </Link>
+                </li>
+
+                <li>
+                  <Link
+                    to="/manage/coupon"
+                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
+                      isActive("/manage/coupon") ? "bg-primary text-white" : "text-white-50"
+                    }`}
+                    onClick={closeSidebar}
+                  >
+                    <i className="bi bi-ticket-perforated fs-5"></i>
+                    <span className="fw-medium">가게 쿠폰 관리</span>
                   </Link>
                 </li>
 
@@ -111,7 +124,7 @@ const Layout = () => {
                     onClick={closeSidebar}
                   >
                     <i className="bi bi-chat-left-text fs-5"></i>
-                    <span className="fw-medium">가게 메시지 관리</span>
+                    <span className="fw-medium">가게 메시지 발송 이력</span>
                   </Link>
                 </li>
 
@@ -124,7 +137,7 @@ const Layout = () => {
                     onClick={closeSidebar}
                   >
                     <i className="bi bi-bar-chart-fill fs-5"></i>
-                    <span className="fw-medium">투표 관리</span>
+                    <span className="fw-medium">커뮤니티 투표 관리</span>
                   </Link>
                 </li>
                 <li>

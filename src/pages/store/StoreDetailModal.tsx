@@ -30,6 +30,7 @@ import StoreImageHistory from '../../components/StoreImageHistory';
 import StoreReportHistory from '../../components/StoreReportHistory';
 import StorePostHistory from '../../components/StorePostHistory';
 import StoreMessageHistory from '../../components/StoreMessageHistory';
+import StoreCouponHistory from '../../components/StoreCouponHistory';
 import StoreSettings from '../../components/StoreSettings';
 import {toast} from 'react-toastify';
 
@@ -969,6 +970,15 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
                       component: StoreMessageHistory,
                       spinnerColor: 'text-success',
                       loadingText: '메시지를 불러오는 중...',
+                      isSupported: true
+                    },
+                    {
+                      key: 'coupons',
+                      title: '쿠폰',
+                      icon: 'bi-ticket-perforated',
+                      component: StoreCouponHistory,
+                      spinnerColor: 'text-warning',
+                      loadingText: '쿠폰을 불러오는 중...',
                       isSupported: true
                     }
                   ]}
