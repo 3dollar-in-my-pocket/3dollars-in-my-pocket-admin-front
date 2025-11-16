@@ -8,7 +8,8 @@ import {LocalStorageService} from "../service/LocalStorageService";
 const Layout = () => {
   const location = useLocation();
   const isActive = (path) => location.pathname === path;
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // 모바일용
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false); // 데스크톱용
 
   const [isLoginState, setIsLoginState] = useRecoilState(LoginStatus);
   const navigator = useNavigate();
@@ -41,7 +42,7 @@ const Layout = () => {
   return (
     <div className="container-fluid h-100">
       <div className="row min-vh-100">
-        <div className={`sidebar bg-dark text-white ${isSidebarOpen ? 'sidebar-open' : ''}`}>
+        <div className={`sidebar bg-dark text-white ${isSidebarOpen ? 'sidebar-open' : ''} ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
           <div className="d-flex flex-column h-100 p-4">
             <Link to="/manage" className="text-white mb-4 fw-bold text-decoration-none h4" onClick={closeSidebar}>
               🎯 DASHBOARD
@@ -354,7 +355,15 @@ const Layout = () => {
           />
         )}
 
-        <main className="main-content bg-light">
+        <main className={`main-content bg-light ${isSidebarCollapsed ? 'main-content-expanded' : ''}`}>
+          <button
+            className="btn btn-dark d-none d-md-flex align-items-center justify-content-center toggle-sidebar-btn-fixed"
+            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+            title={isSidebarCollapsed ? "사이드바 펼치기" : "사이드바 접기"}
+          >
+            <i className={`bi ${isSidebarCollapsed ? 'bi-chevron-right' : 'bi-chevron-left'} fs-5`}></i>
+          </button>
+
           <div
             className="mobile-header d-md-none bg-white shadow-sm p-3 d-flex justify-content-between align-items-center">
             <button
