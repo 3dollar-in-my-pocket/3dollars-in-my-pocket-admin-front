@@ -119,11 +119,18 @@ const ServerStatistics = () => {
   };
 
   const getChartData = () => {
-    return data.map((item) => ({
-      date: item.date.substring(5), // MM-DD 형식으로 표시
-      "신규": item.newCount,
-      "누적": item.totalCount,
-    }));
+    return data.map((item) => {
+      const date = new Date(item.date);
+      const days = ["일", "월", "화", "수", "목", "금", "토"];
+      const dayOfWeek = days[date.getDay()];
+      const dateStr = item.date.substring(5); // MM-DD
+
+      return {
+        date: `${dateStr} (${dayOfWeek})`, // MM-DD (요일) 형식으로 표시
+        "신규": item.newCount,
+        "누적": item.totalCount,
+      };
+    });
   };
 
   return (
