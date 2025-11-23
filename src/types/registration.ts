@@ -9,36 +9,6 @@ export const OS_PLATFORM = {
 
 export type OsPlatform = typeof OS_PLATFORM[keyof typeof OS_PLATFORM];
 
-// Registration context
-export interface RegistrationContext {
-  osPlatform: OsPlatform;
-  appVersion: string;
-}
-
-// Boss information
-export interface Boss {
-  socialType: string;
-  name: string;
-  businessNumber: string;
-}
-
-// Store information
-export interface Store {
-  name: string;
-  categories: string[];
-  certificationPhotoUrl: string;
-}
-
-// Registration
-export interface Registration {
-  registrationId: string;
-  boss: Boss;
-  store: Store;
-  context: RegistrationContext;
-  createdAt: string;
-  updatedAt: string;
-}
-
 // Utility functions
 export const getOsPlatformDisplayName = (osPlatform: OsPlatform): string => {
   switch (osPlatform) {

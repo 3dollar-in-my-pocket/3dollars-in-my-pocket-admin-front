@@ -1,12 +1,13 @@
 import axiosInstance from "./apiBase";
-import { DailyStatisticsResponse } from "../types/statistics";
+import {ApiResponse, ContentListResponse} from "@/types/api";
+import {DailyStatistic} from "@/types/statistics";
 
 export default {
   getDailyStatistics: async (
     statisticsType: string,
     startDate: string,
     endDate: string
-  ): Promise<DailyStatisticsResponse> => {
+  ): Promise<ApiResponse<ContentListResponse<DailyStatistic>>> => {
     try {
       const response = await axiosInstance({
         method: "GET",

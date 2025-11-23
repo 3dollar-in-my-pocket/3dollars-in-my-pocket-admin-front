@@ -159,7 +159,7 @@ export const getSocialTypeBadgeClass = (socialType: SocialType): string => {
 };
 
 export const formatUserIds = (userIdsString: string): number[] => {
-  if (!userIdsString || !userIdsString.trim()) {
+  if (!userIdsString?.trim()) {
     return [];
   }
 
@@ -197,7 +197,7 @@ export const getMarketingConsentBadgeClass = (marketingConsent: MarketingConsent
 
 export const validateUserSearch = (searchType: SearchType, searchQuery: string, userIds: string): string | null => {
   if (searchType === SEARCH_TYPES.NAME) {
-    if (!searchQuery || !searchQuery.trim()) {
+    if (!searchQuery?.trim()) {
       return '검색어를 입력해주세요.';
     }
   }

@@ -1,5 +1,3 @@
-// Medal related type definitions
-
 // Medal acquisition information
 export interface MedalAcquisition {
   description?: string;
@@ -13,11 +11,6 @@ export interface Medal {
   disableIconUrl: string;
   introduction: string;
   acquisition: MedalAcquisition | {};
-}
-
-// Medal list response
-export interface MedalListResponse {
-  contents: Medal[];
 }
 
 // Helper function to check if acquisition exists

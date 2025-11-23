@@ -11,7 +11,6 @@ export interface PaginatedResponse<T> {
   };
 }
 
-export interface ApiError {
-  message: string;
-  error: string;
+export interface ContentListResponse<T> {
+  contents: T[];
 }
