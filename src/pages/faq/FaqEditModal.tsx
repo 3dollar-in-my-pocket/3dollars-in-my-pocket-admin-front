@@ -3,10 +3,21 @@ import {useEffect, useState} from "react";
 import {formatDateTime} from "../../utils/dateUtils";
 import faqApi from "../../api/faqApi";
 import {toast} from "react-toastify";
+import {useNonce} from "../../hooks/useNonce";
 
 const FaqEditModal = ({applications, showModal, handleCloseModal, selectedApplication, selectedFaq, faqCategories}) => {
   const [editedFaq, setEditedFaq] = useState(selectedFaq || {});
   const [selectedCategory, setSelectedCategory] = useState(selectedFaq?.category?.category || "");
+  const {nonce, issueNonce, clearNonce} = useNonce();
+
+  // 모달이 열릴 때 신규 등록인 경우에만 Nonce 토큰 발급
+  useEffect(() => {
+    if (showModal && !selectedFaq) {
+      issueNonce();
+    } else if (!showModal) {
+      clearNonce();
+    }
+  }, [showModal, selectedFaq, issueNonce, clearNonce]);
 
   useEffect(() => {
     if (selectedFaq) {
@@ -30,6 +41,12 @@ const FaqEditModal = ({applications, showModal, handleCloseModal, selectedApplic
   };
 
   const handleSave = async () => {
+    // 신규 등록 시 Nonce 토큰 검증
+    if (!selectedFaq && !nonce) {
+      toast.error("Nonce 토큰이 발급되지 않았습니다. 잠시 후 다시 시도해주세요.");
+      return;
+    }
+
     const payload = {
       application: editedFaq.application,
       question: editedFaq.question,
@@ -42,7 +59,10 @@ const FaqEditModal = ({applications, showModal, handleCloseModal, selectedApplic
         ...payload,
         faqId: editedFaq.faqId,
       })
-      : await faqApi.createFaq(payload);
+      : await faqApi.createFaq({
+        ...payload,
+        nonce,
+      });
 
     const response = await action;
     if (response.ok) {

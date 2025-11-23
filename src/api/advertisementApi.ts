@@ -22,12 +22,15 @@ export default {
       return error.response;
     }
   },
-  createAd: async ({application, adData}: any) => {
+  createAd: async ({application, adData, nonce}: any) => {
     try {
       const response = await axiosInstance({
         method: "POST",
         url: `/v1/application/${application}/advertisement`,
         data: adData,
+        headers: nonce ? {
+          'X-Nonce-Token': nonce,
+        } : {},
       });
       return response.data;
     } catch (error: any) {

@@ -1,6 +1,3 @@
-// User related type definitions and constants
-import { BaseEntity } from './api';
-
 // Social login types
 export const SOCIAL_TYPES = {
   KAKAO: 'KAKAO',
@@ -30,11 +27,12 @@ export const SEARCH_TYPES = {
 export type SearchType = typeof SEARCH_TYPES[keyof typeof SEARCH_TYPES];
 
 // User interfaces
-export interface User extends BaseEntity {
+export interface User {
   name: string;
-  nickname?: string;
   socialType: SocialType;
   userId?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface UserSettings {

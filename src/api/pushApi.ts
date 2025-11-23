@@ -12,14 +12,18 @@ const pushApi = {
    * @param {string} pushData.title - 푸시 제목
    * @param {string} pushData.body - 푸시 내용
    * @param {string} [pushData.path] - 이동 경로 (선택)
+   * @param {string} [nonce] - Nonce 토큰 (중복 발송 방지)
    * @returns {Promise<Object>} 발송 결과
    */
-  sendPush: async (pushType: any, pushData: any) => {
+  sendPush: async (pushType: any, pushData: any, nonce?: string) => {
     try {
       const response = await axiosInstance({
         method: 'POST',
         url: `/v1/push/${pushType}`,
-        data: pushData
+        data: pushData,
+        headers: nonce ? {
+          'X-Nonce-Token': nonce,
+        } : {},
       });
 
       if (response.data.ok) {

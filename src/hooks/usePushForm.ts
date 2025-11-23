@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import pushApi from "../api/pushApi";
 import uploadApi from "../api/uploadApi";
 import {
@@ -7,8 +7,20 @@ import {
   removeUserFromTarget,
   parseAccountIds
 } from "../utils/pushUtils";
+import { useNonce } from "./useNonce";
 
 export const usePushForm = () => {
+  const { nonce, issueNonce, clearNonce } = useNonce();
+
+  // 훅이 처음 마운트될 때 Nonce 토큰 발급
+  useEffect(() => {
+    issueNonce();
+
+    // 클린업 함수로 언마운트 시 토큰 초기화
+    return () => {
+      clearNonce();
+    };
+  }, [issueNonce, clearNonce]);
   // 폼 상태
   const [formData, setFormData] = useState({
     accountIdsInput: "",
@@ -184,6 +196,12 @@ export const usePushForm = () => {
   const confirmSendPush = async () => {
     const validation = validatePushData(formData);
 
+    // Nonce 토큰 검증
+    if (!nonce) {
+      setResult("danger", "Nonce 토큰이 발급되지 않았습니다. 잠시 후 다시 시도해주세요.");
+      return;
+    }
+
     setUiState(prev => ({ ...prev, loading: true, showConfirm: false }));
 
     try {
@@ -196,7 +214,7 @@ export const usePushForm = () => {
         imageUrl: formData.imageUrl
       };
 
-      const response = await pushApi.sendPush(formData.pushType, pushData);
+      const response = await pushApi.sendPush(formData.pushType, pushData, nonce);
 
       if (response.ok) {
         setResult("success", "✅ 푸시 발송 성공!");
@@ -216,6 +234,8 @@ export const usePushForm = () => {
           searchLoading: false
         });
         setSelectedUsers([]);
+        // 새로운 Nonce 토큰 발급
+        issueNonce();
       } else {
         setResult("danger", response.error || "❌ 푸시 발송 실패");
       }

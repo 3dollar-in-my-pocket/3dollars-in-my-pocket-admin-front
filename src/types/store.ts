@@ -1,6 +1,6 @@
 // Store related type definitions and constants
 import { WRITER_TYPE, getWriterTypeBadgeClass, WriterType } from './common';
-import { BaseEntity } from './api';
+
 
 // Store status types (using common STATUS constants)
 export const STORE_STATUS = {
@@ -57,7 +57,7 @@ export const STORE_SEARCH_TYPES = {
 export type StoreSearchType = typeof STORE_SEARCH_TYPES[keyof typeof STORE_SEARCH_TYPES];
 
 // Store interfaces
-export interface Store extends BaseEntity {
+export interface Store {
   name: string;
   status: StoreStatus;
   activitiesStatus?: ActivitiesStatus;

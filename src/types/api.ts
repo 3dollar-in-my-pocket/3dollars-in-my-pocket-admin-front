@@ -1,7 +1,6 @@
 export interface ApiResponse<T = any> {
+  ok: boolean;
   data: T;
-  message?: string;
-  success?: boolean;
 }
 
 export interface PaginatedResponse<T> {
@@ -12,14 +11,7 @@ export interface PaginatedResponse<T> {
   };
 }
 
-export interface BaseEntity {
-  id: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
 export interface ApiError {
   message: string;
-  code?: string;
-  details?: any;
+  error: string;
 }
