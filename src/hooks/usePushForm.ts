@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import pushApi from "../api/pushApi";
 import uploadApi from "../api/uploadApi";
 import {
@@ -7,8 +7,21 @@ import {
   removeUserFromTarget,
   parseAccountIds
 } from "../utils/pushUtils";
+import { useNonce } from "./useNonce";
+import { OS_PLATFORM, OsPlatform } from "../types/push";
 
 export const usePushForm = () => {
+  const { nonce, issueNonce, clearNonce } = useNonce();
+
+  // 훅이 처음 마운트될 때 Nonce 토큰 발급
+  useEffect(() => {
+    issueNonce();
+
+    // 클린업 함수로 언마운트 시 토큰 초기화
+    return () => {
+      clearNonce();
+    };
+  }, [issueNonce, clearNonce]);
   // 폼 상태
   const [formData, setFormData] = useState({
     accountIdsInput: "",
@@ -19,6 +32,10 @@ export const usePushForm = () => {
     imageUrl: "",
     targetType: "USER" // USER 또는 BOSS
   });
+
+  const [targetOsPlatforms, setTargetOsPlatforms] = useState<Set<OsPlatform>>(
+    new Set([OS_PLATFORM.AOS, OS_PLATFORM.IOS])
+  );
 
   // 검색 상태
   const [searchState, setSearchState] = useState({
@@ -163,12 +180,31 @@ export const usePushForm = () => {
     setResult("success", "이미지가 제거되었습니다.");
   };
 
+  // OS 플랫폼 토글
+  const toggleOsPlatform = (platform: OsPlatform) => {
+    setTargetOsPlatforms(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(platform)) {
+        newSet.delete(platform);
+      } else {
+        newSet.add(platform);
+      }
+      return newSet;
+    });
+  };
+
   // 푸시 발송 확인 모달 표시
   const showSendConfirm = () => {
     // 유효성 검사
     const validation = validatePushData(formData);
     if (!validation.isValid) {
       setResult("danger", validation.message);
+      return;
+    }
+
+    // OS 플랫폼 검증
+    if (targetOsPlatforms.size === 0) {
+      setResult("danger", "최소 하나의 OS를 선택해주세요.");
       return;
     }
 
@@ -184,6 +220,12 @@ export const usePushForm = () => {
   const confirmSendPush = async () => {
     const validation = validatePushData(formData);
 
+    // Nonce 토큰 검증
+    if (!nonce) {
+      setResult("danger", "Nonce 토큰이 발급되지 않았습니다. 잠시 후 다시 시도해주세요.");
+      return;
+    }
+
     setUiState(prev => ({ ...prev, loading: true, showConfirm: false }));
 
     try {
@@ -193,10 +235,11 @@ export const usePushForm = () => {
         title: formData.title.trim(),
         body: formData.body.trim(),
         path: formData.path.trim(),
-        imageUrl: formData.imageUrl
+        imageUrl: formData.imageUrl,
+        targetOsPlatforms: Array.from(targetOsPlatforms)
       };
 
-      const response = await pushApi.sendPush(formData.pushType, pushData);
+      const response = await pushApi.sendPush(formData.pushType, pushData, nonce);
 
       if (response.ok) {
         setResult("success", "✅ 푸시 발송 성공!");
@@ -216,6 +259,9 @@ export const usePushForm = () => {
           searchLoading: false
         });
         setSelectedUsers([]);
+        setTargetOsPlatforms(new Set([OS_PLATFORM.AOS, OS_PLATFORM.IOS]));
+        // 새로운 Nonce 토큰 발급
+        issueNonce();
       } else {
         setResult("danger", response.error || "❌ 푸시 발송 실패");
       }
@@ -229,7 +275,7 @@ export const usePushForm = () => {
   // 발송 가능 여부 확인
   const canSend = () => {
     const validation = validatePushData(formData);
-    return validation.isValid && !uiState.loading;
+    return validation.isValid && !uiState.loading && targetOsPlatforms.size > 0;
   };
 
   return {
@@ -238,6 +284,7 @@ export const usePushForm = () => {
     searchState,
     selectedUsers,
     uiState,
+    targetOsPlatforms,
 
     // 액션
     updateFormData,
@@ -251,6 +298,7 @@ export const usePushForm = () => {
     showSendConfirm,
     hideSendConfirm,
     confirmSendPush,
-    canSend
+    canSend,
+    toggleOsPlatform
   };
 };

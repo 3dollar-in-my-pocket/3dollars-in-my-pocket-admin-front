@@ -1,6 +1,6 @@
 // Store related type definitions and constants
-import { WRITER_TYPE, getWriterTypeBadgeClass, WriterType } from './common';
-import { BaseEntity } from './api';
+import { WRITER_TYPE, getWriterTypeBadgeClass } from './common';
+
 
 // Store status types (using common STATUS constants)
 export const STORE_STATUS = {
@@ -57,7 +57,7 @@ export const STORE_SEARCH_TYPES = {
 export type StoreSearchType = typeof STORE_SEARCH_TYPES[keyof typeof STORE_SEARCH_TYPES];
 
 // Store interfaces
-export interface Store extends BaseEntity {
+export interface Store {
   name: string;
   status: StoreStatus;
   activitiesStatus?: ActivitiesStatus;
@@ -71,20 +71,6 @@ export interface Store extends BaseEntity {
     longitude: number;
     address?: string;
   };
-}
-
-export interface StoreSearchRequest {
-  type: StoreSearchType;
-  keyword?: string;
-  cursor?: string | null;
-  size: number;
-}
-
-export interface StoreSearchResponse {
-  stores: Store[];
-  hasMore: boolean;
-  nextCursor?: string | null;
-  totalCount: number;
 }
 
 // Utility functions
@@ -252,17 +238,6 @@ export const getStoreTypeIcon = (storeType: StoreType): string => {
   }
 };
 
-// 가게 기능 지원 여부 체크 함수들 (확장 가능)
-export const isPostsSupported = (storeType: StoreType): boolean => {
-  const supportedTypes: StoreType[] = [STORE_TYPE.BOSS_STORE];
-  return supportedTypes.includes(storeType);
-};
-
-export const isMessagesSupported = (storeType: StoreType): boolean => {
-  const supportedTypes: StoreType[] = [STORE_TYPE.BOSS_STORE];
-  return supportedTypes.includes(storeType);
-};
-
 export const isVisitsSupported = (storeType: StoreType): boolean => {
   const supportedTypes: StoreType[] = [STORE_TYPE.USER_STORE];
   return supportedTypes.includes(storeType);
@@ -276,8 +251,4 @@ export const isImagesSupported = (storeType: StoreType): boolean => {
 export const isReportsSupported = (storeType: StoreType): boolean => {
   const supportedTypes: StoreType[] = [STORE_TYPE.USER_STORE];
   return supportedTypes.includes(storeType);
-};
-
-export const getFeatureUnsupportedMessage = (featureName: string, supportedStoreTypeName = '사장님 가게'): string => {
-  return `${featureName} 기능은 ${supportedStoreTypeName}에서만 지원하고 있습니다.`;
 };

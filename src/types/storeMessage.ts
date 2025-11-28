@@ -1,4 +1,4 @@
-import { StoreInfo } from './review';
+import {StoreInfo} from './review';
 
 export interface StoreMessage {
   messageId: string;
@@ -6,12 +6,4 @@ export interface StoreMessage {
   store?: StoreInfo;
   createdAt: string;
   updatedAt: string;
-}
-
-export interface StoreMessagesResponse {
-  contents: StoreMessage[];
-  cursor: {
-    nextCursor?: string;
-    hasMore: boolean;
-  };
 }

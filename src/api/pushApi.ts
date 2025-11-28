@@ -1,25 +1,30 @@
 import axiosInstance from './apiBase';
 import userApi from './userApi';
 import { SEARCH_TYPES } from '../types/user';
+import { PushRequest } from '../types/push';
 
 const pushApi = {
   /**
    * 푸시 발송
-   * @param {string} pushType - 푸시 타입 ('SIMPLE' | 'SIMPLE_MARKETING')
-   * @param {Object} pushData - 푸시 데이터
-   * @param {Array<string>} pushData.accountIds - 대상 사용자 ID 목록
-   * @param {string} pushData.accountType - 계정 타입 (기본값: 'USER_ACCOUNT')
-   * @param {string} pushData.title - 푸시 제목
-   * @param {string} pushData.body - 푸시 내용
-   * @param {string} [pushData.path] - 이동 경로 (선택)
-   * @returns {Promise<Object>} 발송 결과
    */
-  sendPush: async (pushType: any, pushData: any) => {
+  sendPush: async (
+    pushType: string,
+    pushData: Partial<PushRequest> & { accountIds: string[], accountType: string },
+    nonce?: string
+  ) => {
     try {
+      const requestData = {
+        ...pushData,
+        targetOsPlatforms: pushData.targetOsPlatforms ? new Set(pushData.targetOsPlatforms) : undefined
+      };
+
       const response = await axiosInstance({
         method: 'POST',
         url: `/v1/push/${pushType}`,
-        data: pushData
+        data: requestData,
+        headers: nonce ? {
+          'X-Nonce-Token': nonce,
+        } : {},
       });
 
       if (response.data.ok) {
@@ -44,10 +49,8 @@ const pushApi = {
 
   /**
    * 사용자 닉네임 검색 (userApi의 searchUsers 활용)
-   * @param {string} nickname - 검색할 닉네임
-   * @returns {Promise<Object>} 검색 결과
    */
-  searchUserByNickname: async (nickname: any) => {
+  searchUserByNickname: async (nickname: string) => {
     try {
       const searchRequest = {
         type: SEARCH_TYPES.NAME,

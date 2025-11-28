@@ -54,14 +54,6 @@ export const getCouponStatusBadgeClass = (status: CouponStatus): string => {
   }
 };
 
-export const canIssueCoupon = (status: CouponStatus): boolean => {
-  return status === COUPON_STATUS.ACTIVE;
-};
-
-export const canUseCoupon = (status: CouponStatus): boolean => {
-  return status === COUPON_STATUS.ACTIVE || status === COUPON_STATUS.STOPPED;
-};
-
 export const formatCouponDate = (dateString: string): string => {
   if (!dateString) return '없음';
   return new Date(dateString).toLocaleString('ko-KR', {

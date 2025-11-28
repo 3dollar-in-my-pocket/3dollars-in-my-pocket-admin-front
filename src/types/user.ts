@@ -1,6 +1,3 @@
-// User related type definitions and constants
-import { BaseEntity } from './api';
-
 // Social login types
 export const SOCIAL_TYPES = {
   KAKAO: 'KAKAO',
@@ -30,11 +27,12 @@ export const SEARCH_TYPES = {
 export type SearchType = typeof SEARCH_TYPES[keyof typeof SEARCH_TYPES];
 
 // User interfaces
-export interface User extends BaseEntity {
+export interface User {
   name: string;
-  nickname?: string;
   socialType: SocialType;
   userId?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface UserSettings {
@@ -161,7 +159,7 @@ export const getSocialTypeBadgeClass = (socialType: SocialType): string => {
 };
 
 export const formatUserIds = (userIdsString: string): number[] => {
-  if (!userIdsString || !userIdsString.trim()) {
+  if (!userIdsString?.trim()) {
     return [];
   }
 
@@ -199,7 +197,7 @@ export const getMarketingConsentBadgeClass = (marketingConsent: MarketingConsent
 
 export const validateUserSearch = (searchType: SearchType, searchQuery: string, userIds: string): string | null => {
   if (searchType === SEARCH_TYPES.NAME) {
-    if (!searchQuery || !searchQuery.trim()) {
+    if (!searchQuery?.trim()) {
       return '검색어를 입력해주세요.';
     }
   }

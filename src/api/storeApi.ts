@@ -1,7 +1,5 @@
 import axiosInstance from './apiBase';
-import { AxiosResponse } from 'axios';
-import { Store, StoreType } from '../types/store';
-import { PaginatedResponse } from '../types/api';
+import {StoreType} from '../types/store';
 
 export default {
   /**

@@ -48,11 +48,3 @@ export interface StoreReview {
   createdAt: string;
   updatedAt: string;
 }
-
-export interface StoreReviewsResponse {
-  contents: StoreReview[];
-  cursor: {
-    nextCursor?: string;
-    hasMore: boolean;
-  };
-}

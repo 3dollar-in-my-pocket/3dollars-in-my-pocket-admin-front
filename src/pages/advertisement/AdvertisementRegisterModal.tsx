@@ -1,20 +1,32 @@
-import React, {useState} from "react";
+import React, {useState, useEffect} from "react";
 import PropTypes from "prop-types";
 import {Button, Form, Modal} from "react-bootstrap";
 import {toast} from "react-toastify";
 import advertisementApi from "../../api/advertisementApi";
 import BasicInfoStep from "./steps/BasicInfoStep";
 import ContentInfoStep from "./steps/ContentInfoStep";
+import {useNonce} from "../../hooks/useNonce";
 
 const AdvertisementRegisterModal = ({show, onHide, positions, fetchAdvertisements}) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState(getInitialFormData());
+  const {nonce, issueNonce, clearNonce} = useNonce();
 
   const platforms = [
     {key: "ALL", description: "전체 플랫폼"},
     {key: "AOS", description: "안드로이드"},
     {key: "IOS", description: "iOS"},
   ];
+
+  // 모달이 열릴 때 Nonce 토큰 발급
+  useEffect(() => {
+    if (show) {
+      issueNonce();
+    } else {
+      // 모달이 닫힐 때 Nonce 토큰 초기화
+      clearNonce();
+    }
+  }, [show, issueNonce, clearNonce]);
 
   const resetForm = () => {
     if (!window.confirm("정말로 초기화 하시겠습니까?")) {
@@ -38,6 +50,11 @@ const AdvertisementRegisterModal = ({show, onHide, positions, fetchAdvertisement
       return;
     }
 
+    if (!nonce) {
+      toast.error("Nonce 토큰이 발급되지 않았습니다. 잠시 후 다시 시도해주세요.");
+      return;
+    }
+
     const content = {
       ...formData.content,
       ...(formData.content.link.linkType !== "null" && formData.content.link.linkUrl
@@ -54,6 +71,7 @@ const AdvertisementRegisterModal = ({show, onHide, positions, fetchAdvertisement
           endDateTime: `${formData.endDateTime}:00`,
           content,
         },
+        nonce,
       });
 
       if (res.ok) {

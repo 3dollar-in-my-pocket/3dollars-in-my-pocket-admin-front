@@ -30,7 +30,7 @@ export default {
       return error.response;
     }
   },
-  createFaq: async ({application, question, answer, category}: any) => {
+  createFaq: async ({application, question, answer, category, nonce}: any) => {
     try {
       const response = await axiosInstance(
         {
@@ -40,7 +40,10 @@ export default {
             question,
             answer,
             category
-          }
+          },
+          headers: nonce ? {
+            'X-Nonce-Token': nonce,
+          } : {},
         }
       )
       return response.data
