@@ -13,15 +13,10 @@ const pushApi = {
     nonce?: string
   ) => {
     try {
-      const requestData = {
-        ...pushData,
-        targetOsPlatforms: pushData.targetOsPlatforms ? new Set(pushData.targetOsPlatforms) : undefined
-      };
-
       const response = await axiosInstance({
         method: 'POST',
         url: `/v1/push/${pushType}`,
-        data: requestData,
+        data: pushData,
         headers: nonce ? {
           'X-Nonce-Token': nonce,
         } : {},

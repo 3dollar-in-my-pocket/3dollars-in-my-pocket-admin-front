@@ -235,7 +235,7 @@ export const usePushForm = () => {
         title: formData.title.trim(),
         body: formData.body.trim(),
         path: formData.path.trim(),
-        imageUrl: formData.imageUrl,
+        imageUrl: formData.imageUrl || null,
         targetOsPlatforms: Array.from(targetOsPlatforms)
       };
 
