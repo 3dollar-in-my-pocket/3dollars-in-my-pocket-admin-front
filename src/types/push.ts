@@ -22,5 +22,6 @@ export interface PushRequest {
   title: string;
   body: string;
   path?: string;
-  targetOsPlatforms?: Set<OsPlatform> | OsPlatform[];
+  imageUrl?: string | null;
+  targetOsPlatforms?: OsPlatform[];
 }
