@@ -8,6 +8,7 @@ import {
   parseAccountIds
 } from "../utils/pushUtils";
 import { useNonce } from "./useNonce";
+import { OS_PLATFORM, OsPlatform } from "../types/push";
 
 export const usePushForm = () => {
   const { nonce, issueNonce, clearNonce } = useNonce();
@@ -31,6 +32,10 @@ export const usePushForm = () => {
     imageUrl: "",
     targetType: "USER" // USER 또는 BOSS
   });
+
+  const [targetOsPlatforms, setTargetOsPlatforms] = useState<Set<OsPlatform>>(
+    new Set([OS_PLATFORM.AOS, OS_PLATFORM.IOS])
+  );
 
   // 검색 상태
   const [searchState, setSearchState] = useState({
@@ -175,12 +180,31 @@ export const usePushForm = () => {
     setResult("success", "이미지가 제거되었습니다.");
   };
 
+  // OS 플랫폼 토글
+  const toggleOsPlatform = (platform: OsPlatform) => {
+    setTargetOsPlatforms(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(platform)) {
+        newSet.delete(platform);
+      } else {
+        newSet.add(platform);
+      }
+      return newSet;
+    });
+  };
+
   // 푸시 발송 확인 모달 표시
   const showSendConfirm = () => {
     // 유효성 검사
     const validation = validatePushData(formData);
     if (!validation.isValid) {
       setResult("danger", validation.message);
+      return;
+    }
+
+    // OS 플랫폼 검증
+    if (targetOsPlatforms.size === 0) {
+      setResult("danger", "최소 하나의 OS를 선택해주세요.");
       return;
     }
 
@@ -211,7 +235,8 @@ export const usePushForm = () => {
         title: formData.title.trim(),
         body: formData.body.trim(),
         path: formData.path.trim(),
-        imageUrl: formData.imageUrl
+        imageUrl: formData.imageUrl,
+        targetOsPlatforms: Array.from(targetOsPlatforms)
       };
 
       const response = await pushApi.sendPush(formData.pushType, pushData, nonce);
@@ -234,6 +259,7 @@ export const usePushForm = () => {
           searchLoading: false
         });
         setSelectedUsers([]);
+        setTargetOsPlatforms(new Set([OS_PLATFORM.AOS, OS_PLATFORM.IOS]));
         // 새로운 Nonce 토큰 발급
         issueNonce();
       } else {
@@ -249,7 +275,7 @@ export const usePushForm = () => {
   // 발송 가능 여부 확인
   const canSend = () => {
     const validation = validatePushData(formData);
-    return validation.isValid && !uiState.loading;
+    return validation.isValid && !uiState.loading && targetOsPlatforms.size > 0;
   };
 
   return {
@@ -258,6 +284,7 @@ export const usePushForm = () => {
     searchState,
     selectedUsers,
     uiState,
+    targetOsPlatforms,
 
     // 액션
     updateFormData,
@@ -271,6 +298,7 @@ export const usePushForm = () => {
     showSendConfirm,
     hideSendConfirm,
     confirmSendPush,
-    canSend
+    canSend,
+    toggleOsPlatform
   };
 };

@@ -4,6 +4,7 @@ import PushPreview from "../../components/push/PushPreview";
 import UserSearch from "../../components/push/UserSearch";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { OS_PLATFORM, getOsPlatformDisplayName } from "../../types/push";
 
 const PushManage = () => {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ const PushManage = () => {
     searchState,
     selectedUsers,
     uiState,
+    targetOsPlatforms,
     updateFormData,
     updateNicknameSearch,
     searchUserByNickname,
@@ -25,7 +27,8 @@ const PushManage = () => {
     showSendConfirm,
     hideSendConfirm,
     confirmSendPush,
-    canSend
+    canSend,
+    toggleOsPlatform
   } = usePushForm();
 
   const handleUserToggle = (userId, nickname) => {
@@ -137,6 +140,36 @@ const PushManage = () => {
                       </Tab.Pane>
                     </Tab.Content>
                   </Tab.Container>
+                </Form.Group>
+
+                <Form.Group className="mb-3">
+                  <Form.Label className="fw-semibold">
+                    <i className="bi bi-phone me-2"></i>대상 OS
+                  </Form.Label>
+                  <div className="d-flex gap-3">
+                    {Object.values(OS_PLATFORM).map((platform) => (
+                      <Form.Check
+                        key={platform}
+                        type="checkbox"
+                        id={`os-${platform}`}
+                        label={
+                          <span className="d-flex align-items-center gap-2">
+                            <i className={`bi ${platform === 'AOS' ? 'bi-android2' : 'bi-apple'}`}></i>
+                            {getOsPlatformDisplayName(platform)}
+                          </span>
+                        }
+                        checked={targetOsPlatforms.has(platform)}
+                        onChange={() => toggleOsPlatform(platform)}
+                        className="user-select-none"
+                      />
+                    ))}
+                  </div>
+                  <Form.Text className="text-muted small">
+                    {targetOsPlatforms.size === 0
+                      ? "최소 하나의 OS를 선택해야 합니다"
+                      : `${Array.from(targetOsPlatforms).map(p => getOsPlatformDisplayName(p)).join(', ')}에 발송됩니다`
+                    }
+                  </Form.Text>
                 </Form.Group>
 
                 {formData.targetType === "USER" && (
@@ -363,8 +396,11 @@ const PushManage = () => {
                   <div className="mb-1">
                     <strong>이미지:</strong> {formData.imageUrl ? '첨부됨' : '(없음)'}
                   </div>
-                  <div>
+                  <div className="mb-1">
                     <strong>발송 대상:</strong> {formData.targetType === "USER" ? "유저" : "사장님"} - {selectedUsers.length > 0 ? `${selectedUsers.length}명 선택됨` : '직접 입력된 ID'}
+                  </div>
+                  <div>
+                    <strong>대상 OS:</strong> {Array.from(targetOsPlatforms).map(p => getOsPlatformDisplayName(p)).join(', ')}
                   </div>
                 </div>
               </div>
