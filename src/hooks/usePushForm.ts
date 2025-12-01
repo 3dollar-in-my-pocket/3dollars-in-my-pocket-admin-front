@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import pushApi from "../api/pushApi";
 import uploadApi from "../api/uploadApi";
 import {
@@ -11,6 +12,7 @@ import { useNonce } from "./useNonce";
 import { OS_PLATFORM, OsPlatform } from "../types/push";
 
 export const usePushForm = () => {
+  const location = useLocation();
   const { nonce, issueNonce, clearNonce } = useNonce();
 
   // 훅이 처음 마운트될 때 Nonce 토큰 발급
@@ -22,6 +24,7 @@ export const usePushForm = () => {
       clearNonce();
     };
   }, [issueNonce, clearNonce]);
+
   // 폼 상태
   const [formData, setFormData] = useState({
     accountIdsInput: "",
@@ -32,6 +35,17 @@ export const usePushForm = () => {
     imageUrl: "",
     targetType: "USER" // USER 또는 BOSS
   });
+
+  // location.state에서 전달받은 userIds 처리
+  useEffect(() => {
+    const state = location.state as { userIds?: number[] } | null;
+    if (state?.userIds && state.userIds.length > 0) {
+      setFormData(prev => ({
+        ...prev,
+        accountIdsInput: state.userIds.join(', ')
+      }));
+    }
+  }, [location.state]);
 
   const [targetOsPlatforms, setTargetOsPlatforms] = useState<Set<OsPlatform>>(
     new Set([OS_PLATFORM.AOS, OS_PLATFORM.IOS])

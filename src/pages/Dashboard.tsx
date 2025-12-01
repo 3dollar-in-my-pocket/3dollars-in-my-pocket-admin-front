@@ -52,6 +52,12 @@ const Dashboard = () => {
       icon: "bi-person-badge",
       route: "/manage/tool/random-name"
     },
+    {
+      title: "유저 랭킹 관리",
+      description: "랭킹 타입별 유저 랭킹을 조회하고 관리할 수 있습니다.",
+      icon: "bi-trophy-fill",
+      route: "/manage/user-ranking"
+    },
   ];
 
   const contentTools = [

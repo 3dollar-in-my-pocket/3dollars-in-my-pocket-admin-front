@@ -1,5 +1,6 @@
 import {useEffect, useState} from 'react';
 import {Modal, Tab, Tabs} from 'react-bootstrap';
+import {useNavigate} from 'react-router-dom';
 import '../../styles/mobile-tabs.css';
 import {
   getMarketingConsentBadgeClass,
@@ -9,6 +10,7 @@ import {
 } from '../../types/user';
 import {DEVICE_OS, getOsBadgeClass,} from '../../types/device';
 import userApi from '../../api/userApi';
+import medalApi from '../../api/medalApi';
 import {toast} from 'react-toastify';
 import ActivityHistory from '../../components/ActivityHistory';
 import UserStoreHistory from '../../components/UserStoreHistory';
@@ -16,9 +18,11 @@ import UserReviewHistory from '../../components/UserReviewHistory';
 import UserVisitHistory from '../../components/UserVisitHistory';
 import UserStoreImageHistory from '../../components/UserStoreImageHistory';
 import UserStoreReportHistory from '../../components/UserStoreReportHistory';
+import MedalAssignModal from '../../components/userRanking/MedalAssignModal';
 import deviceApi from "../../api/deviceApi";
 
 const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
+  const navigate = useNavigate();
   const [userDetail, setUserDetail] = useState(null);
   const [devices, setDevices] = useState([]);
   const [settings, setSettings] = useState(null);
@@ -27,6 +31,8 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('basic');
   const [error, setError] = useState(null);
+  const [showMedalModal, setShowMedalModal] = useState(false);
+  const [isAssigningMedal, setIsAssigningMedal] = useState(false);
 
   useEffect(() => {
     if (show && user) {
@@ -129,6 +135,39 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
     }
   };
 
+  // 메달 지급 핸들러
+  const handleAssignMedal = async (medalId) => {
+    if (isAssigningMedal) return;
+
+    setIsAssigningMedal(true);
+    try {
+      const response = await medalApi.assignMedalToUsers(medalId, [parseInt(user.userId)]);
+
+      if (response.ok) {
+        toast.success('메달이 지급되었습니다.');
+        setShowMedalModal(false);
+        // 유저 정보 새로고침
+        await fetchUserDetail();
+      } else {
+        toast.error('메달 지급에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('메달 지급 실패:', error);
+      toast.error('메달 지급 중 오류가 발생했습니다.');
+    } finally {
+      setIsAssigningMedal(false);
+    }
+  };
+
+  // 푸시 발송 핸들러
+  const handleSendPush = () => {
+    navigate('/manage/push-message', {
+      state: {
+        userIds: [parseInt(user.userId)]
+      }
+    });
+  };
+
   if (!show || !user) return null;
 
   return (
@@ -148,7 +187,7 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
         style={{background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'}}
       >
         <div className="w-100">
-          <div className="d-flex align-items-center gap-3 text-white">
+          <div className="d-flex align-items-center justify-content-between gap-3 text-white">
             <div>
               <Modal.Title className="mb-0 fs-4 fs-md-3 fw-bold">
                 사용자 상세 정보
@@ -156,6 +195,23 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
               <p className="mb-0 opacity-90 small">
                 {user.nickname}님의 정보를 확인하세요
               </p>
+            </div>
+            <div className="d-flex gap-2">
+              <button
+                className="btn btn-warning btn-sm d-flex align-items-center gap-2"
+                onClick={() => setShowMedalModal(true)}
+                disabled={isAssigningMedal}
+              >
+                <i className="bi bi-award-fill"></i>
+                <span className="d-none d-md-inline">메달 지급</span>
+              </button>
+              <button
+                className="btn btn-light btn-sm d-flex align-items-center gap-2"
+                onClick={handleSendPush}
+              >
+                <i className="bi bi-send-fill"></i>
+                <span className="d-none d-md-inline">푸시 발송</span>
+              </button>
             </div>
           </div>
         </div>
@@ -756,6 +812,14 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
           닫기
         </button>
       </Modal.Footer>
+
+      {/* 메달 지급 모달 */}
+      <MedalAssignModal
+        show={showMedalModal}
+        onHide={() => setShowMedalModal(false)}
+        selectedUserCount={1}
+        onAssign={handleAssignMedal}
+      />
     </Modal>
   );
 };

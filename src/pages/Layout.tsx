@@ -153,6 +153,19 @@ const Layout = () => {
                     <span className="fw-medium">랜덤 닉네임 관리</span>
                   </Link>
                 </li>
+
+                <li>
+                  <Link
+                    to="/manage/user-ranking"
+                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
+                      isActive("/manage/user-ranking") ? "bg-primary text-white" : "text-white-50"
+                    }`}
+                    onClick={closeSidebar}
+                  >
+                    <i className="bi bi-trophy-fill fs-5"></i>
+                    <span className="fw-medium">유저 랭킹 관리</span>
+                  </Link>
+                </li>
               </ul>
             </div>
 
