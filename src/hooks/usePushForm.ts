@@ -230,6 +230,26 @@ export const usePushForm = () => {
     setUiState(prev => ({ ...prev, showConfirm: false }));
   };
 
+  // 폼 초기화
+  const resetForm = () => {
+    setFormData({
+      accountIdsInput: "",
+      title: "",
+      body: "",
+      path: "",
+      pushType: "SIMPLE",
+      imageUrl: "",
+      targetType: "USER"
+    });
+    setSearchState({
+      nicknameSearch: "",
+      searchResults: [],
+      searchLoading: false
+    });
+    setSelectedUsers([]);
+    setTargetOsPlatforms(new Set([OS_PLATFORM.AOS, OS_PLATFORM.IOS]));
+  };
+
   // 실제 푸시 발송
   const confirmSendPush = async () => {
     const validation = validatePushData(formData);
@@ -237,7 +257,7 @@ export const usePushForm = () => {
     // Nonce 토큰 검증
     if (!nonce) {
       setResult("danger", "Nonce 토큰이 발급되지 않았습니다. 잠시 후 다시 시도해주세요.");
-      return;
+      return false;
     }
 
     setUiState(prev => ({ ...prev, loading: true, showConfirm: false }));
@@ -257,30 +277,17 @@ export const usePushForm = () => {
 
       if (response.ok) {
         setResult("success", "✅ 푸시 발송 성공!");
-        // 폼 초기화
-        setFormData({
-          accountIdsInput: "",
-          title: "",
-          body: "",
-          path: "",
-          pushType: "SIMPLE",
-          imageUrl: "",
-          targetType: "USER"
-        });
-        setSearchState({
-          nicknameSearch: "",
-          searchResults: [],
-          searchLoading: false
-        });
-        setSelectedUsers([]);
-        setTargetOsPlatforms(new Set([OS_PLATFORM.AOS, OS_PLATFORM.IOS]));
+        resetForm();
         // 새로운 Nonce 토큰 발급
         issueNonce();
+        return true;
       } else {
         setResult("danger", response.error || "❌ 푸시 발송 실패");
+        return false;
       }
     } catch (error) {
       setResult("danger", "⚠️ 서버 오류 발생");
+      return false;
     } finally {
       setUiState(prev => ({ ...prev, loading: false }));
     }
@@ -313,6 +320,7 @@ export const usePushForm = () => {
     hideSendConfirm,
     confirmSendPush,
     canSend,
-    toggleOsPlatform
+    toggleOsPlatform,
+    resetForm
   };
 };

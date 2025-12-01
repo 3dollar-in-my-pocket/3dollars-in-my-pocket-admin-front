@@ -17,6 +17,18 @@ const Dashboard = () => {
       route: "/manage/user-search"
     },
     {
+      title: "유저 랜덤 닉네임 관리",
+      description: "유저에게 할당되는 랜덤 닉네임의 현황을 확인할 수 있습니다.",
+      icon: "bi-person-badge",
+      route: "/manage/tool/random-name"
+    },
+    {
+      title: "유저 랭킹 관리",
+      description: "랭킹 타입별 유저 랭킹을 조회하고 관리할 수 있습니다.",
+      icon: "bi-trophy-fill",
+      route: "/manage/user-ranking"
+    },
+    {
       title: "가게 관리",
       description: "가게를 검색하고 상세 정보를 확인할 수 있습니다.",
       icon: "bi-shop",
@@ -45,18 +57,6 @@ const Dashboard = () => {
       description: "투표를 생성하고 관리할 수 있습니다.",
       icon: "bi-bar-chart-fill",
       route: "/manage/poll"
-    },
-    {
-      title: "랜덤 닉네임 관리",
-      description: "유저에게 할당되는 랜덤 닉네임의 현황을 확인할 수 있습니다.",
-      icon: "bi-person-badge",
-      route: "/manage/tool/random-name"
-    },
-    {
-      title: "유저 랭킹 관리",
-      description: "랭킹 타입별 유저 랭킹을 조회하고 관리할 수 있습니다.",
-      icon: "bi-trophy-fill",
-      route: "/manage/user-ranking"
     },
   ];
 

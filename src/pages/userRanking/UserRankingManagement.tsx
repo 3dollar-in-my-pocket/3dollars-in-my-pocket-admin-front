@@ -1,5 +1,4 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import enumApi from '../../api/enumApi';
 import userRankingApi from '../../api/userRankingApi';
@@ -9,12 +8,12 @@ import UserRankingCard from '../../components/userRanking/UserRankingCard';
 import UserDetailModal from '../user/UserDetailModal';
 import StoreDetailModal from '../store/StoreDetailModal';
 import MedalAssignModal from '../../components/userRanking/MedalAssignModal';
+import PushSendModal from '../../components/push/PushSendModal';
 import Loading from '../../components/common/Loading';
 
 const MAX_SELECTION = 500;
 
 const UserRankingManagement = () => {
-  const navigate = useNavigate();
   const [rankingTypes, setRankingTypes] = useState<any[]>([]);
   const [selectedRankingType, setSelectedRankingType] = useState<string>('');
   const [rankingList, setRankingList] = useState<UserRankingItem[]>([]);
@@ -29,6 +28,7 @@ const UserRankingManagement = () => {
   const [endRankInput, setEndRankInput] = useState<string>('');
   const [showMedalModal, setShowMedalModal] = useState(false);
   const [isAssigningMedal, setIsAssigningMedal] = useState(false);
+  const [showPushModal, setShowPushModal] = useState(false);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const pageSize = 20;
@@ -222,12 +222,7 @@ const UserRankingManagement = () => {
       toast.warning('푸시를 발송할 유저를 선택해주세요.');
       return;
     }
-
-    navigate('/manage/push-message', {
-      state: {
-        userIds: Array.from(selectedUserIds)
-      }
-    });
+    setShowPushModal(true);
   };
 
   const handleOpenMedalModal = () => {
@@ -455,6 +450,13 @@ const UserRankingManagement = () => {
         onHide={() => setShowMedalModal(false)}
         selectedUserCount={selectedUserIds.size}
         onAssign={handleAssignMedal}
+      />
+
+      {/* 푸시 발송 모달 */}
+      <PushSendModal
+        show={showPushModal}
+        onHide={() => setShowPushModal(false)}
+        initialUserIds={Array.from(selectedUserIds)}
       />
     </div>
   );

@@ -79,6 +79,32 @@ const Layout = () => {
 
                 <li>
                   <Link
+                    to="/manage/tool/random-name"
+                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
+                      isActive("/manage/tool/random-name") ? "bg-primary text-white" : "text-white-50"
+                    }`}
+                    onClick={closeSidebar}
+                  >
+                    <i className="bi bi-person-badge fs-5"></i>
+                    <span className="fw-medium">유저 랜덤 닉네임 관리</span>
+                  </Link>
+                </li>
+
+                <li>
+                  <Link
+                    to="/manage/user-ranking"
+                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
+                      isActive("/manage/user-ranking") ? "bg-primary text-white" : "text-white-50"
+                    }`}
+                    onClick={closeSidebar}
+                  >
+                    <i className="bi bi-trophy-fill fs-5"></i>
+                    <span className="fw-medium">유저 랭킹 관리</span>
+                  </Link>
+                </li>
+
+                <li>
+                  <Link
                     to="/manage/store-search"
                     className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
                       isActive("/manage/store-search") ? "bg-primary text-white" : "text-white-50"
@@ -139,31 +165,6 @@ const Layout = () => {
                   >
                     <i className="bi bi-bar-chart-fill fs-5"></i>
                     <span className="fw-medium">커뮤니티 투표 관리</span>
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/manage/tool/random-name"
-                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
-                      isActive("/manage/tool/random-name") ? "bg-primary text-white" : "text-white-50"
-                    }`}
-                    onClick={closeSidebar}
-                  >
-                    <i className="bi bi-person-badge fs-5"></i>
-                    <span className="fw-medium">랜덤 닉네임 관리</span>
-                  </Link>
-                </li>
-
-                <li>
-                  <Link
-                    to="/manage/user-ranking"
-                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
-                      isActive("/manage/user-ranking") ? "bg-primary text-white" : "text-white-50"
-                    }`}
-                    onClick={closeSidebar}
-                  >
-                    <i className="bi bi-trophy-fill fs-5"></i>
-                    <span className="fw-medium">유저 랭킹 관리</span>
                   </Link>
                 </li>
               </ul>
