@@ -37,4 +37,26 @@ export default {
       return error.response;
     }
   },
+
+  /**
+   * 유저들에게 메달 지급
+   * @param {number} medalId - 메달 ID
+   * @param {number[]} userIds - 유저 ID 배열
+   * @returns {Promise<Object>} 지급 결과
+   */
+  assignMedalToUsers: async (medalId: number, userIds: number[]): Promise<any> => {
+    try {
+      const response = await axiosInstance({
+        method: 'POST',
+        url: `/v1/users/medal/${medalId}`,
+        data: {
+          userIds: userIds.map(String)
+        }
+      });
+
+      return response.data;
+    } catch (error: any) {
+      return error.response;
+    }
+  },
 };

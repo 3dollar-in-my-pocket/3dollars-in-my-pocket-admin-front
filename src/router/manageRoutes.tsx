@@ -15,6 +15,7 @@ import RandomNameTool from "../pages/tool/RandomNameTool";
 import Admin from "../pages/admin/Admin";
 import PollManagement from "../pages/poll/PollManagement";
 import MedalManagement from "../pages/medal/MedalManagement";
+import UserRankingManagement from "../pages/userRanking/UserRankingManagement";
 import PrivateRouter from "./PrivateRouter";
 
 const manageRoutes = {
@@ -87,6 +88,10 @@ const manageRoutes = {
     {
       path: '/manage/poll',
       element: <PrivateRouter><PollManagement/></PrivateRouter>
+    },
+    {
+      path: '/manage/user-ranking',
+      element: <PrivateRouter><UserRankingManagement/></PrivateRouter>
     }
   ]
 };

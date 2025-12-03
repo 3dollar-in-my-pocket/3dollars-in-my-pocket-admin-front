@@ -14,6 +14,22 @@ const BasicInfoStep = ({
     onChange(name, value);
   };
 
+  // 현재 시간을 datetime-local 형식으로 변환하는 함수
+  const getCurrentDateTime = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+
+  // 현재 시간으로 설정하는 핸들러
+  const setToCurrentTime = (fieldName) => {
+    onChange(fieldName, getCurrentDateTime());
+  };
+
   return (
     <div className="row g-3 g-md-4">
       {/* 캠페인 정보 */}
@@ -196,14 +212,30 @@ const BasicInfoStep = ({
                   <i className="bi bi-play-circle me-1"></i>
                   시작일시 <span className="text-danger">*</span>
                 </Form.Label>
-                <Form.Control
-                  type="datetime-local"
-                  name="startDateTime"
-                  value={formData.startDateTime || ""}
-                  onChange={handleChange}
-                  className="form-control-lg"
-                  style={{borderRadius: '8px'}}
-                />
+                <div className="d-flex gap-2">
+                  <Form.Control
+                    type="datetime-local"
+                    name="startDateTime"
+                    value={formData.startDateTime || ""}
+                    onChange={handleChange}
+                    className="form-control-lg"
+                    style={{borderRadius: '8px', flex: 1}}
+                  />
+                  <button
+                    type="button"
+                    className="btn btn-outline-success d-flex align-items-center gap-1"
+                    onClick={() => setToCurrentTime('startDateTime')}
+                    title="현재 시간으로 설정"
+                    style={{
+                      borderRadius: '8px',
+                      padding: '8px 16px',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    <i className="bi bi-clock-fill"></i>
+                    <span className="d-none d-sm-inline">현재</span>
+                  </button>
+                </div>
                 <Form.Text className="text-muted">
                   광고가 시작될 일시를 설정하세요
                 </Form.Text>
@@ -215,14 +247,30 @@ const BasicInfoStep = ({
                   <i className="bi bi-stop-circle me-1"></i>
                   종료일시 <span className="text-danger">*</span>
                 </Form.Label>
-                <Form.Control
-                  type="datetime-local"
-                  name="endDateTime"
-                  value={formData.endDateTime || ""}
-                  onChange={handleChange}
-                  className="form-control-lg"
-                  style={{borderRadius: '8px'}}
-                />
+                <div className="d-flex gap-2">
+                  <Form.Control
+                    type="datetime-local"
+                    name="endDateTime"
+                    value={formData.endDateTime || ""}
+                    onChange={handleChange}
+                    className="form-control-lg"
+                    style={{borderRadius: '8px', flex: 1}}
+                  />
+                  <button
+                    type="button"
+                    className="btn btn-outline-danger d-flex align-items-center gap-1"
+                    onClick={() => setToCurrentTime('endDateTime')}
+                    title="현재 시간으로 설정"
+                    style={{
+                      borderRadius: '8px',
+                      padding: '8px 16px',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    <i className="bi bi-clock-fill"></i>
+                    <span className="d-none d-sm-inline">현재</span>
+                  </button>
+                </div>
                 <Form.Text className="text-muted">
                   광고가 종료될 일시를 설정하세요
                 </Form.Text>

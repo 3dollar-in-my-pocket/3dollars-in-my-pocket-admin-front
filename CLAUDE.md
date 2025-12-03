@@ -221,3 +221,7 @@ GET /api?cursor={{cursor}}&size=20
 - Skeleton / Spinner / Placeholder 적극 활용
 - 알림 UX
 - Toastify 사용 시 위치/중복 처리 규칙 정의
+
+
+### 기타
+- 신규 페이지 추가시 홈 및 네비 탭에 추가
