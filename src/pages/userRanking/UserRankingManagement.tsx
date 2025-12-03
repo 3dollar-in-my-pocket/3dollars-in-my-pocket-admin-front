@@ -24,8 +24,8 @@ const UserRankingManagement = () => {
   const [selectedStore, setSelectedStore] = useState(null);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [selectedUserIds, setSelectedUserIds] = useState<Set<number>>(new Set());
-  const [startRankInput, setStartRankInput] = useState<string>('');
-  const [endRankInput, setEndRankInput] = useState<string>('');
+  const [startRankInput, setStartRankInput] = useState<number>(1);
+  const [endRankInput, setEndRankInput] = useState<number>(10);
   const [showMedalModal, setShowMedalModal] = useState(false);
   const [isAssigningMedal, setIsAssigningMedal] = useState(false);
   const [showPushModal, setShowPushModal] = useState(false);
@@ -85,14 +85,13 @@ const UserRankingManagement = () => {
       const response = await userRankingApi.getUserRankings(request);
 
       if (response.ok && response.data) {
-        const newItems = response.data.contents || [];
+        const { contents = [], cursor: newCursor = {} } = response.data as any;
         // 탈퇴 유저(userId가 null인 경우) 필터링
-        const filteredItems = newItems.filter((item: UserRankingItem) => item.user?.userId != null);
+        const filteredItems = contents.filter((item: UserRankingItem) => item.user?.userId != null);
 
-        // API 응답에서 nextCursor 추출 (여러 구조 지원)
-        const cursorData = response.data.cursor || {};
-        const nextCursorValue = cursorData.nextCursor || response.data.nextCursor || null;
-        const hasMoreValue = cursorData.hasMore !== undefined ? cursorData.hasMore : false;
+        // API 응답에서 nextCursor 추출
+        const nextCursorValue = newCursor.nextCursor || null;
+        const hasMoreValue = newCursor.hasMore || false;
 
         if (isInitial) {
           setRankingList(filteredItems);
@@ -193,40 +192,37 @@ const UserRankingManagement = () => {
   };
 
   const handleSelectByRank = () => {
-    const startRank = parseInt(startRankInput, 10);
-    const endRank = parseInt(endRankInput, 10);
-
-    if (!startRankInput || isNaN(startRank) || startRank <= 0) {
+    if (isNaN(startRankInput) || startRankInput <= 0) {
       toast.warning('시작 순위는 1 이상의 숫자를 입력해주세요.');
       return;
     }
 
-    if (!endRankInput || isNaN(endRank) || endRank <= 0) {
+    if (isNaN(endRankInput) || endRankInput <= 0) {
       toast.warning('종료 순위는 1 이상의 숫자를 입력해주세요.');
       return;
     }
 
-    if (startRank > endRank) {
+    if (startRankInput > endRankInput) {
       toast.warning('시작 순위는 종료 순위보다 작거나 같아야 합니다.');
       return;
     }
 
-    if (endRank > rankingList.length) {
+    if (endRankInput > rankingList.length) {
       toast.warning(`현재 랭킹에는 ${rankingList.length}명만 있습니다.`);
       return;
     }
 
-    const count = endRank - startRank + 1;
+    const count = endRankInput - startRankInput + 1;
     if (count > MAX_SELECTION) {
       toast.warning(`최대 ${MAX_SELECTION}명까지만 선택할 수 있습니다.`);
       return;
     }
 
     // 배열 인덱스는 0부터 시작하므로 -1
-    const idsToSelect = rankingList.slice(startRank - 1, endRank).map(item => item.user.userId);
+    const idsToSelect = rankingList.slice(startRankInput - 1, endRankInput).map(item => item.user.userId);
     setSelectedUserIds(new Set(idsToSelect));
 
-    toast.success(`${startRank}등부터 ${endRank}등까지 ${count}명이 선택되었습니다.`);
+    toast.success(`${startRankInput}등부터 ${endRankInput}등까지 ${count}명이 선택되었습니다.`);
     // 선택 후 입력값 유지 (재사용 가능하도록)
   };
 
@@ -346,7 +342,7 @@ const UserRankingManagement = () => {
                           className="form-control"
                           placeholder="1"
                           value={startRankInput}
-                          onChange={(e) => setStartRankInput(e.target.value)}
+                          onChange={(e) => setStartRankInput(e.target.valueAsNumber || 0)}
                           style={{ width: '65px' }}
                           min="1"
                         />
@@ -359,8 +355,8 @@ const UserRankingManagement = () => {
                           className="form-control"
                           placeholder="10"
                           value={endRankInput}
-                          onChange={(e) => setEndRankInput(e.target.value)}
-                          onKeyPress={(e) => {
+                          onChange={(e) => setEndRankInput(e.target.valueAsNumber || 0)}
+                          onKeyDown={(e) => {
                             if (e.key === 'Enter') {
                               handleSelectByRank();
                             }
