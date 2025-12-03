@@ -24,7 +24,7 @@ const UserRankingManagement = () => {
   const [selectedStore, setSelectedStore] = useState(null);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [selectedUserIds, setSelectedUserIds] = useState<Set<number>>(new Set());
-  const [startRankInput, setStartRankInput] = useState<string>('1');
+  const [startRankInput, setStartRankInput] = useState<string>('');
   const [endRankInput, setEndRankInput] = useState<string>('');
   const [showMedalModal, setShowMedalModal] = useState(false);
   const [isAssigningMedal, setIsAssigningMedal] = useState(false);
@@ -86,16 +86,29 @@ const UserRankingManagement = () => {
 
       if (response.ok && response.data) {
         const newItems = response.data.contents || [];
-        const cursorData = response.data.cursor || { hasMore: false, nextCursor: null };
+        // 탈퇴 유저(userId가 null인 경우) 필터링
+        const filteredItems = newItems.filter((item: UserRankingItem) => item.user?.userId != null);
+
+        // API 응답에서 nextCursor 추출 (여러 구조 지원)
+        const cursorData = response.data.cursor || {};
+        const nextCursorValue = cursorData.nextCursor || response.data.nextCursor || null;
+        const hasMoreValue = cursorData.hasMore !== undefined ? cursorData.hasMore : false;
 
         if (isInitial) {
-          setRankingList(newItems);
+          setRankingList(filteredItems);
         } else {
-          setRankingList(prev => [...prev, ...newItems]);
+          setRankingList(prev => [...prev, ...filteredItems]);
         }
 
-        setHasMore(cursorData.hasMore || false);
-        setCursor(cursorData.nextCursor || null);
+        setHasMore(hasMoreValue);
+        setCursor(nextCursorValue);
+
+        // 디버깅용 로그
+        console.log('랭킹 페이징 정보:', {
+          현재페이지크기: filteredItems.length,
+          다음커서: nextCursorValue,
+          더있음: hasMoreValue
+        });
       } else {
         if (isInitial) {
           setRankingList([]);
@@ -183,12 +196,12 @@ const UserRankingManagement = () => {
     const startRank = parseInt(startRankInput, 10);
     const endRank = parseInt(endRankInput, 10);
 
-    if (isNaN(startRank) || startRank <= 0) {
+    if (!startRankInput || isNaN(startRank) || startRank <= 0) {
       toast.warning('시작 순위는 1 이상의 숫자를 입력해주세요.');
       return;
     }
 
-    if (isNaN(endRank) || endRank <= 0) {
+    if (!endRankInput || isNaN(endRank) || endRank <= 0) {
       toast.warning('종료 순위는 1 이상의 숫자를 입력해주세요.');
       return;
     }
@@ -214,7 +227,7 @@ const UserRankingManagement = () => {
     setSelectedUserIds(new Set(idsToSelect));
 
     toast.success(`${startRank}등부터 ${endRank}등까지 ${count}명이 선택되었습니다.`);
-    setEndRankInput('');
+    // 선택 후 입력값 유지 (재사용 가능하도록)
   };
 
   const handleSendPush = () => {
@@ -324,37 +337,48 @@ const UserRankingManagement = () => {
                       전체 선택
                     </label>
                   </div>
-                  <div className="d-flex align-items-center gap-2">
-                    <input
-                      type="number"
-                      className="form-control form-control-sm"
-                      placeholder="시작"
-                      value={startRankInput}
-                      onChange={(e) => setStartRankInput(e.target.value)}
-                      style={{ width: '70px' }}
-                      min="1"
-                    />
-                    <span className="text-muted">~</span>
-                    <input
-                      type="number"
-                      className="form-control form-control-sm"
-                      placeholder="종료"
-                      value={endRankInput}
-                      onChange={(e) => setEndRankInput(e.target.value)}
-                      onKeyPress={(e) => {
-                        if (e.key === 'Enter') {
-                          handleSelectByRank();
-                        }
-                      }}
-                      style={{ width: '70px' }}
-                      min="1"
-                    />
-                    <button
-                      className="btn btn-sm btn-outline-primary"
-                      onClick={handleSelectByRank}
-                    >
-                      범위 선택
-                    </button>
+                  <div className="d-flex align-items-center gap-2 flex-wrap">
+                    <div className="d-flex align-items-center gap-2">
+                      <span className="text-muted small fw-semibold">순위 범위:</span>
+                      <div className="input-group input-group-sm" style={{ width: 'auto' }}>
+                        <input
+                          type="number"
+                          className="form-control"
+                          placeholder="1"
+                          value={startRankInput}
+                          onChange={(e) => setStartRankInput(e.target.value)}
+                          style={{ width: '65px' }}
+                          min="1"
+                        />
+                        <span className="input-group-text bg-white">등</span>
+                      </div>
+                      <span className="text-muted fw-bold">~</span>
+                      <div className="input-group input-group-sm" style={{ width: 'auto' }}>
+                        <input
+                          type="number"
+                          className="form-control"
+                          placeholder="10"
+                          value={endRankInput}
+                          onChange={(e) => setEndRankInput(e.target.value)}
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter') {
+                              handleSelectByRank();
+                            }
+                          }}
+                          style={{ width: '65px' }}
+                          min="1"
+                        />
+                        <span className="input-group-text bg-white">등</span>
+                      </div>
+                      <button
+                        className="btn btn-sm btn-primary d-flex align-items-center gap-1"
+                        onClick={handleSelectByRank}
+                        title="입력한 순위 범위의 유저들을 선택합니다"
+                      >
+                        <i className="bi bi-check2-square"></i>
+                        선택
+                      </button>
+                    </div>
                   </div>
                 </>
               )}
