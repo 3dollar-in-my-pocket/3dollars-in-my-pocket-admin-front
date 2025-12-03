@@ -2,6 +2,7 @@ import {useCallback, useEffect, useRef, useState} from 'react';
 import {toast} from 'react-toastify';
 import {getActivitiesStatusDisplayName, getStoreStatusBadgeClass, getStoreStatusDisplayName, getStoreTypeDisplayName, getStoreTypeBadgeClass, getStoreTypeIcon} from "../types/store";
 import reviewApi from "../api/reviewApi";
+import { formatDateTimeKo as formatDateTime } from "../utils/dateUtils";
 
 const UserReviewHistory = ({userId, isActive, onStoreClick}) => {
   const [reviews, setReviews] = useState([]);
@@ -174,18 +175,6 @@ const UserReviewHistory = ({userId, isActive, onStoreClick}) => {
       );
     }
     return stars;
-  };
-
-  const formatDateTime = (dateString) => {
-    if (!dateString) return '없음';
-    return new Date(dateString).toLocaleString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    });
   };
 
   // 리뷰 삭제 핸들러

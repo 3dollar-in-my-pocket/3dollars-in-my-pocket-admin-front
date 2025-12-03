@@ -35,7 +35,8 @@
 - **언어**: TypeScript 5.9.3 (JavaScript에서 마이그레이션 완료)
 - **프론트엔드 프레임워크**: React 18.3.1 + React Router DOM 6.11.0
 - **상태 관리**: Recoil 0.7.7 (`src/state/LoginStatus.ts`)
-- **UI 프레임워크**: React Bootstrap 2.10.3 + Bootstrap 5.3.3 + Bootstrap Icons 1.10.3
+- **UI 프레임워크**: React Bootstrap 2.10.3 + Bootstrap 5.3.3 + Bootstrap Icons 1.10.3 + React Icons 5.5.0
+- **차트/시각화**: Recharts 3.3.0
 - **HTTP 클라이언트**: Axios 1.7.4 (커스텀 인터셉터 포함)
 - **알림 시스템**: React Toastify 11.0.5
 - **유틸리티**: clsx 2.1.1, qs 6.14.0
@@ -84,7 +85,28 @@ src/
 - Axios 인스턴스에서 `baseURL` 환경변수 사용
 - 요청 인터셉터: LocalStorage에서 토큰 가져와 헤더에 추가
 - 응답 인터셉터: 공통 에러 처리 (한국어 메시지)
-- 기능별 API 모듈 (adminApi, advertisementApi 등)
+- 기능별 API 모듈:
+  - `adminApi` - 관리자 관리
+  - `advertisementApi` - 광고 관리
+  - `authApi` - 인증
+  - `couponApi` - 쿠폰 관리
+  - `deviceApi` - 디바이스 관리
+  - `faqApi` - FAQ 관리
+  - `medalApi` - 메달 관리
+  - `policyApi` - 정책 관리
+  - `pollApi` - 투표 관리
+  - `pushApi` - 푸시 알림
+  - `registrationApi` - 회원가입 관리
+  - `reviewApi` - 리뷰 관리
+  - `statisticsApi` - 통계
+  - `storeApi` - 스토어 관리
+  - `storeImageApi` - 스토어 이미지 관리
+  - `storeMessageApi` - 스토어 메시지 관리
+  - `storeReportApi` - 스토어 신고 관리
+  - `uploadApi` - 파일 업로드
+  - `userApi` - 유저 관리
+  - `userRankingApi` - 유저 랭킹 관리
+  - `visitApi` - 방문 관리
 
 #### 인증 흐름
 
@@ -103,18 +125,33 @@ src/
 
 ## 주요 기능 영역
 
+### 관리 페이지 (`/manage/*`)
+
+- **대시보드** (`/manage`): 통계 및 현황 대시보드
 - **광고 관리** (`/manage/advertisement`): 다단계 폼 기반 광고 등록/수정
-- **유저 관리** (`/manage/user`): 유저 검색 및 상세 정보 조회, 리뷰/방문/신고 이력 관리
-- **스토어 관리** (`/manage/store`): 스토어 검색 및 상세 정보, 이미지/메시지/게시물/리뷰/방문/신고 이력 관리
+- **유저 관리** (`/manage/user-search`): 유저 검색 및 상세 정보 조회, 리뷰/방문/신고 이력, 뱃지/푸시 발송
+- **유저 랭킹** (`/manage/user-ranking`): 유저 랭킹 조회 및 메달 지급 기능
+- **스토어 관리** (`/manage/store-search`): 스토어 검색 및 상세 정보, 이미지/메시지/게시물/리뷰/방문/신고 이력 관리
+- **리뷰 관리** (`/manage/review`): 리뷰 조회 및 관리
+- **스토어 메시지 관리** (`/manage/store-message`): 스토어 메시지 관리
+- **메달 관리** (`/manage/medal`): 메달 생성/수정, 아이콘 업로드, 획득 조건 설정
+- **쿠폰 관리** (`/manage/coupon`): 쿠폰 생성 및 관리
 - **FAQ 관리** (`/manage/faq`): FAQ 생성 및 편집
 - **정책 관리** (`/manage/policy`): 정책 설정 및 수정
-- **푸시 알림** (`/manage/push`): 푸시 메시지 타겟팅 및 발송 관리
+- **푸시 알림** (`/manage/push-message`): 푸시 메시지 타겟팅 및 발송 관리
 - **투표 관리** (`/manage/poll`): 투표 생성 및 관리
 - **회원 가입 관리** (`/manage/registration`): 사용자 가입 요청 승인/거부
 - **관리자 관리** (`/manage/admin`): 관리자 계정 관리 및 등록
-- **관리 도구** (`/manage/tool/*`): 캐시 관리, 파일 업로드 등
-- **대시보드** (`/manage/dashboard`): 통계 및 현황 대시보드
-- **푸시 통계 정보** (`/info/push-stat`): 푸시 통계
+
+### 관리 도구 (`/manage/tool/*`)
+
+- **캐시 관리** (`/manage/tool/cache`): 시스템 캐시 관리
+- **파일 업로드** (`/manage/tool/upload`): 이미지 및 파일 업로드
+- **랜덤 이름 생성** (`/manage/tool/random-name`): 랜덤 이름 생성 도구
+
+### 정보 페이지 (`/info/*`)
+
+- **푸시 통계** (`/info/push-stat`): 푸시 발송 통계 및 분석
 
 ---
 
