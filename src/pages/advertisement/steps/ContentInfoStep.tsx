@@ -4,6 +4,7 @@ import {toast} from "react-toastify";
 import uploadApi from "../../../api/uploadApi";
 import AdPreview from "../../../components/advertisement/AdPreview";
 import { isFieldAvailable } from "../../../constants/advertisementSpecs";
+import DeepLinkSelector from "../../../components/common/DeepLinkSelector";
 
 const ContentInfoStep = ({formData, onChange}) => {
   const content = formData.content;
@@ -383,51 +384,54 @@ const ContentInfoStep = ({formData, onChange}) => {
             <i className="bi bi-link-45deg text-success fs-4 me-2"></i>
             <h6 className="mb-0 text-success fw-bold">링크 설정</h6>
           </div>
-          <Row>
-            <Col md={6}>
-              <Form.Group className="mb-3 mb-md-0">
-                <Form.Label className="fw-semibold d-flex align-items-center">
-                  <i className="bi bi-box-arrow-up-right text-success me-2"></i>
-                  링크 유형
-                </Form.Label>
-                <Form.Select
-                  value={content.link.linkType}
-                  onChange={(e) => handleLinkChange("linkType", e.target.value)}
-                  className="shadow-sm"
-                >
-                  <option value="">선택하세요</option>
-                  <option value="APP_SCHEME">📱 앱 딥링크</option>
-                  <option value="WEB">🌐 웹 링크</option>
-                </Form.Select>
-              </Form.Group>
-            </Col>
-            {content.link.linkType && (
-              <Col md={6}>
-                <Form.Group>
-                  <Form.Label className="fw-semibold d-flex align-items-center">
-                    <i className="bi bi-link text-success me-2"></i>
-                    링크 주소
-                  </Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={content.link.linkUrl || ""}
-                    onChange={(e) => handleLinkChange("linkUrl", e.target.value)}
-                    placeholder={
-                      content.link.linkType === 'WEB'
-                        ? "https://example.com"
-                        : "/home"
-                    }
-                    className="shadow-sm"
-                  />
-                  <small className="text-muted">
-                    {content.link.linkType === 'WEB'
-                      ? '예: https://example.com'
-                      : '예: /home 또는 myapp://screen'}
-                  </small>
-                </Form.Group>
-              </Col>
-            )}
-          </Row>
+          <Form.Group className="mb-3">
+            <Form.Label className="fw-semibold d-flex align-items-center">
+              <i className="bi bi-box-arrow-up-right text-success me-2"></i>
+              링크 유형
+              <span className="text-danger ms-1">*</span>
+            </Form.Label>
+            <Form.Select
+              value={content.link.linkType}
+              onChange={(e) => handleLinkChange("linkType", e.target.value)}
+              className="shadow-sm"
+            >
+              <option value="">선택하세요</option>
+              <option value="APP_SCHEME">📱 앱 딥링크</option>
+              <option value="WEB">🌐 웹 링크</option>
+            </Form.Select>
+          </Form.Group>
+
+          {content.link.linkType === 'APP_SCHEME' && (
+            <DeepLinkSelector
+              value={content.link.linkUrl || ""}
+              onChange={(value) => handleLinkChange("linkUrl", value)}
+              applicationType="USER_API"
+              label="링크 주소"
+              required={true}
+              placeholder="/home, /event 등"
+              helpText="광고 클릭 시 이동할 앱 화면 경로를 선택하거나 직접 입력하세요"
+            />
+          )}
+
+          {content.link.linkType === 'WEB' && (
+            <Form.Group>
+              <Form.Label className="fw-semibold d-flex align-items-center">
+                <i className="bi bi-link text-success me-2"></i>
+                링크 주소
+                <span className="text-danger ms-1">*</span>
+              </Form.Label>
+              <Form.Control
+                type="text"
+                value={content.link.linkUrl || ""}
+                onChange={(e) => handleLinkChange("linkUrl", e.target.value)}
+                placeholder="https://example.com"
+                className="shadow-sm"
+              />
+              <Form.Text className="text-muted">
+                예: https://example.com
+              </Form.Text>
+            </Form.Group>
+          )}
         </div>
       )}
     </>
