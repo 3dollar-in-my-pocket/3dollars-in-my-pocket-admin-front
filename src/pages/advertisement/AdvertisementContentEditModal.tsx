@@ -7,6 +7,7 @@ import uploadApi from "../../api/uploadApi";
 import AdTimer from "../../components/common/AdTimer";
 import AdPreview from "../../components/advertisement/AdPreview";
 import { isFieldAvailable, isFieldRequired } from "../../constants/advertisementSpecs";
+import DeepLinkSelector from "../../components/common/DeepLinkSelector";
 
 const AdvertisementContentEditModal = ({show, onHide, ad, fetchAdvertisements}) => {
   const [formData, setFormData] = useState(null);
@@ -386,35 +387,47 @@ const AdvertisementContentEditModal = ({show, onHide, ad, fetchAdvertisements}) 
                   <h6 className="text-warning fw-bold mb-3">
                     <i className="bi bi-link-45deg me-2"></i>링크 설정
                   </h6>
-                  <div className="row g-3">
-                    <div className="col-md-4">
-                      <Form.Group>
-                        <Form.Label className="fw-semibold">
-                          링크 유형 {isLinkRequired && <span className="text-danger">*</span>}
-                        </Form.Label>
-                        <Form.Select
-                          value={formData.linkType}
-                          onChange={(e) => handleChange("linkType", e.target.value)}
-                        >
-                          <option value="WEB">웹 링크</option>
-                          <option value="APP_SCHEME">앱 딥링크</option>
-                        </Form.Select>
-                      </Form.Group>
-                    </div>
-                    <div className="col-md-8">
-                      <Form.Group>
-                        <Form.Label className="fw-semibold">
-                          링크 주소 {isLinkRequired && <span className="text-danger">*</span>}
-                        </Form.Label>
-                        <Form.Control
-                          type="text"
-                          value={formData.linkUrl}
-                          onChange={(e) => handleChange("linkUrl", e.target.value)}
-                          placeholder={formData.linkType === "WEB" ? "https://example.com" : "/home"}
-                        />
-                      </Form.Group>
-                    </div>
-                  </div>
+                  <Form.Group className="mb-3">
+                    <Form.Label className="fw-semibold">
+                      링크 유형 {isLinkRequired && <span className="text-danger">*</span>}
+                    </Form.Label>
+                    <Form.Select
+                      value={formData.linkType}
+                      onChange={(e) => handleChange("linkType", e.target.value)}
+                    >
+                      <option value="WEB">🌐 웹 링크</option>
+                      <option value="APP_SCHEME">📱 앱 딥링크</option>
+                    </Form.Select>
+                  </Form.Group>
+
+                  {formData.linkType === 'APP_SCHEME' && (
+                    <DeepLinkSelector
+                      value={formData.linkUrl}
+                      onChange={(value) => handleChange("linkUrl", value)}
+                      applicationType="USER_API"
+                      label="링크 주소"
+                      required={isLinkRequired}
+                      placeholder="/home, /event 등"
+                      helpText="광고 클릭 시 이동할 앱 화면 경로를 선택하거나 직접 입력하세요"
+                    />
+                  )}
+
+                  {formData.linkType === 'WEB' && (
+                    <Form.Group>
+                      <Form.Label className="fw-semibold">
+                        링크 주소 {isLinkRequired && <span className="text-danger">*</span>}
+                      </Form.Label>
+                      <Form.Control
+                        type="text"
+                        value={formData.linkUrl}
+                        onChange={(e) => handleChange("linkUrl", e.target.value)}
+                        placeholder="https://example.com"
+                      />
+                      <Form.Text className="text-muted">
+                        예: https://example.com
+                      </Form.Text>
+                    </Form.Group>
+                  )}
                 </div>
               )}
             </Form>

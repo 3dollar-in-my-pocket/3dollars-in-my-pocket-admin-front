@@ -31,7 +31,7 @@ export const usePushForm = () => {
     title: "",
     body: "",
     path: "",
-    pushType: "SIMPLE",
+    pushType: "",
     imageUrl: "",
     targetType: "USER" // USER 또는 BOSS
   });
@@ -237,7 +237,7 @@ export const usePushForm = () => {
       title: "",
       body: "",
       path: "",
-      pushType: "SIMPLE",
+      pushType: "",
       imageUrl: "",
       targetType: "USER"
     });

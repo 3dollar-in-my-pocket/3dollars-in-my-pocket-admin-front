@@ -69,7 +69,15 @@ export const isUserInTarget = (currentIds, userId) => {
  * @returns {Object} - 유효성 검사 결과
  */
 export const validatePushData = (pushData) => {
-  const { accountIdsInput, title, body } = pushData;
+  const { accountIdsInput, title, body, pushType, path } = pushData;
+
+  // 푸시 타입 확인
+  if (!pushType || pushType.trim() === "") {
+    return {
+      isValid: false,
+      message: "푸시 타입을 선택해주세요."
+    };
+  }
 
   const accountIds = parseAccountIds(accountIdsInput);
 
@@ -85,6 +93,14 @@ export const validatePushData = (pushData) => {
     return {
       isValid: false,
       message: "제목 또는 내용 중 하나는 반드시 입력해주세요."
+    };
+  }
+
+  // 이동 경로 필수
+  if (!path || path.trim() === "") {
+    return {
+      isValid: false,
+      message: "이동 경로를 입력해주세요."
     };
   }
 

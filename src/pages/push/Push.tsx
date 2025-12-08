@@ -1,10 +1,10 @@
-import {Alert, Button, Card, Container, Form, Modal, Nav, Tab} from "react-bootstrap";
+import {Alert, Button, Card, Container, Form, Modal} from "react-bootstrap";
 import { usePushForm } from "../../hooks/usePushForm";
 import PushPreview from "../../components/push/PushPreview";
-import UserSearch from "../../components/push/UserSearch";
+import PushFormFields from "../../components/push/PushFormFields";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { OS_PLATFORM, getOsPlatformDisplayName } from "../../types/push";
+import { getOsPlatformDisplayName } from "../../types/push";
 
 const PushManage = () => {
   const navigate = useNavigate();
@@ -31,13 +31,6 @@ const PushManage = () => {
     toggleOsPlatform
   } = usePushForm();
 
-  const handleUserToggle = (userId, nickname) => {
-    if (isUserSelected(userId)) {
-      handleRemoveUser(userId);
-    } else {
-      handleAddUser(userId, nickname);
-    }
-  };
 
   return (
     <Container className="py-4">
@@ -93,217 +86,22 @@ const PushManage = () => {
               </div>
 
               <Form className="flex-grow-1 d-flex flex-column">
-                <Form.Group className="mb-3">
-                  <Form.Label className="fw-semibold">
-                    <i className="bi bi-tag me-2"></i>푸시 타입
-                  </Form.Label>
-                  <Form.Select
-                    value={formData.pushType}
-                    onChange={(e) => updateFormData("pushType", e.target.value)}
-                    className="border-2"
-                  >
-                    <option value="SIMPLE">📢 기본 푸시</option>
-                    <option value="SIMPLE_MARKETING">🎯 기본 마케팅 푸시</option>
-                  </Form.Select>
-                  <Form.Text className="text-muted small">
-                    푸시 알림의 유형을 선택하세요
-                  </Form.Text>
-                </Form.Group>
-
-                <Form.Group className="mb-3">
-                  <Form.Label className="fw-semibold">
-                    <i className="bi bi-people me-2"></i>발송 대상
-                  </Form.Label>
-                  <Tab.Container activeKey={formData.targetType} onSelect={(key) => updateFormData("targetType", key)}>
-                    <Nav variant="pills" className="mb-3">
-                      <Nav.Item>
-                        <Nav.Link eventKey="USER" className="px-4">
-                          <i className="bi bi-person me-2"></i>유저
-                        </Nav.Link>
-                      </Nav.Item>
-                      <Nav.Item>
-                        <Nav.Link eventKey="BOSS" className="px-4" disabled>
-                          <i className="bi bi-briefcase me-2"></i>사장님 (준비중)
-                        </Nav.Link>
-                      </Nav.Item>
-                    </Nav>
-                    <Tab.Content>
-                      <Tab.Pane eventKey="USER">
-                        <Form.Text className="text-muted small d-block mb-3">
-                          일반 사용자에게 푸시를 발송합니다
-                        </Form.Text>
-                      </Tab.Pane>
-                      <Tab.Pane eventKey="BOSS">
-                        <Form.Text className="text-muted small d-block mb-3">
-                          사장님 계정에게 푸시를 발송합니다 (준비중)
-                        </Form.Text>
-                      </Tab.Pane>
-                    </Tab.Content>
-                  </Tab.Container>
-                </Form.Group>
-
-                <Form.Group className="mb-3">
-                  <Form.Label className="fw-semibold">
-                    <i className="bi bi-phone me-2"></i>대상 OS
-                  </Form.Label>
-                  <div className="d-flex gap-3">
-                    {Object.values(OS_PLATFORM).map((platform) => (
-                      <Form.Check
-                        key={platform}
-                        type="checkbox"
-                        id={`os-${platform}`}
-                        label={
-                          <span className="d-flex align-items-center gap-2">
-                            <i className={`bi ${platform === 'AOS' ? 'bi-android2' : 'bi-apple'}`}></i>
-                            {getOsPlatformDisplayName(platform)}
-                          </span>
-                        }
-                        checked={targetOsPlatforms.has(platform)}
-                        onChange={() => toggleOsPlatform(platform)}
-                        className="user-select-none"
-                      />
-                    ))}
-                  </div>
-                  <Form.Text className="text-muted small">
-                    {targetOsPlatforms.size === 0
-                      ? "최소 하나의 OS를 선택해야 합니다"
-                      : `${Array.from(targetOsPlatforms).map(p => getOsPlatformDisplayName(p)).join(', ')}에 발송됩니다`
-                    }
-                  </Form.Text>
-                </Form.Group>
-
-                {formData.targetType === "USER" && (
-                  <UserSearch
-                    nicknameSearch={searchState.nicknameSearch}
-                    onNicknameChange={updateNicknameSearch}
-                    onSearch={searchUserByNickname}
-                    searchLoading={searchState.searchLoading}
-                    searchResults={searchState.searchResults}
-                    isUserSelected={isUserSelected}
-                    onUserToggle={handleUserToggle}
-                    selectedUsers={selectedUsers}
-                    onUserRemove={handleRemoveUser}
-                  />
-                )}
-
-                <Form.Group className="mb-3">
-                  <Form.Label className="fw-semibold">
-                    <i className="bi bi-people me-2"></i>대상 {formData.targetType === "USER" ? "사용자" : "사장님"} ID
-                  </Form.Label>
-                  <Form.Control
-                    as="textarea"
-                    rows={3}
-                    placeholder={formData.targetType === "USER"
-                      ? "사용자 ID를 쉼표로 구분하여 입력하거나, 위에서 검색하여 추가하세요"
-                      : "사장님 ID를 쉼표로 구분하여 입력하세요"
-                    }
-                    value={formData.accountIdsInput}
-                    onChange={(e) => updateFormData("accountIdsInput", e.target.value)}
-                    className="border-2"
-                  />
-                  <Form.Text className="text-muted small">
-                    여러 {formData.targetType === "USER" ? "사용자" : "사장님"}에게 발송하려면 쉼표로 구분해주세요
-                  </Form.Text>
-                </Form.Group>
-
-                <Form.Group className="mb-3">
-                  <Form.Label className="fw-semibold">
-                    <i className="bi bi-type me-2"></i>제목 (선택)
-                  </Form.Label>
-                  <Form.Control
-                    type="text"
-                    placeholder="푸시 제목을 입력하세요"
-                    value={formData.title}
-                    onChange={(e) => updateFormData("title", e.target.value)}
-                    className="border-2"
-                    maxLength={50}
-                  />
-                  <Form.Text className="text-muted small">
-                    {formData.title.length}/50자 (제목과 내용 중 하나는 필수입니다)
-                  </Form.Text>
-                </Form.Group>
-
-                <Form.Group className="mb-3">
-                  <Form.Label className="fw-semibold">
-                    <i className="bi bi-chat-text me-2"></i>내용 (선택)
-                  </Form.Label>
-                  <Form.Control
-                    as="textarea"
-                    rows={4}
-                    placeholder="푸시 메시지 내용을 입력하세요"
-                    value={formData.body}
-                    onChange={(e) => updateFormData("body", e.target.value)}
-                    className="border-2"
-                    maxLength={200}
-                  />
-                  <Form.Text className="text-muted small">
-                    {formData.body.length}/200자 (제목과 내용 중 하나는 필수입니다)
-                  </Form.Text>
-                </Form.Group>
-
-                <Form.Group className="mb-3">
-                  <Form.Label className="fw-semibold">
-                    <i className="bi bi-image me-2"></i>푸시 이미지 (선택)
-                  </Form.Label>
-                  {formData.imageUrl ? (
-                    <div className="border rounded p-3 bg-light">
-                      <div className="d-flex align-items-center justify-content-between mb-2">
-                        <small className="text-success fw-medium">
-                          <i className="bi bi-check-circle-fill me-1"></i>
-                          이미지가 업로드되었습니다
-                        </small>
-                        <Button
-                          variant="outline-danger"
-                          size="sm"
-                          onClick={removeImage}
-                        >
-                          <i className="bi bi-trash me-1"></i>제거
-                        </Button>
-                      </div>
-                      <div className="text-center">
-                        <img
-                          src={formData.imageUrl}
-                          alt="푸시 이미지 미리보기"
-                          className="img-fluid rounded"
-                          style={{ maxHeight: '200px', maxWidth: '100%' }}
-                        />
-                      </div>
-                    </div>
-                  ) : (
-                    <Form.Control
-                      type="file"
-                      accept="image/*"
-                      onChange={(e: any) => {
-                        const file = e.target.files[0];
-                        if (file) uploadImage(file);
-                      }}
-                      className="border-2"
-                      disabled={uiState.uploading}
-                    />
-                  )}
-                  <Form.Text className="text-muted small">
-                    {uiState.uploading
-                      ? "이미지 업로드 중..."
-                      : "JPG, PNG 형식의 이미지를 업로드할 수 있습니다"
-                    }
-                  </Form.Text>
-                </Form.Group>
-
-                <Form.Group className="mb-4">
-                  <Form.Label className="fw-semibold">
-                    <i className="bi bi-link-45deg me-2"></i>이동 경로 (선택)
-                  </Form.Label>
-                  <Form.Control
-                    type="text"
-                    placeholder="/home, /event 등"
-                    value={formData.path}
-                    onChange={(e) => updateFormData("path", e.target.value)}
-                    className="border-2"
-                  />
-                  <Form.Text className="text-muted small">
-                    푸시 터치 시 이동할 앱 화면 경로
-                  </Form.Text>
-                </Form.Group>
+                <PushFormFields
+                  formData={formData}
+                  searchState={searchState}
+                  selectedUsers={selectedUsers}
+                  uiState={uiState}
+                  targetOsPlatforms={targetOsPlatforms}
+                  updateFormData={updateFormData}
+                  updateNicknameSearch={updateNicknameSearch}
+                  searchUserByNickname={searchUserByNickname}
+                  handleAddUser={handleAddUser}
+                  handleRemoveUser={handleRemoveUser}
+                  isUserSelected={isUserSelected}
+                  uploadImage={uploadImage}
+                  removeImage={removeImage}
+                  toggleOsPlatform={toggleOsPlatform}
+                />
 
                 <div className="d-grid gap-2">
                   <Button
@@ -347,7 +145,7 @@ const PushManage = () => {
                     <i className="bi bi-lightbulb me-1"></i>사용 가이드
                   </h6>
                   <ul className="small text-muted mb-0 ps-3">
-                    <li><strong>푸시 타입:</strong> 기본 푸시 vs 마케팅 푸시 선택</li>
+                    <li><strong>푸시 타입:</strong> 정보성 푸시 vs 마케팅 푸시 선택</li>
                     <li><strong>사용자 검색:</strong> 닉네임으로 검색하여 대상에 추가</li>
                     <li><strong>미리보기:</strong> 미리보기 버튼을 클릭하여 푸시 알림 모습 확인</li>
                     <li><strong>제한사항:</strong> 제목 50자, 내용 200자까지 입력 가능</li>
@@ -382,7 +180,7 @@ const PushManage = () => {
                 <h6 className="fw-semibold mb-2 text-dark">발송 정보</h6>
                 <div className="small">
                   <div className="mb-1">
-                    <strong>푸시 타입:</strong> {formData.pushType === 'SIMPLE' ? '기본 푸시' : '기본 마케팅 푸시'}
+                    <strong>푸시 타입:</strong> {formData.pushType === 'SIMPLE' ? '정보성 푸시' : '광고성 푸시'}
                   </div>
                   <div className="mb-1">
                     <strong>제목:</strong> {formData.title || '(제목 없음)'}

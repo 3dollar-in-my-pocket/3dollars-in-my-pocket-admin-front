@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Modal, Button, Form, Row, Col, Card, Alert, Spinner } from 'react-bootstrap';
 import medalApi from '../../api/medalApi';
 import uploadApi from '../../api/uploadApi';
-import { Medal, hasAcquisition, getAcquisitionDescription } from '../../types/medal';
+import { Medal, getAcquisitionDescription } from '../../types/medal';
 import { toast } from 'react-toastify';
 
 interface MedalModalProps {
@@ -26,7 +26,8 @@ const MedalModal = ({ show, onHide, medal, onUpdate }: MedalModalProps) => {
     name: '',
     introduction: '',
     activationIconUrl: '',
-    disableIconUrl: ''
+    disableIconUrl: '',
+    acquisitionDescription: ''
   });
 
   useEffect(() => {
@@ -35,7 +36,8 @@ const MedalModal = ({ show, onHide, medal, onUpdate }: MedalModalProps) => {
         name: medal.name,
         introduction: medal.introduction,
         activationIconUrl: medal.iconUrl,
-        disableIconUrl: medal.disableIconUrl
+        disableIconUrl: medal.disableIconUrl,
+        acquisitionDescription: getAcquisitionDescription(medal) || ''
       });
       setIsEditing(false);
       setErrorMessage('');
@@ -144,7 +146,13 @@ const MedalModal = ({ show, onHide, medal, onUpdate }: MedalModalProps) => {
     setErrorMessage('');
 
     try {
-      const response = await medalApi.updateMedal(medal.medalId, formData);
+      const response = await medalApi.updateMedal(medal.medalId, {
+        name: formData.name,
+        introduction: formData.introduction,
+        activationIconUrl: formData.activationIconUrl,
+        disableIconUrl: formData.disableIconUrl,
+        acquisitionDescription: formData.acquisitionDescription || undefined
+      });
 
       if (response.ok) {
         toast.success('메달이 성공적으로 수정되었습니다');
@@ -169,7 +177,8 @@ const MedalModal = ({ show, onHide, medal, onUpdate }: MedalModalProps) => {
       name: medal.name,
       introduction: medal.introduction,
       activationIconUrl: medal.iconUrl,
-      disableIconUrl: medal.disableIconUrl
+      disableIconUrl: medal.disableIconUrl,
+      acquisitionDescription: getAcquisitionDescription(medal) || ''
     });
     setIsEditing(false);
     setErrorMessage('');
@@ -357,22 +366,21 @@ const MedalModal = ({ show, onHide, medal, onUpdate }: MedalModalProps) => {
             )}
           </Form.Group>
 
-          {/* 획득 조건 (읽기 전용) */}
+          {/* 획득 조건 설명 */}
           <Form.Group className="mb-3">
-            <Form.Label className="fw-bold">획득 조건</Form.Label>
-            <div className={`p-3 rounded border ${hasAcquisition(medal) ? 'bg-success bg-opacity-10 border-success' : 'bg-light border-secondary'}`}>
-              {hasAcquisition(medal) ? (
-                <div>
-                  <i className="bi bi-trophy-fill text-success me-2"></i>
-                  <span className="text-dark">{getAcquisitionDescription(medal)}</span>
-                </div>
-              ) : (
-                <div className="text-muted fst-italic">
-                  <i className="bi bi-info-circle me-2"></i>
-                  기본 메달 (획득 조건 없음)
-                </div>
-              )}
-            </div>
+            <Form.Label className="fw-bold">획득 조건 설명</Form.Label>
+            <Form.Control
+              as="textarea"
+              rows={3}
+              name="acquisitionDescription"
+              value={formData.acquisitionDescription}
+              onChange={handleChange}
+              disabled={!isEditing || isProcessing}
+              placeholder="메달 획득 조건을 입력하세요 (선택사항)"
+            />
+            <Form.Text className="text-muted">
+              유저가 메달을 획득하기 위한 조건을 설명합니다.
+            </Form.Text>
           </Form.Group>
         </Form>
       </Modal.Body>
