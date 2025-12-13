@@ -5,9 +5,95 @@ import {useRecoilState} from "recoil";
 import {LoginStatus} from "../state/LoginStatus";
 import {LocalStorageService} from "../service/LocalStorageService";
 
+// 메뉴 항목 타입 정의
+interface MenuItem {
+  path: string;
+  label: string;
+  icon: string; // Bootstrap Icons 클래스명 (예: "bi-search")
+}
+
+// 메뉴 그룹 타입 정의
+interface MenuGroup {
+  title: string;
+  items: MenuItem[];
+}
+
+/**
+ * 사이드바 메뉴 그룹 정의
+ *
+ * 새로운 메뉴를 추가하려면 아래 배열에서 원하는 그룹의 items 배열에 객체를 추가하세요.
+ *
+ * 예시:
+ * {path: "/manage/new-menu", label: "새 메뉴", icon: "bi-star"}
+ */
+const menuGroups: MenuGroup[] = [
+  {
+    title: "유저 관리",
+    items: [
+      {path: "/manage/user-search", label: "유저 검색", icon: "bi-search"},
+      {path: "/manage/tool/random-name", label: "유저 랜덤 닉네임 관리", icon: "bi-person-badge"},
+      {path: "/manage/user-ranking", label: "유저 랭킹 관리", icon: "bi-trophy-fill"},
+    ],
+  },
+  {
+    title: "사장님 관리",
+    items: [
+      {path: "/manage/registration", label: "사장님 가입 신청 관리", icon: "bi-person-lines-fill"},
+    ],
+  },
+  {
+    title: "가게 관리",
+    items: [
+      {path: "/manage/store-search", label: "가게 검색", icon: "bi-shop"},
+      {path: "/manage/popular-neighborhood-stores", label: "인기 가게", icon: "bi-star-fill"},
+      {path: "/manage/review", label: "가게 리뷰 관리", icon: "bi-chat-square-text"},
+      {path: "/manage/coupon", label: "가게 쿠폰 관리", icon: "bi-ticket-perforated"},
+      {path: "/manage/store-message", label: "가게 메시지 발송 이력", icon: "bi-chat-left-text"},
+    ],
+  },
+  {
+    title: "커뮤니티 관리",
+    items: [
+      {path: "/manage/poll", label: "투표 관리", icon: "bi-bar-chart-fill"},
+    ],
+  },
+  {
+  title: "콘텐츠 & 마케팅",
+  items: [
+    { path: "/manage/push-message", label: "푸시 발송", icon: "bi-send-fill" },
+    { path: "/manage/advertisement", label: "광고 관리", icon: "bi-bullseye" },
+    { path: "/manage/medal", label: "메달 관리", icon: "bi-award-fill" },
+    { path: "/manage/faq", label: "FAQ 관리", icon: "bi-question-circle-fill" },
+  ]
+},
+  {
+    title: "운영 툴",
+    items: [
+      {path: "/manage/policy", label: "정책 관리", icon: "bi-shield-fill-check"},
+      {path: "/manage/tool/cache", label: "캐시 툴", icon: "bi-brush-fill"},
+      {path: "/manage/tool/upload", label: "이미지 업로드 툴", icon: "bi-image-fill"},
+    ],
+  },
+  {
+    title: "통계 & 분석",
+    items: [
+      {path: "/info/service-statistics", label: "서비스 통계", icon: "bi-graph-up"},
+      {path: "/info/ad-statistics", label: "광고 통계", icon: "bi-badge-ad"},
+      {path: "/info/push-statistics", label: "푸시 통계", icon: "bi-bar-chart-line-fill"},
+    ],
+  },
+  {
+    title: "시스템 설정",
+    items: [
+      {path: "/manage/admin", label: "관리자 관리", icon: "bi-people-fill"},
+      {path: "/info/etc-link", label: "기타 링크", icon: "bi-link-45deg"},
+    ],
+  },
+];
+
 const Layout = () => {
   const location = useLocation();
-  const isActive = (path) => location.pathname === path;
+  const isActive = (path: string) => location.pathname === path;
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); // 모바일용
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false); // 데스크톱용
 
@@ -48,319 +134,27 @@ const Layout = () => {
               🎯 DASHBOARD
             </Link>
 
-
-            <div className="mb-4">
-              <h5 className="text-white-50 mb-3">서비스 관리</h5>
-              <ul className="nav flex-column gap-2">
-                <li>
-                  <Link
-                    to="/manage/registration"
-                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
-                      isActive("/manage/registration") ? "bg-primary text-white" : "text-white-50"
-                    }`}
-                    onClick={closeSidebar}
-                  >
-                    <i className="bi bi-person-lines-fill fs-5"></i>
-                    <span className="fw-medium">사장님 가입 신청 관리</span>
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/manage/user-search"
-                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
-                      isActive("/manage/user-search") ? "bg-primary text-white" : "text-white-50"
-                    }`}
-                    onClick={closeSidebar}
-                  >
-                    <i className="bi bi-search fs-5"></i>
-                    <span className="fw-medium">유저 검색</span>
-                  </Link>
-                </li>
-
-                <li>
-                  <Link
-                    to="/manage/tool/random-name"
-                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
-                      isActive("/manage/tool/random-name") ? "bg-primary text-white" : "text-white-50"
-                    }`}
-                    onClick={closeSidebar}
-                  >
-                    <i className="bi bi-person-badge fs-5"></i>
-                    <span className="fw-medium">유저 랜덤 닉네임 관리</span>
-                  </Link>
-                </li>
-
-                <li>
-                  <Link
-                    to="/manage/user-ranking"
-                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
-                      isActive("/manage/user-ranking") ? "bg-primary text-white" : "text-white-50"
-                    }`}
-                    onClick={closeSidebar}
-                  >
-                    <i className="bi bi-trophy-fill fs-5"></i>
-                    <span className="fw-medium">유저 랭킹 관리</span>
-                  </Link>
-                </li>
-
-                <li>
-                  <Link
-                    to="/manage/store-search"
-                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
-                      isActive("/manage/store-search") ? "bg-primary text-white" : "text-white-50"
-                    }`}
-                    onClick={closeSidebar}
-                  >
-                    <i className="bi bi-shop fs-5"></i>
-                    <span className="fw-medium">가게 검색</span>
-                  </Link>
-                </li>
-
-                <li>
-                  <Link
-                    to="/manage/popular-neighborhood-stores"
-                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
-                      isActive("/manage/popular-neighborhood-stores") ? "bg-primary text-white" : "text-white-50"
-                    }`}
-                    onClick={closeSidebar}
-                  >
-                    <i className="bi bi-star-fill fs-5"></i>
-                    <span className="fw-medium">인기 가게</span>
-                  </Link>
-                </li>
-
-                <li>
-                  <Link
-                    to="/manage/review"
-                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
-                      isActive("/manage/review") ? "bg-primary text-white" : "text-white-50"
-                    }`}
-                    onClick={closeSidebar}
-                  >
-                    <i className="bi bi-chat-square-text fs-5"></i>
-                    <span className="fw-medium">가게 리뷰 관리</span>
-                  </Link>
-                </li>
-
-                <li>
-                  <Link
-                    to="/manage/coupon"
-                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
-                      isActive("/manage/coupon") ? "bg-primary text-white" : "text-white-50"
-                    }`}
-                    onClick={closeSidebar}
-                  >
-                    <i className="bi bi-ticket-perforated fs-5"></i>
-                    <span className="fw-medium">가게 쿠폰 관리</span>
-                  </Link>
-                </li>
-
-                <li>
-                  <Link
-                    to="/manage/store-message"
-                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
-                      isActive("/manage/store-message") ? "bg-primary text-white" : "text-white-50"
-                    }`}
-                    onClick={closeSidebar}
-                  >
-                    <i className="bi bi-chat-left-text fs-5"></i>
-                    <span className="fw-medium">가게 메시지 발송 이력</span>
-                  </Link>
-                </li>
-
-                <li>
-                  <Link
-                    to="/manage/poll"
-                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
-                      isActive("/manage/poll") ? "bg-primary text-white" : "text-white-50"
-                    }`}
-                    onClick={closeSidebar}
-                  >
-                    <i className="bi bi-bar-chart-fill fs-5"></i>
-                    <span className="fw-medium">커뮤니티 투표 관리</span>
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-
-            <div className="mb-4">
-              <h5 className="text-white-50 mb-3">컨텐츠 관리</h5>
-              <ul className="nav flex-column gap-2">
-                <li>
-                  <Link
-                    to="/manage/advertisement"
-                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
-                      isActive("/manage/advertisement") ? "bg-primary text-white" : "text-white-50"
-                    }`}
-                    onClick={closeSidebar}
-                  >
-                    <i className="bi bi-bullseye fs-5"></i>
-                    <span className="fw-medium">광고 관리</span>
-                  </Link>
-                </li>
-                <ul className="nav flex-column gap-2"></ul>
-                <li>
-                  <Link
-                    to="/manage/faq"
-                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
-                      isActive("/manage/faq") ? "bg-primary text-white" : "text-white-50"
-                    }`}
-                    onClick={closeSidebar}
-                  >
-                    <i className="bi bi-question-circle-fill fs-5"></i>
-                    <span className="fw-medium">FAQ 관리</span>
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/manage/medal"
-                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
-                      isActive("/manage/medal") ? "bg-primary text-white" : "text-white-50"
-                    }`}
-                    onClick={closeSidebar}
-                  >
-                    <i className="bi bi-award-fill fs-5"></i>
-                    <span className="fw-medium">메달 관리</span>
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            <div className="mb-4">
-              <h5 className="text-white-50 mb-3">운영 툴</h5>
-              <ul className="nav flex-column gap-2">
-                <li>
-                  <Link
-                    to="/manage/push-message"
-                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
-                      isActive("/manage/push-message") ? "bg-primary text-white" : "text-white-50"
-                    }`}
-                    onClick={closeSidebar}
-                  >
-                    <i className="bi bi-send-fill fs-5"></i>
-                    <span className="fw-medium">푸시 발송</span>
-                  </Link>
-                </li>
-
-                <li>
-                  <Link
-                    to="/manage/policy"
-                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
-                      isActive("/manage/policy") ? "bg-primary text-white" : "text-white-50"
-                    }`}
-                    onClick={closeSidebar}
-                  >
-                    <i className="bi bi-shield-fill-check fs-5"></i>
-                    <span className="fw-medium">정책 관리</span>
-                  </Link>
-                </li>
-
-                <li>
-                  <Link
-                    to="/manage/tool/cache"
-                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
-                      isActive("/manage/tool/cache") ? "bg-primary text-white" : "text-white-50"
-                    }`}
-                    onClick={closeSidebar}
-                  >
-                    <i className="bi bi-brush-fill fs-5"></i>
-                    <span className="fw-medium">캐시 툴</span>
-                  </Link>
-                </li>
-
-                <li>
-                  <Link
-                    to="/manage/tool/upload"
-                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
-                      isActive("/manage/tool/upload") ? "bg-primary text-white" : "text-white-50"
-                    }`}
-                    onClick={closeSidebar}
-                  >
-                    <i className="bi bi-image-fill fs-5"></i>
-                    <span className="fw-medium">이미지 업로드 툴</span>
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            <div className="mb-4">
-              <h5 className="text-white-50 mb-3">통계</h5>
-              <ul className="nav flex-column gap-2">
-                <li>
-                  <Link
-                    to="/info/service-statistics"
-                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
-                      isActive("/info/service-statistics") ? "bg-primary text-white" : "text-white-50"
-                    }`}
-                    onClick={closeSidebar}
-                  >
-                    <i className="bi bi-graph-up fs-5"></i>
-                    <span className="fw-medium">서비스 통계</span>
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/info/ad-statistics"
-                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
-                      isActive("/info/ad-statistics") ? "bg-primary text-white" : "text-white-50"
-                    }`}
-                    onClick={closeSidebar}
-                  >
-                    <i className="bi bi-badge-ad fs-5"></i>
-                    <span className="fw-medium">광고 통계</span>
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/info/push-statistics"
-                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
-                      isActive("/info/push-statistics") ? "bg-primary text-white" : "text-white-50"
-                    }`}
-                    onClick={closeSidebar}
-                  >
-                    <i className="bi bi-bar-chart-line-fill fs-5"></i>
-                    <span className="fw-medium">푸시 통계</span>
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            <div className="mb-4">
-              <h5 className="text-white-50 mb-3">기타</h5>
-              <ul className="nav flex-column gap-2">
-                <li>
-                  <Link
-                    to="/info/etc-link"
-                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
-                      isActive("/info/etc-link") ? "bg-primary text-white" : "text-white-50"
-                    }`}
-                    onClick={closeSidebar}
-                  >
-                    <i className="bi bi-link-45deg fs-5"></i>
-                    <span className="fw-medium">기타 링크</span>
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            <div className="mb-4">
-              <h5 className="text-white-50 mb-3">관리자</h5>
-              <ul className="nav flex-column gap-2">
-                <li>
-                  <Link
-                    to="/manage/admin"
-                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
-                      isActive("/manage/admin") ? "bg-primary text-white" : "text-white-50"
-                    }`}
-                    onClick={closeSidebar}
-                  >
-                    <i className="bi bi-people-fill fs-5"></i>
-                    <span className="fw-medium">관리자 관리</span>
-                  </Link>
-                </li>
-              </ul>
-            </div>
+            {menuGroups.map((group, groupIndex) => (
+              <div key={groupIndex} className="mb-4">
+                <h5 className="text-white-50 mb-3">{group.title}</h5>
+                <ul className="nav flex-column gap-2">
+                  {group.items.map((item, itemIndex) => (
+                    <li key={itemIndex}>
+                      <Link
+                        to={item.path}
+                        className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
+                          isActive(item.path) ? "bg-primary text-white" : "text-white-50"
+                        }`}
+                        onClick={closeSidebar}
+                      >
+                        <i className={`bi ${item.icon} fs-5`}></i>
+                        <span className="fw-medium">{item.label}</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
 
             {isLoginState && (
               <div className="mt-auto">
