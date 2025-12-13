@@ -118,6 +118,19 @@ const Layout = () => {
 
                 <li>
                   <Link
+                    to="/manage/popular-neighborhood-stores"
+                    className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
+                      isActive("/manage/popular-neighborhood-stores") ? "bg-primary text-white" : "text-white-50"
+                    }`}
+                    onClick={closeSidebar}
+                  >
+                    <i className="bi bi-star-fill fs-5"></i>
+                    <span className="fw-medium">인기 가게</span>
+                  </Link>
+                </li>
+
+                <li>
+                  <Link
                     to="/manage/review"
                     className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
                       isActive("/manage/review") ? "bg-primary text-white" : "text-white-50"
