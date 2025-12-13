@@ -6,14 +6,14 @@ import {LoginStatus} from "../state/LoginStatus";
 import {LocalStorageService} from "../service/LocalStorageService";
 
 // 메뉴 항목 타입 정의
-interface MenuItem {
+export interface MenuItem {
   path: string;
   label: string;
   icon: string; // Bootstrap Icons 클래스명 (예: "bi-search")
 }
 
 // 메뉴 그룹 타입 정의
-interface MenuGroup {
+export interface MenuGroup {
   title: string;
   items: MenuItem[];
 }
@@ -26,7 +26,7 @@ interface MenuGroup {
  * 예시:
  * {path: "/manage/new-menu", label: "새 메뉴", icon: "bi-star"}
  */
-const menuGroups: MenuGroup[] = [
+export const menuGroups: MenuGroup[] = [
   {
     title: "유저 관리",
     items: [
@@ -48,8 +48,16 @@ const menuGroups: MenuGroup[] = [
       {path: "/manage/popular-neighborhood-stores", label: "인기 가게", icon: "bi-star-fill"},
       {path: "/manage/review", label: "가게 리뷰 관리", icon: "bi-chat-square-text"},
       {path: "/manage/coupon", label: "가게 쿠폰 관리", icon: "bi-ticket-perforated"},
-      {path: "/manage/store-message", label: "가게 메시지 발송 이력", icon: "bi-chat-left-text"},
+      {path: "/manage/store-message", label: "가게 메시지 이력", icon: "bi-chat-left-text"},
     ],
+  },
+  {
+  title: "콘텐츠",
+  items: [
+      { path: "/manage/advertisement", label: "광고 관리", icon: "bi-bullseye" },
+      { path: "/manage/medal", label: "메달 관리", icon: "bi-award-fill" },
+      { path: "/manage/faq", label: "FAQ 관리", icon: "bi-question-circle-fill" },
+    ]
   },
   {
     title: "커뮤니티 관리",
@@ -58,18 +66,10 @@ const menuGroups: MenuGroup[] = [
     ],
   },
   {
-  title: "콘텐츠 & 마케팅",
-  items: [
-    { path: "/manage/push-message", label: "푸시 발송", icon: "bi-send-fill" },
-    { path: "/manage/advertisement", label: "광고 관리", icon: "bi-bullseye" },
-    { path: "/manage/medal", label: "메달 관리", icon: "bi-award-fill" },
-    { path: "/manage/faq", label: "FAQ 관리", icon: "bi-question-circle-fill" },
-  ]
-},
-  {
     title: "운영 툴",
     items: [
-      {path: "/manage/policy", label: "정책 관리", icon: "bi-shield-fill-check"},
+      { path: "/manage/push-message", label: "푸시 발송", icon: "bi-send-fill" },
+      {path: "/manage/policy", label: "정책 설정", icon: "bi-shield-fill-check"},
       {path: "/manage/tool/cache", label: "캐시 툴", icon: "bi-brush-fill"},
       {path: "/manage/tool/upload", label: "이미지 업로드 툴", icon: "bi-image-fill"},
     ],
