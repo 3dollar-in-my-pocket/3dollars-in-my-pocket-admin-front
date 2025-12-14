@@ -5,6 +5,7 @@ import statisticsApi from "../../api/statisticsApi";
 import enumApi from "../../api/enumApi";
 import { DailyStatistic } from "../../types/statistics";
 import { toast } from "react-toastify";
+import RecentActivityStatistics from "./RecentActivityStatistics";
 
 const ServerStatistics = () => {
   const [statisticsTypes, setStatisticsTypes] = useState<{ key: string; description: string }[]>([]);
@@ -127,10 +128,14 @@ const ServerStatistics = () => {
 
       return {
         date: `${dateStr} (${dayOfWeek})`, // MM-DD (요일) 형식으로 표시
-        "신규": item.newCount,
+        "신규": item.newCount ?? 0,
         "누적": item.totalCount,
       };
     });
+  };
+
+  const isRecentActivityType = () => {
+    return selectedType === "RECENT_ACTIVITY_USER_STORE" || selectedType === "RECENT_ACTIVITY_BOSS_STORE";
   };
 
   return (
@@ -231,88 +236,108 @@ const ServerStatistics = () => {
             </Alert>
           )}
 
-          <Button
-            variant="primary"
-            onClick={handleFetchData}
-            disabled={loading || !selectedType}
-            className="w-100"
-          >
-            {loading ? "조회 중..." : "통계 조회"}
-          </Button>
+          {!isRecentActivityType() && (
+            <Button
+              variant="primary"
+              onClick={handleFetchData}
+              disabled={loading || !selectedType}
+              className="w-100"
+            >
+              {loading ? "조회 중..." : "통계 조회"}
+            </Button>
+          )}
         </Card.Body>
       </Card>
 
-      {data.length > 0 && (
+      {/* RECENT_ACTIVITY 타입은 별도 컴포넌트로 처리 */}
+      {isRecentActivityType() ? (
+        <RecentActivityStatistics
+          statisticsType={selectedType as "RECENT_ACTIVITY_USER_STORE" | "RECENT_ACTIVITY_BOSS_STORE"}
+          startDate={startDate}
+          endDate={endDate}
+          onFetch={() => setData([])}
+        />
+      ) : (
         <>
-          <Card className="mb-4 shadow-sm">
-            <Card.Body>
-              <h5 className="fw-semibold mb-3">일자별 신규 건수 추이</h5>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={getChartData()}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="신규" fill="#0d6efd" />
-                </BarChart>
-              </ResponsiveContainer>
-            </Card.Body>
-          </Card>
+          {data.length > 0 && (
+            <>
+              {/* 일자별 신규 건수 추이 */}
+              <Card className="mb-4 shadow-sm">
+                <Card.Body>
+                  <h5 className="fw-semibold mb-3">일자별 신규 건수 추이</h5>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={getChartData()}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="date" />
+                      <YAxis />
+                      <Tooltip />
+                      <Legend />
+                      <Bar dataKey="신규" fill="#0d6efd" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </Card.Body>
+              </Card>
 
-          <Card className="mb-4 shadow-sm">
-            <Card.Body>
-              <h5 className="fw-semibold mb-3">누적 건수 추이</h5>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={getChartData()}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis domain={['auto', 'auto']} />
-                  <Tooltip />
-                  <Legend />
-                  <Line type="monotone" dataKey="누적" stroke="#198754" strokeWidth={2} />
-                </LineChart>
-              </ResponsiveContainer>
-            </Card.Body>
-          </Card>
+              <Card className="mb-4 shadow-sm">
+                <Card.Body>
+                  <h5 className="fw-semibold mb-3">누적 건수 추이</h5>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={getChartData()}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="date" />
+                      <YAxis domain={["auto", "auto"]} />
+                      <Tooltip />
+                      <Legend />
+                      <Line type="monotone" dataKey="누적" stroke="#198754" strokeWidth={2} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </Card.Body>
+              </Card>
 
-          {/* 테이블 영역 */}
-          <Card className="shadow-sm">
-            <Card.Body>
-              <h5 className="fw-semibold mb-3">일자별 상세 데이터</h5>
-              <p className="text-muted mb-3">
-                총 <strong>{data.length}일</strong>의 데이터가 조회되었습니다.
-              </p>
-              <div style={{ maxHeight: "500px", overflowY: "auto" }}>
-                <Table striped bordered hover>
-                  <thead className="table-light" style={{ position: "sticky", top: 0 }}>
-                    <tr>
-                      <th>날짜</th>
-                      <th className="text-end">신규 건수</th>
-                      <th className="text-end">누적 건수</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.map((item, index) => (
-                      <tr key={index}>
-                        <td>{formatDateWithDay(item.date)}</td>
-                        <td className="text-end">{formatNumber(item.newCount)}</td>
-                        <td className="text-end">{formatNumber(item.totalCount)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
-              </div>
-            </Card.Body>
-          </Card>
+              {/* 테이블 영역 */}
+              <Card className="shadow-sm">
+                <Card.Body>
+                  <h5 className="fw-semibold mb-3">일자별 상세 데이터</h5>
+                  <p className="text-muted mb-3">
+                    총 <strong>{data.length}일</strong>의 데이터가 조회되었습니다.
+                  </p>
+                  <div style={{ maxHeight: "500px", overflowY: "auto" }}>
+                    <Table striped bordered hover>
+                      <thead className="table-light" style={{ position: "sticky", top: 0 }}>
+                        <tr>
+                          <th>날짜</th>
+                          <th className="text-end">신규 건수</th>
+                          <th className="text-end">누적 건수</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {data.map((item, index) => (
+                          <tr key={index}>
+                            <td>{formatDateWithDay(item.date)}</td>
+                            <td className="text-end">{formatNumber(item.newCount ?? 0)}</td>
+                            <td className="text-end">{formatNumber(item.totalCount)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </Table>
+                  </div>
+                </Card.Body>
+              </Card>
+            </>
+          )}
+
+          {!loading && data.length === 0 && (
+            <Alert variant="info">
+              조회 조건을 설정하고 <strong>통계 조회</strong> 버튼을 클릭하세요.
+            </Alert>
+          )}
         </>
       )}
 
-      {!loading && data.length === 0 && (
-        <Alert variant="info">
-          조회 조건을 설정하고 <strong>통계 조회</strong> 버튼을 클릭하세요.
-        </Alert>
-      )}
+      {/* 안내 문구 */}
+      <Alert variant="secondary" className="mt-4">
+        해당 지표는 실 데이터와는 별도로 수집·집계되며, 지표 수집을 시작한 시점 이후 데이터부터 제공됩니다.
+      </Alert>
     </Container>
   );
 };

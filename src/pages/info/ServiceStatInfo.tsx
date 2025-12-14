@@ -3,7 +3,7 @@ import { Card, Container, Nav } from "react-bootstrap";
 import ServerStatistics from "./ServerStatistics";
 
 const ServiceStatInfo = () => {
-  const [activeTab, setActiveTab] = useState<"firebase" | "server">("firebase");
+  const [activeTab, setActiveTab] = useState<"firebase" | "server">("server");
 
   return (
     <Container className="py-5">
@@ -12,20 +12,20 @@ const ServiceStatInfo = () => {
       <Nav variant="tabs" className="mb-4">
         <Nav.Item>
           <Nav.Link
-            active={activeTab === "firebase"}
-            onClick={() => setActiveTab("firebase")}
-            style={{ cursor: "pointer" }}
-          >
-            Firebase
-          </Nav.Link>
-        </Nav.Item>
-        <Nav.Item>
-          <Nav.Link
             active={activeTab === "server"}
             onClick={() => setActiveTab("server")}
             style={{ cursor: "pointer" }}
           >
-            서버
+            서버 통계
+          </Nav.Link>
+        </Nav.Item>
+        <Nav.Item>
+          <Nav.Link
+            active={activeTab === "firebase"}
+            onClick={() => setActiveTab("firebase")}
+            style={{ cursor: "pointer" }}
+          >
+            클라이언트 통계 (GA)
           </Nav.Link>
         </Nav.Item>
       </Nav>

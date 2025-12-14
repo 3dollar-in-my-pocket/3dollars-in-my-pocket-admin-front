@@ -1,5 +1,5 @@
 export interface DailyStatistic {
   date: string;
-  newCount: number;
+  newCount?: number;
   totalCount: number;
 }
