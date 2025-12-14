@@ -6,6 +6,7 @@ import Policy from "../pages/policy/Policy";
 import Push from "../pages/push/Push";
 import UserSearch from "../pages/user/UserSearch";
 import StoreSearch from "../pages/store/StoreSearch";
+import PopularNeighborhoodStores from "../pages/store/PopularNeighborhoodStores";
 import ReviewManagement from "../pages/review/ReviewManagement";
 import StoreMessageManagement from "../pages/storeMessage/StoreMessageManagement";
 import CouponManagement from "../pages/coupon/CouponManagement";
@@ -56,6 +57,10 @@ const manageRoutes = {
     {
       path: '/manage/store-search',
       element: <PrivateRouter><StoreSearch /></PrivateRouter>
+    },
+    {
+      path: '/manage/popular-neighborhood-stores',
+      element: <PrivateRouter><PopularNeighborhoodStores /></PrivateRouter>
     },
     {
       path: '/manage/review',

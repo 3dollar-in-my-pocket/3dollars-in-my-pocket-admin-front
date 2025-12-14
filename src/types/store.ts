@@ -58,6 +58,7 @@ export type StoreSearchType = typeof STORE_SEARCH_TYPES[keyof typeof STORE_SEARC
 
 // Store interfaces
 export interface Store {
+  storeId: number;
   name: string;
   status: StoreStatus;
   activitiesStatus?: ActivitiesStatus;
