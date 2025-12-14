@@ -119,6 +119,16 @@ const ServerStatistics = () => {
     return `${dateStr} (${dayOfWeek})`;
   };
 
+  const formatYAxisTick = (value: number): string => {
+    if (value >= 1000000) {
+      return `${(value / 1000000).toFixed(2)}M`;
+    }
+    if (value >= 1000) {
+      return `${(value / 1000).toFixed(2)}K`;
+    }
+    return value.toString();
+  };
+
   const getChartData = () => {
     return data.map((item) => {
       const date = new Date(item.date);
@@ -269,7 +279,7 @@ const ServerStatistics = () => {
                     <BarChart data={getChartData()}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="date" />
-                      <YAxis />
+                      <YAxis tickFormatter={formatYAxisTick} />
                       <Tooltip />
                       <Legend />
                       <Bar dataKey="신규" fill="#0d6efd" />
@@ -285,7 +295,7 @@ const ServerStatistics = () => {
                     <LineChart data={getChartData()}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="date" />
-                      <YAxis domain={["auto", "auto"]} />
+                      <YAxis domain={["auto", "auto"]} tickFormatter={formatYAxisTick} />
                       <Tooltip />
                       <Legend />
                       <Line type="monotone" dataKey="누적" stroke="#198754" strokeWidth={2} />
@@ -311,7 +321,7 @@ const ServerStatistics = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {data.map((item, index) => (
+                        {[...data].reverse().map((item, index) => (
                           <tr key={index}>
                             <td>{formatDateWithDay(item.date)}</td>
                             <td className="text-end">{formatNumber(item.newCount ?? 0)}</td>
