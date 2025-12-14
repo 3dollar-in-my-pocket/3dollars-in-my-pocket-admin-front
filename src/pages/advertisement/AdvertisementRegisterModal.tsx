@@ -6,6 +6,7 @@ import advertisementApi from "../../api/advertisementApi";
 import BasicInfoStep from "./steps/BasicInfoStep";
 import ContentInfoStep from "./steps/ContentInfoStep";
 import {useNonce} from "../../hooks/useNonce";
+import {isFieldRequired} from "../../constants/advertisementSpecs";
 
 const AdvertisementRegisterModal = ({show, onHide, positions, fetchAdvertisements}) => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -91,6 +92,23 @@ const AdvertisementRegisterModal = ({show, onHide, positions, fetchAdvertisement
     ? <BasicInfoStep formData={formData} onChange={handleChange} positions={positions} platforms={platforms}/>
     : <ContentInfoStep formData={formData} onChange={setFormData}/>;
 
+  // 등록 버튼 활성화 조건
+  const isSubmitDisabled = () => {
+    // 이미지는 항상 필수
+    if (!formData.content.image.url) {
+      return true;
+    }
+
+    // link가 필수인 구좌인 경우에만 link 검증
+    if (isFieldRequired(formData.position, 'link')) {
+      if (!formData.content.link.linkType || !formData.content.link.linkUrl) {
+        return true;
+      }
+    }
+
+    return false;
+  };
+
   return (
     <Modal show={show} onHide={onHide} size="lg" centered>
       <Modal.Header closeButton className="bg-primary text-white">
@@ -121,7 +139,7 @@ const AdvertisementRegisterModal = ({show, onHide, positions, fetchAdvertisement
                 </Button>
               ) : (
                 <Button variant="success" onClick={handleSubmit}
-                        disabled={!formData.content.image.url || !formData.content.link.linkType || !formData.content.link.linkUrl}
+                        disabled={isSubmitDisabled()}
                 >
                   등록
                 </Button>
