@@ -262,6 +262,7 @@ const ServerStatistics = () => {
       {/* RECENT_ACTIVITY 타입은 별도 컴포넌트로 처리 */}
       {isRecentActivityType() ? (
         <RecentActivityStatistics
+          key={selectedType}
           statisticsType={selectedType as "RECENT_ACTIVITY_USER_STORE" | "RECENT_ACTIVITY_BOSS_STORE"}
           startDate={startDate}
           endDate={endDate}
