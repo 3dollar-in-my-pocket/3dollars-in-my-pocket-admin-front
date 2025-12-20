@@ -32,6 +32,7 @@ import StorePostHistory from '../../components/StorePostHistory';
 import StoreMessageHistory from '../../components/StoreMessageHistory';
 import StoreCouponHistory from '../../components/StoreCouponHistory';
 import StoreSettings from '../../components/StoreSettings';
+import StoreContributorHistory from '../../components/StoreContributorHistory';
 import {toast} from 'react-toastify';
 
 const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) => {
@@ -917,6 +918,59 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
                 onAuthorClick={onAuthorClick}
                 tabs={getFilteredActivityTabs()}
               />
+            </Tab>
+
+            {/* 가게 기여자들 탭 (유저 제보 가게만) */}
+            <Tab
+              eventKey="contributors"
+              disabled={(storeDetail?.storeType === 'BOSS_STORE' || store?.storeType === 'BOSS_STORE')}
+              title={
+                <span className={`d-flex align-items-center gap-1 gap-md-2 px-1 py-2 ${(storeDetail?.storeType === 'BOSS_STORE' || store?.storeType === 'BOSS_STORE') ? 'text-muted' : ''}`} style={{
+                  fontSize: window.innerWidth <= 768 ? '0.85rem' : '1rem',
+                  whiteSpace: 'nowrap',
+                  minWidth: 'fit-content'
+                }}>
+                  <i className="bi bi-people-fill" style={{fontSize: '0.9rem'}}></i>
+                  <span className="fw-medium d-none d-sm-inline">가게 기여자들</span>
+                  <span className="fw-medium d-sm-none">기여자</span>
+                  {(storeDetail?.storeType === 'BOSS_STORE' || store?.storeType === 'BOSS_STORE') && (
+                    <span className="badge bg-secondary bg-opacity-50 rounded-pill ms-1" style={{
+                      fontSize: '0.6rem',
+                      minWidth: '1rem',
+                      height: '1rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      X
+                    </span>
+                  )}
+                </span>
+              }
+            >
+              {(storeDetail?.storeType === 'USER_STORE' || store?.storeType === 'USER_STORE') ? (
+                <StoreContributorHistory
+                  storeId={store?.storeId}
+                  isActive={activeTab === 'contributors'}
+                  onAuthorClick={onAuthorClick}
+                />
+              ) : (
+                <div className="p-4">
+                  <div className="text-center py-5">
+                    <div className="bg-light rounded-circle mx-auto mb-3" style={{width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                      <i className="bi bi-people-fill fs-1 text-secondary"></i>
+                    </div>
+                    <h5 className="text-dark mb-2">가게 기여자 기능 미지원</h5>
+                    <p className="text-muted mb-3">
+                      이 기능은 유저 제보 가게에서만 사용할 수 있습니다.
+                    </p>
+                    <div className="alert alert-info d-inline-block">
+                      <i className="bi bi-info-circle me-2"></i>
+                      가게 타입에 따라 지원되는 기능이 다릅니다.
+                    </div>
+                  </div>
+                </div>
+              )}
             </Tab>
 
             {/* 사장님 활동 탭 */}
