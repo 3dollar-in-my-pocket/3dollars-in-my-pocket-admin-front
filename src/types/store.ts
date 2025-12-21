@@ -48,6 +48,13 @@ export const STORE_TYPE = {
 
 export type StoreType = typeof STORE_TYPE[keyof typeof STORE_TYPE];
 
+// Store label types
+export const STORE_LABEL = {
+  VERIFIED: 'VERIFIED'
+} as const;
+
+export type StoreLabel = typeof STORE_LABEL[keyof typeof STORE_LABEL];
+
 // Search types
 export const STORE_SEARCH_TYPES = {
   KEYWORD: 'keyword',
@@ -67,6 +74,7 @@ export interface Store {
   storeType: StoreType;
   rating?: number;
   categoryId?: string;
+  labels?: StoreLabel[];
   location?: {
     latitude: number;
     longitude: number;
@@ -319,5 +327,33 @@ export const getChangeAttributeBadgeClass = (attributeType: ChangeAttributeType)
       return 'bg-secondary';
     default:
       return 'bg-dark';
+  }
+};
+
+// Store label utility functions
+export const getLabelDisplayName = (label: string): string => {
+  switch (label) {
+    case STORE_LABEL.VERIFIED:
+      return '인증된 가게';
+    default:
+      return label;
+  }
+};
+
+export const getLabelBadgeClass = (label: string): string => {
+  switch (label) {
+    case STORE_LABEL.VERIFIED:
+      return 'bg-success';
+    default:
+      return 'bg-secondary';
+  }
+};
+
+export const getLabelIcon = (label: string): string => {
+  switch (label) {
+    case STORE_LABEL.VERIFIED:
+      return 'bi-patch-check-fill';
+    default:
+      return 'bi-tag-fill';
   }
 };

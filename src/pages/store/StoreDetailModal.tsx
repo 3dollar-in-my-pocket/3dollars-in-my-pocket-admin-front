@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {Modal, Tab, Tabs} from 'react-bootstrap';
+import {Button, Modal, Tab, Tabs} from 'react-bootstrap';
 import '../../styles/mobile-tabs.css';
 import {
   formatCount,
@@ -19,7 +19,10 @@ import {
   getWriterTypeBadgeClass,
   isVisitsSupported,
   isImagesSupported,
-  isReportsSupported
+  isReportsSupported,
+  getLabelDisplayName,
+  getLabelBadgeClass,
+  getLabelIcon
 } from '../../types/store';
 import { WRITER_TYPE } from '../../types/common';
 import storeApi from '../../api/storeApi';
@@ -33,6 +36,7 @@ import StoreMessageHistory from '../../components/StoreMessageHistory';
 import StoreCouponHistory from '../../components/StoreCouponHistory';
 import StoreSettings from '../../components/StoreSettings';
 import StoreContributorHistory from '../../components/StoreContributorHistory';
+import StoreEditForm from '../../components/StoreEditForm';
 import {toast} from 'react-toastify';
 
 const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) => {
@@ -42,6 +46,7 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
   const [error, setError] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [activitySubTab, setActivitySubTab] = useState(null);
+  const [isEditMode, setIsEditMode] = useState(false);
 
   useEffect(() => {
     if (show && store) {
@@ -81,7 +86,13 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
     setError(null);
     setIsDeleting(false);
     setActivitySubTab(null);
+    setIsEditMode(false);
     onHide();
+  };
+
+  const handleEditSuccess = () => {
+    setIsEditMode(false);
+    fetchStoreDetail();
   };
 
   const handleReviewClick = () => {
@@ -274,6 +285,18 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
         {getStoreTypeDisplayName(storeType)}
       </span>
     );
+  };
+
+  const getLabelBadges = (labels) => {
+    if (!labels || labels.length === 0) return null;
+    return labels.map((label, index) => (
+      <span
+        key={index}
+        className={`badge rounded-pill px-3 py-2 ${getLabelBadgeClass(label)} bg-opacity-10 text-dark border`}>
+        <i className={`bi ${getLabelIcon(label)} me-1`}></i>
+        {getLabelDisplayName(label)}
+      </span>
+    ));
   };
 
   const formatDateTime = (dateString) => {
@@ -469,6 +492,12 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
                 {getStatusBadge(storeDetail?.status || store.status)}
                 {getOpenStatusBadge(storeDetail?.openStatus)}
               </div>
+              {/* 라벨 정보 (별도 줄) */}
+              {(storeDetail?.labels || store.labels) && (storeDetail?.labels || store.labels).length > 0 && (
+                <div className="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                  {getLabelBadges(storeDetail?.labels || store.labels)}
+                </div>
+              )}
               <p className="mb-0 text-muted small d-flex align-items-center">
                 <i className="bi bi-geo-alt me-1"></i>
                 <span className="text-truncate">
@@ -542,7 +571,33 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
               }
             >
               <div className="p-0">
-                <div className="container-fluid p-1 p-sm-2 p-md-4">
+                {/* 수정 모드: 편집 폼 표시 */}
+                {isEditMode ? (
+                  <div className="bg-white">
+                    <div className="border-bottom p-3 bg-light d-flex align-items-center justify-content-between">
+                      <h6 className="mb-0 fw-bold text-dark d-flex align-items-center gap-2">
+                        <i className="bi bi-pencil-square text-primary"></i>
+                        가게 정보 수정
+                      </h6>
+                      <Button
+                        variant="outline-secondary"
+                        size="sm"
+                        onClick={() => setIsEditMode(false)}
+                      >
+                        <i className="bi bi-x-lg me-1"></i>
+                        취소
+                      </Button>
+                    </div>
+                    <StoreEditForm
+                      storeId={store.storeId.toString()}
+                      initialName={storeDetail?.name || store.name}
+                      initialLabels={storeDetail?.labels || store.labels || []}
+                      onSuccess={handleEditSuccess}
+                      onCancel={() => setIsEditMode(false)}
+                    />
+                  </div>
+                ) : (
+                  <div className="container-fluid p-1 p-sm-2 p-md-4">
                   {/* 핵심 정보 카드 */}
                   <div className="row mb-4">
                     <div className="col-12">
@@ -563,12 +618,18 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
                                 </div>
                                 <div>
                                   <h5 className="mb-1 fw-bold text-dark">{storeDetail?.name || store.name}</h5>
-                                  <div className="d-flex align-items-center gap-2 flex-wrap">
+                                  <div className="d-flex align-items-center gap-2 flex-wrap mb-2">
                                     {getStatusBadge(storeDetail?.status || store.status)}
                                     {getActivitiesBadge(storeDetail?.activitiesStatus || store.activitiesStatus)}
                                     {getSalesTypeBadge(storeDetail?.salesType)}
                                     {getOpenStatusBadge(storeDetail?.openStatus)}
                                   </div>
+                                  {/* 라벨 정보 (별도 줄) */}
+                                  {(storeDetail?.labels || store.labels) && (storeDetail?.labels || store.labels).length > 0 && (
+                                    <div className="d-flex align-items-center gap-2 flex-wrap">
+                                      {getLabelBadges(storeDetail?.labels || store.labels)}
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                               {storeDetail?.owner && (
@@ -843,7 +904,8 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
                       </div>
                     </div>
                   )}
-                </div>
+                  </div>
+                )}
               </div>
             </Tab>
 
@@ -1064,42 +1126,69 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
         borderBottomRightRadius: '16px',
         boxShadow: '0 -1px 3px rgba(0,0,0,0.1)'
       }}>
-        {/* BOSS_STORE가 아닌 경우에만 삭제 버튼 표시 */}
-        {(storeDetail?.storeType !== 'BOSS_STORE' && store?.storeType !== 'BOSS_STORE') && (
+        <div className="d-flex gap-2">
+          {/* 수정 버튼 */}
           <button
-            className="btn btn-danger rounded-pill px-4 py-2 shadow-sm"
-            onClick={handleDeleteStore}
-            disabled={isDeleting}
+            className="btn btn-primary rounded-pill px-4 py-2 shadow-sm"
+            onClick={() => setIsEditMode(true)}
+            disabled={isEditMode}
             style={{
               transition: 'all 0.3s ease',
               fontWeight: '600'
             }}
             onMouseEnter={(e: any) => {
-              e.target.style.transform = 'translateY(-2px)';
-              e.target.style.boxShadow = '0 8px 20px rgba(220, 53, 69, 0.3)';
+              if (!isEditMode) {
+                e.target.style.transform = 'translateY(-2px)';
+                e.target.style.boxShadow = '0 8px 20px rgba(13, 110, 253, 0.3)';
+              }
             }}
             onMouseLeave={(e: any) => {
               e.target.style.transform = 'translateY(0)';
               e.target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
             }}
           >
-            {isDeleting ? (
-              <>
-                <span className="spinner-border spinner-border-sm me-2"></span>
-                삭제 중...
-              </>
-            ) : (
-              <>
-                <i className="bi bi-trash me-2"></i>
-                가게 삭제
-              </>
-            )}
+            <i className="bi bi-pencil me-2"></i>
+            가게 수정
           </button>
-        )}
+
+          {/* BOSS_STORE가 아닌 경우에만 삭제 버튼 표시 */}
+          {(storeDetail?.storeType !== 'BOSS_STORE' && store?.storeType !== 'BOSS_STORE') && (
+            <button
+              className="btn btn-danger rounded-pill px-4 py-2 shadow-sm"
+              onClick={handleDeleteStore}
+              disabled={isDeleting}
+              style={{
+                transition: 'all 0.3s ease',
+                fontWeight: '600'
+              }}
+              onMouseEnter={(e: any) => {
+                if (!isDeleting) {
+                  e.target.style.transform = 'translateY(-2px)';
+                  e.target.style.boxShadow = '0 8px 20px rgba(220, 53, 69, 0.3)';
+                }
+              }}
+              onMouseLeave={(e: any) => {
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+              }}
+            >
+              {isDeleting ? (
+                <>
+                  <span className="spinner-border spinner-border-sm me-2"></span>
+                  삭제 중...
+                </>
+              ) : (
+                <>
+                  <i className="bi bi-trash me-2"></i>
+                  가게 삭제
+                </>
+              )}
+            </button>
+          )}
+        </div>
+
         <button
-          className={`btn btn-secondary rounded-pill px-4 py-2 shadow-sm ${
-            (storeDetail?.storeType === 'BOSS_STORE' || store?.storeType === 'BOSS_STORE') ? 'ms-auto' : ''
-          }`}
+          className="btn btn-secondary rounded-pill px-4 py-2 shadow-sm"
           onClick={handleClose}
           style={{
             transition: 'all 0.3s ease',

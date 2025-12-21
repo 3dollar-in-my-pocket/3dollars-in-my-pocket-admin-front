@@ -115,6 +115,25 @@ export default {
 
 
   /**
+   * 가게 정보 수정
+   * @param {string} storeId - 수정할 가게 ID
+   * @param {Object} data - 수정할 데이터 (name, labels)
+   * @returns {Promise<Object>} 수정 결과
+   */
+  updateStore: async (storeId: string, data: { name?: string; labels?: string[] }): Promise<any> => {
+    try {
+      const response = await axiosInstance({
+        method: 'PATCH',
+        url: `/v1/store/${storeId}`,
+        data
+      });
+      return response;
+    } catch (error: any) {
+      return error.response;
+    }
+  },
+
+  /**
    * 가게 삭제
    * @param {string} storeId - 삭제할 가게 ID
    * @returns {Promise<Object>} 삭제 결과

@@ -7,7 +7,10 @@ import {
   getStoreStatusDisplayName,
   getStoreTypeDisplayName,
   getStoreTypeBadgeClass,
-  getStoreTypeIcon
+  getStoreTypeIcon,
+  getLabelDisplayName,
+  getLabelBadgeClass,
+  getLabelIcon
 } from '../../types/store';
 import ItemCard from '../common/ItemCard';
 
@@ -129,6 +132,21 @@ const StoreCard = ({ store, onClick, isDeleted = false }) => {
                 <i className={`bi ${getStoreTypeIcon(store.storeType)} me-1`}></i>
                 {getStoreTypeDisplayName(store.storeType)}
               </span>
+            </div>
+          )}
+
+          {/* 라벨 정보 */}
+          {store.labels && store.labels.length > 0 && (
+            <div className="d-flex justify-content-center gap-1 mb-2 flex-wrap">
+              {store.labels.map((label, idx) => (
+                <span
+                  key={idx}
+                  className={`badge rounded-pill ${getLabelBadgeClass(label)} bg-opacity-10 text-dark border px-2 py-1`}
+                  style={{fontSize: '0.7rem'}}>
+                  <i className={`bi ${getLabelIcon(label)} me-1`}></i>
+                  {getLabelDisplayName(label)}
+                </span>
+              ))}
             </div>
           )}
 
