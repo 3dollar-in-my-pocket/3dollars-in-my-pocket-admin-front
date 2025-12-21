@@ -158,57 +158,6 @@ const StoreEditForm = ({storeId, initialName, initialLabels, onSuccess, onCancel
             )}
           </div>
 
-          {/* Enum에서 가져온 라벨 선택 */}
-          {isFetchingEnums ? (
-            <div className="text-center py-3">
-              <Spinner animation="border" size="sm" className="me-2" />
-              <span className="text-muted">라벨 목록 불러오는 중...</span>
-            </div>
-          ) : availableLabels.length > 0 ? (
-            <div className="mb-3 border rounded p-3 bg-light">
-              <div className="d-flex align-items-center mb-2">
-                <i className="bi bi-tags-fill text-primary me-2"></i>
-                <p className="fw-semibold mb-0 small">사용 가능한 라벨</p>
-                <small className="text-muted ms-2">클릭하여 추가</small>
-              </div>
-              <div className="d-flex flex-wrap gap-2">
-                {availableLabels.map((labelOption, index) => {
-                  const isSelected = labels.includes(labelOption.key);
-                  return (
-                    <Badge
-                      key={index}
-                      bg={isSelected ? 'secondary' : 'primary'}
-                      className="px-3 py-2"
-                      role="button"
-                      onClick={() => !isSelected && handleAddLabel(labelOption.key)}
-                      style={{
-                        cursor: isSelected ? 'not-allowed' : 'pointer',
-                        opacity: isSelected ? 0.5 : 1,
-                        fontSize: '0.85rem',
-                        transition: 'all 0.2s ease'
-                      }}
-                      onMouseEnter={(e: any) => {
-                        if (!isSelected) {
-                          e.target.style.transform = 'scale(1.05)';
-                        }
-                      }}
-                      onMouseLeave={(e: any) => {
-                        if (!isSelected) {
-                          e.target.style.transform = 'scale(1)';
-                        }
-                      }}
-                      title={labelOption.key}
-                    >
-                      {isSelected && <i className="bi bi-check-circle-fill me-1"></i>}
-                      {!isSelected && <i className="bi bi-plus-circle me-1"></i>}
-                      {labelOption.description}
-                    </Badge>
-                  );
-                })}
-              </div>
-            </div>
-          ) : null}
-
           {/* 라벨 추가 섹션 */}
           <div className="border rounded p-3 bg-white">
             <p className="fw-semibold mb-3 small d-flex align-items-center">
