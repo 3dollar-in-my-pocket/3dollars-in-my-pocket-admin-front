@@ -56,20 +56,15 @@ const StoreSearch = () => {
     });
   }, []);
 
-  // 검색 실행 핸들러 (키워드 입력 여부에 따라 검색 타입 자동 결정)
+  // 검색 실행 핸들러
   const handleSearchSubmit = useCallback(() => {
-    const trimmedQuery = searchQuery.trim();
-    const newSearchType = trimmedQuery ? STORE_SEARCH_TYPES.KEYWORD : STORE_SEARCH_TYPES.RECENT;
-
-    // 검색 타입이 변경되었거나 키워드 검색인 경우 검색 실행
-    if (searchType !== newSearchType) {
-      resetSearch();
-      setSearchType(newSearchType);
-    } else if (newSearchType === STORE_SEARCH_TYPES.KEYWORD) {
-      // 키워드 검색인 경우 수동으로 검색 실행
+    // 검색 타입에 따라 검색 실행
+    if (searchType === STORE_SEARCH_TYPES.KEYWORD || searchType === STORE_SEARCH_TYPES.STORE_ID) {
+      // 키워드 또는 ID 검색인 경우 수동으로 검색 실행
       handleSearch(true);
     }
-  }, [searchQuery, searchType, setSearchType, resetSearch, handleSearch]);
+    // 최신순 조회는 자동 검색이므로 여기서는 별도 처리 불필요
+  }, [searchType, handleSearch]);
 
   // 가게 타입 필터가 변경되면 검색 재실행
   useEffect(() => {
@@ -132,11 +127,85 @@ const StoreSearch = () => {
       {/* 단순화된 검색 폼 */}
       <div className="card border-0 shadow-sm mb-3 mb-md-4">
         <div className="card-body p-3 p-md-4">
+          {/* 검색 타입 선택 */}
+          <div className="mb-3">
+            <div className="d-flex flex-wrap align-items-center gap-2">
+              <small className="text-muted fw-semibold me-2">
+                <i className="bi bi-funnel me-1"></i>
+                검색 방식:
+              </small>
+              <button
+                type="button"
+                className={`btn btn-sm rounded-pill ${
+                  searchType === STORE_SEARCH_TYPES.RECENT
+                    ? 'btn-primary'
+                    : 'btn-outline-primary'
+                }`}
+                onClick={() => {
+                  resetSearch();
+                  setSearchType(STORE_SEARCH_TYPES.RECENT);
+                }}
+                style={{
+                  fontSize: '0.75rem',
+                  padding: '4px 12px',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <i className="bi bi-clock-history me-1"></i>
+                최신순 조회
+              </button>
+              <button
+                type="button"
+                className={`btn btn-sm rounded-pill ${
+                  searchType === STORE_SEARCH_TYPES.KEYWORD
+                    ? 'btn-primary'
+                    : 'btn-outline-primary'
+                }`}
+                onClick={() => {
+                  resetSearch();
+                  setSearchType(STORE_SEARCH_TYPES.KEYWORD);
+                }}
+                style={{
+                  fontSize: '0.75rem',
+                  padding: '4px 12px',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <i className="bi bi-search me-1"></i>
+                가게 이름
+              </button>
+              <button
+                type="button"
+                className={`btn btn-sm rounded-pill ${
+                  searchType === STORE_SEARCH_TYPES.STORE_ID
+                    ? 'btn-primary'
+                    : 'btn-outline-primary'
+                }`}
+                onClick={() => {
+                  resetSearch();
+                  setSearchType(STORE_SEARCH_TYPES.STORE_ID);
+                }}
+                style={{
+                  fontSize: '0.75rem',
+                  padding: '4px 12px',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <i className="bi bi-hash me-1"></i>
+                가게 ID
+              </button>
+            </div>
+          </div>
+
           <div className="row align-items-end g-2 g-md-3">
             <div className="col-12 col-md-8 col-lg-9 mb-2 mb-md-0">
               <label htmlFor="searchInput" className="form-label fw-semibold text-muted mb-2 d-none d-md-block">
                 <i className="bi bi-search me-2"></i>
-                가게 검색
+                {searchType === STORE_SEARCH_TYPES.STORE_ID
+                  ? '가게 ID 검색'
+                  : searchType === STORE_SEARCH_TYPES.RECENT
+                    ? '최신순 조회'
+                    : '가게 이름 검색'}
               </label>
               <input
                 id="searchInput"
@@ -150,7 +219,13 @@ const StoreSearch = () => {
                   transition: 'all 0.3s ease',
                   fontSize: '15px'
                 }}
-                placeholder="🔍 가게 이름 입력 (비워두면 최신순)"
+                placeholder={
+                  searchType === STORE_SEARCH_TYPES.STORE_ID
+                    ? '🔍 가게 ID 입력 (쉼표로 구분, 최대 5개)'
+                    : searchType === STORE_SEARCH_TYPES.RECENT
+                      ? '🕐 최신순으로 가게를 조회합니다'
+                      : '🔍 가게 이름 입력'
+                }
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => {
@@ -173,6 +248,7 @@ const StoreSearch = () => {
                   e.target.style.boxShadow = 'none';
                   e.target.style.backgroundColor = '#f8f9fa';
                 }}
+                disabled={searchType === STORE_SEARCH_TYPES.RECENT}
               />
             </div>
             <div className="col-12 col-md-4 col-lg-3">
@@ -216,76 +292,86 @@ const StoreSearch = () => {
             </div>
           </div>
 
-          {/* 가게 타입 필터 */}
-          <div className="mt-3 pt-3 border-top">
-            <div className="d-flex flex-wrap align-items-center gap-2">
-              <small className="text-muted fw-semibold me-3">
-                <i className="bi bi-funnel me-1"></i>
-                가게 종류:
-              </small>
-              <button
-                type="button"
-                className={`btn btn-sm rounded-pill ${
-                  selectedStoreTypes.includes(STORE_TYPE.USER_STORE)
-                    ? 'btn-info text-white'
-                    : 'btn-outline-info'
-                }`}
-                onClick={() => handleStoreTypeToggle(STORE_TYPE.USER_STORE)}
-                style={{
-                  fontSize: '0.75rem',
-                  padding: '4px 12px',
-                  border: '1px solid #17a2b8',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                <i className="bi bi-people-fill me-1"></i>
-                일반 가게
-              </button>
-              <button
-                type="button"
-                className={`btn btn-sm rounded-pill ${
-                  selectedStoreTypes.includes(STORE_TYPE.BOSS_STORE)
-                    ? 'btn-warning text-dark'
-                    : 'btn-outline-warning'
-                }`}
-                onClick={() => handleStoreTypeToggle(STORE_TYPE.BOSS_STORE)}
-                style={{
-                  fontSize: '0.75rem',
-                  padding: '4px 12px',
-                  border: '1px solid #ffc107',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                <i className="bi bi-person-badge-fill me-1"></i>
-                사장님 직영점
-              </button>
-              {selectedStoreTypes.length > 0 && (
+          {/* 가게 타입 필터 (가게 ID 검색이 아닐 때만 표시) */}
+          {searchType !== STORE_SEARCH_TYPES.STORE_ID && (
+            <div className="mt-3 pt-3 border-top">
+              <div className="d-flex flex-wrap align-items-center gap-2">
+                <small className="text-muted fw-semibold me-3">
+                  <i className="bi bi-funnel me-1"></i>
+                  가게 종류:
+                </small>
                 <button
                   type="button"
-                  className="btn btn-sm btn-outline-secondary rounded-pill"
-                  onClick={() => setSelectedStoreTypes([])}
+                  className={`btn btn-sm rounded-pill ${
+                    selectedStoreTypes.includes(STORE_TYPE.USER_STORE)
+                      ? 'btn-info text-white'
+                      : 'btn-outline-info'
+                  }`}
+                  onClick={() => handleStoreTypeToggle(STORE_TYPE.USER_STORE)}
                   style={{
                     fontSize: '0.75rem',
-                    padding: '4px 8px'
+                    padding: '4px 12px',
+                    border: '1px solid #17a2b8',
+                    transition: 'all 0.2s ease'
                   }}
                 >
-                  <i className="bi bi-x-circle me-1"></i>
-                  전체
+                  <i className="bi bi-people-fill me-1"></i>
+                  일반 가게
                 </button>
-              )}
+                <button
+                  type="button"
+                  className={`btn btn-sm rounded-pill ${
+                    selectedStoreTypes.includes(STORE_TYPE.BOSS_STORE)
+                      ? 'btn-warning text-dark'
+                      : 'btn-outline-warning'
+                  }`}
+                  onClick={() => handleStoreTypeToggle(STORE_TYPE.BOSS_STORE)}
+                  style={{
+                    fontSize: '0.75rem',
+                    padding: '4px 12px',
+                    border: '1px solid #ffc107',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <i className="bi bi-person-badge-fill me-1"></i>
+                  사장님 직영점
+                </button>
+                {selectedStoreTypes.length > 0 && (
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-outline-secondary rounded-pill"
+                    onClick={() => setSelectedStoreTypes([])}
+                    style={{
+                      fontSize: '0.75rem',
+                      padding: '4px 8px'
+                    }}
+                  >
+                    <i className="bi bi-x-circle me-1"></i>
+                    전체
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* 현재 검색 상태 표시 */}
           <div className="mt-2 mt-md-3">
             <small className="text-muted d-flex align-items-center" style={{ fontSize: '0.75rem' }}>
-              <i className={`bi ${searchQuery.trim() ? 'bi-search' : 'bi-clock-history'} me-2`}></i>
+              <i className={`bi ${
+                searchType === STORE_SEARCH_TYPES.STORE_ID
+                  ? 'bi-hash'
+                  : searchType === STORE_SEARCH_TYPES.KEYWORD
+                    ? 'bi-search'
+                    : 'bi-clock-history'
+              } me-2`}></i>
               <span className="d-none d-md-inline">
-                {searchQuery.trim()
-                  ? `키워드 검색: "${searchQuery.trim()}"`
-                  : '최신순으로 가게를 조회합니다'
+                {searchType === STORE_SEARCH_TYPES.STORE_ID
+                  ? `가게 ID 검색: "${searchQuery.trim() || '입력 대기'}"`
+                  : searchType === STORE_SEARCH_TYPES.KEYWORD
+                    ? `키워드 검색: "${searchQuery.trim() || '입력 대기'}"`
+                    : '최신순으로 가게를 조회합니다'
                 }
-                {selectedStoreTypes.length > 0 && (
+                {searchType !== STORE_SEARCH_TYPES.STORE_ID && selectedStoreTypes.length > 0 && (
                   <span className="ms-2 text-primary">
                     | 필터: {selectedStoreTypes.map(type =>
                       type === STORE_TYPE.USER_STORE ? '일반' : '사장님'
@@ -294,11 +380,13 @@ const StoreSearch = () => {
                 )}
               </span>
               <span className="d-inline d-md-none">
-                {searchQuery.trim()
-                  ? `키워드: "${searchQuery.trim()}"`
-                  : '최신순 조회'
+                {searchType === STORE_SEARCH_TYPES.STORE_ID
+                  ? `ID: "${searchQuery.trim() || '입력 대기'}"`
+                  : searchType === STORE_SEARCH_TYPES.KEYWORD
+                    ? `키워드: "${searchQuery.trim() || '입력 대기'}"`
+                    : '최신순 조회'
                 }
-                {selectedStoreTypes.length > 0 && (
+                {searchType !== STORE_SEARCH_TYPES.STORE_ID && selectedStoreTypes.length > 0 && (
                   <span className="ms-1 text-primary">
                     | {selectedStoreTypes.length}개 필터
                   </span>

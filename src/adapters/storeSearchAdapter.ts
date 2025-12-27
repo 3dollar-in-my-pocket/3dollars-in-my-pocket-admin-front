@@ -20,41 +20,86 @@ interface SearchResult {
 export const storeSearchAdapter = {
   // 검색 함수
   searchFunction: async ({ searchType, searchQuery, cursor, targetStores }: SearchParams): Promise<SearchResult> => {
-    let response;
+    let response: any;
 
     if (searchType === STORE_SEARCH_TYPES.KEYWORD) {
       response = await storeApi.searchStores(searchQuery, cursor, 20, targetStores);
+
+      if (!response.ok) {
+        throw new Error('Store search failed');
+      }
+
+      const { contents, cursor: responseCursor } = response.data;
+
+      // 페이징 종료 조건: nextCursor가 없거나 결과가 비어있으면 더 이상 데이터 없음
+      const hasMore = Boolean(
+        responseCursor?.nextCursor &&
+        contents &&
+        contents.length > 0 &&
+        responseCursor.hasMore !== false
+      );
+
+      return {
+        ok: true,
+        data: {
+          results: contents || [],
+          hasMore,
+          nextCursor: hasMore ? responseCursor.nextCursor : null
+        }
+      };
+    } else if (searchType === STORE_SEARCH_TYPES.STORE_ID) {
+      // 가게 ID 검색: 쉼표로 구분된 ID들을 파싱
+      const storeIds = searchQuery.split(',').map(id => id.trim()).filter(id => id);
+
+      // 각 ID에 대해 API 호출
+      const storePromises = storeIds.map(storeId => storeApi.getStoreDetail(storeId));
+      const storeResponses = await Promise.all(storePromises);
+
+      // 성공한 결과만 필터링
+      const stores = storeResponses
+        .filter(res => res?.ok && res?.data)
+        .map(res => res.data);
+
+      // ID 검색은 페이징 없음 (한 번에 모든 결과 반환)
+      return {
+        ok: true,
+        data: {
+          results: stores,
+          hasMore: false,
+          nextCursor: null
+        }
+      };
     } else {
       response = await storeApi.getStores(cursor, 20, targetStores);
-    }
 
-    if (!response.ok) {
-      throw new Error('Store search failed');
-    }
-
-    const { contents, cursor: responseCursor } = response.data;
-
-    // 페이징 종료 조건: nextCursor가 없거나 결과가 비어있으면 더 이상 데이터 없음
-    const hasMore = Boolean(
-      responseCursor?.nextCursor &&
-      contents &&
-      contents.length > 0 &&
-      responseCursor.hasMore !== false
-    );
-
-    return {
-      ok: true,
-      data: {
-        results: contents || [],
-        hasMore,
-        nextCursor: hasMore ? responseCursor.nextCursor : null
+      if (!response.ok) {
+        throw new Error('Store search failed');
       }
-    };
+
+      const { contents, cursor: responseCursor } = response.data;
+
+      // 페이징 종료 조건: nextCursor가 없거나 결과가 비어있으면 더 이상 데이터 없음
+      const hasMore = Boolean(
+        responseCursor?.nextCursor &&
+        contents &&
+        contents.length > 0 &&
+        responseCursor.hasMore !== false
+      );
+
+      return {
+        ok: true,
+        data: {
+          results: contents || [],
+          hasMore,
+          nextCursor: hasMore ? responseCursor.nextCursor : null
+        }
+      };
+    }
   },
 
   // 검증 함수
   validateSearch: (searchType: StoreSearchType, searchQuery: string): string | null => {
-    if (searchType === STORE_SEARCH_TYPES.KEYWORD) {
+    if (searchType === STORE_SEARCH_TYPES.KEYWORD || searchType === STORE_SEARCH_TYPES.STORE_ID) {
       return validateStoreSearch(searchType, searchQuery);
     }
     return null;
@@ -63,7 +108,8 @@ export const storeSearchAdapter = {
   // 검색 옵션
   searchOptions: [
     { value: STORE_SEARCH_TYPES.RECENT, label: '최신순 조회' },
-    { value: STORE_SEARCH_TYPES.KEYWORD, label: '키워드 검색' }
+    { value: STORE_SEARCH_TYPES.KEYWORD, label: '키워드 검색' },
+    { value: STORE_SEARCH_TYPES.STORE_ID, label: '가게 ID 검색' }
   ],
 
   // 기본 설정
