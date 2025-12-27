@@ -115,6 +115,25 @@ export default {
 
 
   /**
+   * 가게 정보 수정
+   * @param {string} storeId - 수정할 가게 ID
+   * @param {Object} data - 수정할 데이터 (name, labels)
+   * @returns {Promise<Object>} 수정 결과
+   */
+  updateStore: async (storeId: string, data: { name?: string; labels?: string[] }): Promise<any> => {
+    try {
+      const response = await axiosInstance({
+        method: 'PATCH',
+        url: `/v1/store/${storeId}`,
+        data
+      });
+      return response;
+    } catch (error: any) {
+      return error.response;
+    }
+  },
+
+  /**
    * 가게 삭제
    * @param {string} storeId - 삭제할 가게 ID
    * @returns {Promise<Object>} 삭제 결과
@@ -292,6 +311,42 @@ export default {
       const response = await axiosInstance({
         method: 'GET',
         url: `/v1/store/${storeId}/coupons`,
+        params
+      });
+
+      if (response.data.ok) {
+        return {
+          ok: response.data.ok,
+          data: response.data.data
+        };
+      } else {
+        throw new Error('API 응답 오류');
+      }
+    } catch (error: any) {
+      return error.response;
+    }
+  },
+
+  /**
+   * 가게 변경 이력 조회 (기여자 목록)
+   * @param {string} storeId - 가게 ID
+   * @param {string} [cursor] - 페이징 커서
+   * @param {number} [size=20] - 페이지 사이즈
+   * @returns {Promise<Object>} 가게 변경 이력 목록
+   */
+  getStoreChangeHistories: async (storeId: string, cursor: string | null = null, size = 20): Promise<any> => {
+    try {
+      const params: any = {
+        size
+      };
+
+      if (cursor) {
+        params.cursor = cursor;
+      }
+
+      const response = await axiosInstance({
+        method: 'GET',
+        url: `/v1/store/${storeId}/change-histories`,
         params
       });
 

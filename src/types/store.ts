@@ -1,5 +1,5 @@
 // Store related type definitions and constants
-import { WRITER_TYPE, getWriterTypeBadgeClass } from './common';
+import { WRITER_TYPE, WriterType, getWriterTypeBadgeClass } from './common';
 
 
 // Store status types (using common STATUS constants)
@@ -48,6 +48,13 @@ export const STORE_TYPE = {
 
 export type StoreType = typeof STORE_TYPE[keyof typeof STORE_TYPE];
 
+// Store label types
+export const STORE_LABEL = {
+  VERIFIED: 'VERIFIED'
+} as const;
+
+export type StoreLabel = typeof STORE_LABEL[keyof typeof STORE_LABEL];
+
 // Search types
 export const STORE_SEARCH_TYPES = {
   KEYWORD: 'keyword',
@@ -67,6 +74,7 @@ export interface Store {
   storeType: StoreType;
   rating?: number;
   categoryId?: string;
+  labels?: StoreLabel[];
   location?: {
     latitude: number;
     longitude: number;
@@ -252,4 +260,100 @@ export const isImagesSupported = (storeType: StoreType): boolean => {
 export const isReportsSupported = (storeType: StoreType): boolean => {
   const supportedTypes: StoreType[] = [STORE_TYPE.USER_STORE];
   return supportedTypes.includes(storeType);
+};
+
+// Change attribute types
+export const CHANGE_ATTRIBUTE_TYPE = {
+  NAME: 'NAME',
+  LOCATION: 'LOCATION',
+  OPENING_DAY: 'OPENING_DAY',
+  OPENING_HOUR: 'OPENING_HOUR',
+  SALES_TYPE: 'SALES_TYPE',
+  PAYMENT_METHOD: 'PAYMENT_METHOD'
+} as const;
+
+export type ChangeAttributeType = typeof CHANGE_ATTRIBUTE_TYPE[keyof typeof CHANGE_ATTRIBUTE_TYPE];
+
+// Store change history interfaces
+export interface ChangeAttribute {
+  attributeType: ChangeAttributeType;
+  description: string;
+}
+
+export interface ChangeHistoryActor {
+  writerId: string;
+  writerType: WriterType;
+  name: string;
+}
+
+export interface StoreChangeHistory {
+  changeAttributes: ChangeAttribute[];
+  actor: ChangeHistoryActor;
+  changedAt: string;
+}
+
+export const getChangeAttributeIcon = (attributeType: ChangeAttributeType): string => {
+  switch (attributeType) {
+    case CHANGE_ATTRIBUTE_TYPE.NAME:
+      return 'bi-tag-fill';
+    case CHANGE_ATTRIBUTE_TYPE.LOCATION:
+      return 'bi-geo-alt-fill';
+    case CHANGE_ATTRIBUTE_TYPE.OPENING_DAY:
+      return 'bi-calendar-week-fill';
+    case CHANGE_ATTRIBUTE_TYPE.OPENING_HOUR:
+      return 'bi-clock-fill';
+    case CHANGE_ATTRIBUTE_TYPE.SALES_TYPE:
+      return 'bi-shop';
+    case CHANGE_ATTRIBUTE_TYPE.PAYMENT_METHOD:
+      return 'bi-credit-card-fill';
+    default:
+      return 'bi-pencil-fill';
+  }
+};
+
+export const getChangeAttributeBadgeClass = (attributeType: ChangeAttributeType): string => {
+  switch (attributeType) {
+    case CHANGE_ATTRIBUTE_TYPE.NAME:
+      return 'bg-primary';
+    case CHANGE_ATTRIBUTE_TYPE.LOCATION:
+      return 'bg-success';
+    case CHANGE_ATTRIBUTE_TYPE.OPENING_DAY:
+      return 'bg-info';
+    case CHANGE_ATTRIBUTE_TYPE.OPENING_HOUR:
+      return 'bg-warning';
+    case CHANGE_ATTRIBUTE_TYPE.SALES_TYPE:
+      return 'bg-danger';
+    case CHANGE_ATTRIBUTE_TYPE.PAYMENT_METHOD:
+      return 'bg-secondary';
+    default:
+      return 'bg-dark';
+  }
+};
+
+// Store label utility functions
+export const getLabelDisplayName = (label: string): string => {
+  switch (label) {
+    case STORE_LABEL.VERIFIED:
+      return '인증된 가게';
+    default:
+      return label;
+  }
+};
+
+export const getLabelBadgeClass = (label: string): string => {
+  switch (label) {
+    case STORE_LABEL.VERIFIED:
+      return 'bg-success';
+    default:
+      return 'bg-secondary';
+  }
+};
+
+export const getLabelIcon = (label: string): string => {
+  switch (label) {
+    case STORE_LABEL.VERIFIED:
+      return 'bi-patch-check-fill';
+    default:
+      return 'bi-tag-fill';
+  }
 };
