@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import storeApi from '../api/storeApi';
 import StoreMessageItem from './StoreMessageItem';
 
-const StoreMessageHistory = ({ storeId }) => {
+const StoreMessageHistory = ({storeId}) => {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -34,7 +34,7 @@ const StoreMessageHistory = ({ storeId }) => {
         throw new Error('메시지를 불러오는데 실패했습니다.');
       }
 
-      const { contents, cursor } = response.data;
+      const {contents, cursor} = response.data;
 
       if (isInitial) {
         setMessages(contents || []);
@@ -66,7 +66,7 @@ const StoreMessageHistory = ({ storeId }) => {
     return (
       <div className="text-center py-5">
         <div className="mb-3">
-          <div className="spinner-border text-success" style={{ width: '3rem', height: '3rem' }} role="status">
+          <div className="spinner-border text-success" style={{width: '3rem', height: '3rem'}} role="status">
             <span className="visually-hidden">Loading...</span>
           </div>
         </div>
@@ -107,7 +107,7 @@ const StoreMessageHistory = ({ storeId }) => {
     return (
       <div className="text-center py-5">
         <div className="bg-light rounded-circle mx-auto mb-3"
-             style={{ width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+             style={{width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
           <i className="bi bi-chat-dots fs-1 text-secondary"></i>
         </div>
         <h5 className="text-dark mb-2">등록된 메시지가 없습니다</h5>
@@ -140,7 +140,7 @@ const StoreMessageHistory = ({ storeId }) => {
 
       <div className="messages-container">
         {messages.map((message, index) => (
-          <StoreMessageItem key={message.messageId || index} message={message} />
+          <StoreMessageItem key={message.messageId || index} message={message}/>
         ))}
       </div>
 

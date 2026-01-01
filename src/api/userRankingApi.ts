@@ -1,5 +1,5 @@
 import axiosInstance from './apiBase';
-import { UserRankingRequest, UserRankingResponse } from '../types/userRanking';
+import {UserRankingRequest, UserRankingResponse} from '../types/userRanking';
 
 export default {
   /**

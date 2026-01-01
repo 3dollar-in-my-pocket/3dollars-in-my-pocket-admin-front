@@ -1,9 +1,9 @@
-import { Modal } from "react-bootstrap";
-import { useState } from "react";
+import {Modal} from "react-bootstrap";
+import {useState} from "react";
 import adminApi from "../../api/adminApi";
-import { toast } from "react-toastify";
+import {toast} from "react-toastify";
 
-const AdminRegisterModal = ({ show, onHide, onSuccess }: any) => {
+const AdminRegisterModal = ({show, onHide, onSuccess}: any) => {
   const [formData, setFormData] = useState({
     email: '',
     name: ''
@@ -34,7 +34,7 @@ const AdminRegisterModal = ({ show, onHide, onSuccess }: any) => {
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const {name, value} = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -66,13 +66,9 @@ const AdminRegisterModal = ({ show, onHide, onSuccess }: any) => {
 
       if (response.ok) {
         onSuccess();
-        setFormData({ email: '', name: '' });
+        setFormData({email: '', name: ''});
         setErrors({});
-      } else {
-        toast.error('관리자 등록 중 오류가 발생했습니다.');
       }
-    } catch (error) {
-      toast.error('관리자 등록 중 오류가 발생했습니다.');
     } finally {
       setIsSubmitting(false);
     }
@@ -80,7 +76,7 @@ const AdminRegisterModal = ({ show, onHide, onSuccess }: any) => {
 
   const handleClose = () => {
     if (!isSubmitting) {
-      setFormData({ email: '', name: '' });
+      setFormData({email: '', name: ''});
       setErrors({});
       onHide();
     }
@@ -110,7 +106,7 @@ const AdminRegisterModal = ({ show, onHide, onSuccess }: any) => {
               className={`form-control form-control-lg ${errors.email ? 'is-invalid' : ''}`}
               placeholder="admin@example.com"
               disabled={isSubmitting}
-              style={{ borderRadius: '8px' }}
+              style={{borderRadius: '8px'}}
             />
             {errors.email && (
               <div className="invalid-feedback">
@@ -133,7 +129,7 @@ const AdminRegisterModal = ({ show, onHide, onSuccess }: any) => {
               className={`form-control form-control-lg ${errors.name ? 'is-invalid' : ''}`}
               placeholder="관리자 이름을 입력하세요"
               disabled={isSubmitting}
-              style={{ borderRadius: '8px' }}
+              style={{borderRadius: '8px'}}
             />
             {errors.name && (
               <div className="invalid-feedback">
@@ -160,7 +156,7 @@ const AdminRegisterModal = ({ show, onHide, onSuccess }: any) => {
               className="btn btn-light flex-fill py-2"
               onClick={handleClose}
               disabled={isSubmitting}
-              style={{ borderRadius: '8px' }}
+              style={{borderRadius: '8px'}}
             >
               <i className="bi bi-x-lg me-1"></i>
               취소
@@ -169,7 +165,7 @@ const AdminRegisterModal = ({ show, onHide, onSuccess }: any) => {
               type="submit"
               className="btn btn-primary flex-fill py-2"
               disabled={isSubmitting || !formData.email.trim() || !formData.name.trim()}
-              style={{ borderRadius: '8px' }}
+              style={{borderRadius: '8px'}}
             >
               {isSubmitting ? (
                 <>

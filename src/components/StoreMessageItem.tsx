@@ -1,5 +1,4 @@
-
-const StoreMessageItem = ({ message }) => {
+const StoreMessageItem = ({message}) => {
   const formatDateTime = (dateString) => {
     if (!dateString) return '없음';
     return new Date(dateString).toLocaleString('ko-KR', {
@@ -12,7 +11,7 @@ const StoreMessageItem = ({ message }) => {
   };
 
   return (
-    <div className="card border-0 shadow-sm mb-3" style={{ borderRadius: '16px' }}>
+    <div className="card border-0 shadow-sm mb-3" style={{borderRadius: '16px'}}>
       <div className="card-body p-4">
         <div className="d-flex align-items-start gap-3">
           <div className="bg-success bg-opacity-10 rounded-circle p-2">
@@ -21,7 +20,8 @@ const StoreMessageItem = ({ message }) => {
           <div className="flex-grow-1">
             <div className="d-flex align-items-center gap-2 mb-2">
               <h6 className="mb-0 fw-bold text-dark">가게 메시지</h6>
-              <span className="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-2 py-1" style={{ fontSize: '0.7rem' }}>
+              <span className="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-2 py-1"
+                    style={{fontSize: '0.7rem'}}>
                 <i className="bi bi-person-badge me-1"></i>
                 사장님
               </span>
@@ -38,8 +38,8 @@ const StoreMessageItem = ({ message }) => {
             </div>
 
             {message.body && (
-              <div className="bg-light rounded-3 p-3" style={{ borderLeft: '4px solid #198754' }}>
-                <p className="text-dark mb-0" style={{ lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>
+              <div className="bg-light rounded-3 p-3" style={{borderLeft: '4px solid #198754'}}>
+                <p className="text-dark mb-0" style={{lineHeight: '1.6', whiteSpace: 'pre-wrap'}}>
                   {message.body}
                 </p>
               </div>

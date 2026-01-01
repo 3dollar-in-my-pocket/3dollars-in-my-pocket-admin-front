@@ -52,11 +52,11 @@ export const menuGroups: MenuGroup[] = [
     ],
   },
   {
-  title: "콘텐츠",
-  items: [
-      { path: "/manage/advertisement", label: "광고 관리", icon: "bi-bullseye" },
-      { path: "/manage/medal", label: "메달 관리", icon: "bi-award-fill" },
-      { path: "/manage/faq", label: "FAQ 관리", icon: "bi-question-circle-fill" },
+    title: "콘텐츠",
+    items: [
+      {path: "/manage/advertisement", label: "광고 관리", icon: "bi-bullseye"},
+      {path: "/manage/medal", label: "메달 관리", icon: "bi-award-fill"},
+      {path: "/manage/faq", label: "FAQ 관리", icon: "bi-question-circle-fill"},
     ]
   },
   {
@@ -68,7 +68,7 @@ export const menuGroups: MenuGroup[] = [
   {
     title: "운영 툴",
     items: [
-      { path: "/manage/push-message", label: "푸시 발송", icon: "bi-send-fill" },
+      {path: "/manage/push-message", label: "푸시 발송", icon: "bi-send-fill"},
       {path: "/manage/policy", label: "정책 설정", icon: "bi-shield-fill-check"},
       {path: "/manage/tool/cache", label: "캐시 툴", icon: "bi-brush-fill"},
       {path: "/manage/tool/upload", label: "이미지 업로드 툴", icon: "bi-image-fill"},
@@ -128,7 +128,8 @@ const Layout = () => {
   return (
     <div className="container-fluid h-100">
       <div className="row min-vh-100">
-        <div className={`sidebar bg-dark text-white ${isSidebarOpen ? 'sidebar-open' : ''} ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+        <div
+          className={`sidebar bg-dark text-white ${isSidebarOpen ? 'sidebar-open' : ''} ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
           <div className="d-flex flex-column h-100 p-4">
             <Link to="/manage" className="text-white mb-4 fw-bold text-decoration-none h4" onClick={closeSidebar}>
               🎯 DASHBOARD

@@ -1,10 +1,10 @@
 import {Alert, Button, Card, Container, Form, Modal} from "react-bootstrap";
-import { usePushForm } from "../../hooks/usePushForm";
+import {usePushForm} from "../../hooks/usePushForm";
 import PushPreview from "../../components/push/PushPreview";
 import PushFormFields from "../../components/push/PushFormFields";
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
-import { getOsPlatformDisplayName } from "../../types/push";
+import {useNavigate} from "react-router-dom";
+import {useState} from "react";
+import {getOsPlatformDisplayName} from "../../types/push";
 
 const PushManage = () => {
   const navigate = useNavigate();
@@ -195,10 +195,12 @@ const PushManage = () => {
                     <strong>이미지:</strong> {formData.imageUrl ? '첨부됨' : '(없음)'}
                   </div>
                   <div className="mb-1">
-                    <strong>발송 대상:</strong> {formData.targetType === "USER" ? "유저" : "사장님"} - {selectedUsers.length > 0 ? `${selectedUsers.length}명 선택됨` : '직접 입력된 ID'}
+                    <strong>발송
+                      대상:</strong> {formData.targetType === "USER" ? "유저" : "사장님"} - {selectedUsers.length > 0 ? `${selectedUsers.length}명 선택됨` : '직접 입력된 ID'}
                   </div>
                   <div>
-                    <strong>대상 OS:</strong> {Array.from(targetOsPlatforms).map(p => getOsPlatformDisplayName(p)).join(', ')}
+                    <strong>대상
+                      OS:</strong> {Array.from(targetOsPlatforms).map(p => getOsPlatformDisplayName(p)).join(', ')}
                   </div>
                 </div>
               </div>

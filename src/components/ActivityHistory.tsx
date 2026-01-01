@@ -1,15 +1,15 @@
-import { useState, useEffect } from 'react';
-import { Tab, Tabs } from 'react-bootstrap';
+import {useState, useEffect} from 'react';
+import {Tab, Tabs} from 'react-bootstrap';
 import '../styles/mobile-tabs.css';
 
 const ActivityHistory = ({
-  type, // 'user' or 'store'
-  entityId, // userId or storeId
-  tabs = [], // 탭 설정 배열
-  initialActiveTab = null, // 초기 활성 탭
-  onAuthorClick = null, // 작성자 클릭 핸들러
-  onStoreClick = null // 가게 클릭 핸들러
-}) => {
+                           type, // 'user' or 'store'
+                           entityId, // userId or storeId
+                           tabs = [], // 탭 설정 배열
+                           initialActiveTab = null, // 초기 활성 탭
+                           onAuthorClick = null, // 작성자 클릭 핸들러
+                           onStoreClick = null // 가게 클릭 핸들러
+                         }) => {
   const getInitialTab = () => {
     if (initialActiveTab && tabs.find(tab => tab.key === initialActiveTab)) {
       return initialActiveTab;
@@ -52,7 +52,8 @@ const ActivityHistory = ({
     return (
       <div className="p-4">
         <div className="text-center py-5">
-          <div className="bg-light rounded-circle mx-auto mb-4" style={{width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+          <div className="bg-light rounded-circle mx-auto mb-4"
+               style={{width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
             <i className={`bi ${getIcon()} fs-1 text-secondary`}></i>
           </div>
           <h5 className="text-dark mb-2">활동 탭이 설정되지 않았습니다</h5>
@@ -90,14 +91,17 @@ const ActivityHistory = ({
                 eventKey={tab.key}
                 disabled={tab.isSupported === false}
                 title={
-                  <span className={`d-flex align-items-center gap-1 gap-md-2 px-1 py-2 ${tab.isSupported === false ? 'text-muted' : ''}`} style={{
-                    fontSize: window.innerWidth <= 768 ? '0.8rem' : '0.9rem',
-                    whiteSpace: 'nowrap',
-                    minWidth: 'fit-content'
-                  }}>
+                  <span
+                    className={`d-flex align-items-center gap-1 gap-md-2 px-1 py-2 ${tab.isSupported === false ? 'text-muted' : ''}`}
+                    style={{
+                      fontSize: window.innerWidth <= 768 ? '0.8rem' : '0.9rem',
+                      whiteSpace: 'nowrap',
+                      minWidth: 'fit-content'
+                    }}>
                     <i className={`bi ${tab.icon}`} style={{fontSize: '0.85rem'}}></i>
                     <span className="fw-medium d-none d-sm-inline">{tab.title}</span>
-                    <span className="fw-medium d-sm-none">{tab.title.length > 4 ? tab.title.substring(0, 3) + '...' : tab.title}</span>
+                    <span
+                      className="fw-medium d-sm-none">{tab.title.length > 4 ? tab.title.substring(0, 3) + '...' : tab.title}</span>
                     {tab.isSupported === false && (
                       <span className="badge bg-secondary bg-opacity-50 rounded-pill ms-1" style={{
                         fontSize: '0.6rem',
@@ -128,7 +132,13 @@ const ActivityHistory = ({
                 <div className="pt-0">
                   {tab.isSupported === false ? (
                     <div className="text-center py-5">
-                      <div className="bg-light rounded-circle mx-auto mb-3" style={{width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                      <div className="bg-light rounded-circle mx-auto mb-3" style={{
+                        width: '80px',
+                        height: '80px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}>
                         <i className={`bi ${tab.icon} fs-1 text-secondary`}></i>
                       </div>
                       <h5 className="text-dark mb-2">{tab.title} 기능 미지원</h5>
@@ -142,7 +152,7 @@ const ActivityHistory = ({
                     </div>
                   ) : loadedTabs.has(tab.key) ? (
                     <tab.component
-                      {...(type === 'user' ? { userId: entityId } : { storeId: entityId })}
+                      {...(type === 'user' ? {userId: entityId} : {storeId: entityId})}
                       isActive={activeTab === tab.key}
                       onAuthorClick={onAuthorClick}
                       onStoreClick={onStoreClick}

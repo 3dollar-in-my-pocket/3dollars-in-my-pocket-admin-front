@@ -1,8 +1,15 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
-import { toast } from 'react-toastify';
+import {useEffect, useRef, useState, useCallback} from 'react';
+import {toast} from 'react-toastify';
 import couponApi from '../../api/couponApi';
-import { Coupon, getCouponStatusDisplayName, getCouponStatusBadgeClass, formatCouponDate, COUPON_STATUS, CouponStatus } from '../../types/coupon';
-import { getStoreTypeDisplayName, getStoreTypeBadgeClass, getStoreTypeIcon } from '../../types/store';
+import {
+  Coupon,
+  getCouponStatusDisplayName,
+  getCouponStatusBadgeClass,
+  formatCouponDate,
+  COUPON_STATUS,
+  CouponStatus
+} from '../../types/coupon';
+import {getStoreTypeDisplayName, getStoreTypeBadgeClass, getStoreTypeIcon} from '../../types/store';
 import StoreDetailModal from '../store/StoreDetailModal';
 
 interface CouponWithStore extends Coupon {
@@ -74,11 +81,10 @@ const CouponManagement = () => {
       const statusesToSend = selectedStatuses.length > 0 ? selectedStatuses : undefined;
       const response = await couponApi.getAllStoreCoupons(reset ? null : cursor, 20, statusesToSend);
       if (!response?.ok) {
-        toast.error('쿠폰 목록을 불러오는 중 오류가 발생했습니다.');
         return;
       }
 
-      const { contents = [], cursor: newCursor = {} } = response.data || {};
+      const {contents = [], cursor: newCursor = {}} = response.data || {};
 
       if (reset) {
         setCoupons(contents);
@@ -88,9 +94,6 @@ const CouponManagement = () => {
 
       setHasMore(newCursor.hasMore || false);
       setCursor(newCursor.nextCursor || null);
-    } catch (error) {
-      console.error('쿠폰 목록 조회 오류:', error);
-      toast.error('쿠폰 목록을 불러오는 중 오류가 발생했습니다.');
     } finally {
       setIsLoading(false);
     }
@@ -122,7 +125,7 @@ const CouponManagement = () => {
     return (
       <span
         className={`badge ${getStoreTypeBadgeClass(storeType as any)} text-white rounded-pill ${isMobile ? 'px-2 py-1' : 'px-3 py-1'}`}
-        style={{ fontSize: isMobile ? '0.65rem' : '0.75rem', whiteSpace: 'nowrap' }}
+        style={{fontSize: isMobile ? '0.65rem' : '0.75rem', whiteSpace: 'nowrap'}}
       >
         <i className={`bi ${getStoreTypeIcon(storeType as any)} me-1`}></i>
         {getStoreTypeDisplayName(storeType as any)}
@@ -137,14 +140,14 @@ const CouponManagement = () => {
   // 스켈레톤 로더 컴포넌트
   const SkeletonCard = () => (
     <div className="col-12">
-      <div className="card border-0 shadow-sm h-100" style={{ background: '#f8f9fa' }}>
+      <div className="card border-0 shadow-sm h-100" style={{background: '#f8f9fa'}}>
         <div className="card-body p-2 p-md-3">
           <div className="d-flex gap-2 mb-2">
-            <div className="bg-secondary bg-opacity-25 rounded-pill" style={{ width: '100px', height: '24px' }}></div>
-            <div className="bg-secondary bg-opacity-25 rounded-pill" style={{ width: '80px', height: '24px' }}></div>
+            <div className="bg-secondary bg-opacity-25 rounded-pill" style={{width: '100px', height: '24px'}}></div>
+            <div className="bg-secondary bg-opacity-25 rounded-pill" style={{width: '80px', height: '24px'}}></div>
           </div>
-          <div className="bg-secondary bg-opacity-25 rounded mb-2" style={{ width: '60%', height: '20px' }}></div>
-          <div className="bg-secondary bg-opacity-25 rounded mb-2" style={{ width: '100%', height: '80px' }}></div>
+          <div className="bg-secondary bg-opacity-25 rounded mb-2" style={{width: '60%', height: '20px'}}></div>
+          <div className="bg-secondary bg-opacity-25 rounded mb-2" style={{width: '100%', height: '80px'}}></div>
         </div>
       </div>
     </div>
@@ -237,15 +240,21 @@ const CouponManagement = () => {
         </div>
       </div>
 
-      <div ref={scrollContainerRef} style={{ maxHeight: 'calc(100vh - 280px)', overflowY: 'auto' }}>
+      <div ref={scrollContainerRef} style={{maxHeight: 'calc(100vh - 280px)', overflowY: 'auto'}}>
         <div className="row g-3">
           {isLoading && coupons.length === 0 ? (
-            Array.from({ length: skeletonCount }).map((_, idx) => <SkeletonCard key={idx} />)
+            Array.from({length: skeletonCount}).map((_, idx) => <SkeletonCard key={idx}/>)
           ) : coupons.length === 0 ? (
             <div className="col-12">
               <div className="text-center py-5">
                 <div className="bg-light rounded-circle mx-auto mb-3"
-                     style={{ width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                     style={{
+                       width: '80px',
+                       height: '80px',
+                       display: 'flex',
+                       alignItems: 'center',
+                       justifyContent: 'center'
+                     }}>
                   <i className="bi bi-ticket-perforated fs-1 text-secondary"></i>
                 </div>
                 <h5 className="text-dark mb-2">등록된 쿠폰이 없습니다</h5>
@@ -273,7 +282,7 @@ const CouponManagement = () => {
                             <div
                               className="d-flex align-items-center gap-2 mb-2 cursor-pointer"
                               onClick={() => handleStoreClick(coupon.store)}
-                              style={{ cursor: 'pointer' }}
+                              style={{cursor: 'pointer'}}
                             >
                               <i className="bi bi-shop text-primary"></i>
                               <h6 className="fw-bold text-primary mb-0 text-decoration-underline">
@@ -288,15 +297,17 @@ const CouponManagement = () => {
                           </div>
                           <div className="d-flex align-items-center gap-2 flex-wrap">
                             {coupon.store?.categories?.slice(0, 2).map((category: any, idx: number) => (
-                              <span key={idx} className="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-2 py-1"
-                                    style={{ fontSize: '0.7rem' }}>
+                              <span key={idx}
+                                    className="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-2 py-1"
+                                    style={{fontSize: '0.7rem'}}>
                                 <i className="bi bi-tag me-1"></i>
                                 {category.name}
                               </span>
                             ))}
                             {coupon.store?.categories?.length > 2 && (
-                              <span className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-2 py-1"
-                                    style={{ fontSize: '0.7rem' }}>
+                              <span
+                                className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-2 py-1"
+                                style={{fontSize: '0.7rem'}}>
                                 +{coupon.store.categories.length - 2}
                               </span>
                             )}
@@ -308,8 +319,9 @@ const CouponManagement = () => {
                       <div className="mb-3">
                         <div className="d-flex align-items-center gap-2 mb-2">
                           <h6 className="fw-bold text-dark mb-0">{coupon.name}</h6>
-                          <span className={`badge ${getCouponStatusBadgeClass(coupon.status)} bg-opacity-10 text-dark border px-3 py-1 rounded-pill`}>
-                            <i className="bi bi-circle-fill me-1" style={{ fontSize: '0.5rem' }}></i>
+                          <span
+                            className={`badge ${getCouponStatusBadgeClass(coupon.status)} bg-opacity-10 text-dark border px-3 py-1 rounded-pill`}>
+                            <i className="bi bi-circle-fill me-1" style={{fontSize: '0.5rem'}}></i>
                             {getCouponStatusDisplayName(coupon.status)}
                           </span>
                         </div>
@@ -323,7 +335,13 @@ const CouponManagement = () => {
                       <div className="row g-3 mb-3">
                         <div className="col-md-6">
                           <div className="d-flex align-items-center gap-2 p-3 bg-white rounded-3">
-                            <div className="bg-primary bg-opacity-10 rounded-circle p-2" style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <div className="bg-primary bg-opacity-10 rounded-circle p-2" style={{
+                              width: '40px',
+                              height: '40px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}>
                               <i className="bi bi-ticket-detailed text-primary"></i>
                             </div>
                             <div className="flex-grow-1">
@@ -331,11 +349,11 @@ const CouponManagement = () => {
                               <div className="fw-bold text-dark">
                                 {coupon.currentIssuedCount.toLocaleString()} / {coupon.maxIssuableCount.toLocaleString()}
                               </div>
-                              <div className="progress mt-2" style={{ height: '6px' }}>
+                              <div className="progress mt-2" style={{height: '6px'}}>
                                 <div
                                   className="progress-bar bg-primary"
                                   role="progressbar"
-                                  style={{ width: `${progress}%` }}
+                                  style={{width: `${progress}%`}}
                                   aria-valuenow={progress}
                                   aria-valuemin={0}
                                   aria-valuemax={100}
@@ -348,7 +366,13 @@ const CouponManagement = () => {
 
                         <div className="col-md-6">
                           <div className="d-flex align-items-center gap-2 p-3 bg-white rounded-3">
-                            <div className="bg-success bg-opacity-10 rounded-circle p-2" style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <div className="bg-success bg-opacity-10 rounded-circle p-2" style={{
+                              width: '40px',
+                              height: '40px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}>
                               <i className="bi bi-check-circle text-success"></i>
                             </div>
                             <div className="flex-grow-1">
@@ -356,11 +380,11 @@ const CouponManagement = () => {
                               <div className="fw-bold text-dark">
                                 {coupon.currentUsedCount.toLocaleString()} / {coupon.currentIssuedCount.toLocaleString()}
                               </div>
-                              <div className="progress mt-2" style={{ height: '6px' }}>
+                              <div className="progress mt-2" style={{height: '6px'}}>
                                 <div
                                   className="progress-bar bg-success"
                                   role="progressbar"
-                                  style={{ width: `${usageRate}%` }}
+                                  style={{width: `${usageRate}%`}}
                                   aria-valuenow={usageRate}
                                   aria-valuemin={0}
                                   aria-valuemax={100}
@@ -377,12 +401,19 @@ const CouponManagement = () => {
                         <div className="row g-2">
                           <div className="col-12">
                             <div className="d-flex align-items-center gap-2 p-2 bg-white rounded-3">
-                              <div className="bg-primary bg-opacity-10 rounded-circle p-2" style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <i className="bi bi-calendar-range text-primary" style={{ fontSize: '0.9rem' }}></i>
+                              <div className="bg-primary bg-opacity-10 rounded-circle p-2" style={{
+                                width: '32px',
+                                height: '32px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}>
+                                <i className="bi bi-calendar-range text-primary" style={{fontSize: '0.9rem'}}></i>
                               </div>
                               <div className="d-flex align-items-center gap-2 flex-wrap">
                                 <span className="fw-semibold text-dark">유효 기간:</span>
-                                <span className="text-dark">{formatCouponDate(coupon.validityPeriod.startDateTime)}</span>
+                                <span
+                                  className="text-dark">{formatCouponDate(coupon.validityPeriod.startDateTime)}</span>
                                 <i className="bi bi-arrow-right text-muted"></i>
                                 <span className="text-dark">{formatCouponDate(coupon.validityPeriod.endDateTime)}</span>
                               </div>

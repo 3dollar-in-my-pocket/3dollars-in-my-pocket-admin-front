@@ -1,6 +1,13 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
 import {toast} from 'react-toastify';
-import {getActivitiesStatusDisplayName, getStoreStatusBadgeClass, getStoreStatusDisplayName, getStoreTypeDisplayName, getStoreTypeBadgeClass, getStoreTypeIcon} from "../types/store";
+import {
+  getActivitiesStatusDisplayName,
+  getStoreStatusBadgeClass,
+  getStoreStatusDisplayName,
+  getStoreTypeDisplayName,
+  getStoreTypeBadgeClass,
+  getStoreTypeIcon
+} from "../types/store";
 import {getVisitIconClass, getVisitTypeBatchClass, getVisitTypeDisplayName} from "../types/visit";
 import visitApi from "../api/visitApi";
 
@@ -27,7 +34,6 @@ const UserVisitHistory = ({userId, isActive, onStoreClick}) => {
     try {
       const response = await visitApi.getUserVisits(userId, reset ? null : cursor, 20);
       if (!response?.ok) {
-        toast.error('방문 이력을 불러오는 중 오류가 발생했습니다.');
         return;
       }
 
@@ -42,8 +48,6 @@ const UserVisitHistory = ({userId, isActive, onStoreClick}) => {
       setHasMore(newCursor.hasMore || false);
       setCursor(newCursor.nextCursor || null);
       setTotalCount(newCursor.totalCount || 0);
-    } catch (error) {
-      toast.error('방문 이력을 불러오는 중 오류가 발생했습니다.');
     } finally {
       setIsLoading(false);
     }
@@ -240,7 +244,7 @@ const UserVisitHistory = ({userId, isActive, onStoreClick}) => {
                           }}
                         >
                           <h6 className="mb-0 fw-bold text-primary">{visit.store?.name || '가게 이름 없음'}</h6>
-                          <i className="bi bi-box-arrow-up-right text-primary" style={{ fontSize: '0.7rem' }}></i>
+                          <i className="bi bi-box-arrow-up-right text-primary" style={{fontSize: '0.7rem'}}></i>
                         </div>
                         {getVisitTypeBadge(visit.type)}
                       </div>

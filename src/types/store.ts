@@ -1,5 +1,5 @@
 // Store related type definitions and constants
-import { WRITER_TYPE, WriterType, getWriterTypeBadgeClass } from './common';
+import {WRITER_TYPE, WriterType, getWriterTypeBadgeClass} from './common';
 
 
 // Store status types (using common STATUS constants)
@@ -38,7 +38,7 @@ export const OPEN_STATUS = {
 export type OpenStatus = typeof OPEN_STATUS[keyof typeof OPEN_STATUS];
 
 // Re-export WRITER_TYPE for backward compatibility
-export { WRITER_TYPE };
+export {WRITER_TYPE};
 
 // Store type
 export const STORE_TYPE = {
@@ -229,7 +229,7 @@ export const getOpenStatusBadgeClass = (openStatus: OpenStatus): string => {
 };
 
 // Re-export getWriterTypeBadgeClass for backward compatibility
-export { getWriterTypeBadgeClass };
+export {getWriterTypeBadgeClass};
 
 export const formatCount = (count: number): string => {
   if (count >= 1000) {

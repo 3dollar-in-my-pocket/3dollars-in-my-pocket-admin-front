@@ -24,7 +24,13 @@ export default {
    * @param {Object} data - 수정할 메달 정보
    * @returns {Promise<Object>} 수정 결과
    */
-  updateMedal: async (medalId: string, data: { name: string; introduction: string; activationIconUrl: string; disableIconUrl: string; acquisitionDescription?: string }): Promise<any> => {
+  updateMedal: async (medalId: string, data: {
+    name: string;
+    introduction: string;
+    activationIconUrl: string;
+    disableIconUrl: string;
+    acquisitionDescription?: string
+  }): Promise<any> => {
     try {
       const response = await axiosInstance({
         method: 'PUT',

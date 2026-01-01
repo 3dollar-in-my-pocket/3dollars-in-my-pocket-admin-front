@@ -15,7 +15,7 @@ export default {
     }
   },
 
-  getAdmins: async ({ size = 10, page = 1 } = {}) => {
+  getAdmins: async ({size = 10, page = 1} = {}) => {
     try {
       const response = await axiosInstance({
         method: "GET",

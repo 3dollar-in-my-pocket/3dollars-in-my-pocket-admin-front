@@ -5,7 +5,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   // 메뉴 그룹별 색상 및 설명 매핑
-  const groupStyles: Record<string, {color: string; icon: string; description: string}> = {
+  const groupStyles: Record<string, { color: string; icon: string; description: string }> = {
     "유저 관리": {
       color: "primary",
       icon: "bi-people-fill",

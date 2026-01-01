@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
-import { getAdStatus } from '../../utils/timeUtils';
+import {useState, useEffect} from 'react';
+import {getAdStatus} from '../../utils/timeUtils';
 
 /**
  * 광고 상태와 타이머를 표시하는 컴포넌트
  */
-const AdTimer = ({ startDateTime, endDateTime, className = "" }) => {
+const AdTimer = ({startDateTime, endDateTime, className = ""}) => {
   const [status, setStatus] = useState(null);
 
   useEffect(() => {
@@ -43,7 +43,7 @@ const AdTimer = ({ startDateTime, endDateTime, className = "" }) => {
     <div className={`d-flex flex-column ${className}`}>
       {status.status !== 'active' && (
         <div className="d-flex align-items-center justify-content-center gap-2 mb-2">
-          <span className={`badge ${status.badgeClass} d-flex align-items-center gap-1`} style={{ fontSize: '0.75rem' }}>
+          <span className={`badge ${status.badgeClass} d-flex align-items-center gap-1`} style={{fontSize: '0.75rem'}}>
             <span>{getTimerIcon()}</span>
             {status.label}
           </span>

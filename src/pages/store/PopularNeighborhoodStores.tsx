@@ -1,11 +1,11 @@
-import { useEffect, useCallback, useState, useRef } from 'react';
+import {useEffect, useCallback, useState, useRef} from 'react';
 import StoreDetailModal from './StoreDetailModal';
 import UserDetailModal from '../user/UserDetailModal';
 import useSearch from '../../hooks/useSearch';
 import SearchResults from '../../components/common/SearchResults';
 import StoreCard from '../../components/store/StoreCard';
-import rankingApi, { RankingCriteria, Province, District } from '../../api/rankingApi';
-import { toast } from 'react-toastify';
+import rankingApi, {RankingCriteria, Province, District} from '../../api/rankingApi';
+import {toast} from 'react-toastify';
 
 const RANKING_CRITERIA = {
   MOST_REVIEWS: 'MOST_REVIEWS' as RankingCriteria,
@@ -41,7 +41,7 @@ const PopularNeighborhoodStores = () => {
       }
       return null;
     },
-    searchFunction: async ({ cursor }: any) => {
+    searchFunction: async ({cursor}: any) => {
       const response = await rankingApi.getPopularNeighborhoodStores(
         selectedCriteria,
         selectedDistrict,
@@ -53,7 +53,7 @@ const PopularNeighborhoodStores = () => {
         throw new Error('Ranking search failed');
       }
 
-      const { contents, cursor: responseCursor } = response.data;
+      const {contents, cursor: responseCursor} = response.data;
 
       const hasMore = Boolean(
         responseCursor?.nextCursor &&
@@ -93,11 +93,7 @@ const PopularNeighborhoodStores = () => {
               setSelectedDistrict(firstProvince.districts[0].district);
             }
           }
-        } else {
-          toast.error('지역 목록을 불러오는데 실패했습니다.');
         }
-      } catch (error) {
-        toast.error('지역 목록을 불러오는 중 오류가 발생했습니다.');
       } finally {
         setIsLoadingProvinces(false);
       }
@@ -176,7 +172,7 @@ const PopularNeighborhoodStores = () => {
   const handleStoreDeleted = useCallback((deletedStoreId: string) => {
     const updatedResults = storeList.map((store: any) =>
       store.storeId === deletedStoreId
-        ? { ...store, isDeleted: true }
+        ? {...store, isDeleted: true}
         : store
     );
     setResults(updatedResults);
@@ -296,7 +292,7 @@ const PopularNeighborhoodStores = () => {
 
           {/* 현재 검색 상태 표시 */}
           <div className="mt-3">
-            <small className="text-muted d-flex align-items-center" style={{ fontSize: '0.75rem' }}>
+            <small className="text-muted d-flex align-items-center" style={{fontSize: '0.75rem'}}>
               <i className="bi bi-info-circle me-2"></i>
               <span className="d-none d-md-inline">
                 {selectedCriteria === RANKING_CRITERIA.MOST_REVIEWS
@@ -347,7 +343,8 @@ const PopularNeighborhoodStores = () => {
         show={!!selectedUser}
         onHide={handleCloseUserModal}
         user={selectedUser}
-        onStoreClick={() => {}}
+        onStoreClick={() => {
+        }}
       />
     </div>
   );

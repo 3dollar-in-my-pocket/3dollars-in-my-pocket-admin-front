@@ -2,7 +2,7 @@ import {useEffect, useState} from "react";
 import RegistrationModal from "./RegistrationModal";
 import registrationApi from "../../api/registrationApi";
 import Loading from "../../components/common/Loading";
-import { getOsPlatformDisplayName, getOsPlatformBadgeClass, getOsPlatformIcon } from "../../types/registration";
+import {getOsPlatformDisplayName, getOsPlatformBadgeClass, getOsPlatformIcon} from "../../types/registration";
 
 const RegistrationManagement = () => {
   const [registrationList, setRegistrationList] = useState([]);
@@ -84,7 +84,13 @@ const RegistrationManagement = () => {
           </div>
         ) : registrationList.length === 0 ? (
           <div className="text-center py-5">
-            <div className="bg-light rounded-circle mx-auto mb-3" style={{width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+            <div className="bg-light rounded-circle mx-auto mb-3" style={{
+              width: '80px',
+              height: '80px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
               <i className="bi bi-person-plus fs-1 text-secondary"></i>
             </div>
             <h5 className="text-muted">등록된 가입 신청이 없습니다</h5>
@@ -157,7 +163,7 @@ const RegistrationManagement = () => {
                       <div className="mb-2 mb-md-3">
                         <div
                           className="d-flex align-items-center justify-content-center bg-light rounded border cert-placeholder-responsive"
-                          style={{ height: '80px' }}
+                          style={{height: '80px'}}
                         >
                           <div className="text-center text-muted">
                             <i className="bi bi-shield-check fs-4 mb-1"></i>
@@ -185,7 +191,8 @@ const RegistrationManagement = () => {
                       <small className="text-muted d-block" style={{fontSize: '0.75rem'}}>카테고리</small>
                       <div className="d-flex flex-wrap gap-1">
                         {reg.store.categories.slice(0, window.innerWidth >= 768 ? 3 : 2).map((category, idx) => (
-                          <span key={idx} className="badge bg-info bg-opacity-10 text-info border border-info" style={{fontSize: '0.65rem'}}>
+                          <span key={idx} className="badge bg-info bg-opacity-10 text-info border border-info"
+                                style={{fontSize: '0.65rem'}}>
                             {category}
                           </span>
                         ))}
@@ -201,7 +208,8 @@ const RegistrationManagement = () => {
                       <div className="mb-2 mb-md-3">
                         <small className="text-muted d-block" style={{fontSize: '0.75rem'}}>신청 환경</small>
                         <div className="d-flex flex-wrap gap-1">
-                          <span className={`badge ${getOsPlatformBadgeClass(reg.context.osPlatform)}`} style={{fontSize: '0.65rem'}}>
+                          <span className={`badge ${getOsPlatformBadgeClass(reg.context.osPlatform)}`}
+                                style={{fontSize: '0.65rem'}}>
                             <i className={`bi ${getOsPlatformIcon(reg.context.osPlatform)} me-1`}></i>
                             {getOsPlatformDisplayName(reg.context.osPlatform)}
                           </span>
@@ -222,7 +230,8 @@ const RegistrationManagement = () => {
                         </small>
                       </div>
                       <div className="text-end">
-                        <span className="badge bg-warning bg-opacity-10 text-warning border border-warning" style={{fontSize: '0.7rem'}}>
+                        <span className="badge bg-warning bg-opacity-10 text-warning border border-warning"
+                              style={{fontSize: '0.7rem'}}>
                           <i className="bi bi-clock-history me-1"></i>대기중
                         </span>
                       </div>

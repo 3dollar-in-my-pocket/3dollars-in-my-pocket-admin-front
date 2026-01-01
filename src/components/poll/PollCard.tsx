@@ -5,7 +5,7 @@ import {
   getWriterTypeDisplayName
 } from '../../types/common';
 
-const PollCard = ({ poll, onClick, onAuthorClick, onDelete }) => {
+const PollCard = ({poll, onClick, onAuthorClick, onDelete}) => {
   const formatDateTime = (dateString) => {
     if (!dateString) return '없음';
     return new Date(dateString).toLocaleString('ko-KR', {
@@ -36,13 +36,13 @@ const PollCard = ({ poll, onClick, onAuthorClick, onDelete }) => {
     switch (status) {
       case 'upcoming':
         return {
-          badge: { bg: 'warning', icon: 'bi-clock', text: '시작 예정' },
+          badge: {bg: 'warning', icon: 'bi-clock', text: '시작 예정'},
           border: '#ffc107',
-          cardStyle: { opacity: 0.8 }
+          cardStyle: {opacity: 0.8}
         };
       case 'active':
         return {
-          badge: { bg: 'success', icon: 'bi-play-circle-fill', text: '진행중' },
+          badge: {bg: 'success', icon: 'bi-play-circle-fill', text: '진행중'},
           border: '#28a745',
           cardStyle: {
             boxShadow: '0 4px 15px rgba(40, 167, 69, 0.2)',
@@ -51,7 +51,7 @@ const PollCard = ({ poll, onClick, onAuthorClick, onDelete }) => {
         };
       case 'ended':
         return {
-          badge: { bg: 'secondary', icon: 'bi-stop-circle', text: '종료' },
+          badge: {bg: 'secondary', icon: 'bi-stop-circle', text: '종료'},
           border: '#6c757d',
           cardStyle: {
             opacity: 0.7,
@@ -60,7 +60,7 @@ const PollCard = ({ poll, onClick, onAuthorClick, onDelete }) => {
         };
       default:
         return {
-          badge: { bg: 'secondary', icon: 'bi-question-circle', text: '알 수 없음' },
+          badge: {bg: 'secondary', icon: 'bi-question-circle', text: '알 수 없음'},
           border: '#6c757d',
           cardStyle: {}
         };
@@ -170,7 +170,7 @@ const PollCard = ({ poll, onClick, onAuthorClick, onDelete }) => {
               }}
               title="투표 삭제"
             >
-              <i className="bi bi-trash" style={{ fontSize: '0.75rem' }}></i>
+              <i className="bi bi-trash" style={{fontSize: '0.75rem'}}></i>
             </button>
           </div>
         )}
@@ -194,10 +194,10 @@ const PollCard = ({ poll, onClick, onAuthorClick, onDelete }) => {
                   borderRadius: '20px'
                 }}
               >
-                <i className="bi bi-play-circle-fill" style={{ fontSize: '0.7rem' }}></i>
+                <i className="bi bi-play-circle-fill" style={{fontSize: '0.7rem'}}></i>
                 <span>진행중</span>
-                <div className="vr bg-white opacity-50 mx-1" style={{ width: '1px', height: '12px' }}></div>
-                <i className="bi bi-clock" style={{ fontSize: '0.7rem' }}></i>
+                <div className="vr bg-white opacity-50 mx-1" style={{width: '1px', height: '12px'}}></div>
+                <i className="bi bi-clock" style={{fontSize: '0.7rem'}}></i>
                 <span>{timeRemaining}</span>
               </span>
             </div>
@@ -205,15 +205,15 @@ const PollCard = ({ poll, onClick, onAuthorClick, onDelete }) => {
             <span
               className={`badge rounded-pill px-3 py-2 d-flex align-items-center ${
                 pollStatus === 'active' ? 'text-white' :
-                pollStatus === 'upcoming' ? 'text-dark' :
-                'text-white'
+                  pollStatus === 'upcoming' ? 'text-dark' :
+                    'text-white'
               }`}
               style={{
                 background: pollStatus === 'active'
                   ? 'linear-gradient(135deg, #28a745 0%, #20c997 100%)'
                   : pollStatus === 'upcoming'
-                  ? 'linear-gradient(135deg, #ffc107 0%, #fd7e14 100%)'
-                  : 'linear-gradient(135deg, #6c757d 0%, #495057 100%)',
+                    ? 'linear-gradient(135deg, #ffc107 0%, #fd7e14 100%)'
+                    : 'linear-gradient(135deg, #6c757d 0%, #495057 100%)',
                 boxShadow: `0 3px 12px ${statusConfig.border}40`,
                 fontSize: '0.75rem',
                 fontWeight: '600',
@@ -233,15 +233,15 @@ const PollCard = ({ poll, onClick, onAuthorClick, onDelete }) => {
                   }}></span>
                 </span>
               )}
-              <i className={`bi ${statusConfig.badge.icon} me-2`} style={{ fontSize: '0.7rem' }}></i>
+              <i className={`bi ${statusConfig.badge.icon} me-2`} style={{fontSize: '0.7rem'}}></i>
               {statusConfig.badge.text}
             </span>
           )}
         </div>
 
-        <div className="card-body" style={{ padding: '16px 12px 12px 12px' }}>
+        <div className="card-body" style={{padding: '16px 12px 12px 12px'}}>
           {/* 작성자 정보 */}
-          <div className="mb-2 mb-md-3" style={{ marginTop: '32px' }}>
+          <div className="mb-2 mb-md-3" style={{marginTop: '32px'}}>
             <div className="d-flex align-items-start justify-content-between gap-3">
               <div
                 className={`d-flex align-items-center gap-2 flex-grow-1 ${poll.writer && onAuthorClick ? 'cursor-pointer' : ''}`}
@@ -270,8 +270,11 @@ const PollCard = ({ poll, onClick, onAuthorClick, onDelete }) => {
               >
                 {poll.writer ? (
                   <>
-                    <div className={`rounded-circle p-2 ${getWriterTypeBgClass(poll.writer.writerType)}`} style={{ minWidth: '32px', width: '32px', height: '32px' }}>
-                      <i className={`bi ${getWriterTypeIcon(poll.writer.writerType)} ${getWriterTypeTextClass(poll.writer.writerType)}`} style={{ fontSize: '0.8rem' }}></i>
+                    <div className={`rounded-circle p-2 ${getWriterTypeBgClass(poll.writer.writerType)}`}
+                         style={{minWidth: '32px', width: '32px', height: '32px'}}>
+                      <i
+                        className={`bi ${getWriterTypeIcon(poll.writer.writerType)} ${getWriterTypeTextClass(poll.writer.writerType)}`}
+                        style={{fontSize: '0.8rem'}}></i>
                     </div>
                     <div className="d-flex flex-column">
                       <span className="text-dark fw-medium" style={{
@@ -283,26 +286,27 @@ const PollCard = ({ poll, onClick, onAuthorClick, onDelete }) => {
                       }}>
                         {poll.writer.name || `ID: ${poll.writer.writerId}`}
                       </span>
-                      <span className={`fw-medium ${getWriterTypeTextClass(poll.writer.writerType)}`} style={{ fontSize: '0.7rem' }}>
+                      <span className={`fw-medium ${getWriterTypeTextClass(poll.writer.writerType)}`}
+                            style={{fontSize: '0.7rem'}}>
                         {getWriterTypeDisplayName(poll.writer.writerType)}
                       </span>
                     </div>
                     {onAuthorClick && (
                       <div className="ms-auto">
-                        <i className="bi bi-box-arrow-up-right text-primary" style={{ fontSize: '0.8rem' }}></i>
+                        <i className="bi bi-box-arrow-up-right text-primary" style={{fontSize: '0.8rem'}}></i>
                       </div>
                     )}
                   </>
                 ) : (
                   <>
-                    <div className="bg-secondary bg-opacity-10 rounded-circle p-2" style={{ minWidth: '36px' }}>
+                    <div className="bg-secondary bg-opacity-10 rounded-circle p-2" style={{minWidth: '36px'}}>
                       <i className="bi bi-person-x text-muted"></i>
                     </div>
                     <div className="d-flex flex-column">
-                      <span className="text-muted fw-medium" style={{ fontSize: '0.9rem' }}>
+                      <span className="text-muted fw-medium" style={{fontSize: '0.9rem'}}>
                         익명
                       </span>
-                      <span className="text-muted" style={{ fontSize: '0.75rem' }}>
+                      <span className="text-muted" style={{fontSize: '0.75rem'}}>
                         작성자 정보 없음
                       </span>
                     </div>
@@ -371,7 +375,7 @@ const PollCard = ({ poll, onClick, onAuthorClick, onDelete }) => {
                       ></div>
 
                       {/* 옵션 내용 */}
-                      <div className="position-relative" style={{ zIndex: 2 }}>
+                      <div className="position-relative" style={{zIndex: 2}}>
                         <div className="d-flex align-items-center justify-content-between gap-3">
                           <div className="d-flex align-items-center gap-3 flex-grow-1">
                             <div
@@ -386,7 +390,7 @@ const PollCard = ({ poll, onClick, onAuthorClick, onDelete }) => {
                             >
                               <div
                                 className="rounded-circle bg-white"
-                                style={{ width: '6px', height: '6px' }}
+                                style={{width: '6px', height: '6px'}}
                               ></div>
                             </div>
                             <span className="fw-semibold text-dark" style={{
@@ -399,12 +403,13 @@ const PollCard = ({ poll, onClick, onAuthorClick, onDelete }) => {
                               {option.name}
                             </span>
                           </div>
-                          <div className="text-end" style={{ flexShrink: 0 }}>
-                            <div className={`fw-bold text-${colorClass} d-flex align-items-center gap-1 justify-content-end`}>
-                              <span style={{ fontSize: '0.95rem' }}>{option.count || 0}</span>
+                          <div className="text-end" style={{flexShrink: 0}}>
+                            <div
+                              className={`fw-bold text-${colorClass} d-flex align-items-center gap-1 justify-content-end`}>
+                              <span style={{fontSize: '0.95rem'}}>{option.count || 0}</span>
                               <span className="text-muted small">표</span>
                             </div>
-                            <div className={`fw-medium text-${colorClass}`} style={{ fontSize: '0.75rem' }}>
+                            <div className={`fw-medium text-${colorClass}`} style={{fontSize: '0.75rem'}}>
                               {percentage}%
                             </div>
                           </div>
@@ -485,13 +490,13 @@ const PollCard = ({ poll, onClick, onAuthorClick, onDelete }) => {
                 <div className="text-center">
                   <div className="d-flex align-items-center justify-content-center gap-1 gap-md-2 mb-1">
                     <div className="rounded-circle bg-primary bg-opacity-10 p-1">
-                      <i className="bi bi-people text-primary" style={{ fontSize: '0.7rem' }}></i>
+                      <i className="bi bi-people text-primary" style={{fontSize: '0.7rem'}}></i>
                     </div>
-                    <span className="text-muted fw-medium" style={{ fontSize: '0.7rem' }}>참여자</span>
+                    <span className="text-muted fw-medium" style={{fontSize: '0.7rem'}}>참여자</span>
                   </div>
-                  <div className="fw-bold text-primary" style={{ fontSize: '0.95rem' }}>
+                  <div className="fw-bold text-primary" style={{fontSize: '0.95rem'}}>
                     {totalVotes.toLocaleString()}
-                    <span className="text-muted ms-1" style={{ fontSize: '0.7rem' }}>명</span>
+                    <span className="text-muted ms-1" style={{fontSize: '0.7rem'}}>명</span>
                   </div>
                 </div>
               </div>
@@ -499,13 +504,13 @@ const PollCard = ({ poll, onClick, onAuthorClick, onDelete }) => {
                 <div className="text-center">
                   <div className="d-flex align-items-center justify-content-center gap-1 gap-md-2 mb-1">
                     <div className="rounded-circle bg-info bg-opacity-10 p-1">
-                      <i className="bi bi-chat-square-text text-info" style={{ fontSize: '0.7rem' }}></i>
+                      <i className="bi bi-chat-square-text text-info" style={{fontSize: '0.7rem'}}></i>
                     </div>
-                    <span className="text-muted fw-medium" style={{ fontSize: '0.7rem' }}>댓글</span>
+                    <span className="text-muted fw-medium" style={{fontSize: '0.7rem'}}>댓글</span>
                   </div>
-                  <div className="fw-bold text-info" style={{ fontSize: '0.95rem' }}>
+                  <div className="fw-bold text-info" style={{fontSize: '0.95rem'}}>
                     {(poll.metadata?.commentCount || 0).toLocaleString()}
-                    <span className="text-muted ms-1" style={{ fontSize: '0.7rem' }}>개</span>
+                    <span className="text-muted ms-1" style={{fontSize: '0.7rem'}}>개</span>
                   </div>
                 </div>
               </div>

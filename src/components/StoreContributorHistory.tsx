@@ -34,7 +34,6 @@ const StoreContributorHistory = ({storeId, isActive, onAuthorClick}: StoreContri
     try {
       const response = await storeApi.getStoreChangeHistories(storeId, reset ? null : cursor, 20);
       if (!response?.ok) {
-        toast.error('변경 이력을 불러오는 중 오류가 발생했습니다.');
         return;
       }
 
@@ -48,9 +47,6 @@ const StoreContributorHistory = ({storeId, isActive, onAuthorClick}: StoreContri
 
       setHasMore(newCursor.hasMore || false);
       setCursor(newCursor.nextCursor || null);
-    } catch (error) {
-      console.error('변경 이력 조회 실패:', error);
-      toast.error('변경 이력을 불러오는 중 오류가 발생했습니다.');
     } finally {
       setIsLoading(false);
     }
@@ -120,7 +116,13 @@ const StoreContributorHistory = ({storeId, isActive, onAuthorClick}: StoreContri
                   <div className="card-body p-3">
                     <div className="d-flex align-items-start gap-3">
                       <div className="bg-primary bg-opacity-10 rounded-circle p-3"
-                           style={{minWidth: '48px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                           style={{
+                             minWidth: '48px',
+                             height: '48px',
+                             display: 'flex',
+                             alignItems: 'center',
+                             justifyContent: 'center'
+                           }}>
                         <i className="bi bi-pencil-square text-primary fs-5"></i>
                       </div>
                       <div className="flex-grow-1">
@@ -151,7 +153,8 @@ const StoreContributorHistory = ({storeId, isActive, onAuthorClick}: StoreContri
                               }
                             }}
                           >
-                            <span className={`badge rounded-pill px-3 py-2 ${getWriterTypeBadgeClass(history.actor.writerType)} bg-opacity-10 ${history.actor.writerType === 'USER' && onAuthorClick ? 'text-primary' : 'text-dark'} border`}>
+                            <span
+                              className={`badge rounded-pill px-3 py-2 ${getWriterTypeBadgeClass(history.actor.writerType)} bg-opacity-10 ${history.actor.writerType === 'USER' && onAuthorClick ? 'text-primary' : 'text-dark'} border`}>
                               <i className="bi bi-person-fill me-1"></i>
                               {history.actor.name}
                             </span>

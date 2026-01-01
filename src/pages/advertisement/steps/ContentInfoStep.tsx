@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, {useState} from "react";
 import {Button, Col, Form, Row} from "react-bootstrap";
 import {toast} from "react-toastify";
 import uploadApi from "../../../api/uploadApi";
 import AdPreview from "../../../components/advertisement/AdPreview";
-import { isFieldAvailable } from "../../../constants/advertisementSpecs";
+import {isFieldAvailable} from "../../../constants/advertisementSpecs";
 import DeepLinkSelector from "../../../components/common/DeepLinkSelector";
 
 const ContentInfoStep = ({formData, onChange}) => {
@@ -69,13 +69,7 @@ const ContentInfoStep = ({formData, onChange}) => {
       if (response.ok && response.data) {
         handleImageChange('url', response.data);
         toast.success("이미지가 업로드되었습니다!");
-      } else {
-        const errorMsg = response?.message || "이미지 업로드에 실패했습니다.";
-        toast.error(errorMsg);
       }
-    } catch (error) {
-      console.error('Upload error:', error);
-      toast.error("이미지 업로드 중 오류가 발생했습니다.");
     } finally {
       setIsUploading(false);
     }
@@ -91,17 +85,20 @@ const ContentInfoStep = ({formData, onChange}) => {
   return (
     <>
       <h5 className="text-primary mb-4 d-flex align-items-center">
-        <span className="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center me-2" style={{ width: '32px', height: '32px', fontSize: '0.9rem' }}>2</span>
+        <span
+          className="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center me-2"
+          style={{width: '32px', height: '32px', fontSize: '0.9rem'}}>2</span>
         콘텐츠 정보
       </h5>
 
       {/* 미리보기 섹션 */}
       {formData.position && (
-        <div className="mb-4 p-4 border border-info border-2 rounded-3 shadow-sm" style={{ background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)' }}>
+        <div className="mb-4 p-4 border border-info border-2 rounded-3 shadow-sm"
+             style={{background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)'}}>
           <h6 className="text-info mb-3 fw-bold d-flex align-items-center">
             <i className="bi bi-eye-fill me-2"></i>
             실시간 미리보기
-            <span className="badge bg-info ms-2" style={{ fontSize: '0.7rem' }}>LIVE</span>
+            <span className="badge bg-info ms-2" style={{fontSize: '0.7rem'}}>LIVE</span>
           </h6>
           <div className="bg-white rounded-3 p-4 shadow-sm">
             <AdPreview
@@ -145,12 +142,12 @@ const ContentInfoStep = ({formData, onChange}) => {
                 variant="primary"
                 disabled={isUploading}
                 onClick={() => document.getElementById('image-upload-input').click()}
-                style={{ minWidth: '150px', whiteSpace: 'nowrap' }}
+                style={{minWidth: '150px', whiteSpace: 'nowrap'}}
                 className="shadow-sm"
               >
                 {isUploading ? (
                   <>
-                    <span className="spinner-border spinner-border-sm me-2" />
+                    <span className="spinner-border spinner-border-sm me-2"/>
                     업로드 중...
                   </>
                 ) : (
@@ -164,7 +161,7 @@ const ContentInfoStep = ({formData, onChange}) => {
                 id="image-upload-input"
                 type="file"
                 accept="image/*"
-                style={{ display: 'none' }}
+                style={{display: 'none'}}
                 onChange={handleImageUpload}
               />
             </div>
@@ -181,9 +178,9 @@ const ContentInfoStep = ({formData, onChange}) => {
           <Col md={6}>
             <Form.Group>
               <Form.Label className="fw-semibold d-flex align-items-center">
-                <i className="bi bi-arrows-expand text-secondary me-2" style={{ fontSize: '0.85rem' }}></i>
+                <i className="bi bi-arrows-expand text-secondary me-2" style={{fontSize: '0.85rem'}}></i>
                 이미지 가로
-                <span className="badge bg-secondary ms-2" style={{ fontSize: '0.65rem' }}>선택</span>
+                <span className="badge bg-secondary ms-2" style={{fontSize: '0.65rem'}}>선택</span>
               </Form.Label>
               <Form.Control
                 type="number"
@@ -197,9 +194,9 @@ const ContentInfoStep = ({formData, onChange}) => {
           <Col md={6}>
             <Form.Group>
               <Form.Label className="fw-semibold d-flex align-items-center">
-                <i className="bi bi-arrows-expand text-secondary me-2" style={{ fontSize: '0.85rem' }}></i>
+                <i className="bi bi-arrows-expand text-secondary me-2" style={{fontSize: '0.85rem'}}></i>
                 이미지 세로
-                <span className="badge bg-secondary ms-2" style={{ fontSize: '0.65rem' }}>선택</span>
+                <span className="badge bg-secondary ms-2" style={{fontSize: '0.65rem'}}>선택</span>
               </Form.Label>
               <Form.Control
                 type="number"
@@ -243,14 +240,14 @@ const ContentInfoStep = ({formData, onChange}) => {
                     value={content.titleFontColor || "#000000"}
                     onChange={(e) => handleContentChange("titleFontColor", e.target.value)}
                     className="shadow-sm"
-                    style={{ height: '38px' }}
+                    style={{height: '38px'}}
                   />
                   <Form.Control
                     type="text"
                     value={content.titleFontColor || "#000000"}
                     onChange={(e) => handleContentChange("titleFontColor", e.target.value)}
                     className="shadow-sm"
-                    style={{ fontFamily: 'monospace', fontSize: '0.85rem' }}
+                    style={{fontFamily: 'monospace', fontSize: '0.85rem'}}
                   />
                 </div>
               </Form.Group>
@@ -289,14 +286,14 @@ const ContentInfoStep = ({formData, onChange}) => {
                     value={content.subTitleFontColor || "#969696"}
                     onChange={(e) => handleContentChange("subTitleFontColor", e.target.value)}
                     className="shadow-sm"
-                    style={{ height: '38px' }}
+                    style={{height: '38px'}}
                   />
                   <Form.Control
                     type="text"
                     value={content.subTitleFontColor || "#969696"}
                     onChange={(e) => handleContentChange("subTitleFontColor", e.target.value)}
                     className="shadow-sm"
-                    style={{ fontFamily: 'monospace', fontSize: '0.85rem' }}
+                    style={{fontFamily: 'monospace', fontSize: '0.85rem'}}
                   />
                 </div>
               </Form.Group>
@@ -335,14 +332,14 @@ const ContentInfoStep = ({formData, onChange}) => {
                     value={content.extraContentFontColor || "#000000"}
                     onChange={(e) => handleContentChange("extraContentFontColor", e.target.value)}
                     className="shadow-sm"
-                    style={{ height: '38px' }}
+                    style={{height: '38px'}}
                   />
                   <Form.Control
                     type="text"
                     value={content.extraContentFontColor || "#000000"}
                     onChange={(e) => handleContentChange("extraContentFontColor", e.target.value)}
                     className="shadow-sm"
-                    style={{ fontFamily: 'monospace', fontSize: '0.85rem' }}
+                    style={{fontFamily: 'monospace', fontSize: '0.85rem'}}
                   />
                 </div>
               </Form.Group>
@@ -358,20 +355,20 @@ const ContentInfoStep = ({formData, onChange}) => {
               <i className="bi bi-paint-bucket text-primary me-2"></i>
               배경 색상
             </Form.Label>
-            <div className="d-flex align-items-center gap-2" style={{ maxWidth: '300px' }}>
+            <div className="d-flex align-items-center gap-2" style={{maxWidth: '300px'}}>
               <Form.Control
                 type="color"
                 value={content.backgroundColor || "#FFFFFF"}
                 onChange={(e) => handleContentChange("backgroundColor", e.target.value)}
                 className="shadow-sm"
-                style={{ height: '38px', width: '80px' }}
+                style={{height: '38px', width: '80px'}}
               />
               <Form.Control
                 type="text"
                 value={content.backgroundColor || "#FFFFFF"}
                 onChange={(e) => handleContentChange("backgroundColor", e.target.value)}
                 className="shadow-sm"
-                style={{ fontFamily: 'monospace', fontSize: '0.85rem' }}
+                style={{fontFamily: 'monospace', fontSize: '0.85rem'}}
               />
             </div>
           </Form.Group>

@@ -1,5 +1,5 @@
 import storeApi from '../api/storeApi';
-import { STORE_SEARCH_TYPES, validateStoreSearch, StoreSearchType, Store, StoreType } from '../types/store';
+import {STORE_SEARCH_TYPES, validateStoreSearch, StoreSearchType, Store, StoreType} from '../types/store';
 
 interface SearchParams {
   searchType: StoreSearchType;
@@ -19,7 +19,7 @@ interface SearchResult {
 
 export const storeSearchAdapter = {
   // 검색 함수
-  searchFunction: async ({ searchType, searchQuery, cursor, targetStores }: SearchParams): Promise<SearchResult> => {
+  searchFunction: async ({searchType, searchQuery, cursor, targetStores}: SearchParams): Promise<SearchResult> => {
     let response: any;
 
     if (searchType === STORE_SEARCH_TYPES.KEYWORD) {
@@ -29,7 +29,7 @@ export const storeSearchAdapter = {
         throw new Error('Store search failed');
       }
 
-      const { contents, cursor: responseCursor } = response.data;
+      const {contents, cursor: responseCursor} = response.data;
 
       // 페이징 종료 조건: nextCursor가 없거나 결과가 비어있으면 더 이상 데이터 없음
       const hasMore = Boolean(
@@ -76,7 +76,7 @@ export const storeSearchAdapter = {
         throw new Error('Store search failed');
       }
 
-      const { contents, cursor: responseCursor } = response.data;
+      const {contents, cursor: responseCursor} = response.data;
 
       // 페이징 종료 조건: nextCursor가 없거나 결과가 비어있으면 더 이상 데이터 없음
       const hasMore = Boolean(
@@ -107,9 +107,9 @@ export const storeSearchAdapter = {
 
   // 검색 옵션
   searchOptions: [
-    { value: STORE_SEARCH_TYPES.RECENT, label: '최신순 조회' },
-    { value: STORE_SEARCH_TYPES.KEYWORD, label: '키워드 검색' },
-    { value: STORE_SEARCH_TYPES.STORE_ID, label: '가게 ID 검색' }
+    {value: STORE_SEARCH_TYPES.RECENT, label: '최신순 조회'},
+    {value: STORE_SEARCH_TYPES.KEYWORD, label: '키워드 검색'},
+    {value: STORE_SEARCH_TYPES.STORE_ID, label: '가게 ID 검색'}
   ],
 
   // 기본 설정

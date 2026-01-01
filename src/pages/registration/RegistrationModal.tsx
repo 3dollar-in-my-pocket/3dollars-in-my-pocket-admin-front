@@ -3,7 +3,7 @@ import registrationApi from "../../api/registrationApi";
 import {useEffect, useState} from "react";
 import enumApi from "../../api/enumApi";
 import {toast} from "react-toastify";
-import { getOsPlatformDisplayName, getOsPlatformBadgeClass, getOsPlatformIcon } from "../../types/registration";
+import {getOsPlatformDisplayName, getOsPlatformBadgeClass, getOsPlatformIcon} from "../../types/registration";
 
 const RegistrationModal = ({show, onHide, registration}) => {
   const [rejectReasons, setRejectReasons] = useState([]);

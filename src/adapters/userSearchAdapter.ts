@@ -26,7 +26,12 @@ interface UserSearchResult {
 
 export const userSearchAdapter = {
   // 검색 함수
-  searchFunction: async ({ searchType, searchQuery, additionalParams, cursor }: UserSearchParams): Promise<UserSearchResult> => {
+  searchFunction: async ({
+                           searchType,
+                           searchQuery,
+                           additionalParams,
+                           cursor
+                         }: UserSearchParams): Promise<UserSearchResult> => {
     const searchRequest = createUserSearchRequest({
       type: searchType,
       query: searchType === SEARCH_TYPES.NAME ? searchQuery : undefined,
@@ -41,7 +46,7 @@ export const userSearchAdapter = {
       throw new Error('User search failed');
     }
 
-    const { users, hasMore, nextCursor } = response.data;
+    const {users, hasMore, nextCursor} = response.data;
 
     return {
       ok: true,
@@ -63,8 +68,8 @@ export const userSearchAdapter = {
 
   // 검색 옵션
   searchOptions: [
-    { value: SEARCH_TYPES.NAME, label: '닉네임 검색' },
-    { value: SEARCH_TYPES.USER_ID, label: '유저 ID' }
+    {value: SEARCH_TYPES.NAME, label: '닉네임 검색'},
+    {value: SEARCH_TYPES.USER_ID, label: '유저 ID'}
   ],
 
   // 기본 설정

@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { Alert, Button, Col, Container, Form, Row, Spinner, Card } from 'react-bootstrap';
+import React, {useEffect, useState} from 'react';
+import {Alert, Button, Col, Container, Form, Row, Spinner, Card} from 'react-bootstrap';
 import enumApi from "../../api/enumApi";
 import cacheToolApi from "../../api/cacheToolApi";
-import { toast } from "react-toastify";
+import {toast} from "react-toastify";
 
 const CacheTools = () => {
   const [cacheTypes, setCacheTypes] = useState([]);
@@ -92,7 +92,7 @@ const CacheTools = () => {
               >
                 {isLoading ? (
                   <>
-                    <Spinner animation="border" size="sm" className="me-2" />
+                    <Spinner animation="border" size="sm" className="me-2"/>
                     처리 중...
                   </>
                 ) : (

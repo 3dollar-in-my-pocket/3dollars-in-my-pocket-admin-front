@@ -1,15 +1,15 @@
 const SearchResults = ({
-  results = [],
-  isLoading = false,
-  hasMore = false,
-  scrollContainerRef,
-  onScroll,
-  renderItem,
-  emptyMessage = "검색 결과가 없습니다",
-  emptyDescription = "다른 검색어로 시도해보세요",
-  loadingMessage = "검색 중입니다",
-  title = "검색 결과"
-}) => {
+                         results = [],
+                         isLoading = false,
+                         hasMore = false,
+                         scrollContainerRef,
+                         onScroll,
+                         renderItem,
+                         emptyMessage = "검색 결과가 없습니다",
+                         emptyDescription = "다른 검색어로 시도해보세요",
+                         loadingMessage = "검색 중입니다",
+                         title = "검색 결과"
+                       }) => {
   const renderEmptyState = () => (
     <div className="text-center py-5 text-muted">
       <div className="mb-4">
@@ -90,11 +90,11 @@ const SearchResults = ({
         style={{maxHeight: '80vh', overflowY: 'auto'}}
       >
         {results.length === 0 && !isLoading ? renderEmptyState() :
-         results.length > 0 ? (
-          <div className="row g-3 p-3">
-            {results.map((item, index) => renderItem(item, index))}
-          </div>
-        ) : null}
+          results.length > 0 ? (
+            <div className="row g-3 p-3">
+              {results.map((item, index) => renderItem(item, index))}
+            </div>
+          ) : null}
 
         {renderLoadMoreIndicator()}
         {isLoading && results.length === 0 && renderLoadingState()}

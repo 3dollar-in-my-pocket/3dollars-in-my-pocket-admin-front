@@ -1,7 +1,7 @@
-import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
-import { toast } from "react-toastify";
-import { LocalStorageService } from "../service/LocalStorageService";
-import { AUTH_KEY } from "../constants/google";
+import axios, {AxiosError, AxiosResponse, InternalAxiosRequestConfig} from 'axios';
+import {toast} from "react-toastify";
+import {LocalStorageService} from "../service/LocalStorageService";
+import {AUTH_KEY} from "../constants/google";
 
 interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
   suppressToast?: boolean;
@@ -52,6 +52,7 @@ const handleAxiosError = (error: AxiosError): void => {
       401: "인증되지 않은 요청입니다.",
       403: "권한이 없습니다.",
       404: "요청한 리소스를 찾을 수 없습니다.",
+      409: "중복된 요청입니다.",
       500: `서버 오류가 발생하였습니다`,
     };
 

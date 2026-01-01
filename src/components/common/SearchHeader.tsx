@@ -1,4 +1,4 @@
-const SearchHeader = ({ title, description, icon = "bi-search" }) => {
+const SearchHeader = ({title, description, icon = "bi-search"}) => {
   return (
     <div className="text-center mb-5">
       <div className="d-inline-flex align-items-center gap-3 bg-white rounded-pill px-4 py-3 shadow-lg mb-3"

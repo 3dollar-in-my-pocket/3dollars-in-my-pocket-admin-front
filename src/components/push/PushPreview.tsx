@@ -1,6 +1,6 @@
-import { getPushTypeStyles } from "../../utils/pushUtils";
+import {getPushTypeStyles} from "../../utils/pushUtils";
 
-const PushPreview = ({ title, body, path, pushType, imageUrl }) => {
+const PushPreview = ({title, body, path, pushType, imageUrl}) => {
   const styles = getPushTypeStyles(pushType);
 
   return (

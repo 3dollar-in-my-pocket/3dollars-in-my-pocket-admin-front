@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
-import { Modal, Button, Form } from 'react-bootstrap';
-import { toast } from 'react-toastify';
+import {useState, useEffect} from 'react';
+import {Modal, Button, Form} from 'react-bootstrap';
+import {toast} from 'react-toastify';
 import medalApi from '../../api/medalApi';
-import { Medal, getAcquisitionDescription } from '../../types/medal';
+import {Medal, getAcquisitionDescription} from '../../types/medal';
 
 interface MedalEditModalProps {
   show: boolean;
@@ -11,7 +11,7 @@ interface MedalEditModalProps {
   onUpdate: () => void;
 }
 
-const MedalEditModal = ({ show, onHide, medal, onUpdate }: MedalEditModalProps) => {
+const MedalEditModal = ({show, onHide, medal, onUpdate}: MedalEditModalProps) => {
   const [formData, setFormData] = useState({
     name: '',
     introduction: '',
@@ -69,12 +69,7 @@ const MedalEditModal = ({ show, onHide, medal, onUpdate }: MedalEditModalProps) 
         toast.success('메달 정보가 수정되었습니다.');
         onUpdate();
         onHide();
-      } else {
-        toast.error('메달 정보 수정에 실패했습니다.');
       }
-    } catch (error) {
-      console.error('메달 수정 실패:', error);
-      toast.error('메달 정보 수정 중 오류가 발생했습니다.');
     } finally {
       setIsSubmitting(false);
     }

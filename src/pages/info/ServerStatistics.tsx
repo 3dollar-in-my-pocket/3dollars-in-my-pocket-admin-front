@@ -1,10 +1,21 @@
-import React, { useState, useEffect } from "react";
-import { Card, Container, Form, Button, Row, Col, Table, Alert } from "react-bootstrap";
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import React, {useState, useEffect} from "react";
+import {Card, Container, Form, Button, Row, Col, Table, Alert} from "react-bootstrap";
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer
+} from "recharts";
 import statisticsApi from "../../api/statisticsApi";
 import enumApi from "../../api/enumApi";
-import { DailyStatistic } from "../../types/statistics";
-import { toast } from "react-toastify";
+import {DailyStatistic} from "../../types/statistics";
+import {toast} from "react-toastify";
 import RecentActivityStatistics from "./RecentActivityStatistics";
 
 const ServerStatistics = () => {
@@ -278,12 +289,12 @@ const ServerStatistics = () => {
                   <h5 className="fw-semibold mb-3">일자별 신규 건수 추이</h5>
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={getChartData()}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="date" />
-                      <YAxis tickFormatter={formatYAxisTick} />
-                      <Tooltip />
-                      <Legend />
-                      <Bar dataKey="신규" fill="#0d6efd" />
+                      <CartesianGrid strokeDasharray="3 3"/>
+                      <XAxis dataKey="date"/>
+                      <YAxis tickFormatter={formatYAxisTick}/>
+                      <Tooltip/>
+                      <Legend/>
+                      <Bar dataKey="신규" fill="#0d6efd"/>
                     </BarChart>
                   </ResponsiveContainer>
                 </Card.Body>
@@ -294,12 +305,12 @@ const ServerStatistics = () => {
                   <h5 className="fw-semibold mb-3">누적 건수 추이</h5>
                   <ResponsiveContainer width="100%" height={300}>
                     <LineChart data={getChartData()}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="date" />
-                      <YAxis domain={["auto", "auto"]} tickFormatter={formatYAxisTick} />
-                      <Tooltip />
-                      <Legend />
-                      <Line type="monotone" dataKey="누적" stroke="#198754" strokeWidth={2} />
+                      <CartesianGrid strokeDasharray="3 3"/>
+                      <XAxis dataKey="date"/>
+                      <YAxis domain={["auto", "auto"]} tickFormatter={formatYAxisTick}/>
+                      <Tooltip/>
+                      <Legend/>
+                      <Line type="monotone" dataKey="누적" stroke="#198754" strokeWidth={2}/>
                     </LineChart>
                   </ResponsiveContainer>
                 </Card.Body>
@@ -312,23 +323,23 @@ const ServerStatistics = () => {
                   <p className="text-muted mb-3">
                     총 <strong>{data.length}일</strong>의 데이터가 조회되었습니다.
                   </p>
-                  <div style={{ maxHeight: "500px", overflowY: "auto" }}>
+                  <div style={{maxHeight: "500px", overflowY: "auto"}}>
                     <Table striped bordered hover>
-                      <thead className="table-light" style={{ position: "sticky", top: 0 }}>
-                        <tr>
-                          <th>날짜</th>
-                          <th className="text-end">신규 건수</th>
-                          <th className="text-end">누적 건수</th>
-                        </tr>
+                      <thead className="table-light" style={{position: "sticky", top: 0}}>
+                      <tr>
+                        <th>날짜</th>
+                        <th className="text-end">신규 건수</th>
+                        <th className="text-end">누적 건수</th>
+                      </tr>
                       </thead>
                       <tbody>
-                        {[...data].reverse().map((item, index) => (
-                          <tr key={index}>
-                            <td>{formatDateWithDay(item.date)}</td>
-                            <td className="text-end">{formatNumber(item.newCount ?? 0)}</td>
-                            <td className="text-end">{formatNumber(item.totalCount)}</td>
-                          </tr>
-                        ))}
+                      {[...data].reverse().map((item, index) => (
+                        <tr key={index}>
+                          <td>{formatDateWithDay(item.date)}</td>
+                          <td className="text-end">{formatNumber(item.newCount ?? 0)}</td>
+                          <td className="text-end">{formatNumber(item.totalCount)}</td>
+                        </tr>
+                      ))}
                       </tbody>
                     </Table>
                   </div>

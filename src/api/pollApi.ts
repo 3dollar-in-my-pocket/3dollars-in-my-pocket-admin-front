@@ -36,7 +36,7 @@ const pollApi = {
   deletePoll: async (pollId: any) => {
     try {
       const response = await apiBase.delete(`/v1/poll/${pollId}`);
-      return response;
+      return response.data;
     } catch (error: any) {
       console.error('투표 삭제 실패:', error);
       throw error;

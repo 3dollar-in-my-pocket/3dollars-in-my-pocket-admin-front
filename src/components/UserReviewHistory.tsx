@@ -1,8 +1,15 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
 import {toast} from 'react-toastify';
-import {getActivitiesStatusDisplayName, getStoreStatusBadgeClass, getStoreStatusDisplayName, getStoreTypeDisplayName, getStoreTypeBadgeClass, getStoreTypeIcon} from "../types/store";
+import {
+  getActivitiesStatusDisplayName,
+  getStoreStatusBadgeClass,
+  getStoreStatusDisplayName,
+  getStoreTypeDisplayName,
+  getStoreTypeBadgeClass,
+  getStoreTypeIcon
+} from "../types/store";
 import reviewApi from "../api/reviewApi";
-import { formatDateTimeKo as formatDateTime } from "../utils/dateUtils";
+import {formatDateTimeKo as formatDateTime} from "../utils/dateUtils";
 
 const UserReviewHistory = ({userId, isActive, onStoreClick}) => {
   const [reviews, setReviews] = useState([]);
@@ -28,7 +35,6 @@ const UserReviewHistory = ({userId, isActive, onStoreClick}) => {
     try {
       const response = await reviewApi.getUserReviews(userId, reset ? null : cursor, 20);
       if (!response?.ok) {
-        toast.error('리뷰 이력을 불러오는 중 오류가 발생했습니다.');
         return;
       }
 
@@ -43,8 +49,6 @@ const UserReviewHistory = ({userId, isActive, onStoreClick}) => {
       setHasMore(newCursor.hasMore || false);
       setCursor(newCursor.nextCursor || null);
       setTotalCount(newCursor.totalCount || 0);
-    } catch (error) {
-      toast.error('리뷰 이력을 불러오는 중 오류가 발생했습니다.');
     } finally {
       setIsLoading(false);
     }
@@ -185,15 +189,12 @@ const UserReviewHistory = ({userId, isActive, onStoreClick}) => {
     try {
       const response = await reviewApi.blindStoreReview(selectedReview.reviewId);
       if (response.status >= 400) {
-        toast.error('리뷰 삭제에 실패했습니다.');
         setIsDeleting(false);
         return;
       }
       toast.success('리뷰가 성공적으로 삭제되었습니다.');
       handleCloseModal();
       fetchReviews(true);
-    } catch (error) {
-      toast.error('리뷰 삭제 중 오류가 발생했습니다.');
     } finally {
       setIsDeleting(false);
     }
@@ -202,11 +203,12 @@ const UserReviewHistory = ({userId, isActive, onStoreClick}) => {
   return (
     <div>
       <div className="px-2 px-sm-3 px-md-4 pt-2 pt-md-4">
-        <div className="d-flex align-items-center justify-content-between mb-3 mb-md-4 p-2 p-sm-3 p-md-4 rounded-4 shadow-sm"
-             style={{
-               background: 'linear-gradient(135deg, #e3f2fd 0%, #f8fffe 100%)',
-               border: '1px solid rgba(13, 110, 253, 0.1)'
-             }}>
+        <div
+          className="d-flex align-items-center justify-content-between mb-3 mb-md-4 p-2 p-sm-3 p-md-4 rounded-4 shadow-sm"
+          style={{
+            background: 'linear-gradient(135deg, #e3f2fd 0%, #f8fffe 100%)',
+            border: '1px solid rgba(13, 110, 253, 0.1)'
+          }}>
           <div className="d-flex align-items-center gap-3">
             <div className="rounded-circle p-3 shadow-sm"
                  style={{background: 'linear-gradient(135deg, #0d6efd 0%, #6610f2 100%)'}}>
@@ -305,7 +307,7 @@ const UserReviewHistory = ({userId, isActive, onStoreClick}) => {
                           }}>
                             {review.store?.name || '가게 이름 없음'}
                           </h6>
-                          <i className="bi bi-box-arrow-up-right text-primary" style={{ fontSize: '0.7rem' }}></i>
+                          <i className="bi bi-box-arrow-up-right text-primary" style={{fontSize: '0.7rem'}}></i>
                         </div>
                         <div className="d-flex gap-1 flex-wrap">
                           {getReviewStatusBadge(review.status)}

@@ -100,8 +100,12 @@ const FaqEditModal = ({applications, showModal, handleCloseModal, selectedApplic
           <TextAreaField label="답변" name="answer" value={editedFaq.answer} handleChange={handleChange}/>
           {selectedFaq && (
             <>
-              <InputField label="생성일자" name="createdAt" value={formatDateTime(selectedFaq.createdAt)} handleChange={() => {}} disabled/>
-              <InputField label="수정일자" name="updatedAt" value={formatDateTime(selectedFaq.updatedAt)} handleChange={() => {}} disabled/>
+              <InputField label="생성일자" name="createdAt" value={formatDateTime(selectedFaq.createdAt)}
+                          handleChange={() => {
+                          }} disabled/>
+              <InputField label="수정일자" name="updatedAt" value={formatDateTime(selectedFaq.updatedAt)}
+                          handleChange={() => {
+                          }} disabled/>
             </>
           )}
         </div>

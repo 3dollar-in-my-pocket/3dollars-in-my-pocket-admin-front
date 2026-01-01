@@ -2,13 +2,13 @@ import React from "react";
 import {Col, Form, Row} from "react-bootstrap";
 
 const BasicInfoStep = ({
-  formData,
-  onChange,
-  positions,
-  platforms,
-  disablePosition = false,
-  disablePlatform = false,
-}) => {
+                         formData,
+                         onChange,
+                         positions,
+                         platforms,
+                         disablePosition = false,
+                         disablePlatform = false,
+                       }) => {
   const handleChange = (e) => {
     const {name, value} = e.target;
     onChange(name, value);

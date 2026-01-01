@@ -56,23 +56,23 @@ const manageRoutes = {
     },
     {
       path: '/manage/store-search',
-      element: <PrivateRouter><StoreSearch /></PrivateRouter>
+      element: <PrivateRouter><StoreSearch/></PrivateRouter>
     },
     {
       path: '/manage/popular-neighborhood-stores',
-      element: <PrivateRouter><PopularNeighborhoodStores /></PrivateRouter>
+      element: <PrivateRouter><PopularNeighborhoodStores/></PrivateRouter>
     },
     {
       path: '/manage/review',
-      element: <PrivateRouter><ReviewManagement /></PrivateRouter>
+      element: <PrivateRouter><ReviewManagement/></PrivateRouter>
     },
     {
       path: '/manage/coupon',
-      element: <PrivateRouter><CouponManagement /></PrivateRouter>
+      element: <PrivateRouter><CouponManagement/></PrivateRouter>
     },
     {
       path: '/manage/store-message',
-      element: <PrivateRouter><StoreMessageManagement /></PrivateRouter>
+      element: <PrivateRouter><StoreMessageManagement/></PrivateRouter>
     },
     {
       path: '/manage/tool/cache',

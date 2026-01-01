@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
-import { toast } from 'react-toastify';
+import {useEffect, useRef, useState, useCallback} from 'react';
+import {toast} from 'react-toastify';
 import storeMessageApi from '../../api/storeMessageApi';
-import { StoreMessage } from '../../types/storeMessage';
-import { getStoreTypeDisplayName, getStoreTypeBadgeClass, getStoreTypeIcon } from '../../types/store';
+import {StoreMessage} from '../../types/storeMessage';
+import {getStoreTypeDisplayName, getStoreTypeBadgeClass, getStoreTypeIcon} from '../../types/store';
 import StoreDetailModal from '../store/StoreDetailModal';
 
 const StoreMessageManagement = () => {
@@ -59,11 +59,10 @@ const StoreMessageManagement = () => {
     try {
       const response = await storeMessageApi.getAllStoreMessages(reset ? null : cursor, 20);
       if (!response?.ok) {
-        toast.error('메시지 목록을 불러오는 중 오류가 발생했습니다.');
         return;
       }
 
-      const { contents = [], cursor: newCursor = {} } = response.data || {};
+      const {contents = [], cursor: newCursor = {}} = response.data || {};
 
       if (reset) {
         setMessages(contents);
@@ -73,9 +72,6 @@ const StoreMessageManagement = () => {
 
       setHasMore(newCursor.hasMore || false);
       setCursor(newCursor.nextCursor || null);
-    } catch (error) {
-      console.error('메시지 목록 조회 오류:', error);
-      toast.error('메시지 목록을 불러오는 중 오류가 발생했습니다.');
     } finally {
       setIsLoading(false);
     }
@@ -162,7 +158,7 @@ const StoreMessageManagement = () => {
       <div
         ref={scrollContainerRef}
         className="message-container"
-        style={{ maxHeight: 'calc(100vh - 280px)', overflowY: 'auto' }}
+        style={{maxHeight: 'calc(100vh - 280px)', overflowY: 'auto'}}
       >
         {messages.length === 0 && !isLoading ? (
           <div className="text-center py-5">
@@ -216,7 +212,7 @@ const StoreMessageManagement = () => {
                               e.stopPropagation();
                               handleStoreClick(message.store);
                             }}
-                            style={{ cursor: 'pointer' }}
+                            style={{cursor: 'pointer'}}
                           >
                             <i className="bi bi-shop text-primary"></i>
                             <h6 className="fw-bold text-primary mb-0 text-decoration-underline">
@@ -233,15 +229,17 @@ const StoreMessageManagement = () => {
                         </div>
                         <div className="d-flex align-items-center gap-2 flex-wrap">
                           {message.store?.categories?.slice(0, 2).map((category: any, idx: number) => (
-                            <span key={idx} className="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-2 py-1"
-                                  style={{ fontSize: '0.7rem' }}>
+                            <span key={idx}
+                                  className="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-2 py-1"
+                                  style={{fontSize: '0.7rem'}}>
                               <i className="bi bi-tag me-1"></i>
                               {category.name}
                             </span>
                           ))}
                           {message.store?.categories?.length > 2 && (
-                            <span className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-2 py-1"
-                                  style={{ fontSize: '0.7rem' }}>
+                            <span
+                              className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-2 py-1"
+                              style={{fontSize: '0.7rem'}}>
                               +{message.store.categories.length - 2}
                             </span>
                           )}
@@ -251,7 +249,7 @@ const StoreMessageManagement = () => {
 
                     {/* 시간 */}
                     <div className="d-flex align-items-center justify-content-end mb-3">
-                      <div className="text-muted" style={{ fontSize: '0.75rem' }}>
+                      <div className="text-muted" style={{fontSize: '0.75rem'}}>
                         <i className="bi bi-clock me-1"></i>
                         {formatDateTime(message.createdAt)}
                       </div>
@@ -259,7 +257,7 @@ const StoreMessageManagement = () => {
 
                     {/* 메시지 제목 */}
                     <div className="mb-2">
-                      <h6 className="fw-bold text-dark mb-0" style={{ fontSize: '1rem', lineHeight: '1.4' }}>
+                      <h6 className="fw-bold text-dark mb-0" style={{fontSize: '1rem', lineHeight: '1.4'}}>
                         <i className="bi bi-chat-left-text text-success me-2"></i>
                         가게 메시지
                       </h6>
@@ -296,7 +294,7 @@ const StoreMessageManagement = () => {
           <div ref={loadMoreRef} className="text-center mt-4 mb-4">
             {isLoading ? (
               <div className="py-3">
-                <div className="spinner-border text-primary" style={{ width: '2rem', height: '2rem' }} role="status">
+                <div className="spinner-border text-primary" style={{width: '2rem', height: '2rem'}} role="status">
                   <span className="visually-hidden">Loading...</span>
                 </div>
                 <p className="text-muted mt-2 mb-0">메시지를 불러오는 중...</p>
@@ -317,7 +315,7 @@ const StoreMessageManagement = () => {
         {isLoading && messages.length === 0 && (
           <div className="text-center py-5">
             <div className="mb-3">
-              <div className="spinner-border text-primary" style={{ width: '2rem', height: '2rem' }} role="status">
+              <div className="spinner-border text-primary" style={{width: '2rem', height: '2rem'}} role="status">
                 <span className="visually-hidden">Loading...</span>
               </div>
             </div>
@@ -330,7 +328,7 @@ const StoreMessageManagement = () => {
       {showModal && selectedMessage && (
         <div
           className="modal fade show"
-          style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}
+          style={{display: 'block', backgroundColor: 'rgba(0,0,0,0.5)'}}
           onClick={() => setShowModal(false)}
         >
           <div className="modal-dialog modal-lg modal-dialog-centered" onClick={(e) => e.stopPropagation()}>
@@ -369,7 +367,7 @@ const StoreMessageManagement = () => {
                   <div className="col-12">
                     <label className="form-label fw-bold">메시지 내용</label>
                     <div className="border rounded p-3 bg-light">
-                      <p className="mb-0" style={{ whiteSpace: 'pre-wrap' }}>
+                      <p className="mb-0" style={{whiteSpace: 'pre-wrap'}}>
                         {selectedMessage.body || '내용이 없습니다.'}
                       </p>
                     </div>
@@ -385,7 +383,8 @@ const StoreMessageManagement = () => {
                             {selectedMessage.store.name}
                           </span>
                           {selectedMessage.store.storeId && (
-                            <span className="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-3 py-2">
+                            <span
+                              className="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-3 py-2">
                               <i className="bi bi-hash me-1"></i>
                               {selectedMessage.store.storeId}
                             </span>
@@ -414,8 +413,10 @@ const StoreMessageManagement = () => {
         show={!!selectedStore}
         onHide={() => setSelectedStore(null)}
         store={selectedStore}
-        onAuthorClick={() => {}}
-        onStoreDeleted={() => {}}
+        onAuthorClick={() => {
+        }}
+        onStoreDeleted={() => {
+        }}
       />
     </div>
   );

@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import {useState, useEffect} from "react";
+import {useLocation} from "react-router-dom";
 import pushApi from "../api/pushApi";
 import uploadApi from "../api/uploadApi";
 import {
@@ -8,12 +8,12 @@ import {
   removeUserFromTarget,
   parseAccountIds
 } from "../utils/pushUtils";
-import { useNonce } from "./useNonce";
-import { OS_PLATFORM, OsPlatform } from "../types/push";
+import {useNonce} from "./useNonce";
+import {OS_PLATFORM, OsPlatform} from "../types/push";
 
 export const usePushForm = () => {
   const location = useLocation();
-  const { nonce, issueNonce, clearNonce } = useNonce();
+  const {nonce, issueNonce, clearNonce} = useNonce();
 
   // 훅이 처음 마운트될 때 Nonce 토큰 발급
   useEffect(() => {
@@ -81,7 +81,7 @@ export const usePushForm = () => {
   const setResult = (type, message) => {
     setUiState(prev => ({
       ...prev,
-      result: { type, message }
+      result: {type, message}
     }));
   };
 
@@ -92,7 +92,7 @@ export const usePushForm = () => {
       return;
     }
 
-    setSearchState(prev => ({ ...prev, searchLoading: true }));
+    setSearchState(prev => ({...prev, searchLoading: true}));
 
     try {
       const response = await pushApi.searchUserByNickname(searchState.nicknameSearch);
@@ -147,7 +147,7 @@ export const usePushForm = () => {
 
     // 선택된 사용자 목록에 추가 (중복 방지)
     if (nickname && !selectedUsers.find(user => user.id.toString() === userId.toString())) {
-      setSelectedUsers(prev => [...prev, { id: userId.toString(), nickname }]);
+      setSelectedUsers(prev => [...prev, {id: userId.toString(), nickname}]);
     }
   };
 
@@ -170,7 +170,7 @@ export const usePushForm = () => {
   const uploadImage = async (file) => {
     if (!file) return;
 
-    setUiState(prev => ({ ...prev, uploading: true }));
+    setUiState(prev => ({...prev, uploading: true}));
 
     try {
       const response = await uploadApi.uploadImage("PUSH_IMAGE", file);
@@ -184,7 +184,7 @@ export const usePushForm = () => {
     } catch (error) {
       setResult("danger", "이미지 업로드 중 오류가 발생했습니다.");
     } finally {
-      setUiState(prev => ({ ...prev, uploading: false }));
+      setUiState(prev => ({...prev, uploading: false}));
     }
   };
 
@@ -222,12 +222,12 @@ export const usePushForm = () => {
       return;
     }
 
-    setUiState(prev => ({ ...prev, showConfirm: true }));
+    setUiState(prev => ({...prev, showConfirm: true}));
   };
 
   // 푸시 발송 확인 모달 닫기
   const hideSendConfirm = () => {
-    setUiState(prev => ({ ...prev, showConfirm: false }));
+    setUiState(prev => ({...prev, showConfirm: false}));
   };
 
   // 폼 초기화
@@ -260,7 +260,7 @@ export const usePushForm = () => {
       return false;
     }
 
-    setUiState(prev => ({ ...prev, loading: true, showConfirm: false }));
+    setUiState(prev => ({...prev, loading: true, showConfirm: false}));
 
     try {
       const pushData = {
@@ -289,7 +289,7 @@ export const usePushForm = () => {
       setResult("danger", "⚠️ 서버 오류 발생");
       return false;
     } finally {
-      setUiState(prev => ({ ...prev, loading: false }));
+      setUiState(prev => ({...prev, loading: false}));
     }
   };
 

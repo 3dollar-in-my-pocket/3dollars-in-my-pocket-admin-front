@@ -1,13 +1,13 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
-import { toast } from 'react-toastify';
+import {useState, useCallback, useRef, useEffect} from 'react';
+import {toast} from 'react-toastify';
 
 export const useSearch = ({
-  validateSearch,
-  searchFunction,
-  resetFunction,
-  errorMessage = '검색 중 오류가 발생했습니다.',
-  autoSearchTypes = []
-}) => {
+                            validateSearch,
+                            searchFunction,
+                            resetFunction,
+                            errorMessage = '검색 중 오류가 발생했습니다.',
+                            autoSearchTypes = []
+                          }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchType, setSearchType] = useState('');
   const [additionalParams, setAdditionalParams] = useState({});
@@ -62,7 +62,7 @@ export const useSearch = ({
         throw new Error('Search failed');
       }
 
-      const { results: newResults, hasMore: newHasMore, nextCursor: newNextCursor } = response.data;
+      const {results: newResults, hasMore: newHasMore, nextCursor: newNextCursor} = response.data;
 
       if (reset) {
         setResults(newResults || []);
@@ -119,7 +119,7 @@ export const useSearch = ({
       return;
     }
 
-    const { scrollTop, scrollHeight, clientHeight } = e.target;
+    const {scrollTop, scrollHeight, clientHeight} = e.target;
 
     // 스크롤이 하단 95% 지점에 도달했을 때 다음 페이지 로드 (더 보수적으로 변경)
     const scrollPercentage = (scrollTop + clientHeight) / scrollHeight;

@@ -207,7 +207,7 @@ const UserStoreReportHistory = ({userId, isActive, onStoreClick}) => {
                           <h6 className="fw-bold text-primary mb-0">
                             {report.store?.name || '가게 정보 없음'}
                           </h6>
-                          <i className="bi bi-box-arrow-up-right text-primary" style={{ fontSize: '0.7rem' }}></i>
+                          <i className="bi bi-box-arrow-up-right text-primary" style={{fontSize: '0.7rem'}}></i>
                         </div>
                         <div className="d-flex align-items-center gap-2 mb-2">
                           {getReasonBadge(report.reason)}

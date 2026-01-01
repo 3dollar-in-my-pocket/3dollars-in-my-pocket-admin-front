@@ -6,7 +6,7 @@ import advertisementApi from "../../api/advertisementApi";
 import uploadApi from "../../api/uploadApi";
 import AdTimer from "../../components/common/AdTimer";
 import AdPreview from "../../components/advertisement/AdPreview";
-import { isFieldAvailable, isFieldRequired } from "../../constants/advertisementSpecs";
+import {isFieldAvailable, isFieldRequired} from "../../constants/advertisementSpecs";
 import DeepLinkSelector from "../../components/common/DeepLinkSelector";
 
 const AdvertisementContentEditModal = ({show, onHide, ad, fetchAdvertisements}) => {
@@ -120,11 +120,7 @@ const AdvertisementContentEditModal = ({show, onHide, ad, fetchAdvertisements}) 
         toast.success("광고 컨텐츠가 수정되었습니다.");
         fetchAdvertisements();
         onHide();
-      } else {
-        toast.error("광고 컨텐츠 수정에 실패했습니다.");
       }
-    } catch {
-      toast.error("오류가 발생했습니다.");
     } finally {
       setIsSubmitting(false);
     }
@@ -142,7 +138,8 @@ const AdvertisementContentEditModal = ({show, onHide, ad, fetchAdvertisements}) 
 
   return (
     <Modal show={show} onHide={onHide} size="xl" centered fullscreen="lg-down">
-      <Modal.Header closeButton className="border-0" style={{background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'}}>
+      <Modal.Header closeButton className="border-0"
+                    style={{background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'}}>
         <Modal.Title className="text-white d-flex align-items-center gap-2">
           <i className="bi bi-pencil-square"></i>
           광고 컨텐츠 수정
@@ -237,11 +234,11 @@ const AdvertisementContentEditModal = ({show, onHide, ad, fetchAdvertisements}) 
                       variant="primary"
                       disabled={isUploading}
                       onClick={() => document.getElementById('content-edit-image-upload').click()}
-                      style={{ minWidth: '130px', whiteSpace: 'nowrap' }}
+                      style={{minWidth: '130px', whiteSpace: 'nowrap'}}
                     >
                       {isUploading ? (
                         <>
-                          <span className="spinner-border spinner-border-sm me-1" />
+                          <span className="spinner-border spinner-border-sm me-1"/>
                           업로드 중...
                         </>
                       ) : (
@@ -255,7 +252,7 @@ const AdvertisementContentEditModal = ({show, onHide, ad, fetchAdvertisements}) 
                       id="content-edit-image-upload"
                       type="file"
                       accept="image/*"
-                      style={{ display: 'none' }}
+                      style={{display: 'none'}}
                       onChange={handleImageUpload}
                     />
                   </div>

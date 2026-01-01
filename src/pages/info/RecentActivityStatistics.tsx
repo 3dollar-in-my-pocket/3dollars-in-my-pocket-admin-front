@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
-import { Card, Button, Alert, Table } from "react-bootstrap";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import React, {useState, useEffect} from "react";
+import {Card, Button, Alert, Table} from "react-bootstrap";
+import {LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer} from "recharts";
 import statisticsApi from "../../api/statisticsApi";
-import { DailyStatistic } from "../../types/statistics";
-import { toast } from "react-toastify";
+import {DailyStatistic} from "../../types/statistics";
+import {toast} from "react-toastify";
 
 interface RecentActivityStatisticsProps {
   statisticsType: "RECENT_ACTIVITY_USER_STORE" | "RECENT_ACTIVITY_BOSS_STORE";
@@ -13,11 +13,11 @@ interface RecentActivityStatisticsProps {
 }
 
 const RecentActivityStatistics: React.FC<RecentActivityStatisticsProps> = ({
-  statisticsType,
-  startDate,
-  endDate,
-  onFetch,
-}) => {
+                                                                             statisticsType,
+                                                                             startDate,
+                                                                             endDate,
+                                                                             onFetch,
+                                                                           }) => {
   const [baseData, setBaseData] = useState<DailyStatistic[]>([]);
   const [activityData, setActivityData] = useState<DailyStatistic[]>([]);
   const [loading, setLoading] = useState(false);
@@ -92,7 +92,7 @@ const RecentActivityStatistics: React.FC<RecentActivityStatisticsProps> = ({
       // 최근 활동 데이터가 있는 날짜만 포함
       if (activityDates.has(item.date)) {
         if (!dataMap.has(item.date)) {
-          dataMap.set(item.date, { base: 0, activity: 0, ratio: 0 });
+          dataMap.set(item.date, {base: 0, activity: 0, ratio: 0});
         }
         dataMap.get(item.date)!.base = item.totalCount;
       }
@@ -100,7 +100,7 @@ const RecentActivityStatistics: React.FC<RecentActivityStatisticsProps> = ({
 
     activityData.forEach((item) => {
       if (!dataMap.has(item.date)) {
-        dataMap.set(item.date, { base: 0, activity: 0, ratio: 0 });
+        dataMap.set(item.date, {base: 0, activity: 0, ratio: 0});
       }
       dataMap.get(item.date)!.activity = item.totalCount;
     });
@@ -143,7 +143,7 @@ const RecentActivityStatistics: React.FC<RecentActivityStatisticsProps> = ({
       // 최근 활동 데이터가 있는 날짜만 포함
       if (activityDates.has(item.date)) {
         if (!dataMap.has(item.date)) {
-          dataMap.set(item.date, { base: 0, activity: 0, ratio: 0 });
+          dataMap.set(item.date, {base: 0, activity: 0, ratio: 0});
         }
         dataMap.get(item.date)!.base = item.totalCount;
       }
@@ -151,7 +151,7 @@ const RecentActivityStatistics: React.FC<RecentActivityStatisticsProps> = ({
 
     activityData.forEach((item) => {
       if (!dataMap.has(item.date)) {
-        dataMap.set(item.date, { base: 0, activity: 0, ratio: 0 });
+        dataMap.set(item.date, {base: 0, activity: 0, ratio: 0});
       }
       dataMap.get(item.date)!.activity = item.totalCount;
     });
@@ -183,7 +183,7 @@ const RecentActivityStatistics: React.FC<RecentActivityStatisticsProps> = ({
           <Alert variant="info" className="mb-3">
             <strong>{statisticsType === "RECENT_ACTIVITY_USER_STORE" ? "유저 스토어" : "사장님 스토어"}</strong>의
             최근 활동 통계입니다.
-            <br />
+            <br/>
             전체 스토어 수 대비 최근 활동이 있는 스토어의 비율을 확인할 수 있습니다.
           </Alert>
 
@@ -206,11 +206,11 @@ const RecentActivityStatistics: React.FC<RecentActivityStatisticsProps> = ({
               <h5 className="fw-semibold mb-3">최근 활동이 있는 가게 수 추이</h5>
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
+                  <CartesianGrid strokeDasharray="3 3"/>
+                  <XAxis dataKey="date"/>
+                  <YAxis/>
+                  <Tooltip/>
+                  <Legend/>
                   <Line
                     type="monotone"
                     dataKey="최근 활동이 있는 가게 수"
@@ -228,17 +228,17 @@ const RecentActivityStatistics: React.FC<RecentActivityStatisticsProps> = ({
               <h5 className="fw-semibold mb-3">최근 활동 가게 비율 추이 (%)</h5>
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis domain={[0, 100]} />
-                  <Tooltip />
-                  <Legend />
+                  <CartesianGrid strokeDasharray="3 3"/>
+                  <XAxis dataKey="date"/>
+                  <YAxis domain={[0, 100]}/>
+                  <Tooltip/>
+                  <Legend/>
                   <Line
                     type="monotone"
                     dataKey="활동 비율(%)"
                     stroke="#dc3545"
                     strokeWidth={2}
-                    dot={{ fill: "#dc3545" }}
+                    dot={{fill: "#dc3545"}}
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -252,25 +252,25 @@ const RecentActivityStatistics: React.FC<RecentActivityStatisticsProps> = ({
               <p className="text-muted mb-3">
                 총 <strong>{tableData.length}일</strong>의 데이터가 조회되었습니다.
               </p>
-              <div style={{ maxHeight: "500px", overflowY: "auto" }}>
+              <div style={{maxHeight: "500px", overflowY: "auto"}}>
                 <Table striped bordered hover>
-                  <thead className="table-light" style={{ position: "sticky", top: 0 }}>
-                    <tr>
-                      <th>날짜</th>
-                      <th className="text-end">전체 가게 수</th>
-                      <th className="text-end">최근 활동이 있는 가게 수</th>
-                      <th className="text-end">비율 (%)</th>
-                    </tr>
+                  <thead className="table-light" style={{position: "sticky", top: 0}}>
+                  <tr>
+                    <th>날짜</th>
+                    <th className="text-end">전체 가게 수</th>
+                    <th className="text-end">최근 활동이 있는 가게 수</th>
+                    <th className="text-end">비율 (%)</th>
+                  </tr>
                   </thead>
                   <tbody>
-                    {tableData.map((item, index) => (
-                      <tr key={index}>
-                        <td>{formatDateWithDay(item.date)}</td>
-                        <td className="text-end">{formatNumber(item.base)}</td>
-                        <td className="text-end">{formatNumber(item.activity)}</td>
-                        <td className="text-end">{item.ratio.toFixed(2)}%</td>
-                      </tr>
-                    ))}
+                  {tableData.map((item, index) => (
+                    <tr key={index}>
+                      <td>{formatDateWithDay(item.date)}</td>
+                      <td className="text-end">{formatNumber(item.base)}</td>
+                      <td className="text-end">{formatNumber(item.activity)}</td>
+                      <td className="text-end">{item.ratio.toFixed(2)}%</td>
+                    </tr>
+                  ))}
                   </tbody>
                 </Table>
               </div>

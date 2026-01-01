@@ -28,14 +28,14 @@ const applicationApi = {
       } else {
         return {
           ok: false,
-          data: { contents: [] }
+          data: {contents: []}
         };
       }
     } catch (error: any) {
       console.error('스킴 목록 조회 실패:', error);
       return {
         ok: false,
-        data: { contents: [] }
+        data: {contents: []}
       };
     }
   }

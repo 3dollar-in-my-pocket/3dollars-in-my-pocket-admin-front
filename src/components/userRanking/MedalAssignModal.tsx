@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
-import { Modal, Button } from 'react-bootstrap';
-import { toast } from 'react-toastify';
+import {useEffect, useState} from 'react';
+import {Modal, Button} from 'react-bootstrap';
+import {toast} from 'react-toastify';
 import medalApi from '../../api/medalApi';
 import Loading from '../common/Loading';
 
@@ -19,7 +19,7 @@ interface Medal {
   introduction: string;
 }
 
-const MedalAssignModal = ({ show, onHide, selectedUserCount, onAssign }: MedalAssignModalProps) => {
+const MedalAssignModal = ({show, onHide, selectedUserCount, onAssign}: MedalAssignModalProps) => {
   const [medals, setMedals] = useState<Medal[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedMedalId, setSelectedMedalId] = useState<number | null>(null);
@@ -37,11 +37,7 @@ const MedalAssignModal = ({ show, onHide, selectedUserCount, onAssign }: MedalAs
       if (response.ok && response.data) {
         setMedals(response.data.contents || []);
       } else {
-        toast.error('메달 목록을 불러오는데 실패했습니다.');
       }
-    } catch (error) {
-      console.error('메달 목록 조회 실패:', error);
-      toast.error('메달 목록을 불러오는데 실패했습니다.');
     } finally {
       setIsLoading(false);
     }
@@ -79,7 +75,7 @@ const MedalAssignModal = ({ show, onHide, selectedUserCount, onAssign }: MedalAs
 
         {isLoading ? (
           <div className="text-center py-5">
-            <Loading />
+            <Loading/>
             <p className="text-muted mt-3">메달 목록을 불러오는 중입니다</p>
           </div>
         ) : medals.length === 0 ? (
@@ -114,7 +110,7 @@ const MedalAssignModal = ({ show, onHide, selectedUserCount, onAssign }: MedalAs
                       {selectedMedalId === medal.medalId && (
                         <div
                           className="position-absolute top-0 end-0 bg-primary rounded-circle d-flex align-items-center justify-content-center"
-                          style={{ width: '24px', height: '24px', marginTop: '-8px', marginRight: '-8px' }}
+                          style={{width: '24px', height: '24px', marginTop: '-8px', marginRight: '-8px'}}
                         >
                           <i className="bi bi-check text-white"></i>
                         </div>

@@ -4,7 +4,7 @@ import {
 } from '../../types/user';
 import ItemCard from '../common/ItemCard';
 
-const UserCard = ({ user, onClick }) => {
+const UserCard = ({user, onClick}) => {
   const getBorderColor = () => {
     const socialTypeClass = getSocialTypeBadgeClass(user.socialType);
     if (socialTypeClass.includes('warning')) return '#ffc107';
@@ -38,7 +38,7 @@ const UserCard = ({ user, onClick }) => {
             alignItems: 'center',
             justifyContent: 'center'
           }}>
-            <i className="bi bi-person fs-4" style={{ color: borderColor }}></i>
+            <i className="bi bi-person fs-4" style={{color: borderColor}}></i>
           </div>
         </div>
 
@@ -49,7 +49,8 @@ const UserCard = ({ user, onClick }) => {
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap'
             }}>{user.nickname}</h6>
-            <span className={`badge rounded-pill ${getSocialTypeBadgeClass(user.socialType)} bg-opacity-10 text-dark border px-2 py-1 small`}>
+            <span
+              className={`badge rounded-pill ${getSocialTypeBadgeClass(user.socialType)} bg-opacity-10 text-dark border px-2 py-1 small`}>
               {getSocialTypeDisplayName(user.socialType)}
             </span>
           </div>
@@ -57,7 +58,8 @@ const UserCard = ({ user, onClick }) => {
           <div className="text-center mb-3">
             <div className="row g-1">
               <div className="col-12">
-                <div className="text-muted small mb-1 d-flex align-items-center justify-content-center" title={user.userId}>
+                <div className="text-muted small mb-1 d-flex align-items-center justify-content-center"
+                     title={user.userId}>
                   <i className="bi bi-hash me-1"></i>
                   <span style={{
                     overflow: 'hidden',
