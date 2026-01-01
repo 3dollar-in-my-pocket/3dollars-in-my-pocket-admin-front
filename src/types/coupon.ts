@@ -1,5 +1,7 @@
 // Coupon related type definitions and constants
 
+import { StoreInfo } from './review';
+
 // Coupon status types
 export const COUPON_STATUS = {
   ACTIVE: 'ACTIVE',
@@ -25,6 +27,10 @@ export interface Coupon {
   status: CouponStatus;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface StoreCoupon extends Coupon {
+  store?: StoreInfo;
 }
 
 // Utility functions

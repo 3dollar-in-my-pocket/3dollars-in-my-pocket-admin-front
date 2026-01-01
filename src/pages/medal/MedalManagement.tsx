@@ -19,7 +19,7 @@ const MedalManagement = () => {
       if (response.ok) {
         setMedals(response.data.contents);
       } else {
-        setErrorMessage(response.data?.message || '메달 목록 조회에 실패했습니다.');
+        setErrorMessage(response.message || '메달 목록 조회에 실패했습니다.');
       }
     } catch (error: any) {
       if (!error.response) {

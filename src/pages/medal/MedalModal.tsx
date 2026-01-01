@@ -159,7 +159,7 @@ const MedalModal = ({show, onHide, medal, onUpdate}: MedalModalProps) => {
         setIsEditing(false);
         onUpdate();
       } else {
-        setErrorMessage(response.data?.message || '메달 수정에 실패했습니다.');
+        setErrorMessage(response.message || '메달 수정에 실패했습니다.');
       }
     } catch (error: any) {
       if (!error.response) {

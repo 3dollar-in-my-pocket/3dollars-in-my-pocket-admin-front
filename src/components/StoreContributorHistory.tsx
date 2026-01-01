@@ -37,7 +37,7 @@ const StoreContributorHistory = ({storeId, isActive, onAuthorClick}: StoreContri
         return;
       }
 
-      const {contents = [], cursor: newCursor = {}} = response.data || {};
+      const {contents = [], cursor: newCursor} = response.data || { contents: [], cursor: { hasMore: false, nextCursor: null } };
 
       if (reset) {
         setHistories(contents);

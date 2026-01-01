@@ -26,7 +26,7 @@ const StoreVisitHistory = ({storeId, isActive, onAuthorClick}) => {
         return;
       }
 
-      const {contents = [], cursor: newCursor = {}} = response.data || {};
+      const {contents = [], cursor: newCursor} = response.data || { contents: [], cursor: { hasMore: false, nextCursor: null } };
 
       if (reset) {
         setVisits(contents);

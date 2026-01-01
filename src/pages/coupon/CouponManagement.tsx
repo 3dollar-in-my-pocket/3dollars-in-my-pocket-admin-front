@@ -2,7 +2,7 @@ import {useEffect, useRef, useState, useCallback} from 'react';
 import {toast} from 'react-toastify';
 import couponApi from '../../api/couponApi';
 import {
-  Coupon,
+  StoreCoupon,
   getCouponStatusDisplayName,
   getCouponStatusBadgeClass,
   formatCouponDate,
@@ -12,12 +12,8 @@ import {
 import {getStoreTypeDisplayName, getStoreTypeBadgeClass, getStoreTypeIcon} from '../../types/store';
 import StoreDetailModal from '../store/StoreDetailModal';
 
-interface CouponWithStore extends Coupon {
-  store: any;
-}
-
 const CouponManagement = () => {
-  const [coupons, setCoupons] = useState<CouponWithStore[]>([]);
+  const [coupons, setCoupons] = useState<StoreCoupon[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const [cursor, setCursor] = useState<string | null>(null);
@@ -84,7 +80,7 @@ const CouponManagement = () => {
         return;
       }
 
-      const {contents = [], cursor: newCursor = {}} = response.data || {};
+      const {contents = [], cursor: newCursor} = response.data || { contents: [], cursor: { hasMore: false, nextCursor: null } };
 
       if (reset) {
         setCoupons(contents);

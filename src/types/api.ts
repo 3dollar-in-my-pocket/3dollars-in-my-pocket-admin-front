@@ -1,6 +1,7 @@
 export interface ApiResponse<T = any> {
   ok: boolean;
   data: T;
+  message?: string;
 }
 
 // 커서 정보
@@ -31,9 +32,10 @@ export interface PagePaginationParams {
 // 페이지 기반 페이지네이션 응답
 export interface PagePaginatedResponse<T> {
   contents: T[];
-  page: number;
-  totalPages: number;
-  totalElements: number;
+  page: {
+    totalPage: number;
+    totalSize: number;
+  };
 }
 
 // 컨텐츠 목록 응답

@@ -79,7 +79,7 @@ const UserRankingManagement = () => {
       const response = await userRankingApi.getUserRankings(request);
 
       if (response.ok && response.data) {
-        const {contents = [], cursor: newCursor = {}} = response.data as any;
+        const {contents = [], cursor: newCursor} = response.data as any;
         // 탈퇴 유저(userId가 null인 경우) 필터링
         const filteredItems = contents.filter((item: UserRankingItem) => item.user?.userId != null);
 

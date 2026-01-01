@@ -70,7 +70,7 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
       }
 
       if (allMedalsResponse.ok && allMedalsResponse.data) {
-        setAllMedals(allMedalsResponse.data.contents || []);
+        setAllMedals(allMedalsResponse.data.contents);
       } else {
         setAllMedals([]);
       }

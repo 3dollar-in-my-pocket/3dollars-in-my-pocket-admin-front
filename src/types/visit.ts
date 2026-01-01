@@ -1,37 +1,56 @@
-export const VISIT_TYPE = {
-  EXISTS: 'EXISTS',
-  NOT_EXISTS: 'NOT_EXISTS',
+/**
+ * 방문 관련 타입 정의
+ */
+
+export interface Visit {
+  visitId: string;
+  createdAt: string;
+  visitType: string;
+  visitor?: {
+    userId: string;
+    name: string;
+  };
+}
+
+export interface UserVisit extends Visit {
+  store?: {
+    storeId: string;
+    name: string;
+  };
+}
+
+// 방문 타입 표시 이름
+export const getVisitTypeDisplayName = (visitType: string): string => {
+  switch (visitType) {
+    case 'EXISTS':
+      return '존재해요';
+    case 'NOT_EXISTS':
+      return '없어졌어요';
+    default:
+      return visitType;
+  }
 };
 
-export const getVisitTypeBatchClass = (visitType) => {
+// 방문 타입 배지 클래스
+export const getVisitTypeBatchClass = (visitType: string): string => {
   switch (visitType) {
-    case VISIT_TYPE.EXISTS:
-      return 'bg-success'
-    case VISIT_TYPE.NOT_EXISTS:
-      return 'bg-danger'
+    case 'EXISTS':
+      return 'bg-success';
+    case 'NOT_EXISTS':
+      return 'bg-danger';
     default:
-      return 'bg-secondary'
+      return 'bg-secondary';
   }
-}
+};
 
-export const getVisitTypeDisplayName = (visitType) => {
+// 방문 타입 아이콘 클래스
+export const getVisitIconClass = (visitType: string): string => {
   switch (visitType) {
-    case VISIT_TYPE.EXISTS:
-      return '방문 성공'
-    case VISIT_TYPE.NOT_EXISTS:
-      return '방문 실패'
+    case 'EXISTS':
+      return 'bi-check-circle-fill';
+    case 'NOT_EXISTS':
+      return 'bi-x-circle-fill';
     default:
-      return '알 수 없음'
+      return 'bi-question-circle-fill';
   }
-}
-
-export const getVisitIconClass = (visitType) => {
-  switch (visitType) {
-    case VISIT_TYPE.EXISTS:
-      return 'bi-check-circle'
-    case VISIT_TYPE.NOT_EXISTS:
-      return 'bi-x-circle'
-    default:
-      return 'bi-question-circle'
-  }
-}
+};

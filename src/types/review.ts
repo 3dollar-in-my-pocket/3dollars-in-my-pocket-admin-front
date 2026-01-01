@@ -1,50 +1,36 @@
-export interface ReviewImage {
-  imageUrl: string;
-  width: number;
-  height: number;
-}
-
-export interface StoreCategory {
-  categoryId: string;
-  name: string;
-  description: string;
-  imageUrl: string;
-  classification: {
-    type: string;
-    description: string;
-  };
-  isNew: boolean;
-}
+/**
+ * 리뷰 관련 타입 정의
+ */
 
 export interface StoreInfo {
-  storeId: number;
-  storeType: 'USER_STORE' | 'BOSS_STORE';
+  storeId: string;
   name: string;
-  rating: number;
-  address: any;
-  categories: StoreCategory[];
-  status: 'ACTIVE' | 'DELETED';
-  activitiesStatus: string;
-  createdAt: string;
-  updatedAt: string;
+  storeType?: string;
+  categories?: any[];
+  address?: {
+    fullAddress?: string;
+  };
 }
 
-export interface ReviewWriter {
-  userId: number;
-  name: string;
-  socialType: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface StoreReview {
-  reviewId: number;
+export interface Review {
+  reviewId: string;
   rating: number;
   contents: string;
-  status: 'ACTIVE' | 'FILTERED' | 'DELETED';
-  images: ReviewImage[];
-  store?: StoreInfo;
-  writer?: ReviewWriter;
   createdAt: string;
-  updatedAt: string;
+  updatedAt?: string;
+  status?: string;
+  writer?: {
+    userId: string;
+    name: string;
+    socialType?: string;
+  };
+  images?: any[];
+}
+
+export interface StoreReview extends Review {
+  store?: StoreInfo;
+}
+
+export interface UserReview extends Review {
+  store?: StoreInfo;
 }

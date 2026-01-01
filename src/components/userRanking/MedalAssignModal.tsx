@@ -3,20 +3,13 @@ import {Modal, Button} from 'react-bootstrap';
 import {toast} from 'react-toastify';
 import medalApi from '../../api/medalApi';
 import Loading from '../common/Loading';
+import { Medal } from '../../types/medal';
 
 interface MedalAssignModalProps {
   show: boolean;
   onHide: () => void;
   selectedUserCount: number;
   onAssign: (medalId: number) => void;
-}
-
-interface Medal {
-  medalId: number;
-  name: string;
-  iconUrl: string;
-  disableIconUrl: string;
-  introduction: string;
 }
 
 const MedalAssignModal = ({show, onHide, selectedUserCount, onAssign}: MedalAssignModalProps) => {
@@ -35,7 +28,7 @@ const MedalAssignModal = ({show, onHide, selectedUserCount, onAssign}: MedalAssi
     try {
       const response = await medalApi.getMedals();
       if (response.ok && response.data) {
-        setMedals(response.data.contents || []);
+        setMedals(response.data.contents);
       } else {
       }
     } finally {
