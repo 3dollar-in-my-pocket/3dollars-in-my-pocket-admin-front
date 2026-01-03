@@ -85,7 +85,24 @@ src/
 - Axios 인스턴스에서 `baseURL` 환경변수 사용
 - 요청 인터셉터: LocalStorage에서 토큰 가져와 헤더에 추가
 - 응답 인터셉터: 공통 에러 처리 (한국어 메시지)
-- 기능별 API 모듈:
+
+**API Helper Functions** (`src/api/apiHelpers.ts`):
+- `apiGet<T>()` - 타입 안전한 GET 요청
+- `apiPost<T>()` - 타입 안전한 POST 요청 (nonce 지원)
+- `apiPut<T>()` - 타입 안전한 PUT 요청
+- `apiPatch<T>()` - 타입 안전한 PATCH 요청
+- `apiDelete<T>()` - 타입 안전한 DELETE 요청
+- `apiGetPaginated<T>()` - 커서 기반 페이지네이션 GET 요청
+
+**IMPORTANT**: 새로운 API 모듈을 만들 때는 반드시 `apiHelpers`의 함수를 사용하세요. 직접 axiosInstance를 호출하지 마세요.
+
+**Nonce 토큰 패턴**:
+- 멱등성 없는 API의 중복 요청 방지를 위해 Nonce 토큰 사용
+- `useNonce` 훅으로 토큰 발급 및 관리
+- POST 요청 시 `apiPost`의 `options.nonce` 파라미터로 전달
+- 예: FAQ 생성, 쿠폰 생성 등
+
+**기능별 API 모듈**:
   - `adminApi` - 관리자 관리
   - `advertisementApi` - 광고 관리
   - `authApi` - 인증
@@ -230,14 +247,37 @@ GET /api?cursor={{cursor}}&size=20
 
 ### 🔧 코드 재사용 & 공통 패턴
 
-- 공통 컴포넌트: components/ 디렉토리에 구현
+**공통 컴포넌트** (`src/components/common/`):
+- `EmptyState.tsx` - 빈 상태 UI 컴포넌트 (아이콘, 타이틀, 설명, 선택적 액션 버튼)
+- `Loading.tsx` - 로딩 인디케이터
 - 예: SearchForm, InputField, Button, Modal, Card, List
-- 유틸 함수: utils/에 정의
-- 날짜/시간 포맷, 데이터 변환, 검증
-- 타입 정의: types/에 공통 정의
-- 상수 관리: constants/에서 일괄 관리
-- 커스텀 훅: useSearch, useApi, usePagination 등
-- 어댑터 패턴: API 응답을 UI 친화적으로 변환
+
+**재사용 가능한 커스텀 훅** (`src/hooks/`):
+- `useInfiniteScroll` - IntersectionObserver 기반 무한 스크롤 구현
+  - 리턴값: `{ scrollContainerRef, loadMoreRef }`
+  - 파라미터: `{ hasMore, isLoading, onLoadMore, threshold }`
+- `useModalForm<T>` - 모달 폼 상태 관리 (validation, submission, error 처리)
+  - 리턴값: `{ formData, errors, isSubmitting, handleChange, handleSubmit, resetForm, setFormData, setFieldValue }`
+  - 파라미터: `{ initialValues, onSubmit, onSuccess, validate, resetOnSuccess }`
+- `useNonce` - Nonce 토큰 발급 및 관리 (중복 요청 방지)
+  - 리턴값: `{ nonce, issueNonce, clearNonce, isLoading }`
+- `useSearch` - 검색 및 커서 기반 페이지네이션
+- `usePushForm` - 푸시 메시지 폼 관리
+
+**유틸리티 함수** (`src/utils/`):
+- `apiUtils.ts` - API 응답 처리, 커서 파라미터 빌드, Nonce 헤더 빌드
+- `dateUtils.ts` - 날짜/시간 포맷
+- 데이터 변환, 검증 등
+
+**타입 정의** (`src/types/`):
+- `api.ts` - API 공통 타입 (CursorResponse, ApiResponse, PaginatedResponse 등)
+- `common.ts` - 공통 UI 컴포넌트 타입 (EmptyStateProps, InfiniteScrollConfig, ModalFormConfig)
+- `auth.ts` - 인증 관련 타입
+- 각 도메인별 타입 (store, user, review, coupon 등)
+
+**상수 관리**: `constants/`에서 일괄 관리
+
+**어댑터 패턴** (`src/adapters/`): API 응답을 UI 친화적으로 변환
 
 ### 🔒 React 보안 체크리스트
 
@@ -262,3 +302,186 @@ GET /api?cursor={{cursor}}&size=20
 
 ### 기타
 - 신규 페이지 추가시 홈 및 네비 탭에 추가
+
+---
+
+## 🎯 공통 개발 패턴
+
+### 새로운 API 모듈 만들기
+
+```typescript
+// src/api/exampleApi.ts
+import { apiGet, apiPost, apiPut, apiDelete } from './apiHelpers';
+import { ExampleType } from '../types/example';
+
+const exampleApi = {
+  getAll: async () => {
+    return apiGet<ExampleType[]>('/v1/examples');
+  },
+
+  create: async (data: CreateExampleRequest, nonce: string) => {
+    return apiPost<ExampleType>('/v1/examples', data, { nonce });
+  },
+
+  update: async (id: string, data: UpdateExampleRequest) => {
+    return apiPut<ExampleType>(`/v1/examples/${id}`, data);
+  },
+
+  delete: async (id: string) => {
+    return apiDelete(`/v1/examples/${id}`);
+  }
+};
+
+export default exampleApi;
+```
+
+### 무한 스크롤 페이지 만들기
+
+```typescript
+import { useState, useCallback } from 'react';
+import useInfiniteScroll from '../../hooks/useInfiniteScroll';
+import EmptyState from '../../components/common/EmptyState';
+
+const ExampleList = () => {
+  const [items, setItems] = useState<Item[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
+  const [cursor, setCursor] = useState<string | null>(null);
+
+  const fetchItems = useCallback(async (reset = false) => {
+    if (isLoading) return;
+
+    setIsLoading(true);
+    try {
+      const response = await exampleApi.getAll(reset ? null : cursor, 20);
+      if (!response?.ok) return;
+
+      const { contents = [], cursor: newCursor } = response.data || {};
+
+      if (reset) {
+        setItems(contents);
+      } else {
+        setItems(prev => [...prev, ...contents]);
+      }
+
+      setHasMore(newCursor.hasMore || false);
+      setCursor(newCursor.nextCursor || null);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [cursor, isLoading]);
+
+  const { scrollContainerRef, loadMoreRef } = useInfiniteScroll({
+    hasMore,
+    isLoading,
+    onLoadMore: () => fetchItems(false),
+    threshold: 0.1
+  });
+
+  return (
+    <div ref={scrollContainerRef} style={{maxHeight: 'calc(100vh - 280px)', overflowY: 'auto'}}>
+      {items.length === 0 && !isLoading ? (
+        <EmptyState
+          icon="bi-inbox"
+          title="항목이 없습니다"
+          description="등록된 항목이 없습니다."
+        />
+      ) : (
+        <div>
+          {items.map(item => (
+            <div key={item.id}>{item.name}</div>
+          ))}
+        </div>
+      )}
+
+      {hasMore && items.length > 0 && (
+        <div ref={loadMoreRef}>
+          {isLoading && <div className="spinner-border" />}
+        </div>
+      )}
+    </div>
+  );
+};
+```
+
+### 모달 폼 만들기
+
+```typescript
+import { Modal } from "react-bootstrap";
+import useModalForm from "../../hooks/useModalForm";
+import { useNonce } from "../../hooks/useNonce";
+
+interface FormData {
+  name: string;
+  email: string;
+}
+
+const ExampleModal = ({ show, onHide, selectedItem, onSuccess }) => {
+  const { nonce, issueNonce, clearNonce } = useNonce();
+
+  const {
+    formData,
+    errors,
+    isSubmitting,
+    handleChange,
+    handleSubmit,
+    resetForm
+  } = useModalForm<FormData>({
+    initialValues: { name: '', email: '' },
+    validate: (values) => {
+      const errors: any = {};
+      if (!values.name.trim()) {
+        errors.name = '이름은 필수입니다.';
+      }
+      if (!values.email.trim()) {
+        errors.email = '이메일은 필수입니다.';
+      }
+      return errors;
+    },
+    onSubmit: async (values) => {
+      if (selectedItem) {
+        return await exampleApi.update(selectedItem.id, values);
+      } else {
+        // 신규 등록 시 nonce 필요
+        if (!nonce) throw new Error("Nonce 토큰이 없습니다.");
+        return await exampleApi.create(values, nonce);
+      }
+    },
+    onSuccess: () => {
+      toast.success(selectedItem ? '수정되었습니다' : '등록되었습니다');
+      onSuccess();
+      onHide();
+    }
+  });
+
+  // 신규 등록 시 nonce 발급
+  useEffect(() => {
+    if (show && !selectedItem) {
+      issueNonce();
+    } else if (!show) {
+      clearNonce();
+    }
+  }, [show, selectedItem]);
+
+  return (
+    <Modal show={show} onHide={onHide}>
+      <form onSubmit={handleSubmit}>
+        <Modal.Body>
+          <input
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            className={errors.name ? 'is-invalid' : ''}
+          />
+          {errors.name && <div className="invalid-feedback">{errors.name}</div>}
+        </Modal.Body>
+        <Modal.Footer>
+          <button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? '처리 중...' : '저장'}
+          </button>
+        </Modal.Footer>
+      </form>
+    </Modal>
+  );
+};
+```
