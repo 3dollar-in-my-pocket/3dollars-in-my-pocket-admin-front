@@ -1,83 +1,58 @@
 import {Modal} from "react-bootstrap";
-import {useState} from "react";
 import adminApi from "../../api/adminApi";
 import {toast} from "react-toastify";
+import useModalForm from "../../hooks/useModalForm";
+
+interface AdminFormData {
+  email: string;
+  name: string;
+}
 
 const AdminRegisterModal = ({show, onHide, onSuccess}: any) => {
-  const [formData, setFormData] = useState({
-    email: '',
-    name: ''
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errors, setErrors] = useState<any>({});
+  const {
+    formData,
+    errors,
+    isSubmitting,
+    handleChange,
+    handleSubmit,
+    resetForm
+  } = useModalForm<AdminFormData>({
+    initialValues: {
+      email: '',
+      name: ''
+    },
+    validate: (values) => {
+      const errors: any = {};
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  const validateEmail = (email: any) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
-  const validateForm = () => {
-    const newErrors: any = {};
-
-    if (!formData.email.trim()) {
-      newErrors.email = '이메일은 필수 입력 항목입니다.';
-    } else if (!validateEmail(formData.email)) {
-      newErrors.email = '올바른 이메일 형식을 입력해주세요.';
-    }
-
-    if (!formData.name.trim()) {
-      newErrors.name = '이름은 필수 입력 항목입니다.';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleChange = (e) => {
-    const {name, value} = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-
-    // 에러 메시지 실시간 제거
-    if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }));
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-      const response = await adminApi.createAdmin({
-        email: formData.email.trim(),
-        name: formData.name.trim()
-      });
-
-      if (response.ok) {
-        onSuccess();
-        setFormData({email: '', name: ''});
-        setErrors({});
+      if (!values.email.trim()) {
+        errors.email = '이메일은 필수 입력 항목입니다.';
+      } else if (!emailRegex.test(values.email)) {
+        errors.email = '올바른 이메일 형식을 입력해주세요.';
       }
-    } finally {
-      setIsSubmitting(false);
+
+      if (!values.name.trim()) {
+        errors.name = '이름은 필수 입력 항목입니다.';
+      }
+
+      return errors;
+    },
+    onSubmit: async (values) => {
+      return await adminApi.createAdmin({
+        email: values.email.trim(),
+        name: values.name.trim()
+      });
+    },
+    onSuccess: () => {
+      toast.success('관리자가 성공적으로 등록되었습니다.');
+      onSuccess();
+      onHide();
     }
-  };
+  });
 
   const handleClose = () => {
     if (!isSubmitting) {
-      setFormData({email: '', name: ''});
-      setErrors({});
+      resetForm();
       onHide();
     }
   };

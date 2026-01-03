@@ -1,14 +1,85 @@
 import {Modal} from "react-bootstrap";
-import {useEffect, useState} from "react";
+import {useEffect} from "react";
 import {formatDateTime} from "../../utils/dateUtils";
 import faqApi from "../../api/faqApi";
 import {toast} from "react-toastify";
 import {useNonce} from "../../hooks/useNonce";
+import useModalForm from "../../hooks/useModalForm";
+
+interface FaqFormData {
+  application: string;
+  question: string;
+  answer: string;
+  category: string;
+  faqId?: string;
+}
 
 const FaqEditModal = ({applications, showModal, handleCloseModal, selectedApplication, selectedFaq, faqCategories}) => {
-  const [editedFaq, setEditedFaq] = useState(selectedFaq || {});
-  const [selectedCategory, setSelectedCategory] = useState(selectedFaq?.category?.category || "");
   const {nonce, issueNonce, clearNonce} = useNonce();
+
+  const {
+    formData,
+    setFormData,
+    handleChange,
+    setFieldValue,
+    resetForm
+  } = useModalForm<FaqFormData>({
+    initialValues: {
+      application: selectedApplication || '',
+      question: '',
+      answer: '',
+      category: '',
+      faqId: ''
+    },
+    validate: (values) => {
+      const errors: any = {};
+
+      if (!values.application && !selectedFaq) {
+        errors.application = '서비스를 선택해주세요.';
+      }
+      if (!values.category) {
+        errors.category = '카테고리를 선택해주세요.';
+      }
+      if (!values.question?.trim()) {
+        errors.question = '질문을 입력해주세요.';
+      }
+      if (!values.answer?.trim()) {
+        errors.answer = '답변을 입력해주세요.';
+      }
+
+      return errors;
+    },
+    onSubmit: async (values) => {
+      // 신규 등록 시 Nonce 토큰 검증
+      if (!selectedFaq && !nonce) {
+        throw new Error("Nonce 토큰이 발급되지 않았습니다. 잠시 후 다시 시도해주세요.");
+      }
+
+      const payload = {
+        application: values.application,
+        question: values.question,
+        answer: values.answer,
+        category: values.category,
+      };
+
+      if (selectedFaq) {
+        return await faqApi.updateFaq({
+          ...payload,
+          faqId: values.faqId!,
+        });
+      } else {
+        return await faqApi.createFaq({
+          ...payload,
+          nonce,
+        });
+      }
+    },
+    onSuccess: () => {
+      toast.info(selectedFaq ? "수정되었습니다" : "등록되었습니다");
+      handleCloseModal();
+    },
+    resetOnSuccess: false
+  });
 
   // 모달이 열릴 때 신규 등록인 경우에만 Nonce 토큰 발급
   useEffect(() => {
@@ -19,28 +90,36 @@ const FaqEditModal = ({applications, showModal, handleCloseModal, selectedApplic
     }
   }, [showModal, selectedFaq, issueNonce, clearNonce]);
 
+  // selectedFaq 변경 시 폼 데이터 업데이트
   useEffect(() => {
     if (selectedFaq) {
-      setEditedFaq(selectedFaq);
-      setSelectedCategory(selectedFaq.category?.category || "");
+      setFormData({
+        application: selectedFaq.application,
+        question: selectedFaq.question,
+        answer: selectedFaq.answer,
+        category: selectedFaq.category?.category || "",
+        faqId: selectedFaq.faqId
+      });
     } else {
-      setEditedFaq({application: selectedApplication});
-      setSelectedCategory("");
+      setFormData({
+        application: selectedApplication || '',
+        question: '',
+        answer: '',
+        category: '',
+        faqId: ''
+      });
     }
-  }, [selectedFaq, selectedApplication, showModal]);
+  }, [selectedFaq, selectedApplication, showModal, setFormData]);
 
-  const handleChange = ({target: {name, value}}) => {
-    setEditedFaq((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-    if (name === "category") {
-      setSelectedCategory(value);
+    // 수동 validation
+    if (!formData.category || !formData.question?.trim() || !formData.answer?.trim() || (!selectedFaq && !formData.application)) {
+      toast.error('모든 필수 항목을 입력해주세요.');
+      return;
     }
-  };
 
-  const handleSave = async () => {
     // 신규 등록 시 Nonce 토큰 검증
     if (!selectedFaq && !nonce) {
       toast.error("Nonce 토큰이 발급되지 않았습니다. 잠시 후 다시 시도해주세요.");
@@ -48,34 +127,35 @@ const FaqEditModal = ({applications, showModal, handleCloseModal, selectedApplic
     }
 
     const payload = {
-      application: editedFaq.application,
-      question: editedFaq.question,
-      answer: editedFaq.answer,
-      category: selectedCategory,
+      application: formData.application,
+      question: formData.question,
+      answer: formData.answer,
+      category: formData.category,
     };
 
-    const action = selectedFaq
-      ? await faqApi.updateFaq({
-        ...payload,
-        faqId: editedFaq.faqId,
-      })
-      : await faqApi.createFaq({
-        ...payload,
-        nonce,
-      });
+    try {
+      const response = selectedFaq
+        ? await faqApi.updateFaq({
+            ...payload,
+            faqId: formData.faqId!,
+          })
+        : await faqApi.createFaq({
+            ...payload,
+            nonce,
+          });
 
-    const response = await action;
-    if (response.ok) {
-      toast.info(selectedFaq ? "수정되었습니다" : "등록되었습니다");
-      handleCloseModal();
+      if (response.ok) {
+        toast.info(selectedFaq ? "수정되었습니다" : "등록되었습니다");
+        handleCloseModal();
+      }
+    } catch (error: any) {
+      toast.error(error.message || '오류가 발생했습니다.');
     }
   };
 
   const handleDelete = () => {
-    console.log(editedFaq);
-
     if (selectedFaq && window.confirm("정말 삭제하시겠습니까?")) {
-      faqApi.deleteFaq({application: editedFaq.application, faqId: selectedFaq.faqId}).then((response) => {
+      faqApi.deleteFaq({application: formData.application, faqId: selectedFaq.faqId}).then((response) => {
         if (response.ok) {
           toast.info("삭제되었습니다");
           handleCloseModal();
@@ -92,12 +172,12 @@ const FaqEditModal = ({applications, showModal, handleCloseModal, selectedApplic
 
       <Modal.Body className="p-4">
         <div className="row g-3">
-          <ApplicationSelect applications={applications} selectedApplication={editedFaq.application}
+          <ApplicationSelect applications={applications} selectedApplication={formData.application}
                              handleChange={handleChange} faq={selectedFaq}/>
-          <CategorySelect selectedCategory={selectedCategory} handleChange={handleChange}
+          <CategorySelect selectedCategory={formData.category} handleChange={handleChange}
                           faqCategories={faqCategories}/>
-          <InputField label="질문" name="question" value={editedFaq.question} handleChange={handleChange}/>
-          <TextAreaField label="답변" name="answer" value={editedFaq.answer} handleChange={handleChange}/>
+          <InputField label="질문" name="question" value={formData.question} handleChange={handleChange}/>
+          <TextAreaField label="답변" name="answer" value={formData.answer} handleChange={handleChange}/>
           {selectedFaq && (
             <>
               <InputField label="생성일자" name="createdAt" value={formatDateTime(selectedFaq.createdAt)}
@@ -121,7 +201,7 @@ const FaqEditModal = ({applications, showModal, handleCloseModal, selectedApplic
           <button
             className="btn btn-primary w-100 w-sm-auto order-sm-2 ms-sm-auto"
             onClick={handleSave}
-            disabled={!editedFaq.category || !editedFaq.question?.trim() || !editedFaq.answer?.trim() || (!selectedFaq && !editedFaq.application)}
+            disabled={!formData.category || !formData.question?.trim() || !formData.answer?.trim() || (!selectedFaq && !formData.application)}
           >
             저장
           </button>

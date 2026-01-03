@@ -1,13 +1,11 @@
 import {useEffect, useRef, useState, useCallback} from 'react';
-import {toast} from 'react-toastify';
 import couponApi from '../../api/couponApi';
 import {
   StoreCoupon,
   getCouponStatusDisplayName,
   getCouponStatusBadgeClass,
   formatCouponDate,
-  COUPON_STATUS,
-  CouponStatus
+  COUPON_STATUS
 } from '../../types/coupon';
 import {getStoreTypeDisplayName, getStoreTypeBadgeClass, getStoreTypeIcon} from '../../types/store';
 import StoreDetailModal from '../store/StoreDetailModal';

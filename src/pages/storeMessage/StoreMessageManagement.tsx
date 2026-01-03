@@ -1,5 +1,4 @@
-import {useEffect, useRef, useState, useCallback} from 'react';
-import {toast} from 'react-toastify';
+import {useEffect, useState, useCallback} from 'react';
 import storeMessageApi from '../../api/storeMessageApi';
 import {StoreMessage} from '../../types/storeMessage';
 import {getStoreTypeDisplayName, getStoreTypeBadgeClass, getStoreTypeIcon} from '../../types/store';
