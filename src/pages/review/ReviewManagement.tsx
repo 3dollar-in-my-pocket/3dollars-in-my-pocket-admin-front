@@ -5,6 +5,8 @@ import {StoreReview} from '../../types/review';
 import {getStoreTypeDisplayName, getStoreTypeBadgeClass, getStoreTypeIcon} from '../../types/store';
 import UserDetailModal from '../user/UserDetailModal';
 import StoreDetailModal from '../store/StoreDetailModal';
+import useInfiniteScroll from '../../hooks/useInfiniteScroll';
+import EmptyState from '../../components/common/EmptyState';
 
 const ReviewManagement = () => {
   const [reviews, setReviews] = useState<StoreReview[]>([]);
@@ -16,45 +18,12 @@ const ReviewManagement = () => {
   const [isBlinding, setIsBlinding] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [selectedStore, setSelectedStore] = useState<any>(null);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const observerRef = useRef<IntersectionObserver | null>(null);
-  const loadMoreRef = useRef<HTMLDivElement>(null);
   const [skeletonCount] = useState(3);
 
   // 초기 데이터 로드
   useEffect(() => {
     fetchReviews(true);
   }, []);
-
-  // Intersection Observer 설정
-  useEffect(() => {
-    if (observerRef.current) {
-      observerRef.current.disconnect();
-    }
-
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        const firstEntry = entries[0];
-        if (firstEntry.isIntersecting && hasMore && !isLoading) {
-          fetchReviews(false);
-        }
-      },
-      {
-        root: scrollContainerRef.current,
-        threshold: 0.1
-      }
-    );
-
-    if (loadMoreRef.current) {
-      observerRef.current.observe(loadMoreRef.current);
-    }
-
-    return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-      }
-    };
-  }, [hasMore, isLoading]);
 
   const fetchReviews = useCallback(async (reset = false) => {
     if (isLoading) return;
@@ -81,11 +50,13 @@ const ReviewManagement = () => {
     }
   }, [cursor, isLoading]);
 
-  const handleLoadMore = useCallback(() => {
-    if (hasMore && !isLoading) {
-      fetchReviews(false);
-    }
-  }, [hasMore, isLoading, fetchReviews]);
+  // Infinite Scroll 훅 사용
+  const { scrollContainerRef, loadMoreRef } = useInfiniteScroll({
+    hasMore,
+    isLoading,
+    onLoadMore: () => fetchReviews(false),
+    threshold: 0.1
+  });
 
   const formatDateTime = (dateString: string) => {
     if (!dateString) return '없음';
@@ -277,26 +248,13 @@ const ReviewManagement = () => {
         className="review-container"
         style={{maxHeight: 'calc(100vh - 280px)', overflowY: 'auto'}}
       >
-        {/* 빈 상태 - 개선된 디자인 */}
+        {/* 빈 상태 */}
         {reviews.length === 0 && !isLoading ? (
-          <div className="text-center py-5">
-            <div
-              className="mx-auto mb-4 position-relative"
-              style={{
-                width: 'clamp(80px, 20vw, 120px)',
-                height: 'clamp(80px, 20vw, 120px)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                background: 'linear-gradient(135deg, #667eea15 0%, #764ba215 100%)',
-                borderRadius: '50%'
-              }}
-            >
-              <i className="bi bi-chat-square-text text-primary" style={{fontSize: 'clamp(2rem, 8vw, 3rem)'}}></i>
-            </div>
-            <h5 className="text-dark mb-2" style={{fontSize: 'clamp(1rem, 4vw, 1.25rem)'}}>등록된 리뷰가 없습니다</h5>
-            <p className="text-muted mb-0" style={{fontSize: 'clamp(0.875rem, 3vw, 1rem)'}}>아직 등록된 리뷰가 없습니다.</p>
-          </div>
+          <EmptyState
+            icon="bi-chat-square-text"
+            title="등록된 리뷰가 없습니다"
+            description="아직 등록된 리뷰가 없습니다."
+          />
         ) : (
           <div className="row g-2 g-md-3">
             {reviews.map((review) => (
@@ -518,17 +476,13 @@ const ReviewManagement = () => {
         )}
 
         {/* Intersection Observer 타겟 */}
-        {hasMore && reviews.length > 0 && !isLoading && (
+        {hasMore && reviews.length > 0 && (
           <div ref={loadMoreRef} className="text-center mt-3 mb-3">
-            <button
-              className="btn btn-outline-primary rounded-pill px-3 px-md-4 py-2"
-              onClick={handleLoadMore}
-              style={{minHeight: '44px', fontSize: 'clamp(0.8rem, 2.5vw, 0.95rem)'}}
-            >
-              <i className="bi bi-arrow-down-circle me-2"></i>
-              <span className="d-none d-sm-inline">더 많은 리뷰 보기</span>
-              <span className="d-inline d-sm-none">더보기</span>
-            </button>
+            {isLoading && (
+              <div className="spinner-border text-primary" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+            )}
           </div>
         )}
 

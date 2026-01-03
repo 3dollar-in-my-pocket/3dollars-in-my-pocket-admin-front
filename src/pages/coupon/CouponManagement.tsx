@@ -11,6 +11,8 @@ import {
 } from '../../types/coupon';
 import {getStoreTypeDisplayName, getStoreTypeBadgeClass, getStoreTypeIcon} from '../../types/store';
 import StoreDetailModal from '../store/StoreDetailModal';
+import useInfiniteScroll from '../../hooks/useInfiniteScroll';
+import EmptyState from '../../components/common/EmptyState';
 
 const CouponManagement = () => {
   const [coupons, setCoupons] = useState<StoreCoupon[]>([]);
@@ -19,9 +21,6 @@ const CouponManagement = () => {
   const [cursor, setCursor] = useState<string | null>(null);
   const [selectedStore, setSelectedStore] = useState<any>(null);
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const observerRef = useRef<IntersectionObserver | null>(null);
-  const loadMoreRef = useRef<HTMLDivElement>(null);
   const [skeletonCount] = useState(3);
   const isInitialMount = useRef(true);
 
@@ -38,36 +37,6 @@ const CouponManagement = () => {
     }
     fetchCoupons(true);
   }, [selectedStatuses]);
-
-  // Intersection Observer 설정
-  useEffect(() => {
-    if (observerRef.current) {
-      observerRef.current.disconnect();
-    }
-
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        const firstEntry = entries[0];
-        if (firstEntry.isIntersecting && hasMore && !isLoading) {
-          fetchCoupons(false);
-        }
-      },
-      {
-        root: scrollContainerRef.current,
-        threshold: 0.1
-      }
-    );
-
-    if (loadMoreRef.current) {
-      observerRef.current.observe(loadMoreRef.current);
-    }
-
-    return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-      }
-    };
-  }, [hasMore, isLoading]);
 
   const fetchCoupons = useCallback(async (reset = false) => {
     if (isLoading) return;
@@ -95,11 +64,13 @@ const CouponManagement = () => {
     }
   }, [cursor, isLoading, selectedStatuses]);
 
-  const handleLoadMore = useCallback(() => {
-    if (hasMore && !isLoading) {
-      fetchCoupons(false);
-    }
-  }, [hasMore, isLoading, fetchCoupons]);
+  // Infinite Scroll 훅 사용
+  const { scrollContainerRef, loadMoreRef } = useInfiniteScroll({
+    hasMore,
+    isLoading,
+    onLoadMore: () => fetchCoupons(false),
+    threshold: 0.1
+  });
 
   const handleStatusToggle = (status: string) => {
     setSelectedStatuses(prev => {
@@ -242,20 +213,11 @@ const CouponManagement = () => {
             Array.from({length: skeletonCount}).map((_, idx) => <SkeletonCard key={idx}/>)
           ) : coupons.length === 0 ? (
             <div className="col-12">
-              <div className="text-center py-5">
-                <div className="bg-light rounded-circle mx-auto mb-3"
-                     style={{
-                       width: '80px',
-                       height: '80px',
-                       display: 'flex',
-                       alignItems: 'center',
-                       justifyContent: 'center'
-                     }}>
-                  <i className="bi bi-ticket-perforated fs-1 text-secondary"></i>
-                </div>
-                <h5 className="text-dark mb-2">등록된 쿠폰이 없습니다</h5>
-                <p className="text-muted">아직 가게에서 발급한 쿠폰이 없어요.</p>
-              </div>
+              <EmptyState
+                icon="bi-ticket-perforated"
+                title="등록된 쿠폰이 없습니다"
+                description="아직 가게에서 발급한 쿠폰이 없어요."
+              />
             </div>
           ) : (
             coupons.map((coupon, index) => {

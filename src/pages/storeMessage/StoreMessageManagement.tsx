@@ -4,6 +4,8 @@ import storeMessageApi from '../../api/storeMessageApi';
 import {StoreMessage} from '../../types/storeMessage';
 import {getStoreTypeDisplayName, getStoreTypeBadgeClass, getStoreTypeIcon} from '../../types/store';
 import StoreDetailModal from '../store/StoreDetailModal';
+import useInfiniteScroll from '../../hooks/useInfiniteScroll';
+import EmptyState from '../../components/common/EmptyState';
 
 const StoreMessageManagement = () => {
   const [messages, setMessages] = useState<StoreMessage[]>([]);
@@ -13,44 +15,11 @@ const StoreMessageManagement = () => {
   const [selectedMessage, setSelectedMessage] = useState<StoreMessage | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [selectedStore, setSelectedStore] = useState<any>(null);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const observerRef = useRef<IntersectionObserver | null>(null);
-  const loadMoreRef = useRef<HTMLDivElement>(null);
 
   // 초기 데이터 로드
   useEffect(() => {
     fetchMessages(true);
   }, []);
-
-  // Intersection Observer 설정
-  useEffect(() => {
-    if (observerRef.current) {
-      observerRef.current.disconnect();
-    }
-
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        const firstEntry = entries[0];
-        if (firstEntry.isIntersecting && hasMore && !isLoading) {
-          fetchMessages(false);
-        }
-      },
-      {
-        root: scrollContainerRef.current,
-        threshold: 0.1
-      }
-    );
-
-    if (loadMoreRef.current) {
-      observerRef.current.observe(loadMoreRef.current);
-    }
-
-    return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-      }
-    };
-  }, [hasMore, isLoading]);
 
   const fetchMessages = useCallback(async (reset = false) => {
     if (isLoading) return;
@@ -77,11 +46,13 @@ const StoreMessageManagement = () => {
     }
   }, [cursor, isLoading]);
 
-  const handleLoadMore = useCallback(() => {
-    if (hasMore && !isLoading) {
-      fetchMessages(false);
-    }
-  }, [hasMore, isLoading, fetchMessages]);
+  // Infinite Scroll 훅 사용
+  const { scrollContainerRef, loadMoreRef } = useInfiniteScroll({
+    hasMore,
+    isLoading,
+    onLoadMore: () => fetchMessages(false),
+    threshold: 0.1
+  });
 
   const formatDateTime = (dateString: string) => {
     if (!dateString) return '없음';
@@ -161,22 +132,11 @@ const StoreMessageManagement = () => {
         style={{maxHeight: 'calc(100vh - 280px)', overflowY: 'auto'}}
       >
         {messages.length === 0 && !isLoading ? (
-          <div className="text-center py-5">
-            <div
-              className="bg-light rounded-circle mx-auto mb-4"
-              style={{
-                width: '80px',
-                height: '80px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              <i className="bi bi-chat-left-text fs-1 text-secondary"></i>
-            </div>
-            <h5 className="text-dark mb-2">등록된 메시지가 없습니다</h5>
-            <p className="text-muted">아직 등록된 메시지가 없습니다.</p>
-          </div>
+          <EmptyState
+            icon="bi-chat-left-text"
+            title="등록된 메시지가 없습니다"
+            description="아직 등록된 메시지가 없습니다."
+          />
         ) : (
           <div className="row g-3">
             {messages.map((message) => (
@@ -292,21 +252,13 @@ const StoreMessageManagement = () => {
         {/* Intersection Observer 타겟 */}
         {hasMore && messages.length > 0 && (
           <div ref={loadMoreRef} className="text-center mt-4 mb-4">
-            {isLoading ? (
+            {isLoading && (
               <div className="py-3">
                 <div className="spinner-border text-primary" style={{width: '2rem', height: '2rem'}} role="status">
                   <span className="visually-hidden">Loading...</span>
                 </div>
                 <p className="text-muted mt-2 mb-0">메시지를 불러오는 중...</p>
               </div>
-            ) : (
-              <button
-                className="btn btn-outline-primary rounded-pill px-4 py-2"
-                onClick={handleLoadMore}
-              >
-                <i className="bi bi-arrow-down-circle me-2"></i>
-                더 많은 메시지 보기
-              </button>
             )}
           </div>
         )}
