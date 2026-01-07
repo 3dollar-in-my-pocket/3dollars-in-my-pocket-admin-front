@@ -16,33 +16,30 @@ const CouponManagement = () => {
   const [coupons, setCoupons] = useState<StoreCoupon[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
-  const [cursor, setCursor] = useState<string | null>(null);
   const [selectedStore, setSelectedStore] = useState<any>(null);
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [skeletonCount] = useState(3);
   const isInitialMount = useRef(true);
 
-  // 초기 데이터 로드
-  useEffect(() => {
-    fetchCoupons(true);
-  }, []);
+  // cursor와 isLoading을 ref로 관리하여 useCallback 의존성 문제 해결
+  const cursorRef = useRef<string | null>(null);
+  const isLoadingRef = useRef(false);
+  const selectedStatusesRef = useRef<string[]>([]);
 
-  // 상태 필터 변경 시 재조회
+  // selectedStatuses 변경 시 ref 업데이트
   useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      return;
-    }
-    fetchCoupons(true);
+    selectedStatusesRef.current = selectedStatuses;
   }, [selectedStatuses]);
 
   const fetchCoupons = useCallback(async (reset = false) => {
-    if (isLoading) return;
+    // 중복 호출 방지
+    if (isLoadingRef.current) return;
 
+    isLoadingRef.current = true;
     setIsLoading(true);
     try {
-      const statusesToSend = selectedStatuses.length > 0 ? selectedStatuses : undefined;
-      const response = await couponApi.getAllStoreCoupons(reset ? null : cursor, 20, statusesToSend);
+      const statusesToSend = selectedStatusesRef.current.length > 0 ? selectedStatusesRef.current : undefined;
+      const response = await couponApi.getAllStoreCoupons(reset ? null : cursorRef.current, 20, statusesToSend);
       if (!response?.ok) {
         return;
       }
@@ -51,16 +48,32 @@ const CouponManagement = () => {
 
       if (reset) {
         setCoupons(contents);
+        cursorRef.current = null; // reset 시 cursor 초기화
       } else {
         setCoupons(prev => [...prev, ...contents]);
       }
 
       setHasMore(newCursor.hasMore || false);
-      setCursor(newCursor.nextCursor || null);
+      cursorRef.current = newCursor.nextCursor || null;
     } finally {
+      isLoadingRef.current = false;
       setIsLoading(false);
     }
-  }, [cursor, isLoading, selectedStatuses]);
+  }, []);
+
+  // 초기 데이터 로드
+  useEffect(() => {
+    fetchCoupons(true);
+  }, [fetchCoupons]);
+
+  // 상태 필터 변경 시 재조회
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    fetchCoupons(true);
+  }, [selectedStatuses, fetchCoupons]);
 
   // Infinite Scroll 훅 사용
   const { scrollContainerRef, loadMoreRef } = useInfiniteScroll({
@@ -396,19 +409,24 @@ const CouponManagement = () => {
             })
           )}
 
-          {/* 무한 스크롤 트리거 */}
-          {hasMore && (
-            <div ref={loadMoreRef} className="col-12 text-center py-3">
-              {isLoading && (
-                <div className="d-flex flex-column align-items-center gap-2">
-                  <div className="spinner-border text-primary" role="status">
-                    <span className="visually-hidden">Loading...</span>
-                  </div>
-                  <span className="text-muted small">쿠폰을 불러오는 중...</span>
+          {/* 무한 스크롤 트리거 - 항상 렌더링 */}
+          <div
+            ref={loadMoreRef}
+            className="col-12 text-center py-3"
+            style={{
+              display: hasMore ? 'block' : 'none',
+              minHeight: '50px'
+            }}
+          >
+            {isLoading && (
+              <div className="d-flex flex-column align-items-center gap-2">
+                <div className="spinner-border text-primary" role="status">
+                  <span className="visually-hidden">Loading...</span>
                 </div>
-              )}
-            </div>
-          )}
+                <span className="text-muted small">쿠폰을 불러오는 중...</span>
+              </div>
+            )}
+          </div>
 
           {!hasMore && coupons.length > 0 && (
             <div className="col-12 text-center py-3">

@@ -1,4 +1,4 @@
-import {useEffect, useState, useCallback} from 'react';
+import {useEffect, useState, useCallback, useRef} from 'react';
 import {toast} from 'react-toastify';
 import reviewApi from '../../api/reviewApi';
 import {StoreReview} from '../../types/review';
@@ -12,7 +12,6 @@ const ReviewManagement = () => {
   const [reviews, setReviews] = useState<StoreReview[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
-  const [cursor, setCursor] = useState<string | null>(null);
   const [selectedReview, setSelectedReview] = useState<StoreReview | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [isBlinding, setIsBlinding] = useState(false);
@@ -20,17 +19,18 @@ const ReviewManagement = () => {
   const [selectedStore, setSelectedStore] = useState<any>(null);
   const [skeletonCount] = useState(3);
 
-  // 초기 데이터 로드
-  useEffect(() => {
-    fetchReviews(true);
-  }, []);
+  // cursor와 isLoading을 ref로 관리하여 useCallback 의존성 문제 해결
+  const cursorRef = useRef<string | null>(null);
+  const isLoadingRef = useRef(false);
 
   const fetchReviews = useCallback(async (reset = false) => {
-    if (isLoading) return;
+    // 중복 호출 방지
+    if (isLoadingRef.current) return;
 
+    isLoadingRef.current = true;
     setIsLoading(true);
     try {
-      const response = await reviewApi.getAllStoreReviews(reset ? null : cursor, 20);
+      const response = await reviewApi.getAllStoreReviews(reset ? null : cursorRef.current, 20);
       if (!response?.ok) {
         return;
       }
@@ -39,16 +39,23 @@ const ReviewManagement = () => {
 
       if (reset) {
         setReviews(contents);
+        cursorRef.current = null; // reset 시 cursor 초기화
       } else {
         setReviews(prev => [...prev, ...contents]);
       }
 
       setHasMore(newCursor.hasMore || false);
-      setCursor(newCursor.nextCursor || null);
+      cursorRef.current = newCursor.nextCursor || null;
     } finally {
+      isLoadingRef.current = false;
       setIsLoading(false);
     }
-  }, [cursor, isLoading]);
+  }, []);
+
+  // 초기 데이터 로드
+  useEffect(() => {
+    fetchReviews(true);
+  }, [fetchReviews]);
 
   // Infinite Scroll 훅 사용
   const { scrollContainerRef, loadMoreRef } = useInfiniteScroll({
@@ -475,16 +482,21 @@ const ReviewManagement = () => {
           </div>
         )}
 
-        {/* Intersection Observer 타겟 */}
-        {hasMore && reviews.length > 0 && (
-          <div ref={loadMoreRef} className="text-center mt-3 mb-3">
-            {isLoading && (
-              <div className="spinner-border text-primary" role="status">
-                <span className="visually-hidden">Loading...</span>
-              </div>
-            )}
-          </div>
-        )}
+        {/* Intersection Observer 타겟 - 항상 렌더링 */}
+        <div
+          ref={loadMoreRef}
+          className="text-center mt-3 mb-3"
+          style={{
+            display: hasMore && reviews.length > 0 ? 'block' : 'none',
+            minHeight: '50px'
+          }}
+        >
+          {isLoading && (
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
+          )}
+        </div>
 
         {/* 초기 로딩 - 스켈레톤 */}
         {isLoading && reviews.length === 0 && (

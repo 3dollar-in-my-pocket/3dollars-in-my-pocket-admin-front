@@ -1,4 +1,4 @@
-import {useEffect, useState, useCallback} from 'react';
+import {useEffect, useState, useCallback, useRef} from 'react';
 import storeMessageApi from '../../api/storeMessageApi';
 import {StoreMessage} from '../../types/storeMessage';
 import {getStoreTypeDisplayName, getStoreTypeBadgeClass, getStoreTypeIcon} from '../../types/store';
@@ -10,22 +10,22 @@ const StoreMessageManagement = () => {
   const [messages, setMessages] = useState<StoreMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
-  const [cursor, setCursor] = useState<string | null>(null);
   const [selectedMessage, setSelectedMessage] = useState<StoreMessage | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [selectedStore, setSelectedStore] = useState<any>(null);
 
-  // 초기 데이터 로드
-  useEffect(() => {
-    fetchMessages(true);
-  }, []);
+  // cursor와 isLoading을 ref로 관리하여 useCallback 의존성 문제 해결
+  const cursorRef = useRef<string | null>(null);
+  const isLoadingRef = useRef(false);
 
   const fetchMessages = useCallback(async (reset = false) => {
-    if (isLoading) return;
+    // 중복 호출 방지
+    if (isLoadingRef.current) return;
 
+    isLoadingRef.current = true;
     setIsLoading(true);
     try {
-      const response = await storeMessageApi.getAllStoreMessages(reset ? null : cursor, 20);
+      const response = await storeMessageApi.getAllStoreMessages(reset ? null : cursorRef.current, 20);
       if (!response?.ok) {
         return;
       }
@@ -34,16 +34,23 @@ const StoreMessageManagement = () => {
 
       if (reset) {
         setMessages(contents);
+        cursorRef.current = null; // reset 시 cursor 초기화
       } else {
         setMessages(prev => [...prev, ...contents]);
       }
 
       setHasMore(newCursor.hasMore || false);
-      setCursor(newCursor.nextCursor || null);
+      cursorRef.current = newCursor.nextCursor || null;
     } finally {
+      isLoadingRef.current = false;
       setIsLoading(false);
     }
-  }, [cursor, isLoading]);
+  }, []);
+
+  // 초기 데이터 로드
+  useEffect(() => {
+    fetchMessages(true);
+  }, [fetchMessages]);
 
   // Infinite Scroll 훅 사용
   const { scrollContainerRef, loadMoreRef } = useInfiniteScroll({
@@ -248,19 +255,24 @@ const StoreMessageManagement = () => {
           </div>
         )}
 
-        {/* Intersection Observer 타겟 */}
-        {hasMore && messages.length > 0 && (
-          <div ref={loadMoreRef} className="text-center mt-4 mb-4">
-            {isLoading && (
-              <div className="py-3">
-                <div className="spinner-border text-primary" style={{width: '2rem', height: '2rem'}} role="status">
-                  <span className="visually-hidden">Loading...</span>
-                </div>
-                <p className="text-muted mt-2 mb-0">메시지를 불러오는 중...</p>
+        {/* Intersection Observer 타겟 - 항상 렌더링 */}
+        <div
+          ref={loadMoreRef}
+          className="text-center mt-4 mb-4"
+          style={{
+            display: hasMore && messages.length > 0 ? 'block' : 'none',
+            minHeight: '50px'
+          }}
+        >
+          {isLoading && (
+            <div className="py-3">
+              <div className="spinner-border text-primary" style={{width: '2rem', height: '2rem'}} role="status">
+                <span className="visually-hidden">Loading...</span>
               </div>
-            )}
-          </div>
-        )}
+              <p className="text-muted mt-2 mb-0">메시지를 불러오는 중...</p>
+            </div>
+          )}
+        </div>
 
         {/* 초기 로딩 인디케이터 */}
         {isLoading && messages.length === 0 && (
