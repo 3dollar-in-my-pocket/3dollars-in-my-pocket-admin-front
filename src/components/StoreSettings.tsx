@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import {useState, useEffect} from 'react';
 import storeApi from '../api/storeApi';
 
-const StoreSettings = ({ storeId }) => {
+const StoreSettings = ({storeId}) => {
   const [settings, setSettings] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -54,7 +54,7 @@ const StoreSettings = ({ storeId }) => {
       <div className="p-4">
         <div className="text-center py-5">
           <div className="mb-3">
-            <div className="spinner-border text-primary" style={{ width: '3rem', height: '3rem' }} role="status">
+            <div className="spinner-border text-primary" style={{width: '3rem', height: '3rem'}} role="status">
               <span className="visually-hidden">Loading...</span>
             </div>
           </div>
@@ -99,7 +99,7 @@ const StoreSettings = ({ storeId }) => {
       <div className="p-4">
         <div className="text-center py-5">
           <div className="bg-light rounded-circle mx-auto mb-3"
-               style={{ width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+               style={{width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
             <i className="bi bi-gear fs-1 text-secondary"></i>
           </div>
           <h5 className="text-dark mb-2">설정 정보가 없습니다</h5>
@@ -131,7 +131,7 @@ const StoreSettings = ({ storeId }) => {
       <div className="row g-3">
         {settings.map((setting, index) => (
           <div key={setting.code || index} className="col-12">
-            <div className="card border-0 shadow-sm" style={{ borderRadius: '16px' }}>
+            <div className="card border-0 shadow-sm" style={{borderRadius: '16px'}}>
               <div className="card-body p-4">
                 <div className="d-flex align-items-start justify-content-between">
                   <div className="flex-grow-1 me-3">
@@ -141,7 +141,7 @@ const StoreSettings = ({ storeId }) => {
                         {formatValue(setting.value)}
                       </span>
                     </div>
-                    <p className="text-muted mb-0" style={{ lineHeight: '1.6' }}>
+                    <p className="text-muted mb-0" style={{lineHeight: '1.6'}}>
                       {setting.description}
                     </p>
                   </div>

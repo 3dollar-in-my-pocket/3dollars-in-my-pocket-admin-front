@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import {useState, useEffect} from 'react';
 import AdminRegisterModal from './AdminRegisterModal';
 import adminApi from '../../api/adminApi';
-import { toast } from 'react-toastify';
+import {toast} from 'react-toastify';
 
 const Admin = () => {
   const [admins, setAdmins] = useState([]);
@@ -17,16 +17,13 @@ const Admin = () => {
   const fetchAdmins = async (page = 1) => {
     setIsLoading(true);
     try {
-      const response = await adminApi.getAdmins({ size: pageSize, page });
+      const response = await adminApi.getAdmins({size: pageSize, page});
       if (response.ok) {
         setAdmins(response.data.contents);
         setTotalPages(response.data.page.totalPage);
         setTotalSize(response.data.page.totalSize);
         setCurrentPage(page);
       }
-    } catch (error) {
-      toast.error('관리자 목록을 불러오는 중 오류가 발생했습니다.');
-      setAdmins([]);
     } finally {
       setIsLoading(false);
     }
@@ -101,7 +98,13 @@ const Admin = () => {
           ) : admins.length === 0 ? (
             <div className="text-center py-5 text-muted">
               <div className="mb-4">
-                <div className="bg-light rounded-circle mx-auto" style={{width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                <div className="bg-light rounded-circle mx-auto" style={{
+                  width: '80px',
+                  height: '80px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
                   <i className="bi bi-people fs-1 text-secondary"></i>
                 </div>
               </div>
@@ -112,46 +115,46 @@ const Admin = () => {
             <div className="table-responsive">
               <table className="table table-hover mb-0">
                 <thead className="bg-light">
-                  <tr>
-                    <th className="px-4 py-3 text-center">#</th>
-                    <th className="px-4 py-3">관리자 ID</th>
-                    <th className="px-4 py-3">이메일</th>
-                    <th className="px-4 py-3">이름</th>
-                    <th className="px-4 py-3 text-center">생성일</th>
-                    <th className="px-4 py-3 text-center">수정일</th>
-                  </tr>
+                <tr>
+                  <th className="px-4 py-3 text-center">#</th>
+                  <th className="px-4 py-3">관리자 ID</th>
+                  <th className="px-4 py-3">이메일</th>
+                  <th className="px-4 py-3">이름</th>
+                  <th className="px-4 py-3 text-center">생성일</th>
+                  <th className="px-4 py-3 text-center">수정일</th>
+                </tr>
                 </thead>
                 <tbody>
-                  {admins.map((admin, index) => (
-                    <tr key={admin.adminId}>
-                      <td className="px-4 py-3 text-center text-muted">
-                        {(currentPage - 1) * pageSize + index + 1}
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="d-flex align-items-center gap-2">
-                          <div className="bg-primary bg-opacity-10 rounded-circle p-2">
-                            <i className="bi bi-person text-primary"></i>
-                          </div>
-                          <span className="fw-bold text-dark">{admin.adminId}</span>
+                {admins.map((admin, index) => (
+                  <tr key={admin.adminId}>
+                    <td className="px-4 py-3 text-center text-muted">
+                      {(currentPage - 1) * pageSize + index + 1}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="d-flex align-items-center gap-2">
+                        <div className="bg-primary bg-opacity-10 rounded-circle p-2">
+                          <i className="bi bi-person text-primary"></i>
                         </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="d-flex align-items-center gap-2">
-                          <i className="bi bi-envelope text-muted"></i>
-                          <span className="text-dark">{admin.email}</span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className="fw-medium text-dark">{admin.name}</span>
-                      </td>
-                      <td className="px-4 py-3 text-center text-muted">
-                        <small>{formatDate(admin.createdAt)}</small>
-                      </td>
-                      <td className="px-4 py-3 text-center text-muted">
-                        <small>{formatDate(admin.updatedAt)}</small>
-                      </td>
-                    </tr>
-                  ))}
+                        <span className="fw-bold text-dark">{admin.adminId}</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="d-flex align-items-center gap-2">
+                        <i className="bi bi-envelope text-muted"></i>
+                        <span className="text-dark">{admin.email}</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="fw-medium text-dark">{admin.name}</span>
+                    </td>
+                    <td className="px-4 py-3 text-center text-muted">
+                      <small>{formatDate(admin.createdAt)}</small>
+                    </td>
+                    <td className="px-4 py-3 text-center text-muted">
+                      <small>{formatDate(admin.updatedAt)}</small>
+                    </td>
+                  </tr>
+                ))}
                 </tbody>
               </table>
             </div>
@@ -173,7 +176,7 @@ const Admin = () => {
                   </button>
                 </li>
 
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                {Array.from({length: totalPages}, (_, i) => i + 1).map(page => (
                   <li key={page} className={`page-item ${currentPage === page ? 'active' : ''}`}>
                     <button
                       className="page-link"

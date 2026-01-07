@@ -21,7 +21,7 @@ const FaqManagement = () => {
     if (!selectedApplication) return;
     setIsLoading(true);
     faqApi
-      .listFaqs({ application: selectedApplication, category: selectedFaqCategory })
+      .listFaqs({application: selectedApplication, category: selectedFaqCategory})
       .then((res) => {
         if (res.ok) setFaqs(res.data.contents);
       })
@@ -30,7 +30,7 @@ const FaqManagement = () => {
 
   const fetchFaqCategories = useCallback(() => {
     faqApi
-      .listFaqCategories({ application: selectedApplication })
+      .listFaqCategories({application: selectedApplication})
       .then((res) => {
         if (res.ok) setFaqCategories(res.data.contents);
       });
@@ -87,7 +87,7 @@ const FaqManagement = () => {
         fetchFaqs={fetchFaqs}
       />
 
-      <FaqTable faqs={faqs} onEdit={handleShowModal} isLoading={isLoading} />
+      <FaqTable faqs={faqs} onEdit={handleShowModal} isLoading={isLoading}/>
 
       <FaqEditModal
         selectedApplication={selectedApplication}
@@ -114,36 +114,36 @@ const FilterSection = ({
       <div className="row g-3">
         <div className="col-12 col-md-4">
           <label className="form-label fw-semibold text-secondary">서비스</label>
-        <select
-          className="form-select"
-          value={selectedApplication}
-          onChange={(e) => setSelectedApplication(e.target.value)}
-        >
-          <option value="">선택하세요</option>
-          {applications.map((app) => (
-            <option key={app.type} value={app.type}>
-              {app.description}
-            </option>
-          ))}
-        </select>
-      </div>
+          <select
+            className="form-select"
+            value={selectedApplication}
+            onChange={(e) => setSelectedApplication(e.target.value)}
+          >
+            <option value="">선택하세요</option>
+            {applications.map((app) => (
+              <option key={app.type} value={app.type}>
+                {app.description}
+              </option>
+            ))}
+          </select>
+        </div>
 
         <div className="col-12 col-md-4">
           <label className="form-label fw-semibold text-secondary">FAQ 카테고리</label>
-        <select
-          className="form-select"
-          value={selectedFaqCategory}
-          onChange={(e) => setSelectedFaqCategory(e.target.value)}
-          disabled={!faqCategories.length}
-        >
-          <option value="">전체</option>
-          {faqCategories.map((cat) => (
-            <option key={cat.category} value={cat.category}>
-              {cat.description}
-            </option>
-          ))}
-        </select>
-      </div>
+          <select
+            className="form-select"
+            value={selectedFaqCategory}
+            onChange={(e) => setSelectedFaqCategory(e.target.value)}
+            disabled={!faqCategories.length}
+          >
+            <option value="">전체</option>
+            {faqCategories.map((cat) => (
+              <option key={cat.category} value={cat.category}>
+                {cat.description}
+              </option>
+            ))}
+          </select>
+        </div>
 
         <div className="col-12 col-md-4">
           <div className="d-flex align-items-end h-100">
@@ -160,11 +160,11 @@ const FilterSection = ({
   </div>
 );
 
-const FaqTable = ({ faqs, onEdit, isLoading }) => {
+const FaqTable = ({faqs, onEdit, isLoading}) => {
   if (isLoading) {
     return (
       <div className="py-5 text-center">
-        <Loading />
+        <Loading/>
       </div>
     );
   }
@@ -224,10 +224,10 @@ const FaqTable = ({ faqs, onEdit, isLoading }) => {
         <table className="table table-bordered align-middle text-center table-hover">
           <thead className="table-dark">
           <tr>
-            <th style={{ width: "180px" }}>카테고리</th>
-            <th style={{ width: "500px" }}>질문</th>
+            <th style={{width: "180px"}}>카테고리</th>
+            <th style={{width: "500px"}}>질문</th>
             <th>답변 요약</th>
-            <th style={{ width: "120px" }}>관리</th>
+            <th style={{width: "120px"}}>관리</th>
           </tr>
           </thead>
           <tbody>
@@ -235,7 +235,7 @@ const FaqTable = ({ faqs, onEdit, isLoading }) => {
             <tr key={faq.faqId}>
               <td>{faq.category.description}</td>
               <td className="text-start">{faq.question}</td>
-              <td className="text-start text-truncate" style={{ maxWidth: "300px" }}>
+              <td className="text-start text-truncate" style={{maxWidth: "300px"}}>
                 {faq.answer}
               </td>
               <td>

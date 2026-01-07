@@ -9,6 +9,7 @@ import StoreSearch from "../pages/store/StoreSearch";
 import PopularNeighborhoodStores from "../pages/store/PopularNeighborhoodStores";
 import ReviewManagement from "../pages/review/ReviewManagement";
 import StoreMessageManagement from "../pages/storeMessage/StoreMessageManagement";
+import StoreCategoryManagement from "../pages/storeCategory/StoreCategoryManagement";
 import CouponManagement from "../pages/coupon/CouponManagement";
 import CacheTool from "../pages/tool/CacheTool";
 import FileUploadTool from "../pages/tool/FileUploadTool";
@@ -56,23 +57,27 @@ const manageRoutes = {
     },
     {
       path: '/manage/store-search',
-      element: <PrivateRouter><StoreSearch /></PrivateRouter>
+      element: <PrivateRouter><StoreSearch/></PrivateRouter>
     },
     {
       path: '/manage/popular-neighborhood-stores',
-      element: <PrivateRouter><PopularNeighborhoodStores /></PrivateRouter>
+      element: <PrivateRouter><PopularNeighborhoodStores/></PrivateRouter>
     },
     {
       path: '/manage/review',
-      element: <PrivateRouter><ReviewManagement /></PrivateRouter>
+      element: <PrivateRouter><ReviewManagement/></PrivateRouter>
     },
     {
       path: '/manage/coupon',
-      element: <PrivateRouter><CouponManagement /></PrivateRouter>
+      element: <PrivateRouter><CouponManagement/></PrivateRouter>
     },
     {
       path: '/manage/store-message',
-      element: <PrivateRouter><StoreMessageManagement /></PrivateRouter>
+      element: <PrivateRouter><StoreMessageManagement/></PrivateRouter>
+    },
+    {
+      path: '/manage/store-category',
+      element: <PrivateRouter><StoreCategoryManagement/></PrivateRouter>
     },
     {
       path: '/manage/tool/cache',

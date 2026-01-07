@@ -1,8 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Button, Card, Container, Form, Row, Col, Spinner } from 'react-bootstrap';
+import React, {useEffect, useRef, useState} from 'react';
+import {Button, Card, Container, Form, Row, Col, Spinner} from 'react-bootstrap';
 import UploadApi from "../../api/uploadApi";
 import enumApi from "../../api/enumApi";
-import { toast } from "react-toastify";
+import {toast} from "react-toastify";
 
 const FileUpload = () => {
   const fileInputRef = useRef(null);
@@ -99,7 +99,7 @@ const FileUpload = () => {
                   type="file"
                   accept="image/*"
                   ref={fileInputRef}
-                  style={{ display: 'none' }}
+                  style={{display: 'none'}}
                   onChange={handleFileChange}
                 />
                 <Button
@@ -121,7 +121,7 @@ const FileUpload = () => {
                 src={fileImageUrl}
                 alt="Uploaded"
                 className="img-fluid rounded shadow-sm"
-                style={{ maxHeight: '320px', objectFit: 'cover' }}
+                style={{maxHeight: '320px', objectFit: 'cover'}}
               />
               <p className="text-muted small mt-3">{fileImageUrl}</p>
             </div>
@@ -154,7 +154,7 @@ const FileUpload = () => {
             >
               {isLoading ? (
                 <>
-                  <Spinner animation="border" size="sm" className="me-2" />
+                  <Spinner animation="border" size="sm" className="me-2"/>
                   처리 중...
                 </>
               ) : (
@@ -171,7 +171,7 @@ const FileUpload = () => {
       <textarea
         ref={urlTextAreaRef}
         value={fileImageUrl}
-        style={{ position: 'absolute', top: '-1000px', left: '-1000px' }}
+        style={{position: 'absolute', top: '-1000px', left: '-1000px'}}
         readOnly
       />
     </Container>

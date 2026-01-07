@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
-import { Modal, Button, Form, Alert } from 'react-bootstrap';
-import { toast } from 'react-toastify';
-import { usePushForm } from '../../hooks/usePushForm';
+import {useEffect, useState} from 'react';
+import {Modal, Button, Form, Alert} from 'react-bootstrap';
+import {toast} from 'react-toastify';
+import {usePushForm} from '../../hooks/usePushForm';
 import PushFormFields from './PushFormFields';
 import PushPreview from './PushPreview';
-import { getOsPlatformDisplayName } from '../../types/push';
+import {getOsPlatformDisplayName} from '../../types/push';
 
 interface PushSendModalProps {
   show: boolean;
@@ -12,7 +12,7 @@ interface PushSendModalProps {
   initialUserIds?: number[];
 }
 
-const PushSendModal = ({ show, onHide, initialUserIds = [] }: PushSendModalProps) => {
+const PushSendModal = ({show, onHide, initialUserIds = []}: PushSendModalProps) => {
   const [showPreviewModal, setShowPreviewModal] = useState(false);
 
   const {
@@ -189,7 +189,8 @@ const PushSendModal = ({ show, onHide, initialUserIds = [] }: PushSendModalProps
                 <h6 className="fw-semibold mb-2 text-dark">발송 정보</h6>
                 <div className="small">
                   <div className="mb-1">
-                    <strong>푸시 타입:</strong> {formData.pushType === 'SIMPLE' ? '정보성 푸시' : formData.pushType === 'SIMPLE_MARKETING' ? '광고성 푸시' : '미선택'}
+                    <strong>푸시
+                      타입:</strong> {formData.pushType === 'SIMPLE' ? '정보성 푸시' : formData.pushType === 'SIMPLE_MARKETING' ? '광고성 푸시' : '미선택'}
                   </div>
                   <div className="mb-1">
                     <strong>제목:</strong> {formData.title || '(제목 없음)'}
@@ -204,10 +205,12 @@ const PushSendModal = ({ show, onHide, initialUserIds = [] }: PushSendModalProps
                     <strong>이미지:</strong> {formData.imageUrl ? '첨부됨' : '(없음)'}
                   </div>
                   <div className="mb-1">
-                    <strong>발송 대상:</strong> {formData.targetType === "USER" ? "유저" : "사장님"} - {selectedUsers.length > 0 ? `${selectedUsers.length}명 선택됨` : '직접 입력된 ID'}
+                    <strong>발송
+                      대상:</strong> {formData.targetType === "USER" ? "유저" : "사장님"} - {selectedUsers.length > 0 ? `${selectedUsers.length}명 선택됨` : '직접 입력된 ID'}
                   </div>
                   <div>
-                    <strong>대상 OS:</strong> {Array.from(targetOsPlatforms).map(p => getOsPlatformDisplayName(p)).join(', ')}
+                    <strong>대상
+                      OS:</strong> {Array.from(targetOsPlatforms).map(p => getOsPlatformDisplayName(p)).join(', ')}
                   </div>
                 </div>
               </div>

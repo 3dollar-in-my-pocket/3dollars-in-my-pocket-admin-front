@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import storeApi from '../api/storeApi';
 import StorePostItem from './StorePostItem';
 
-const StorePostHistory = ({ storeId }) => {
+const StorePostHistory = ({storeId}) => {
   const [posts, setPosts] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -34,7 +34,7 @@ const StorePostHistory = ({ storeId }) => {
         throw new Error('소식을 불러오는데 실패했습니다.');
       }
 
-      const { contents, cursor } = response.data;
+      const {contents, cursor} = response.data;
 
       if (isInitial) {
         setPosts(contents || []);
@@ -66,7 +66,7 @@ const StorePostHistory = ({ storeId }) => {
     return (
       <div className="text-center py-5">
         <div className="mb-3">
-          <div className="spinner-border text-primary" style={{ width: '3rem', height: '3rem' }} role="status">
+          <div className="spinner-border text-primary" style={{width: '3rem', height: '3rem'}} role="status">
             <span className="visually-hidden">Loading...</span>
           </div>
         </div>
@@ -107,7 +107,7 @@ const StorePostHistory = ({ storeId }) => {
     return (
       <div className="text-center py-5">
         <div className="bg-light rounded-circle mx-auto mb-3"
-             style={{ width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+             style={{width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
           <i className="bi bi-newspaper fs-1 text-secondary"></i>
         </div>
         <h5 className="text-dark mb-2">등록된 소식이 없습니다</h5>
@@ -140,7 +140,7 @@ const StorePostHistory = ({ storeId }) => {
 
       <div className="posts-container">
         {posts.map((post, index) => (
-          <StorePostItem key={post.postId || index} post={post} />
+          <StorePostItem key={post.postId || index} post={post}/>
         ))}
       </div>
 

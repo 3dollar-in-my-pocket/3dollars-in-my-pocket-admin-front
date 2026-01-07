@@ -5,7 +5,7 @@ export interface MedalAcquisition {
 
 // Medal
 export interface Medal {
-  medalId: string;
+  medalId: number;
   name: string;
   iconUrl: string;
   disableIconUrl: string;

@@ -35,15 +35,10 @@ const Policy = () => {
   }, [selectedCategory]);
 
   const loadEnums = async () => {
-    try {
-      const enumResponse = await enumApi.getEnum();
-      if (enumResponse.data) {
-        setCategories([{key: "", description: "전체 카테고리"}, ...enumResponse.data["PolicyCategoryType"] || []]);
-        setPolicies(enumResponse.data["PolicyType"] || []);
-      }
-    } catch (error) {
-      console.error("Enum 조회 실패:", error);
-      toast.error("카테고리 목록을 불러오는데 실패했습니다.");
+    const enumResponse = await enumApi.getEnum();
+    if (enumResponse.data) {
+      setCategories([{key: "", description: "전체 카테고리"}, ...enumResponse.data["PolicyCategoryType"] || []]);
+      setPolicies(enumResponse.data["PolicyType"] || []);
     }
   };
 
@@ -73,9 +68,6 @@ const Policy = () => {
         setPolicyList([]);
         setHasMore(false);
       }
-    } catch (error) {
-      console.error("정책 목록 조회 실패:", error);
-      toast.error("정책 목록을 불러오는데 실패했습니다.");
     } finally {
       setIsLoading(false);
     }
@@ -120,26 +112,20 @@ const Policy = () => {
       return;
     }
 
-    try {
-      const response = await policyApi.deletePolicy({
-        policyId: policyId
-      });
+    const response = await policyApi.deletePolicy({
+      policyId: policyId
+    });
 
-      if (response.data) {
-        toast.success("정책이 삭제되었습니다.");
-        fetchPolicies(); // 목록 새로고침
-        setSelectedPolicy(null); // 모달 닫기
-      } else {
-        toast.error("정책 삭제에 실패했습니다.");
-      }
-    } catch (error) {
-      console.error("정책 삭제 실패:", error);
-      toast.error("정책 삭제 중 오류가 발생했습니다.");
+    if (response.data) {
+      toast.success("정책이 삭제되었습니다.");
+      fetchPolicies(); // 목록 새로고침
+      setSelectedPolicy(null); // 모달 닫기
     }
   };
 
   return (<div className="container-fluid py-4">
-    <div className="d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center mb-4 border-bottom pb-2 gap-2">
+    <div
+      className="d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center mb-4 border-bottom pb-2 gap-2">
       <h2 className="fw-bold mb-2 mb-md-0">🛡️ 정책 관리</h2>
       <button
         className="btn btn-success"

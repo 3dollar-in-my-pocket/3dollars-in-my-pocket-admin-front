@@ -1,7 +1,7 @@
-import { useEffect, useState, useMemo } from 'react';
-import { Alert, Button, Col, Container, Row, Spinner, Card, Table, Badge, ButtonGroup } from 'react-bootstrap';
+import {useEffect, useState, useMemo} from 'react';
+import {Alert, Button, Col, Container, Row, Spinner, Card, Table, Badge, ButtonGroup} from 'react-bootstrap';
 import userApi from "../../api/userApi";
-import { RandomNameItem } from "../../types/user";
+import {RandomNameItem} from "../../types/user";
 
 type FilterType = 'all' | 'issued' | 'not_issued';
 
@@ -115,7 +115,7 @@ const RandomNameTool = () => {
                 >
                   {isLoading ? (
                     <>
-                      <Spinner animation="border" size="sm" className="me-2" />
+                      <Spinner animation="border" size="sm" className="me-2"/>
                       조회 중...
                     </>
                   ) : (
@@ -198,7 +198,7 @@ const RandomNameTool = () => {
 
             {isLoading && randomNames.length === 0 ? (
               <div className="text-center py-5">
-                <Spinner animation="border" variant="primary" />
+                <Spinner animation="border" variant="primary"/>
                 <p className="mt-3 text-muted">데이터를 불러오는 중...</p>
               </div>
             ) : filteredRandomNames.length === 0 ? (
@@ -208,37 +208,37 @@ const RandomNameTool = () => {
                 </p>
               </div>
             ) : (
-              <div className="table-responsive" style={{ maxHeight: '600px', overflowY: 'auto' }}>
+              <div className="table-responsive" style={{maxHeight: '600px', overflowY: 'auto'}}>
                 <Table striped bordered hover>
                   <thead className="table-light sticky-top">
-                    <tr>
-                      <th style={{ width: '10%' }} className="text-center">번호</th>
-                      <th style={{ width: '40%' }}>접두사</th>
-                      <th style={{ width: '20%' }} className="text-center">발급 횟수</th>
-                      <th style={{ width: '30%' }}>마지막 발급 닉네임</th>
-                    </tr>
+                  <tr>
+                    <th style={{width: '10%'}} className="text-center">번호</th>
+                    <th style={{width: '40%'}}>접두사</th>
+                    <th style={{width: '20%'}} className="text-center">발급 횟수</th>
+                    <th style={{width: '30%'}}>마지막 발급 닉네임</th>
+                  </tr>
                   </thead>
                   <tbody>
-                    {filteredRandomNames.map((item, index) => (
-                      <tr key={index}>
-                        <td className="text-center">{index + 1}</td>
-                        <td className="fw-bold">{item.prefix}</td>
-                        <td className="text-center">
-                          {item.sequence === 0 ? (
-                            <span className="text-muted fst-italic">발급 이력 없음</span>
-                          ) : (
-                            <Badge bg="info">{item.sequence}</Badge>
-                          )}
-                        </td>
-                        <td>
-                          {item.sequence === 0 ? (
-                            <span className="text-muted fst-italic">발급 이력 없음</span>
-                          ) : (
-                            <code className="text-primary">{formatNickname(item.prefix, item.sequence)}</code>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
+                  {filteredRandomNames.map((item, index) => (
+                    <tr key={index}>
+                      <td className="text-center">{index + 1}</td>
+                      <td className="fw-bold">{item.prefix}</td>
+                      <td className="text-center">
+                        {item.sequence === 0 ? (
+                          <span className="text-muted fst-italic">발급 이력 없음</span>
+                        ) : (
+                          <Badge bg="info">{item.sequence}</Badge>
+                        )}
+                      </td>
+                      <td>
+                        {item.sequence === 0 ? (
+                          <span className="text-muted fst-italic">발급 이력 없음</span>
+                        ) : (
+                          <code className="text-primary">{formatNickname(item.prefix, item.sequence)}</code>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
                   </tbody>
                 </Table>
               </div>

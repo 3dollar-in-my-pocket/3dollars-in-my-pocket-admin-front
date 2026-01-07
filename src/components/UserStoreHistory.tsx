@@ -31,11 +31,10 @@ const UserStoreHistory = ({userId, isActive, onStoreClick}) => {
     try {
       const response = await storeApi.getUserStores(userId, reset ? null : cursor, 20);
       if (!response?.ok) {
-        toast.error('제보한 가게 이력을 불러오는 중 오류가 발생했습니다.');
         return;
       }
 
-      const {contents = [], cursor: newCursor = {}} = response.data || {};
+      const {contents = [], cursor: newCursor} = response.data || { contents: [], cursor: { hasMore: false, nextCursor: null } };
 
       if (reset) {
         setStores(contents);
@@ -46,8 +45,6 @@ const UserStoreHistory = ({userId, isActive, onStoreClick}) => {
       setHasMore(newCursor.hasMore || false);
       setCursor(newCursor.nextCursor || null);
       setTotalCount(newCursor.totalCount || 0);
-    } catch (error) {
-      toast.error('제보한 가게 이력을 불러오는 중 오류가 발생했습니다.');
     } finally {
       setIsLoading(false);
     }

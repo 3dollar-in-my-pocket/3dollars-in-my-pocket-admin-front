@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react";
+import React, {useEffect, useState} from "react";
 import PropTypes from "prop-types";
 import {Button, Form, Modal} from "react-bootstrap";
 import {toast} from "react-toastify";
@@ -63,28 +63,22 @@ const AdvertisementRegisterModal = ({show, onHide, positions, fetchAdvertisement
         : {}),
     };
 
-    try {
-      const res = await advertisementApi.createAd({
-        application: "USER_API",
-        adData: {
-          ...formData,
-          startDateTime: `${formData.startDateTime}:00`,
-          endDateTime: `${formData.endDateTime}:00`,
-          content,
-        },
-        nonce,
-      });
+    const res = await advertisementApi.createAd({
+      application: "USER_API",
+      adData: {
+        ...formData,
+        startDateTime: `${formData.startDateTime}:00`,
+        endDateTime: `${formData.endDateTime}:00`,
+        content,
+      },
+      nonce,
+    });
 
-      if (res.ok) {
-        toast.success("광고 등록이 완료되었습니다.");
-        reset();
-        fetchAdvertisements()
-        onHide();
-      } else {
-        toast.error("광고 등록에 실패했습니다.");
-      }
-    } catch {
-      toast.error("오류가 발생했습니다.");
+    if (res.ok) {
+      toast.success("광고 등록이 완료되었습니다.");
+      reset();
+      fetchAdvertisements()
+      onHide();
     }
   };
 

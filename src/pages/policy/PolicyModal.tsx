@@ -55,12 +55,7 @@ const PolicyModal = ({show, onHide, policy, categories, policies, onRefresh, onD
         setOriginalData(formData);
         onRefresh(); // 목록 새로고침
         onHide(); // 모달 닫기
-      } else {
-        toast.error("정책 수정에 실패했습니다.");
       }
-    } catch (error) {
-      console.error("정책 수정 실패:", error);
-      toast.error("정책 수정 중 오류가 발생했습니다.");
     } finally {
       setIsLoading(false);
     }
@@ -242,7 +237,8 @@ const PolicyModal = ({show, onHide, policy, categories, policies, onRefresh, onD
                   border: 'none'
                 }}
               >
-                <i className={`bi ${isLoading ? 'bi-arrow-repeat' : 'bi-check-lg'} fs-5 ${isLoading ? 'spinner-border spinner-border-sm' : ''}`}></i>
+                <i
+                  className={`bi ${isLoading ? 'bi-arrow-repeat' : 'bi-check-lg'} fs-5 ${isLoading ? 'spinner-border spinner-border-sm' : ''}`}></i>
                 {isLoading ? "저장중..." : "저장"}
               </Button>
             </>
@@ -296,4 +292,4 @@ const PolicyModal = ({show, onHide, policy, categories, policies, onRefresh, onD
   );
 };
 
-export default PolicyModal; 
+export default PolicyModal;

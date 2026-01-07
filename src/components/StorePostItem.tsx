@@ -1,6 +1,6 @@
 import React from 'react';
 
-const StorePostItem = ({ post }) => {
+const StorePostItem = ({post}) => {
   const formatDateTime = (dateString) => {
     if (!dateString) return '없음';
     return new Date(dateString).toLocaleString('ko-KR', {
@@ -53,7 +53,7 @@ const StorePostItem = ({ post }) => {
                   src={section.url}
                   alt={`소식 이미지 ${index + 1}`}
                   className="img-fluid w-100 h-100"
-                  style={{ objectFit: 'cover' }}
+                  style={{objectFit: 'cover'}}
                   onError={(e: any) => {
                     e.target.style.display = 'none';
                     e.target.nextSibling.style.display = 'flex';
@@ -61,7 +61,7 @@ const StorePostItem = ({ post }) => {
                 />
                 <div
                   className="d-none position-absolute top-0 start-0 w-100 h-100 bg-light align-items-center justify-content-center"
-                  style={{ borderRadius: '12px' }}
+                  style={{borderRadius: '12px'}}
                 >
                   <div className="text-center">
                     <i className="bi bi-image text-muted fs-1 mb-2"></i>
@@ -87,7 +87,7 @@ const StorePostItem = ({ post }) => {
             className={`d-flex align-items-center gap-1 px-2 py-1 rounded-pill border ${
               sticker.reactedByMe ? 'bg-primary bg-opacity-10 border-primary' : 'bg-light border-secondary'
             }`}
-            style={{ fontSize: '0.875rem' }}
+            style={{fontSize: '0.875rem'}}
           >
             <span>{sticker.emoji || getStickerEmoji(sticker.stickerId)}</span>
             <span className={`small ${sticker.reactedByMe ? 'text-primary fw-semibold' : 'text-muted'}`}>
@@ -100,7 +100,7 @@ const StorePostItem = ({ post }) => {
   };
 
   return (
-    <div className="card border-0 shadow-sm mb-3" style={{ borderRadius: '16px' }}>
+    <div className="card border-0 shadow-sm mb-3" style={{borderRadius: '16px'}}>
       <div className="card-body p-4">
         <div className="d-flex align-items-start gap-3 mb-3">
           <div className="bg-primary bg-opacity-10 rounded-circle p-2">
@@ -110,7 +110,9 @@ const StorePostItem = ({ post }) => {
             <div className="d-flex align-items-center gap-2 mb-2">
               <h6 className="mb-0 fw-bold text-dark">가게 소식</h6>
               {post.isOwner && (
-                <span className="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-2 py-1" style={{ fontSize: '0.7rem' }}>
+                <span
+                  className="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-2 py-1"
+                  style={{fontSize: '0.7rem'}}>
                   <i className="bi bi-person-badge me-1"></i>
                   사장님
                 </span>
@@ -131,7 +133,7 @@ const StorePostItem = ({ post }) => {
 
         {post.body && (
           <div className="mb-3">
-            <p className="text-dark mb-0" style={{ lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>
+            <p className="text-dark mb-0" style={{lineHeight: '1.6', whiteSpace: 'pre-wrap'}}>
               {post.body}
             </p>
           </div>

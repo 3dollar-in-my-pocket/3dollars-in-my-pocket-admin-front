@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
-import { Form, Nav, Tab, Button, Badge, InputGroup } from 'react-bootstrap';
-import { OS_PLATFORM, getOsPlatformDisplayName } from '../../types/push';
+import {useEffect, useState} from 'react';
+import {Form, Nav, Tab, Button, Badge, InputGroup} from 'react-bootstrap';
+import {OS_PLATFORM, getOsPlatformDisplayName} from '../../types/push';
 import UserSearch from './UserSearch';
-import applicationApi, { AppScheme } from '../../api/applicationApi';
+import applicationApi, {AppScheme} from '../../api/applicationApi';
 
 interface PushFormFieldsProps {
   formData: {
@@ -37,21 +37,21 @@ interface PushFormFieldsProps {
 }
 
 const PushFormFields = ({
-  formData,
-  searchState,
-  selectedUsers,
-  uiState,
-  targetOsPlatforms,
-  updateFormData,
-  updateNicknameSearch,
-  searchUserByNickname,
-  handleAddUser,
-  handleRemoveUser,
-  isUserSelected,
-  uploadImage,
-  removeImage,
-  toggleOsPlatform
-}: PushFormFieldsProps) => {
+                          formData,
+                          searchState,
+                          selectedUsers,
+                          uiState,
+                          targetOsPlatforms,
+                          updateFormData,
+                          updateNicknameSearch,
+                          searchUserByNickname,
+                          handleAddUser,
+                          handleRemoveUser,
+                          isUserSelected,
+                          uploadImage,
+                          removeImage,
+                          toggleOsPlatform
+                        }: PushFormFieldsProps) => {
   const [schemes, setSchemes] = useState<AppScheme[]>([]);
   const [selectedScheme, setSelectedScheme] = useState<string>('');
   const [schemeParams, setSchemeParams] = useState<Record<string, string>>({});
@@ -115,7 +115,7 @@ const PushFormFields = ({
 
   // 파라미터 입력 핸들러
   const handleParamChange = (param: string, value: string) => {
-    const newParams = { ...schemeParams, [param]: value };
+    const newParams = {...schemeParams, [param]: value};
     setSchemeParams(newParams);
 
     // 모든 파라미터가 입력되었는지 확인
@@ -161,7 +161,7 @@ const PushFormFields = ({
           {formData.pushType === "SIMPLE_MARKETING" && (
             <>
               활동 알림 + 마케팅 수신 동의가 활성화된 디바이스로만 푸시가 발송됩니다
-              <br />
+              <br/>
               <span className="text-warning">※ 21:00 ~ 08:00인 경우 야간 광고성 푸시 수신 동의한 디바이스로만 발송</span>
             </>
           )}
@@ -293,7 +293,7 @@ const PushFormFields = ({
                 src={formData.imageUrl}
                 alt="푸시 이미지 미리보기"
                 className="img-fluid rounded"
-                style={{ maxHeight: '200px', maxWidth: '100%' }}
+                style={{maxHeight: '200px', maxWidth: '100%'}}
               />
             </div>
           </div>
@@ -330,11 +330,11 @@ const PushFormFields = ({
         >
           <option value="">경로를 선택하세요</option>
           <option value="custom">✏️ 직접 입력</option>
-            {schemes.map((scheme, index) => (
-              <option key={index} value={scheme.path}>
-                {scheme.description}
-              </option>
-            ))}
+          {schemes.map((scheme, index) => (
+            <option key={index} value={scheme.path}>
+              {scheme.description}
+            </option>
+          ))}
         </Form.Select>
 
         {/* 선택된 스킴 정보 표시 */}
@@ -360,7 +360,7 @@ const PushFormFields = ({
                 <Form.Label className="small mb-1">
                   <Badge bg="secondary" className="me-1">{param}</Badge>
                   {param === 'storeType' && (
-                    <span className="text-muted ms-1" style={{ fontSize: '0.75rem' }}>가게 유형</span>
+                    <span className="text-muted ms-1" style={{fontSize: '0.75rem'}}>가게 유형</span>
                   )}
                 </Form.Label>
 

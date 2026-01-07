@@ -1,9 +1,9 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
-import { toast } from 'react-toastify';
+import {useEffect, useState, useRef, useCallback} from 'react';
+import {toast} from 'react-toastify';
 import enumApi from '../../api/enumApi';
 import userRankingApi from '../../api/userRankingApi';
 import medalApi from '../../api/medalApi';
-import { UserRankingItem, createUserRankingRequest } from '../../types/userRanking';
+import {UserRankingItem, createUserRankingRequest} from '../../types/userRanking';
 import UserRankingCard from '../../components/userRanking/UserRankingCard';
 import UserDetailModal from '../user/UserDetailModal';
 import StoreDetailModal from '../store/StoreDetailModal';
@@ -44,17 +44,11 @@ const UserRankingManagement = () => {
   }, [selectedRankingType]);
 
   const loadEnums = async () => {
-    try {
-      const enumResponse = await enumApi.getEnum();
-        const types = enumResponse.data['UserRankingType'] || [];
-        console.log(types)
-        setRankingTypes(types);
-        if (types.length > 0) {
-          setSelectedRankingType(types[0].key);
-      }
-    } catch (error) {
-      console.error('Enum 조회 실패:', error);
-      toast.error('랭킹 타입 목록을 불러오는데 실패했습니다.');
+    const enumResponse = await enumApi.getEnum();
+    const types = enumResponse.data['UserRankingType'] || [];
+    setRankingTypes(types);
+    if (types.length > 0) {
+      setSelectedRankingType(types[0].key);
     }
   };
 
@@ -85,7 +79,7 @@ const UserRankingManagement = () => {
       const response = await userRankingApi.getUserRankings(request);
 
       if (response.ok && response.data) {
-        const { contents = [], cursor: newCursor = {} } = response.data as any;
+        const {contents = [], cursor: newCursor} = response.data as any;
         // 탈퇴 유저(userId가 null인 경우) 필터링
         const filteredItems = contents.filter((item: UserRankingItem) => item.user?.userId != null);
 
@@ -114,9 +108,6 @@ const UserRankingManagement = () => {
         }
         setHasMore(false);
       }
-    } catch (error) {
-      console.error('유저 랭킹 조회 실패:', error);
-      toast.error('유저 랭킹을 불러오는데 실패했습니다.');
     } finally {
       setIsLoading(false);
       setIsLoadingMore(false);
@@ -126,7 +117,7 @@ const UserRankingManagement = () => {
   const handleScroll = useCallback(() => {
     if (!scrollContainerRef.current || isLoadingMore || !hasMore) return;
 
-    const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
+    const {scrollTop, scrollHeight, clientHeight} = scrollContainerRef.current;
     const scrollPercentage = (scrollTop + clientHeight) / scrollHeight;
 
     if (scrollPercentage > 0.8 && hasMore && cursor) {
@@ -253,12 +244,7 @@ const UserRankingManagement = () => {
         toast.success(`${selectedUserIds.size}명에게 메달이 지급되었습니다.`);
         setShowMedalModal(false);
         setSelectedUserIds(new Set());
-      } else {
-        toast.error('메달 지급에 실패했습니다.');
       }
-    } catch (error) {
-      console.error('메달 지급 실패:', error);
-      toast.error('메달 지급 중 오류가 발생했습니다.');
     } finally {
       setIsAssigningMedal(false);
     }
@@ -299,7 +285,7 @@ const UserRankingManagement = () => {
               </label>
               <select
                 className="form-select form-select-lg border-0 shadow-sm"
-                style={{ backgroundColor: '#f8f9fa', borderRadius: '12px' }}
+                style={{backgroundColor: '#f8f9fa', borderRadius: '12px'}}
                 value={selectedRankingType}
                 onChange={(e) => setSelectedRankingType(e.target.value)}
               >
@@ -336,20 +322,20 @@ const UserRankingManagement = () => {
                   <div className="d-flex align-items-center gap-2 flex-wrap">
                     <div className="d-flex align-items-center gap-2">
                       <span className="text-muted small fw-semibold">순위 범위:</span>
-                      <div className="input-group input-group-sm" style={{ width: 'auto' }}>
+                      <div className="input-group input-group-sm" style={{width: 'auto'}}>
                         <input
                           type="number"
                           className="form-control"
                           placeholder="1"
                           value={startRankInput}
                           onChange={(e) => setStartRankInput(e.target.valueAsNumber || 0)}
-                          style={{ width: '65px' }}
+                          style={{width: '65px'}}
                           min="1"
                         />
                         <span className="input-group-text bg-white">등</span>
                       </div>
                       <span className="text-muted fw-bold">~</span>
-                      <div className="input-group input-group-sm" style={{ width: 'auto' }}>
+                      <div className="input-group input-group-sm" style={{width: 'auto'}}>
                         <input
                           type="number"
                           className="form-control"
@@ -361,7 +347,7 @@ const UserRankingManagement = () => {
                               handleSelectByRank();
                             }
                           }}
-                          style={{ width: '65px' }}
+                          style={{width: '65px'}}
                           min="1"
                         />
                         <span className="input-group-text bg-white">등</span>
@@ -406,7 +392,7 @@ const UserRankingManagement = () => {
         >
           {isLoading ? (
             <div className="text-center py-5">
-              <Loading />
+              <Loading/>
               <p className="text-muted mt-3">랭킹을 불러오는 중입니다</p>
             </div>
           ) : rankingList.length === 0 ? (
@@ -460,8 +446,10 @@ const UserRankingManagement = () => {
         show={!!selectedStore}
         onHide={handleCloseStoreModal}
         store={selectedStore}
-        onAuthorClick={() => {}}
-        onStoreDeleted={() => {}}
+        onAuthorClick={() => {
+        }}
+        onStoreDeleted={() => {
+        }}
       />
 
       {/* 메달 지급 모달 */}

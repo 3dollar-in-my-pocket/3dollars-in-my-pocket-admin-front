@@ -17,15 +17,15 @@ interface StoreCardPreviewProps {
  * 광고 상세 미리보기와는 다른 비율의 가게 카드 형태
  */
 const StoreCardPreview: React.FC<StoreCardPreviewProps> = ({
-  imageUrl,
-  imageWidth,
-  imageHeight,
-  storeName,
-  category,
-  rating = 0,
-  reviewCount = 0,
-  backgroundColor = '#FFFFFF'
-}) => {
+                                                             imageUrl,
+                                                             imageWidth,
+                                                             imageHeight,
+                                                             storeName,
+                                                             category,
+                                                             rating = 0,
+                                                             reviewCount = 0,
+                                                             backgroundColor = '#FFFFFF'
+                                                           }) => {
   // 가게 카드 이미지 비율 계산 (1:1 정사각형 기본)
   let displayWidth = 160;
   let displayHeight = 160;

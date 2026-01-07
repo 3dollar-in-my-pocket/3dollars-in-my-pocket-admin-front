@@ -1,5 +1,11 @@
 import axiosInstance from './apiBase';
-import { createUserDetailResponse, createUserSearchResponse, createUserSettings, UserSearchRequest, createRandomNameResponse } from '../types/user';
+import {
+  createUserDetailResponse,
+  createUserSearchResponse,
+  createUserSettings,
+  UserSearchRequest,
+  createRandomNameResponse
+} from '../types/user';
 
 export default {
   /**

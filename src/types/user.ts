@@ -77,12 +77,12 @@ export interface UserDetailResponse {
 
 // User search request interface
 export const createUserSearchRequest = ({
-  type = SEARCH_TYPES.NAME,
-  query = '',
-  userIds = [],
-  cursor = null,
-  size = 20
-}: Partial<UserSearchRequest> & { type?: SearchType }): UserSearchRequest => ({
+                                          type = SEARCH_TYPES.NAME,
+                                          query = '',
+                                          userIds = [],
+                                          cursor = null,
+                                          size = 20
+                                        }: Partial<UserSearchRequest> & { type?: SearchType }): UserSearchRequest => ({
   type,
   query: type === SEARCH_TYPES.NAME ? query : undefined,
   userIds: type === SEARCH_TYPES.USER_ID ? userIds : undefined,
@@ -92,11 +92,11 @@ export const createUserSearchRequest = ({
 
 // Search response interface
 export const createUserSearchResponse = ({
-  users = [],
-  hasMore = false,
-  nextCursor = null,
-  totalCount = 0
-}: Partial<UserSearchResponse>): UserSearchResponse => ({
+                                           users = [],
+                                           hasMore = false,
+                                           nextCursor = null,
+                                           totalCount = 0
+                                         }: Partial<UserSearchResponse>): UserSearchResponse => ({
   users,
   hasMore,
   nextCursor,
@@ -105,20 +105,20 @@ export const createUserSearchResponse = ({
 
 // User settings interface
 export const createUserSettings = ({
-  enableActivitiesPush = false,
-  marketingConsent = MARKETING_CONSENT.UNVERIFIED
-}: Partial<UserSettings>): UserSettings => ({
+                                     enableActivitiesPush = false,
+                                     marketingConsent = MARKETING_CONSENT.UNVERIFIED
+                                   }: Partial<UserSettings>): UserSettings => ({
   enableActivitiesPush,
   marketingConsent
 });
 
 // User detail response interface
 export const createUserDetailResponse = ({
-  user = null,
-  representativeMedal = null,
-  medals = [],
-  setting = null
-}: Partial<UserDetailResponse>): UserDetailResponse => ({
+                                           user = null,
+                                           representativeMedal = null,
+                                           medals = [],
+                                           setting = null
+                                         }: Partial<UserDetailResponse>): UserDetailResponse => ({
   user,
   representativeMedal,
   medals,
@@ -226,7 +226,7 @@ export interface RandomNameResponse {
 }
 
 export const createRandomNameResponse = ({
-  contents = []
-}: Partial<RandomNameResponse>): RandomNameResponse => ({
+                                           contents = []
+                                         }: Partial<RandomNameResponse>): RandomNameResponse => ({
   contents
 });

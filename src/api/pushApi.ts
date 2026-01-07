@@ -1,7 +1,7 @@
 import axiosInstance from './apiBase';
 import userApi from './userApi';
-import { SEARCH_TYPES } from '../types/user';
-import { PushRequest } from '../types/push';
+import {SEARCH_TYPES} from '../types/user';
+import {PushRequest} from '../types/push';
 
 const pushApi = {
   /**

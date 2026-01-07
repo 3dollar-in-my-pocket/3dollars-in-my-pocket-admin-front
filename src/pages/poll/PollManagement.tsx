@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { toast } from 'react-toastify';
+import {useState, useEffect, useCallback, useRef} from 'react';
+import {toast} from 'react-toastify';
 import pollApi from '../../api/pollApi';
 import SearchHeader from '../../components/common/SearchHeader';
 import PollCard from '../../components/poll/PollCard';
@@ -19,18 +19,13 @@ const PollManagement = () => {
   // 카테고리 목록 조회
   useEffect(() => {
     const fetchCategories = async () => {
-      try {
-        const response = await pollApi.getPollCategories();
-        if (response.ok) {
-          setCategories(response.data.contents);
-          // 첫 번째 카테고리를 기본 선택
-          if (response.data.contents.length > 0) {
-            setSelectedCategory(response.data.contents[0].categoryId);
-          }
+      const response = await pollApi.getPollCategories();
+      if (response.ok) {
+        setCategories(response.data.contents);
+        // 첫 번째 카테고리를 기본 선택
+        if (response.data.contents.length > 0) {
+          setSelectedCategory(response.data.contents[0].categoryId);
         }
-      } catch (error) {
-        console.error('카테고리 조회 실패:', error);
-        toast.error('카테고리를 불러오는데 실패했습니다.');
       }
     };
 
@@ -79,13 +74,6 @@ const PollManagement = () => {
         }
       }
     } catch (error) {
-      console.error('투표 목록 조회 실패:', error);
-      const errorMessage = isLoadMore
-        ? '추가 투표를 불러오는데 실패했습니다.'
-        : '투표 목록을 불러오는데 실패했습니다.';
-      toast.error(errorMessage);
-
-      // 더보기 실패 시 hasMore 상태 유지하여 재시도 가능하도록 함
       if (!isLoadMore) {
         setPolls([]);
         setHasMore(false);
@@ -114,7 +102,7 @@ const PollManagement = () => {
     // 300ms 디바운싱으로 중복 호출 방지
     if (now - lastScrollTime.current < 300) return;
 
-    const { scrollTop, scrollHeight, clientHeight } = container;
+    const {scrollTop, scrollHeight, clientHeight} = container;
     const threshold = 100; // 하단에서 100px 전에 로딩 시작
 
     // 스크롤이 하단 근처에 도달했을 때만 더보기 실행
@@ -165,24 +153,10 @@ const PollManagement = () => {
 
     if (!confirmed) return;
 
-    try {
-      const response = await pollApi.deletePoll(poll.pollId);
-
-      if (response.status === 200 || response.status === 204) {
-        toast.success('투표가 성공적으로 삭제되었습니다.');
-        // 현재 카테고리의 투표 목록을 새로 조회
-        fetchPolls(selectedCategory);
-      } else {
-        throw new Error('삭제 실패');
-      }
-    } catch (error) {
-      console.error('투표 삭제 실패:', error);
-      const errorMessage = error.response?.status === 404
-        ? '투표를 찾을 수 없습니다. 이미 삭제되었을 수 있습니다.'
-        : error.response?.status === 403
-        ? '투표 삭제 권한이 없습니다.'
-        : '투표 삭제 중 오류가 발생했습니다.';
-      toast.error(errorMessage);
+    const response = await pollApi.deletePoll(poll.pollId);
+    if (response.ok) {
+      toast.success('투표가 성공적으로 삭제되었습니다.');
+      fetchPolls(selectedCategory);
     }
   };
 
@@ -205,7 +179,7 @@ const PollManagement = () => {
 
   return (
     <div className="container-fluid px-2 px-md-4 py-3 py-md-4">
-       <div className="d-flex justify-content-between align-items-center mb-3 mb-md-4 pb-2 border-bottom">
+      <div className="d-flex justify-content-between align-items-center mb-3 mb-md-4 pb-2 border-bottom">
         <h2 className="fw-bold">투표 관리</h2>
       </div>
 
@@ -257,7 +231,7 @@ const PollManagement = () => {
                         alignItems: 'center',
                         justifyContent: 'center'
                       }}>
-                        <i className="bi bi-bar-chart-fill" style={{ fontSize: '1.2rem' }}></i>
+                        <i className="bi bi-bar-chart-fill" style={{fontSize: '1.2rem'}}></i>
                       </div>
                       <h6 className="fw-bold mb-1 small">{category.title}</h6>
                       <p className="text-muted mb-0 d-none d-md-block" style={{
@@ -381,7 +355,8 @@ const PollManagement = () => {
         show={!!selectedUser}
         onHide={handleCloseModal}
         user={selectedUser}
-        onStoreClick={() => {}}
+        onStoreClick={() => {
+        }}
       />
     </div>
   );

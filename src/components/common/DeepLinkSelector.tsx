@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { Form, Badge } from 'react-bootstrap';
-import applicationApi, { AppScheme } from '../../api/applicationApi';
+import React, {useEffect, useState} from 'react';
+import {Form, Badge} from 'react-bootstrap';
+import applicationApi, {AppScheme} from '../../api/applicationApi';
 
 interface DeepLinkSelectorProps {
   value: string;
@@ -14,15 +14,15 @@ interface DeepLinkSelectorProps {
 }
 
 const DeepLinkSelector: React.FC<DeepLinkSelectorProps> = ({
-  value,
-  onChange,
-  applicationType = 'USER_API',
-  label = '이동 경로',
-  required = false,
-  placeholder = '/home, /event 등',
-  helpText,
-  className = ''
-}) => {
+                                                             value,
+                                                             onChange,
+                                                             applicationType = 'USER_API',
+                                                             label = '이동 경로',
+                                                             required = false,
+                                                             placeholder = '/home, /event 등',
+                                                             helpText,
+                                                             className = ''
+                                                           }) => {
   const [schemes, setSchemes] = useState<AppScheme[]>([]);
   const [selectedScheme, setSelectedScheme] = useState<string>('');
   const [schemeParams, setSchemeParams] = useState<Record<string, string>>({});
@@ -84,7 +84,7 @@ const DeepLinkSelector: React.FC<DeepLinkSelectorProps> = ({
 
   // 파라미터 입력 핸들러
   const handleParamChange = (param: string, paramValue: string) => {
-    const newParams = { ...schemeParams, [param]: paramValue };
+    const newParams = {...schemeParams, [param]: paramValue};
     setSchemeParams(newParams);
 
     // 모든 파라미터가 입력되었는지 확인
@@ -149,7 +149,7 @@ const DeepLinkSelector: React.FC<DeepLinkSelectorProps> = ({
               <Form.Label className="small mb-1">
                 <Badge bg="secondary" className="me-1">{param}</Badge>
                 {param === 'storeType' && (
-                  <span className="text-muted ms-1" style={{ fontSize: '0.75rem' }}>가게 유형</span>
+                  <span className="text-muted ms-1" style={{fontSize: '0.75rem'}}>가게 유형</span>
                 )}
               </Form.Label>
 

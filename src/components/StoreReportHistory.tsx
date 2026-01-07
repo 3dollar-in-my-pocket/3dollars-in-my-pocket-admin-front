@@ -27,11 +27,10 @@ const StoreReportHistory = ({storeId, isActive, onAuthorClick}) => {
     try {
       const response = await storeReportApi.getStoreReports(storeId, reset ? null : cursor, 20);
       if (!response?.ok) {
-        toast.error('신고 이력을 불러오는 중 오류가 발생했습니다.');
         return;
       }
 
-      const {contents = [], cursor: newCursor = {}} = response.data || {};
+      const {contents = [], cursor: newCursor} = response.data || { contents: [], cursor: { hasMore: false, nextCursor: null } };
 
       if (reset) {
         setReports(contents);
@@ -42,8 +41,6 @@ const StoreReportHistory = ({storeId, isActive, onAuthorClick}) => {
       setHasMore(newCursor.hasMore || false);
       setCursor(newCursor.nextCursor || null);
       setTotalCount(newCursor.totalCount || 0);
-    } catch (error) {
-      toast.error('신고 이력을 불러오는 중 오류가 발생했습니다.');
     } finally {
       setIsLoading(false);
     }
@@ -176,7 +173,7 @@ const StoreReportHistory = ({storeId, isActive, onAuthorClick}) => {
                           <div>
                             <div className="d-flex align-items-center gap-2 mb-2">
                               <div className="bg-danger bg-opacity-10 rounded-circle p-1">
-                                <i className="bi bi-person-fill text-danger" style={{ fontSize: '0.8rem' }}></i>
+                                <i className="bi bi-person-fill text-danger" style={{fontSize: '0.8rem'}}></i>
                               </div>
                               <div
                                 className={`d-flex align-items-center gap-1 ${report.reporter && onAuthorClick ? 'clickable-author' : ''}`}
@@ -207,11 +204,12 @@ const StoreReportHistory = ({storeId, isActive, onAuthorClick}) => {
                                 }}
                               >
                                 <span className="text-muted small">신고자:</span>
-                                <h6 className={`fw-bold mb-0 ${report.reporter && onAuthorClick ? 'text-primary' : 'text-dark'}`}>
+                                <h6
+                                  className={`fw-bold mb-0 ${report.reporter && onAuthorClick ? 'text-primary' : 'text-dark'}`}>
                                   {report.reporter?.name || '익명 신고자'}
                                 </h6>
                                 {report.reporter && onAuthorClick && (
-                                  <i className="bi bi-box-arrow-up-right text-primary" style={{ fontSize: '0.7rem' }}></i>
+                                  <i className="bi bi-box-arrow-up-right text-primary" style={{fontSize: '0.7rem'}}></i>
                                 )}
                               </div>
                             </div>

@@ -1,10 +1,17 @@
-import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
-import { toast } from "react-toastify";
-import { LocalStorageService } from "../service/LocalStorageService";
-import { AUTH_KEY } from "../constants/google";
+import axios, {AxiosError, AxiosResponse, InternalAxiosRequestConfig} from 'axios';
+import {toast} from "react-toastify";
+import {LocalStorageService} from "../service/LocalStorageService";
+import {AUTH_KEY} from "../constants/google";
 
-interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
+// 커스텀 Axios 설정 인터페이스
+export interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
   suppressToast?: boolean;
+}
+
+// API 에러 응답 데이터 타입
+interface ApiErrorData {
+  message?: string;
+  ok: boolean;
 }
 
 const axiosInstance = axios.create({
@@ -29,7 +36,7 @@ axiosInstance.interceptors.request.use(
 
 axiosInstance.interceptors.response.use(
   (response: AxiosResponse) => response,
-  (error: AxiosError) => {
+  (error: AxiosError<ApiErrorData>) => {
     const config = error.config as CustomAxiosRequestConfig;
 
     if (config?.suppressToast) {
@@ -41,30 +48,35 @@ axiosInstance.interceptors.response.use(
   }
 );
 
-const handleAxiosError = (error: AxiosError): void => {
-
+const handleAxiosError = (error: AxiosError<ApiErrorData>): void => {
+  // Axios 에러 처리
   if (axios.isAxiosError(error)) {
+    // 타임아웃 에러 체크
+    if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+      toast.error("요청 시간이 초과되었습니다.");
+      return;
+    }
+
+    // HTTP 에러 처리
     const status = error.response?.status;
-    const message = (error.response?.data as any)?.message;
+    const message = error.response?.data?.message;
 
     const statusMessages: Record<number, string> = {
       400: "잘못된 요청입니다.",
       401: "인증되지 않은 요청입니다.",
       403: "권한이 없습니다.",
       404: "요청한 리소스를 찾을 수 없습니다.",
+      409: "중복된 요청입니다.",
       500: `서버 오류가 발생하였습니다`,
     };
 
-    if (status === 401) {
-      toast.error(message || statusMessages[status || 500])
-    } else {
-      toast.error(message || statusMessages[status || 500])
-    }
-  } else if ((error as any) instanceof Error && (error as any).name === "TimeoutError") {
-    toast.error("요청 시간이 초과되었습니다.");
-  } else {
-    toast.error("알 수 없는 오류가 발생했습니다.");
+    // 서버 메시지가 있으면 우선 사용, 없으면 기본 메시지
+    toast.error(message || statusMessages[status || 500]);
+    return;
   }
+
+  // 기타 알 수 없는 에러
+  toast.error("알 수 없는 오류가 발생했습니다.");
 };
 
 export default axiosInstance;

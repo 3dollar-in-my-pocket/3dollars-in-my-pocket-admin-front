@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Card, Container, Nav } from "react-bootstrap";
+import React, {useState} from "react";
+import {Card, Container, Nav} from "react-bootstrap";
 import ServerStatistics from "./ServerStatistics";
 
 const ServiceStatInfo = () => {
@@ -14,7 +14,7 @@ const ServiceStatInfo = () => {
           <Nav.Link
             active={activeTab === "server"}
             onClick={() => setActiveTab("server")}
-            style={{ cursor: "pointer" }}
+            style={{cursor: "pointer"}}
           >
             서버 통계
           </Nav.Link>
@@ -23,7 +23,7 @@ const ServiceStatInfo = () => {
           <Nav.Link
             active={activeTab === "firebase"}
             onClick={() => setActiveTab("firebase")}
-            style={{ cursor: "pointer" }}
+            style={{cursor: "pointer"}}
           >
             클라이언트 통계 (GA)
           </Nav.Link>
@@ -73,7 +73,7 @@ const ServiceStatInfo = () => {
         </div>
       )}
 
-      {activeTab === "server" && <ServerStatistics />}
+      {activeTab === "server" && <ServerStatistics/>}
     </Container>
   );
 };

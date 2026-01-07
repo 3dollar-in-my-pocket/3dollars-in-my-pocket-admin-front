@@ -86,12 +86,7 @@ const PolicyRegisterModal = ({show, onHide, categories, policies, onRefresh}) =>
         toast.success("정책이 성공적으로 등록되었습니다.");
         onRefresh(); // 목록 새로고침
         onHide(); // 모달 닫기
-      } else {
-        toast.error("정책 등록에 실패했습니다.");
       }
-    } catch (error) {
-      console.error("정책 등록 실패:", error);
-      toast.error("정책 등록 중 오류가 발생했습니다.");
     } finally {
       setIsLoading(false);
     }
@@ -104,7 +99,8 @@ const PolicyRegisterModal = ({show, onHide, categories, policies, onRefresh}) =>
   };
 
   return (
-    <Modal show={show} onHide={handleClose} size="lg" centered fullscreen="md-down" backdrop={isLoading ? "static" : true}>
+    <Modal show={show} onHide={handleClose} size="lg" centered fullscreen="md-down"
+           backdrop={isLoading ? "static" : true}>
       <Modal.Header closeButton className="bg-success text-white">
         <Modal.Title>
           ➕ 신규 정책 등록
@@ -266,4 +262,4 @@ const PolicyRegisterModal = ({show, onHide, categories, policies, onRefresh}) =>
   );
 };
 
-export default PolicyRegisterModal; 
+export default PolicyRegisterModal;

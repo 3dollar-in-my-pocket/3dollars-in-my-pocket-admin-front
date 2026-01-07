@@ -27,11 +27,10 @@ const UserStoreImageHistory = ({userId, isActive, onStoreClick}) => {
     try {
       const response = await storeImageApi.getUserStoreImages(userId, reset ? null : cursor, 20);
       if (!response?.ok) {
-        toast.error('가게 이미지 이력을 불러오는 중 오류가 발생했습니다.');
         return;
       }
 
-      const {contents = [], cursor: newCursor = {}} = response.data || {};
+      const {contents = [], cursor: newCursor} = response.data || { contents: [], cursor: { hasMore: false, nextCursor: null } };
 
       if (reset) {
         setStoreImages(contents);
@@ -42,8 +41,6 @@ const UserStoreImageHistory = ({userId, isActive, onStoreClick}) => {
       setHasMore(newCursor.hasMore || false);
       setCursor(newCursor.nextCursor || null);
       setTotalCount(newCursor.totalCount || 0);
-    } catch (error) {
-      toast.error('가게 이미지 이력을 불러오는 중 오류가 발생했습니다.');
     } finally {
       setIsLoading(false);
     }
@@ -137,15 +134,12 @@ const UserStoreImageHistory = ({userId, isActive, onStoreClick}) => {
     try {
       const response = await storeImageApi.deleteStoreImage(selectedImage.imageId);
       if (response.status >= 400) {
-        toast.error('이미지 삭제에 실패했습니다.');
         setIsDeleting(false);
         return;
       }
       toast.success('이미지가 성공적으로 삭제되었습니다.');
       handleCloseModal();
       fetchStoreImages(true);
-    } catch (error) {
-      toast.error('이미지 삭제 중 오류가 발생했습니다.');
     } finally {
       setIsDeleting(false);
     }
@@ -283,7 +277,7 @@ const UserStoreImageHistory = ({userId, isActive, onStoreClick}) => {
                           }}
                         >
                           <h6 className="mb-0 fw-bold text-primary">{storeImage.store?.name || '가게명 없음'}</h6>
-                          <i className="bi bi-box-arrow-up-right text-primary" style={{ fontSize: '0.6rem' }}></i>
+                          <i className="bi bi-box-arrow-up-right text-primary" style={{fontSize: '0.6rem'}}></i>
                         </div>
                         <div className="d-flex flex-wrap align-items-center gap-1 mb-2">
                           {getSalesTypeBadge(storeImage.store?.salesType)}

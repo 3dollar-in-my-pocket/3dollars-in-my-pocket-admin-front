@@ -1,85 +1,80 @@
-import axiosInstance from "./apiBase";
+import { ApiResponse, ContentListResponse } from '../types/api';
+import { Faq, FaqCategory, CreateFaqRequest, UpdateFaqRequest } from '../types/faq';
+import { apiGet, apiPost, apiPut, apiDelete } from './apiHelpers';
 
 export default {
-  listFaqs: async ({application, category}: any) => {
-    try {
-      const response = await axiosInstance(
-        {
-          method: "GET",
-          url: `/v1/application/${application}/faqs`,
-          params: {
-            ...(category && {category})
-          },
-        }
-      );
-      return response.data;
-    } catch (error: any) {
-      return error.response;
-    }
+  /**
+   * FAQ 목록 조회
+   */
+  listFaqs: async ({application, category}: {application: string; category?: string}): Promise<ApiResponse<ContentListResponse<Faq>>> => {
+    return apiGet<ContentListResponse<Faq>>(
+      `/v1/application/${application}/faqs`,
+      category ? { category } : undefined
+    );
   },
-  listFaqCategories: async ({application}: any) => {
-    try {
-      const response = await axiosInstance(
-        {
-          method: "GET",
-          url: `/v1/application/${application}/faq/categories`,
-        }
-      );
-      return response.data;
-    } catch (error: any) {
-      return error.response;
-    }
+
+  /**
+   * FAQ 카테고리 목록 조회
+   */
+  listFaqCategories: async ({application}: {application: string}): Promise<ApiResponse<ContentListResponse<FaqCategory>>> => {
+    return apiGet<ContentListResponse<FaqCategory>>(`/v1/application/${application}/faq/categories`);
   },
-  createFaq: async ({application, question, answer, category, nonce}: any) => {
-    try {
-      const response = await axiosInstance(
-        {
-          method: "POST",
-          url: `/v1/application/${application}/faq`,
-          data: {
-            question,
-            answer,
-            category
-          },
-          headers: nonce ? {
-            'X-Nonce-Token': nonce,
-          } : {},
-        }
-      )
-      return response.data
-    } catch (error: any) {
-      return error.response;
-    }
+
+  /**
+   * FAQ 생성 (nonce 보호)
+   */
+  createFaq: async ({
+    application,
+    question,
+    answer,
+    category,
+    nonce
+  }: {
+    application: string;
+    question: string;
+    answer: string;
+    category: string;
+    nonce?: string;
+  }): Promise<ApiResponse<Faq>> => {
+    return apiPost<Faq>(
+      `/v1/application/${application}/faq`,
+      { question, answer, category },
+      { nonce }
+    );
   },
-  updateFaq: async ({application, faqId, question, answer, category}: any) => {
-    try {
-      const response = await axiosInstance(
-        {
-          method: "PUT",
-          url: `/v1/application/${application}/faq/${faqId}`,
-          data: {
-            question,
-            answer,
-            category
-          }
-        }
-      )
-      return response.data
-    } catch (error: any) {
-      return error.response;
-    }
+
+  /**
+   * FAQ 수정
+   */
+  updateFaq: async ({
+    application,
+    faqId,
+    question,
+    answer,
+    category
+  }: {
+    application: string;
+    faqId: string;
+    question: string;
+    answer: string;
+    category: string;
+  }): Promise<ApiResponse<Faq>> => {
+    return apiPut<Faq>(
+      `/v1/application/${application}/faq/${faqId}`,
+      { question, answer, category }
+    );
   },
-  deleteFaq: async ({application, faqId}: any) => {
-    try {
-      const response = await axiosInstance(
-        {
-          method: "DELETE",
-          url: `/v1/application/${application}/faq/${faqId}`,
-        }
-      )
-      return response.data
-    } catch (error: any) {
-      return error.response;
-    }
+
+  /**
+   * FAQ 삭제
+   */
+  deleteFaq: async ({
+    application,
+    faqId
+  }: {
+    application: string;
+    faqId: string;
+  }): Promise<ApiResponse<void>> => {
+    return apiDelete<void>(`/v1/application/${application}/faq/${faqId}`);
   },
 }

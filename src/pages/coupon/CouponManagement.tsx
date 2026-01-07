@@ -1,31 +1,70 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
-import { toast } from 'react-toastify';
+import {useEffect, useRef, useState, useCallback} from 'react';
 import couponApi from '../../api/couponApi';
-import { Coupon, getCouponStatusDisplayName, getCouponStatusBadgeClass, formatCouponDate, COUPON_STATUS, CouponStatus } from '../../types/coupon';
-import { getStoreTypeDisplayName, getStoreTypeBadgeClass, getStoreTypeIcon } from '../../types/store';
+import {
+  StoreCoupon,
+  getCouponStatusDisplayName,
+  getCouponStatusBadgeClass,
+  formatCouponDate,
+  COUPON_STATUS
+} from '../../types/coupon';
+import {getStoreTypeDisplayName, getStoreTypeBadgeClass, getStoreTypeIcon} from '../../types/store';
 import StoreDetailModal from '../store/StoreDetailModal';
-
-interface CouponWithStore extends Coupon {
-  store: any;
-}
+import useInfiniteScroll from '../../hooks/useInfiniteScroll';
+import EmptyState from '../../components/common/EmptyState';
 
 const CouponManagement = () => {
-  const [coupons, setCoupons] = useState<CouponWithStore[]>([]);
+  const [coupons, setCoupons] = useState<StoreCoupon[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
-  const [cursor, setCursor] = useState<string | null>(null);
   const [selectedStore, setSelectedStore] = useState<any>(null);
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const observerRef = useRef<IntersectionObserver | null>(null);
-  const loadMoreRef = useRef<HTMLDivElement>(null);
   const [skeletonCount] = useState(3);
   const isInitialMount = useRef(true);
+
+  // cursor와 isLoading을 ref로 관리하여 useCallback 의존성 문제 해결
+  const cursorRef = useRef<string | null>(null);
+  const isLoadingRef = useRef(false);
+  const selectedStatusesRef = useRef<string[]>([]);
+
+  // selectedStatuses 변경 시 ref 업데이트
+  useEffect(() => {
+    selectedStatusesRef.current = selectedStatuses;
+  }, [selectedStatuses]);
+
+  const fetchCoupons = useCallback(async (reset = false) => {
+    // 중복 호출 방지
+    if (isLoadingRef.current) return;
+
+    isLoadingRef.current = true;
+    setIsLoading(true);
+    try {
+      const statusesToSend = selectedStatusesRef.current.length > 0 ? selectedStatusesRef.current : undefined;
+      const response = await couponApi.getAllStoreCoupons(reset ? null : cursorRef.current, 20, statusesToSend);
+      if (!response?.ok) {
+        return;
+      }
+
+      const {contents = [], cursor: newCursor} = response.data || { contents: [], cursor: { hasMore: false, nextCursor: null } };
+
+      if (reset) {
+        setCoupons(contents);
+        cursorRef.current = null; // reset 시 cursor 초기화
+      } else {
+        setCoupons(prev => [...prev, ...contents]);
+      }
+
+      setHasMore(newCursor.hasMore || false);
+      cursorRef.current = newCursor.nextCursor || null;
+    } finally {
+      isLoadingRef.current = false;
+      setIsLoading(false);
+    }
+  }, []);
 
   // 초기 데이터 로드
   useEffect(() => {
     fetchCoupons(true);
-  }, []);
+  }, [fetchCoupons]);
 
   // 상태 필터 변경 시 재조회
   useEffect(() => {
@@ -34,73 +73,15 @@ const CouponManagement = () => {
       return;
     }
     fetchCoupons(true);
-  }, [selectedStatuses]);
+  }, [selectedStatuses, fetchCoupons]);
 
-  // Intersection Observer 설정
-  useEffect(() => {
-    if (observerRef.current) {
-      observerRef.current.disconnect();
-    }
-
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        const firstEntry = entries[0];
-        if (firstEntry.isIntersecting && hasMore && !isLoading) {
-          fetchCoupons(false);
-        }
-      },
-      {
-        root: scrollContainerRef.current,
-        threshold: 0.1
-      }
-    );
-
-    if (loadMoreRef.current) {
-      observerRef.current.observe(loadMoreRef.current);
-    }
-
-    return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-      }
-    };
-  }, [hasMore, isLoading]);
-
-  const fetchCoupons = useCallback(async (reset = false) => {
-    if (isLoading) return;
-
-    setIsLoading(true);
-    try {
-      const statusesToSend = selectedStatuses.length > 0 ? selectedStatuses : undefined;
-      const response = await couponApi.getAllStoreCoupons(reset ? null : cursor, 20, statusesToSend);
-      if (!response?.ok) {
-        toast.error('쿠폰 목록을 불러오는 중 오류가 발생했습니다.');
-        return;
-      }
-
-      const { contents = [], cursor: newCursor = {} } = response.data || {};
-
-      if (reset) {
-        setCoupons(contents);
-      } else {
-        setCoupons(prev => [...prev, ...contents]);
-      }
-
-      setHasMore(newCursor.hasMore || false);
-      setCursor(newCursor.nextCursor || null);
-    } catch (error) {
-      console.error('쿠폰 목록 조회 오류:', error);
-      toast.error('쿠폰 목록을 불러오는 중 오류가 발생했습니다.');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [cursor, isLoading, selectedStatuses]);
-
-  const handleLoadMore = useCallback(() => {
-    if (hasMore && !isLoading) {
-      fetchCoupons(false);
-    }
-  }, [hasMore, isLoading, fetchCoupons]);
+  // Infinite Scroll 훅 사용
+  const { scrollContainerRef, loadMoreRef } = useInfiniteScroll({
+    hasMore,
+    isLoading,
+    onLoadMore: () => fetchCoupons(false),
+    threshold: 0.1
+  });
 
   const handleStatusToggle = (status: string) => {
     setSelectedStatuses(prev => {
@@ -122,7 +103,7 @@ const CouponManagement = () => {
     return (
       <span
         className={`badge ${getStoreTypeBadgeClass(storeType as any)} text-white rounded-pill ${isMobile ? 'px-2 py-1' : 'px-3 py-1'}`}
-        style={{ fontSize: isMobile ? '0.65rem' : '0.75rem', whiteSpace: 'nowrap' }}
+        style={{fontSize: isMobile ? '0.65rem' : '0.75rem', whiteSpace: 'nowrap'}}
       >
         <i className={`bi ${getStoreTypeIcon(storeType as any)} me-1`}></i>
         {getStoreTypeDisplayName(storeType as any)}
@@ -137,14 +118,14 @@ const CouponManagement = () => {
   // 스켈레톤 로더 컴포넌트
   const SkeletonCard = () => (
     <div className="col-12">
-      <div className="card border-0 shadow-sm h-100" style={{ background: '#f8f9fa' }}>
+      <div className="card border-0 shadow-sm h-100" style={{background: '#f8f9fa'}}>
         <div className="card-body p-2 p-md-3">
           <div className="d-flex gap-2 mb-2">
-            <div className="bg-secondary bg-opacity-25 rounded-pill" style={{ width: '100px', height: '24px' }}></div>
-            <div className="bg-secondary bg-opacity-25 rounded-pill" style={{ width: '80px', height: '24px' }}></div>
+            <div className="bg-secondary bg-opacity-25 rounded-pill" style={{width: '100px', height: '24px'}}></div>
+            <div className="bg-secondary bg-opacity-25 rounded-pill" style={{width: '80px', height: '24px'}}></div>
           </div>
-          <div className="bg-secondary bg-opacity-25 rounded mb-2" style={{ width: '60%', height: '20px' }}></div>
-          <div className="bg-secondary bg-opacity-25 rounded mb-2" style={{ width: '100%', height: '80px' }}></div>
+          <div className="bg-secondary bg-opacity-25 rounded mb-2" style={{width: '60%', height: '20px'}}></div>
+          <div className="bg-secondary bg-opacity-25 rounded mb-2" style={{width: '100%', height: '80px'}}></div>
         </div>
       </div>
     </div>
@@ -237,20 +218,17 @@ const CouponManagement = () => {
         </div>
       </div>
 
-      <div ref={scrollContainerRef} style={{ maxHeight: 'calc(100vh - 280px)', overflowY: 'auto' }}>
+      <div ref={scrollContainerRef} style={{maxHeight: 'calc(100vh - 280px)', overflowY: 'auto'}}>
         <div className="row g-3">
           {isLoading && coupons.length === 0 ? (
-            Array.from({ length: skeletonCount }).map((_, idx) => <SkeletonCard key={idx} />)
+            Array.from({length: skeletonCount}).map((_, idx) => <SkeletonCard key={idx}/>)
           ) : coupons.length === 0 ? (
             <div className="col-12">
-              <div className="text-center py-5">
-                <div className="bg-light rounded-circle mx-auto mb-3"
-                     style={{ width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <i className="bi bi-ticket-perforated fs-1 text-secondary"></i>
-                </div>
-                <h5 className="text-dark mb-2">등록된 쿠폰이 없습니다</h5>
-                <p className="text-muted">아직 가게에서 발급한 쿠폰이 없어요.</p>
-              </div>
+              <EmptyState
+                icon="bi-ticket-perforated"
+                title="등록된 쿠폰이 없습니다"
+                description="아직 가게에서 발급한 쿠폰이 없어요."
+              />
             </div>
           ) : (
             coupons.map((coupon, index) => {
@@ -273,7 +251,7 @@ const CouponManagement = () => {
                             <div
                               className="d-flex align-items-center gap-2 mb-2 cursor-pointer"
                               onClick={() => handleStoreClick(coupon.store)}
-                              style={{ cursor: 'pointer' }}
+                              style={{cursor: 'pointer'}}
                             >
                               <i className="bi bi-shop text-primary"></i>
                               <h6 className="fw-bold text-primary mb-0 text-decoration-underline">
@@ -288,15 +266,17 @@ const CouponManagement = () => {
                           </div>
                           <div className="d-flex align-items-center gap-2 flex-wrap">
                             {coupon.store?.categories?.slice(0, 2).map((category: any, idx: number) => (
-                              <span key={idx} className="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-2 py-1"
-                                    style={{ fontSize: '0.7rem' }}>
+                              <span key={idx}
+                                    className="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-2 py-1"
+                                    style={{fontSize: '0.7rem'}}>
                                 <i className="bi bi-tag me-1"></i>
                                 {category.name}
                               </span>
                             ))}
                             {coupon.store?.categories?.length > 2 && (
-                              <span className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-2 py-1"
-                                    style={{ fontSize: '0.7rem' }}>
+                              <span
+                                className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-2 py-1"
+                                style={{fontSize: '0.7rem'}}>
                                 +{coupon.store.categories.length - 2}
                               </span>
                             )}
@@ -308,8 +288,9 @@ const CouponManagement = () => {
                       <div className="mb-3">
                         <div className="d-flex align-items-center gap-2 mb-2">
                           <h6 className="fw-bold text-dark mb-0">{coupon.name}</h6>
-                          <span className={`badge ${getCouponStatusBadgeClass(coupon.status)} bg-opacity-10 text-dark border px-3 py-1 rounded-pill`}>
-                            <i className="bi bi-circle-fill me-1" style={{ fontSize: '0.5rem' }}></i>
+                          <span
+                            className={`badge ${getCouponStatusBadgeClass(coupon.status)} bg-opacity-10 text-dark border px-3 py-1 rounded-pill`}>
+                            <i className="bi bi-circle-fill me-1" style={{fontSize: '0.5rem'}}></i>
                             {getCouponStatusDisplayName(coupon.status)}
                           </span>
                         </div>
@@ -323,7 +304,13 @@ const CouponManagement = () => {
                       <div className="row g-3 mb-3">
                         <div className="col-md-6">
                           <div className="d-flex align-items-center gap-2 p-3 bg-white rounded-3">
-                            <div className="bg-primary bg-opacity-10 rounded-circle p-2" style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <div className="bg-primary bg-opacity-10 rounded-circle p-2" style={{
+                              width: '40px',
+                              height: '40px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}>
                               <i className="bi bi-ticket-detailed text-primary"></i>
                             </div>
                             <div className="flex-grow-1">
@@ -331,11 +318,11 @@ const CouponManagement = () => {
                               <div className="fw-bold text-dark">
                                 {coupon.currentIssuedCount.toLocaleString()} / {coupon.maxIssuableCount.toLocaleString()}
                               </div>
-                              <div className="progress mt-2" style={{ height: '6px' }}>
+                              <div className="progress mt-2" style={{height: '6px'}}>
                                 <div
                                   className="progress-bar bg-primary"
                                   role="progressbar"
-                                  style={{ width: `${progress}%` }}
+                                  style={{width: `${progress}%`}}
                                   aria-valuenow={progress}
                                   aria-valuemin={0}
                                   aria-valuemax={100}
@@ -348,7 +335,13 @@ const CouponManagement = () => {
 
                         <div className="col-md-6">
                           <div className="d-flex align-items-center gap-2 p-3 bg-white rounded-3">
-                            <div className="bg-success bg-opacity-10 rounded-circle p-2" style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <div className="bg-success bg-opacity-10 rounded-circle p-2" style={{
+                              width: '40px',
+                              height: '40px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}>
                               <i className="bi bi-check-circle text-success"></i>
                             </div>
                             <div className="flex-grow-1">
@@ -356,11 +349,11 @@ const CouponManagement = () => {
                               <div className="fw-bold text-dark">
                                 {coupon.currentUsedCount.toLocaleString()} / {coupon.currentIssuedCount.toLocaleString()}
                               </div>
-                              <div className="progress mt-2" style={{ height: '6px' }}>
+                              <div className="progress mt-2" style={{height: '6px'}}>
                                 <div
                                   className="progress-bar bg-success"
                                   role="progressbar"
-                                  style={{ width: `${usageRate}%` }}
+                                  style={{width: `${usageRate}%`}}
                                   aria-valuenow={usageRate}
                                   aria-valuemin={0}
                                   aria-valuemax={100}
@@ -377,12 +370,19 @@ const CouponManagement = () => {
                         <div className="row g-2">
                           <div className="col-12">
                             <div className="d-flex align-items-center gap-2 p-2 bg-white rounded-3">
-                              <div className="bg-primary bg-opacity-10 rounded-circle p-2" style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <i className="bi bi-calendar-range text-primary" style={{ fontSize: '0.9rem' }}></i>
+                              <div className="bg-primary bg-opacity-10 rounded-circle p-2" style={{
+                                width: '32px',
+                                height: '32px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}>
+                                <i className="bi bi-calendar-range text-primary" style={{fontSize: '0.9rem'}}></i>
                               </div>
                               <div className="d-flex align-items-center gap-2 flex-wrap">
                                 <span className="fw-semibold text-dark">유효 기간:</span>
-                                <span className="text-dark">{formatCouponDate(coupon.validityPeriod.startDateTime)}</span>
+                                <span
+                                  className="text-dark">{formatCouponDate(coupon.validityPeriod.startDateTime)}</span>
                                 <i className="bi bi-arrow-right text-muted"></i>
                                 <span className="text-dark">{formatCouponDate(coupon.validityPeriod.endDateTime)}</span>
                               </div>
@@ -409,19 +409,24 @@ const CouponManagement = () => {
             })
           )}
 
-          {/* 무한 스크롤 트리거 */}
-          {hasMore && (
-            <div ref={loadMoreRef} className="col-12 text-center py-3">
-              {isLoading && (
-                <div className="d-flex flex-column align-items-center gap-2">
-                  <div className="spinner-border text-primary" role="status">
-                    <span className="visually-hidden">Loading...</span>
-                  </div>
-                  <span className="text-muted small">쿠폰을 불러오는 중...</span>
+          {/* 무한 스크롤 트리거 - 항상 렌더링 */}
+          <div
+            ref={loadMoreRef}
+            className="col-12 text-center py-3"
+            style={{
+              display: hasMore ? 'block' : 'none',
+              minHeight: '50px'
+            }}
+          >
+            {isLoading && (
+              <div className="d-flex flex-column align-items-center gap-2">
+                <div className="spinner-border text-primary" role="status">
+                  <span className="visually-hidden">Loading...</span>
                 </div>
-              )}
-            </div>
-          )}
+                <span className="text-muted small">쿠폰을 불러오는 중...</span>
+              </div>
+            )}
+          </div>
 
           {!hasMore && coupons.length > 0 && (
             <div className="col-12 text-center py-3">

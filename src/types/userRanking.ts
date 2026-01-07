@@ -1,4 +1,4 @@
-import { ApiResponse, PaginatedResponse } from './api';
+import {ApiResponse, PaginatedResponse} from './api';
 
 export interface UserRankingUser {
   userId: number;
@@ -22,10 +22,10 @@ export interface UserRankingRequest {
 }
 
 export const createUserRankingRequest = ({
-  userRankingType,
-  cursor = null,
-  size = 20
-}: UserRankingRequest): UserRankingRequest => ({
+                                           userRankingType,
+                                           cursor = null,
+                                           size = 20
+                                         }: UserRankingRequest): UserRankingRequest => ({
   userRankingType,
   cursor,
   size

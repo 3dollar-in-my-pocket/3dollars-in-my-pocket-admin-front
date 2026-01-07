@@ -33,19 +33,15 @@ const AdvertisementModal = ({
     if (!window.confirm("정말로 삭제하시겠습니까?")) {
       return
     }
-    try {
-      const response = await advertisementApi.deleteAd({
-        application: "USER_API",
-        advertisementId: ad.advertisementId,
-      });  // 광고 삭제 API 호출
-      if (response.ok) {
-        toast.success("✅ 광고가 삭제되었습니다.");
-        fetchAdvertisements();
-      } else {
-        toast.error("❌ 광고 삭제에 실패했습니다.");
-      }
-    } catch (error) {
-      toast.error("❌ 광고 삭제 중 오류가 발생했습니다.");
+    const response = await advertisementApi.deleteAd({
+      application: "USER_API",
+      advertisementId: ad.advertisementId,
+    });  // 광고 삭제 API 호출
+    if (response.ok) {
+      toast.success("✅ 광고가 삭제되었습니다.");
+      fetchAdvertisements();
+    } else {
+      toast.error("❌ 광고 삭제에 실패했습니다.");
     }
     onHide()
   };
@@ -133,7 +129,8 @@ const AdvertisementModal = ({
                   </small>
                   <div className="d-flex justify-content-center gap-3">
                     {(ad.platformType === 'ALL' || ad.platformType === 'AOS') && (
-                      <div className="d-flex align-items-center gap-2 px-3 py-2 rounded bg-success-subtle border border-success">
+                      <div
+                        className="d-flex align-items-center gap-2 px-3 py-2 rounded bg-success-subtle border border-success">
                         <i className="bi bi-android2 text-success" style={{fontSize: '1.2rem'}}></i>
                         <small className="fw-semibold text-success" style={{fontSize: '0.85rem'}}>
                           Android
@@ -141,7 +138,8 @@ const AdvertisementModal = ({
                       </div>
                     )}
                     {(ad.platformType === 'ALL' || ad.platformType === 'IOS') && (
-                      <div className="d-flex align-items-center gap-2 px-3 py-2 rounded bg-primary-subtle border border-primary">
+                      <div
+                        className="d-flex align-items-center gap-2 px-3 py-2 rounded bg-primary-subtle border border-primary">
                         <i className="bi bi-apple text-primary" style={{fontSize: '1.2rem'}}></i>
                         <small className="fw-semibold text-primary" style={{fontSize: '0.85rem'}}>
                           iOS

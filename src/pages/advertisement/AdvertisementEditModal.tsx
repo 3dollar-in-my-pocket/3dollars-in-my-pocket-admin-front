@@ -36,27 +36,20 @@ const AdvertisementEditModal = ({show, onHide, ad, positions, fetchAdvertisement
   };
 
   const handleSubmit = async () => {
-
-    try {
-      const res = await advertisementApi.updateAd({
-        application: "USER_API",
-        advertisementId: ad.advertisementId,
-        adData: {
-          ...formData,
-          startDateTime: `${formData.startDateTime}:00`,
-          endDateTime: `${formData.endDateTime}:00`,
-          sortNumber: formData.orderType === "RANDOM" ? null : formData.sortNumber,
-        },
-      });
-      if (res.ok) {
-        toast.success("광고가 수정되었습니다.");
-        fetchAdvertisements();
-        onHide();
-      } else {
-        toast.error("광고 수정에 실패했습니다.");
-      }
-    } catch {
-      toast.error("오류가 발생했습니다.");
+    const res = await advertisementApi.updateAd({
+      application: "USER_API",
+      advertisementId: ad.advertisementId,
+      adData: {
+        ...formData,
+        startDateTime: `${formData.startDateTime}:00`,
+        endDateTime: `${formData.endDateTime}:00`,
+        sortNumber: formData.orderType === "RANDOM" ? null : formData.sortNumber,
+      },
+    });
+    if (res.ok) {
+      toast.success("광고가 수정되었습니다.");
+      fetchAdvertisements();
+      onHide();
     }
   };
 
@@ -64,7 +57,8 @@ const AdvertisementEditModal = ({show, onHide, ad, positions, fetchAdvertisement
 
   return (
     <Modal show={show} onHide={onHide} size="xl" centered fullscreen="lg-down">
-      <Modal.Header closeButton className="border-0" style={{background: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)'}}>
+      <Modal.Header closeButton className="border-0"
+                    style={{background: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)'}}>
         <Modal.Title className="text-white d-flex align-items-center gap-2">
           <i className="bi bi-gear"></i>
           광고 기본 정보 수정
@@ -120,7 +114,8 @@ const AdvertisementEditModal = ({show, onHide, ad, positions, fetchAdvertisement
               <div>
                 <strong>기본 정보 수정 영역</strong>
                 <br/>
-                <small>캠페인 ID, 노출 일정, 플랫폼, 노출 순서 등 기본 설정을 변경할 수 있습니다. 광고의 이미지, 제목, 링크 등 컨텐츠를 수정하려면 "컨텐츠 수정" 버튼을 사용해주세요.</small>
+                <small>캠페인 ID, 노출 일정, 플랫폼, 노출 순서 등 기본 설정을 변경할 수 있습니다. 광고의 이미지, 제목, 링크 등 컨텐츠를 수정하려면 "컨텐츠 수정" 버튼을
+                  사용해주세요.</small>
               </div>
             </div>
             <Form>

@@ -68,7 +68,7 @@ export default {
       const response = await axiosInstance({
         method: 'GET',
         url: '/v1/ranking/popular-neighborhood/provinces',
-        params: { includeAll }
+        params: {includeAll}
       });
 
       if (response.data.ok) {

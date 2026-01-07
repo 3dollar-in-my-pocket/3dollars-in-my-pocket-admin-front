@@ -23,11 +23,10 @@ const StoreVisitHistory = ({storeId, isActive, onAuthorClick}) => {
     try {
       const response = await visitApi.getStoreVisits(storeId, reset ? null : cursor, 20);
       if (!response?.ok) {
-        toast.error('방문 목록을 불러오는 중 오류가 발생했습니다.');
         return;
       }
 
-      const {contents = [], cursor: newCursor = {}} = response.data || {};
+      const {contents = [], cursor: newCursor} = response.data || { contents: [], cursor: { hasMore: false, nextCursor: null } };
 
       if (reset) {
         setVisits(contents);
@@ -38,8 +37,6 @@ const StoreVisitHistory = ({storeId, isActive, onAuthorClick}) => {
       setHasMore(newCursor.hasMore || false);
       setCursor(newCursor.nextCursor || null);
       setTotalCount(newCursor.totalCount || 0);
-    } catch (error) {
-      toast.error('방문 목록을 불러오는 중 오류가 발생했습니다.');
     } finally {
       setIsLoading(false);
     }
@@ -150,7 +147,7 @@ const StoreVisitHistory = ({storeId, isActive, onAuthorClick}) => {
                           <div>
                             <div className="d-flex align-items-center gap-2 mb-2">
                               <div className="bg-warning bg-opacity-10 rounded-circle p-1">
-                                <i className="bi bi-person-fill text-warning" style={{ fontSize: '0.8rem' }}></i>
+                                <i className="bi bi-person-fill text-warning" style={{fontSize: '0.8rem'}}></i>
                               </div>
                               <div
                                 className={`d-flex align-items-center gap-1 ${visit.visitor && onAuthorClick ? 'clickable-author' : ''}`}
@@ -181,11 +178,12 @@ const StoreVisitHistory = ({storeId, isActive, onAuthorClick}) => {
                                 }}
                               >
                                 <span className="text-muted small">방문자:</span>
-                                <h6 className={`fw-bold mb-0 ${visit.visitor && onAuthorClick ? 'text-primary' : 'text-dark'}`}>
+                                <h6
+                                  className={`fw-bold mb-0 ${visit.visitor && onAuthorClick ? 'text-primary' : 'text-dark'}`}>
                                   {visit.visitor?.name || '익명 사용자'}
                                 </h6>
                                 {visit.visitor && onAuthorClick && (
-                                  <i className="bi bi-box-arrow-up-right text-primary" style={{ fontSize: '0.7rem' }}></i>
+                                  <i className="bi bi-box-arrow-up-right text-primary" style={{fontSize: '0.7rem'}}></i>
                                 )}
                               </div>
                             </div>

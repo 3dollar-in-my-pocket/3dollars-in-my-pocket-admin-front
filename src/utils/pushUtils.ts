@@ -69,7 +69,7 @@ export const isUserInTarget = (currentIds, userId) => {
  * @returns {Object} - 유효성 검사 결과
  */
 export const validatePushData = (pushData) => {
-  const { accountIdsInput, title, body, pushType, path } = pushData;
+  const {accountIdsInput, title, body, pushType, path} = pushData;
 
   // 푸시 타입 확인
   if (!pushType || pushType.trim() === "") {

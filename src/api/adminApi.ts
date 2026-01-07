@@ -1,48 +1,26 @@
-import axiosInstance from "./apiBase";
+import { ApiResponse, PagePaginatedResponse } from '../types/api';
+import { Admin, CreateAdminRequest } from '../types/admin';
+import { apiGet, apiPost } from './apiHelpers';
 
 export default {
-  getMyAdmin: async () => {
-    try {
-      const response = await axiosInstance(
-        {
-          method: "GET",
-          url: `/v1/my/admin`,
-        })
-
-      return response.data;
-    } catch (error: any) {
-      return error.response;
-    }
+  /**
+   * 내 관리자 정보 조회
+   */
+  getMyAdmin: async (): Promise<ApiResponse<Admin>> => {
+    return apiGet<Admin>(`/v1/my/admin`);
   },
 
-  getAdmins: async ({ size = 10, page = 1 } = {}) => {
-    try {
-      const response = await axiosInstance({
-        method: "GET",
-        url: `/v1/admins`,
-        params: {
-          size,
-          page
-        }
-      });
-
-      return response.data;
-    } catch (error: any) {
-      return error.response;
-    }
+  /**
+   * 관리자 목록 조회 (페이지 기반)
+   */
+  getAdmins: async ({size = 10, page = 1}: {size?: number; page?: number} = {}): Promise<ApiResponse<PagePaginatedResponse<Admin>>> => {
+    return apiGet<PagePaginatedResponse<Admin>>(`/v1/admins`, { size, page });
   },
 
-  createAdmin: async (adminData: any) => {
-    try {
-      const response = await axiosInstance({
-        method: "POST",
-        url: `/v1/admin`,
-        data: adminData
-      });
-
-      return response.data;
-    } catch (error: any) {
-      return error.response;
-    }
+  /**
+   * 관리자 생성
+   */
+  createAdmin: async (adminData: CreateAdminRequest): Promise<ApiResponse<Admin>> => {
+    return apiPost<Admin>(`/v1/admin`, adminData);
   }
 }

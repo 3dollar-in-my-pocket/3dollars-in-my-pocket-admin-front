@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
+import {useEffect, useState} from 'react';
 import UserDetailModal from './UserDetailModal';
 import StoreDetailModal from '../store/StoreDetailModal';
-import { SEARCH_TYPES } from '../../types/user';
+import {SEARCH_TYPES} from '../../types/user';
 import useSearch from '../../hooks/useSearch';
-import { userSearchAdapter } from '../../adapters/userSearchAdapter';
+import {userSearchAdapter} from '../../adapters/userSearchAdapter';
 import SearchForm from '../../components/common/SearchForm';
 import SearchResults from '../../components/common/SearchResults';
 import UserCard from '../../components/user/UserCard';
@@ -41,7 +41,14 @@ const UserSearch = () => {
     setSearchType(userSearchAdapter.defaultSearchType);
   }, [setSearchType]);
 
-  const renderCustomInputs = ({ searchType, searchQuery, handleSearchQueryChange, additionalParams, handleAdditionalParamChange, onKeyPress }) => {
+  const renderCustomInputs = ({
+                                searchType,
+                                searchQuery,
+                                handleSearchQueryChange,
+                                additionalParams,
+                                handleAdditionalParamChange,
+                                onKeyPress
+                              }) => {
     if (searchType === SEARCH_TYPES.NAME) {
       return (
         <input
@@ -76,7 +83,7 @@ const UserSearch = () => {
   };
 
   const renderUserCard = (user) => (
-    <UserCard key={user.userId} user={user} onClick={handleUserClick} />
+    <UserCard key={user.userId} user={user} onClick={handleUserClick}/>
   );
 
   // 가게 클릭 핸들러
@@ -93,7 +100,7 @@ const UserSearch = () => {
 
   return (
     <div className="container-fluid px-4 py-4">
-    <div className="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+      <div className="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
         <h2 className="fw-bold">유저 검색</h2>
       </div>
 
@@ -135,8 +142,10 @@ const UserSearch = () => {
         show={!!selectedStore}
         onHide={handleCloseStoreModal}
         store={selectedStore}
-        onAuthorClick={() => {}}
-        onStoreDeleted={() => {}}
+        onAuthorClick={() => {
+        }}
+        onStoreDeleted={() => {
+        }}
       />
     </div>
   );

@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import storeApi from '../api/storeApi';
-import { Coupon, getCouponStatusDisplayName, getCouponStatusBadgeClass, formatCouponDate } from '../types/coupon';
+import {Coupon, getCouponStatusDisplayName, getCouponStatusBadgeClass, formatCouponDate} from '../types/coupon';
 
 interface StoreCouponHistoryProps {
   storeId: string;
 }
 
-const StoreCouponHistory: React.FC<StoreCouponHistoryProps> = ({ storeId }) => {
+const StoreCouponHistory: React.FC<StoreCouponHistoryProps> = ({storeId}) => {
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -38,7 +38,7 @@ const StoreCouponHistory: React.FC<StoreCouponHistoryProps> = ({ storeId }) => {
         throw new Error('쿠폰을 불러오는데 실패했습니다.');
       }
 
-      const { contents, cursor } = response.data;
+      const {contents, cursor} = response.data;
 
       if (isInitial) {
         setCoupons(contents || []);
@@ -75,7 +75,7 @@ const StoreCouponHistory: React.FC<StoreCouponHistoryProps> = ({ storeId }) => {
     return (
       <div className="text-center py-5">
         <div className="mb-3">
-          <div className="spinner-border text-primary" style={{ width: '3rem', height: '3rem' }} role="status">
+          <div className="spinner-border text-primary" style={{width: '3rem', height: '3rem'}} role="status">
             <span className="visually-hidden">Loading...</span>
           </div>
         </div>
@@ -116,7 +116,7 @@ const StoreCouponHistory: React.FC<StoreCouponHistoryProps> = ({ storeId }) => {
     return (
       <div className="text-center py-5">
         <div className="bg-light rounded-circle mx-auto mb-3"
-             style={{ width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+             style={{width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
           <i className="bi bi-ticket-perforated fs-1 text-secondary"></i>
         </div>
         <h5 className="text-dark mb-2">등록된 쿠폰이 없습니다</h5>
@@ -165,8 +165,9 @@ const StoreCouponHistory: React.FC<StoreCouponHistoryProps> = ({ storeId }) => {
                     <div className="flex-grow-1">
                       <div className="d-flex align-items-center gap-2 mb-2">
                         <h6 className="fw-bold text-dark mb-0">{coupon.name}</h6>
-                        <span className={`badge ${getCouponStatusBadgeClass(coupon.status)} bg-opacity-10 text-dark border px-3 py-1 rounded-pill`}>
-                          <i className="bi bi-circle-fill me-1" style={{ fontSize: '0.5rem' }}></i>
+                        <span
+                          className={`badge ${getCouponStatusBadgeClass(coupon.status)} bg-opacity-10 text-dark border px-3 py-1 rounded-pill`}>
+                          <i className="bi bi-circle-fill me-1" style={{fontSize: '0.5rem'}}></i>
                           {getCouponStatusDisplayName(coupon.status)}
                         </span>
                       </div>
@@ -176,7 +177,13 @@ const StoreCouponHistory: React.FC<StoreCouponHistoryProps> = ({ storeId }) => {
                   <div className="row g-3 mb-3">
                     <div className="col-md-6">
                       <div className="d-flex align-items-center gap-2 p-3 bg-white rounded-3">
-                        <div className="bg-primary bg-opacity-10 rounded-circle p-2" style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div className="bg-primary bg-opacity-10 rounded-circle p-2" style={{
+                          width: '40px',
+                          height: '40px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
                           <i className="bi bi-ticket-detailed text-primary"></i>
                         </div>
                         <div className="flex-grow-1">
@@ -184,11 +191,11 @@ const StoreCouponHistory: React.FC<StoreCouponHistoryProps> = ({ storeId }) => {
                           <div className="fw-bold text-dark">
                             {coupon.currentIssuedCount.toLocaleString()} / {coupon.maxIssuableCount.toLocaleString()}
                           </div>
-                          <div className="progress mt-2" style={{ height: '6px' }}>
+                          <div className="progress mt-2" style={{height: '6px'}}>
                             <div
                               className="progress-bar bg-primary"
                               role="progressbar"
-                              style={{ width: `${progress}%` }}
+                              style={{width: `${progress}%`}}
                               aria-valuenow={progress}
                               aria-valuemin={0}
                               aria-valuemax={100}
@@ -201,7 +208,13 @@ const StoreCouponHistory: React.FC<StoreCouponHistoryProps> = ({ storeId }) => {
 
                     <div className="col-md-6">
                       <div className="d-flex align-items-center gap-2 p-3 bg-white rounded-3">
-                        <div className="bg-success bg-opacity-10 rounded-circle p-2" style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div className="bg-success bg-opacity-10 rounded-circle p-2" style={{
+                          width: '40px',
+                          height: '40px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
                           <i className="bi bi-check-circle text-success"></i>
                         </div>
                         <div className="flex-grow-1">
@@ -209,11 +222,11 @@ const StoreCouponHistory: React.FC<StoreCouponHistoryProps> = ({ storeId }) => {
                           <div className="fw-bold text-dark">
                             {coupon.currentUsedCount.toLocaleString()} / {coupon.currentIssuedCount.toLocaleString()}
                           </div>
-                          <div className="progress mt-2" style={{ height: '6px' }}>
+                          <div className="progress mt-2" style={{height: '6px'}}>
                             <div
                               className="progress-bar bg-success"
                               role="progressbar"
-                              style={{ width: `${usageRate}%` }}
+                              style={{width: `${usageRate}%`}}
                               aria-valuenow={usageRate}
                               aria-valuemin={0}
                               aria-valuemax={100}

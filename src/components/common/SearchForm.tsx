@@ -1,18 +1,17 @@
-
 const SearchForm = ({
-  searchType,
-  setSearchType,
-  searchQuery,
-  setSearchQuery,
-  additionalParams = {},
-  setAdditionalParams,
-  searchOptions = [],
-  onSearch,
-  onKeyPress,
-  isSearching = false,
-  placeholder = "검색어를 입력하세요",
-  customInputs = null
-}) => {
+                      searchType,
+                      setSearchType,
+                      searchQuery,
+                      setSearchQuery,
+                      additionalParams = {},
+                      setAdditionalParams,
+                      searchOptions = [],
+                      onSearch,
+                      onKeyPress,
+                      isSearching = false,
+                      placeholder = "검색어를 입력하세요",
+                      customInputs = null
+                    }) => {
   const handleSearchTypeChange = (e) => {
     setSearchType(e.target.value);
   };

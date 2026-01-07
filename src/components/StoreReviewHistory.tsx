@@ -27,11 +27,10 @@ const StoreReviewHistory = ({storeId, isActive, onAuthorClick}) => {
     try {
       const response = await reviewApi.getStoreReviews(storeId, reset ? null : cursor, 20);
       if (!response?.ok) {
-        toast.error('리뷰 목록을 불러오는 중 오류가 발생했습니다.');
         return;
       }
 
-      const {contents = [], cursor: newCursor = {}} = response.data || {};
+      const {contents = [], cursor: newCursor} = response.data || { contents: [], cursor: { hasMore: false, nextCursor: null } };
 
       if (reset) {
         setReviews(contents);
@@ -42,8 +41,6 @@ const StoreReviewHistory = ({storeId, isActive, onAuthorClick}) => {
       setHasMore(newCursor.hasMore || false);
       setCursor(newCursor.nextCursor || null);
       setTotalCount(newCursor.totalCount || 0);
-    } catch (error) {
-      toast.error('리뷰 목록을 불러오는 중 오류가 발생했습니다.');
     } finally {
       setIsLoading(false);
     }
@@ -111,17 +108,12 @@ const StoreReviewHistory = ({storeId, isActive, onAuthorClick}) => {
     try {
       const response = await reviewApi.blindStoreReview(selectedReview.reviewId);
 
-      if (response.status === 200 || response.status === 204) {
+      if (response.ok) {
         toast.success('리뷰가 성공적으로 블라인드 처리되었습니다.');
         setShowModal(false);
         // 리뷰 목록 새로고침
         fetchReviews(true);
-      } else {
-        throw new Error('블라인드 처리 실패');
       }
-    } catch (error) {
-      console.error('리뷰 블라인드 실패:', error);
-      toast.error('리뷰 블라인드 처리 중 오류가 발생했습니다.');
     } finally {
       setIsBlinding(false);
     }
@@ -201,7 +193,7 @@ const StoreReviewHistory = ({storeId, isActive, onAuthorClick}) => {
                             <div className="d-flex align-items-center gap-2 mb-1">
                               <div className="d-flex align-items-center gap-2">
                                 <div className="bg-primary bg-opacity-10 rounded-circle p-1">
-                                  <i className="bi bi-person-fill text-primary" style={{ fontSize: '0.8rem' }}></i>
+                                  <i className="bi bi-person-fill text-primary" style={{fontSize: '0.8rem'}}></i>
                                 </div>
                                 <div
                                   className={`d-flex align-items-center gap-1 ${review.writer && onAuthorClick ? 'clickable-author' : ''}`}
@@ -232,28 +224,30 @@ const StoreReviewHistory = ({storeId, isActive, onAuthorClick}) => {
                                   }}
                                 >
                                   <span className="text-muted small">작성자:</span>
-                                  <h6 className={`fw-bold mb-0 ${review.writer && onAuthorClick ? 'text-primary' : 'text-dark'}`}>
+                                  <h6
+                                    className={`fw-bold mb-0 ${review.writer && onAuthorClick ? 'text-primary' : 'text-dark'}`}>
                                     {review.writer?.name || '익명 사용자'}
                                   </h6>
                                   {review.writer && onAuthorClick && (
-                                    <i className="bi bi-box-arrow-up-right text-primary" style={{ fontSize: '0.7rem' }}></i>
+                                    <i className="bi bi-box-arrow-up-right text-primary"
+                                       style={{fontSize: '0.7rem'}}></i>
                                   )}
                                 </div>
                               </div>
                               {/* 리뷰 상태 표시 */}
                               <span className={`badge rounded-pill ${
                                 review.status === 'POSTED' ? 'bg-success' :
-                                review.status === 'DELETED' ? 'bg-danger' :
-                                review.status === 'FILTERED' ? 'bg-warning' : 'bg-secondary'
+                                  review.status === 'DELETED' ? 'bg-danger' :
+                                    review.status === 'FILTERED' ? 'bg-warning' : 'bg-secondary'
                               } text-white px-2 py-1`} style={{fontSize: '0.7rem'}}>
                                 <i className={`bi ${
                                   review.status === 'POSTED' ? 'bi-eye-fill' :
-                                  review.status === 'DELETED' ? 'bi-trash-fill' :
-                                  review.status === 'FILTERED' ? 'bi-eye-slash-fill' : 'bi-question-circle-fill'
+                                    review.status === 'DELETED' ? 'bi-trash-fill' :
+                                      review.status === 'FILTERED' ? 'bi-eye-slash-fill' : 'bi-question-circle-fill'
                                 } me-1`}></i>
                                 {review.status === 'POSTED' ? '활성' :
-                                 review.status === 'DELETED' ? '삭제됨' :
-                                 review.status === 'FILTERED' ? '블라인드' : '알 수 없음'}
+                                  review.status === 'DELETED' ? '삭제됨' :
+                                    review.status === 'FILTERED' ? '블라인드' : '알 수 없음'}
                               </span>
                             </div>
                             <div className="d-flex align-items-center gap-2 mb-2">

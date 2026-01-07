@@ -1,11 +1,11 @@
 const ItemCard = ({
-  item,
-  onClick,
-  borderColor = '#6c757d',
-  children,
-  className = '',
-  style = {}
-}) => {
+                    item,
+                    onClick,
+                    borderColor = '#6c757d',
+                    children,
+                    className = '',
+                    style = {}
+                  }) => {
   return (
     <div
       className={`card border-0 shadow-lg h-100 position-relative overflow-hidden ${className}`}

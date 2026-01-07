@@ -1,9 +1,9 @@
-import { useEffect, useCallback, useState } from 'react';
+import {useEffect, useCallback, useState} from 'react';
 import StoreDetailModal from './StoreDetailModal';
 import UserDetailModal from '../user/UserDetailModal';
-import { STORE_SEARCH_TYPES, STORE_TYPE } from '../../types/store';
+import {STORE_SEARCH_TYPES, STORE_TYPE} from '../../types/store';
 import useSearch from '../../hooks/useSearch';
-import { storeSearchAdapter } from '../../adapters/storeSearchAdapter';
+import {storeSearchAdapter} from '../../adapters/storeSearchAdapter';
 import SearchResults from '../../components/common/SearchResults';
 import StoreCard from '../../components/store/StoreCard';
 
@@ -110,7 +110,7 @@ const StoreSearch = () => {
     // 결과 목록에서 해당 가게를 삭제 상태로 표시
     const updatedResults = storeList.map(store =>
       store.storeId === deletedStoreId
-        ? { ...store, isDeleted: true }
+        ? {...store, isDeleted: true}
         : store
     );
 
@@ -356,7 +356,7 @@ const StoreSearch = () => {
 
           {/* 현재 검색 상태 표시 */}
           <div className="mt-2 mt-md-3">
-            <small className="text-muted d-flex align-items-center" style={{ fontSize: '0.75rem' }}>
+            <small className="text-muted d-flex align-items-center" style={{fontSize: '0.75rem'}}>
               <i className={`bi ${
                 searchType === STORE_SEARCH_TYPES.STORE_ID
                   ? 'bi-hash'
@@ -374,8 +374,8 @@ const StoreSearch = () => {
                 {searchType !== STORE_SEARCH_TYPES.STORE_ID && selectedStoreTypes.length > 0 && (
                   <span className="ms-2 text-primary">
                     | 필터: {selectedStoreTypes.map(type =>
-                      type === STORE_TYPE.USER_STORE ? '일반' : '사장님'
-                    ).join(', ')}
+                    type === STORE_TYPE.USER_STORE ? '일반' : '사장님'
+                  ).join(', ')}
                   </span>
                 )}
               </span>
@@ -423,7 +423,8 @@ const StoreSearch = () => {
         show={!!selectedUser}
         onHide={handleCloseUserModal}
         user={selectedUser}
-        onStoreClick={() => {}}
+        onStoreClick={() => {
+        }}
       />
     </div>
   );

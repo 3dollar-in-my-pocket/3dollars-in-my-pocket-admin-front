@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
-import { Modal, Button, Form, Row, Col, Card, Alert, Spinner } from 'react-bootstrap';
+import {useState, useEffect, useRef} from 'react';
+import {Modal, Button, Form, Row, Col, Card, Alert, Spinner} from 'react-bootstrap';
 import medalApi from '../../api/medalApi';
 import uploadApi from '../../api/uploadApi';
-import { Medal, getAcquisitionDescription } from '../../types/medal';
-import { toast } from 'react-toastify';
+import {Medal, getAcquisitionDescription} from '../../types/medal';
+import {toast} from 'react-toastify';
 
 interface MedalModalProps {
   show: boolean;
@@ -12,7 +12,7 @@ interface MedalModalProps {
   onUpdate: () => void;
 }
 
-const MedalModal = ({ show, onHide, medal, onUpdate }: MedalModalProps) => {
+const MedalModal = ({show, onHide, medal, onUpdate}: MedalModalProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -159,7 +159,7 @@ const MedalModal = ({ show, onHide, medal, onUpdate }: MedalModalProps) => {
         setIsEditing(false);
         onUpdate();
       } else {
-        setErrorMessage(response.data?.message || '메달 수정에 실패했습니다.');
+        setErrorMessage(response.message || '메달 수정에 실패했습니다.');
       }
     } catch (error: any) {
       if (!error.response) {
@@ -297,7 +297,7 @@ const MedalModal = ({ show, onHide, medal, onUpdate }: MedalModalProps) => {
                   type="file"
                   accept="image/*"
                   ref={activationFileInputRef}
-                  style={{ display: 'none' }}
+                  style={{display: 'none'}}
                   onChange={handleActivationFileChange}
                 />
                 <Button
@@ -309,7 +309,7 @@ const MedalModal = ({ show, onHide, medal, onUpdate }: MedalModalProps) => {
                 >
                   {isUploadingActivation ? (
                     <>
-                      <Spinner animation="border" size="sm" className="me-2" />
+                      <Spinner animation="border" size="sm" className="me-2"/>
                       업로드 중...
                     </>
                   ) : (
@@ -340,7 +340,7 @@ const MedalModal = ({ show, onHide, medal, onUpdate }: MedalModalProps) => {
                   type="file"
                   accept="image/*"
                   ref={disableFileInputRef}
-                  style={{ display: 'none' }}
+                  style={{display: 'none'}}
                   onChange={handleDisableFileChange}
                 />
                 <Button
@@ -352,7 +352,7 @@ const MedalModal = ({ show, onHide, medal, onUpdate }: MedalModalProps) => {
                 >
                   {isUploadingDisable ? (
                     <>
-                      <Spinner animation="border" size="sm" className="me-2" />
+                      <Spinner animation="border" size="sm" className="me-2"/>
                       업로드 중...
                     </>
                   ) : (
@@ -412,7 +412,7 @@ const MedalModal = ({ show, onHide, medal, onUpdate }: MedalModalProps) => {
             >
               {isProcessing ? (
                 <>
-                  <Spinner animation="border" size="sm" className="me-2" />
+                  <Spinner animation="border" size="sm" className="me-2"/>
                   저장 중...
                 </>
               ) : (

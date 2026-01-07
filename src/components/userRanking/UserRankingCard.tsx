@@ -3,7 +3,7 @@ import {
   getSocialTypeBadgeClass
 } from '../../types/user';
 import ItemCard from '../common/ItemCard';
-import { UserRankingItem } from '../../types/userRanking';
+import {UserRankingItem} from '../../types/userRanking';
 
 interface UserRankingCardProps {
   rankingItem: UserRankingItem;
@@ -13,8 +13,8 @@ interface UserRankingCardProps {
   onToggleSelect?: (userId: number) => void;
 }
 
-const UserRankingCard = ({ rankingItem, rank, onClick, isSelected = false, onToggleSelect }: UserRankingCardProps) => {
-  const { user, score } = rankingItem;
+const UserRankingCard = ({rankingItem, rank, onClick, isSelected = false, onToggleSelect}: UserRankingCardProps) => {
+  const {user, score} = rankingItem;
 
   const getBorderColor = () => {
     const socialTypeClass = getSocialTypeBadgeClass(user.socialType);
@@ -61,7 +61,7 @@ const UserRankingCard = ({ rankingItem, rank, onClick, isSelected = false, onTog
                 onToggleSelect(user.userId);
               }}
               onClick={(e) => e.stopPropagation()}
-              style={{ width: '20px', height: '20px', cursor: 'pointer' }}
+              style={{width: '20px', height: '20px', cursor: 'pointer'}}
             />
           </div>
         )}
@@ -91,7 +91,7 @@ const UserRankingCard = ({ rankingItem, rank, onClick, isSelected = false, onTog
             alignItems: 'center',
             justifyContent: 'center'
           }}>
-            <i className="bi bi-person fs-4" style={{ color: borderColor }}></i>
+            <i className="bi bi-person fs-4" style={{color: borderColor}}></i>
           </div>
         </div>
 
@@ -102,7 +102,8 @@ const UserRankingCard = ({ rankingItem, rank, onClick, isSelected = false, onTog
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap'
             }}>{user.name}</h6>
-            <span className={`badge rounded-pill ${getSocialTypeBadgeClass(user.socialType)} bg-opacity-10 text-dark border px-2 py-1 small`}>
+            <span
+              className={`badge rounded-pill ${getSocialTypeBadgeClass(user.socialType)} bg-opacity-10 text-dark border px-2 py-1 small`}>
               {getSocialTypeDisplayName(user.socialType)}
             </span>
           </div>
@@ -110,7 +111,8 @@ const UserRankingCard = ({ rankingItem, rank, onClick, isSelected = false, onTog
           <div className="text-center mb-3">
             <div className="row g-1">
               <div className="col-12">
-                <div className="text-muted small mb-1 d-flex align-items-center justify-content-center" title={String(user.userId)}>
+                <div className="text-muted small mb-1 d-flex align-items-center justify-content-center"
+                     title={String(user.userId)}>
                   <i className="bi bi-hash me-1"></i>
                   <span style={{
                     overflow: 'hidden',
@@ -124,7 +126,7 @@ const UserRankingCard = ({ rankingItem, rank, onClick, isSelected = false, onTog
               </div>
               <div className="col-12">
                 <div className="fw-bold d-flex align-items-center justify-content-center"
-                     style={{ color: '#667eea', fontSize: '1.1rem' }}>
+                     style={{color: '#667eea', fontSize: '1.1rem'}}>
                   <i className="bi bi-trophy-fill me-1"></i>
                   {score}점
                 </div>

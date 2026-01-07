@@ -1,5 +1,5 @@
 import React from 'react';
-import { getAdPositionSpec } from '../../constants/advertisementSpecs';
+import {getAdPositionSpec} from '../../constants/advertisementSpecs';
 import './AdPreview.css';
 
 interface AdPreviewProps {
@@ -20,18 +20,18 @@ interface AdPreviewProps {
  * 광고 미리보기 컴포넌트
  */
 const AdPreview: React.FC<AdPreviewProps> = ({
-  positionType,
-  imageUrl,
-  imageWidth,
-  imageHeight,
-  title,
-  subTitle,
-  extraContent,
-  titleFontColor = '#000000',
-  subTitleFontColor = '#969696',
-  extraContentFontColor = '#000000',
-  backgroundColor = '#FFFFFF'
-}) => {
+                                               positionType,
+                                               imageUrl,
+                                               imageWidth,
+                                               imageHeight,
+                                               title,
+                                               subTitle,
+                                               extraContent,
+                                               titleFontColor = '#000000',
+                                               subTitleFontColor = '#969696',
+                                               extraContentFontColor = '#000000',
+                                               backgroundColor = '#FFFFFF'
+                                             }) => {
   const spec = getAdPositionSpec(positionType);
 
   if (!spec) {
@@ -43,7 +43,7 @@ const AdPreview: React.FC<AdPreviewProps> = ({
     );
   }
 
-  const { previewConfig } = spec;
+  const {previewConfig} = spec;
 
   // API 응답의 imageWidth, imageHeight 비율 기반으로 표시 크기 계산
   let displayWidth = previewConfig.imageWidth;
@@ -129,13 +129,13 @@ const AdPreview: React.FC<AdPreviewProps> = ({
             <div className="ad-preview-text-area">
               <div
                 className="ad-preview-title"
-                style={{ color: titleFontColor }}
+                style={{color: titleFontColor}}
               >
                 {title || '광고 제목을 입력하세요'}
               </div>
               <div
                 className="ad-preview-subtitle"
-                style={{ color: subTitleFontColor }}
+                style={{color: subTitleFontColor}}
               >
                 {subTitle || '광고 부제목을 입력하세요'}
               </div>
@@ -191,13 +191,13 @@ const AdPreview: React.FC<AdPreviewProps> = ({
 
               <div
                 className="ad-preview-list-title"
-                style={{ color: titleFontColor }}
+                style={{color: titleFontColor}}
               >
                 {title || '광고 제목'}
               </div>
               <div
                 className="ad-preview-list-subtitle"
-                style={{ color: subTitleFontColor }}
+                style={{color: subTitleFontColor}}
               >
                 {subTitle || '광고 부제목'}
               </div>
@@ -248,7 +248,7 @@ const AdPreview: React.FC<AdPreviewProps> = ({
             {/* 타이틀 */}
             <div
               className="ad-preview-icon-title"
-              style={{ color: titleFontColor }}
+              style={{color: titleFontColor}}
             >
               {title || '광고광고광고'}
             </div>
@@ -288,7 +288,7 @@ const AdPreview: React.FC<AdPreviewProps> = ({
                   src={imageUrl}
                   alt="배너 이미지"
                   className="ad-preview-image"
-                  style={{ objectFit: 'contain' }}
+                  style={{objectFit: 'contain'}}
                 />
               ) : (
                 <div className="ad-preview-placeholder">
@@ -301,13 +301,13 @@ const AdPreview: React.FC<AdPreviewProps> = ({
             <div className="ad-preview-banner-text">
               <div
                 className="ad-preview-banner-title"
-                style={{ color: titleFontColor }}
+                style={{color: titleFontColor}}
               >
                 {title || '📢 광고문의 📢'}
               </div>
               <div
                 className="ad-preview-banner-subtitle"
-                style={{ color: subTitleFontColor }}
+                style={{color: subTitleFontColor}}
               >
                 {subTitle || '여기에 광고를 하고 싶으시다면? 여기에 광고를 하고 싶으시다면?'}
               </div>
@@ -402,13 +402,13 @@ const AdPreview: React.FC<AdPreviewProps> = ({
             <div className="ad-preview-popup-text">
               <div
                 className="ad-preview-popup-title"
-                style={{ color: titleFontColor }}
+                style={{color: titleFontColor}}
               >
                 {title || '광고 제목을 입력하세요'}
               </div>
               <div
                 className="ad-preview-popup-subtitle"
-                style={{ color: subTitleFontColor }}
+                style={{color: subTitleFontColor}}
               >
                 {subTitle || '광고 부제목을 입력하세요'}
               </div>
@@ -473,13 +473,13 @@ const AdPreview: React.FC<AdPreviewProps> = ({
             <div className="ad-preview-poll-text">
               <div
                 className="ad-preview-poll-title"
-                style={{ color: titleFontColor }}
+                style={{color: titleFontColor}}
               >
                 {title || '투표 광고 제목을 입력하세요'}
               </div>
               <div
                 className="ad-preview-poll-subtitle"
-                style={{ color: subTitleFontColor }}
+                style={{color: subTitleFontColor}}
               >
                 {subTitle || '투표 광고 부제목을 입력하세요'}
               </div>

@@ -42,9 +42,6 @@ const StoreEditForm = ({storeId, initialName, initialLabels, onSuccess, onCancel
       } else {
         console.warn('StoreLabel이 없거나 응답이 실패:', response);
       }
-    } catch (error) {
-      console.error('Enum 조회 실패:', error);
-      toast.error('라벨 목록을 불러오는데 실패했습니다.');
     } finally {
       setIsFetchingEnums(false);
     }
@@ -93,15 +90,10 @@ const StoreEditForm = ({storeId, initialName, initialLabels, onSuccess, onCancel
         labels
       });
 
-      if (response.status === 200 || response.status === 204) {
+      if (response.ok) {
         toast.success('가게 정보가 수정되었습니다.');
         onSuccess();
-      } else {
-        throw new Error('수정 실패');
       }
-    } catch (error) {
-      console.error('가게 정보 수정 실패:', error);
-      toast.error('가게 정보 수정 중 오류가 발생했습니다.');
     } finally {
       setIsLoading(false);
     }
@@ -201,7 +193,7 @@ const StoreEditForm = ({storeId, initialName, initialLabels, onSuccess, onCancel
             {/* 구분선 */}
             {availableLabels.length > 0 && (
               <div className="position-relative mb-3">
-                <hr className="my-0" />
+                <hr className="my-0"/>
                 <span className="position-absolute top-50 start-50 translate-middle bg-white px-2 text-muted small">
                   또는
                 </span>
@@ -265,7 +257,7 @@ const StoreEditForm = ({storeId, initialName, initialLabels, onSuccess, onCancel
           >
             {isLoading ? (
               <>
-                <Spinner animation="border" size="sm" className="me-2" />
+                <Spinner animation="border" size="sm" className="me-2"/>
                 저장 중...
               </>
             ) : (

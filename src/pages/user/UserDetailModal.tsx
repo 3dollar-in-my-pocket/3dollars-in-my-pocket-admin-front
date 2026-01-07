@@ -70,7 +70,7 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
       }
 
       if (allMedalsResponse.ok && allMedalsResponse.data) {
-        setAllMedals(allMedalsResponse.data.contents || []);
+        setAllMedals(allMedalsResponse.data.contents);
       } else {
         setAllMedals([]);
       }
@@ -132,15 +132,8 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
     setIsLoading(true);
     try {
       const response = await deviceApi.deleteDevice(deviceId);
-      if (response.status >= 400) {
-        toast.error('디바이스 삭제에 실패했습니다.');
-        return;
-      }
-      // 삭제 성공 시 상태에서 제거
       setDevices((prev) => prev.filter((d) => d.deviceId !== deviceId));
       toast.success('디바이스가 성공적으로 삭제되었습니다.');
-    } catch (error) {
-      toast.error('디바이스 삭제 중 오류가 발생했습니다.');
     } finally {
       setIsLoading(false);
     }
@@ -177,14 +170,8 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
       if (response.ok) {
         toast.success('메달이 지급되었습니다.');
         setSelectedMedalForAssign(null);
-        // 유저 정보 새로고침
         await fetchUserDetail();
-      } else {
-        toast.error('메달 지급에 실패했습니다.');
       }
-    } catch (error) {
-      console.error('메달 지급 실패:', error);
-      toast.error('메달 지급 중 오류가 발생했습니다.');
     } finally {
       setIsAssigningMedal(false);
     }
@@ -314,7 +301,8 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
 
                         <div className="row g-3 g-md-4">
                           <div className="col-12 col-md-6">
-                            <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-2 gap-sm-3 p-3 bg-light rounded-3">
+                            <div
+                              className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-2 gap-sm-3 p-3 bg-light rounded-3">
                               <div className="bg-primary bg-opacity-10 rounded-circle p-2">
                                 <i className="bi bi-hash text-primary"></i>
                               </div>
@@ -329,7 +317,8 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
                           </div>
 
                           <div className="col-12 col-md-6">
-                            <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-2 gap-sm-3 p-3 bg-light rounded-3">
+                            <div
+                              className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-2 gap-sm-3 p-3 bg-light rounded-3">
                               <div className="bg-success bg-opacity-10 rounded-circle p-2">
                                 <i className="bi bi-person-badge text-success"></i>
                               </div>
@@ -344,7 +333,8 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
                           </div>
 
                           <div className="col-12 col-md-6">
-                            <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-2 gap-sm-3 p-3 bg-light rounded-3">
+                            <div
+                              className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-2 gap-sm-3 p-3 bg-light rounded-3">
                               <div className="bg-warning bg-opacity-10 rounded-circle p-2">
                                 <i className="bi bi-shield-lock text-warning"></i>
                               </div>
@@ -358,7 +348,8 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
                           </div>
 
                           <div className="col-12 col-md-6">
-                            <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-2 gap-sm-3 p-3 bg-light rounded-3">
+                            <div
+                              className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-2 gap-sm-3 p-3 bg-light rounded-3">
                               <div className="bg-info bg-opacity-10 rounded-circle p-2">
                                 <i className="bi bi-calendar3 text-info"></i>
                               </div>
@@ -403,7 +394,8 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
                         ) : (
                           <div className="row g-3 g-md-4">
                             <div className="col-12 col-md-6">
-                              <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-2 gap-sm-3 p-3 bg-light rounded-3">
+                              <div
+                                className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-2 gap-sm-3 p-3 bg-light rounded-3">
                                 <div className="bg-primary bg-opacity-10 rounded-circle p-2">
                                   <i className="bi bi-bell text-primary"></i>
                                 </div>
@@ -423,7 +415,8 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
                             </div>
 
                             <div className="col-12 col-md-6">
-                              <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-2 gap-sm-3 p-3 bg-light rounded-3">
+                              <div
+                                className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-2 gap-sm-3 p-3 bg-light rounded-3">
                                 <div className="bg-info bg-opacity-10 rounded-circle p-2">
                                   <i className="bi bi-envelope text-info"></i>
                                 </div>
@@ -712,14 +705,14 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
                                   <div
                                     className={`card border-0 shadow-sm h-100 ${
                                       isRepresentative ? 'border-warning border-2' :
-                                      isSelected ? 'border-primary border-3' : ''
+                                        isSelected ? 'border-primary border-3' : ''
                                     }`}
                                     style={{
                                       background: isRepresentative
                                         ? 'linear-gradient(135deg, #fff3cd 0%, #ffffff 100%)'
                                         : isSelected
-                                        ? 'linear-gradient(135deg, #cfe2ff 0%, #ffffff 100%)'
-                                        : 'linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%)',
+                                          ? 'linear-gradient(135deg, #cfe2ff 0%, #ffffff 100%)'
+                                          : 'linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%)',
                                       borderRadius: '16px',
                                       opacity: isOwned ? 1 : 0.6,
                                       cursor: 'pointer',
@@ -767,8 +760,9 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
                                           )}
                                           {isSelected && (
                                             <div className="position-absolute top-0 start-0 translate-middle">
-                                              <div className="bg-primary rounded-circle d-flex align-items-center justify-content-center"
-                                                   style={{ width: '20px', height: '20px' }}>
+                                              <div
+                                                className="bg-primary rounded-circle d-flex align-items-center justify-content-center"
+                                                style={{width: '20px', height: '20px'}}>
                                                 <i className="bi bi-check text-white fw-bold"></i>
                                               </div>
                                             </div>
@@ -823,7 +817,8 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
                                   onClick={handleOpenAssignConfirm}
                                   disabled={isAssigningMedal || isAlreadyOwned}
                                 >
-                                  <i className={`bi ${isAlreadyOwned ? 'bi-check-circle-fill' : 'bi-award-fill'} me-2`}></i>
+                                  <i
+                                    className={`bi ${isAlreadyOwned ? 'bi-check-circle-fill' : 'bi-award-fill'} me-2`}></i>
                                   {isAlreadyOwned ? '이미 보유한 메달입니다' : '선택한 메달 지급하기'}
                                 </button>
                               </div>
@@ -933,7 +928,7 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
                     src={selectedMedal.iconUrl}
                     alt={selectedMedal.name}
                     className="rounded-circle mb-3"
-                    style={{ width: '80px', height: '80px', objectFit: 'cover' }}
+                    style={{width: '80px', height: '80px', objectFit: 'cover'}}
                   />
                   <h5 className="fw-bold text-dark mb-2">{selectedMedal.name}</h5>
                   <p className="text-muted mb-0">{selectedMedal.introduction}</p>

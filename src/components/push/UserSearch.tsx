@@ -1,16 +1,16 @@
-import { Button, Form } from "react-bootstrap";
+import {Button, Form} from "react-bootstrap";
 
 const UserSearch = ({
-  nicknameSearch,
-  onNicknameChange,
-  onSearch,
-  searchLoading,
-  searchResults,
-  isUserSelected,
-  onUserToggle,
-  selectedUsers,
-  onUserRemove
-}) => {
+                      nicknameSearch,
+                      onNicknameChange,
+                      onSearch,
+                      searchLoading,
+                      searchResults,
+                      isUserSelected,
+                      onUserToggle,
+                      selectedUsers,
+                      onUserRemove
+                    }) => {
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();

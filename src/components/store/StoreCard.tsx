@@ -14,7 +14,7 @@ import {
 } from '../../types/store';
 import ItemCard from '../common/ItemCard';
 
-const StoreCard = ({ store, onClick, isDeleted = false }) => {
+const StoreCard = ({store, onClick, isDeleted = false}) => {
   const formatDateTime = (dateString) => {
     if (!dateString) return '없음';
     return new Date(dateString).toLocaleDateString('ko-KR');
@@ -58,14 +58,21 @@ const StoreCard = ({ store, onClick, isDeleted = false }) => {
 
 
         {isDeleted && (
-          <div className="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style={{
-            background: 'rgba(220, 53, 69, 0.1)',
-            backdropFilter: 'blur(1px)',
-            zIndex: 10,
-            borderRadius: '15px'
-          }}>
+          <div className="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+               style={{
+                 background: 'rgba(220, 53, 69, 0.1)',
+                 backdropFilter: 'blur(1px)',
+                 zIndex: 10,
+                 borderRadius: '15px'
+               }}>
             <div className="text-center">
-              <div className="bg-danger rounded-circle p-3 mb-2 mx-auto" style={{width: '60px', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+              <div className="bg-danger rounded-circle p-3 mb-2 mx-auto" style={{
+                width: '60px',
+                height: '60px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
                 <i className="bi bi-trash text-white fs-4"></i>
               </div>
               <h6 className="text-danger fw-bold mb-1">삭제된 가게</h6>
@@ -88,13 +95,13 @@ const StoreCard = ({ store, onClick, isDeleted = false }) => {
               <div className="d-flex justify-content-center">
                 <span className={`badge rounded-pill position-relative ${
                   store.status === 'ACTIVE' ? 'bg-success' :
-                  store.status === 'DELETED' ? 'bg-danger' :
-                  store.status === 'AUTO_DELETED' ? 'bg-warning' : 'bg-secondary'
+                    store.status === 'DELETED' ? 'bg-danger' :
+                      store.status === 'AUTO_DELETED' ? 'bg-warning' : 'bg-secondary'
                 } text-white px-3 py-1 small`} style={{fontSize: '0.75rem'}}>
                   <i className={`bi ${
                     store.status === 'ACTIVE' ? 'bi-check-circle-fill' :
-                    store.status === 'DELETED' ? 'bi-x-circle-fill' :
-                    store.status === 'AUTO_DELETED' ? 'bi-exclamation-triangle-fill' : 'bi-question-circle-fill'
+                      store.status === 'DELETED' ? 'bi-x-circle-fill' :
+                        store.status === 'AUTO_DELETED' ? 'bi-exclamation-triangle-fill' : 'bi-question-circle-fill'
                   } me-1`}></i>
                   {getStoreStatusDisplayName(store.status)}
                   {store.status === 'ACTIVE' && (

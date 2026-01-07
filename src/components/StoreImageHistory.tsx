@@ -27,11 +27,10 @@ const StoreImageHistory = ({storeId, isActive, onAuthorClick}) => {
     try {
       const response = await storeImageApi.getStoreImages(storeId, reset ? null : cursor, 20);
       if (!response?.ok) {
-        toast.error('이미지 목록을 불러오는 중 오류가 발생했습니다.');
         return;
       }
 
-      const {contents = [], cursor: newCursor = {}} = response.data || {};
+      const {contents = [], cursor: newCursor} = response.data || { contents: [], cursor: { hasMore: false, nextCursor: null } };
 
       if (reset) {
         setImages(contents);
@@ -42,8 +41,6 @@ const StoreImageHistory = ({storeId, isActive, onAuthorClick}) => {
       setHasMore(newCursor.hasMore || false);
       setCursor(newCursor.nextCursor || null);
       setTotalCount(newCursor.totalCount || 0);
-    } catch (error) {
-      toast.error('이미지 목록을 불러오는 중 오류가 발생했습니다.');
     } finally {
       setIsLoading(false);
     }
@@ -96,17 +93,12 @@ const StoreImageHistory = ({storeId, isActive, onAuthorClick}) => {
     try {
       const response = await storeImageApi.deleteStoreImage(selectedImage.imageId);
 
-      if (response.status === 200 || response.status === 204) {
+      if (response.ok) {
         toast.success('이미지가 성공적으로 삭제되었습니다.');
         handleCloseModal();
         // 이미지 목록 새로고침
         fetchImages(true);
-      } else {
-        throw new Error('삭제 실패');
       }
-    } catch (error) {
-      console.error('이미지 삭제 실패:', error);
-      toast.error('이미지 삭제 중 오류가 발생했습니다.');
     } finally {
       setIsDeleting(false);
     }

@@ -23,12 +23,9 @@ export const useNonce = () => {
         setNonce(response.data.nonce);
         return response.data.nonce;
       } else {
-        toast.error("Nonce 토큰 발급에 실패했습니다.");
         return null;
       }
     } catch (error) {
-      console.error("Nonce 토큰 발급 오류:", error);
-      toast.error("Nonce 토큰 발급 중 오류가 발생했습니다.");
       return null;
     } finally {
       setIsLoading(false);

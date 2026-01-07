@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
-import { Alert, Button, Card, Col, Container, Row, Spinner, Badge } from 'react-bootstrap';
+import {useEffect, useState} from 'react';
+import {Alert, Button, Card, Col, Container, Row, Spinner, Badge} from 'react-bootstrap';
 import medalApi from "../../api/medalApi";
-import { Medal, hasAcquisition, getAcquisitionDescription } from "../../types/medal";
+import {Medal, hasAcquisition, getAcquisitionDescription} from "../../types/medal";
 import MedalModal from "./MedalModal";
 
 const MedalManagement = () => {
@@ -19,7 +19,7 @@ const MedalManagement = () => {
       if (response.ok) {
         setMedals(response.data.contents);
       } else {
-        setErrorMessage(response.data?.message || '메달 목록 조회에 실패했습니다.');
+        setErrorMessage(response.message || '메달 목록 조회에 실패했습니다.');
       }
     } catch (error: any) {
       if (!error.response) {
@@ -56,7 +56,7 @@ const MedalManagement = () => {
         <Button variant="primary" onClick={fetchMedals} disabled={isLoading}>
           {isLoading ? (
             <>
-              <Spinner animation="border" size="sm" className="me-2" />
+              <Spinner animation="border" size="sm" className="me-2"/>
               조회 중...
             </>
           ) : (
@@ -77,12 +77,13 @@ const MedalManagement = () => {
 
       {isLoading && medals.length === 0 ? (
         <div className="text-center py-5">
-          <Spinner animation="border" variant="primary" />
+          <Spinner animation="border" variant="primary"/>
           <p className="mt-3 text-muted">메달 목록을 불러오는 중...</p>
         </div>
       ) : medals.length === 0 ? (
         <div className="text-center py-5">
-          <div className="bg-light rounded-circle mx-auto mb-3" style={{width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+          <div className="bg-light rounded-circle mx-auto mb-3"
+               style={{width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
             <i className="bi bi-award fs-1 text-secondary"></i>
           </div>
           <h5 className="text-muted">메달이 없습니다.</h5>
@@ -93,7 +94,7 @@ const MedalManagement = () => {
             <Col key={medal.medalId} xs={12} sm={6} md={4} lg={3}>
               <Card
                 className="h-100 shadow-sm hover-shadow"
-                style={{ cursor: 'pointer', transition: 'all 0.3s' }}
+                style={{cursor: 'pointer', transition: 'all 0.3s'}}
                 onClick={() => handleMedalClick(medal)}
               >
                 <Card.Body className="d-flex flex-column">
@@ -117,7 +118,7 @@ const MedalManagement = () => {
                     <h6 className="fw-bold mb-1">{medal.name}</h6>
                   </div>
 
-                  <p className="text-muted small text-center mb-3" style={{ minHeight: '40px' }}>
+                  <p className="text-muted small text-center mb-3" style={{minHeight: '40px'}}>
                     {medal.introduction}
                   </p>
 

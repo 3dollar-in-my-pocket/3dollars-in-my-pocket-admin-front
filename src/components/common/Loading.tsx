@@ -10,12 +10,12 @@ interface LoadingProps {
 }
 
 export default function Loading({
-  loading = true,
-  variant = "center",
-  size = "md",
-  color = "primary",
-  children,
-}: LoadingProps): React.ReactElement {
+                                  loading = true,
+                                  variant = "center",
+                                  size = "md",
+                                  color = "primary",
+                                  children,
+                                }: LoadingProps): React.ReactElement {
   if (!loading) return <>{children}</>;
 
   const sizeMap: Record<string, string> = {

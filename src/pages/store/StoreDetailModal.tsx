@@ -24,7 +24,7 @@ import {
   getLabelBadgeClass,
   getLabelIcon
 } from '../../types/store';
-import { WRITER_TYPE } from '../../types/common';
+import {WRITER_TYPE} from '../../types/common';
 import storeApi from '../../api/storeApi';
 import ActivityHistory from '../../components/ActivityHistory';
 import StoreReviewHistory from '../../components/StoreReviewHistory';
@@ -161,19 +161,14 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
     try {
       const response = await storeApi.deleteStore(store.storeId);
 
-      if (response.status === 200 || response.status === 204) {
+      if (response.ok) {
         toast.success('가게가 성공적으로 삭제되었습니다.');
         handleClose();
         // 부모 컴포넌트에 삭제 완료를 알려 목록에서 해당 가게를 제거하도록 함
         if (onStoreDeleted) {
           onStoreDeleted(store.storeId);
         }
-      } else {
-        throw new Error('삭제 실패');
       }
-    } catch (error) {
-      console.error('가게 삭제 실패:', error);
-      toast.error('가게 삭제 중 오류가 발생했습니다.');
     } finally {
       setIsDeleting(false);
     }
@@ -233,7 +228,7 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
     return (
       <div className="d-flex align-items-center gap-2">
         <div className="bg-success bg-opacity-10 rounded-circle p-1">
-          <i className="bi bi-person-fill text-success" style={{ fontSize: '0.9rem' }}></i>
+          <i className="bi bi-person-fill text-success" style={{fontSize: '0.9rem'}}></i>
         </div>
         <div
           className={`d-flex align-items-center gap-1 ${isClickable ? 'clickable-author' : ''}`}
@@ -264,12 +259,13 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
           }}
         >
           <span className="text-muted small">가게 제보자:</span>
-          <span className={`badge rounded-pill px-3 py-2 ${getWriterTypeBadgeClass(owner.writerType)} bg-opacity-10 ${isClickable ? 'text-primary' : 'text-dark'} border`}>
+          <span
+            className={`badge rounded-pill px-3 py-2 ${getWriterTypeBadgeClass(owner.writerType)} bg-opacity-10 ${isClickable ? 'text-primary' : 'text-dark'} border`}>
             <i className="bi bi-shop me-1"></i>
             {owner.name}
           </span>
           {isClickable && (
-            <i className="bi bi-box-arrow-up-right text-primary" style={{ fontSize: '0.7rem' }}></i>
+            <i className="bi bi-box-arrow-up-right text-primary" style={{fontSize: '0.7rem'}}></i>
           )}
         </div>
       </div>
@@ -334,7 +330,7 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
         <span
           key={day}
           className={`badge ${isActive ? 'bg-primary' : 'bg-light text-muted'} me-1 mb-1`}
-          style={{ fontSize: '0.75rem', minWidth: '24px' }}
+          style={{fontSize: '0.75rem', minWidth: '24px'}}
         >
           {dayNames[index]}
         </span>
@@ -358,7 +354,7 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
     }
 
     return methods.map((method, index) => (
-      <span key={index} className="badge bg-info me-1 mb-1" style={{ fontSize: '0.75rem' }}>
+      <span key={index} className="badge bg-info me-1 mb-1" style={{fontSize: '0.75rem'}}>
         {getPaymentMethodDisplayName(method)}
       </span>
     ));
@@ -598,312 +594,316 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
                   </div>
                 ) : (
                   <div className="container-fluid p-1 p-sm-2 p-md-4">
-                  {/* 핵심 정보 카드 */}
-                  <div className="row mb-4">
-                    <div className="col-12">
-                      <div className="card border-0 shadow-sm" style={{borderRadius: '12px'}}>
-                        <div className="card-body p-2 p-sm-3 p-md-4">
-                          <div className="row align-items-center">
-                            <div className="col-lg-8">
-                              <div className="d-flex align-items-center gap-3 mb-3">
-                                <div
-                                  className="rounded-3 d-flex align-items-center justify-content-center"
-                                  style={{
-                                    width: '48px',
-                                    height: '48px',
-                                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-                                  }}
-                                >
-                                  <i className="bi bi-shop fs-5 text-white"></i>
-                                </div>
-                                <div>
-                                  <h5 className="mb-1 fw-bold text-dark">{storeDetail?.name || store.name}</h5>
-                                  <div className="d-flex align-items-center gap-2 flex-wrap mb-2">
-                                    {getStatusBadge(storeDetail?.status || store.status)}
-                                    {getActivitiesBadge(storeDetail?.activitiesStatus || store.activitiesStatus)}
-                                    {getSalesTypeBadge(storeDetail?.salesType)}
-                                    {getOpenStatusBadge(storeDetail?.openStatus)}
+                    {/* 핵심 정보 카드 */}
+                    <div className="row mb-4">
+                      <div className="col-12">
+                        <div className="card border-0 shadow-sm" style={{borderRadius: '12px'}}>
+                          <div className="card-body p-2 p-sm-3 p-md-4">
+                            <div className="row align-items-center">
+                              <div className="col-lg-8">
+                                <div className="d-flex align-items-center gap-3 mb-3">
+                                  <div
+                                    className="rounded-3 d-flex align-items-center justify-content-center"
+                                    style={{
+                                      width: '48px',
+                                      height: '48px',
+                                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                                    }}
+                                  >
+                                    <i className="bi bi-shop fs-5 text-white"></i>
                                   </div>
-                                  {/* 라벨 정보 (별도 줄) */}
-                                  {(storeDetail?.labels || store.labels) && (storeDetail?.labels || store.labels).length > 0 && (
-                                    <div className="d-flex align-items-center gap-2 flex-wrap">
-                                      {getLabelBadges(storeDetail?.labels || store.labels)}
+                                  <div>
+                                    <h5 className="mb-1 fw-bold text-dark">{storeDetail?.name || store.name}</h5>
+                                    <div className="d-flex align-items-center gap-2 flex-wrap mb-2">
+                                      {getStatusBadge(storeDetail?.status || store.status)}
+                                      {getActivitiesBadge(storeDetail?.activitiesStatus || store.activitiesStatus)}
+                                      {getSalesTypeBadge(storeDetail?.salesType)}
+                                      {getOpenStatusBadge(storeDetail?.openStatus)}
                                     </div>
-                                  )}
+                                    {/* 라벨 정보 (별도 줄) */}
+                                    {(storeDetail?.labels || store.labels) && (storeDetail?.labels || store.labels).length > 0 && (
+                                      <div className="d-flex align-items-center gap-2 flex-wrap">
+                                        {getLabelBadges(storeDetail?.labels || store.labels)}
+                                      </div>
+                                    )}
+                                  </div>
                                 </div>
+                                {storeDetail?.owner && (
+                                  <div className="mb-3">
+                                    {getOwnerBadge(storeDetail.owner)}
+                                  </div>
+                                )}
                               </div>
-                              {storeDetail?.owner && (
-                                <div className="mb-3">
-                                  {getOwnerBadge(storeDetail.owner)}
+                              {storeDetail?.metadata && (
+                                <div className="col-lg-4">
+                                  <div className="row g-2">
+                                    <div className="col-4">
+                                      <div
+                                        className="bg-primary bg-opacity-10 rounded-3 p-3 text-center position-relative"
+                                        style={{cursor: 'pointer', transition: 'all 0.2s ease'}}
+                                        onClick={handleReviewClick}
+                                      >
+                                        <div
+                                          className="fw-bold text-primary mb-1">{formatCount(storeDetail.metadata.reviewCount)}</div>
+                                        <div className="text-muted small">리뷰</div>
+                                      </div>
+                                    </div>
+                                    <div className="col-4">
+                                      <div className="bg-success bg-opacity-10 rounded-3 p-3 text-center">
+                                        <div
+                                          className="fw-bold text-success mb-1">{formatCount(storeDetail.metadata.subscriberCount)}</div>
+                                        <div className="text-muted small">구독자</div>
+                                      </div>
+                                    </div>
+                                    <div className="col-4">
+                                      <div
+                                        className="bg-danger bg-opacity-10 rounded-3 p-3 text-center position-relative"
+                                        style={{cursor: 'pointer', transition: 'all 0.2s ease'}}
+                                        onClick={handleReportClick}
+                                      >
+                                        <div
+                                          className="fw-bold text-danger mb-1">{formatCount(storeDetail.metadata.reportCount)}</div>
+                                        <div className="text-muted small">신고</div>
+                                      </div>
+                                    </div>
+                                  </div>
                                 </div>
                               )}
                             </div>
-                            {storeDetail?.metadata && (
-                              <div className="col-lg-4">
-                                <div className="row g-2">
-                                  <div className="col-4">
-                                    <div
-                                      className="bg-primary bg-opacity-10 rounded-3 p-3 text-center position-relative"
-                                      style={{cursor: 'pointer', transition: 'all 0.2s ease'}}
-                                      onClick={handleReviewClick}
-                                    >
-                                      <div className="fw-bold text-primary mb-1">{formatCount(storeDetail.metadata.reviewCount)}</div>
-                                      <div className="text-muted small">리뷰</div>
-                                    </div>
-                                  </div>
-                                  <div className="col-4">
-                                    <div className="bg-success bg-opacity-10 rounded-3 p-3 text-center">
-                                      <div className="fw-bold text-success mb-1">{formatCount(storeDetail.metadata.subscriberCount)}</div>
-                                      <div className="text-muted small">구독자</div>
-                                    </div>
-                                  </div>
-                                  <div className="col-4">
-                                    <div
-                                      className="bg-danger bg-opacity-10 rounded-3 p-3 text-center position-relative"
-                                      style={{cursor: 'pointer', transition: 'all 0.2s ease'}}
-                                      onClick={handleReportClick}
-                                    >
-                                      <div className="fw-bold text-danger mb-1">{formatCount(storeDetail.metadata.reportCount)}</div>
-                                      <div className="text-muted small">신고</div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            )}
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* 상세 정보 섹션 */}
-                  <div className="row mb-4">
-                    <div className="col-12">
-                      <div className="card border-0 shadow-sm" style={{borderRadius: '12px'}}>
-                        <div className="card-header bg-white border-0 p-2 p-sm-3 p-md-4">
-                          <h6 className="mb-0 fw-bold text-dark d-flex align-items-center gap-2">
-                            <i className="bi bi-info-circle text-primary"></i>
-                            상세 정보
-                          </h6>
-                        </div>
-                        <div className="card-body p-2 p-sm-3 p-md-4">
-                          <div className="row g-4">
-                          <div className="col-md-6">
-                            <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
-                              <div className="bg-primary bg-opacity-10 rounded-circle p-2">
-                                <i className="bi bi-hash text-primary"></i>
-                              </div>
-                              <div>
-                                <label className="form-label fw-semibold text-muted mb-1">가게 ID</label>
-                                <p className="mb-0 fw-bold text-dark">{storeDetail?.storeId || store.storeId}</p>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="col-md-6">
-                            <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
-                              <div className="bg-warning bg-opacity-10 rounded-circle p-2">
-                                <i className="bi bi-star text-warning"></i>
-                              </div>
-                              <div>
-                                <label className="form-label fw-semibold text-muted mb-1">평균 평점</label>
-                                <p
-                                  className="mb-0 fw-bold text-dark">{formatRating(storeDetail?.rating || store.rating)}</p>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="col-12">
-                            <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
-                              <div className="bg-success bg-opacity-10 rounded-circle p-2">
-                                <i className="bi bi-geo-alt text-success"></i>
-                              </div>
-                              <div className="flex-grow-1">
-                                <label className="form-label fw-semibold text-muted mb-1">주소</label>
-                                <p className="mb-0 fw-bold text-dark">
-                                  {(storeDetail?.address || store.address)?.fullAddress || '주소 정보 없음'}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="col-md-6">
-                            <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
-                              <div className="bg-info bg-opacity-10 rounded-circle p-2">
-                                <i className="bi bi-calendar3 text-info"></i>
-                              </div>
-                              <div>
-                                <label className="form-label fw-semibold text-muted mb-1">생성일</label>
-                                <p
-                                  className="mb-0 fw-bold text-dark">{formatDateTime(storeDetail?.createdAt || store.createdAt)}</p>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="col-md-6">
-                            <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
-                              <div className="bg-secondary bg-opacity-10 rounded-circle p-2">
-                                <i className="bi bi-clock-history text-secondary"></i>
-                              </div>
-                              <div>
-                                <label className="form-label fw-semibold text-muted mb-1">마지막 수정일</label>
-                                <p
-                                  className="mb-0 fw-bold text-dark">{formatDateTime(storeDetail?.updatedAt || store.updatedAt)}</p>
-                              </div>
-                            </div>
-                          </div>
-
-                          {storeDetail?.openStatus?.openStartDateTime && (
-                            <div className="col-md-6">
-                              <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
-                                <div className="bg-success bg-opacity-10 rounded-circle p-2">
-                                  <i className="bi bi-clock text-success"></i>
-                                </div>
-                                <div>
-                                  <label className="form-label fw-semibold text-muted mb-1">영업 시작</label>
-                                  <p className="mb-0 fw-bold text-dark">{formatOpenStartDateTime(storeDetail.openStatus.openStartDateTime)}</p>
-                                </div>
-                              </div>
-                            </div>
-                          )}
-
-                          <div className="col-12">
-                            <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
-                              <div className="bg-primary bg-opacity-10 rounded-circle p-2">
-                                <i className="bi bi-calendar-week text-primary"></i>
-                              </div>
-                              <div className="flex-grow-1">
-                                <label className="form-label fw-semibold text-muted mb-1">영업 요일</label>
-                                <div className="d-flex flex-wrap gap-1">
-                                  {formatAppearanceDays(storeDetail?.appearanceDays || store.appearanceDays)}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="col-12">
-                            <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
-                              <div className="bg-info bg-opacity-10 rounded-circle p-2">
-                                <i className="bi bi-credit-card text-info"></i>
-                              </div>
-                              <div className="flex-grow-1">
-                                <label className="form-label fw-semibold text-muted mb-1">결제 방법</label>
-                                <div className="d-flex flex-wrap gap-1">
-                                  {formatPaymentMethods(storeDetail?.paymentMethods || store.paymentMethods)}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 카테고리 정보 섹션 */}
-                  <div className="row mb-4">
-                    <div className="col-12">
-                      <div className="card border-0 shadow-sm" style={{borderRadius: '12px'}}>
-                        <div className="card-header bg-white border-0 p-2 p-sm-3 p-md-4">
-                          <h6 className="mb-0 fw-bold text-dark d-flex align-items-center gap-2">
-                            <i className="bi bi-tags text-info"></i>
-                            카테고리 정보
-                            {store.categories && store.categories.length > 0 && (
-                              <span className="badge bg-info ms-auto px-3 py-2 rounded-pill">
-                                총 {store.categories.length}개
-                              </span>
-                            )}
-                          </h6>
-                        </div>
-                        <div className="card-body p-2 p-sm-3 p-md-4">
-                          {getCategoryList(storeDetail?.categories || store.categories)}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 메뉴 정보 섹션 */}
-                  {storeDetail?.menus && storeDetail.menus.length > 0 && (
+                    {/* 상세 정보 섹션 */}
                     <div className="row mb-4">
                       <div className="col-12">
                         <div className="card border-0 shadow-sm" style={{borderRadius: '12px'}}>
                           <div className="card-header bg-white border-0 p-2 p-sm-3 p-md-4">
                             <h6 className="mb-0 fw-bold text-dark d-flex align-items-center gap-2">
-                              <i className="bi bi-menu-button-wide text-warning"></i>
-                              메뉴 정보
-                              <span className="badge bg-warning ms-auto px-3 py-2 rounded-pill">
-                                총 {storeDetail.menus.length}개
-                              </span>
+                              <i className="bi bi-info-circle text-primary"></i>
+                              상세 정보
                             </h6>
                           </div>
                           <div className="card-body p-2 p-sm-3 p-md-4">
-                            <div className="row g-3">
-                              {storeDetail.menus.map((menu, index) => (
-                                <div key={index} className="col-md-6 col-lg-4">
-                                  <div className="card border-0 shadow-sm h-100" style={{
-                                    background: 'linear-gradient(135deg, #fff8dc 0%, #ffffff 100%)',
-                                    borderRadius: '16px'
-                                  }}>
-                                    <div className="card-body p-3">
-                                      <div className="d-flex flex-column align-items-center text-center">
-                                        <div className="mb-3">
-                                          {menu.category?.imageUrl ? (
-                                            <img
-                                              src={menu.category.imageUrl}
-                                              alt={menu.category.name}
-                                              className="rounded-circle"
-                                              style={{width: '50px', height: '50px', objectFit: 'cover'}}
-                                            />
-                                          ) : (
-                                            <div className="bg-warning bg-opacity-10 rounded-circle p-3" style={{
-                                              width: '50px',
-                                              height: '50px',
-                                              display: 'flex',
-                                              alignItems: 'center',
-                                              justifyContent: 'center'
-                                            }}>
-                                              <i
-                                                className={`bi ${getCategoryIcon(menu.category?.categoryId)} text-warning`}></i>
-                                            </div>
+                            <div className="row g-4">
+                              <div className="col-md-6">
+                                <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
+                                  <div className="bg-primary bg-opacity-10 rounded-circle p-2">
+                                    <i className="bi bi-hash text-primary"></i>
+                                  </div>
+                                  <div>
+                                    <label className="form-label fw-semibold text-muted mb-1">가게 ID</label>
+                                    <p className="mb-0 fw-bold text-dark">{storeDetail?.storeId || store.storeId}</p>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="col-md-6">
+                                <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
+                                  <div className="bg-warning bg-opacity-10 rounded-circle p-2">
+                                    <i className="bi bi-star text-warning"></i>
+                                  </div>
+                                  <div>
+                                    <label className="form-label fw-semibold text-muted mb-1">평균 평점</label>
+                                    <p
+                                      className="mb-0 fw-bold text-dark">{formatRating(storeDetail?.rating || store.rating)}</p>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="col-12">
+                                <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
+                                  <div className="bg-success bg-opacity-10 rounded-circle p-2">
+                                    <i className="bi bi-geo-alt text-success"></i>
+                                  </div>
+                                  <div className="flex-grow-1">
+                                    <label className="form-label fw-semibold text-muted mb-1">주소</label>
+                                    <p className="mb-0 fw-bold text-dark">
+                                      {(storeDetail?.address || store.address)?.fullAddress || '주소 정보 없음'}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="col-md-6">
+                                <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
+                                  <div className="bg-info bg-opacity-10 rounded-circle p-2">
+                                    <i className="bi bi-calendar3 text-info"></i>
+                                  </div>
+                                  <div>
+                                    <label className="form-label fw-semibold text-muted mb-1">생성일</label>
+                                    <p
+                                      className="mb-0 fw-bold text-dark">{formatDateTime(storeDetail?.createdAt || store.createdAt)}</p>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="col-md-6">
+                                <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
+                                  <div className="bg-secondary bg-opacity-10 rounded-circle p-2">
+                                    <i className="bi bi-clock-history text-secondary"></i>
+                                  </div>
+                                  <div>
+                                    <label className="form-label fw-semibold text-muted mb-1">마지막 수정일</label>
+                                    <p
+                                      className="mb-0 fw-bold text-dark">{formatDateTime(storeDetail?.updatedAt || store.updatedAt)}</p>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {storeDetail?.openStatus?.openStartDateTime && (
+                                <div className="col-md-6">
+                                  <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
+                                    <div className="bg-success bg-opacity-10 rounded-circle p-2">
+                                      <i className="bi bi-clock text-success"></i>
+                                    </div>
+                                    <div>
+                                      <label className="form-label fw-semibold text-muted mb-1">영업 시작</label>
+                                      <p
+                                        className="mb-0 fw-bold text-dark">{formatOpenStartDateTime(storeDetail.openStatus.openStartDateTime)}</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+
+                              <div className="col-12">
+                                <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
+                                  <div className="bg-primary bg-opacity-10 rounded-circle p-2">
+                                    <i className="bi bi-calendar-week text-primary"></i>
+                                  </div>
+                                  <div className="flex-grow-1">
+                                    <label className="form-label fw-semibold text-muted mb-1">영업 요일</label>
+                                    <div className="d-flex flex-wrap gap-1">
+                                      {formatAppearanceDays(storeDetail?.appearanceDays || store.appearanceDays)}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="col-12">
+                                <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
+                                  <div className="bg-info bg-opacity-10 rounded-circle p-2">
+                                    <i className="bi bi-credit-card text-info"></i>
+                                  </div>
+                                  <div className="flex-grow-1">
+                                    <label className="form-label fw-semibold text-muted mb-1">결제 방법</label>
+                                    <div className="d-flex flex-wrap gap-1">
+                                      {formatPaymentMethods(storeDetail?.paymentMethods || store.paymentMethods)}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 카테고리 정보 섹션 */}
+                    <div className="row mb-4">
+                      <div className="col-12">
+                        <div className="card border-0 shadow-sm" style={{borderRadius: '12px'}}>
+                          <div className="card-header bg-white border-0 p-2 p-sm-3 p-md-4">
+                            <h6 className="mb-0 fw-bold text-dark d-flex align-items-center gap-2">
+                              <i className="bi bi-tags text-info"></i>
+                              카테고리 정보
+                              {store.categories && store.categories.length > 0 && (
+                                <span className="badge bg-info ms-auto px-3 py-2 rounded-pill">
+                                총 {store.categories.length}개
+                              </span>
+                              )}
+                            </h6>
+                          </div>
+                          <div className="card-body p-2 p-sm-3 p-md-4">
+                            {getCategoryList(storeDetail?.categories || store.categories)}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 메뉴 정보 섹션 */}
+                    {storeDetail?.menus && storeDetail.menus.length > 0 && (
+                      <div className="row mb-4">
+                        <div className="col-12">
+                          <div className="card border-0 shadow-sm" style={{borderRadius: '12px'}}>
+                            <div className="card-header bg-white border-0 p-2 p-sm-3 p-md-4">
+                              <h6 className="mb-0 fw-bold text-dark d-flex align-items-center gap-2">
+                                <i className="bi bi-menu-button-wide text-warning"></i>
+                                메뉴 정보
+                                <span className="badge bg-warning ms-auto px-3 py-2 rounded-pill">
+                                총 {storeDetail.menus.length}개
+                              </span>
+                              </h6>
+                            </div>
+                            <div className="card-body p-2 p-sm-3 p-md-4">
+                              <div className="row g-3">
+                                {storeDetail.menus.map((menu, index) => (
+                                  <div key={index} className="col-md-6 col-lg-4">
+                                    <div className="card border-0 shadow-sm h-100" style={{
+                                      background: 'linear-gradient(135deg, #fff8dc 0%, #ffffff 100%)',
+                                      borderRadius: '16px'
+                                    }}>
+                                      <div className="card-body p-3">
+                                        <div className="d-flex flex-column align-items-center text-center">
+                                          <div className="mb-3">
+                                            {menu.category?.imageUrl ? (
+                                              <img
+                                                src={menu.category.imageUrl}
+                                                alt={menu.category.name}
+                                                className="rounded-circle"
+                                                style={{width: '50px', height: '50px', objectFit: 'cover'}}
+                                              />
+                                            ) : (
+                                              <div className="bg-warning bg-opacity-10 rounded-circle p-3" style={{
+                                                width: '50px',
+                                                height: '50px',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center'
+                                              }}>
+                                                <i
+                                                  className={`bi ${getCategoryIcon(menu.category?.categoryId)} text-warning`}></i>
+                                              </div>
+                                            )}
+                                          </div>
+                                          <h6 className="fw-bold text-dark mb-1 small">
+                                            {menu.name || menu.category?.name || '메뉴명 없음'}
+                                          </h6>
+                                          {menu.description && (
+                                            <p className="text-muted mb-2 small"
+                                               style={{fontSize: '0.75rem', lineHeight: '1.2'}}>
+                                              {menu.description}
+                                            </p>
                                           )}
-                                        </div>
-                                        <h6 className="fw-bold text-dark mb-1 small">
-                                          {menu.name || menu.category?.name || '메뉴명 없음'}
-                                        </h6>
-                                        {menu.description && (
-                                          <p className="text-muted mb-2 small"
-                                             style={{fontSize: '0.75rem', lineHeight: '1.2'}}>
-                                            {menu.description}
-                                          </p>
-                                        )}
-                                        {menu.category && (
-                                          <div className="d-flex flex-column gap-1">
+                                          {menu.category && (
+                                            <div className="d-flex flex-column gap-1">
                                             <span
                                               className="badge bg-warning bg-opacity-10 text-warning border border-warning rounded-pill px-2 py-1"
                                               style={{fontSize: '0.7rem'}}>
                                               <i className="bi bi-tag me-1"></i>
                                               {menu.category.name}
                                             </span>
-                                            {menu.category.classification && (
-                                              <span
-                                                className="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-2 py-1"
-                                                style={{fontSize: '0.7rem'}}>
+                                              {menu.category.classification && (
+                                                <span
+                                                  className="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-2 py-1"
+                                                  style={{fontSize: '0.7rem'}}>
                                                 {menu.category.classification.description}
                                               </span>
-                                            )}
-                                          </div>
-                                        )}
+                                              )}
+                                            </div>
+                                          )}
+                                        </div>
                                       </div>
                                     </div>
                                   </div>
-                                </div>
-                              ))}
+                                ))}
+                              </div>
                             </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  )}
+                    )}
                   </div>
                 )}
               </div>
@@ -914,11 +914,13 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
               eventKey="settings"
               disabled={(storeDetail?.storeType !== 'BOSS_STORE' && store?.storeType !== 'BOSS_STORE')}
               title={
-                <span className={`d-flex align-items-center gap-1 gap-md-2 px-1 py-2 ${(storeDetail?.storeType !== 'BOSS_STORE' && store?.storeType !== 'BOSS_STORE') ? 'text-muted' : ''}`} style={{
-                  fontSize: window.innerWidth <= 768 ? '0.85rem' : '1rem',
-                  whiteSpace: 'nowrap',
-                  minWidth: 'fit-content'
-                }}>
+                <span
+                  className={`d-flex align-items-center gap-1 gap-md-2 px-1 py-2 ${(storeDetail?.storeType !== 'BOSS_STORE' && store?.storeType !== 'BOSS_STORE') ? 'text-muted' : ''}`}
+                  style={{
+                    fontSize: window.innerWidth <= 768 ? '0.85rem' : '1rem',
+                    whiteSpace: 'nowrap',
+                    minWidth: 'fit-content'
+                  }}>
                   <i className="bi bi-gear" style={{fontSize: '0.9rem'}}></i>
                   <span className="fw-medium d-none d-sm-inline">가게 설정</span>
                   <span className="fw-medium d-sm-none">설정</span>
@@ -938,11 +940,17 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
               }
             >
               {(storeDetail?.storeType === 'BOSS_STORE' || store?.storeType === 'BOSS_STORE') ? (
-                <StoreSettings storeId={store?.storeId} />
+                <StoreSettings storeId={store?.storeId}/>
               ) : (
                 <div className="p-4">
                   <div className="text-center py-5">
-                    <div className="bg-light rounded-circle mx-auto mb-3" style={{width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                    <div className="bg-light rounded-circle mx-auto mb-3" style={{
+                      width: '80px',
+                      height: '80px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
                       <i className="bi bi-gear fs-1 text-secondary"></i>
                     </div>
                     <h5 className="text-dark mb-2">가게 설정 기능 미지원</h5>
@@ -987,11 +995,13 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
               eventKey="contributors"
               disabled={(storeDetail?.storeType === 'BOSS_STORE' || store?.storeType === 'BOSS_STORE')}
               title={
-                <span className={`d-flex align-items-center gap-1 gap-md-2 px-1 py-2 ${(storeDetail?.storeType === 'BOSS_STORE' || store?.storeType === 'BOSS_STORE') ? 'text-muted' : ''}`} style={{
-                  fontSize: window.innerWidth <= 768 ? '0.85rem' : '1rem',
-                  whiteSpace: 'nowrap',
-                  minWidth: 'fit-content'
-                }}>
+                <span
+                  className={`d-flex align-items-center gap-1 gap-md-2 px-1 py-2 ${(storeDetail?.storeType === 'BOSS_STORE' || store?.storeType === 'BOSS_STORE') ? 'text-muted' : ''}`}
+                  style={{
+                    fontSize: window.innerWidth <= 768 ? '0.85rem' : '1rem',
+                    whiteSpace: 'nowrap',
+                    minWidth: 'fit-content'
+                  }}>
                   <i className="bi bi-people-fill" style={{fontSize: '0.9rem'}}></i>
                   <span className="fw-medium d-none d-sm-inline">가게 기여자들</span>
                   <span className="fw-medium d-sm-none">기여자</span>
@@ -1019,7 +1029,13 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
               ) : (
                 <div className="p-4">
                   <div className="text-center py-5">
-                    <div className="bg-light rounded-circle mx-auto mb-3" style={{width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                    <div className="bg-light rounded-circle mx-auto mb-3" style={{
+                      width: '80px',
+                      height: '80px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
                       <i className="bi bi-people-fill fs-1 text-secondary"></i>
                     </div>
                     <h5 className="text-dark mb-2">가게 기여자 기능 미지원</h5>
@@ -1040,11 +1056,13 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
               eventKey="owner-activity"
               disabled={(storeDetail?.storeType !== 'BOSS_STORE' && store?.storeType !== 'BOSS_STORE')}
               title={
-                <span className={`d-flex align-items-center gap-1 gap-md-2 px-1 py-2 ${(storeDetail?.storeType !== 'BOSS_STORE' && store?.storeType !== 'BOSS_STORE') ? 'text-muted' : ''}`} style={{
-                  fontSize: window.innerWidth <= 768 ? '0.85rem' : '1rem',
-                  whiteSpace: 'nowrap',
-                  minWidth: 'fit-content'
-                }}>
+                <span
+                  className={`d-flex align-items-center gap-1 gap-md-2 px-1 py-2 ${(storeDetail?.storeType !== 'BOSS_STORE' && store?.storeType !== 'BOSS_STORE') ? 'text-muted' : ''}`}
+                  style={{
+                    fontSize: window.innerWidth <= 768 ? '0.85rem' : '1rem',
+                    whiteSpace: 'nowrap',
+                    minWidth: 'fit-content'
+                  }}>
                   <i className="bi bi-person-badge" style={{fontSize: '0.9rem'}}></i>
                   <span className="fw-medium d-none d-sm-inline">사장님 활동</span>
                   <span className="fw-medium d-sm-none">사장</span>
@@ -1102,7 +1120,13 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
               ) : (
                 <div className="p-4">
                   <div className="text-center py-5">
-                    <div className="bg-light rounded-circle mx-auto mb-3" style={{width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                    <div className="bg-light rounded-circle mx-auto mb-3" style={{
+                      width: '80px',
+                      height: '80px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
                       <i className="bi bi-person-badge fs-1 text-secondary"></i>
                     </div>
                     <h5 className="text-dark mb-2">사장님 활동 기능 미지원</h5>
