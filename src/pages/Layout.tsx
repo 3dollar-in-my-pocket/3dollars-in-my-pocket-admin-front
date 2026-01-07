@@ -57,6 +57,7 @@ export const menuGroups: MenuGroup[] = [
       {path: "/manage/advertisement", label: "광고 관리", icon: "bi-bullseye"},
       {path: "/manage/medal", label: "메달 관리", icon: "bi-award-fill"},
       {path: "/manage/faq", label: "FAQ 관리", icon: "bi-question-circle-fill"},
+      {path: "/manage/store-category", label: "가게 카테고리 관리", icon: "bi-grid-3x3-gap"},
     ]
   },
   {

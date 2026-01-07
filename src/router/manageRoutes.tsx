@@ -9,6 +9,7 @@ import StoreSearch from "../pages/store/StoreSearch";
 import PopularNeighborhoodStores from "../pages/store/PopularNeighborhoodStores";
 import ReviewManagement from "../pages/review/ReviewManagement";
 import StoreMessageManagement from "../pages/storeMessage/StoreMessageManagement";
+import StoreCategoryManagement from "../pages/storeCategory/StoreCategoryManagement";
 import CouponManagement from "../pages/coupon/CouponManagement";
 import CacheTool from "../pages/tool/CacheTool";
 import FileUploadTool from "../pages/tool/FileUploadTool";
@@ -73,6 +74,10 @@ const manageRoutes = {
     {
       path: '/manage/store-message',
       element: <PrivateRouter><StoreMessageManagement/></PrivateRouter>
+    },
+    {
+      path: '/manage/store-category',
+      element: <PrivateRouter><StoreCategoryManagement/></PrivateRouter>
     },
     {
       path: '/manage/tool/cache',
