@@ -11,8 +11,9 @@ export default {
     try {
       const response = await axiosInstance({
         method: "GET",
-        url: `/statistics-type/${statisticsType}/daily-statistics`,
+        url: `/statistics/daily`,
         params: {
+          type: statisticsType,          
           startDate,
           endDate,
         },

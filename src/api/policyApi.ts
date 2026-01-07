@@ -82,7 +82,7 @@ export default {
       const response = await axiosInstance(
         {
           method: "GET",
-          url: `/v1/policy/types`,
+          url: `/v1/policy-types`,
           params: {
             ...(categoryId && {categoryId})
           }

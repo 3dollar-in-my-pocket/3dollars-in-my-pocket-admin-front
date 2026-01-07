@@ -17,7 +17,7 @@ export default {
    * FAQ 카테고리 목록 조회
    */
   listFaqCategories: async ({application}: {application: string}): Promise<ApiResponse<ContentListResponse<FaqCategory>>> => {
-    return apiGet<ContentListResponse<FaqCategory>>(`/v1/application/${application}/faq/categories`);
+    return apiGet<ContentListResponse<FaqCategory>>(`/v1/application/${application}/faq-categories`);
   },
 
   /**
