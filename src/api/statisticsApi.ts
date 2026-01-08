@@ -6,16 +6,18 @@ export default {
   getDailyStatistics: async (
     statisticsType: string,
     startDate: string,
-    endDate: string
+    endDate: string,
+    groupId?: string
   ): Promise<ApiResponse<ContentListResponse<DailyStatistic>>> => {
     try {
       const response = await axiosInstance({
         method: "GET",
         url: `/statistics/daily`,
         params: {
-          type: statisticsType,          
+          type: statisticsType,
           startDate,
           endDate,
+          ...(groupId && { groupId }),
         },
       });
       return response.data;

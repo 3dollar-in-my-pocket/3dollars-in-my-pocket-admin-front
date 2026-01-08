@@ -1,30 +1,15 @@
-import React, {useState, useEffect} from "react";
-import {Card, Container, Form, Button, Row, Col, Table, Alert} from "react-bootstrap";
-import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer
-} from "recharts";
-import statisticsApi from "../../api/statisticsApi";
+import React, {useState, useEffect, useMemo, useCallback} from "react";
+import {Card, Container, Form, Button, Row, Col, Alert} from "react-bootstrap";
 import enumApi from "../../api/enumApi";
-import {DailyStatistic} from "../../types/statistics";
-import {toast} from "react-toastify";
 import RecentActivityStatistics from "./RecentActivityStatistics";
+import DefaultStatistics from "./DefaultStatistics";
+import StoreByCategoryStatistics from "./StoreByCategoryStatistics";
 
 const ServerStatistics = () => {
   const [statisticsTypes, setStatisticsTypes] = useState<{ key: string; description: string }[]>([]);
   const [selectedType, setSelectedType] = useState<string>("");
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
-  const [data, setData] = useState<DailyStatistic[]>([]);
-  const [loading, setLoading] = useState(false);
   const [dateRangeError, setDateRangeError] = useState<string>("");
 
   useEffect(() => {
@@ -66,10 +51,10 @@ const ServerStatistics = () => {
     return `${year}-${month}-${day}`;
   };
 
-  const validateDateRange = (): boolean => {
+  useEffect(() => {
+    // 날짜 변경 시 유효성 검사
     if (!startDate || !endDate) {
-      setDateRangeError("시작일과 종료일을 모두 선택해주세요.");
-      return false;
+      return;
     }
 
     const start = new Date(startDate);
@@ -77,7 +62,7 @@ const ServerStatistics = () => {
 
     if (start > end) {
       setDateRangeError("시작일은 종료일보다 이전이어야 합니다.");
-      return false;
+      return;
     }
 
     const diffTime = Math.abs(end.getTime() - start.getTime());
@@ -85,79 +70,60 @@ const ServerStatistics = () => {
 
     if (diffDays > 365) {
       setDateRangeError("조회 기간은 최대 1년(365일)까지 가능합니다.");
-      return false;
+      return;
     }
 
     setDateRangeError("");
-    return true;
-  };
+  }, [startDate, endDate]);
 
-  const handleFetchData = async () => {
-    if (!selectedType) {
-      toast.error("통계 타입을 선택해주세요.");
-      return;
+  const handleFetch = useCallback(() => {
+    // 필요시 추가 로직 구현
+  }, []);
+
+  const statisticsComponent = useMemo(() => {
+    // 날짜가 없으면 안내 메시지만 표시
+    if (!startDate || !endDate) {
+      return (
+        <Alert variant="info">
+          조회 조건을 설정하고 통계를 확인하세요.
+        </Alert>
+      );
     }
 
-    if (!validateDateRange()) {
-      return;
+    // RECENT_ACTIVITY 타입은 기존 컴포넌트 사용
+    if (selectedType === "RECENT_ACTIVITY_USER_STORE" || selectedType === "RECENT_ACTIVITY_BOSS_STORE") {
+      return (
+        <RecentActivityStatistics
+          statisticsType={selectedType as "RECENT_ACTIVITY_USER_STORE" | "RECENT_ACTIVITY_BOSS_STORE"}
+          startDate={startDate}
+          endDate={endDate}
+          onFetch={handleFetch}
+        />
+      );
     }
 
-    setLoading(true);
-    try {
-      const response = await statisticsApi.getDailyStatistics(selectedType, startDate, endDate);
-      if (response.ok && response.data) {
-        setData(response.data.contents || []);
-        if (response.data.contents.length === 0) {
-          toast.info("조회된 데이터가 없습니다.");
-        }
-      }
-    } catch (error) {
-      console.error("통계 데이터 조회 실패:", error);
-      setData([]);
-    } finally {
-      setLoading(false);
+    // STORE_BY_CATEGORY 타입은 카테고리별 통계 컴포넌트 사용
+    if (selectedType === "STORE_BY_CATEGORY") {
+      return (
+        <StoreByCategoryStatistics
+          statisticsType={selectedType}
+          startDate={startDate}
+          endDate={endDate}
+          onFetch={handleFetch}
+        />
+      );
     }
-  };
 
-  const formatNumber = (num: number): string => {
-    return num.toLocaleString("ko-KR");
-  };
-
-  const formatDateWithDay = (dateStr: string): string => {
-    const date = new Date(dateStr);
-    const days = ["일", "월", "화", "수", "목", "금", "토"];
-    const dayOfWeek = days[date.getDay()];
-    return `${dateStr} (${dayOfWeek})`;
-  };
-
-  const formatYAxisTick = (value: number): string => {
-    if (value >= 1000000) {
-      return `${(value / 1000000).toFixed(2)}M`;
-    }
-    if (value >= 1000) {
-      return `${(value / 1000).toFixed(2)}K`;
-    }
-    return value.toString();
-  };
-
-  const getChartData = () => {
-    return data.map((item) => {
-      const date = new Date(item.date);
-      const days = ["일", "월", "화", "수", "목", "금", "토"];
-      const dayOfWeek = days[date.getDay()];
-      const dateStr = item.date.substring(5); // MM-DD
-
-      return {
-        date: `${dateStr} (${dayOfWeek})`, // MM-DD (요일) 형식으로 표시
-        "신규": item.newCount ?? 0,
-        "누적": item.totalCount,
-      };
-    });
-  };
-
-  const isRecentActivityType = () => {
-    return selectedType === "RECENT_ACTIVITY_USER_STORE" || selectedType === "RECENT_ACTIVITY_BOSS_STORE";
-  };
+    // 기본 통계 컴포넌트 사용
+    return (
+      <DefaultStatistics
+        statisticsType={selectedType}
+        startDate={startDate}
+        endDate={endDate}
+        onFetch={handleFetch}
+      />
+    );
+  }, [selectedType, startDate, endDate, handleFetch]);
 
   return (
     <Container className="py-5">
@@ -172,7 +138,6 @@ const ServerStatistics = () => {
             <Form.Select
               value={selectedType}
               onChange={(e) => setSelectedType(e.target.value)}
-              disabled={loading}
             >
               {statisticsTypes.map((type) => (
                 <option key={type.key} value={type.key}>
@@ -189,7 +154,6 @@ const ServerStatistics = () => {
                 variant="outline-primary"
                 size="sm"
                 onClick={() => setQuickDateRange(7)}
-                disabled={loading}
               >
                 최근 7일
               </Button>
@@ -197,7 +161,6 @@ const ServerStatistics = () => {
                 variant="outline-primary"
                 size="sm"
                 onClick={() => setQuickDateRange(30)}
-                disabled={loading}
               >
                 최근 30일
               </Button>
@@ -205,7 +168,6 @@ const ServerStatistics = () => {
                 variant="outline-primary"
                 size="sm"
                 onClick={() => setQuickDateRange(90)}
-                disabled={loading}
               >
                 최근 90일
               </Button>
@@ -213,7 +175,6 @@ const ServerStatistics = () => {
                 variant="outline-primary"
                 size="sm"
                 onClick={() => setQuickDateRange(365)}
-                disabled={loading}
               >
                 최근 1년
               </Button>
@@ -231,7 +192,6 @@ const ServerStatistics = () => {
                     setStartDate(e.target.value);
                     setDateRangeError("");
                   }}
-                  disabled={loading}
                 />
               </Form.Group>
             </Col>
@@ -245,116 +205,21 @@ const ServerStatistics = () => {
                     setEndDate(e.target.value);
                     setDateRangeError("");
                   }}
-                  disabled={loading}
                 />
               </Form.Group>
             </Col>
           </Row>
 
           {dateRangeError && (
-            <Alert variant="danger" className="mb-3">
+            <Alert variant="danger" className="mb-0">
               {dateRangeError}
             </Alert>
-          )}
-
-          {!isRecentActivityType() && (
-            <Button
-              variant="primary"
-              onClick={handleFetchData}
-              disabled={loading || !selectedType}
-              className="w-100"
-            >
-              {loading ? "조회 중..." : "통계 조회"}
-            </Button>
           )}
         </Card.Body>
       </Card>
 
-      {/* RECENT_ACTIVITY 타입은 별도 컴포넌트로 처리 */}
-      {isRecentActivityType() ? (
-        <RecentActivityStatistics
-          key={selectedType}
-          statisticsType={selectedType as "RECENT_ACTIVITY_USER_STORE" | "RECENT_ACTIVITY_BOSS_STORE"}
-          startDate={startDate}
-          endDate={endDate}
-          onFetch={() => setData([])}
-        />
-      ) : (
-        <>
-          {data.length > 0 && (
-            <>
-              {/* 일자별 신규 건수 추이 */}
-              <Card className="mb-4 shadow-sm">
-                <Card.Body>
-                  <h5 className="fw-semibold mb-3">일자별 신규 건수 추이</h5>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={getChartData()}>
-                      <CartesianGrid strokeDasharray="3 3"/>
-                      <XAxis dataKey="date"/>
-                      <YAxis tickFormatter={formatYAxisTick}/>
-                      <Tooltip/>
-                      <Legend/>
-                      <Bar dataKey="신규" fill="#0d6efd"/>
-                    </BarChart>
-                  </ResponsiveContainer>
-                </Card.Body>
-              </Card>
-
-              <Card className="mb-4 shadow-sm">
-                <Card.Body>
-                  <h5 className="fw-semibold mb-3">누적 건수 추이</h5>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <LineChart data={getChartData()}>
-                      <CartesianGrid strokeDasharray="3 3"/>
-                      <XAxis dataKey="date"/>
-                      <YAxis domain={["auto", "auto"]} tickFormatter={formatYAxisTick}/>
-                      <Tooltip/>
-                      <Legend/>
-                      <Line type="monotone" dataKey="누적" stroke="#198754" strokeWidth={2}/>
-                    </LineChart>
-                  </ResponsiveContainer>
-                </Card.Body>
-              </Card>
-
-              {/* 테이블 영역 */}
-              <Card className="shadow-sm">
-                <Card.Body>
-                  <h5 className="fw-semibold mb-3">일자별 상세 데이터</h5>
-                  <p className="text-muted mb-3">
-                    총 <strong>{data.length}일</strong>의 데이터가 조회되었습니다.
-                  </p>
-                  <div style={{maxHeight: "500px", overflowY: "auto"}}>
-                    <Table striped bordered hover>
-                      <thead className="table-light" style={{position: "sticky", top: 0}}>
-                      <tr>
-                        <th>날짜</th>
-                        <th className="text-end">신규 건수</th>
-                        <th className="text-end">누적 건수</th>
-                      </tr>
-                      </thead>
-                      <tbody>
-                      {[...data].reverse().map((item, index) => (
-                        <tr key={index}>
-                          <td>{formatDateWithDay(item.date)}</td>
-                          <td className="text-end">{formatNumber(item.newCount ?? 0)}</td>
-                          <td className="text-end">{formatNumber(item.totalCount)}</td>
-                        </tr>
-                      ))}
-                      </tbody>
-                    </Table>
-                  </div>
-                </Card.Body>
-              </Card>
-            </>
-          )}
-
-          {!loading && data.length === 0 && (
-            <Alert variant="info">
-              조회 조건을 설정하고 <strong>통계 조회</strong> 버튼을 클릭하세요.
-            </Alert>
-          )}
-        </>
-      )}
+      {/* 통계 타입에 따라 적절한 컴포넌트 렌더링 */}
+      {statisticsComponent}
 
       {/* 안내 문구 */}
       <Alert variant="secondary" className="mt-4">
