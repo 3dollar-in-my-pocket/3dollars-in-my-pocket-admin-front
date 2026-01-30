@@ -18,6 +18,7 @@ export default {
           deviceId: device.deviceId,
           os: device.osPlatform === 'AOS' ? 'Android' : device.osPlatform,
           appVersion: device.appVersion,
+          pushToken: device.pushToken,
           createdAt: device.createdAt,
           updatedAt: device.updatedAt,
         })) || [];

@@ -81,6 +81,7 @@ const ContentInfoStep = ({formData, onChange}) => {
   const showExtraContent = isFieldAvailable(formData.position, 'extraContent');
   const showBackgroundColor = isFieldAvailable(formData.position, 'backgroundColor');
   const showLink = isFieldAvailable(formData.position, 'link');
+  const showExposureIndex = formData.position === 'MENU_CATEGORY_ICON' || formData.position === 'POLL_CARD';
 
   return (
     <>
@@ -429,6 +430,38 @@ const ContentInfoStep = ({formData, onChange}) => {
               </Form.Text>
             </Form.Group>
           )}
+        </div>
+      )}
+
+      {showExposureIndex && (
+        <div className="mb-4 p-3 border border-warning border-2 rounded-3 bg-white shadow-sm">
+          <div className="d-flex align-items-center mb-3">
+            <i className="bi bi-list-ol text-warning fs-4 me-2"></i>
+            <h6 className="mb-0 text-warning fw-bold">노출 순서 설정</h6>
+          </div>
+          <Form.Group className="mb-0">
+            <Form.Label className="fw-semibold d-flex align-items-center">
+              <i className="bi bi-sort-numeric-down text-warning me-2"></i>
+              노출 순서 (카드 인덱스)
+              <span className="badge bg-warning ms-2" style={{fontSize: '0.65rem'}}>선택</span>
+            </Form.Label>
+            <Form.Control
+              type="number"
+              value={content.exposureIndex || ""}
+              onChange={(e) => handleContentChange("exposureIndex", e.target.value ? parseInt(e.target.value) : null)}
+              placeholder="ex) 1, 2, 3..."
+              className="shadow-sm"
+              style={{maxWidth: '200px'}}
+              min="1"
+              max="99"
+            />
+            <Form.Text className="text-muted d-flex align-items-center mt-2">
+              <i className="bi bi-info-circle me-1"></i>
+              <div>
+                몇 번째 카드에 광고를 노출시킬지 지정합니다.<br/>
+              </div>
+            </Form.Text>
+          </Form.Group>
         </div>
       )}
     </>
