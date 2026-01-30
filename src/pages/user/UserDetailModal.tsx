@@ -546,7 +546,7 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
                                     )}
 
                                     {device.updatedAt && (
-                                      <div className="d-flex align-items-center gap-2">
+                                      <div className="d-flex align-items-center gap-2 mb-2">
                                         <span className="text-muted small">
                                           <i className="bi bi-clock-history me-1"></i>
                                           마지막 접근 일자
@@ -554,6 +554,40 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
                                         <span className="text-dark small fw-medium">
                                           {formatDateTime(device.updatedAt)}
                                         </span>
+                                      </div>
+                                    )}
+
+                                    {device.pushToken && (
+                                      <div className="d-flex align-items-center gap-2">
+                                        <span className="text-muted small">
+                                          <i className="bi bi-bell me-1"></i>
+                                          푸시 토큰
+                                        </span>
+                                        <div className="d-flex align-items-center gap-2 flex-grow-1">
+                                          <span
+                                            className="text-dark small fw-medium text-truncate flex-grow-1"
+                                            style={{
+                                              maxWidth: '200px',
+                                              fontSize: '0.75rem',
+                                              fontFamily: 'monospace'
+                                            }}
+                                            title={device.pushToken}
+                                          >
+                                            {device.pushToken}
+                                          </span>
+                                          <button
+                                            className="btn btn-outline-secondary btn-sm p-1"
+                                            style={{ fontSize: '0.7rem', lineHeight: '1' }}
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              navigator.clipboard.writeText(device.pushToken || '');
+                                              toast.success('푸시 토큰이 복사되었습니다');
+                                            }}
+                                            title="토큰 복사"
+                                          >
+                                            <i className="bi bi-clipboard"></i>
+                                          </button>
+                                        </div>
                                       </div>
                                     )}
                                   </div>

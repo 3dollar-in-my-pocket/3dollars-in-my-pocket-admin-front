@@ -419,6 +419,27 @@ const Advertisement = () => {
                               </div>
                             </div>
                           </div>
+                          {/* 노출 순서 표시 (MENU_CATEGORY_ICON, POLL_CARD만) */}
+                          {(info.positionType === 'MENU_CATEGORY_ICON' || info.positionType === 'POLL_CARD') && (
+                            <div className="col-12">
+                              <div className="bg-light rounded p-2 text-center">
+                                <small className="text-muted d-block mb-2" style={{fontSize: '0.7rem'}}>
+                                  <i className="bi bi-list-ol me-1"></i>노출 순서
+                                </small>
+                                {info.exposureIndex ? (
+                                  <span className="badge bg-warning-subtle text-warning" style={{fontSize: '0.7rem'}}>
+                                    <i className="bi bi-sort-numeric-down me-1"></i>
+                                    {info.exposureIndex}번째 카드
+                                  </span>
+                                ) : (
+                                  <span className="badge bg-light text-muted" style={{fontSize: '0.7rem'}}>
+                                    <i className="bi bi-shuffle me-1"></i>
+                                    랜덤 노출
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          )}
                         </div>
 
                         {info.description && (

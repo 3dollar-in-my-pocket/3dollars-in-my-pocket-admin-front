@@ -135,6 +135,7 @@ const AdvertisementContentEditModal = ({show, onHide, ad, fetchAdvertisements}) 
   const showBackgroundColor = isFieldAvailable(ad?.positionType, 'backgroundColor');
   const showLink = isFieldAvailable(ad?.positionType, 'link');
   const isLinkRequired = isFieldRequired(ad?.positionType, 'link');
+  const showExposureIndex = ad?.positionType === 'MENU_CATEGORY_ICON' || ad?.positionType === 'POLL_CARD';
 
   return (
     <Modal show={show} onHide={onHide} size="xl" centered fullscreen="lg-down">
@@ -425,6 +426,37 @@ const AdvertisementContentEditModal = ({show, onHide, ad, fetchAdvertisements}) 
                       </Form.Text>
                     </Form.Group>
                   )}
+                </div>
+              )}
+
+              {/* 노출 순서 섹션 (MENU_CATEGORY_ICON, POLL_CARD 구좌만) */}
+              {showExposureIndex && (
+                <div className="bg-light rounded p-4">
+                  <h6 className="text-warning fw-bold mb-3">
+                    <i className="bi bi-list-ol me-2"></i>노출 순서 설정
+                  </h6>
+                  <Form.Group className="mb-0">
+                    <Form.Label className="fw-semibold d-flex align-items-center">
+                      <i className="bi bi-sort-numeric-down text-warning me-2"></i>
+                      노출 순서 (카드 인덱스)
+                      <span className="badge bg-warning ms-2" style={{fontSize: '0.65rem'}}>선택</span>
+                    </Form.Label>
+                    <Form.Control
+                      type="number"
+                      value={formData.exposureIndex || ""}
+                      onChange={(e) => handleChange("exposureIndex", e.target.value ? parseInt(e.target.value) : null)}
+                      placeholder="ex) 1, 2, 3..."
+                      style={{maxWidth: '200px'}}
+                      min="1"
+                      max="99"
+                    />
+                    <Form.Text className="text-muted d-flex align-items-center mt-2">
+                      <i className="bi bi-info-circle me-1"></i>
+                      <div>
+                        몇 번째 카드에 광고를 노출시킬지 지정합니다.<br/>
+                      </div>
+                    </Form.Text>
+                  </Form.Group>
                 </div>
               )}
             </Form>

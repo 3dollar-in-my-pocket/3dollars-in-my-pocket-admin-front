@@ -2,6 +2,7 @@ export interface Device {
   deviceId: string;
   os: 'AOS' | 'IOS' | 'UNKNOWN';
   appVersion: string;
+  pushToken?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -12,7 +13,7 @@ export const DEVICE_OS = {
   UNKNOWN: 'UNKNOWN'
 };
 
-export const getOsBadgeClass = (os) => {
+export const getOsBadgeClass = (os: string) => {
   switch (os) {
     case DEVICE_OS.IOS:
       return 'bg-primary';
