@@ -362,4 +362,21 @@ export default {
       return error.response;
     }
   },
+
+  /**
+   * 사장님 가게 강제 영업 종료
+   * @param {string} storeId - 가게 ID
+   * @returns {Promise<Object>} 강제 영업 종료 결과
+   */
+  forceCloseStore: async (storeId: string): Promise<any> => {
+    try {
+      const response = await axiosInstance({
+        method: 'DELETE',
+        url: `/v1/store/${storeId}/open`
+      });
+      return response;
+    } catch (error: any) {
+      return error.response;
+    }
+  },
 };
