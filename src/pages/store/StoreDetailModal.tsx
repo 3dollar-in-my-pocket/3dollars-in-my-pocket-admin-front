@@ -47,6 +47,7 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
   const [isDeleting, setIsDeleting] = useState(false);
   const [activitySubTab, setActivitySubTab] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [isForceClosing, setIsForceClosing] = useState(false);
 
   useEffect(() => {
     if (show && store) {
@@ -87,6 +88,7 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
     setIsDeleting(false);
     setActivitySubTab(null);
     setIsEditMode(false);
+    setIsForceClosing(false);
     onHide();
   };
 
@@ -171,6 +173,25 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
       }
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const handleForceCloseStore = async () => {
+    const confirmed = window.confirm(`정말로 "${store.name}" 가게의 영업을 강제 종료하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.`);
+
+    if (!confirmed) return;
+
+    setIsForceClosing(true);
+    try {
+      const response = await storeApi.forceCloseStore(store.storeId);
+
+      if (response.ok) {
+        toast.success('가게 영업이 성공적으로 종료되었습니다.');
+        // 가게 정보를 다시 불러와서 상태를 업데이트
+        fetchStoreDetail();
+      }
+    } finally {
+      setIsForceClosing(false);
     }
   };
 
@@ -1205,6 +1226,41 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
                 <>
                   <i className="bi bi-trash me-2"></i>
                   가게 삭제
+                </>
+              )}
+            </button>
+          )}
+
+          {/* BOSS_STORE인 경우 강제 영업 종료 버튼 표시 */}
+          {(storeDetail?.storeType === 'BOSS_STORE' || store?.storeType === 'BOSS_STORE') && (
+            <button
+              className="btn btn-warning rounded-pill px-4 py-2 shadow-sm"
+              onClick={handleForceCloseStore}
+              disabled={isForceClosing}
+              style={{
+                transition: 'all 0.3s ease',
+                fontWeight: '600'
+              }}
+              onMouseEnter={(e: any) => {
+                if (!isForceClosing) {
+                  e.target.style.transform = 'translateY(-2px)';
+                  e.target.style.boxShadow = '0 8px 20px rgba(255, 193, 7, 0.3)';
+                }
+              }}
+              onMouseLeave={(e: any) => {
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+              }}
+            >
+              {isForceClosing ? (
+                <>
+                  <span className="spinner-border spinner-border-sm me-2"></span>
+                  종료 중...
+                </>
+              ) : (
+                <>
+                  <i className="bi bi-power me-2"></i>
+                  강제 영업 종료 & 지도 미노출
                 </>
               )}
             </button>
