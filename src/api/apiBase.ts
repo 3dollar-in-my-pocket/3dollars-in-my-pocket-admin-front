@@ -3,6 +3,13 @@ import {toast} from "react-toastify";
 import {LocalStorageService} from "../service/LocalStorageService";
 import {AUTH_KEY} from "../constants/google";
 
+// 전역 네비게이션 함수 - 403 에러 시 홈으로 이동용
+let globalNavigate: ((path: string) => void) | null = null;
+
+export const setGlobalNavigate = (navigateFunction: (path: string) => void) => {
+  globalNavigate = navigateFunction;
+};
+
 // 커스텀 Axios 설정 인터페이스
 export interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
   suppressToast?: boolean;
@@ -69,6 +76,13 @@ const handleAxiosError = (error: AxiosError<ApiErrorData>): void => {
       409: "중복된 요청입니다.",
       500: `서버 오류가 발생하였습니다`,
     };
+
+    // 403 권한 에러 시 홈으로 이동
+    if (status === 403 && globalNavigate) {
+      toast.error("접근 권한이 없습니다. 홈 페이지로 이동합니다.");
+      globalNavigate('/manage');
+      return;
+    }
 
     // 서버 메시지가 있으면 우선 사용, 없으면 기본 메시지
     toast.error(message || statusMessages[status || 500]);
