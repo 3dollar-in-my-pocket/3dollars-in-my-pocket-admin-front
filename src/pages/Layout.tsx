@@ -27,7 +27,7 @@ export const menuGroups: MenuGroup[] = [
   {
     title: "유저 관리",
     items: [
-      {path: "/manage/user-search", label: "유저 검색", icon: "bi-search", allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]},
+      {path: "/manage/user-search", label: "유저 검색", icon: "bi-search", allowedRoles: [AdminRole.OPERATOR]},
       {path: "/manage/tool/random-name", label: "유저 랜덤 닉네임 관리", icon: "bi-person-badge"},
       {path: "/manage/user-ranking", label: "유저 랭킹 관리", icon: "bi-trophy-fill"},
     ],
@@ -68,17 +68,17 @@ export const menuGroups: MenuGroup[] = [
     title: "운영 툴",
     items: [
       {path: "/manage/push-message", label: "푸시 발송", icon: "bi-send-fill", allowedRoles: [AdminRole.OPERATOR]},
-      {path: "/manage/policy", label: "정책 설정", icon: "bi-shield-fill-check"},
+      {path: "/manage/policy", label: "정책 설정", icon: "bi-shield-fill-check", allowedRoles: [AdminRole.OPERATOR]},
       {path: "/manage/tool/cache", label: "캐시 툴", icon: "bi-brush-fill"},
-      {path: "/manage/tool/upload", label: "이미지 업로드 툴", icon: "bi-image-fill"},
+      {path: "/manage/tool/upload", label: "이미지 업로드 툴", icon: "bi-image-fill", allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]},
     ],
   },
   {
     title: "통계 & 분석",
     items: [
       {path: "/info/service-statistics", label: "서비스 통계", icon: "bi-graph-up", allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]},
-      {path: "/info/ad-statistics", label: "광고 통계", icon: "bi-badge-ad"},
-      {path: "/info/push-statistics", label: "푸시 통계", icon: "bi-bar-chart-line-fill"},
+      {path: "/info/ad-statistics", label: "광고 통계", icon: "bi-badge-ad", allowedRoles: [AdminRole.OPERATOR]},
+      {path: "/info/push-statistics", label: "푸시 통계", icon: "bi-bar-chart-line-fill", allowedRoles: [AdminRole.OPERATOR]},
     ],
   },
   {
