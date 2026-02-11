@@ -321,37 +321,91 @@ const ReviewManagement = () => {
                           </span>
                         </div>
 
-                        {/* 가게 정보 - 모바일 최적화 */}
+                        {/* 가게 정보 섹션 */}
                         {review.store && (
-                          <div
-                            className="d-flex align-items-center gap-1 gap-md-2 clickable-author"
-                            style={{
-                              cursor: 'pointer',
-                              padding: '3px 6px',
-                              borderRadius: '8px',
-                              transition: 'all 0.2s ease',
-                              backgroundColor: 'transparent',
-                              minHeight: '44px'
-                            }}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleStoreClick(review.store);
-                            }}
-                            onMouseEnter={(e: any) => {
-                              e.currentTarget.style.backgroundColor = 'rgba(25, 135, 84, 0.1)';
-                              e.currentTarget.style.transform = 'scale(1.02)';
-                            }}
-                            onMouseLeave={(e: any) => {
-                              e.currentTarget.style.backgroundColor = 'transparent';
-                              e.currentTarget.style.transform = 'scale(1)';
-                            }}
-                          >
-                            <span className="text-success fw-bold text-truncate"
-                                  style={{fontSize: 'clamp(0.75rem, 2.5vw, 0.875rem)', maxWidth: '120px'}}>
-                              {review.store.name}
-                            </span>
+                          <div className="w-100 mb-2 pb-2 border-bottom">
+                            <div className="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                              <div className="flex-grow-1">
+                                <div
+                                  className="d-flex align-items-center gap-2 mb-2"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleStoreClick(review.store);
+                                  }}
+                                  style={{cursor: 'pointer'}}
+                                >
+                                  <i className="bi bi-shop text-primary"></i>
+                                  <h6 className="fw-bold text-primary mb-0 text-decoration-underline">
+                                    {review.store?.name || '가게 이름 없음'}
+                                  </h6>
+                                  {review.store?.storeType && (
+                                    <span
+                                      className={`badge rounded-pill px-2 py-1 ${getStoreTypeBadgeClass(review.store.storeType as any)}`}
+                                      style={{fontSize: '0.65rem'}}
+                                    >
+                                      <i className={`${getStoreTypeIcon(review.store.storeType as any)} me-1`}></i>
+                                      {getStoreTypeDisplayName(review.store.storeType as any)}
+                                    </span>
+                                  )}
+                                </div>
+                                {review.store?.address?.fullAddress && (
+                                  <div className="d-flex align-items-center gap-2 text-muted small">
+                                    <i className="bi bi-geo-alt"></i>
+                                    <span>{review.store.address.fullAddress}</span>
+                                  </div>
+                                )}
+                              </div>
+                              <div className="d-flex align-items-center gap-2 flex-wrap">
+                                {review.store?.categories?.slice(0, 2).map((category: any, idx: number) => (
+                                  <span key={idx}
+                                        className="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-2 py-1"
+                                        style={{fontSize: '0.65rem'}}>
+                                    <i className="bi bi-tag me-1"></i>
+                                    {category.name}
+                                  </span>
+                                ))}
+                                {review.store?.categories?.length > 2 && (
+                                  <span
+                                    className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-2 py-1"
+                                    style={{fontSize: '0.65rem'}}>
+                                    +{review.store.categories.length - 2}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
                           </div>
                         )}
+
+                        {/* 작성자 정보만 간단하게 표시 */}
+                        <div
+                          className="d-flex align-items-center gap-1 gap-md-2 clickable-author"
+                          style={{
+                            cursor: 'pointer',
+                            padding: '3px 6px',
+                            borderRadius: '8px',
+                            transition: 'all 0.2s ease',
+                            backgroundColor: 'transparent',
+                            minHeight: '44px'
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (review.writer) {
+                              handleAuthorClick(review.writer);
+                            }
+                          }}
+                          onMouseEnter={(e: any) => {
+                            e.currentTarget.style.backgroundColor = 'rgba(13, 110, 253, 0.1)';
+                            e.currentTarget.style.transform = 'scale(1.02)';
+                          }}
+                          onMouseLeave={(e: any) => {
+                            e.currentTarget.style.backgroundColor = 'transparent';
+                            e.currentTarget.style.transform = 'scale(1)';
+                          }}
+                        >
+                          <span className="text-primary fw-bold" style={{fontSize: 'clamp(0.75rem, 2.5vw, 0.875rem)'}}>
+                            작성자: {review.writer?.name || '익명'}
+                          </span>
+                        </div>
                       </div>
 
                       {/* 평점 - 오른쪽 상단으로 이동 */}
