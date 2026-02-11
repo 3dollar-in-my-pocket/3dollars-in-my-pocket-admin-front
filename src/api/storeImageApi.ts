@@ -2,9 +2,29 @@ import { ApiResponse, PaginatedResponse } from '../types/api';
 import { StoreImage, UserStoreImage } from '../types/storeImage';
 import { apiGetPaginated, apiDelete } from './apiHelpers';
 import { INCLUDES } from '../constants/api';
-import axiosInstance from './apiBase';
 
 export default {
+  /**
+   * 전체 가게 이미지 목록 조회 (관리자용)
+   * @param {string | null} [cursor] - 페이징 커서
+   * @param {number} [size] - 페이지 사이즈
+   * @returns {Promise<ApiResponse<PaginatedResponse<StoreImage>>>} 가게 이미지 목록
+   */
+  getAllStoreImages: async (
+    cursor: string | null = null,
+    size: number = 20
+  ): Promise<ApiResponse<PaginatedResponse<StoreImage>>> => {
+    const params: Record<string, any> = {
+      size
+    };
+
+    if (cursor) {
+      params.cursor = cursor;
+    }
+
+    return apiGetPaginated<StoreImage>('/v1/store-images', params, { includes: 'STORE,WRITER'});
+  },
+
   /**
    * 가게 이미지 목록 조회
    * @param {string} storeId - 가게 ID
@@ -30,15 +50,7 @@ export default {
    * @returns {Promise<any>} 삭제 결과
    */
   deleteStoreImage: async (imageId: string): Promise<any> => {
-    try {
-      const response = await axiosInstance({
-        method: 'DELETE',
-        url: `/v1/store-image/${imageId}`
-      });
-      return response;
-    } catch (error: any) {
-      return error.response;
-    }
+    return apiDelete(`/v1/store-image/${imageId}`);
   },
 
   /**

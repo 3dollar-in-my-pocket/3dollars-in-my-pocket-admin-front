@@ -1,16 +1,35 @@
 import React, {useState, useEffect, useMemo, useCallback} from "react";
 import {Card, Container, Form, Button, Row, Col, Alert} from "react-bootstrap";
+import { useRecoilValue } from "recoil";
+import { AdminAuthState } from "../../state/AdminAuthState";
+import { AdminRole } from "../../types/admin";
 import enumApi from "../../api/enumApi";
 import RecentActivityStatistics from "./RecentActivityStatistics";
 import DefaultStatistics from "./DefaultStatistics";
 import StoreByCategoryStatistics from "./StoreByCategoryStatistics";
 
 const ServerStatistics = () => {
+  const adminAuth = useRecoilValue(AdminAuthState);
   const [statisticsTypes, setStatisticsTypes] = useState<{ key: string; description: string }[]>([]);
   const [selectedType, setSelectedType] = useState<string>("");
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
   const [dateRangeError, setDateRangeError] = useState<string>("");
+
+  const VIEWER_ALLOWED_STATISTICS_TYPES = [
+    'USER',
+    'BOSS',
+    'WITHDRAWAL_USER',
+    'WITHDRAWAL_BOSS',
+    'IOS_DEVICE',
+    'ANDROID_DEVICE',
+    'USER_STORE',
+    'BOSS_STORE',
+    'STORE_FAVORITE',
+    'STORE_REVIEW',
+    'STORE_VISIT',
+    'STORE_IMAGE'
+  ];
 
   useEffect(() => {
     fetchStatisticsTypes();
@@ -22,7 +41,14 @@ const ServerStatistics = () => {
     try {
       const response = await enumApi.getEnum();
       if (response?.data?.StatisticsType) {
-        const types = response.data.StatisticsType || [];
+        let types = response.data.StatisticsType || [];
+
+        // VIEWER 권한인 경우 허용된 타입만 필터링
+        if (adminAuth?.role === AdminRole.VIEWER) {
+          types = types.filter((type: { key: string }) =>
+            VIEWER_ALLOWED_STATISTICS_TYPES.includes(type.key)
+          );
+        }
 
         setStatisticsTypes(types);
         if (types.length > 0) {

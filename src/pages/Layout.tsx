@@ -28,8 +28,8 @@ export const menuGroups: MenuGroup[] = [
     title: "유저 관리",
     items: [
       {path: "/manage/user-search", label: "유저 검색", icon: "bi-search", allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]},
-      {path: "/manage/tool/random-name", label: "유저 랜덤 닉네임 관리", icon: "bi-person-badge", allowedRoles: [AdminRole.OPERATOR]},
-      {path: "/manage/user-ranking", label: "유저 랭킹 관리", icon: "bi-trophy-fill", allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]},
+      {path: "/manage/tool/random-name", label: "유저 랜덤 닉네임 관리", icon: "bi-person-badge"},
+      {path: "/manage/user-ranking", label: "유저 랭킹 관리", icon: "bi-trophy-fill"},
     ],
   },
   {
@@ -44,8 +44,9 @@ export const menuGroups: MenuGroup[] = [
       {path: "/manage/store-search", label: "가게 검색", icon: "bi-shop", allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]},
       {path: "/manage/popular-neighborhood-stores", label: "인기 가게", icon: "bi-star-fill", allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]},
       {path: "/manage/review", label: "가게 리뷰 관리", icon: "bi-chat-square-text", allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]},
+      {path: "/manage/store-image", label: "가게 이미지 관리", icon: "bi-image"},
       {path: "/manage/coupon", label: "가게 쿠폰 관리", icon: "bi-ticket-perforated", allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]},
-      {path: "/manage/store-message", label: "가게 메시지 이력", icon: "bi-chat-left-text", allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]},
+      {path: "/manage/store-message", label: "가게 메시지 관리", icon: "bi-chat-left-text", allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]},
     ],
   },
   {
@@ -67,7 +68,7 @@ export const menuGroups: MenuGroup[] = [
     title: "운영 툴",
     items: [
       {path: "/manage/push-message", label: "푸시 발송", icon: "bi-send-fill", allowedRoles: [AdminRole.OPERATOR]},
-      {path: "/manage/policy", label: "정책 설정", icon: "bi-shield-fill-check", allowedRoles: [AdminRole.OPERATOR]},
+      {path: "/manage/policy", label: "정책 설정", icon: "bi-shield-fill-check"},
       {path: "/manage/tool/cache", label: "캐시 툴", icon: "bi-brush-fill"},
       {path: "/manage/tool/upload", label: "이미지 업로드 툴", icon: "bi-image-fill"},
     ],
@@ -75,9 +76,9 @@ export const menuGroups: MenuGroup[] = [
   {
     title: "통계 & 분석",
     items: [
-      {path: "/info/service-statistics", label: "서비스 통계", icon: "bi-graph-up", allowedRoles: [AdminRole.OPERATOR]},
-      {path: "/info/ad-statistics", label: "광고 통계", icon: "bi-badge-ad", allowedRoles: [AdminRole.OPERATOR]},
-      {path: "/info/push-statistics", label: "푸시 통계", icon: "bi-bar-chart-line-fill", allowedRoles: [AdminRole.OPERATOR]},
+      {path: "/info/service-statistics", label: "서비스 통계", icon: "bi-graph-up", allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]},
+      {path: "/info/ad-statistics", label: "광고 통계", icon: "bi-badge-ad"},
+      {path: "/info/push-statistics", label: "푸시 통계", icon: "bi-bar-chart-line-fill"},
     ],
   },
   {
