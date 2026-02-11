@@ -1,8 +1,28 @@
 import {useNavigate} from "react-router-dom";
+import {useRecoilValue} from "recoil";
 import {menuGroups} from "./Layout";
+import {AdminAuthState} from "../state/AdminAuthState";
+import {filterMenuItemsByRole} from "../utils/roleUtils";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const adminAuth = useRecoilValue(AdminAuthState);
+
+  // 현재 관리자의 역할에 따라 메뉴 필터링
+  const getFilteredMenuGroups = () => {
+    if (!adminAuth?.role) {
+      // 역할 정보가 없으면 모든 메뉴 숨김
+      return [];
+    }
+
+    return menuGroups.map(group => {
+      const filteredItems = filterMenuItemsByRole(group.items, adminAuth.role);
+      return {
+        ...group,
+        items: filteredItems
+      };
+    }).filter(group => group.items.length > 0); // 접근 가능한 항목이 하나도 없는 그룹은 제외
+  };
 
   // 메뉴 그룹별 색상 및 설명 매핑
   const groupStyles: Record<string, { color: string; icon: string; description: string }> = {
@@ -60,7 +80,7 @@ const Dashboard = () => {
       <div className="mb-5">
         <h4 className="fw-semibold mb-4">주요 기능</h4>
         <div className="row g-4">
-          {menuGroups.map((group, idx) => {
+          {getFilteredMenuGroups().map((group, idx) => {
             const style = groupStyles[group.title] || {
               color: "secondary",
               icon: "bi-folder-fill",

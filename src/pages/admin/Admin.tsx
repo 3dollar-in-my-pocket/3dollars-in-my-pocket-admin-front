@@ -2,11 +2,18 @@ import {useState, useEffect} from 'react';
 import AdminRegisterModal from './AdminRegisterModal';
 import adminApi from '../../api/adminApi';
 import {toast} from 'react-toastify';
+import { AdminRole, Admin as AdminType } from '../../types/admin';
 
 const Admin = () => {
   const [admins, setAdmins] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
+
+  // 인라인 편집 상태 관리
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingField, setEditingField] = useState<'name' | 'role' | null>(null);
+  const [editingValue, setEditingValue] = useState<string>('');
+  const [isUpdating, setIsUpdating] = useState(false);
 
   // 페이지네이션 상태
   const [currentPage, setCurrentPage] = useState(1);
@@ -42,7 +49,43 @@ const Admin = () => {
   const handleRegisterSuccess = () => {
     setShowRegisterModal(false);
     fetchAdmins(1);
-    toast.success('관리자가 성공적으로 등록되었습니다.');
+  };
+
+  // 인라인 편집 시작
+  const startEditing = (adminId: string, field: 'name' | 'role', currentValue: string) => {
+    setEditingId(adminId);
+    setEditingField(field);
+    setEditingValue(currentValue);
+  };
+
+  // 편집 취소
+  const cancelEditing = () => {
+    setEditingId(null);
+    setEditingField(null);
+    setEditingValue('');
+  };
+
+  // 편집 저장
+  const saveEdit = async () => {
+    if (!editingId || !editingField || !editingValue.trim()) return;
+
+    setIsUpdating(true);
+    try {
+      const updateData: any = {};
+      updateData[editingField] = editingField === 'role' ? editingValue as AdminRole : editingValue.trim();
+
+      const response = await adminApi.updateAdmin(editingId, updateData);
+      if (response?.ok) {
+        toast.success('관리자 정보가 성공적으로 수정되었습니다.');
+        fetchAdmins(currentPage);
+        cancelEditing();
+      }
+    } catch (error) {
+      console.error('관리자 정보 수정 실패:', error);
+      toast.error('관리자 정보 수정에 실패했습니다.');
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   const formatDate = (dateString) => {
@@ -53,6 +96,32 @@ const Admin = () => {
       hour: '2-digit',
       minute: '2-digit'
     });
+  };
+
+  const getRoleDisplayName = (role: AdminRole) => {
+    switch (role) {
+      case AdminRole.OWNER:
+        return '소유자';
+      case AdminRole.OPERATOR:
+        return '서비스 운영자';
+      case AdminRole.VIEWER:
+        return '뷰어';
+      default:
+        return role;
+    }
+  };
+
+  const getRoleBadgeClass = (role: AdminRole) => {
+    switch (role) {
+      case AdminRole.OWNER:
+        return 'bg-danger';
+      case AdminRole.OPERATOR:
+        return 'bg-primary';
+      case AdminRole.VIEWER:
+        return 'bg-secondary';
+      default:
+        return 'bg-secondary';
+    }
   };
 
   return (
@@ -120,6 +189,7 @@ const Admin = () => {
                   <th className="px-4 py-3">관리자 ID</th>
                   <th className="px-4 py-3">이메일</th>
                   <th className="px-4 py-3">이름</th>
+                  <th className="px-4 py-3 text-center">역할</th>
                   <th className="px-4 py-3 text-center">생성일</th>
                   <th className="px-4 py-3 text-center">수정일</th>
                 </tr>
@@ -145,7 +215,96 @@ const Admin = () => {
                       </div>
                     </td>
                     <td className="px-4 py-3">
-                      <span className="fw-medium text-dark">{admin.name}</span>
+                      {editingId === admin.adminId && editingField === 'name' ? (
+                        <div className="d-flex align-items-center gap-2">
+                          <input
+                            type="text"
+                            value={editingValue}
+                            onChange={(e) => setEditingValue(e.target.value)}
+                            className="form-control form-control-sm"
+                            style={{ minWidth: '150px' }}
+                            autoFocus
+                            disabled={isUpdating}
+                          />
+                          <button
+                            className="btn btn-success btn-sm"
+                            onClick={saveEdit}
+                            disabled={isUpdating || !editingValue.trim()}
+                            title="저장"
+                          >
+                            <i className="bi bi-check"></i>
+                          </button>
+                          <button
+                            className="btn btn-secondary btn-sm"
+                            onClick={cancelEditing}
+                            disabled={isUpdating}
+                            title="취소"
+                          >
+                            <i className="bi bi-x"></i>
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="d-flex align-items-center justify-content-between">
+                          <span className="fw-medium text-dark">{admin.name}</span>
+                          <button
+                            className="btn btn-outline-primary btn-sm ms-2"
+                            onClick={() => startEditing(admin.adminId, 'name', admin.name)}
+                            disabled={editingId !== null}
+                            title="이름 수정"
+                          >
+                            <i className="bi bi-pencil"></i>
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      {editingId === admin.adminId && editingField === 'role' ? (
+                        <div className="d-flex align-items-center justify-content-center gap-2">
+                          <select
+                            value={editingValue}
+                            onChange={(e) => setEditingValue(e.target.value)}
+                            className="form-select form-select-sm"
+                            style={{ minWidth: '120px' }}
+                            disabled={isUpdating}
+                          >
+                            {Object.values(AdminRole).map(role => (
+                              <option key={role} value={role}>
+                                {getRoleDisplayName(role)}
+                              </option>
+                            ))}
+                          </select>
+                          <button
+                            className="btn btn-success btn-sm"
+                            onClick={saveEdit}
+                            disabled={isUpdating}
+                            title="저장"
+                          >
+                            <i className="bi bi-check"></i>
+                          </button>
+                          <button
+                            className="btn btn-secondary btn-sm"
+                            onClick={cancelEditing}
+                            disabled={isUpdating}
+                            title="취소"
+                          >
+                            <i className="bi bi-x"></i>
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="d-flex align-items-center justify-content-center gap-2">
+                          <span className={`badge ${getRoleBadgeClass(admin.role)} px-2 py-1`}>
+                            {getRoleDisplayName(admin.role)}
+                          </span>
+                          <button
+                            className="btn btn-outline-warning btn-sm"
+                            onClick={() => startEditing(admin.adminId, 'role', admin.role)}
+                            disabled={editingId !== null}
+                            title="역할 수정"
+                          >
+                            <i className="bi bi-pencil"></i>
+                          </button>
+                        </div>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-center text-muted">
                       <small>{formatDate(admin.createdAt)}</small>

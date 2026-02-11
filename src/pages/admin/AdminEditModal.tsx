@@ -1,42 +1,38 @@
-import {Modal} from "react-bootstrap";
+import { Modal } from "react-bootstrap";
 import adminApi from "../../api/adminApi";
-import {toast} from "react-toastify";
+import { toast } from "react-toastify";
 import useModalForm from "../../hooks/useModalForm";
-import { AdminRole } from "../../types/admin";
-import { useNonce } from "../../hooks/useNonce";
+import { AdminRole, Admin as AdminType } from "../../types/admin";
 import { useEffect } from "react";
 
-interface AdminFormData {
-  email: string;
+interface AdminEditFormData {
   name: string;
   role: AdminRole;
 }
 
-const AdminRegisterModal = ({show, onHide, onSuccess}: any) => {
-  const { nonce, issueNonce, clearNonce } = useNonce();
+interface AdminEditModalProps {
+  show: boolean;
+  onHide: () => void;
+  onSuccess: () => void;
+  selectedAdmin: AdminType | null;
+}
 
+const AdminEditModal = ({ show, onHide, onSuccess, selectedAdmin }: AdminEditModalProps) => {
   const {
     formData,
     errors,
     isSubmitting,
     handleChange,
     handleSubmit,
-    resetForm
-  } = useModalForm<AdminFormData>({
+    resetForm,
+    setFormData
+  } = useModalForm<AdminEditFormData>({
     initialValues: {
-      email: '',
       name: '',
       role: AdminRole.OPERATOR
     },
     validate: (values) => {
       const errors: any = {};
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-      if (!values.email.trim()) {
-        errors.email = '이메일은 필수 입력 항목입니다.';
-      } else if (!emailRegex.test(values.email)) {
-        errors.email = '올바른 이메일 형식을 입력해주세요.';
-      }
 
       if (!values.name.trim()) {
         errors.name = '이름은 필수 입력 항목입니다.';
@@ -49,28 +45,40 @@ const AdminRegisterModal = ({show, onHide, onSuccess}: any) => {
       return errors;
     },
     onSubmit: async (values) => {
-      if (!nonce) throw new Error("Nonce 토큰이 없습니다.");
-      return await adminApi.createAdmin({
-        email: values.email.trim(),
-        name: values.name.trim(),
-        role: values.role
-      }, nonce);
+      if (!selectedAdmin) throw new Error("수정할 관리자를 선택해주세요.");
+
+      // 변경된 필드만 전송 (부분 업데이트)
+      const updateData: any = {};
+      if (values.name.trim() !== selectedAdmin.name) {
+        updateData.name = values.name.trim();
+      }
+      if (values.role !== selectedAdmin.role) {
+        updateData.role = values.role;
+      }
+
+      // 변경사항이 없으면 에러
+      if (Object.keys(updateData).length === 0) {
+        throw new Error("변경된 내용이 없습니다.");
+      }
+
+      return await adminApi.updateAdmin(selectedAdmin.adminId, updateData);
     },
     onSuccess: () => {
-      toast.success('관리자가 성공적으로 등록되었습니다.');
+      toast.success('관리자 정보가 성공적으로 수정되었습니다.');
       onSuccess();
       onHide();
     }
   });
 
-  // nonce 발급 관리
+  // selectedAdmin이 변경되면 폼 데이터 초기화
   useEffect(() => {
-    if (show) {
-      issueNonce();
-    } else {
-      clearNonce();
+    if (show && selectedAdmin) {
+      setFormData({
+        name: selectedAdmin.name || '',
+        role: selectedAdmin.role || AdminRole.OPERATOR
+      });
     }
-  }, [show, issueNonce, clearNonce]);
+  }, [show, selectedAdmin?.adminId]); // adminId로 의존성을 제한
 
   const handleClose = () => {
     if (!isSubmitting) {
@@ -105,12 +113,13 @@ const AdminRegisterModal = ({show, onHide, onSuccess}: any) => {
     }
   };
 
+
   return (
     <Modal show={show} onHide={handleClose} centered>
       <Modal.Header closeButton className="border-0 pb-0">
         <Modal.Title className="fw-bold">
-          <i className="bi bi-person-plus me-2 text-primary"></i>
-          신규 관리자 등록
+          <i className="bi bi-person-gear me-2 text-warning"></i>
+          관리자 정보 수정
         </Modal.Title>
       </Modal.Header>
 
@@ -118,25 +127,17 @@ const AdminRegisterModal = ({show, onHide, onSuccess}: any) => {
         <Modal.Body className="p-4">
           <div className="mb-4">
             <label className="form-label fw-semibold text-dark mb-2">
-              <i className="bi bi-envelope me-2 text-primary"></i>
-              이메일 <span className="text-danger">*</span>
+              <i className="bi bi-envelope me-2 text-muted"></i>
+              이메일
             </label>
             <input
               type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className={`form-control form-control-lg ${errors.email ? 'is-invalid' : ''}`}
-              placeholder="admin@example.com"
-              disabled={isSubmitting}
-              style={{borderRadius: '8px'}}
+              value={selectedAdmin?.email || ''}
+              className="form-control form-control-lg bg-light"
+              disabled
+              style={{ borderRadius: '8px' }}
             />
-            {errors.email && (
-              <div className="invalid-feedback">
-                <i className="bi bi-exclamation-circle me-1"></i>
-                {errors.email}
-              </div>
-            )}
+            <small className="text-muted">이메일은 수정할 수 없습니다.</small>
           </div>
 
           <div className="mb-3">
@@ -152,7 +153,7 @@ const AdminRegisterModal = ({show, onHide, onSuccess}: any) => {
               className={`form-control form-control-lg ${errors.name ? 'is-invalid' : ''}`}
               placeholder="관리자 이름을 입력하세요"
               disabled={isSubmitting}
-              style={{borderRadius: '8px'}}
+              style={{ borderRadius: '8px' }}
             />
             {errors.name && (
               <div className="invalid-feedback">
@@ -173,7 +174,7 @@ const AdminRegisterModal = ({show, onHide, onSuccess}: any) => {
               onChange={handleChange}
               className={`form-select form-select-lg ${errors.role ? 'is-invalid' : ''}`}
               disabled={isSubmitting}
-              style={{borderRadius: '8px'}}
+              style={{ borderRadius: '8px' }}
             >
               {Object.values(AdminRole).map(role => (
                 <option key={role} value={role}>
@@ -193,7 +194,7 @@ const AdminRegisterModal = ({show, onHide, onSuccess}: any) => {
             <div className="d-flex align-items-center text-muted">
               <i className="bi bi-info-circle me-2"></i>
               <small>
-                등록된 관리자는 관리자 권한으로 시스템에 접근할 수 있습니다.
+                변경된 권한은 다음 로그인 시부터 적용됩니다.
               </small>
             </div>
           </div>
@@ -206,26 +207,26 @@ const AdminRegisterModal = ({show, onHide, onSuccess}: any) => {
               className="btn btn-light flex-fill py-2"
               onClick={handleClose}
               disabled={isSubmitting}
-              style={{borderRadius: '8px'}}
+              style={{ borderRadius: '8px' }}
             >
               <i className="bi bi-x-lg me-1"></i>
               취소
             </button>
             <button
               type="submit"
-              className="btn btn-primary flex-fill py-2"
-              disabled={isSubmitting || !formData.email.trim() || !formData.name.trim() || !formData.role}
-              style={{borderRadius: '8px'}}
+              className="btn btn-warning flex-fill py-2"
+              disabled={isSubmitting || !formData.name.trim() || !formData.role}
+              style={{ borderRadius: '8px' }}
             >
               {isSubmitting ? (
                 <>
                   <span className="spinner-border spinner-border-sm me-2" role="status"></span>
-                  등록 중...
+                  수정 중...
                 </>
               ) : (
                 <>
                   <i className="bi bi-check-lg me-1"></i>
-                  등록하기
+                  수정하기
                 </>
               )}
             </button>
@@ -236,4 +237,4 @@ const AdminRegisterModal = ({show, onHide, onSuccess}: any) => {
   );
 };
 
-export default AdminRegisterModal;
+export default AdminEditModal;
