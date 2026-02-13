@@ -424,17 +424,17 @@ const Advertisement = () => {
                             <div className="col-12">
                               <div className="bg-light rounded p-2 text-center">
                                 <small className="text-muted d-block mb-2" style={{fontSize: '0.7rem'}}>
-                                  <i className="bi bi-list-ol me-1"></i>노출 순서
+                                  <i className="bi bi-list-ol me-1"></i>노출 인덱스 (0부터 시작)
                                 </small>
-                                {info.exposureIndex ? (
+                                {info.exposureIndex !== null && info.exposureIndex !== undefined ? (
                                   <span className="badge bg-warning-subtle text-warning" style={{fontSize: '0.7rem'}}>
                                     <i className="bi bi-sort-numeric-down me-1"></i>
-                                    {info.exposureIndex}번째 카드
+                                    인덱스: {info.exposureIndex}
                                   </span>
                                 ) : (
                                   <span className="badge bg-light text-muted" style={{fontSize: '0.7rem'}}>
                                     <i className="bi bi-shuffle me-1"></i>
-                                    랜덤 노출
+                                    인덱스 미지정 (앱 기본값 적용)
                                   </span>
                                 )}
                               </div>

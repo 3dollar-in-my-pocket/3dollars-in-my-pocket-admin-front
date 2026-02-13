@@ -29,7 +29,7 @@ const AdvertisementContentEditModal = ({show, onHide, ad, fetchAdvertisements}) 
         imageHeight: ad.imageHeight || "",
         linkType: ad.linkType || "WEB",
         linkUrl: ad.linkUrl || "",
-        exposureIndex: ad.exposureIndex || null,
+        exposureIndex: ad.exposureIndex !== null && ad.exposureIndex !== undefined ? ad.exposureIndex : null,
       });
     }
   }, [ad]);
@@ -429,31 +429,39 @@ const AdvertisementContentEditModal = ({show, onHide, ad, fetchAdvertisements}) 
                 </div>
               )}
 
-              {/* 노출 순서 섹션 (MENU_CATEGORY_ICON, POLL_CARD 구좌만) */}
+              {/* 인덱스 섹션 (MENU_CATEGORY_ICON, POLL_CARD 구좌만) */}
               {showExposureIndex && (
                 <div className="bg-light rounded p-4">
                   <h6 className="text-warning fw-bold mb-3">
-                    <i className="bi bi-list-ol me-2"></i>노출 순서 설정
+                    <i className="bi bi-list-ol me-2"></i>인덱스 설정
                   </h6>
                   <Form.Group className="mb-0">
                     <Form.Label className="fw-semibold d-flex align-items-center">
                       <i className="bi bi-sort-numeric-down text-warning me-2"></i>
-                      노출 순서 (카드 인덱스)
+                      인덱스 (0부터 시작)
                       <span className="badge bg-warning ms-2" style={{fontSize: '0.65rem'}}>선택</span>
                     </Form.Label>
                     <Form.Control
                       type="number"
-                      value={formData.exposureIndex || ""}
-                      onChange={(e) => handleChange("exposureIndex", e.target.value ? parseInt(e.target.value) : null)}
-                      placeholder="ex) 1, 2, 3..."
+                      value={formData.exposureIndex !== null && formData.exposureIndex !== undefined ? formData.exposureIndex : ""}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value === "") {
+                          handleChange("exposureIndex", null);
+                        } else {
+                          const numValue = parseInt(value);
+                          handleChange("exposureIndex", isNaN(numValue) ? null : numValue);
+                        }
+                      }}
+                      placeholder="0, 1, 2, 3..."
                       style={{maxWidth: '200px'}}
-                      min="1"
+                      min="0"
                       max="99"
                     />
                     <Form.Text className="text-muted d-flex align-items-center mt-2">
                       <i className="bi bi-info-circle me-1"></i>
                       <div>
-                        몇 번째 카드에 광고를 노출시킬지 지정합니다.<br/>
+                        몇 번째 인덱스에 광고를 노출시킬지 인덱스로 지정합니다. (0부터 시작)<br/>
                       </div>
                     </Form.Text>
                   </Form.Group>
