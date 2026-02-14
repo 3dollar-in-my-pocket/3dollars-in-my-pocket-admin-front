@@ -449,10 +449,10 @@ const ContentInfoStep = ({formData, onChange}) => {
               type="number"
               value={content.exposureIndex || ""}
               onChange={(e) => handleContentChange("exposureIndex", e.target.value ? parseInt(e.target.value) : null)}
-              placeholder="ex) 1, 2, 3..."
+              placeholder="ex) 0, 1, 2, 3..."
               className="shadow-sm"
               style={{maxWidth: '200px'}}
-              min="1"
+              min="0"
               max="99"
             />
             <Form.Text className="text-muted d-flex align-items-center mt-2">
