@@ -47,6 +47,7 @@ export const menuGroups: MenuGroup[] = [
       {path: "/manage/store-image", label: "가게 이미지 관리", icon: "bi-image"},
       {path: "/manage/coupon", label: "가게 쿠폰 관리", icon: "bi-ticket-perforated", allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]},
       {path: "/manage/store-message", label: "가게 메시지 관리", icon: "bi-chat-left-text", allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]},
+      {path: "/manage/store-report", label: "전체 가게 신고 이력", icon: "bi-flag-fill", allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]},
     ],
   },
   {
