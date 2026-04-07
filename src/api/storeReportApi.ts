@@ -1,5 +1,5 @@
 import { ApiResponse, PaginatedResponse } from '../types/api';
-import { StoreReport, UserStoreReport } from '../types/report';
+import { StoreReport, UserStoreReport, AllStoreReport } from '../types/report';
 import { apiGetPaginated } from './apiHelpers';
 import { INCLUDES } from '../constants/api';
 
@@ -39,6 +39,23 @@ export default {
       `/v1/user/${userId}/store-reports`,
       { cursor, size },
       { includes: INCLUDES.STORE }
+    );
+  },
+
+  /**
+   * 전체 가게 신고 이력 조회
+   * @param {string | null} [cursor] - 페이징 커서
+   * @param {number} [size] - 페이지 사이즈
+   * @returns {Promise<ApiResponse<PaginatedResponse<AllStoreReport>>>} 전체 가게 신고 이력
+   */
+  getAllStoreReports: async (
+    cursor: string | null = null,
+    size?: number
+  ): Promise<ApiResponse<PaginatedResponse<AllStoreReport>>> => {
+    return apiGetPaginated<AllStoreReport>(
+      `/v1/store-reports`,
+      { cursor, size },
+      { includes: `${INCLUDES.REPORTER},${INCLUDES.STORE}` }
     );
   },
 };
