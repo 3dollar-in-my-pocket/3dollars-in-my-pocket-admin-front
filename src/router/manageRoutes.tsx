@@ -19,6 +19,7 @@ import PollManagement from "../pages/poll/PollManagement";
 import MedalManagement from "../pages/medal/MedalManagement";
 import UserRankingManagement from "../pages/userRanking/UserRankingManagement";
 import StoreImageManage from "../pages/manage/StoreImageManage";
+import StoreMarkerManage from "../pages/manage/StoreMarkerManage";
 import StoreReportManagement from "../pages/storeReport/StoreReportManagement";
 import PrivateRouter from "./PrivateRouter";
 
@@ -108,6 +109,10 @@ const manageRoutes = {
     {
       path: '/manage/store-image',
       element: <PrivateRouter><StoreImageManage/></PrivateRouter>
+    },
+    {
+      path: '/manage/store-marker',
+      element: <PrivateRouter><StoreMarkerManage/></PrivateRouter>
     },
     {
       path: '/manage/store-report',

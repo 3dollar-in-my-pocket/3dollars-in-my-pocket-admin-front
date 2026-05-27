@@ -34,6 +34,7 @@ import StoreReportHistory from '../../components/StoreReportHistory';
 import StorePostHistory from '../../components/StorePostHistory';
 import StoreMessageHistory from '../../components/StoreMessageHistory';
 import StoreCouponHistory from '../../components/StoreCouponHistory';
+import StoreMarkerHistory from '../../components/StoreMarkerHistory';
 import StoreSettings from '../../components/StoreSettings';
 import StoreContributorHistory from '../../components/StoreContributorHistory';
 import StoreEditForm from '../../components/StoreEditForm';
@@ -1008,6 +1009,29 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
                 initialActiveTab={activitySubTab}
                 onAuthorClick={onAuthorClick}
                 tabs={getFilteredActivityTabs()}
+              />
+            </Tab>
+
+            {/* 가게 마커 관리 탭 */}
+            <Tab
+              eventKey="markers"
+              title={
+                <span
+                  className="d-flex align-items-center gap-1 gap-md-2 px-1 py-2"
+                  style={{
+                    fontSize: window.innerWidth <= 768 ? '0.85rem' : '1rem',
+                    whiteSpace: 'nowrap',
+                    minWidth: 'fit-content'
+                  }}>
+                  <i className="bi bi-geo-alt-fill" style={{fontSize: '0.9rem'}}></i>
+                  <span className="fw-medium d-none d-sm-inline">마커 관리</span>
+                  <span className="fw-medium d-sm-none">마커</span>
+                </span>
+              }
+            >
+              <StoreMarkerHistory
+                storeId={store?.storeId}
+                isActive={activeTab === 'markers'}
               />
             </Tab>
 
