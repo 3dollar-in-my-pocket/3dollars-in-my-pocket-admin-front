@@ -111,7 +111,7 @@ const StoreReportManagement = () => {
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h4 className="fw-bold mb-0">
           <i className="bi bi-flag-fill text-danger me-2"></i>
-          전체 가게 신고 이력
+          가게 신고 이력
         </h4>
         <button
           className="btn btn-outline-secondary btn-sm rounded-pill px-3"

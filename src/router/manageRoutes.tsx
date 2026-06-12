@@ -21,6 +21,7 @@ import UserRankingManagement from "../pages/userRanking/UserRankingManagement";
 import StoreImageManage from "../pages/manage/StoreImageManage";
 import StoreMarkerManage from "../pages/manage/StoreMarkerManage";
 import StoreReportManagement from "../pages/storeReport/StoreReportManagement";
+import StorePostManagement from "../pages/storePost/StorePostManagement";
 import PrivateRouter from "./PrivateRouter";
 
 const manageRoutes = {
@@ -117,6 +118,10 @@ const manageRoutes = {
     {
       path: '/manage/store-report',
       element: <PrivateRouter><StoreReportManagement/></PrivateRouter>
+    },
+    {
+      path: '/manage/store-post',
+      element: <PrivateRouter><StorePostManagement/></PrivateRouter>
     }
   ]
 };
