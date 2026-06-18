@@ -72,6 +72,7 @@ export const menuGroups: MenuGroup[] = [
     items: [
       {path: "/manage/push-message", label: "푸시 발송", icon: "bi-send-fill", allowedRoles: [AdminRole.OPERATOR]},
       {path: "/manage/policy", label: "정책 설정", icon: "bi-shield-fill-check", allowedRoles: [AdminRole.OPERATOR]},
+      {path: "/manage/prompt", label: "AI 프롬프트 관리", icon: "bi-robot", allowedRoles: [AdminRole.OWNER]},
       {path: "/manage/tool/cache", label: "캐시 툴", icon: "bi-brush-fill"},
       {path: "/manage/tool/upload", label: "이미지 업로드 툴", icon: "bi-image-fill", allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]},
     ],
