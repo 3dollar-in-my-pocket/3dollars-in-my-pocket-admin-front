@@ -5,7 +5,11 @@ import {
   getMarketingConsentBadgeClass,
   getMarketingConsentDisplayName,
   getSocialTypeBadgeClass,
-  getSocialTypeDisplayName
+  getSocialTypeDisplayName,
+  getUserRoleBadgeClass,
+  getUserRoleLabel,
+  getUserRoleValue,
+  UserRoleOption
 } from '../../types/user';
 import {DEVICE_OS, getOsBadgeClass,} from '../../types/device';
 import userApi from '../../api/userApi';
@@ -19,6 +23,7 @@ import UserStoreImageHistory from '../../components/UserStoreImageHistory';
 import UserStoreReportHistory from '../../components/UserStoreReportHistory';
 import PushSendModal from '../../components/push/PushSendModal';
 import deviceApi from "../../api/deviceApi";
+import enumApi from "../../api/enumApi";
 
 const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
   const [userDetail, setUserDetail] = useState(null);
@@ -27,7 +32,10 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
   const [representativeMedal, setRepresentativeMedal] = useState(null);
   const [medals, setMedals] = useState([]);
   const [allMedals, setAllMedals] = useState([]);
+  const [userRoleOptions, setUserRoleOptions] = useState<UserRoleOption[]>([]);
+  const [selectedRole, setSelectedRole] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isUpdatingRole, setIsUpdatingRole] = useState(false);
   const [activeTab, setActiveTab] = useState('basic');
   const [error, setError] = useState(null);
   const [selectedMedalForAssign, setSelectedMedalForAssign] = useState<number | null>(null);
@@ -46,10 +54,11 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
     setError(null);
 
     try {
-      const [userResponse, devicesResponse, allMedalsResponse] = await Promise.all([
+      const [userResponse, devicesResponse, allMedalsResponse, enumResponse] = await Promise.all([
         userApi.getUserDetail(user.userId),
         deviceApi.getUserDevices(user.userId),
-        medalApi.getMedals()
+        medalApi.getMedals(),
+        enumApi.getEnum()
       ]);
 
       if (!userResponse.ok) {
@@ -59,9 +68,11 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
       const userData = userResponse.data;
 
       setUserDetail(userData.user);
+      setSelectedRole(userData.user?.role || '');
       setSettings(userData.setting);
       setRepresentativeMedal(userData.representativeMedal);
       setMedals(userData.medals || []);
+      setUserRoleOptions(enumResponse?.data?.UserRole || []);
 
       if (devicesResponse.ok) {
         setDevices(devicesResponse.data || []);
@@ -86,6 +97,8 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
     setRepresentativeMedal(null);
     setMedals([]);
     setAllMedals([]);
+    setUserRoleOptions([]);
+    setSelectedRole('');
     setSelectedMedalForAssign(null);
     setShowAssignConfirm(false);
     setActiveTab('basic');
@@ -110,6 +123,15 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
       <span className={`badge rounded-pill px-3 py-2 ${getOsBadgeClass(os)} bg-opacity-10 text-dark border`}>
         <i className={`bi ${iconClass} me-1`}></i>
         {os}
+      </span>
+    );
+  };
+
+  const getUserRoleBadge = (role) => {
+    return (
+      <span className={`badge rounded-pill px-3 py-2 ${getUserRoleBadgeClass(role)} bg-opacity-10 border`}>
+        <i className="bi bi-person-gear me-1"></i>
+        {getUserRoleLabel(role, userRoleOptions)}
       </span>
     );
   };
@@ -180,6 +202,32 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
   // 푸시 발송 핸들러
   const handleSendPush = () => {
     setShowPushModal(true);
+  };
+
+  const handleUpdateRole = async () => {
+    if (isUpdatingRole || !userDetail?.userId || !selectedRole || selectedRole === userDetail?.role) return;
+
+    if (!window.confirm(`${userDetail.nickname}님의 권한을 ${getUserRoleLabel(selectedRole, userRoleOptions)}(으)로 변경하시겠습니까?`)) {
+      return;
+    }
+
+    setIsUpdatingRole(true);
+    try {
+      const response = await userApi.updateUserRole(userDetail.userId, selectedRole);
+
+      if (response?.ok) {
+        const updatedUser = response.data || {};
+        setUserDetail((prev) => ({
+          ...prev,
+          ...updatedUser,
+          nickname: updatedUser.name || updatedUser.nickname || prev?.nickname,
+        }));
+        setSelectedRole(updatedUser.role || selectedRole);
+        toast.success('유저 권한이 변경되었습니다.');
+      }
+    } finally {
+      setIsUpdatingRole(false);
+    }
   };
 
   if (!show || !user) return null;
@@ -342,6 +390,58 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
                                 <label className="form-label fw-semibold text-muted mb-2 small">소셜 가입 방식</label>
                                 <div>
                                   {getSocialTypeBadge(userDetail?.socialType)}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="col-12 col-md-6">
+                            <div
+                              className="d-flex flex-column flex-sm-row align-items-start gap-2 gap-sm-3 p-3 bg-light rounded-3">
+                              <div className="bg-danger bg-opacity-10 rounded-circle p-2">
+                                <i className="bi bi-person-gear text-danger"></i>
+                              </div>
+                              <div className="flex-grow-1 w-100">
+                                <label className="form-label fw-semibold text-muted mb-2 small">유저 권한</label>
+                                <div className="mb-2">
+                                  {getUserRoleBadge(userDetail?.role)}
+                                </div>
+                                <div className="d-flex flex-column flex-sm-row gap-2">
+                                  <select
+                                    className="form-select form-select-sm flex-grow-1"
+                                    value={selectedRole}
+                                    onChange={(e) => setSelectedRole(e.target.value)}
+                                    disabled={isUpdatingRole || !userDetail?.userId || userRoleOptions.length === 0}
+                                  >
+                                    <option value="">권한 선택</option>
+                                    {userRoleOptions.map((roleOption) => {
+                                      const roleValue = getUserRoleValue(roleOption);
+                                      return (
+                                        <option key={roleValue} value={roleValue}>
+                                          {getUserRoleLabel(roleValue, userRoleOptions)}
+                                        </option>
+                                      );
+                                    })}
+                                  </select>
+                                  <button
+                                    type="button"
+                                    className="btn btn-outline-primary btn-sm d-inline-flex align-items-center justify-content-center gap-1 px-3"
+                                    onClick={handleUpdateRole}
+                                    disabled={isUpdatingRole || !selectedRole || selectedRole === userDetail?.role}
+                                    style={{whiteSpace: 'nowrap'}}
+                                  >
+                                    {isUpdatingRole ? (
+                                      <>
+                                        <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                        변경 중
+                                      </>
+                                    ) : (
+                                      <>
+                                        <i className="bi bi-check2-circle"></i>
+                                        변경
+                                      </>
+                                    )}
+                                  </button>
                                 </div>
                               </div>
                             </div>
@@ -1017,4 +1117,3 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
 };
 
 export default UserDetailModal;
-

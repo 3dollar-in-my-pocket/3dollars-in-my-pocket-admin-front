@@ -1,10 +1,13 @@
 import axiosInstance from './apiBase';
+import { apiPut } from './apiHelpers';
 import {
   createUserDetailResponse,
   createUserSearchResponse,
   createUserSettings,
   UserSearchRequest,
-  createRandomNameResponse
+  createRandomNameResponse,
+  UserRole,
+  User
 } from '../types/user';
 
 export default {
@@ -36,6 +39,7 @@ export default {
               userId: user.userId,
               nickname: user.name,
               socialType: user.socialType,
+              role: user.role,
               createdAt: user.createdAt
             })) || [],
             hasMore: response.data.data.cursor.hasMore || false,
@@ -69,6 +73,7 @@ export default {
               userId: user.userId,
               nickname: user.name,
               socialType: user.socialType,
+              role: user.role,
               createdAt: user.createdAt,
               updatedAt: user.updatedAt
             })) || [],
@@ -109,9 +114,12 @@ export default {
         const detailResponse = createUserDetailResponse({
           user: {
             userId: response.data.data.user.userId,
+            name: response.data.data.user.name,
             nickname: response.data.data.user.name,
             socialType: response.data.data.user.socialType,
-            createdAt: response.data.data.user.createdAt
+            role: response.data.data.user.role,
+            createdAt: response.data.data.user.createdAt,
+            updatedAt: response.data.data.user.updatedAt
           } as any,
           representativeMedal: response.data.data.representativeMedal ? {
             medalId: response.data.data.representativeMedal.medalId,
@@ -148,6 +156,20 @@ export default {
       } else {
         throw new Error('API 응답 오류');
       }
+    } catch (error: any) {
+      return error.response;
+    }
+  },
+
+  /**
+   * 사용자 권한 변경
+   * @param {string} userId - 사용자 ID
+   * @param {UserRole} role - 변경할 권한
+   * @returns {Promise<Object>} 변경된 사용자 정보
+   */
+  updateUserRole: async (userId: string, role: UserRole): Promise<any> => {
+    try {
+      return await apiPut<User>(`/v1/user/${userId}/role`, { role });
     } catch (error: any) {
       return error.response;
     }

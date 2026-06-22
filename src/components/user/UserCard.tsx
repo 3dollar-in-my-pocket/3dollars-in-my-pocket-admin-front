@@ -1,6 +1,8 @@
 import {
   getSocialTypeDisplayName,
-  getSocialTypeBadgeClass
+  getSocialTypeBadgeClass,
+  getUserRoleBadgeClass,
+  getUserRoleLabel
 } from '../../types/user';
 import ItemCard from '../common/ItemCard';
 
@@ -52,6 +54,11 @@ const UserCard = ({user, onClick}) => {
             <span
               className={`badge rounded-pill ${getSocialTypeBadgeClass(user.socialType)} bg-opacity-10 text-dark border px-2 py-1 small`}>
               {getSocialTypeDisplayName(user.socialType)}
+            </span>
+            <span
+              className={`badge rounded-pill ${getUserRoleBadgeClass(user.role)} bg-opacity-10 border px-2 py-1 small ms-1`}>
+              <i className="bi bi-person-gear me-1"></i>
+              {getUserRoleLabel(user.role)}
             </span>
           </div>
 
