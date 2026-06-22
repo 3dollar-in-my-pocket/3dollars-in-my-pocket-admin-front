@@ -9,6 +9,23 @@ export const SOCIAL_TYPES = {
 
 export type SocialType = typeof SOCIAL_TYPES[keyof typeof SOCIAL_TYPES];
 
+// User role types
+export const USER_ROLES = {
+  MEMBER: 'MEMBER',
+  MANAGER: 'MANAGER'
+} as const;
+
+export type UserRole = typeof USER_ROLES[keyof typeof USER_ROLES] | null | string;
+
+export interface UserRoleOption {
+  type?: string;
+  key?: string;
+  value?: string;
+  name?: string;
+  description?: string;
+  displayName?: string;
+}
+
 // Marketing consent types
 export const MARKETING_CONSENT = {
   APPROVE: 'APPROVE',
@@ -29,7 +46,9 @@ export type SearchType = typeof SEARCH_TYPES[keyof typeof SEARCH_TYPES];
 // User interfaces
 export interface User {
   name: string;
+  nickname?: string;
   socialType: SocialType;
+  role?: UserRole;
   userId?: string;
   createdAt: string;
   updatedAt: string;
@@ -155,6 +174,39 @@ export const getSocialTypeBadgeClass = (socialType: SocialType): string => {
       return 'bg-success';
     default:
       return 'bg-secondary';
+  }
+};
+
+export const getUserRoleValue = (option: UserRoleOption): string => {
+  return option.type || option.key || option.value || option.name || '';
+};
+
+export const getUserRoleLabel = (role: UserRole, roleOptions: UserRoleOption[] = []): string => {
+  if (!role) return '없음';
+
+  const option = roleOptions.find((item) => getUserRoleValue(item) === role);
+  if (option) {
+    return option.description || option.displayName || getUserRoleValue(option);
+  }
+
+  switch (role) {
+    case USER_ROLES.MEMBER:
+      return '일반 유저';
+    case USER_ROLES.MANAGER:
+      return '매니저';
+    default:
+      return role;
+  }
+};
+
+export const getUserRoleBadgeClass = (role: UserRole): string => {
+  switch (role) {
+    case USER_ROLES.MANAGER:
+      return 'bg-danger text-danger border-danger';
+    case USER_ROLES.MEMBER:
+      return 'bg-primary text-primary border-primary';
+    default:
+      return 'bg-secondary text-secondary border-secondary';
   }
 };
 
