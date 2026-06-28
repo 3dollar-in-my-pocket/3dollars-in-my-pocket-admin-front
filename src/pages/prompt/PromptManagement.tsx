@@ -7,7 +7,7 @@ import EmptyState from '../../components/common/EmptyState';
 import Loading from '../../components/common/Loading';
 import useInfiniteScroll from '../../hooks/useInfiniteScroll';
 import { formatDateTime } from '../../utils/dateUtils';
-import { EnumOption, PromptFormRequest, PromptResponse, PromptStatus } from '../../types/prompt';
+import { AIModel, EnumOption, PromptFormRequest, PromptResponse, PromptStatus } from '../../types/prompt';
 import './PromptManagement.css';
 
 const PAGE_SIZE = 10;
@@ -30,15 +30,30 @@ const getStatusLabel = (status: PromptStatus, promptStatuses: EnumOption[]): str
   return option ? getEnumLabel(option) : status;
 };
 
+const getModelLabel = (model: AIModel | null | undefined, aiModels: EnumOption[]): string | null => {
+  if (!model) return null;
+
+  const option = aiModels.find((item) => getEnumValue(item) === model);
+  return option ? getEnumLabel(option) : model;
+};
+
 const getStatusDescription = (status: PromptStatus): string => {
   if (status === PROMPT_STATUS.ACTIVE) return '실제 서비스 적용 후보';
   if (status === PROMPT_STATUS.DRAFT) return '서비스 미적용 초안';
   return '상태 정보';
 };
 
+const formatOptionalValue = (value?: string | number | null): string => {
+  if (value === null || value === undefined || value === '') return '-';
+  return String(value);
+};
+
+type PromptFormErrors = Partial<Record<keyof PromptFormRequest, string>>;
+
 const PromptManagement = () => {
   const [promptTypes, setPromptTypes] = useState<EnumOption[]>([]);
   const [promptStatuses, setPromptStatuses] = useState<EnumOption[]>([]);
+  const [aiModels, setAiModels] = useState<EnumOption[]>([]);
   const [selectedPromptType, setSelectedPromptType] = useState('');
   const [prompts, setPrompts] = useState<PromptResponse[]>([]);
   const [selectedPrompt, setSelectedPrompt] = useState<PromptResponse | null>(null);
@@ -62,8 +77,10 @@ const PromptManagement = () => {
         const response = await enumApi.getEnum();
         const types = response?.data?.PromptType || [];
         const statuses = response?.data?.PromptStatus || [];
+        const models = response?.data?.AIModel || [];
         setPromptTypes(types);
         setPromptStatuses(statuses);
+        setAiModels(models);
 
         const firstType = types[0] ? getEnumValue(types[0]) : '';
         if (firstType) {
@@ -308,6 +325,7 @@ const PromptManagement = () => {
                   prompt={prompt}
                   promptTypeLabel={selectedPromptTypeLabel}
                   statusLabel={getStatusLabel(prompt.status, promptStatuses)}
+                  modelLabel={getModelLabel(prompt.model, aiModels)}
                   isApplied={activePrompt?.promptId === prompt.promptId}
                   onStatusChange={(nextStatus) => handleStatusChange(prompt, nextStatus)}
                   onEdit={() => handleShowModal(prompt)}
@@ -328,6 +346,7 @@ const PromptManagement = () => {
         show={showModal}
         promptType={selectedPromptType}
         promptTypeLabel={selectedPromptTypeLabel}
+        aiModels={aiModels}
         selectedPrompt={selectedPrompt}
         onHide={() => handleCloseModal(false)}
         onSuccess={() => handleCloseModal(true)}
@@ -340,6 +359,7 @@ const PromptCard = ({
   prompt,
   promptTypeLabel,
   statusLabel,
+  modelLabel,
   isApplied,
   onStatusChange,
   onEdit,
@@ -347,12 +367,20 @@ const PromptCard = ({
   prompt: PromptResponse;
   promptTypeLabel: string;
   statusLabel: string;
+  modelLabel: string | null;
   isApplied: boolean;
   onStatusChange: (nextStatus: PromptStatus) => void;
   onEdit: () => void;
 }) => {
   const isActive = prompt.status === PROMPT_STATUS.ACTIVE;
   const nextStatus = isActive ? PROMPT_STATUS.DRAFT : PROMPT_STATUS.ACTIVE;
+  const hasSystemInstruction = Boolean(prompt.systemInstruction?.trim());
+  const hasMaxOutputTokens = prompt.maxOutputTokens !== null && prompt.maxOutputTokens !== undefined;
+  const hasTemperature = prompt.temperature !== null && prompt.temperature !== undefined;
+  const hasThinkingBudget = prompt.thinkingBudget !== null && prompt.thinkingBudget !== undefined;
+  const hasModelOptions = Boolean(
+    prompt.model || hasMaxOutputTokens || hasTemperature || hasThinkingBudget
+  );
 
   return (
     <article className={`prompt-card ${isActive ? 'is-active' : 'is-draft'} ${isApplied ? 'is-applied' : ''}`}>
@@ -404,6 +432,34 @@ const PromptCard = ({
         {prompt.content}
       </div>
 
+      {hasSystemInstruction && (
+        <div className="prompt-system-preview">
+          <span>System Instruction</span>
+          <pre>{prompt.systemInstruction}</pre>
+        </div>
+      )}
+
+      {hasModelOptions && (
+        <div className="prompt-model-row">
+          <div className="prompt-model-item">
+            <span>모델</span>
+            <strong>{formatOptionalValue(modelLabel)}</strong>
+          </div>
+          <div className="prompt-model-item">
+            <span>최대 토큰</span>
+            <strong>{formatOptionalValue(prompt.maxOutputTokens)}</strong>
+          </div>
+          <div className="prompt-model-item">
+            <span>Temperature</span>
+            <strong>{formatOptionalValue(prompt.temperature)}</strong>
+          </div>
+          <div className="prompt-model-item">
+            <span>Thinking Budget</span>
+            <strong>{formatOptionalValue(prompt.thinkingBudget)}</strong>
+          </div>
+        </div>
+      )}
+
       <div className="prompt-meta-row">
         <div className="prompt-meta-item">
           <span>생성</span>
@@ -422,6 +478,7 @@ const PromptEditModal = ({
   show,
   promptType,
   promptTypeLabel,
+  aiModels,
   selectedPrompt,
   onHide,
   onSuccess,
@@ -429,6 +486,7 @@ const PromptEditModal = ({
   show: boolean;
   promptType: string;
   promptTypeLabel: string;
+  aiModels: EnumOption[];
   selectedPrompt: PromptResponse | null;
   onHide: () => void;
   onSuccess: () => void;
@@ -436,8 +494,13 @@ const PromptEditModal = ({
   const [formData, setFormData] = useState<PromptFormRequest>({
     description: '',
     content: '',
+    systemInstruction: '',
+    model: null,
+    maxOutputTokens: null,
+    temperature: null,
+    thinkingBudget: null,
   });
-  const [errors, setErrors] = useState<Partial<PromptFormRequest>>({});
+  const [errors, setErrors] = useState<PromptFormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isEdit = Boolean(selectedPrompt);
 
@@ -447,13 +510,18 @@ const PromptEditModal = ({
     setFormData({
       description: selectedPrompt?.description || '',
       content: selectedPrompt?.content || '',
+      systemInstruction: selectedPrompt?.systemInstruction || '',
+      model: selectedPrompt?.model || null,
+      maxOutputTokens: selectedPrompt?.maxOutputTokens ?? null,
+      temperature: selectedPrompt?.temperature ?? null,
+      thinkingBudget: selectedPrompt?.thinkingBudget ?? null,
     });
     setErrors({});
     setIsSubmitting(false);
   }, [show, selectedPrompt]);
 
   const validate = () => {
-    const nextErrors: Partial<PromptFormRequest> = {};
+    const nextErrors: PromptFormErrors = {};
 
     if (!formData.description.trim()) {
       nextErrors.description = '설명을 입력해주세요.';
@@ -465,14 +533,45 @@ const PromptEditModal = ({
       nextErrors.content = '프롬프트 본문을 입력해주세요.';
     }
 
+    if (
+      formData.maxOutputTokens !== null &&
+      formData.maxOutputTokens !== undefined &&
+      (!Number.isFinite(formData.maxOutputTokens) || formData.maxOutputTokens < 1)
+    ) {
+      nextErrors.maxOutputTokens = '최대 출력 토큰은 1 이상이어야 합니다.';
+    }
+
+    if (
+      formData.temperature !== null &&
+      formData.temperature !== undefined &&
+      (!Number.isFinite(formData.temperature) || formData.temperature < 0)
+    ) {
+      nextErrors.temperature = 'Temperature는 0 이상이어야 합니다.';
+    }
+
+    if (
+      formData.thinkingBudget !== null &&
+      formData.thinkingBudget !== undefined &&
+      (!Number.isFinite(formData.thinkingBudget) || formData.thinkingBudget < 0)
+    ) {
+      nextErrors.thinkingBudget = 'Thinking Budget은 0 이상이어야 합니다.';
+    }
+
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
   };
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = event.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const numberFields = ['maxOutputTokens', 'temperature', 'thinkingBudget'];
+    const nextValue = numberFields.includes(name) ? (value === '' ? null : Number(value)) : value;
+    setFormData((prev) => ({ ...prev, [name]: nextValue }));
     setErrors((prev) => ({ ...prev, [name]: undefined }));
+  };
+
+  const normalizeOptionalText = (value?: string | null) => {
+    const trimmedValue = value?.trim();
+    return trimmedValue ? trimmedValue : null;
   };
 
   const savePrompt = async (
@@ -485,6 +584,11 @@ const PromptEditModal = ({
       const payload = {
         description: formData.description.trim(),
         content: formData.content.trim(),
+        systemInstruction: normalizeOptionalText(formData.systemInstruction),
+        model: formData.model || null,
+        maxOutputTokens: formData.maxOutputTokens ?? null,
+        temperature: formData.temperature ?? null,
+        thinkingBudget: formData.thinkingBudget ?? null,
       };
 
       const response = selectedPrompt
@@ -574,6 +678,84 @@ const PromptEditModal = ({
                 )}
                 <small className="text-muted ms-2">{formData.description.length}/100</small>
               </div>
+            </div>
+
+            <div className="col-12 col-md-6 col-xl-3">
+              <label className="form-label prompt-label">AI 모델</label>
+              <select
+                name="model"
+                value={formData.model || ''}
+                onChange={handleChange}
+                className="form-select prompt-select"
+              >
+                <option value="">선택 안 함</option>
+                {aiModels.map((model) => {
+                  const value = getEnumValue(model) as AIModel;
+                  return (
+                    <option key={value} value={value}>
+                      {getEnumLabel(model)}
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
+
+            <div className="col-12 col-md-6 col-xl-3">
+              <label className="form-label prompt-label">최대 출력 토큰</label>
+              <input
+                type="number"
+                name="maxOutputTokens"
+                value={formData.maxOutputTokens ?? ''}
+                onChange={handleChange}
+                min={1}
+                className={`form-control ${errors.maxOutputTokens ? 'is-invalid' : ''}`}
+                placeholder="예: 4096"
+              />
+              {errors.maxOutputTokens && <div className="invalid-feedback d-block">{errors.maxOutputTokens}</div>}
+            </div>
+
+            <div className="col-12 col-md-6 col-xl-3">
+              <label className="form-label prompt-label">Temperature</label>
+              <input
+                type="number"
+                name="temperature"
+                value={formData.temperature ?? ''}
+                onChange={handleChange}
+                min={0}
+                step={0.1}
+                className={`form-control ${errors.temperature ? 'is-invalid' : ''}`}
+                placeholder="예: 0.7"
+              />
+              {errors.temperature && <div className="invalid-feedback d-block">{errors.temperature}</div>}
+            </div>
+
+            <div className="col-12 col-md-6 col-xl-3">
+              <label className="form-label prompt-label">Thinking Budget</label>
+              <input
+                type="number"
+                name="thinkingBudget"
+                value={formData.thinkingBudget ?? ''}
+                onChange={handleChange}
+                min={0}
+                className={`form-control ${errors.thinkingBudget ? 'is-invalid' : ''}`}
+                placeholder="예: 1024"
+              />
+              {errors.thinkingBudget && <div className="invalid-feedback d-block">{errors.thinkingBudget}</div>}
+            </div>
+
+            <div className="col-12">
+              <div className="d-flex justify-content-between align-items-center gap-2">
+                <label className="form-label prompt-label">System Instruction</label>
+                <small className="text-muted">{(formData.systemInstruction || '').length.toLocaleString()}자</small>
+              </div>
+              <textarea
+                name="systemInstruction"
+                value={formData.systemInstruction || ''}
+                onChange={handleChange}
+                className="form-control prompt-system-editor"
+                rows={5}
+                placeholder="모델에 전달할 시스템 지시문을 입력해주세요."
+              />
             </div>
 
             <div className="col-12">
