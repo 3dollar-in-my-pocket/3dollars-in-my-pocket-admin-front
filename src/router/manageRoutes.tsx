@@ -23,6 +23,7 @@ import StoreMarkerManage from "../pages/manage/StoreMarkerManage";
 import StoreReportManagement from "../pages/storeReport/StoreReportManagement";
 import StorePostManagement from "../pages/storePost/StorePostManagement";
 import PromptManagement from "../pages/prompt/PromptManagement";
+import AiMenuImageExtract from "../pages/proto/AiMenuImageExtract";
 import PrivateRouter from "./PrivateRouter";
 import PermissionGuard from "../components/auth/PermissionGuard";
 import { AdminRole } from "../types/admin";
@@ -101,6 +102,25 @@ const manageRoutes = {
             }
           >
             <PromptManagement/>
+          </PermissionGuard>
+        </PrivateRouter>
+      )
+    },
+    {
+      path: '/manage/proto/ai-menu-image-extract',
+      element: (
+        <PrivateRouter>
+          <PermissionGuard
+            allowedRoles={[AdminRole.OPERATOR, AdminRole.VIEWER]}
+            fallback={
+              <div className="container-fluid py-5 text-center text-muted">
+                <i className="bi bi-lock-fill fs-1 d-block mb-3"></i>
+                <h4 className="fw-bold">접근 권한이 없습니다</h4>
+                <p className="mb-0">AI 메뉴 이미지 추출은 뷰어 이상만 접근할 수 있습니다.</p>
+              </div>
+            }
+          >
+            <AiMenuImageExtract/>
           </PermissionGuard>
         </PrivateRouter>
       )

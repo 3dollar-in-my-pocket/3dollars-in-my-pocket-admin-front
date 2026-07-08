@@ -56,6 +56,11 @@ const Dashboard = () => {
       icon: "bi-tools",
       description: "정책, 캐시, 이미지 업로드 등 운영 도구를 관리합니다"
     },
+    "PoC": {
+      color: "primary",
+      icon: "bi-stars",
+      description: "출시 전 기능을 테스트합니다"
+    },
     "통계 & 분석": {
       color: "danger",
       icon: "bi-graph-up",

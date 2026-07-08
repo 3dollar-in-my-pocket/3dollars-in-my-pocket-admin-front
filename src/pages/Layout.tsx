@@ -78,6 +78,12 @@ export const menuGroups: MenuGroup[] = [
     ],
   },
   {
+    title: "PoC",
+    items: [
+      {path: "/manage/proto/ai-menu-image-extract", label: "AI 메뉴 이미지 추출", icon: "bi-stars", allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]},
+    ],
+  },
+  {
     title: "통계 & 분석",
     items: [
       {path: "/info/service-statistics", label: "서비스 통계", icon: "bi-graph-up", allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]},

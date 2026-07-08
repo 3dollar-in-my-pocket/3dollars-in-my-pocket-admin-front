@@ -42,6 +42,28 @@ export async function apiPost<T>(
 }
 
 /**
+ * 타입 안전한 multipart/form-data POST 요청 (nonce/timeout 지원)
+ */
+export async function apiPostFormData<T>(
+  url: string,
+  data: FormData,
+  options?: { nonce?: string; timeout?: number }
+): Promise<ApiResponse<T>> {
+  const response = await axiosInstance({
+    method: 'POST',
+    url,
+    data,
+    headers: {
+      ...buildNonceHeader(options?.nonce),
+      'Content-Type': 'multipart/form-data',
+    },
+    timeout: options?.timeout,
+  });
+
+  return unwrapApiResponse<T>(response);
+}
+
+/**
  * 타입 안전한 PATCH 요청
  */
 export async function apiPatch<T>(
