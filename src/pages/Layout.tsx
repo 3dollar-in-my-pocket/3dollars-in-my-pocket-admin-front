@@ -81,6 +81,12 @@ export const menuGroups: MenuGroup[] = [
     title: "PoC",
     items: [
       {path: "/manage/proto/ai-menu-image-extract", label: "AI 메뉴 이미지 추출", icon: "bi-stars", allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]},
+      {
+        path: "/manage/store-file-upload",
+        label: "신규 가게 등록",
+        icon: "bi-file-earmark-arrow-up",
+        allowedRoles: [AdminRole.OPERATOR]
+      },
     ],
   },
   {

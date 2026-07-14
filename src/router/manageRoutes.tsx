@@ -24,6 +24,7 @@ import StoreReportManagement from "../pages/storeReport/StoreReportManagement";
 import StorePostManagement from "../pages/storePost/StorePostManagement";
 import PromptManagement from "../pages/prompt/PromptManagement";
 import AiMenuImageExtract from "../pages/proto/AiMenuImageExtract";
+import StoreFileUpload from "../pages/store/StoreFileUpload";
 import PrivateRouter from "./PrivateRouter";
 import PermissionGuard from "../components/auth/PermissionGuard";
 import { AdminRole } from "../types/admin";
@@ -66,6 +67,16 @@ const manageRoutes = {
     {
       path: '/manage/store-search',
       element: <PrivateRouter><StoreSearch/></PrivateRouter>
+    },
+    {
+      path: '/manage/store-file-upload',
+      element: (
+        <PrivateRouter>
+          <PermissionGuard allowedRoles={[AdminRole.OPERATOR]}>
+            <StoreFileUpload/>
+          </PermissionGuard>
+        </PrivateRouter>
+      )
     },
     {
       path: '/manage/popular-neighborhood-stores',
