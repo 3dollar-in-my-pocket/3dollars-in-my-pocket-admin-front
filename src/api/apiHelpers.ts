@@ -24,6 +24,26 @@ export async function apiGet<T>(
 }
 
 /**
+ * 인증이 필요한 바이너리 파일 다운로드 요청
+ */
+export async function apiGetBlob(
+  url: string,
+  options?: { timeout?: number; accept?: string }
+): Promise<Blob> {
+  const response = await axiosInstance({
+    method: 'GET',
+    url,
+    responseType: 'blob',
+    timeout: options?.timeout,
+    headers: {
+      Accept: options?.accept || 'application/octet-stream',
+    },
+  });
+
+  return response.data;
+}
+
+/**
  * 타입 안전한 POST 요청 (nonce 지원)
  */
 export async function apiPost<T>(
@@ -36,6 +56,29 @@ export async function apiPost<T>(
     url,
     data,
     headers: buildNonceHeader(options?.nonce),
+  });
+
+  return unwrapApiResponse<T>(response);
+}
+
+/**
+ * 타입 안전한 multipart/form-data POST 요청 (nonce/timeout 지원)
+ */
+export async function apiPostFormData<T>(
+  url: string,
+  data: FormData,
+  options?: { nonce?: string; timeout?: number }
+): Promise<ApiResponse<T>> {
+  const response = await axiosInstance({
+    method: 'POST',
+    url,
+    data,
+    headers: {
+      ...buildNonceHeader(options?.nonce),
+      // Axios 인스턴스의 application/json 기본값을 제거해 브라우저가 multipart boundary를 설정하게 한다.
+      'Content-Type': undefined,
+    },
+    timeout: options?.timeout,
   });
 
   return unwrapApiResponse<T>(response);
