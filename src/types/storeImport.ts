@@ -1,4 +1,4 @@
-export type StoreImportValidationStatus = 'READY' | 'FAILED';
+export type StoreImportValidationStatus = 'READY_TO_CREATE' | 'READY_TO_UPDATE' | 'FAILED';
 export type StoreImportSaveStatus = 'SAVED' | 'FAILED';
 
 export interface StoreImportMenu {
@@ -23,6 +23,7 @@ export interface StoreImportValidatedData {
 export interface StoreImportValidationResult {
   importKey: string;
   status: StoreImportValidationStatus;
+  existingStoreId?: number | null;
   data: StoreImportValidatedData | null;
   error: string | null;
 }
