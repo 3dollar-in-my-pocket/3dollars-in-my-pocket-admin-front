@@ -112,6 +112,12 @@ const StoreFileUpload = () => {
     return (
       <div className="small">
         <dl className="row mb-3">
+          {result.status === 'READY_TO_UPDATE' && (
+            <>
+              <dt className="col-sm-4 col-lg-3">기존 가게 ID</dt>
+              <dd className="col-sm-8 col-lg-9">{result.existingStoreId ?? '-'}</dd>
+            </>
+          )}
           <dt className="col-sm-4 col-lg-3">가게명</dt>
           <dd className="col-sm-8 col-lg-9">{data.storeName || '-'}</dd>
           <dt className="col-sm-4 col-lg-3">주소</dt>
@@ -167,6 +173,7 @@ const StoreFileUpload = () => {
       <div className="mb-4 pb-2 border-bottom">
         <h2 className="fw-bold mb-1">신규 가게 등록</h2>
         <p className="text-muted mb-0">CSV 두 개를 먼저 검증한 뒤 유저 가게로 일괄 등록합니다.</p>
+        <p className="text-muted mb-0">동일한 importKey를 가진 가게는 업데이트 됩니다.</p>
       </div>
 
       <div
@@ -235,9 +242,15 @@ const StoreFileUpload = () => {
                   {validation.results.map((result, index) => (
                     <tr key={`${result.importKey}-${index}`}>
                       <td className="fw-semibold">{result.importKey}</td>
-                      <td><span className={`badge ${result.status === 'READY' ? 'text-bg-success' : 'text-bg-danger'}`}>
-                        {result.status === 'READY' ? '등록 가능' : '실패'}
-                      </span></td>
+                      <td>
+                        <span className={`badge ${result.status === 'READY_TO_CREATE'
+                          ? 'text-bg-success'
+                          : result.status === 'READY_TO_UPDATE' ? 'text-bg-warning' : 'text-bg-danger'}`}>
+                          {result.status === 'READY_TO_CREATE'
+                            ? '신규 등록 예정'
+                            : result.status === 'READY_TO_UPDATE' ? '기존 가게 갱신 예정' : '실패'}
+                        </span>
+                      </td>
                       <td>{renderValidatedDetail(result)}</td>
                     </tr>
                   ))}
