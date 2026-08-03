@@ -34,7 +34,7 @@ const AdvertisementModal = ({
       return
     }
     const response = await advertisementApi.deleteAd({
-      application: "USER_API",
+      application: "USER",
       advertisementId: ad.advertisementId,
     });  // 광고 삭제 API 호출
     if (response.ok) {

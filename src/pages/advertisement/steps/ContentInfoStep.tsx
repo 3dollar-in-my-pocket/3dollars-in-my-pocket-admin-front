@@ -403,7 +403,7 @@ const ContentInfoStep = ({formData, onChange}) => {
             <DeepLinkSelector
               value={content.link.linkUrl || ""}
               onChange={(value) => handleLinkChange("linkUrl", value)}
-              applicationType="USER_API"
+              applicationType="USER"
               label="링크 주소"
               required={true}
               placeholder="/home, /event 등"

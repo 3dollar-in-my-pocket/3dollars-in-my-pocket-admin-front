@@ -4,8 +4,8 @@ import FaqEditModal from "./FaqEditModal";
 import Loading from "../../components/common/Loading";
 
 const applications = [
-  {type: "USER_API", description: "가슴속 3천원"},
-  {type: "BOSS_API", description: "가슴속 3천원 사장님"},
+  {type: "USER", description: "가슴속 3천원"},
+  {type: "BOSS", description: "가슴속 3천원 사장님"},
 ];
 
 const FaqManagement = () => {

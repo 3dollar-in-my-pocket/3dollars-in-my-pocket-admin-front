@@ -16,7 +16,7 @@ const applicationApi = {
   /**
    * 앱 스킴 목록 조회
    */
-  getSchemes: async (applicationType: string = 'USER_API'): Promise<AppSchemesResponse> => {
+  getSchemes: async (applicationType: string = 'USER'): Promise<AppSchemesResponse> => {
     try {
       const response = await axiosInstance.get(`/v1/application/${applicationType}/schemes`);
 
