@@ -37,7 +37,7 @@ const AdvertisementEditModal = ({show, onHide, ad, positions, fetchAdvertisement
 
   const handleSubmit = async () => {
     const res = await advertisementApi.updateAd({
-      application: "USER_API",
+      application: "USER",
       advertisementId: ad.advertisementId,
       adData: {
         ...formData,

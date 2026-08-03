@@ -111,7 +111,7 @@ const AdvertisementContentEditModal = ({show, onHide, ad, fetchAdvertisements}) 
       };
 
       const res = await advertisementApi.updateAdContent({
-        application: "USER_API",
+        application: "USER",
         advertisementId: ad.advertisementId,
         contentData,
       });
@@ -402,7 +402,7 @@ const AdvertisementContentEditModal = ({show, onHide, ad, fetchAdvertisements}) 
                     <DeepLinkSelector
                       value={formData.linkUrl}
                       onChange={(value) => handleChange("linkUrl", value)}
-                      applicationType="USER_API"
+                      applicationType="USER"
                       label="링크 주소"
                       required={isLinkRequired}
                       placeholder="/home, /event 등"

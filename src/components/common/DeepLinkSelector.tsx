@@ -5,7 +5,7 @@ import applicationApi, {AppScheme} from '../../api/applicationApi';
 interface DeepLinkSelectorProps {
   value: string;
   onChange: (value: string) => void;
-  applicationType?: 'USER_API' | 'BOSS_API';
+  applicationType?: 'USER' | 'BOSS';
   label?: string;
   required?: boolean;
   placeholder?: string;
@@ -16,7 +16,7 @@ interface DeepLinkSelectorProps {
 const DeepLinkSelector: React.FC<DeepLinkSelectorProps> = ({
                                                              value,
                                                              onChange,
-                                                             applicationType = 'USER_API',
+                                                             applicationType = 'USER',
                                                              label = '이동 경로',
                                                              required = false,
                                                              placeholder = '/home, /event 등',

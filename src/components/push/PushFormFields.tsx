@@ -61,7 +61,7 @@ const PushFormFields = ({
   useEffect(() => {
     const loadSchemes = async () => {
       // targetType에 따라 API 타입 결정
-      const apiType = formData.targetType === 'USER' ? 'USER_API' : 'BOSS_API';
+      const apiType = formData.targetType === 'USER' ? 'USER' : 'BOSS';
       const response = await applicationApi.getSchemes(apiType);
       if (response.ok) {
         setSchemes(response.data.contents);

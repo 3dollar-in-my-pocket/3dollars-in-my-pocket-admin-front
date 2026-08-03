@@ -53,7 +53,7 @@ const Advertisement = () => {
     const fetchAdvertisements = () => {
       setIsLoading(true)
       advertisementApi.listAds({
-        application: "USER_API",
+        application: "USER",
         page: 1,
         size: 30,
         ...(selectedPosition && {position: selectedPosition}),

@@ -64,7 +64,7 @@ const AdvertisementRegisterModal = ({show, onHide, positions, fetchAdvertisement
     };
 
     const res = await advertisementApi.createAd({
-      application: "USER_API",
+      application: "USER",
       adData: {
         ...formData,
         startDateTime: `${formData.startDateTime}:00`,
