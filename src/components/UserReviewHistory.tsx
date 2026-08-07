@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useRef, useState} from 'react';
+import {useCallback, useRef, useState} from 'react';
 import {toast} from 'react-toastify';
 import {
   getActivitiesStatusDisplayName,
@@ -9,65 +9,41 @@ import {
   getStoreTypeIcon
 } from "../types/store";
 import reviewApi from "../api/reviewApi";
+import useCursorPagination from "../hooks/useCursorPagination";
 import {formatDateTimeKo as formatDateTime} from "../utils/dateUtils";
 
 const UserReviewHistory = ({userId, isActive, onStoreClick}) => {
-  const [reviews, setReviews] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(false);
-  const [cursor, setCursor] = useState(null);
-  const [totalCount, setTotalCount] = useState(0);
-  const [selectedReview, setSelectedReview] = useState(null);
+  const [selectedReview, setSelectedReview] = useState<any>(null);
   const [showModal, setShowModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const scrollContainerRef = useRef(null);
 
-  useEffect(() => {
-    if (userId && isActive) {
-      fetchReviews(true);
-    }
-  }, [userId, isActive]);
+  const fetchUserReviews = useCallback(
+    (cursor: string | null) => reviewApi.getUserReviews(userId, cursor, 20),
+    [userId]
+  );
 
-  const fetchReviews = useCallback(async (reset = false) => {
-    if (isLoading) return;
-
-    setIsLoading(true);
-    try {
-      const response = await reviewApi.getUserReviews(userId, reset ? null : cursor, 20);
-      if (!response?.ok) {
-        return;
-      }
-
-      const {contents = [], cursor: newCursor} = response.data || { contents: [], cursor: { hasMore: false, nextCursor: null } };
-
-      if (reset) {
-        setReviews(contents);
-      } else {
-        setReviews(prev => [...prev, ...contents]);
-      }
-
-      setHasMore(newCursor.hasMore || false);
-      setCursor(newCursor.nextCursor || null);
-      setTotalCount(newCursor.totalCount || 0);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [userId, cursor, isLoading]);
-
-  const handleLoadMore = useCallback(() => {
-    if (hasMore && !isLoading) {
-      fetchReviews(false);
-    }
-  }, [hasMore, isLoading, fetchReviews]);
+  const {
+    items: reviews,
+    isLoading,
+    hasMore,
+    totalCount,
+    refresh,
+    loadMore
+  } = useCursorPagination({
+    fetcher: fetchUserReviews,
+    enabled: Boolean(userId && isActive),
+    deps: [userId]
+  });
 
   const handleScroll = useCallback((e) => {
     const {scrollTop, scrollHeight, clientHeight} = e.target;
     const isScrolledToBottom = scrollHeight - scrollTop <= clientHeight + 100;
 
     if (isScrolledToBottom && hasMore && !isLoading) {
-      handleLoadMore();
+      loadMore();
     }
-  }, [hasMore, isLoading, handleLoadMore]);
+  }, [hasMore, isLoading, loadMore]);
 
   const handleReviewClick = (review) => {
     setSelectedReview(review);
@@ -194,7 +170,7 @@ const UserReviewHistory = ({userId, isActive, onStoreClick}) => {
       }
       toast.success('리뷰가 성공적으로 삭제되었습니다.');
       handleCloseModal();
-      fetchReviews(true);
+      refresh();
     } finally {
       setIsDeleting(false);
     }

@@ -4,11 +4,20 @@
 
 export interface Visit {
   visitId: string;
-  createdAt: string;
-  visitType: string;
+  /** 방문 일시 */
+  visitDateTime: string;
+  createdAt?: string;
+  /** 문자열 코드 또는 { type, description } 객체로 응답됩니다. */
+  visitType: string | { type?: string; description?: string };
+  /** 일부 응답에서 방문 유형이 최상위 type으로 내려옵니다. */
+  type?: string;
   visitor?: {
     userId: string;
     name: string;
+  };
+  device?: {
+    os?: string;
+    version?: string;
   };
 }
 
@@ -16,6 +25,13 @@ export interface UserVisit extends Visit {
   store?: {
     storeId: string;
     name: string;
+    storeType?: string;
+    address?: any;
+    salesType?: any;
+    status?: string;
+    activitiesStatus?: string;
+    rating?: number;
+    categories?: any[];
   };
 }
 

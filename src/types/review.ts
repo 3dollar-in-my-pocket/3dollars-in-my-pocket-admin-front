@@ -7,6 +7,8 @@ export interface StoreInfo {
   name: string;
   storeType?: string;
   categories?: any[];
+  salesType?: any;
+  status?: string;
   address?: {
     fullAddress?: string;
   };
@@ -25,12 +27,9 @@ export interface Review {
     socialType?: string;
   };
   images?: any[];
-}
-
-export interface StoreReview extends Review {
   store?: StoreInfo;
 }
 
-export interface UserReview extends Review {
-  store?: StoreInfo;
-}
+export type StoreReview = Review;
+
+export type UserReview = Review;

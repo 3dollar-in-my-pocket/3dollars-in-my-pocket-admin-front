@@ -1,5 +1,5 @@
-import {useCallback, useEffect, useRef, useState} from 'react';
-import {toast} from 'react-toastify';
+import {useCallback, useRef, useState} from 'react';
+import useCursorPagination from "../hooks/useCursorPagination";
 import {
   getActivitiesStatusDisplayName,
   getStoreStatusBadgeClass,
@@ -12,61 +12,35 @@ import {getVisitIconClass, getVisitTypeBatchClass, getVisitTypeDisplayName} from
 import visitApi from "../api/visitApi";
 
 const UserVisitHistory = ({userId, isActive, onStoreClick}) => {
-  const [visits, setVisits] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(false);
-  const [cursor, setCursor] = useState(null);
-  const [totalCount, setTotalCount] = useState(0);
-  const [selectedVisit, setSelectedVisit] = useState(null);
+  const [selectedVisit, setSelectedVisit] = useState<any>(null);
   const [showModal, setShowModal] = useState(false);
   const scrollContainerRef = useRef(null);
 
-  useEffect(() => {
-    if (userId && isActive) {
-      fetchVisits(true);
-    }
-  }, [userId, isActive]);
+  const fetchUserVisits = useCallback(
+    (cursor: string | null) => visitApi.getUserVisits(userId, cursor, 20),
+    [userId]
+  );
 
-  const fetchVisits = useCallback(async (reset = false) => {
-    if (isLoading) return;
-
-    setIsLoading(true);
-    try {
-      const response = await visitApi.getUserVisits(userId, reset ? null : cursor, 20);
-      if (!response?.ok) {
-        return;
-      }
-
-      const {contents = [], cursor: newCursor} = response.data || { contents: [], cursor: { hasMore: false, nextCursor: null } };
-
-      if (reset) {
-        setVisits(contents);
-      } else {
-        setVisits(prev => [...prev, ...contents]);
-      }
-
-      setHasMore(newCursor.hasMore || false);
-      setCursor(newCursor.nextCursor || null);
-      setTotalCount(newCursor.totalCount || 0);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [userId, cursor, isLoading]);
-
-  const handleLoadMore = useCallback(() => {
-    if (hasMore && !isLoading) {
-      fetchVisits(false);
-    }
-  }, [hasMore, isLoading, fetchVisits]);
+  const {
+    items: visits,
+    isLoading,
+    hasMore,
+    totalCount,
+    loadMore
+  } = useCursorPagination({
+    fetcher: fetchUserVisits,
+    enabled: Boolean(userId && isActive),
+    deps: [userId]
+  });
 
   const handleScroll = useCallback((e) => {
     const {scrollTop, scrollHeight, clientHeight} = e.target;
     const isScrolledToBottom = scrollHeight - scrollTop <= clientHeight + 100;
 
     if (isScrolledToBottom && hasMore && !isLoading) {
-      handleLoadMore();
+      loadMore();
     }
-  }, [hasMore, isLoading, handleLoadMore]);
+  }, [hasMore, isLoading, loadMore]);
 
   const handleVisitClick = (visit) => {
     setSelectedVisit(visit);

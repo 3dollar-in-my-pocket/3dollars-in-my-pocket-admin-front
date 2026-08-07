@@ -33,6 +33,7 @@ export interface StoreReport {
   reportId: string;
   reason: string | StoreReportReason;
   createdAt: string;
+  priority?: string;
   reporter?: {
     userId: string | number;
     name: string;
@@ -40,15 +41,16 @@ export interface StoreReport {
     createdAt?: string;
     updatedAt?: string;
   };
-}
-
-export interface UserStoreReport extends StoreReport {
   store?: {
     storeId: string | number;
     name: string;
     storeType?: string;
+    address?: any;
+    categories?: any[];
   };
 }
+
+export type UserStoreReport = StoreReport;
 
 export interface AllStoreReport {
   reportId: number;

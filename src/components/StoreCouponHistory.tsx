@@ -1,77 +1,39 @@
-import React, {useState, useEffect} from 'react';
+import React, {useCallback} from 'react';
 import storeApi from '../api/storeApi';
 import {Coupon, getCouponStatusDisplayName, getCouponStatusBadgeClass, formatCouponDate} from '../types/coupon';
+import useCursorPagination from '../hooks/useCursorPagination';
 
 interface StoreCouponHistoryProps {
   storeId: string;
 }
 
 const StoreCouponHistory: React.FC<StoreCouponHistoryProps> = ({storeId}) => {
-  const [coupons, setCoupons] = useState<Coupon[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
-  const [nextCursor, setNextCursor] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const fetchCoupons = useCallback(
+    (cursor: string | null) => storeApi.getStoreCoupons(storeId, cursor, 20),
+    [storeId]
+  );
 
-  useEffect(() => {
-    if (storeId) {
-      fetchCoupons(true);
-    }
-  }, [storeId]);
-
-  const fetchCoupons = async (isInitial = false) => {
-    if (isInitial) {
-      setIsLoading(true);
-      setCoupons([]);
-      setNextCursor(null);
-      setHasMore(true);
-      setError(null);
-    } else {
-      setIsLoadingMore(true);
-    }
-
-    try {
-      const response = await storeApi.getStoreCoupons(storeId, isInitial ? null : nextCursor, 20);
-
-      if (!response.ok) {
-        throw new Error('쿠폰을 불러오는데 실패했습니다.');
-      }
-
-      const {contents, cursor} = response.data;
-
-      if (isInitial) {
-        setCoupons(contents || []);
-      } else {
-        setCoupons(prev => [...prev, ...(contents || [])]);
-      }
-
-      setHasMore(cursor?.hasMore || false);
-      setNextCursor(cursor?.nextCursor || null);
-    } catch (error: any) {
-      console.error('가게 쿠폰 조회 실패:', error);
-      const errorMessage = error.response?.status
-        ? `서버 오류가 발생했습니다. (${error.response.status})`
-        : '쿠폰을 불러오는데 실패했습니다. 인터넷 연결을 확인해주세요.';
-      setError(errorMessage);
-    } finally {
-      setIsLoading(false);
-      setIsLoadingMore(false);
-    }
-  };
-
-  const handleLoadMore = () => {
-    if (!isLoadingMore && hasMore && nextCursor) {
-      fetchCoupons(false);
-    }
-  };
+  const {
+    items: coupons,
+    isLoading,
+    isLoadingMore,
+    hasMore,
+    error,
+    refresh,
+    loadMore: handleLoadMore
+  } = useCursorPagination<Coupon>({
+    fetcher: fetchCoupons,
+    enabled: Boolean(storeId),
+    deps: [storeId],
+    errorMessage: '쿠폰을 불러오는데 실패했습니다.'
+  });
 
   const calculateProgress = (issued: number, max: number): number => {
     if (max === 0) return 0;
     return Math.round((issued / max) * 100);
   };
 
-  if (isLoading) {
+  if (isLoading && coupons.length === 0) {
     return (
       <div className="text-center py-5">
         <div className="mb-3">
@@ -103,7 +65,7 @@ const StoreCouponHistory: React.FC<StoreCouponHistoryProps> = ({storeId}) => {
         <p className="text-muted mb-3">{error}</p>
         <button
           className="btn btn-outline-primary rounded-pill px-4"
-          onClick={() => fetchCoupons(true)}
+          onClick={refresh}
         >
           <i className="bi bi-arrow-clockwise me-2"></i>
           다시 시도
@@ -139,7 +101,7 @@ const StoreCouponHistory: React.FC<StoreCouponHistoryProps> = ({storeId}) => {
         </div>
         <button
           className="btn btn-outline-secondary btn-sm rounded-pill"
-          onClick={() => fetchCoupons(true)}
+          onClick={refresh}
           disabled={isLoading}
         >
           <i className="bi bi-arrow-clockwise me-1"></i>

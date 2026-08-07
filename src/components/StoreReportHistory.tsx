@@ -1,67 +1,32 @@
-import {useCallback, useEffect, useRef, useState} from 'react';
-import {toast} from 'react-toastify';
+import {useCallback, useRef, useState} from 'react';
 import storeReportApi from "../api/storeReportApi";
 import {getReportReasonBadgeClass} from "../types/report";
 import {getStoreTypeDisplayName, getStoreTypeBadgeClass, getStoreTypeIcon} from "../types/store";
+import useCursorPagination from "../hooks/useCursorPagination";
+import {formatDateTimeShortKo as formatDateTime} from "../utils/dateUtils";
 
 const StoreReportHistory = ({storeId, isActive, onAuthorClick}) => {
-  const [reports, setReports] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(false);
-  const [cursor, setCursor] = useState(null);
-  const [totalCount, setTotalCount] = useState(0);
   const [selectedReport, setSelectedReport] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const scrollContainerRef = useRef(null);
 
-  useEffect(() => {
-    if (storeId && isActive) {
-      fetchReports(true);
-    }
-  }, [storeId, isActive]);
+  const fetchReports = useCallback(
+    (cursor: string | null) => storeReportApi.getStoreReports(storeId, cursor, 20),
+    [storeId]
+  );
 
-  const fetchReports = useCallback(async (reset = false) => {
-    if (isLoading) return;
-
-    setIsLoading(true);
-    try {
-      const response = await storeReportApi.getStoreReports(storeId, reset ? null : cursor, 20);
-      if (!response?.ok) {
-        return;
-      }
-
-      const {contents = [], cursor: newCursor} = response.data || { contents: [], cursor: { hasMore: false, nextCursor: null } };
-
-      if (reset) {
-        setReports(contents);
-      } else {
-        setReports(prev => [...prev, ...contents]);
-      }
-
-      setHasMore(newCursor.hasMore || false);
-      setCursor(newCursor.nextCursor || null);
-      setTotalCount(newCursor.totalCount || 0);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [storeId, cursor, isLoading]);
-
-  const handleLoadMore = useCallback(() => {
-    if (hasMore && !isLoading) {
-      fetchReports(false);
-    }
-  }, [hasMore, isLoading, fetchReports]);
-
-  const formatDateTime = (dateString) => {
-    if (!dateString) return '없음';
-    return new Date(dateString).toLocaleString('ko-KR', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
+  const {
+    items: reports,
+    isLoading,
+    hasMore,
+    totalCount,
+    refresh,
+    loadMore
+  } = useCursorPagination({
+    fetcher: fetchReports,
+    enabled: Boolean(storeId && isActive),
+    deps: [storeId]
+  });
 
   const getReportTypeBadge = (reason) => {
     const reasonText = reason.description
@@ -112,7 +77,7 @@ const StoreReportHistory = ({storeId, isActive, onAuthorClick}) => {
         {totalCount > 0 && (
           <button
             className="btn btn-outline-danger btn-sm rounded-pill px-3"
-            onClick={() => fetchReports(true)}
+            onClick={refresh}
             disabled={isLoading}
           >
             <i className="bi bi-arrow-clockwise me-1"></i>
@@ -268,7 +233,7 @@ const StoreReportHistory = ({storeId, isActive, onAuthorClick}) => {
           <div className="text-center mt-4">
             <button
               className="btn btn-outline-danger rounded-pill px-4 py-2"
-              onClick={handleLoadMore}
+              onClick={loadMore}
               disabled={isLoading}
             >
               {isLoading ? (

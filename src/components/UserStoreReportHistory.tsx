@@ -1,16 +1,10 @@
-import {useCallback, useEffect, useState} from 'react';
+import {useCallback} from 'react';
 import storeReportApi from "../api/storeReportApi";
 import {getReportReasonBadgeClass} from "../types/report";
 import {getStoreTypeDisplayName, getStoreTypeBadgeClass, getStoreTypeIcon} from "../types/store";
+import useCursorPagination from "../hooks/useCursorPagination";
 
 const UserStoreReportHistory = ({userId, isActive, onStoreClick}) => {
-  const [reports, setReports] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [cursor, setCursor] = useState(null);
-  const [hasMore, setHasMore] = useState(false);
-  const [totalCount, setTotalCount] = useState(0);
-
   const formatDateTime = (dateString) => {
     if (!dateString) return '없음';
     return new Date(dateString).toLocaleString('ko-KR', {
@@ -52,50 +46,25 @@ const UserStoreReportHistory = ({userId, isActive, onStoreClick}) => {
     );
   };
 
-  const fetchReports = useCallback(async (isLoadMore = false) => {
-    if (!userId || !isActive) return;
+  const fetchUserReports = useCallback(
+    (cursor: string | null) => storeReportApi.getUserStoreReports(userId, cursor, 20),
+    [userId]
+  );
 
-    if (isLoadMore && !hasMore) return;
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const response = await storeReportApi.getUserStoreReports(
-        userId,
-        isLoadMore ? cursor : null,
-        20
-      );
-
-      if (!response.ok) {
-        return;
-      }
-
-      const data = response.data;
-
-      if (isLoadMore) {
-        setReports(prev => [...prev, ...(data.contents || [])]);
-      } else {
-        setReports(data.contents || []);
-        setTotalCount(data.cursor?.totalCount || 0);
-      }
-
-      setCursor(data.cursor?.nextCursor || null);
-      setHasMore(data.cursor?.hasMore || false);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [userId, isActive]);
-
-  useEffect(() => {
-    if (isActive && reports.length === 0 && !isLoading) {
-      fetchReports();
-    }
-  }, [isActive, fetchReports]);
-
-  const handleLoadMore = () => {
-    fetchReports(true);
-  };
+  const {
+    items: reports,
+    isLoading,
+    hasMore,
+    totalCount,
+    error,
+    refresh,
+    loadMore: handleLoadMore
+  } = useCursorPagination({
+    fetcher: fetchUserReports,
+    enabled: Boolean(userId && isActive),
+    deps: [userId],
+    errorMessage: '신고 이력을 불러오는데 실패했습니다.'
+  });
 
   if (error) {
     return (
@@ -110,12 +79,7 @@ const UserStoreReportHistory = ({userId, isActive, onStoreClick}) => {
         <p className="text-muted mb-3">{error}</p>
         <button
           className="btn btn-outline-primary rounded-pill px-4"
-          onClick={() => {
-            setReports([]);
-            setCursor(null);
-            setError(null);
-            fetchReports();
-          }}
+          onClick={refresh}
         >
           <i className="bi bi-arrow-clockwise me-2"></i>
           다시 시도

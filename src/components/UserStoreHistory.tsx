@@ -1,6 +1,7 @@
-import {useCallback, useEffect, useRef, useState} from 'react';
+import {useCallback, useRef} from 'react';
 import storeApi from '../api/storeApi';
-import {toast} from 'react-toastify';
+import useCursorPagination from '../hooks/useCursorPagination';
+import {formatDateTimeKo as formatDateTime} from '../utils/dateUtils';
 import {
   getActivitiesStatusDisplayName,
   getStoreStatusBadgeClass,
@@ -11,59 +12,33 @@ import {
 } from "../types/store";
 
 const UserStoreHistory = ({userId, isActive, onStoreClick}) => {
-  const [stores, setStores] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(false);
-  const [cursor, setCursor] = useState(null);
-  const [totalCount, setTotalCount] = useState(0);
   const scrollContainerRef = useRef(null);
 
-  useEffect(() => {
-    if (userId && isActive) {
-      fetchStores(true);
-    }
-  }, [userId, isActive]);
+  const fetchUserStores = useCallback(
+    (cursor: string | null) => storeApi.getUserStores(userId, cursor, 20),
+    [userId]
+  );
 
-  const fetchStores = useCallback(async (reset = false) => {
-    if (isLoading) return;
-
-    setIsLoading(true);
-    try {
-      const response = await storeApi.getUserStores(userId, reset ? null : cursor, 20);
-      if (!response?.ok) {
-        return;
-      }
-
-      const {contents = [], cursor: newCursor} = response.data || { contents: [], cursor: { hasMore: false, nextCursor: null } };
-
-      if (reset) {
-        setStores(contents);
-      } else {
-        setStores(prev => [...prev, ...contents]);
-      }
-
-      setHasMore(newCursor.hasMore || false);
-      setCursor(newCursor.nextCursor || null);
-      setTotalCount(newCursor.totalCount || 0);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [userId, cursor, isLoading]);
-
-  const handleLoadMore = useCallback(() => {
-    if (hasMore && !isLoading) {
-      fetchStores(false);
-    }
-  }, [hasMore, isLoading, fetchStores]);
+  const {
+    items: stores,
+    isLoading,
+    hasMore,
+    totalCount,
+    loadMore
+  } = useCursorPagination<any>({
+    fetcher: fetchUserStores,
+    enabled: Boolean(userId && isActive),
+    deps: [userId]
+  });
 
   const handleScroll = useCallback((e) => {
     const {scrollTop, scrollHeight, clientHeight} = e.target;
     const isScrolledToBottom = scrollHeight - scrollTop <= clientHeight + 100;
 
     if (isScrolledToBottom && hasMore && !isLoading) {
-      handleLoadMore();
+      loadMore();
     }
-  }, [hasMore, isLoading, handleLoadMore]);
+  }, [hasMore, isLoading, loadMore]);
 
   const handleStoreClick = (store) => {
     if (onStoreClick) {
@@ -141,18 +116,6 @@ const UserStoreHistory = ({userId, isActive, onStoreClick}) => {
       'CARD': '카드'
     };
     return methodMap[method] || method;
-  };
-
-  const formatDateTime = (dateString) => {
-    if (!dateString) return '없음';
-    return new Date(dateString).toLocaleString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    });
   };
 
   return (

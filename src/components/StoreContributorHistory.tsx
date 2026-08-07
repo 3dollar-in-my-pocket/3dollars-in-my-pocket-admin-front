@@ -1,5 +1,4 @@
-import {useCallback, useEffect, useRef, useState} from 'react';
-import {toast} from 'react-toastify';
+import {useCallback, useRef} from 'react';
 import storeApi from '../api/storeApi';
 import {
   StoreChangeHistory,
@@ -7,6 +6,8 @@ import {
   getChangeAttributeBadgeClass
 } from '../types/store';
 import {getWriterTypeBadgeClass} from '../types/common';
+import useCursorPagination from '../hooks/useCursorPagination';
+import {formatDateTimeShortKo as formatDateTime} from '../utils/dateUtils';
 
 interface StoreContributorHistoryProps {
   storeId: string;
@@ -15,59 +16,23 @@ interface StoreContributorHistoryProps {
 }
 
 const StoreContributorHistory = ({storeId, isActive, onAuthorClick}: StoreContributorHistoryProps) => {
-  const [histories, setHistories] = useState<StoreChangeHistory[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(false);
-  const [cursor, setCursor] = useState<string | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (storeId && isActive) {
-      fetchChangeHistories(true);
-    }
-  }, [storeId, isActive]);
+  const fetchChangeHistories = useCallback(
+    (cursor: string | null) => storeApi.getStoreChangeHistories(storeId, cursor, 20),
+    [storeId]
+  );
 
-  const fetchChangeHistories = useCallback(async (reset = false) => {
-    if (isLoading) return;
-
-    setIsLoading(true);
-    try {
-      const response = await storeApi.getStoreChangeHistories(storeId, reset ? null : cursor, 20);
-      if (!response?.ok) {
-        return;
-      }
-
-      const {contents = [], cursor: newCursor} = response.data || { contents: [], cursor: { hasMore: false, nextCursor: null } };
-
-      if (reset) {
-        setHistories(contents);
-      } else {
-        setHistories(prev => [...prev, ...contents]);
-      }
-
-      setHasMore(newCursor.hasMore || false);
-      setCursor(newCursor.nextCursor || null);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [storeId, cursor, isLoading]);
-
-  const handleLoadMore = useCallback(() => {
-    if (hasMore && !isLoading) {
-      fetchChangeHistories(false);
-    }
-  }, [hasMore, isLoading, fetchChangeHistories]);
-
-  const formatDateTime = (dateString: string) => {
-    if (!dateString) return '없음';
-    return new Date(dateString).toLocaleString('ko-KR', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
+  const {
+    items: histories,
+    isLoading,
+    hasMore,
+    loadMore
+  } = useCursorPagination<StoreChangeHistory>({
+    fetcher: fetchChangeHistories,
+    enabled: Boolean(storeId && isActive),
+    deps: [storeId]
+  });
 
   const handleAuthorClick = (actor: any) => {
     if (onAuthorClick && actor.writerType === 'USER') {
@@ -197,7 +162,7 @@ const StoreContributorHistory = ({storeId, isActive, onAuthorClick}: StoreContri
             <div className="text-center mt-4">
               <button
                 className="btn btn-outline-primary rounded-pill px-4 py-2"
-                onClick={handleLoadMore}
+                onClick={loadMore}
                 disabled={isLoading}
               >
                 {isLoading ? (

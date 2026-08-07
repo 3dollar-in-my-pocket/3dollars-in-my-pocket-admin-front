@@ -1,67 +1,33 @@
-import {useCallback, useEffect, useRef, useState} from 'react';
+import {useCallback, useRef, useState} from 'react';
 import {toast} from 'react-toastify';
 import storeImageApi from "../api/storeImageApi";
 import {getStoreTypeDisplayName, getStoreTypeBadgeClass, getStoreTypeIcon} from "../types/store";
+import useCursorPagination from "../hooks/useCursorPagination";
+import {formatDateTimeShortKo as formatDateTime} from "../utils/dateUtils";
 
 const StoreImageHistory = ({storeId, isActive, onAuthorClick}) => {
-  const [images, setImages] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(false);
-  const [cursor, setCursor] = useState(null);
-  const [totalCount, setTotalCount] = useState(0);
-  const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedImage, setSelectedImage] = useState<any>(null);
   const [showModal, setShowModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const scrollContainerRef = useRef(null);
 
-  useEffect(() => {
-    if (storeId && isActive) {
-      fetchImages(true);
-    }
-  }, [storeId, isActive]);
+  const fetchImages = useCallback(
+    (cursor: string | null) => storeImageApi.getStoreImages(storeId, cursor, 20),
+    [storeId]
+  );
 
-  const fetchImages = useCallback(async (reset = false) => {
-    if (isLoading) return;
-
-    setIsLoading(true);
-    try {
-      const response = await storeImageApi.getStoreImages(storeId, reset ? null : cursor, 20);
-      if (!response?.ok) {
-        return;
-      }
-
-      const {contents = [], cursor: newCursor} = response.data || { contents: [], cursor: { hasMore: false, nextCursor: null } };
-
-      if (reset) {
-        setImages(contents);
-      } else {
-        setImages(prev => [...prev, ...contents]);
-      }
-
-      setHasMore(newCursor.hasMore || false);
-      setCursor(newCursor.nextCursor || null);
-      setTotalCount(newCursor.totalCount || 0);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [storeId, cursor, isLoading]);
-
-  const handleLoadMore = useCallback(() => {
-    if (hasMore && !isLoading) {
-      fetchImages(false);
-    }
-  }, [hasMore, isLoading, fetchImages]);
-
-  const formatDateTime = (dateString) => {
-    if (!dateString) return '없음';
-    return new Date(dateString).toLocaleString('ko-KR', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
+  const {
+    items: images,
+    isLoading,
+    hasMore,
+    totalCount,
+    refresh,
+    loadMore
+  } = useCursorPagination({
+    fetcher: fetchImages,
+    enabled: Boolean(storeId && isActive),
+    deps: [storeId]
+  });
 
   const handleImageClick = (image) => {
     setSelectedImage(image);
@@ -97,7 +63,7 @@ const StoreImageHistory = ({storeId, isActive, onAuthorClick}) => {
         toast.success('이미지가 성공적으로 삭제되었습니다.');
         handleCloseModal();
         // 이미지 목록 새로고침
-        fetchImages(true);
+        refresh();
       }
     } finally {
       setIsDeleting(false);
@@ -121,7 +87,7 @@ const StoreImageHistory = ({storeId, isActive, onAuthorClick}) => {
         {totalCount > 0 && (
           <button
             className="btn btn-outline-info btn-sm rounded-pill px-3"
-            onClick={() => fetchImages(true)}
+            onClick={refresh}
             disabled={isLoading}
           >
             <i className="bi bi-arrow-clockwise me-1"></i>
@@ -314,7 +280,7 @@ const StoreImageHistory = ({storeId, isActive, onAuthorClick}) => {
           <div className="text-center mt-4">
             <button
               className="btn btn-outline-info rounded-pill px-4 py-2"
-              onClick={handleLoadMore}
+              onClick={loadMore}
               disabled={isLoading}
             >
               {isLoading ? (

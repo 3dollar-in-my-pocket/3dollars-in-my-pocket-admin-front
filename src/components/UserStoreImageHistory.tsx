@@ -1,65 +1,42 @@
-import {useCallback, useEffect, useRef, useState} from 'react';
+import {useCallback, useRef, useState} from 'react';
 import {toast} from 'react-toastify';
 import storeImageApi from "../api/storeImageApi";
 import {getStoreTypeDisplayName, getStoreTypeBadgeClass, getStoreTypeIcon} from "../types/store";
+import useCursorPagination from "../hooks/useCursorPagination";
+import {formatDateTimeKo as formatDateTime} from "../utils/dateUtils";
 
 const UserStoreImageHistory = ({userId, isActive, onStoreClick}) => {
-  const [storeImages, setStoreImages] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(false);
-  const [cursor, setCursor] = useState(null);
-  const [totalCount, setTotalCount] = useState(0);
-  const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedImage, setSelectedImage] = useState<any>(null);
   const [showModal, setShowModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const scrollContainerRef = useRef(null);
 
-  useEffect(() => {
-    if (userId && isActive) {
-      fetchStoreImages(true);
-    }
-  }, [userId, isActive]);
+  const fetchStoreImages = useCallback(
+    (cursor: string | null) => storeImageApi.getUserStoreImages(userId, cursor, 20),
+    [userId]
+  );
 
-  const fetchStoreImages = useCallback(async (reset = false) => {
-    if (isLoading) return;
-
-    setIsLoading(true);
-    try {
-      const response = await storeImageApi.getUserStoreImages(userId, reset ? null : cursor, 20);
-      if (!response?.ok) {
-        return;
-      }
-
-      const {contents = [], cursor: newCursor} = response.data || { contents: [], cursor: { hasMore: false, nextCursor: null } };
-
-      if (reset) {
-        setStoreImages(contents);
-      } else {
-        setStoreImages(prev => [...prev, ...contents]);
-      }
-
-      setHasMore(newCursor.hasMore || false);
-      setCursor(newCursor.nextCursor || null);
-      setTotalCount(newCursor.totalCount || 0);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [userId, cursor, isLoading]);
-
-  const handleLoadMore = useCallback(() => {
-    if (hasMore && !isLoading) {
-      fetchStoreImages(false);
-    }
-  }, [hasMore, isLoading, fetchStoreImages]);
+  const {
+    items: storeImages,
+    isLoading,
+    hasMore,
+    totalCount,
+    refresh,
+    loadMore
+  } = useCursorPagination<any>({
+    fetcher: fetchStoreImages,
+    enabled: Boolean(userId && isActive),
+    deps: [userId]
+  });
 
   const handleScroll = useCallback((e) => {
     const {scrollTop, scrollHeight, clientHeight} = e.target;
     const isScrolledToBottom = scrollHeight - scrollTop <= clientHeight + 100;
 
     if (isScrolledToBottom && hasMore && !isLoading) {
-      handleLoadMore();
+      loadMore();
     }
-  }, [hasMore, isLoading, handleLoadMore]);
+  }, [hasMore, isLoading, loadMore]);
 
   const handleImageClick = (storeImage) => {
     setSelectedImage(storeImage);
@@ -114,18 +91,6 @@ const UserStoreImageHistory = ({userId, isActive, onStoreClick}) => {
     );
   };
 
-  const formatDateTime = (dateString) => {
-    if (!dateString) return '없음';
-    return new Date(dateString).toLocaleString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    });
-  };
-
   // 이미지 삭제 핸들러
   const handleDeleteImage = async () => {
     if (!selectedImage) return;
@@ -139,7 +104,7 @@ const UserStoreImageHistory = ({userId, isActive, onStoreClick}) => {
       }
       toast.success('이미지가 성공적으로 삭제되었습니다.');
       handleCloseModal();
-      fetchStoreImages(true);
+      refresh();
     } finally {
       setIsDeleting(false);
     }

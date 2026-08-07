@@ -57,6 +57,10 @@ export interface Writer {
 export interface StoreImage {
   imageId: number;
   url: string;
+  /** 일부 응답에서 url 대신 imageUrl로 내려옵니다. */
+  imageUrl?: string;
+  width?: number;
+  height?: number;
   status: string;
   store: Store | null;
   writer: Writer | null;

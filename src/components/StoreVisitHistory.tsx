@@ -1,63 +1,28 @@
-import {useCallback, useEffect, useRef, useState} from 'react';
-import {toast} from 'react-toastify';
+import {useCallback, useRef} from 'react';
 import visitApi from "../api/visitApi";
+import useCursorPagination from "../hooks/useCursorPagination";
+import {formatDateTimeShortKo} from "../utils/dateUtils";
 
 const StoreVisitHistory = ({storeId, isActive, onAuthorClick}) => {
-  const [visits, setVisits] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(false);
-  const [cursor, setCursor] = useState(null);
-  const [totalCount, setTotalCount] = useState(0);
   const scrollContainerRef = useRef(null);
 
-  useEffect(() => {
-    if (storeId && isActive) {
-      fetchVisits(true);
-    }
-  }, [storeId, isActive]);
+  const fetchVisits = useCallback(
+    (cursor: string | null) => visitApi.getStoreVisits(storeId, cursor, 20),
+    [storeId]
+  );
 
-  const fetchVisits = useCallback(async (reset = false) => {
-    if (isLoading) return;
-
-    setIsLoading(true);
-    try {
-      const response = await visitApi.getStoreVisits(storeId, reset ? null : cursor, 20);
-      if (!response?.ok) {
-        return;
-      }
-
-      const {contents = [], cursor: newCursor} = response.data || { contents: [], cursor: { hasMore: false, nextCursor: null } };
-
-      if (reset) {
-        setVisits(contents);
-      } else {
-        setVisits(prev => [...prev, ...contents]);
-      }
-
-      setHasMore(newCursor.hasMore || false);
-      setCursor(newCursor.nextCursor || null);
-      setTotalCount(newCursor.totalCount || 0);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [storeId, cursor, isLoading]);
-
-  const handleLoadMore = useCallback(() => {
-    if (hasMore && !isLoading) {
-      fetchVisits(false);
-    }
-  }, [hasMore, isLoading, fetchVisits]);
-
-  const formatDateTime = (dateString) => {
-    if (!dateString) return '없음';
-    return new Date(dateString).toLocaleString('ko-KR', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
+  const {
+    items: visits,
+    isLoading,
+    hasMore,
+    totalCount,
+    refresh,
+    loadMore
+  } = useCursorPagination({
+    fetcher: fetchVisits,
+    enabled: Boolean(storeId && isActive),
+    deps: [storeId]
+  });
 
   const getVisitTypeBadge = (visitType) => {
     const typeMap = {
@@ -97,7 +62,7 @@ const StoreVisitHistory = ({storeId, isActive, onAuthorClick}) => {
         {totalCount > 0 && (
           <button
             className="btn btn-outline-warning btn-sm rounded-pill px-3"
-            onClick={() => fetchVisits(true)}
+            onClick={refresh}
             disabled={isLoading}
           >
             <i className="bi bi-arrow-clockwise me-1"></i>
@@ -195,7 +160,7 @@ const StoreVisitHistory = ({storeId, isActive, onAuthorClick}) => {
                             <div className="mb-1">
                               <span className="text-muted small">
                                 <i className="bi bi-calendar me-1"></i>
-                                방문일: {formatDateTime(visit.visitDateTime)}
+                                방문일: {formatDateTimeShortKo(visit.visitDateTime)}
                               </span>
                             </div>
                           </div>
@@ -224,7 +189,7 @@ const StoreVisitHistory = ({storeId, isActive, onAuthorClick}) => {
           <div className="text-center mt-4">
             <button
               className="btn btn-outline-warning rounded-pill px-4 py-2"
-              onClick={handleLoadMore}
+              onClick={loadMore}
               disabled={isLoading}
             >
               {isLoading ? (

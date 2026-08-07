@@ -1,67 +1,33 @@
-import {useCallback, useEffect, useRef, useState} from 'react';
+import {useCallback, useRef, useState} from 'react';
 import {toast} from 'react-toastify';
 import reviewApi from "../api/reviewApi";
 import {getStoreTypeDisplayName, getStoreTypeBadgeClass, getStoreTypeIcon} from "../types/store";
+import useCursorPagination from "../hooks/useCursorPagination";
+import {formatDateTimeShortKo as formatDateTime} from "../utils/dateUtils";
 
 const StoreReviewHistory = ({storeId, isActive, onAuthorClick}) => {
-  const [reviews, setReviews] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(false);
-  const [cursor, setCursor] = useState(null);
-  const [totalCount, setTotalCount] = useState(0);
-  const [selectedReview, setSelectedReview] = useState(null);
+  const [selectedReview, setSelectedReview] = useState<any>(null);
   const [showModal, setShowModal] = useState(false);
   const [isBlinding, setIsBlinding] = useState(false);
   const scrollContainerRef = useRef(null);
 
-  useEffect(() => {
-    if (storeId && isActive) {
-      fetchReviews(true);
-    }
-  }, [storeId, isActive]);
+  const fetchReviews = useCallback(
+    (cursor: string | null) => reviewApi.getStoreReviews(storeId, cursor, 20),
+    [storeId]
+  );
 
-  const fetchReviews = useCallback(async (reset = false) => {
-    if (isLoading) return;
-
-    setIsLoading(true);
-    try {
-      const response = await reviewApi.getStoreReviews(storeId, reset ? null : cursor, 20);
-      if (!response?.ok) {
-        return;
-      }
-
-      const {contents = [], cursor: newCursor} = response.data || { contents: [], cursor: { hasMore: false, nextCursor: null } };
-
-      if (reset) {
-        setReviews(contents);
-      } else {
-        setReviews(prev => [...prev, ...contents]);
-      }
-
-      setHasMore(newCursor.hasMore || false);
-      setCursor(newCursor.nextCursor || null);
-      setTotalCount(newCursor.totalCount || 0);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [storeId, cursor, isLoading]);
-
-  const handleLoadMore = useCallback(() => {
-    if (hasMore && !isLoading) {
-      fetchReviews(false);
-    }
-  }, [hasMore, isLoading, fetchReviews]);
-
-  const formatDateTime = (dateString) => {
-    if (!dateString) return '없음';
-    return new Date(dateString).toLocaleString('ko-KR', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
+  const {
+    items: reviews,
+    isLoading,
+    hasMore,
+    totalCount,
+    refresh,
+    loadMore
+  } = useCursorPagination({
+    fetcher: fetchReviews,
+    enabled: Boolean(storeId && isActive),
+    deps: [storeId]
+  });
 
   const getRatingStars = (rating) => {
     const stars = [];
@@ -112,7 +78,7 @@ const StoreReviewHistory = ({storeId, isActive, onAuthorClick}) => {
         toast.success('리뷰가 성공적으로 블라인드 처리되었습니다.');
         setShowModal(false);
         // 리뷰 목록 새로고침
-        fetchReviews(true);
+        refresh();
       }
     } finally {
       setIsBlinding(false);
@@ -136,7 +102,7 @@ const StoreReviewHistory = ({storeId, isActive, onAuthorClick}) => {
         {totalCount > 0 && (
           <button
             className="btn btn-outline-primary btn-sm rounded-pill px-3"
-            onClick={() => fetchReviews(true)}
+            onClick={refresh}
             disabled={isLoading}
           >
             <i className="bi bi-arrow-clockwise me-1"></i>
@@ -341,7 +307,7 @@ const StoreReviewHistory = ({storeId, isActive, onAuthorClick}) => {
           <div className="text-center mt-4">
             <button
               className="btn btn-outline-primary rounded-pill px-4 py-2"
-              onClick={handleLoadMore}
+              onClick={loadMore}
               disabled={isLoading}
             >
               {isLoading ? (
