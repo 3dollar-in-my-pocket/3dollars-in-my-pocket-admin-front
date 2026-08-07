@@ -1,9 +1,10 @@
 import {FormEvent, useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {Image} from '../../types/domain';
 import storeMarkerApi from '../../api/storeMarkerApi';
 import EmptyState from '../../components/common/EmptyState';
 import useInfiniteScroll from '../../hooks/useInfiniteScroll';
 import StoreDetailModal from '../store/StoreDetailModal';
-import {StoreMarker, StoreMarkerImage} from '../../types/storeMarker';
+import {StoreMarker} from '../../types/storeMarker';
 import {formatDateTime} from '../../utils/dateUtils';
 import {toast} from 'react-toastify';
 
@@ -12,10 +13,9 @@ const toApiDateTime = (value: string): string => {
   return value.length === 16 ? `${value}:00` : value;
 };
 
-// 서버 응답(ImageResponse)은 imageUrl, 요청(ImageRequest)은 url을 사용한다.
-const getMarkerImageUrl = (image?: StoreMarkerImage): string => {
+const getMarkerImageUrl = (image?: Image): string => {
   if (!image) return '';
-  return image.imageUrl || image.url || '';
+  return image.imageUrl || '';
 };
 
 const getMarkerImageSize = (value?: number): number => Number(value || 0);
@@ -268,7 +268,7 @@ const StoreMarkerManage = () => {
   );
 };
 
-const MarkerImagePreview = ({title, image}: {title: string; image?: StoreMarkerImage}) => {
+const MarkerImagePreview = ({title, image}: {title: string; image?: Image}) => {
   const imageUrl = getMarkerImageUrl(image);
   const width = getMarkerImageSize(image?.width);
   const height = getMarkerImageSize(image?.height);

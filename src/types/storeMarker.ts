@@ -1,30 +1,32 @@
-export interface StoreMarkerImage {
-  url?: string;
-  imageUrl?: string;
+/**
+ * 가게 지도 핀(마커) 타입 정의
+ */
+
+import { DateTimeInterval, Image } from './domain';
+
+/** ImageRequest — 등록/수정 요청의 이미지는 url을 사용합니다. */
+export interface StoreMarkerImageRequest {
+  url: string;
   width: number;
   height: number;
 }
 
+/** StoreMarkerResponse */
 export interface StoreMarker {
-  markerId: string | number;
+  markerId: number;
   groupId: string;
-  storeId?: string | number;
-  selectedMarkerImage: StoreMarkerImage;
-  unselectedMarkerImage: StoreMarkerImage;
-  period?: {
-    startDateTime: string;
-    endDateTime: string;
-  };
-  startDateTime: string;
-  endDateTime: string;
-  createdAt?: string;
-  updatedAt?: string;
+  storeId: number;
+  /** 응답의 이미지는 imageUrl을 사용합니다. (요청과 필드명이 다름) */
+  selectedMarkerImage: Image;
+  unselectedMarkerImage: Image;
+  period: DateTimeInterval;
 }
 
+/** StoreMarkerCreateRequest / StoreMarkerUpdateRequest (동일 구조) */
 export interface StoreMarkerRequest {
   groupId: string;
-  selectedMarkerImage: StoreMarkerImage;
-  unselectedMarkerImage: StoreMarkerImage;
+  selectedMarkerImage: StoreMarkerImageRequest;
+  unselectedMarkerImage: StoreMarkerImageRequest;
   startDateTime: string;
   endDateTime: string;
 }
