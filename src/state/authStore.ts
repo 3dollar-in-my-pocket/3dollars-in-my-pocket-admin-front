@@ -1,6 +1,5 @@
-
 import {create} from 'zustand';
-import {Admin, AdminRole} from '../types/admin';
+import {Admin} from '../types/admin';
 import {LocalStorageService} from '../service/LocalStorageService';
 
 interface AuthState {
@@ -38,9 +37,3 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({admin: null, isLoggedIn: false});
   },
 }));
-
-/**
- * 현재 관리자의 역할을 반환합니다.
- */
-export const useCurrentRole = (): AdminRole | null =>
-  useAuthStore((state) => state.admin?.role ?? null);

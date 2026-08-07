@@ -1,8 +1,8 @@
-import { ApiResponse, PaginatedResponse } from '../types/api';
-import { StoreCoupon } from '../types/coupon';
-import { INCLUDES } from '../constants/api';
-import { buildArrayParam } from '../utils/apiUtils';
-import { apiGetPaginated } from './apiHelpers';
+import {ApiResponse, PaginatedResponse} from '../types/api';
+import {Coupon} from '../types/coupon';
+import {INCLUDES} from '../constants/api';
+import {buildArrayParam} from '../utils/apiUtils';
+import {apiGetPaginated} from './apiHelpers';
 
 export default {
   /**
@@ -10,13 +10,13 @@ export default {
    * @param {string} [cursor] - 페이징 커서
    * @param {number} [size] - 페이지 사이즈
    * @param {string[]} [statuses] - 필터링할 쿠폰 상태 목록 (예: ['ACTIVE', 'STOPPED', 'ENDED'])
-   * @returns {Promise<ApiResponse<PaginatedResponse<StoreCoupon>>>} 쿠폰 목록
+   * @returns {Promise<ApiResponse<PaginatedResponse<Coupon>>>} 쿠폰 목록
    */
   getAllStoreCoupons: async (
     cursor: string | null = null,
     size?: number,
     statuses?: string[]
-  ): Promise<ApiResponse<PaginatedResponse<StoreCoupon>>> => {
+  ): Promise<ApiResponse<PaginatedResponse<Coupon>>> => {
     const additionalParams: Record<string, any> = {
       includes: INCLUDES.STORE,
     };
@@ -26,9 +26,9 @@ export default {
       additionalParams.statuses = statusesParam;
     }
 
-    return apiGetPaginated<StoreCoupon>(
+    return apiGetPaginated<Coupon>(
       '/v1/store-coupons',
-      { cursor, size },
+      {cursor, size},
       additionalParams
     );
   },

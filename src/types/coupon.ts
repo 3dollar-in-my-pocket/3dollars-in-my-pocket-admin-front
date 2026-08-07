@@ -1,7 +1,7 @@
 // Coupon related type definitions and constants
 
-import { DateTimeInterval } from './domain';
-import { SimpleStore } from './store';
+import {DateTimeInterval} from './domain';
+import {SimpleStore} from './store';
 
 // Coupon status types
 export const COUPON_STATUS = {
@@ -12,9 +12,6 @@ export const COUPON_STATUS = {
 
 export type CouponStatus = typeof COUPON_STATUS[keyof typeof COUPON_STATUS];
 
-/** DateTimeIntervalResponse와 동일합니다. */
-export type ValidityPeriod = DateTimeInterval;
-
 /** StoreCouponResponse */
 export interface Coupon {
   couponId: string;
@@ -22,12 +19,9 @@ export interface Coupon {
   maxIssuableCount: number;
   currentIssuedCount: number;
   currentUsedCount: number;
-  validityPeriod: ValidityPeriod;
+  validityPeriod: DateTimeInterval;
   status: CouponStatus;
   store?: SimpleStore;
   createdAt?: string;
   updatedAt?: string;
 }
-
-/** 응답 스키마가 Coupon과 동일합니다. */
-export type StoreCoupon = Coupon;

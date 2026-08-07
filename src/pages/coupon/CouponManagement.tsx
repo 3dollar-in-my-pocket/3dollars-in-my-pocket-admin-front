@@ -1,17 +1,16 @@
 import StoreTypeBadge from '../../components/common/badges/StoreTypeBadge';
-import {useEffect, useRef, useState, useCallback} from 'react';
+import {useCallback, useEffect, useRef, useState} from 'react';
 import couponApi from '../../api/couponApi';
-import {StoreCoupon, COUPON_STATUS} from '../../types/coupon';
+import {Coupon, COUPON_STATUS} from '../../types/coupon';
 import {formatDateTimeShortKo as formatCouponDate} from '../../utils/dateUtils';
 import {getCouponStatusBadgeClass, getCouponStatusDisplayName} from '../../utils/display/couponDisplay';
-import {getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from '../../utils/display/storeDisplay';
 
 import StoreDetailModal from '../store/StoreDetailModal';
 import useInfiniteScroll from '../../hooks/useInfiniteScroll';
 import EmptyState from '../../components/common/EmptyState';
 
 const CouponManagement = () => {
-  const [coupons, setCoupons] = useState<StoreCoupon[]>([]);
+  const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const [selectedStore, setSelectedStore] = useState<any>(null);
@@ -42,7 +41,10 @@ const CouponManagement = () => {
         return;
       }
 
-      const {contents = [], cursor: newCursor} = response.data || { contents: [], cursor: { hasMore: false, nextCursor: null } };
+      const {contents = [], cursor: newCursor} = response.data || {
+        contents: [],
+        cursor: {hasMore: false, nextCursor: null}
+      };
 
       if (reset) {
         setCoupons(contents);
@@ -74,7 +76,7 @@ const CouponManagement = () => {
   }, [selectedStatuses, fetchCoupons]);
 
   // Infinite Scroll 훅 사용
-  const { scrollContainerRef, loadMoreRef } = useInfiniteScroll({
+  const {scrollContainerRef, loadMoreRef} = useInfiniteScroll({
     hasMore,
     isLoading,
     onLoadMore: () => fetchCoupons(false),

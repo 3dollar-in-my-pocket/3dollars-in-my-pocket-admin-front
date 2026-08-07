@@ -1,4 +1,4 @@
-import { AdminRole } from '../types/admin';
+import {AdminRole} from '../types/admin';
 
 /**
  * 역할 기반 접근 제어 유틸리티 함수들
@@ -28,27 +28,4 @@ export const hasMenuAccess = (userRole: AdminRole, allowedRoles?: AdminRole[]): 
  */
 export const filterMenuItemsByRole = (items: any[], userRole: AdminRole) => {
   return items.filter(item => hasMenuAccess(userRole, item.allowedRoles));
-};
-
-/**
- * 역할별 권한 확인
- */
-export const canAccessAdminManagement = (userRole: AdminRole): boolean => {
-  return userRole === AdminRole.OWNER;
-};
-
-/**
- * 역할 표시명 반환
- */
-export const getRoleDisplayName = (role: AdminRole): string => {
-  switch (role) {
-    case AdminRole.OWNER:
-      return '소유자';
-    case AdminRole.OPERATOR:
-      return '서비스 운영자';
-    case AdminRole.VIEWER:
-      return '뷰어';
-    default:
-      return role;
-  }
 };
