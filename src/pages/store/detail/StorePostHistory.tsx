@@ -3,6 +3,7 @@ import storeApi from '@/api/storeApi';
 import StorePostItem from '@/components/StorePostItem';
 import useCursorPagination from '@/hooks/useCursorPagination';
 import {StorePost} from '@/types/storePost';
+import ErrorState from '@/components/common/ErrorState';
 
 interface StorePostHistoryProps {
   storeId: string;
@@ -44,30 +45,7 @@ const StorePostHistory: React.FC<StorePostHistoryProps> = ({storeId}) => {
   }
 
   if (error) {
-    return (
-      <div className="text-center py-5 text-danger">
-        <div className="mb-4">
-          <div className="bg-danger bg-opacity-10 rounded-circle mx-auto" style={{
-            width: '80px',
-            height: '80px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}>
-            <i className="bi bi-exclamation-circle fs-1 text-danger"></i>
-          </div>
-        </div>
-        <h5 className="text-dark mb-2">오류가 발생했습니다</h5>
-        <p className="text-muted mb-3">{error}</p>
-        <button
-          className="btn btn-outline-primary rounded-pill px-4"
-          onClick={refresh}
-        >
-          <i className="bi bi-arrow-clockwise me-2"></i>
-          다시 시도
-        </button>
-      </div>
-    );
+    return <ErrorState message={error} onRetry={refresh}/>;
   }
 
   if (posts.length === 0) {

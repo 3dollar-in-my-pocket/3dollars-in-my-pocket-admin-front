@@ -1,10 +1,10 @@
-import {useEffect, useState, useRef, useCallback} from 'react';
+import {useCallback, useEffect, useRef, useState} from 'react';
 import {toast} from 'react-toastify';
 import enumApi from '@/api/enumApi';
 import userRankingApi from '@/api/userRankingApi';
 import medalApi from '@/api/medalApi';
 import useCursorPagination from '@/hooks/useCursorPagination';
-import {UserRankingItem, createUserRankingRequest} from '@/types/userRanking';
+import {createUserRankingRequest, UserRankingItem} from '@/types/userRanking';
 import UserRankingCard from '@/components/userRanking/UserRankingCard';
 import UserDetailModal from '@/pages/user/UserDetailModal';
 import StoreDetailModal from '@/pages/store/StoreDetailModal';

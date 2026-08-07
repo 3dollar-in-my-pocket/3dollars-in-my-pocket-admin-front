@@ -1,7 +1,6 @@
 import OpenStatusBadge from '@/components/common/badges/OpenStatusBadge';
 import StoreLabelBadges from '@/components/common/badges/StoreLabelBadges';
 import StoreBasicInfoTab from './StoreBasicInfoTab';
-import SalesTypeBadge from '@/components/common/badges/SalesTypeBadge';
 import StoreStatusBadge from '@/components/common/badges/StoreStatusBadge';
 import StoreTypeBadge from '@/components/common/badges/StoreTypeBadge';
 import '../../styles/mobile-tabs.css';
@@ -12,7 +11,6 @@ import storeApi from '@/api/storeApi';
 import ActivityHistory from '@/components/ActivityHistory';
 import StoreContributorHistory from './detail/StoreContributorHistory';
 import StoreCouponHistory from './detail/StoreCouponHistory';
-import StoreEditForm from './detail/StoreEditForm';
 import StoreImageHistory from './detail/StoreImageHistory';
 import StoreMarkerHistory from './detail/StoreMarkerHistory';
 import StoreMessageHistory from './detail/StoreMessageHistory';
@@ -21,7 +19,7 @@ import StoreReportHistory from './detail/StoreReportHistory';
 import StoreReviewHistory from './detail/StoreReviewHistory';
 import StoreSettings from './detail/StoreSettings';
 import StoreVisitHistory from './detail/StoreVisitHistory';
-import {StoreDetail, isVisitsSupported, isImagesSupported, isReportsSupported} from '@/types/store';
+import {isImagesSupported, isReportsSupported, isVisitsSupported, StoreDetail} from '@/types/store';
 
 interface StoreDetailModalProps {
   show: boolean;

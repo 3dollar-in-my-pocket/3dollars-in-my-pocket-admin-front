@@ -1,16 +1,16 @@
-import React, {useState, useEffect} from "react";
-import {Card, Table, Alert, Form} from "react-bootstrap";
+import React, {useEffect, useState} from "react";
+import {Alert, Card, Form, Table} from "react-bootstrap";
 import {
-  LineChart,
-  Line,
-  BarChart,
   Bar,
-  XAxis,
-  YAxis,
+  BarChart,
   CartesianGrid,
-  Tooltip,
   Legend,
-  ResponsiveContainer
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis
 } from "recharts";
 import statisticsApi from "@/api/statisticsApi";
 import storeCategoryApi from "@/api/storeCategoryApi";
@@ -26,11 +26,11 @@ interface StoreByCategoryStatisticsProps {
 }
 
 const StoreByCategoryStatistics: React.FC<StoreByCategoryStatisticsProps> = ({
-  statisticsType,
-  startDate,
-  endDate,
-  onFetch
-}) => {
+                                                                               statisticsType,
+                                                                               startDate,
+                                                                               endDate,
+                                                                               onFetch
+                                                                             }) => {
   const [data, setData] = useState<DailyStatistic[]>([]);
   const [loading, setLoading] = useState(false);
   const [storeCategories, setStoreCategories] = useState<StoreCategory[]>([]);

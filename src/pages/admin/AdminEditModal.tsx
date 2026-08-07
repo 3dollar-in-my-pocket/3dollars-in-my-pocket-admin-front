@@ -1,9 +1,9 @@
-import { Modal } from "react-bootstrap";
+import {Modal} from "react-bootstrap";
 import adminApi from "@/api/adminApi";
-import { toast } from "react-toastify";
+import {toast} from "react-toastify";
 import useModalForm from "@/hooks/useModalForm";
-import { AdminRole, Admin as AdminType } from "@/types/admin";
-import { useEffect } from "react";
+import {Admin as AdminType, AdminRole} from "@/types/admin";
+import {useEffect} from "react";
 
 interface AdminEditFormData {
   name: string;
@@ -17,7 +17,7 @@ interface AdminEditModalProps {
   selectedAdmin: AdminType | null;
 }
 
-const AdminEditModal = ({ show, onHide, onSuccess, selectedAdmin }: AdminEditModalProps) => {
+const AdminEditModal = ({show, onHide, onSuccess, selectedAdmin}: AdminEditModalProps) => {
   const {
     formData,
     errors,
@@ -135,7 +135,7 @@ const AdminEditModal = ({ show, onHide, onSuccess, selectedAdmin }: AdminEditMod
               value={selectedAdmin?.email || ''}
               className="form-control form-control-lg bg-light"
               disabled
-              style={{ borderRadius: '8px' }}
+              style={{borderRadius: '8px'}}
             />
             <small className="text-muted">이메일은 수정할 수 없습니다.</small>
           </div>
@@ -153,7 +153,7 @@ const AdminEditModal = ({ show, onHide, onSuccess, selectedAdmin }: AdminEditMod
               className={`form-control form-control-lg ${errors.name ? 'is-invalid' : ''}`}
               placeholder="관리자 이름을 입력하세요"
               disabled={isSubmitting}
-              style={{ borderRadius: '8px' }}
+              style={{borderRadius: '8px'}}
             />
             {errors.name && (
               <div className="invalid-feedback">
@@ -174,7 +174,7 @@ const AdminEditModal = ({ show, onHide, onSuccess, selectedAdmin }: AdminEditMod
               onChange={handleChange}
               className={`form-select form-select-lg ${errors.role ? 'is-invalid' : ''}`}
               disabled={isSubmitting}
-              style={{ borderRadius: '8px' }}
+              style={{borderRadius: '8px'}}
             >
               {Object.values(AdminRole).map(role => (
                 <option key={role} value={role}>
@@ -207,7 +207,7 @@ const AdminEditModal = ({ show, onHide, onSuccess, selectedAdmin }: AdminEditMod
               className="btn btn-light flex-fill py-2"
               onClick={handleClose}
               disabled={isSubmitting}
-              style={{ borderRadius: '8px' }}
+              style={{borderRadius: '8px'}}
             >
               <i className="bi bi-x-lg me-1"></i>
               취소
@@ -216,7 +216,7 @@ const AdminEditModal = ({ show, onHide, onSuccess, selectedAdmin }: AdminEditMod
               type="submit"
               className="btn btn-warning flex-fill py-2"
               disabled={isSubmitting || !formData.name.trim() || !formData.role}
-              style={{ borderRadius: '8px' }}
+              style={{borderRadius: '8px'}}
             >
               {isSubmitting ? (
                 <>

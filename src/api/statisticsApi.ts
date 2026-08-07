@@ -13,7 +13,7 @@ export default {
       type: statisticsType,
       startDate,
       endDate,
-      ...(groupId && { groupId }),
+      ...(groupId && {groupId}),
     });
   },
 };

@@ -1,10 +1,6 @@
 import React from 'react';
-import {
-  getStoreTypeBadgeClass,
-  getStoreTypeDisplayName,
-  getStoreTypeIcon
-} from '@/utils/display/storeDisplay';
-import { StoreType } from '@/types/store';
+import {getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from '@/utils/display/storeDisplay';
+import {StoreType} from '@/types/store';
 
 export type BadgeSize = 'sm' | 'md' | 'lg';
 
@@ -28,12 +24,12 @@ const SIZE_CLASS: Record<BadgeSize, string> = {
  * 가게 유형(유저 제보 / 사장님) 배지
  */
 const StoreTypeBadge = ({
-  storeType,
-  size = 'sm',
-  bordered = false,
-  className = '',
-  style
-}: StoreTypeBadgeProps) => {
+                          storeType,
+                          size = 'sm',
+                          bordered = false,
+                          className = '',
+                          style
+                        }: StoreTypeBadgeProps) => {
   if (!storeType) return null;
 
   const type = storeType as StoreType;

@@ -1,11 +1,12 @@
-import { useState, useCallback } from 'react';
-import { Badge } from 'react-bootstrap';
-import { toast } from 'react-toastify';
+import {useCallback, useState} from 'react';
+import {Badge} from 'react-bootstrap';
+import {toast} from 'react-toastify';
 import storeImageApi from '@/api/storeImageApi';
-import { StoreImage } from '@/types/storeImage';
+import {StoreImage} from '@/types/storeImage';
 import useInfiniteScroll from '@/hooks/useInfiniteScroll';
 import useCursorPagination from '@/hooks/useCursorPagination';
 import EmptyState from '@/components/common/EmptyState';
+import ErrorState from '@/components/common/ErrorState';
 import StoreDetailModal from '@/pages/store/StoreDetailModal';
 import UserDetailModal from '@/pages/user/UserDetailModal';
 
@@ -27,6 +28,8 @@ const StoreImageManage = () => {
     setItems: setImages,
     isLoading,
     hasMore,
+    error,
+    refresh,
     loadMore
   } = useCursorPagination<StoreImage>({
     fetcher: fetchImages,
@@ -34,7 +37,7 @@ const StoreImageManage = () => {
   });
 
   // Infinite Scroll 훅 사용
-  const { scrollContainerRef, loadMoreRef } = useInfiniteScroll({
+  const {scrollContainerRef, loadMoreRef} = useInfiniteScroll({
     hasMore,
     isLoading,
     onLoadMore: loadMore,
@@ -142,7 +145,9 @@ const StoreImageManage = () => {
         style={{maxHeight: 'calc(100vh - 280px)', overflowY: 'auto'}}
       >
         {/* 빈 상태 */}
-        {images.length === 0 && !isLoading ? (
+        {error ? (
+          <ErrorState message={error} onRetry={refresh}/>
+        ) : images.length === 0 && !isLoading ? (
           <EmptyState
             icon="bi-image"
             title="등록된 가게 이미지가 없습니다"
@@ -171,12 +176,12 @@ const StoreImageManage = () => {
                   }}
                 >
                   {/* 이미지 섹션 */}
-                  <div className="position-relative" style={{ height: '240px' }}>
+                  <div className="position-relative" style={{height: '240px'}}>
                     <img
                       src={image.url}
                       alt="가게 이미지"
                       className="w-100 h-100"
-                      style={{ objectFit: 'cover' }}
+                      style={{objectFit: 'cover'}}
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = '/placeholder-image.png';
                       }}
@@ -221,14 +226,15 @@ const StoreImageManage = () => {
                       <div className="mb-3">
                         <div
                           className="d-flex align-items-center gap-2 mb-2"
-                          style={{ cursor: 'pointer' }}
+                          style={{cursor: 'pointer'}}
                           onClick={(e) => {
                             e.stopPropagation();
                             handleStoreClick(image.store);
                           }}
                         >
                           <i className="bi bi-shop text-primary fs-5"></i>
-                          <h6 className="fw-bold text-primary mb-0 text-decoration-underline" style={{ fontSize: '1.1rem' }}>
+                          <h6 className="fw-bold text-primary mb-0 text-decoration-underline"
+                              style={{fontSize: '1.1rem'}}>
                             {image.store.name}
                           </h6>
                         </div>
@@ -240,7 +246,7 @@ const StoreImageManage = () => {
                           </div>
                           <div className="d-flex align-items-center gap-1">
                             <i className="bi bi-geo-alt"></i>
-                            <span className="text-truncate" style={{ maxWidth: '200px' }}>
+                            <span className="text-truncate" style={{maxWidth: '200px'}}>
                               {image.store.address?.fullAddress || '주소 없음'}
                             </span>
                           </div>
@@ -253,7 +259,7 @@ const StoreImageManage = () => {
                               <span
                                 key={idx}
                                 className="badge bg-primary bg-opacity-10 text-primary border border-primary rounded-pill px-2 py-1"
-                                style={{ fontSize: '0.7rem' }}
+                                style={{fontSize: '0.7rem'}}
                               >
                                 {category.name}
                               </span>
@@ -261,7 +267,7 @@ const StoreImageManage = () => {
                             {image.store.categories.length > 3 && (
                               <span
                                 className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-2 py-1"
-                                style={{ fontSize: '0.7rem' }}
+                                style={{fontSize: '0.7rem'}}
                               >
                                 +{image.store.categories.length - 3}
                               </span>
@@ -280,7 +286,7 @@ const StoreImageManage = () => {
                     <div className="d-flex justify-content-between align-items-center pt-3 border-top">
                       <div
                         className="d-flex align-items-center gap-2"
-                        style={{ cursor: image.writer ? 'pointer' : 'default' }}
+                        style={{cursor: image.writer ? 'pointer' : 'default'}}
                         onClick={(e) => {
                           if (image.writer) {
                             e.stopPropagation();
@@ -289,7 +295,8 @@ const StoreImageManage = () => {
                         }}
                       >
                         <i className="bi bi-person-circle text-muted"></i>
-                        <span className={`small ${image.writer ? 'text-primary text-decoration-underline' : 'text-muted'}`}>
+                        <span
+                          className={`small ${image.writer ? 'text-primary text-decoration-underline' : 'text-muted'}`}>
                           {image.writer ? image.writer.name : '탈퇴한 사용자'}
                         </span>
                       </div>
@@ -328,22 +335,26 @@ const StoreImageManage = () => {
         show={selectedStore !== null}
         onHide={() => setSelectedStore(null)}
         store={selectedStore}
-        onAuthorClick={() => {}}
-        onStoreDeleted={() => {}}
+        onAuthorClick={() => {
+        }}
+        onStoreDeleted={() => {
+        }}
       />
 
       <UserDetailModal
         show={selectedUser !== null}
         onHide={() => setSelectedUser(null)}
         user={selectedUser}
-        onStoreClick={() => {}}
+        onStoreClick={() => {
+        }}
       />
 
       {/* 이미지 상세 정보 모달 */}
       {selectedImage && (
-        <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }} onClick={() => setSelectedImage(null)}>
+        <div className="modal fade show" style={{display: 'block', backgroundColor: 'rgba(0,0,0,0.5)'}}
+             onClick={() => setSelectedImage(null)}>
           <div className="modal-dialog modal-xl modal-dialog-centered" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-content" style={{ borderRadius: '16px', overflow: 'hidden' }}>
+            <div className="modal-content" style={{borderRadius: '16px', overflow: 'hidden'}}>
               <div className="modal-header border-0 pb-0">
                 <h5 className="modal-title fw-bold">
                   <i className="bi bi-image me-2 text-primary"></i>
@@ -356,12 +367,12 @@ const StoreImageManage = () => {
                 <div className="row g-0">
                   {/* 이미지 섹션 */}
                   <div className="col-md-6">
-                    <div className="position-relative" style={{ height: '500px' }}>
+                    <div className="position-relative" style={{height: '500px'}}>
                       <img
                         src={selectedImage.url}
                         alt="가게 이미지"
                         className="w-100 h-100"
-                        style={{ objectFit: 'contain', backgroundColor: '#f8f9fa' }}
+                        style={{objectFit: 'contain', backgroundColor: '#f8f9fa'}}
                         onError={(e) => {
                           (e.target as HTMLImageElement).src = '/placeholder-image.png';
                         }}
@@ -451,7 +462,7 @@ const StoreImageManage = () => {
                                         <span
                                           key={idx}
                                           className="badge bg-primary bg-opacity-10 text-primary border border-primary rounded-pill px-2 py-1"
-                                          style={{ fontSize: '0.75rem' }}
+                                          style={{fontSize: '0.75rem'}}
                                         >
                                           {category.name}
                                         </span>

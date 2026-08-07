@@ -21,14 +21,14 @@ interface UserMedalTabProps {
  * 유저 상세 모달의 메달 정보 탭
  */
 const UserMedalTab = ({
-  medals,
-  allMedals,
-  representativeMedal,
-  selectedMedalForAssign,
-  isAssigningMedal,
-  onSelectMedal,
-  onOpenAssignConfirm
-}: UserMedalTabProps) => {
+                        medals,
+                        allMedals,
+                        representativeMedal,
+                        selectedMedalForAssign,
+                        isAssigningMedal,
+                        onSelectMedal,
+                        onOpenAssignConfirm
+                      }: UserMedalTabProps) => {
   return (
     <div className="p-1 p-sm-2 p-md-4">
       <div className="card border-0 shadow-sm">

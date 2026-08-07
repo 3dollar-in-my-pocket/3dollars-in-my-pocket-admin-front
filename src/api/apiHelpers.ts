@@ -1,11 +1,6 @@
 import axiosInstance from './apiBase';
-import { ApiResponse, PaginatedResponse, CursorPaginationParams } from '@/types/api';
-import {
-  unwrapApiResponse,
-  normalizeCursorResponse,
-  buildCursorParams,
-  buildNonceHeader
-} from '@/utils/apiUtils';
+import {ApiResponse, CursorPaginationParams, PaginatedResponse} from '@/types/api';
+import {buildCursorParams, buildNonceHeader, normalizeCursorResponse, unwrapApiResponse} from '@/utils/apiUtils';
 
 /**
  * 요청을 수행하고 실패는 { ok: false }로 흡수합니다.
@@ -17,7 +12,7 @@ async function request<T>(run: () => Promise<ApiResponse<T>>): Promise<ApiRespon
   try {
     return await run();
   } catch (error) {
-    return { ok: false, data: null as T };
+    return {ok: false, data: null as T};
   }
 }
 
@@ -187,12 +182,12 @@ export async function apiGetPaginated<T>(
 
     return {
       ok: false,
-      data: { contents: [], cursor: { hasMore: false, nextCursor: null } },
+      data: {contents: [], cursor: {hasMore: false, nextCursor: null}},
     };
   } catch (error) {
     return {
       ok: false,
-      data: { contents: [], cursor: { hasMore: false, nextCursor: null } },
+      data: {contents: [], cursor: {hasMore: false, nextCursor: null}},
     };
   }
 }

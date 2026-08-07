@@ -1,7 +1,7 @@
 import {useEffect, useState} from 'react';
-import {Alert, Button, Card, Col, Container, Row, Spinner, Badge} from 'react-bootstrap';
+import {Alert, Badge, Button, Card, Col, Container, Row, Spinner} from 'react-bootstrap';
 import medalApi from "@/api/medalApi";
-import {Medal, hasAcquisition, getAcquisitionDescription} from "@/types/medal";
+import {getAcquisitionDescription, hasAcquisition, Medal} from "@/types/medal";
 import MedalModal from "./MedalModal";
 
 const MedalManagement = () => {

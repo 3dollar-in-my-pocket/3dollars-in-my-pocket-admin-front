@@ -1,13 +1,13 @@
 import {useEffect, useState} from 'react';
 import type {SimpleStore} from '@/types/store';
 import type {User} from '@/types/user';
+import {SEARCH_TYPES} from '@/types/user';
 import type {SearchCustomInputsArgs} from '@/components/common/SearchForm';
+import SearchForm from '@/components/common/SearchForm';
 import UserDetailModal from './UserDetailModal';
 import StoreDetailModal from '@/pages/store/StoreDetailModal';
-import {SEARCH_TYPES} from '@/types/user';
 import useSearch from '@/hooks/useSearch';
 import {userSearchAdapter} from '@/adapters/userSearchAdapter';
-import SearchForm from '@/components/common/SearchForm';
 import SearchResults from '@/components/common/SearchResults';
 import UserCard from '@/components/user/UserCard';
 

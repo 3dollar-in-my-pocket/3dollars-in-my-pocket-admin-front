@@ -2,9 +2,9 @@
  * 리뷰 관련 타입 정의
  */
 
-import { Image } from './domain';
-import { SimpleStore } from './store';
-import { SimpleUser } from './user';
+import {Image} from './domain';
+import {SimpleStore} from './store';
+import {SimpleUser} from './user';
 
 export type ReviewStatus = 'POSTED' | 'FILTERED' | 'DELETED';
 

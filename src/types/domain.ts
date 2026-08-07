@@ -5,7 +5,7 @@
  * 특정 도메인의 응답 모델은 해당 도메인 타입 파일에 둡니다.
  */
 
-import { WriterType } from './common';
+import {WriterType} from './common';
 
 /** AddressResponse */
 export interface Address {

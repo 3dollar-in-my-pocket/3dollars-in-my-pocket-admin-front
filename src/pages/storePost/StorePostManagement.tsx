@@ -38,7 +38,8 @@ const StorePostManagement = () => {
 
   return (
     <div className="container-fluid px-2 px-md-4 py-2 py-md-4">
-      <div className="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3 mb-md-4 pb-2 border-bottom">
+      <div
+        className="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3 mb-md-4 pb-2 border-bottom">
         <h2 className="fw-bold mb-0" style={{fontSize: 'clamp(1.25rem, 5vw, 2rem)'}}>
           <i className="bi bi-newspaper text-info me-2"></i>
           가게 소식

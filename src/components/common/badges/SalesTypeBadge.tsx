@@ -1,4 +1,4 @@
-import { BadgeSize } from './StoreTypeBadge';
+import {BadgeSize} from './StoreTypeBadge';
 
 /** 응답이 { type, description } 객체로 내려옵니다. */
 export interface SalesTypeValue {
@@ -31,11 +31,11 @@ const BADGE_CLASS: Record<string, string> = {
  * 서버가 내려주는 description을 우선 표시합니다.
  */
 const SalesTypeBadge = ({
-  salesType,
-  size = 'sm',
-  withIcon = false,
-  className = ''
-}: SalesTypeBadgeProps) => {
+                          salesType,
+                          size = 'sm',
+                          withIcon = false,
+                          className = ''
+                        }: SalesTypeBadgeProps) => {
   if (!salesType) return null;
 
   const badgeClass = BADGE_CLASS[salesType.type || ''] || 'bg-secondary';

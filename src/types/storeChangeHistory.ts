@@ -2,7 +2,7 @@
  * 가게 변경 이력 타입 정의
  */
 
-import { Writer } from './domain';
+import {Writer} from './domain';
 
 /** StoreAttributeResponse.type */
 export const CHANGE_ATTRIBUTE_TYPE = {

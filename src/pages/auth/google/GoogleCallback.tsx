@@ -1,10 +1,10 @@
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import React, {useEffect} from 'react';
+import {useNavigate} from 'react-router-dom';
+import {toast} from 'react-toastify';
 
 import googleAuthApi from "@/api/googleAuthApi";
 import authApi from "@/api/authApi";
-import { useAuthStore } from "@/state/authStore";
+import {useAuthStore} from "@/state/authStore";
 import Loading from "@/components/common/Loading";
 
 const GoogleCallback = () => {
@@ -32,7 +32,7 @@ const GoogleCallback = () => {
         }
 
         // Google OAuth 토큰 가져오기
-        const accessToken = await googleAuthApi.getAccessToken({ code });
+        const accessToken = await googleAuthApi.getAccessToken({code});
 
         // 로그인 API 호출
         const response = await authApi.login({
@@ -60,8 +60,8 @@ const GoogleCallback = () => {
   }, [navigate, login, logout]);
 
   return (
-    <div className="container-fluid py-4 d-flex justify-content-center align-items-center" style={{ height: '80vh' }}>
-      <Loading />
+    <div className="container-fluid py-4 d-flex justify-content-center align-items-center" style={{height: '80vh'}}>
+      <Loading/>
     </div>
   );
 };

@@ -17,7 +17,7 @@ import {
   StoreStatus,
   StoreType
 } from '@/types/store';
-import { CHANGE_ATTRIBUTE_TYPE, ChangeAttributeType } from '@/types/storeChangeHistory';
+import {CHANGE_ATTRIBUTE_TYPE, ChangeAttributeType} from '@/types/storeChangeHistory';
 
 export const getStoreStatusDisplayName = (status: string): string => {
   switch (status) {

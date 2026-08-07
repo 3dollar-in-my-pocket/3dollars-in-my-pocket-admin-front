@@ -1,12 +1,12 @@
-import { ChangeEvent, useState } from 'react';
-import { toast } from 'react-toastify';
+import {ChangeEvent, useState} from 'react';
+import {toast} from 'react-toastify';
 import storeImportApi from '@/api/storeImportApi';
 import {
   StoreImportSaveResponse,
   StoreImportValidationResponse,
   StoreImportValidationResult,
 } from '@/types/storeImport';
-import { showConfirm } from '@/utils/confirmDialog';
+import {showConfirm} from '@/utils/confirmDialog';
 
 const isCsvFile = (file: File): boolean => file.name.toLowerCase().endsWith('.csv');
 
@@ -139,26 +139,28 @@ const StoreFileUpload = () => {
         <div className="table-responsive">
           <table className="table table-sm table-bordered mb-0">
             <thead className="table-light">
-              <tr>
-                <th>#</th>
-                <th>메뉴명</th>
-                <th>수량</th>
-                <th>가격</th>
-                <th>카테고리</th>
-              </tr>
+            <tr>
+              <th>#</th>
+              <th>메뉴명</th>
+              <th>수량</th>
+              <th>가격</th>
+              <th>카테고리</th>
+            </tr>
             </thead>
             <tbody>
-              {data.menus?.length ? data.menus.map((menu, index) => (
-                <tr key={`${menu.name}-${index}`}>
-                  <td>{index + 1}</td>
-                  <td>{menu.name || '-'}</td>
-                  <td>{menu.count ?? '-'}</td>
-                  <td>{menu.price ?? '-'}</td>
-                  <td>{menu.category || '-'}</td>
-                </tr>
-              )) : (
-                <tr><td colSpan={5} className="text-center text-muted">메뉴 없음</td></tr>
-              )}
+            {data.menus?.length ? data.menus.map((menu, index) => (
+              <tr key={`${menu.name}-${index}`}>
+                <td>{index + 1}</td>
+                <td>{menu.name || '-'}</td>
+                <td>{menu.count ?? '-'}</td>
+                <td>{menu.price ?? '-'}</td>
+                <td>{menu.category || '-'}</td>
+              </tr>
+            )) : (
+              <tr>
+                <td colSpan={5} className="text-center text-muted">메뉴 없음</td>
+              </tr>
+            )}
             </tbody>
           </table>
         </div>
@@ -189,8 +191,8 @@ const StoreFileUpload = () => {
           disabled={isDownloading}
         >
           {isDownloading
-            ? <span className="spinner-border spinner-border-sm me-2" />
-            : <i className="bi bi-download me-2" />}
+            ? <span className="spinner-border spinner-border-sm me-2"/>
+            : <i className="bi bi-download me-2"/>}
           샘플 ZIP 다운로드
         </button>
       </div>
@@ -202,12 +204,12 @@ const StoreFileUpload = () => {
             <div className="col-12 col-lg-6">
               <label htmlFor="stores-file" className="form-label fw-semibold">가게 파일 (stores.csv)</label>
               <input id="stores-file" type="file" accept=".csv,text/csv" className="form-control"
-                     disabled={isValidating || isSaving} onChange={event => handleFileChange(event, setStoresFile)} />
+                     disabled={isValidating || isSaving} onChange={event => handleFileChange(event, setStoresFile)}/>
             </div>
             <div className="col-12 col-lg-6">
               <label htmlFor="menus-file" className="form-label fw-semibold">메뉴 파일 (store_menus.csv)</label>
               <input id="menus-file" type="file" accept=".csv,text/csv" className="form-control"
-                     disabled={isValidating || isSaving} onChange={event => handleFileChange(event, setMenusFile)} />
+                     disabled={isValidating || isSaving} onChange={event => handleFileChange(event, setMenusFile)}/>
             </div>
           </div>
           <div className="form-text mt-3">
@@ -215,7 +217,7 @@ const StoreFileUpload = () => {
           </div>
           <button className="btn btn-primary mt-3" disabled={!storesFile || !menusFile || isValidating || isSaving}
                   onClick={handleValidate}>
-            {isValidating && <span className="spinner-border spinner-border-sm me-2" />}
+            {isValidating && <span className="spinner-border spinner-border-sm me-2"/>}
             {isValidating ? '주소 및 데이터 검증 중...' : '파일 사전 검증'}
           </button>
         </div>
@@ -237,12 +239,18 @@ const StoreFileUpload = () => {
             )}
             <div className="table-responsive">
               <table className="table table-hover align-middle mb-0">
-                <thead><tr><th>가게 연결 키</th><th>상태</th><th style={{minWidth: 360}}>검증 내용</th></tr></thead>
+                <thead>
+                <tr>
+                  <th>가게 연결 키</th>
+                  <th>상태</th>
+                  <th style={{minWidth: 360}}>검증 내용</th>
+                </tr>
+                </thead>
                 <tbody>
-                  {validation.results.map((result, index) => (
-                    <tr key={`${result.importKey}-${index}`}>
-                      <td className="fw-semibold">{result.importKey}</td>
-                      <td>
+                {validation.results.map((result, index) => (
+                  <tr key={`${result.importKey}-${index}`}>
+                    <td className="fw-semibold">{result.importKey}</td>
+                    <td>
                         <span className={`badge ${result.status === 'READY_TO_CREATE'
                           ? 'text-bg-success'
                           : result.status === 'READY_TO_UPDATE' ? 'text-bg-warning' : 'text-bg-danger'}`}>
@@ -250,10 +258,10 @@ const StoreFileUpload = () => {
                             ? '신규 등록 예정'
                             : result.status === 'READY_TO_UPDATE' ? '기존 가게 갱신 예정' : '실패'}
                         </span>
-                      </td>
-                      <td>{renderValidatedDetail(result)}</td>
-                    </tr>
-                  ))}
+                    </td>
+                    <td>{renderValidatedDetail(result)}</td>
+                  </tr>
+                ))}
                 </tbody>
               </table>
             </div>
@@ -265,7 +273,7 @@ const StoreFileUpload = () => {
         <div className="card-body">
           <h5 className="card-title fw-bold mb-3">3. 실제 가게 등록</h5>
           <button className="btn btn-success" disabled={!canSave || isSaving} onClick={handleSave}>
-            {isSaving && <span className="spinner-border spinner-border-sm me-2" />}
+            {isSaving && <span className="spinner-border spinner-border-sm me-2"/>}
             {isSaving ? '가게 등록 중...' : '검증 파일 등록'}
           </button>
           {!validation && (
@@ -280,8 +288,8 @@ const StoreFileUpload = () => {
                 {saveResult.results.map((result, index) => (
                   <li key={`${result.importKey}-${index}`}>
                     <strong>{result.importKey}</strong>: {result.status === 'SAVED'
-                      ? `저장 완료 (가게 ID: ${result.storeId})`
-                      : `실패 - ${result.error || '알 수 없는 오류'}`}
+                    ? `저장 완료 (가게 ID: ${result.storeId})`
+                    : `실패 - ${result.error || '알 수 없는 오류'}`}
                   </li>
                 ))}
               </ul>

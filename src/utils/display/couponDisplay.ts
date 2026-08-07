@@ -4,7 +4,7 @@
  * 타입과 상수 정의는 types/coupon.ts에 있습니다.
  */
 
-import { COUPON_STATUS, CouponStatus } from '@/types/coupon';
+import {COUPON_STATUS, CouponStatus} from '@/types/coupon';
 
 // Utility functions
 export const getCouponStatusDisplayName = (status: CouponStatus): string => {

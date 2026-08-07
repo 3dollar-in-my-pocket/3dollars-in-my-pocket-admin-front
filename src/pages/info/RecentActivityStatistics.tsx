@@ -1,6 +1,6 @@
-import React, {useState, useEffect} from "react";
-import {Card, Button, Alert, Table} from "react-bootstrap";
-import {LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer} from "recharts";
+import React, {useEffect, useState} from "react";
+import {Alert, Button, Card, Table} from "react-bootstrap";
+import {CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts";
 import statisticsApi from "@/api/statisticsApi";
 import {DailyStatistic} from "@/types/statistics";
 import {toast} from "react-toastify";

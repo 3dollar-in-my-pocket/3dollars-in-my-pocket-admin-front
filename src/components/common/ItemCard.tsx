@@ -11,13 +11,13 @@ interface ItemCardProps<T = any> {
 }
 
 const ItemCard = <T, >({
-                    item,
-                    onClick,
-                    borderColor = '#6c757d',
-                    children,
-                    className = '',
-                    style = {}
-                  }: ItemCardProps<T>) => {
+                         item,
+                         onClick,
+                         borderColor = '#6c757d',
+                         children,
+                         className = '',
+                         style = {}
+                       }: ItemCardProps<T>) => {
   return (
     <div
       className={`card border-0 shadow-lg h-100 position-relative overflow-hidden ${className}`}

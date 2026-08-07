@@ -1,5 +1,5 @@
 import userApi from '@/api/userApi';
-import {SEARCH_TYPES, createUserSearchRequest, SearchType, User} from '@/types/user';
+import {createUserSearchRequest, SEARCH_TYPES, SearchType, User} from '@/types/user';
 import {formatUserIds, validateUserSearch} from '@/utils/validation/userValidation';
 
 interface UserSearchParams {

@@ -1,14 +1,14 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Modal } from 'react-bootstrap';
-import { toast } from 'react-toastify';
+import {useCallback, useEffect, useMemo, useState} from 'react';
+import {Modal} from 'react-bootstrap';
+import {toast} from 'react-toastify';
 import enumApi from '@/api/enumApi';
 import promptApi from '@/api/promptApi';
 import EmptyState from '@/components/common/EmptyState';
 import Loading from '@/components/common/Loading';
 import useCursorPagination from '@/hooks/useCursorPagination';
 import useInfiniteScroll from '@/hooks/useInfiniteScroll';
-import { formatDateTime } from '@/utils/dateUtils';
-import { AIModel, EnumOption, PromptFormRequest, PromptResponse, PromptStatus } from '@/types/prompt';
+import {formatDateTime} from '@/utils/dateUtils';
+import {AIModel, EnumOption, PromptFormRequest, PromptResponse, PromptStatus} from '@/types/prompt';
 import './PromptManagement.css';
 
 const PAGE_SIZE = 10;
@@ -125,11 +125,11 @@ const PromptManagement = () => {
         active: counts.active + (prompt.status === PROMPT_STATUS.ACTIVE ? 1 : 0),
         draft: counts.draft + (prompt.status === PROMPT_STATUS.DRAFT ? 1 : 0),
       }),
-      { active: 0, draft: 0 }
+      {active: 0, draft: 0}
     );
   }, [prompts]);
 
-  const { scrollContainerRef, loadMoreRef } = useInfiniteScroll({
+  const {scrollContainerRef, loadMoreRef} = useInfiniteScroll({
     hasMore,
     isLoading,
     onLoadMore: loadMore,
@@ -164,7 +164,7 @@ const PromptManagement = () => {
     if (!window.confirm(message)) return;
 
     try {
-      const response = await promptApi.updatePrompt(selectedPromptType, prompt.promptId, { status: nextStatus });
+      const response = await promptApi.updatePrompt(selectedPromptType, prompt.promptId, {status: nextStatus});
       if (response?.ok) {
         toast.success(nextStatus === PROMPT_STATUS.ACTIVE ? '활성화되었습니다' : '초안으로 전환되었습니다');
         fetchPrompts();
@@ -324,14 +324,14 @@ const PromptManagement = () => {
 };
 
 const PromptCard = ({
-  prompt,
-  promptTypeLabel,
-  statusLabel,
-  modelLabel,
-  isApplied,
-  onStatusChange,
-  onEdit,
-}: {
+                      prompt,
+                      promptTypeLabel,
+                      statusLabel,
+                      modelLabel,
+                      isApplied,
+                      onStatusChange,
+                      onEdit,
+                    }: {
   prompt: PromptResponse;
   promptTypeLabel: string;
   statusLabel: string;
@@ -443,14 +443,14 @@ const PromptCard = ({
 };
 
 const PromptEditModal = ({
-  show,
-  promptType,
-  promptTypeLabel,
-  aiModels,
-  selectedPrompt,
-  onHide,
-  onSuccess,
-}: {
+                           show,
+                           promptType,
+                           promptTypeLabel,
+                           aiModels,
+                           selectedPrompt,
+                           onHide,
+                           onSuccess,
+                         }: {
   show: boolean;
   promptType: string;
   promptTypeLabel: string;
@@ -530,11 +530,11 @@ const PromptEditModal = ({
   };
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = event.target;
+    const {name, value} = event.target;
     const numberFields = ['maxOutputTokens', 'temperature', 'thinkingBudget'];
     const nextValue = numberFields.includes(name) ? (value === '' ? null : Number(value)) : value;
-    setFormData((prev) => ({ ...prev, [name]: nextValue }));
-    setErrors((prev) => ({ ...prev, [name]: undefined }));
+    setFormData((prev) => ({...prev, [name]: nextValue}));
+    setErrors((prev) => ({...prev, [name]: undefined}));
   };
 
   const normalizeOptionalText = (value?: string | null) => {
@@ -562,9 +562,9 @@ const PromptEditModal = ({
       const response = selectedPrompt
         ? await promptApi.updatePrompt(promptType, selectedPrompt.promptId, payload)
         : await promptApi.createPrompt(promptType, {
-            ...payload,
-            status: statusOnCreate,
-          });
+          ...payload,
+          status: statusOnCreate,
+        });
 
       if (response?.ok) {
         toast.success(selectedPrompt ? '수정되었습니다' : '등록되었습니다');
@@ -619,12 +619,12 @@ const PromptEditModal = ({
           <div className="row g-3">
             <div className="col-12 col-md-6">
               <label className="form-label prompt-label">프롬프트 타입</label>
-              <input className="form-control prompt-readonly-input" value={promptTypeLabel} disabled />
+              <input className="form-control prompt-readonly-input" value={promptTypeLabel} disabled/>
             </div>
             {selectedPrompt && (
               <div className="col-12 col-md-6">
                 <label className="form-label prompt-label">버전</label>
-                <input className="form-control prompt-readonly-input" value={`v${selectedPrompt.version}`} disabled />
+                <input className="form-control prompt-readonly-input" value={`v${selectedPrompt.version}`} disabled/>
               </div>
             )}
 
@@ -746,11 +746,13 @@ const PromptEditModal = ({
               <>
                 <div className="col-12 col-md-6">
                   <label className="form-label prompt-label">생성일자</label>
-                  <input className="form-control prompt-readonly-input" value={formatDateTime(selectedPrompt.createdAt)} disabled />
+                  <input className="form-control prompt-readonly-input" value={formatDateTime(selectedPrompt.createdAt)}
+                         disabled/>
                 </div>
                 <div className="col-12 col-md-6">
                   <label className="form-label prompt-label">수정일자</label>
-                  <input className="form-control prompt-readonly-input" value={formatDateTime(selectedPrompt.updatedAt)} disabled />
+                  <input className="form-control prompt-readonly-input" value={formatDateTime(selectedPrompt.updatedAt)}
+                         disabled/>
                 </div>
               </>
             )}

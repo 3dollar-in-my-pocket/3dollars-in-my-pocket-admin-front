@@ -2,10 +2,7 @@ import StoreStatusBadge from '@/components/common/badges/StoreStatusBadge';
 import StoreTypeBadge from '@/components/common/badges/StoreTypeBadge';
 import {useCallback, useRef, useState} from 'react';
 import useCursorPagination from "@/hooks/useCursorPagination";
-import {
-  getActivitiesStatusBadgeClass,
-  getActivitiesStatusDisplayName
-} from '@/utils/display/storeDisplay';
+import {getActivitiesStatusBadgeClass, getActivitiesStatusDisplayName} from '@/utils/display/storeDisplay';
 import {getVisitIconClass, getVisitTypeBatchClass, getVisitTypeDisplayName} from '@/utils/display/visitDisplay';
 
 import {Visit, VisitType} from "@/types/visit";

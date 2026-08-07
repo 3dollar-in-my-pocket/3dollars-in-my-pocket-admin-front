@@ -1,4 +1,4 @@
-import { SimpleStore } from './store';
+import {SimpleStore} from './store';
 
 /** MessageResponse */
 export interface StoreMessage {

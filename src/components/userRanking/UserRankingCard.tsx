@@ -1,4 +1,3 @@
-
 import {getSocialTypeBadgeClass, getSocialTypeDisplayName} from '@/utils/display/userDisplay';
 import ItemCard from '@/components/common/ItemCard';
 import {UserRankingItem} from '@/types/userRanking';

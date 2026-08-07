@@ -1,9 +1,8 @@
 import {useCallback, useEffect, useState} from "react";
 import faqApi from "@/api/faqApi";
-import FaqEditModal from "./FaqEditModal";
+import FaqEditModal, {FaqApplicationOption} from "./FaqEditModal";
 import Loading from "@/components/common/Loading";
 import {Faq, FaqCategory} from "@/types/faq";
-import {FaqApplicationOption} from "./FaqEditModal";
 
 const applications: FaqApplicationOption[] = [
   {type: "USER", description: "가슴속 3천원"},

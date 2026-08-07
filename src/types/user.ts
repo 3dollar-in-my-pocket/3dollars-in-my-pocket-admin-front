@@ -1,7 +1,7 @@
-import { Medal } from './medal';
+import {Medal} from './medal';
 
 // 유저 응답에 포함되는 메달은 메달 관리와 동일한 모델을 사용합니다.
-export type { Medal };
+export type {Medal};
 
 // Social login types
 export const SOCIAL_TYPES = {

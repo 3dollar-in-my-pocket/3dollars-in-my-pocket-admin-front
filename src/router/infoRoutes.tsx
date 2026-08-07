@@ -1,4 +1,4 @@
-import { lazy } from "react";
+import {lazy} from "react";
 import PrivateRouter from "./PrivateRouter";
 
 // 정보 페이지는 라우트 진입 시점에 로드합니다. (Suspense fallback은 Layout에 있음)
@@ -29,4 +29,4 @@ const infoRoutes = {
   ]
 };
 
-export default infoRoutes; 
+export default infoRoutes;

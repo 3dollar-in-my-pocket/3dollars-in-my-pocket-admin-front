@@ -1,5 +1,9 @@
-
-import {getSocialTypeBadgeClass, getSocialTypeDisplayName, getUserRoleBadgeClass, getUserRoleLabel} from '@/utils/display/userDisplay';
+import {
+  getSocialTypeBadgeClass,
+  getSocialTypeDisplayName,
+  getUserRoleBadgeClass,
+  getUserRoleLabel
+} from '@/utils/display/userDisplay';
 import ItemCard from '@/components/common/ItemCard';
 import {User} from '@/types/user';
 

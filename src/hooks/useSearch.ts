@@ -1,4 +1,4 @@
-import React, {useState, useCallback, useRef, useEffect} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {toast} from 'react-toastify';
 
 /**
@@ -48,12 +48,12 @@ export interface UseSearchConfig<T, SearchType extends string = string> {
 }
 
 export const useSearch = <T = any, SearchType extends string = string>({
-                            validateSearch,
-                            searchFunction,
-                            resetFunction,
-                            errorMessage = '검색 중 오류가 발생했습니다.',
-                            autoSearchTypes = []
-                          }: UseSearchConfig<T, SearchType>) => {
+                                                                         validateSearch,
+                                                                         searchFunction,
+                                                                         resetFunction,
+                                                                         errorMessage = '검색 중 오류가 발생했습니다.',
+                                                                         autoSearchTypes = []
+                                                                       }: UseSearchConfig<T, SearchType>) => {
   const [searchQuery, setSearchQuery] = useState('');
   // searchType은 SearchForm 등 공용 컴포넌트가 string으로 다루므로 string으로 유지하고,
   // 좁은 유니온을 요구하는 어댑터 호출 시점에만 단언합니다.

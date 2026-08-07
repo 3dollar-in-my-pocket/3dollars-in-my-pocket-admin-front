@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {Button, Card, Container, Form, Row, Col, Spinner} from 'react-bootstrap';
+import {Button, Card, Col, Container, Form, Row, Spinner} from 'react-bootstrap';
 import UploadApi from "@/api/uploadApi";
 import enumApi from "@/api/enumApi";
 import {toast} from "react-toastify";

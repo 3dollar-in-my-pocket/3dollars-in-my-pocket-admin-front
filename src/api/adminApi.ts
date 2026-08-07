@@ -1,6 +1,6 @@
-import { ApiResponse, PagePaginatedResponse } from '@/types/api';
-import { Admin, CreateAdminRequest, UpdateAdminRequest } from '@/types/admin';
-import { apiGet, apiPost, apiPatch } from './apiHelpers';
+import {ApiResponse, PagePaginatedResponse} from '@/types/api';
+import {Admin, CreateAdminRequest, UpdateAdminRequest} from '@/types/admin';
+import {apiGet, apiPatch, apiPost} from './apiHelpers';
 
 export default {
   /**
@@ -13,15 +13,18 @@ export default {
   /**
    * 관리자 목록 조회 (페이지 기반)
    */
-  getAdmins: async ({size = 10, page = 1}: {size?: number; page?: number} = {}): Promise<ApiResponse<PagePaginatedResponse<Admin>>> => {
-    return apiGet<PagePaginatedResponse<Admin>>(`/v1/admins`, { size, page });
+  getAdmins: async ({size = 10, page = 1}: {
+    size?: number;
+    page?: number
+  } = {}): Promise<ApiResponse<PagePaginatedResponse<Admin>>> => {
+    return apiGet<PagePaginatedResponse<Admin>>(`/v1/admins`, {size, page});
   },
 
   /**
    * 관리자 생성
    */
   createAdmin: async (adminData: CreateAdminRequest, nonce?: string): Promise<ApiResponse<Admin>> => {
-    return apiPost<Admin>(`/v1/admin`, adminData, { nonce });
+    return apiPost<Admin>(`/v1/admin`, adminData, {nonce});
   },
 
   /**

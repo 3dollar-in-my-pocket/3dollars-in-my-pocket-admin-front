@@ -2,7 +2,7 @@
  * 가게 지도 핀(마커) 타입 정의
  */
 
-import { DateTimeInterval, Image } from './domain';
+import {DateTimeInterval, Image} from './domain';
 
 /** ImageRequest — 등록/수정 요청의 이미지는 url을 사용합니다. */
 export interface StoreMarkerImageRequest {

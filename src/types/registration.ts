@@ -4,7 +4,7 @@
  * api-docs.json(OpenAPI)의 BossRegistration*Response와 1:1로 대응합니다.
  */
 
-import { OsPlatform } from './device';
+import {OsPlatform} from './device';
 
 /**
  * 소셜 로그인 타입

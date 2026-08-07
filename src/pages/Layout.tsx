@@ -1,11 +1,11 @@
-import React, {useState, useEffect, Suspense} from "react";
+import React, {Suspense, useEffect, useState} from "react";
 import {Link, Outlet, useLocation, useNavigate} from "react-router-dom";
 import Loading from "@/components/common/Loading";
 import {Bounce, toast, ToastContainer} from "react-toastify";
 import {useAuthStore} from "@/state/authStore";
-import { AdminRole } from "@/types/admin";
-import { filterMenuItemsByRole } from "@/utils/roleUtils";
-import { setGlobalNavigate } from "@/api/apiBase";
+import {AdminRole} from "@/types/admin";
+import {filterMenuItemsByRole} from "@/utils/roleUtils";
+import {setGlobalNavigate} from "@/api/apiBase";
 
 // 메뉴 항목 타입 정의
 export interface MenuItem {
@@ -33,21 +33,66 @@ export const menuGroups: MenuGroup[] = [
   {
     title: "사장님 관리",
     items: [
-      {path: "/manage/registration", label: "사장님 가입 신청 관리", icon: "bi-person-lines-fill", allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]},
+      {
+        path: "/manage/registration",
+        label: "사장님 가입 신청 관리",
+        icon: "bi-person-lines-fill",
+        allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]
+      },
     ],
   },
   {
     title: "가게 관리",
     items: [
-      {path: "/manage/store-search", label: "가게 검색", icon: "bi-shop", allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]},
-      {path: "/manage/popular-neighborhood-stores", label: "인기 가게", icon: "bi-star-fill", allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]},
-      {path: "/manage/review", label: "가게 리뷰 관리", icon: "bi-chat-square-text", allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]},
+      {
+        path: "/manage/store-search",
+        label: "가게 검색",
+        icon: "bi-shop",
+        allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]
+      },
+      {
+        path: "/manage/popular-neighborhood-stores",
+        label: "인기 가게",
+        icon: "bi-star-fill",
+        allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]
+      },
+      {
+        path: "/manage/review",
+        label: "가게 리뷰 관리",
+        icon: "bi-chat-square-text",
+        allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]
+      },
       {path: "/manage/store-image", label: "가게 이미지 관리", icon: "bi-image"},
-      {path: "/manage/store-post", label: "가게 소식", icon: "bi-newspaper", allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]},
-      {path: "/manage/coupon", label: "가게 쿠폰 관리", icon: "bi-ticket-perforated", allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]},
-      {path: "/manage/store-message", label: "가게 메시지 관리", icon: "bi-chat-left-text", allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]},
-      {path: "/manage/store-report", label: "가게 신고 이력", icon: "bi-flag-fill", allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]},
-      {path: "/manage/store-marker", label: "가게 지도 핀 관리", icon: "bi-geo-alt-fill", allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]},
+      {
+        path: "/manage/store-post",
+        label: "가게 소식",
+        icon: "bi-newspaper",
+        allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]
+      },
+      {
+        path: "/manage/coupon",
+        label: "가게 쿠폰 관리",
+        icon: "bi-ticket-perforated",
+        allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]
+      },
+      {
+        path: "/manage/store-message",
+        label: "가게 메시지 관리",
+        icon: "bi-chat-left-text",
+        allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]
+      },
+      {
+        path: "/manage/store-report",
+        label: "가게 신고 이력",
+        icon: "bi-flag-fill",
+        allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]
+      },
+      {
+        path: "/manage/store-marker",
+        label: "가게 지도 핀 관리",
+        icon: "bi-geo-alt-fill",
+        allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]
+      },
     ],
   },
   {
@@ -56,13 +101,23 @@ export const menuGroups: MenuGroup[] = [
       {path: "/manage/advertisement", label: "광고 관리", icon: "bi-bullseye", allowedRoles: [AdminRole.OPERATOR]},
       {path: "/manage/medal", label: "메달 관리", icon: "bi-award-fill", allowedRoles: [AdminRole.OPERATOR]},
       {path: "/manage/faq", label: "FAQ 관리", icon: "bi-question-circle-fill", allowedRoles: [AdminRole.OPERATOR]},
-      {path: "/manage/store-category", label: "가게 카테고리 관리", icon: "bi-grid-3x3-gap", allowedRoles: [AdminRole.OPERATOR]},
+      {
+        path: "/manage/store-category",
+        label: "가게 카테고리 관리",
+        icon: "bi-grid-3x3-gap",
+        allowedRoles: [AdminRole.OPERATOR]
+      },
     ]
   },
   {
     title: "커뮤니티 관리",
     items: [
-      {path: "/manage/poll", label: "투표 관리", icon: "bi-bar-chart-fill", allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]},
+      {
+        path: "/manage/poll",
+        label: "투표 관리",
+        icon: "bi-bar-chart-fill",
+        allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]
+      },
     ],
   },
   {
@@ -72,13 +127,23 @@ export const menuGroups: MenuGroup[] = [
       {path: "/manage/policy", label: "정책 설정", icon: "bi-shield-fill-check", allowedRoles: [AdminRole.OPERATOR]},
       {path: "/manage/prompt", label: "AI 프롬프트 관리", icon: "bi-robot", allowedRoles: [AdminRole.OWNER]},
       {path: "/manage/tool/cache", label: "캐시 툴", icon: "bi-brush-fill"},
-      {path: "/manage/tool/upload", label: "이미지 업로드 툴", icon: "bi-image-fill", allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]},
+      {
+        path: "/manage/tool/upload",
+        label: "이미지 업로드 툴",
+        icon: "bi-image-fill",
+        allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]
+      },
     ],
   },
   {
     title: "PoC",
     items: [
-      {path: "/manage/proto/ai-menu-image-extract", label: "AI 메뉴 이미지 추출", icon: "bi-stars", allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]},
+      {
+        path: "/manage/proto/ai-menu-image-extract",
+        label: "AI 메뉴 이미지 추출",
+        icon: "bi-stars",
+        allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]
+      },
       {
         path: "/manage/store-file-upload",
         label: "신규 가게 등록",
@@ -90,9 +155,19 @@ export const menuGroups: MenuGroup[] = [
   {
     title: "통계 & 분석",
     items: [
-      {path: "/info/service-statistics", label: "서비스 통계", icon: "bi-graph-up", allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]},
+      {
+        path: "/info/service-statistics",
+        label: "서비스 통계",
+        icon: "bi-graph-up",
+        allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]
+      },
       {path: "/info/ad-statistics", label: "광고 통계", icon: "bi-badge-ad", allowedRoles: [AdminRole.OPERATOR]},
-      {path: "/info/push-statistics", label: "푸시 통계", icon: "bi-bar-chart-line-fill", allowedRoles: [AdminRole.OPERATOR]},
+      {
+        path: "/info/push-statistics",
+        label: "푸시 통계",
+        icon: "bi-bar-chart-line-fill",
+        allowedRoles: [AdminRole.OPERATOR]
+      },
     ],
   },
   {
@@ -101,10 +176,15 @@ export const menuGroups: MenuGroup[] = [
       {path: "/manage/admin", label: "관리자 관리", icon: "bi-people-fill"},
     ],
   },
-    {
+  {
     title: "기타",
     items: [
-      {path: "/info/etc-link", label: "기타 링크", icon: "bi-link-45deg", allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]},
+      {
+        path: "/info/etc-link",
+        label: "기타 링크",
+        icon: "bi-link-45deg",
+        allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]
+      },
     ],
   },
 ];

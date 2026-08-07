@@ -4,7 +4,7 @@
  * 타입과 상수 정의는 types/common.ts에 있습니다.
  */
 
-import { WRITER_TYPE, WriterType } from '@/types/common';
+import {WRITER_TYPE, WriterType} from '@/types/common';
 
 // Writer type display names
 export const getWriterTypeDisplayName = (writerType: WriterType): string => {

@@ -1,7 +1,7 @@
 import React from 'react';
-import { useAuthStore } from '@/state/authStore';
-import { AdminRole } from '@/types/admin';
-import { hasMenuAccess } from '@/utils/roleUtils';
+import {useAuthStore} from '@/state/authStore';
+import {AdminRole} from '@/types/admin';
+import {hasMenuAccess} from '@/utils/roleUtils';
 
 interface PermissionGuardProps {
   allowedRoles?: AdminRole[];
@@ -14,10 +14,10 @@ interface PermissionGuardProps {
  * 특정 역할만 접근 가능한 컴포넌트를 감쌀 때 사용
  */
 const PermissionGuard: React.FC<PermissionGuardProps> = ({
-  allowedRoles,
-  children,
-  fallback = null
-}) => {
+                                                           allowedRoles,
+                                                           children,
+                                                           fallback = null
+                                                         }) => {
   const adminAuth = useAuthStore((state) => state.admin);
 
   if (!adminAuth?.role) {

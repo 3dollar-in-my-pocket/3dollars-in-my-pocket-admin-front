@@ -201,7 +201,8 @@ const StoreMarkerManage = () => {
                                 <i className="bi bi-calendar-event me-1"></i>
                                 시작일
                               </div>
-                              <div className="fw-semibold text-dark">{formatDateTime(marker.period?.startDateTime)}</div>
+                              <div
+                                className="fw-semibold text-dark">{formatDateTime(marker.period?.startDateTime)}</div>
                             </div>
                           </div>
                           <div className="col-md-6">
@@ -257,7 +258,7 @@ const StoreMarkerManage = () => {
   );
 };
 
-const MarkerImagePreview = ({title, image}: {title: string; image?: Image}) => {
+const MarkerImagePreview = ({title, image}: { title: string; image?: Image }) => {
   const imageUrl = getMarkerImageUrl(image);
   const width = getMarkerImageSize(image?.width);
   const height = getMarkerImageSize(image?.height);

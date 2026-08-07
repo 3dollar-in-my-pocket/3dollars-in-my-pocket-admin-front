@@ -1,9 +1,5 @@
 import {useEffect, useState} from "react";
-import type {
-  Advertisement as AdvertisementItem,
-  AdvertisementPositionType,
-  EnumOption
-} from '@/types/advertisement';
+import type {Advertisement as AdvertisementItem, AdvertisementPositionType, EnumOption} from '@/types/advertisement';
 import advertisementApi from "@/api/advertisementApi";
 import enumApi from "@/api/enumApi";
 import AdvertisementModal from "./AdvertisementModal";

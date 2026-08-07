@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react';
-import { toast } from 'react-toastify';
+import {useCallback, useState} from 'react';
+import {toast} from 'react-toastify';
 
 /**
  * Modal Form Hook
@@ -44,12 +44,12 @@ interface UseModalFormReturn<T> {
  * });
  */
 export const useModalForm = <T extends Record<string, any>>({
-  initialValues,
-  onSubmit,
-  onSuccess,
-  validate,
-  resetOnSuccess = true
-}: UseModalFormOptions<T>): UseModalFormReturn<T> => {
+                                                              initialValues,
+                                                              onSubmit,
+                                                              onSuccess,
+                                                              validate,
+                                                              resetOnSuccess = true
+                                                            }: UseModalFormOptions<T>): UseModalFormReturn<T> => {
   const [formData, setFormData] = useState<T>(initialValues);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -60,7 +60,7 @@ export const useModalForm = <T extends Record<string, any>>({
   const handleChange = useCallback((
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
-    const { name, value } = e.target;
+    const {name, value} = e.target;
 
     setFormData(prev => ({
       ...prev,
@@ -70,7 +70,7 @@ export const useModalForm = <T extends Record<string, any>>({
     // 해당 필드의 에러 제거
     if (errors[name]) {
       setErrors(prev => {
-        const newErrors = { ...prev };
+        const newErrors = {...prev};
         delete newErrors[name];
         return newErrors;
       });
@@ -89,7 +89,7 @@ export const useModalForm = <T extends Record<string, any>>({
     // 해당 필드의 에러 제거
     if (errors[field as string]) {
       setErrors(prev => {
-        const newErrors = { ...prev };
+        const newErrors = {...prev};
         delete newErrors[field as string];
         return newErrors;
       });

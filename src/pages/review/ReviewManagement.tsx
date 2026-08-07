@@ -1,5 +1,5 @@
 import StoreTypeBadge from '@/components/common/badges/StoreTypeBadge';
-import {useState, useCallback} from 'react';
+import {useCallback, useState} from 'react';
 import {toast} from 'react-toastify';
 import reviewApi from '@/api/reviewApi';
 import {Review} from '@/types/review';
@@ -9,6 +9,7 @@ import StoreDetailModal from '@/pages/store/StoreDetailModal';
 import useInfiniteScroll from '@/hooks/useInfiniteScroll';
 import useCursorPagination from '@/hooks/useCursorPagination';
 import EmptyState from '@/components/common/EmptyState';
+import ErrorState from '@/components/common/ErrorState';
 
 import {formatDateTimeShortKo as formatDateTime} from '@/utils/dateUtils';
 
@@ -29,6 +30,7 @@ const ReviewManagement = () => {
     items: reviews,
     isLoading,
     hasMore,
+    error,
     refresh,
     loadMore
   } = useCursorPagination<Review>({
@@ -37,7 +39,7 @@ const ReviewManagement = () => {
   });
 
   // Infinite Scroll 훅 사용
-  const { scrollContainerRef, loadMoreRef } = useInfiniteScroll({
+  const {scrollContainerRef, loadMoreRef} = useInfiniteScroll({
     hasMore,
     isLoading,
     onLoadMore: loadMore,
@@ -211,8 +213,10 @@ const ReviewManagement = () => {
         className="review-container"
         style={{maxHeight: 'calc(100vh - 280px)', overflowY: 'auto'}}
       >
-        {/* 빈 상태 */}
-        {reviews.length === 0 && !isLoading ? (
+        {/* 오류 / 빈 상태 */}
+        {error ? (
+          <ErrorState message={error} onRetry={refresh}/>
+        ) : reviews.length === 0 && !isLoading ? (
           <EmptyState
             icon="bi-chat-square-text"
             title="등록된 리뷰가 없습니다"

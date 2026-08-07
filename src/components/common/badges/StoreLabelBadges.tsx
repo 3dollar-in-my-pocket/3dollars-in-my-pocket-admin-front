@@ -1,8 +1,4 @@
-import {
-  getLabelBadgeClass,
-  getLabelDisplayName,
-  getLabelIcon
-} from '@/utils/display/storeDisplay';
+import {getLabelBadgeClass, getLabelDisplayName, getLabelIcon} from '@/utils/display/storeDisplay';
 
 interface StoreLabelBadgesProps {
   labels?: string[] | null;

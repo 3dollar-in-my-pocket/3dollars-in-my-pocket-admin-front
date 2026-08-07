@@ -1,6 +1,6 @@
-import { useAuthStore } from '@/state/authStore';
-import { AdminRole } from '@/types/admin';
-import { hasMenuAccess } from '@/utils/roleUtils';
+import {useAuthStore} from '@/state/authStore';
+import {AdminRole} from '@/types/admin';
+import {hasMenuAccess} from '@/utils/roleUtils';
 
 /**
  * 권한 확인을 위한 커스텀 훅

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import {useEffect, useState} from 'react';
 import storeCategoryApi from '@/api/storeCategoryApi';
 import EmptyState from '@/components/common/EmptyState';
 import {StoreCategory} from '@/types/storeCategory';
@@ -22,7 +22,7 @@ const StoreCategoryManagement = () => {
         return;
       }
 
-      const { contents = [] } = response.data || { contents: [] };
+      const {contents = []} = response.data || {contents: []};
 
       // displayOrder 순으로 정렬 (null은 가장 마지막)
       const sortedCategories = contents.sort((a, b) => {
@@ -53,7 +53,7 @@ const StoreCategoryManagement = () => {
     return (
       <span
         className={`badge ${getCategoryClassificationBadgeClass(classification.type)} text-white rounded-pill px-3 py-1`}
-        style={{ fontSize: '0.75rem', whiteSpace: 'nowrap' }}
+        style={{fontSize: '0.75rem', whiteSpace: 'nowrap'}}
       >
         <i className={`bi ${getCategoryClassificationIcon(classification.type)} me-1`}></i>
         {classification.description}
@@ -83,7 +83,7 @@ const StoreCategoryManagement = () => {
     <div className="container-fluid px-2 px-md-4 py-2 py-md-4">
       {/* 헤더 */}
       <div className="d-flex justify-content-between align-items-center mb-3 mb-md-4 pb-2 border-bottom">
-        <h2 className="fw-bold mb-0" style={{ fontSize: 'clamp(1.25rem, 5vw, 2rem)' }}>
+        <h2 className="fw-bold mb-0" style={{fontSize: 'clamp(1.25rem, 5vw, 2rem)'}}>
           <i className="bi bi-grid-3x3-gap text-primary me-2"></i>
           <span className="d-none d-sm-inline">가게 카테고리 관리</span>
           <span className="d-inline d-sm-none">카테고리</span>
@@ -92,7 +92,7 @@ const StoreCategoryManagement = () => {
           className="btn btn-outline-primary btn-sm rounded-pill px-2 px-md-3"
           onClick={fetchCategories}
           disabled={isLoading}
-          style={{ minHeight: '44px', minWidth: '44px' }}
+          style={{minHeight: '44px', minWidth: '44px'}}
         >
           <i className="bi bi-arrow-clockwise me-0 me-md-1"></i>
           <span className="d-none d-md-inline">새로고침</span>
@@ -106,16 +106,16 @@ const StoreCategoryManagement = () => {
       }}>
         <div className="card-body p-2 p-md-3">
           <div className="d-flex align-items-start gap-2">
-            <i className="bi bi-info-circle text-primary mt-1" style={{ fontSize: '1rem' }}></i>
+            <i className="bi bi-info-circle text-primary mt-1" style={{fontSize: '1rem'}}></i>
             <div className="flex-grow-1">
               <small className="text-muted d-block"
-                     style={{ fontSize: 'clamp(0.75rem, 2.5vw, 0.875rem)', lineHeight: '1.5' }}>
+                     style={{fontSize: 'clamp(0.75rem, 2.5vw, 0.875rem)', lineHeight: '1.5'}}>
                 <span className="d-none d-md-inline">가게 카테고리 목록입니다.</span>
                 <span className="d-inline d-md-none">카테고리 목록</span>
               </small>
               {categories.length > 0 && (
                 <div className="mt-2">
-                  <span className="badge bg-primary rounded-pill px-2 py-1" style={{ fontSize: '0.7rem' }}>
+                  <span className="badge bg-primary rounded-pill px-2 py-1" style={{fontSize: '0.7rem'}}>
                     <i className="bi bi-check-circle me-1"></i>
                     {categories.length}개
                   </span>
@@ -199,7 +199,7 @@ const StoreCategoryManagement = () => {
                             {category.isNew && (
                               <span
                                 className="position-absolute top-0 end-0 badge bg-danger rounded-pill"
-                                style={{ fontSize: '0.6rem', padding: '2px 6px' }}
+                                style={{fontSize: '0.6rem', padding: '2px 6px'}}
                               >
                                 NEW
                               </span>
@@ -207,12 +207,12 @@ const StoreCategoryManagement = () => {
                           </div>
 
                           {/* 카테고리 이름 */}
-                          <h6 className="fw-bold mb-1" style={{ fontSize: '0.9rem' }}>
+                          <h6 className="fw-bold mb-1" style={{fontSize: '0.9rem'}}>
                             {category.name}
                           </h6>
 
                           {/* displayOrder */}
-                          <small className="d-block" style={{ fontSize: '0.7rem' }}>
+                          <small className="d-block" style={{fontSize: '0.7rem'}}>
                             {category.displayOrder === null ? (
                               <span className="badge bg-secondary">필터 미노출</span>
                             ) : (
@@ -234,12 +234,12 @@ const StoreCategoryManagement = () => {
       {showModal && selectedCategory && (
         <div
           className="modal fade show"
-          style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.6)' }}
+          style={{display: 'block', backgroundColor: 'rgba(0,0,0,0.6)'}}
           onClick={() => setShowModal(false)}
         >
           <div className="modal-dialog modal-dialog-centered mx-2 mx-md-auto"
                onClick={(e) => e.stopPropagation()}>
-            <div className="modal-content" style={{ borderRadius: '16px', border: 'none' }}>
+            <div className="modal-content" style={{borderRadius: '16px', border: 'none'}}>
               {/* 헤더 */}
               <div className="modal-header border-bottom" style={{
                 background: 'linear-gradient(135deg, #667eea15 0%, #764ba215 100%)',
@@ -261,7 +261,7 @@ const StoreCategoryManagement = () => {
                   type="button"
                   className="btn-close"
                   onClick={() => setShowModal(false)}
-                  style={{ minWidth: '44px', minHeight: '44px' }}
+                  style={{minWidth: '44px', minHeight: '44px'}}
                 ></button>
               </div>
 
@@ -300,7 +300,7 @@ const StoreCategoryManagement = () => {
                   {/* 설명 */}
                   <div className="col-12">
                     <label className="form-label text-muted small mb-1">설명</label>
-                    <div style={{ whiteSpace: 'pre-wrap' }}>
+                    <div style={{whiteSpace: 'pre-wrap'}}>
                       {selectedCategory.description || '설명 없음'}
                     </div>
                   </div>
@@ -333,7 +333,7 @@ const StoreCategoryManagement = () => {
                   {/* 이미지 URL */}
                   <div className="col-12">
                     <label className="form-label text-muted small mb-1">이미지 URL</label>
-                    <div className="p-2 bg-light rounded" style={{ wordBreak: 'break-all' }}>
+                    <div className="p-2 bg-light rounded" style={{wordBreak: 'break-all'}}>
                       <small className="text-muted">{selectedCategory.imageUrl}</small>
                     </div>
                   </div>

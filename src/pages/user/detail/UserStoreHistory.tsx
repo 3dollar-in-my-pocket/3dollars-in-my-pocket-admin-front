@@ -5,10 +5,7 @@ import storeApi from '@/api/storeApi';
 import useCursorPagination from '@/hooks/useCursorPagination';
 import {ActivitiesStatus, SimpleStore} from '@/types/store';
 import {formatDateTimeKo as formatDateTime} from '@/utils/dateUtils';
-import {
-  getActivitiesStatusBadgeClass,
-  getActivitiesStatusDisplayName
-} from '@/utils/display/storeDisplay';
+import {getActivitiesStatusBadgeClass, getActivitiesStatusDisplayName} from '@/utils/display/storeDisplay';
 
 interface UserStoreHistoryProps {
   userId: string;
@@ -52,7 +49,6 @@ const UserStoreHistory = ({userId, isActive, onStoreClick}: UserStoreHistoryProp
       onStoreClick(store);
     }
   };
-
 
 
   const getActivitiesStatusBadge = (activitiesStatus?: ActivitiesStatus) => {

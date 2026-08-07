@@ -15,17 +15,17 @@ interface SearchResultsProps<T = any> {
 }
 
 const SearchResults = <T, >({
-                         results = [],
-                         isLoading = false,
-                         hasMore = false,
-                         scrollContainerRef,
-                         onScroll,
-                         renderItem,
-                         emptyMessage = "검색 결과가 없습니다",
-                         emptyDescription = "다른 검색어로 시도해보세요",
-                         loadingMessage = "검색 중입니다",
-                         title = "검색 결과"
-                       }: SearchResultsProps<T>) => {
+                              results = [],
+                              isLoading = false,
+                              hasMore = false,
+                              scrollContainerRef,
+                              onScroll,
+                              renderItem,
+                              emptyMessage = "검색 결과가 없습니다",
+                              emptyDescription = "다른 검색어로 시도해보세요",
+                              loadingMessage = "검색 중입니다",
+                              title = "검색 결과"
+                            }: SearchResultsProps<T>) => {
   const renderEmptyState = () => (
     <div className="text-center py-5 text-muted">
       <div className="mb-4">

@@ -1,8 +1,8 @@
-import {useState, useEffect, useRef} from 'react';
-import {Modal, Button, Form, Row, Col, Card, Alert, Spinner} from 'react-bootstrap';
+import {useEffect, useRef, useState} from 'react';
+import {Alert, Button, Card, Col, Form, Modal, Row, Spinner} from 'react-bootstrap';
 import medalApi from '@/api/medalApi';
 import uploadApi from '@/api/uploadApi';
-import {Medal, getAcquisitionDescription} from '@/types/medal';
+import {getAcquisitionDescription, Medal} from '@/types/medal';
 import {toast} from 'react-toastify';
 
 interface MedalModalProps {

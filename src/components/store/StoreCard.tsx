@@ -1,6 +1,17 @@
-
 import {formatRating} from '@/utils/formatUtils';
-import {getActivitiesStatusBadgeClass, getActivitiesStatusDisplayName, getCategoryIcon, getLabelBadgeClass, getLabelDisplayName, getLabelIcon, getStoreStatusBadgeClass, getStoreStatusDisplayName, getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from '@/utils/display/storeDisplay';
+import {
+  getActivitiesStatusBadgeClass,
+  getActivitiesStatusDisplayName,
+  getCategoryIcon,
+  getLabelBadgeClass,
+  getLabelDisplayName,
+  getLabelIcon,
+  getStoreStatusBadgeClass,
+  getStoreStatusDisplayName,
+  getStoreTypeBadgeClass,
+  getStoreTypeDisplayName,
+  getStoreTypeIcon
+} from '@/utils/display/storeDisplay';
 import ItemCard from '@/components/common/ItemCard';
 import {SimpleStore} from '@/types/store';
 

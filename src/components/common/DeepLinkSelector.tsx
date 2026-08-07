@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Form, Badge} from 'react-bootstrap';
+import {Badge, Form} from 'react-bootstrap';
 import applicationApi, {AppScheme} from '@/api/applicationApi';
 
 interface DeepLinkSelectorProps {

@@ -1,7 +1,7 @@
-import { ApiResponse, PaginatedResponse } from '@/types/api';
-import { StoreMessage } from '@/types/storeMessage';
-import { INCLUDES } from '@/constants/api';
-import { apiGetPaginated } from './apiHelpers';
+import {ApiResponse, PaginatedResponse} from '@/types/api';
+import {StoreMessage} from '@/types/storeMessage';
+import {INCLUDES} from '@/constants/api';
+import {apiGetPaginated} from './apiHelpers';
 
 export default {
   /**
@@ -16,8 +16,8 @@ export default {
   ): Promise<ApiResponse<PaginatedResponse<StoreMessage>>> => {
     return apiGetPaginated<StoreMessage>(
       '/v1/store-messages',
-      { cursor, size },
-      { includes: INCLUDES.STORE }
+      {cursor, size},
+      {includes: INCLUDES.STORE}
     );
   },
 };

@@ -1,19 +1,19 @@
-import { apiGet, apiGetPaginated, apiPut } from './apiHelpers';
-import { ApiResponse, ContentListResponse } from '@/types/api';
-import { Medal } from '@/types/medal';
+import {apiGet, apiGetPaginated, apiPut} from './apiHelpers';
+import {ApiResponse, ContentListResponse} from '@/types/api';
+import {Medal} from '@/types/medal';
 import {
+  createRandomNameResponse,
   createUserDetailResponse,
   createUserSearchResponse,
   createUserSettings,
-  UserSearchRequest,
-  UserSearchResponse,
-  UserDetailResponse,
   RandomNameItem,
   RandomNameResponse,
-  createRandomNameResponse,
-  UserRole,
-  User,
   SimpleUser,
+  User,
+  UserDetailResponse,
+  UserRole,
+  UserSearchRequest,
+  UserSearchResponse,
   UserSettings
 } from '@/types/user';
 
@@ -48,8 +48,8 @@ export default {
     if (searchRequest.type === 'name' && searchRequest.query) {
       const response = await apiGetPaginated<SimpleUser>(
         '/v1/search/users',
-        { cursor: searchRequest.cursor, size: searchRequest.size },
-        { name: searchRequest.query }
+        {cursor: searchRequest.cursor, size: searchRequest.size},
+        {name: searchRequest.query}
       );
 
       const contents = response.data?.contents || [];
@@ -100,10 +100,10 @@ export default {
     const response = await apiGet<RawUserDetailResponse>(`/v1/user/${userId}`);
 
     if (!response.ok || !response.data) {
-      return { ok: false, data: createUserDetailResponse({}) };
+      return {ok: false, data: createUserDetailResponse({})};
     }
 
-    const { user, representativeMedal, medals, setting } = response.data;
+    const {user, representativeMedal, medals, setting} = response.data;
 
     return {
       ok: true,
@@ -123,7 +123,7 @@ export default {
    * @returns 변경된 사용자 정보
    */
   updateUserRole: async (userId: string, role: UserRole): Promise<ApiResponse<SimpleUser>> => {
-    return apiPut<SimpleUser>(`/v1/user/${userId}/role`, { role });
+    return apiPut<SimpleUser>(`/v1/user/${userId}/role`, {role});
   },
 
   /**
@@ -135,7 +135,7 @@ export default {
 
     return {
       ok: response.ok,
-      data: createRandomNameResponse({ contents: response.data?.contents || [] })
+      data: createRandomNameResponse({contents: response.data?.contents || []})
     };
   },
 };

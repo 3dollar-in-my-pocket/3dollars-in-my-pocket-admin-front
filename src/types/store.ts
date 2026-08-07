@@ -1,5 +1,5 @@
 // Store related type definitions and constants
-import { Address, Location, Writer } from './domain';
+import {Address, Location, Writer} from './domain';
 
 // Store status types (using common STATUS constants)
 export const STORE_STATUS = {

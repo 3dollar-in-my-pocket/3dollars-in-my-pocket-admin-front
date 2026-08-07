@@ -2,7 +2,7 @@
  * 가게 검색 입력값 검증
  */
 
-import { STORE_SEARCH_TYPES, StoreSearchType } from '@/types/store';
+import {STORE_SEARCH_TYPES, StoreSearchType} from '@/types/store';
 
 export const validateStoreSearch = (searchType: StoreSearchType, keyword: string): string | null => {
   if (searchType === STORE_SEARCH_TYPES.KEYWORD) {

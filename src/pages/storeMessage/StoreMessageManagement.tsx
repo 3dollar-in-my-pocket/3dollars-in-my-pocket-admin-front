@@ -1,5 +1,5 @@
 import StoreTypeBadge from '@/components/common/badges/StoreTypeBadge';
-import {useState, useCallback} from 'react';
+import {useCallback, useState} from 'react';
 import storeMessageApi from '@/api/storeMessageApi';
 import {StoreMessage} from '@/types/storeMessage';
 
@@ -7,6 +7,7 @@ import StoreDetailModal from '@/pages/store/StoreDetailModal';
 import useInfiniteScroll from '@/hooks/useInfiniteScroll';
 import useCursorPagination from '@/hooks/useCursorPagination';
 import EmptyState from '@/components/common/EmptyState';
+import ErrorState from '@/components/common/ErrorState';
 
 import {formatDateTimeShortKo as formatDateTime} from '@/utils/dateUtils';
 
@@ -24,6 +25,7 @@ const StoreMessageManagement = () => {
     items: messages,
     isLoading,
     hasMore,
+    error,
     refresh,
     loadMore
   } = useCursorPagination<StoreMessage>({
@@ -32,7 +34,7 @@ const StoreMessageManagement = () => {
   });
 
   // Infinite Scroll 훅 사용
-  const { scrollContainerRef, loadMoreRef } = useInfiniteScroll({
+  const {scrollContainerRef, loadMoreRef} = useInfiniteScroll({
     hasMore,
     isLoading,
     onLoadMore: loadMore,
@@ -96,7 +98,9 @@ const StoreMessageManagement = () => {
         className="message-container"
         style={{maxHeight: 'calc(100vh - 280px)', overflowY: 'auto'}}
       >
-        {messages.length === 0 && !isLoading ? (
+        {error ? (
+          <ErrorState message={error} onRetry={refresh}/>
+        ) : messages.length === 0 && !isLoading ? (
           <EmptyState
             icon="bi-chat-left-text"
             title="등록된 메시지가 없습니다"
@@ -299,7 +303,8 @@ const StoreMessageManagement = () => {
                     <div className="d-flex gap-2 flex-wrap">
                       {selectedMessage.store ? (
                         <>
-                          {selectedMessage.store.storeType && <StoreTypeBadge storeType={selectedMessage.store.storeType}/>}
+                          {selectedMessage.store.storeType &&
+                            <StoreTypeBadge storeType={selectedMessage.store.storeType}/>}
                           <span className="badge bg-light text-dark border rounded-pill px-3 py-2">
                             <i className="bi bi-shop me-1"></i>
                             {selectedMessage.store.name}

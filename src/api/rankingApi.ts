@@ -1,6 +1,6 @@
-import { apiGet, apiGetPaginated } from './apiHelpers';
-import { ApiResponse, ContentListResponse, PaginatedResponse } from '@/types/api';
-import { SimpleStore } from '@/types/store';
+import {apiGet, apiGetPaginated} from './apiHelpers';
+import {ApiResponse, ContentListResponse, PaginatedResponse} from '@/types/api';
+import {SimpleStore} from '@/types/store';
 
 export type RankingCriteria = 'MOST_REVIEWS' | 'MOST_VISITS';
 
@@ -34,8 +34,8 @@ export default {
   ): Promise<ApiResponse<PaginatedResponse<SimpleStore>>> => {
     return apiGetPaginated<SimpleStore>(
       '/v1/ranking/popular-neighborhood/stores',
-      { cursor, size },
-      { criteria, district }
+      {cursor, size},
+      {criteria, district}
     );
   },
 
@@ -47,7 +47,7 @@ export default {
   getProvinces: async (includeAll = true): Promise<ApiResponse<ContentListResponse<Province>>> => {
     return apiGet<ContentListResponse<Province>>(
       '/v1/ranking/popular-neighborhood/provinces',
-      { includeAll }
+      {includeAll}
     );
   }
 };

@@ -1,6 +1,6 @@
-import { apiGet, apiDelete } from './apiHelpers';
-import { ApiResponse, ContentListResponse } from '@/types/api';
-import { Device } from '@/types/device';
+import {apiDelete, apiGet} from './apiHelpers';
+import {ApiResponse, ContentListResponse} from '@/types/api';
+import {Device} from '@/types/device';
 
 export default {
   /**

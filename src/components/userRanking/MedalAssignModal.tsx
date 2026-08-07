@@ -1,9 +1,9 @@
 import {useEffect, useState} from 'react';
-import {Modal, Button} from 'react-bootstrap';
+import {Button, Modal} from 'react-bootstrap';
 import {toast} from 'react-toastify';
 import medalApi from '@/api/medalApi';
 import Loading from '@/components/common/Loading';
-import { Medal } from '@/types/medal';
+import {Medal} from '@/types/medal';
 
 interface MedalAssignModalProps {
   show: boolean;

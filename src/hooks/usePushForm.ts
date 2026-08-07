@@ -1,13 +1,8 @@
-import {useState, useEffect} from "react";
+import {useEffect, useState} from "react";
 import {useLocation} from "react-router-dom";
 import pushApi, {PushTargetUser} from "@/api/pushApi";
 import uploadApi from "@/api/uploadApi";
-import {
-  validatePushData,
-  addUserToTarget,
-  removeUserFromTarget,
-  parseAccountIds
-} from "@/utils/pushUtils";
+import {addUserToTarget, parseAccountIds, removeUserFromTarget, validatePushData} from "@/utils/pushUtils";
 import {useNonce} from "./useNonce";
 import {PUSH_OS_PLATFORM, PushOsPlatform} from "@/types/device";
 

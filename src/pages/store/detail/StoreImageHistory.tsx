@@ -204,24 +204,26 @@ const StoreImageHistory = ({storeId, isActive, onAuthorClick}: StoreImageHistory
                             }}
                           >
                             <span className="text-muted small">등록자:</span>
-                            <h6 className={`fw-bold mb-0 ${image.writer && onAuthorClick ? 'text-primary' : 'text-dark'}`} style={{ fontSize: '0.9rem' }}>
+                            <h6
+                              className={`fw-bold mb-0 ${image.writer && onAuthorClick ? 'text-primary' : 'text-dark'}`}
+                              style={{fontSize: '0.9rem'}}>
                               {image.writer?.name || '익명 사용자'}
                             </h6>
                             {image.writer && onAuthorClick && (
-                              <i className="bi bi-box-arrow-up-right text-primary" style={{ fontSize: '0.6rem' }}></i>
+                              <i className="bi bi-box-arrow-up-right text-primary" style={{fontSize: '0.6rem'}}></i>
                             )}
                           </div>
                           {/* 이미지 상태 표시 */}
                           <span className={`badge rounded-pill ${
                             image.status === 'ACTIVE' ? 'bg-success' :
-                            image.status === 'INACTIVE' ? 'bg-danger' : 'bg-secondary'
+                              image.status === 'INACTIVE' ? 'bg-danger' : 'bg-secondary'
                           } text-white px-2 py-1`} style={{fontSize: '0.65rem'}}>
                             <i className={`bi ${
                               image.status === 'ACTIVE' ? 'bi-image-fill' :
-                              image.status === 'INACTIVE' ? 'bi-image-alt' : 'bi-question-circle-fill'
+                                image.status === 'INACTIVE' ? 'bi-image-alt' : 'bi-question-circle-fill'
                             } me-1`}></i>
                             {image.status === 'ACTIVE' ? '활성' :
-                             image.status === 'INACTIVE' ? '비활성' : '알 수 없음'}
+                              image.status === 'INACTIVE' ? '비활성' : '알 수 없음'}
                           </span>
                         </div>
                         <div className="d-flex gap-1 flex-wrap">
@@ -375,7 +377,8 @@ const StoreImageHistory = ({storeId, isActive, onAuthorClick}: StoreImageHistory
                       <div className="mt-1">
                         {<StoreTypeBadge storeType={selectedImage.store.storeType}/>}
                         {selectedImage.store?.name && (
-                          <span className="badge bg-light text-dark border rounded-pill px-2 py-1 ms-1" style={{fontSize: '0.7rem'}}>
+                          <span className="badge bg-light text-dark border rounded-pill px-2 py-1 ms-1"
+                                style={{fontSize: '0.7rem'}}>
                             <i className="bi bi-shop me-1"></i>
                             {selectedImage.store.name}
                           </span>

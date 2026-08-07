@@ -2,8 +2,8 @@
  * 가게 이미지 타입 정의
  */
 
-import { SimpleStore } from './store';
-import { SimpleUser } from './user';
+import {SimpleStore} from './store';
+import {SimpleUser} from './user';
 
 export type StoreImageStatus = 'ACTIVE' | 'INACTIVE';
 

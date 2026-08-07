@@ -2,8 +2,8 @@
  * 신고 관련 타입 정의
  */
 
-import { SimpleStore } from './store';
-import { SimpleUser } from './user';
+import {SimpleStore} from './store';
+import {SimpleUser} from './user';
 
 export type ReportReasonCode = 'NOSTORE' | 'WRONGNOPOSITION' | 'OVERLAPSTORE' | 'WRONG_CONTENT';
 

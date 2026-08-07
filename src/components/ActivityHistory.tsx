@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Tab, Tabs} from 'react-bootstrap';
 import {ActivityAuthor} from '@/types/domain';
 import {SimpleStore} from '@/types/store';
@@ -51,13 +51,13 @@ interface ActivityHistoryProps {
 }
 
 const ActivityHistory: React.FC<ActivityHistoryProps> = ({
-                           type, // 'user' or 'store'
-                           entityId, // userId or storeId
-                           tabs = [], // 탭 설정 배열
-                           initialActiveTab = null, // 초기 활성 탭
-                           onAuthorClick = null, // 작성자 클릭 핸들러
-                           onStoreClick = null // 가게 클릭 핸들러
-                         }) => {
+                                                           type, // 'user' or 'store'
+                                                           entityId, // userId or storeId
+                                                           tabs = [], // 탭 설정 배열
+                                                           initialActiveTab = null, // 초기 활성 탭
+                                                           onAuthorClick = null, // 작성자 클릭 핸들러
+                                                           onStoreClick = null // 가게 클릭 핸들러
+                                                         }) => {
   const getInitialTab = (): string => {
     if (initialActiveTab && tabs.find(tab => tab.key === initialActiveTab)) {
       return initialActiveTab;

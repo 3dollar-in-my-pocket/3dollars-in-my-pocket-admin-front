@@ -4,7 +4,7 @@
  * api-docs.json(OpenAPI)의 Poll*Response와 1:1로 대응합니다.
  */
 
-import { DateTimeInterval, Writer } from './domain';
+import {DateTimeInterval, Writer} from './domain';
 
 /** PollCategoryResponse */
 export interface PollCategory {

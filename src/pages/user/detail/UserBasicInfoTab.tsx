@@ -31,14 +31,14 @@ interface UserBasicInfoTabProps {
  * 유저 상세 모달의 기본 정보 탭
  */
 const UserBasicInfoTab = ({
-  userDetail,
-  settings,
-  userRoleOptions,
-  selectedRole,
-  isUpdatingRole,
-  onSelectedRoleChange,
-  onUpdateRole
-}: UserBasicInfoTabProps) => {
+                            userDetail,
+                            settings,
+                            userRoleOptions,
+                            selectedRole,
+                            isUpdatingRole,
+                            onSelectedRoleChange,
+                            onUpdateRole
+                          }: UserBasicInfoTabProps) => {
   const getSocialTypeBadge = (socialType?: SocialType) => {
     return (
       <span
@@ -162,7 +162,8 @@ const UserBasicInfoTab = ({
                         >
                           {isUpdatingRole ? (
                             <>
-                              <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                              <span className="spinner-border spinner-border-sm" role="status"
+                                    aria-hidden="true"></span>
                               변경 중
                             </>
                           ) : (

@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { ApiResponse, PaginatedResponse } from '@/types/api';
+import {useCallback, useEffect, useRef, useState} from 'react';
+import {ApiResponse, PaginatedResponse} from '@/types/api';
 
 /**
  * 커서 페이지네이션 fetcher
@@ -46,11 +46,11 @@ export interface CursorPaginationResult<T> {
  * 반환된 refresh/loadMore는 렌더링 간 참조가 안정적입니다.
  */
 export function useCursorPagination<T>({
-  fetcher,
-  enabled = true,
-  deps = [],
-  errorMessage = '데이터를 불러오는데 실패했습니다.'
-}: CursorPaginationConfig<T>): CursorPaginationResult<T> {
+                                         fetcher,
+                                         enabled = true,
+                                         deps = [],
+                                         errorMessage = '데이터를 불러오는데 실패했습니다.'
+                                       }: CursorPaginationConfig<T>): CursorPaginationResult<T> {
   const [items, setItems] = useState<T[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -91,7 +91,7 @@ export function useCursorPagination<T>({
         return;
       }
 
-      const { contents = [], cursor } = response.data || ({} as PaginatedResponse<T>);
+      const {contents = [], cursor} = response.data || ({} as PaginatedResponse<T>);
       const nextCursor = cursor?.nextCursor ?? null;
 
       setItems(prev => (reset ? contents : [...prev, ...contents]));

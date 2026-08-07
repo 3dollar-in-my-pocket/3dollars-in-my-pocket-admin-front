@@ -1,7 +1,6 @@
-import {useState, useEffect, useCallback, useRef} from 'react';
+import {useCallback, useEffect, useRef, useState} from 'react';
 import {toast} from 'react-toastify';
 import pollApi from '@/api/pollApi';
-import SearchHeader from '@/components/common/SearchHeader';
 import useCursorPagination from '@/hooks/useCursorPagination';
 import PollCard from '@/components/poll/PollCard';
 import UserDetailModal from '@/pages/user/UserDetailModal';

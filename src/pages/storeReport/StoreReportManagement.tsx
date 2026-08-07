@@ -7,6 +7,7 @@ import {getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from 
 import useInfiniteScroll from '@/hooks/useInfiniteScroll';
 import useCursorPagination from '@/hooks/useCursorPagination';
 import EmptyState from '@/components/common/EmptyState';
+import ErrorState from '@/components/common/ErrorState';
 import UserDetailModal from '@/pages/user/UserDetailModal';
 import StoreDetailModal from '@/pages/store/StoreDetailModal';
 
@@ -25,6 +26,7 @@ const StoreReportManagement = () => {
     items: reports,
     isLoading,
     hasMore,
+    error,
     refresh,
     loadMore
   } = useCursorPagination<StoreReport>({
@@ -100,7 +102,9 @@ const StoreReportManagement = () => {
         ref={scrollContainerRef}
         style={{maxHeight: 'calc(100vh - 200px)', overflowY: 'auto'}}
       >
-        {reports.length === 0 && !isLoading ? (
+        {error ? (
+          <ErrorState message={error} onRetry={refresh}/>
+        ) : reports.length === 0 && !isLoading ? (
           <EmptyState
             icon="bi-flag"
             title="신고 이력이 없습니다"

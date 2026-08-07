@@ -1,5 +1,5 @@
-import { apiPostFormData } from './apiHelpers';
-import { StoreMenuExtractResponse } from '@/types/storeMenu';
+import {apiPostFormData} from './apiHelpers';
+import {StoreMenuExtractResponse} from '@/types/storeMenu';
 
 const storeMenuApi = {
   extractMenus: async (file: File, nonce?: string) => {

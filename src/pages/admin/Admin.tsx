@@ -1,4 +1,4 @@
-import {useState, useEffect} from 'react';
+import {useEffect, useState} from 'react';
 import AdminRegisterModal from './AdminRegisterModal';
 import adminApi from '@/api/adminApi';
 import {toast} from 'react-toastify';
@@ -215,7 +215,7 @@ const Admin = () => {
                             value={editingValue}
                             onChange={(e) => setEditingValue(e.target.value)}
                             className="form-control form-control-sm"
-                            style={{ minWidth: '150px' }}
+                            style={{minWidth: '150px'}}
                             autoFocus
                             disabled={isUpdating}
                           />
@@ -257,7 +257,7 @@ const Admin = () => {
                             value={editingValue}
                             onChange={(e) => setEditingValue(e.target.value)}
                             className="form-select form-select-sm"
-                            style={{ minWidth: '120px' }}
+                            style={{minWidth: '120px'}}
                             disabled={isUpdating}
                           >
                             {Object.values(AdminRole).map(role => (

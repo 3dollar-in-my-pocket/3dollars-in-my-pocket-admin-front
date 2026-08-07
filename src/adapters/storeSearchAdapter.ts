@@ -1,6 +1,6 @@
 import {validateStoreSearch} from '@/utils/validation/storeValidation';
 import storeApi from '@/api/storeApi';
-import {STORE_SEARCH_TYPES, SimpleStore, StoreSearchType, StoreType} from '@/types/store';
+import {SimpleStore, STORE_SEARCH_TYPES, StoreSearchType, StoreType} from '@/types/store';
 
 interface SearchParams {
   /** useSearch는 string으로 넘기므로 여기서 좁힙니다. */

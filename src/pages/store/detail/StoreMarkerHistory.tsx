@@ -419,7 +419,8 @@ const StoreMarkerHistory: React.FC<StoreMarkerHistoryProps> = ({storeId, isActiv
                     <MarkerImagePreview title="미선택" image={marker.unselectedMarkerImage}/>
                   </div>
 
-                  <div className="d-flex flex-row flex-xl-column gap-2 justify-content-center p-3 p-md-4 border-top border-xl-top-0">
+                  <div
+                    className="d-flex flex-row flex-xl-column gap-2 justify-content-center p-3 p-md-4 border-top border-xl-top-0">
                     <button
                       className="btn btn-outline-primary btn-sm d-inline-flex align-items-center justify-content-center gap-1"
                       onClick={() => openEditModal(marker)}
@@ -435,7 +436,8 @@ const StoreMarkerHistory: React.FC<StoreMarkerHistoryProps> = ({storeId, isActiv
                       disabled={deletingMarkerId === String(marker.markerId) || isSubmitting}
                       style={{minWidth: '76px'}}
                     >
-                      <i className={`bi ${deletingMarkerId === String(marker.markerId) ? 'bi-hourglass-split' : 'bi-trash'}`}></i>
+                      <i
+                        className={`bi ${deletingMarkerId === String(marker.markerId) ? 'bi-hourglass-split' : 'bi-trash'}`}></i>
                       {deletingMarkerId === String(marker.markerId) ? '삭제 중...' : '삭제'}
                     </button>
                   </div>
@@ -492,16 +494,16 @@ interface MarkerFormModalProps {
 }
 
 const MarkerFormModal: React.FC<MarkerFormModalProps> = ({
-  show,
-  editingMarker,
-  formData,
-  isSubmitting,
-  uploadingField,
-  onHide,
-  onChange,
-  onUploadImage,
-  onSubmit,
-}) => (
+                                                           show,
+                                                           editingMarker,
+                                                           formData,
+                                                           isSubmitting,
+                                                           uploadingField,
+                                                           onHide,
+                                                           onChange,
+                                                           onUploadImage,
+                                                           onSubmit,
+                                                         }) => (
   <Modal show={show} onHide={onHide} size="lg" centered backdrop={(isSubmitting || uploadingField) ? 'static' : true}>
     <form onSubmit={onSubmit}>
       <Modal.Header closeButton={!isSubmitting && !uploadingField}>
@@ -665,14 +667,14 @@ interface MarkerImageUrlInputProps {
 }
 
 const MarkerImageUrlInput: React.FC<MarkerImageUrlInputProps> = ({
-  field,
-  value,
-  isDisabled,
-  isUploading,
-  placeholder,
-  onChange,
-  onUploadImage,
-}) => (
+                                                                   field,
+                                                                   value,
+                                                                   isDisabled,
+                                                                   isUploading,
+                                                                   placeholder,
+                                                                   onChange,
+                                                                   onUploadImage,
+                                                                 }) => (
   <div className="mb-2">
     <div className="input-group">
       <input
@@ -705,11 +707,11 @@ const MarkerImageUrlInput: React.FC<MarkerImageUrlInputProps> = ({
 );
 
 const MarkerFormImagePreview = ({
-  title,
-  url,
-  width,
-  height,
-}: {
+                                  title,
+                                  url,
+                                  width,
+                                  height,
+                                }: {
   title: string;
   url: string;
   width: string;
@@ -763,7 +765,7 @@ const MarkerFormImagePreview = ({
   );
 };
 
-const MarkerImagePreview = ({title, image}: {title: string; image?: Image}) => {
+const MarkerImagePreview = ({title, image}: { title: string; image?: Image }) => {
   const imageUrl = getMarkerImageUrl(image);
   const width = getMarkerImageSize(image?.width);
   const height = getMarkerImageSize(image?.height);

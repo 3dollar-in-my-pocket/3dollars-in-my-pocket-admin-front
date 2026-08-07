@@ -2,8 +2,8 @@
  * 방문 관련 타입 정의
  */
 
-import { SimpleStore } from './store';
-import { SimpleUser } from './user';
+import {SimpleStore} from './store';
+import {SimpleUser} from './user';
 
 /** 방문 유형 코드 (StoreVisitTypeResponse.type) */
 export type VisitTypeCode = 'EXISTS' | 'NOT_EXISTS';

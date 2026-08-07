@@ -82,7 +82,6 @@ const UserStoreImageHistory = ({userId, isActive, onStoreClick}: UserStoreImageH
   };
 
 
-
   // 이미지 삭제 핸들러
   const handleDeleteImage = async () => {
     if (!selectedImage) return;

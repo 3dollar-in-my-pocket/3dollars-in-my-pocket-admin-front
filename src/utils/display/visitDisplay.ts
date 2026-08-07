@@ -4,7 +4,7 @@
  * 타입과 상수 정의는 types/visit.ts에 있습니다.
  */
 
-import { VisitTypeCode } from '@/types/visit';
+import {VisitTypeCode} from '@/types/visit';
 
 // 방문 타입 표시 이름
 export const getVisitTypeDisplayName = (visitType: VisitTypeCode): string => {

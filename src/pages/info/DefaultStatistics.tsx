@@ -1,16 +1,16 @@
 import React, {useState} from "react";
-import {Card, Table, Alert} from "react-bootstrap";
+import {Alert, Card, Table} from "react-bootstrap";
 import {
-  LineChart,
-  Line,
-  BarChart,
   Bar,
-  XAxis,
-  YAxis,
+  BarChart,
   CartesianGrid,
-  Tooltip,
   Legend,
-  ResponsiveContainer
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis
 } from "recharts";
 import statisticsApi from "@/api/statisticsApi";
 import {DailyStatistic} from "@/types/statistics";
@@ -24,11 +24,11 @@ interface DefaultStatisticsProps {
 }
 
 const DefaultStatistics: React.FC<DefaultStatisticsProps> = ({
-  statisticsType,
-  startDate,
-  endDate,
-  onFetch
-}) => {
+                                                               statisticsType,
+                                                               startDate,
+                                                               endDate,
+                                                               onFetch
+                                                             }) => {
   const [data, setData] = useState<DailyStatistic[]>([]);
   const [loading, setLoading] = useState(false);
 

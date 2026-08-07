@@ -1,21 +1,21 @@
 import React from 'react';
-import { Button } from 'react-bootstrap';
-import { EmptyStateProps } from '@/types/common';
+import {Button} from 'react-bootstrap';
+import {EmptyStateProps} from '@/types/common';
 
 /**
  * EmptyState 컴포넌트
  * 데이터가 없을 때 표시하는 빈 상태 UI
  */
 const EmptyState: React.FC<EmptyStateProps> = ({
-  icon,
-  title,
-  description,
-  actionButton,
-  iconSize = 80,
-  iconColor = 'text-secondary',
-  iconBg = 'bg-light',
-  className = ''
-}) => {
+                                                 icon,
+                                                 title,
+                                                 description,
+                                                 actionButton,
+                                                 iconSize = 80,
+                                                 iconColor = 'text-secondary',
+                                                 iconBg = 'bg-light',
+                                                 className = ''
+                                               }) => {
   return (
     <div className={`text-center py-5 ${className}`}>
       <div

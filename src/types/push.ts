@@ -1,4 +1,4 @@
-import { PushOsPlatform } from './device';
+import {PushOsPlatform} from './device';
 
 export interface PushRequest {
   accountIds: string[];

@@ -165,13 +165,13 @@ const FaqEditModal = ({
     try {
       const response = selectedFaq
         ? await faqApi.updateFaq({
-            ...payload,
-            faqId: formData.faqId!,
-          })
+          ...payload,
+          faqId: formData.faqId!,
+        })
         : await faqApi.createFaq({
-            ...payload,
-            nonce,
-          });
+          ...payload,
+          nonce,
+        });
 
       if (response.ok) {
         toast.info(selectedFaq ? "수정되었습니다" : "등록되었습니다");

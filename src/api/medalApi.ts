@@ -1,6 +1,6 @@
-import { ApiResponse, ContentListResponse } from '@/types/api';
-import { Medal } from '@/types/medal';
-import { apiGet, apiPut, apiPost } from './apiHelpers';
+import {ApiResponse, ContentListResponse} from '@/types/api';
+import {Medal} from '@/types/medal';
+import {apiGet, apiPost, apiPut} from './apiHelpers';
 
 export interface UpdateMedalRequest {
   name: string;

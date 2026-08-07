@@ -1,9 +1,6 @@
-import {
-  getStoreStatusBadgeClass,
-  getStoreStatusDisplayName
-} from '@/utils/display/storeDisplay';
-import { StoreStatus } from '@/types/store';
-import { BadgeSize } from './StoreTypeBadge';
+import {getStoreStatusBadgeClass, getStoreStatusDisplayName} from '@/utils/display/storeDisplay';
+import {StoreStatus} from '@/types/store';
+import {BadgeSize} from './StoreTypeBadge';
 
 interface StoreStatusBadgeProps {
   status?: StoreStatus | string | null;
@@ -23,11 +20,11 @@ const SIZE_CLASS: Record<BadgeSize, string> = {
  * 가게 상태(활성/삭제) 배지
  */
 const StoreStatusBadge = ({
-  status,
-  size = 'sm',
-  withIcon = false,
-  className = ''
-}: StoreStatusBadgeProps) => {
+                            status,
+                            size = 'sm',
+                            withIcon = false,
+                            className = ''
+                          }: StoreStatusBadgeProps) => {
   if (!status) return null;
 
   const value = status as StoreStatus;

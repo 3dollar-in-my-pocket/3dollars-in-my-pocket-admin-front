@@ -1,7 +1,12 @@
 import {Poll, PollOption} from '@/types/poll';
 import {ActivityAuthor} from '@/types/domain';
 import {formatDateTimeShortKo as formatDateTime} from '@/utils/dateUtils';
-import {getWriterTypeBgClass, getWriterTypeDisplayName, getWriterTypeIcon, getWriterTypeTextClass} from '@/utils/display/writerDisplay';
+import {
+  getWriterTypeBgClass,
+  getWriterTypeDisplayName,
+  getWriterTypeIcon,
+  getWriterTypeTextClass
+} from '@/utils/display/writerDisplay';
 
 type PollStatus = 'upcoming' | 'active' | 'ended';
 
