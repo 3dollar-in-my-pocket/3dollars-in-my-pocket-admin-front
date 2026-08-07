@@ -32,21 +32,3 @@ export interface Coupon {
 export interface StoreCoupon extends Coupon {
   store?: SimpleStore;
 }
-
-/**
- * 하위 호환용 별칭
- *
- * dateUtils의 formatDateTimeShortKo와 동일합니다. 새 코드는 그쪽을 사용하세요.
- */
-export {formatDateTimeShortKo as formatCouponDate} from '../utils/dateUtils';
-
-/**
- * 하위 호환용 re-export
- *
- * 표시 로직은 utils/display/couponDisplay.ts로 옮겼습니다.
- * 새 코드는 원본 경로에서 직접 import하세요.
- */
-export {
-  getCouponStatusDisplayName,
-  getCouponStatusBadgeClass
-} from '../utils/display/couponDisplay';

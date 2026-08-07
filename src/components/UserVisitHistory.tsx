@@ -1,14 +1,9 @@
 import {useCallback, useRef, useState} from 'react';
 import useCursorPagination from "../hooks/useCursorPagination";
-import {
-  getActivitiesStatusDisplayName,
-  getStoreStatusBadgeClass,
-  getStoreStatusDisplayName,
-  getStoreTypeDisplayName,
-  getStoreTypeBadgeClass,
-  getStoreTypeIcon
-} from "../types/store";
-import {VisitType, getVisitIconClass, getVisitTypeBatchClass, getVisitTypeDisplayName} from "../types/visit";
+import {getActivitiesStatusDisplayName, getStoreStatusBadgeClass, getStoreStatusDisplayName, getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from '../utils/display/storeDisplay';
+import {getVisitIconClass, getVisitTypeBatchClass, getVisitTypeDisplayName} from '../utils/display/visitDisplay';
+
+import {VisitType} from "../types/visit";
 import visitApi from "../api/visitApi";
 
 const UserVisitHistory = ({userId, isActive, onStoreClick}) => {
@@ -51,7 +46,6 @@ const UserVisitHistory = ({userId, isActive, onStoreClick}) => {
     setShowModal(false);
     setSelectedVisit(null);
   };
-
 
   const getStatusBadge = (status) => {
     if (!status) return null;

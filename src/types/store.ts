@@ -1,5 +1,5 @@
 // Store related type definitions and constants
-import {WRITER_TYPE, WriterType, getWriterTypeBadgeClass} from './common';
+import {WriterType} from './common';
 
 // Store status types (using common STATUS constants)
 export const STORE_STATUS = {
@@ -35,9 +35,6 @@ export const OPEN_STATUS = {
 } as const;
 
 export type OpenStatus = typeof OPEN_STATUS[keyof typeof OPEN_STATUS];
-
-// Re-export WRITER_TYPE for backward compatibility
-export {WRITER_TYPE};
 
 // Store type
 export const STORE_TYPE = {
@@ -81,9 +78,6 @@ export interface Store {
     address?: string;
   };
 }
-
-// Re-export getWriterTypeBadgeClass for backward compatibility
-export {getWriterTypeBadgeClass};
 
 export const isVisitsSupported = (storeType: StoreType): boolean => {
   const supportedTypes: StoreType[] = [STORE_TYPE.USER_STORE];
@@ -129,31 +123,3 @@ export interface StoreChangeHistory {
   actor: ChangeHistoryActor;
   changedAt: string;
 }
-
-/**
- * 하위 호환용 re-export
- *
- * 표시·검증·포맷 로직은 아래 위치로 옮겼습니다. 새 코드는 원본 경로에서
- * 직접 import하세요.
- */
-export {
-  getStoreStatusDisplayName,
-  getStoreStatusBadgeClass,
-  getActivitiesStatusDisplayName,
-  getActivitiesStatusBadgeClass,
-  getCategoryIcon,
-  getSalesTypeDisplayName,
-  getSalesTypeBadgeClass,
-  getOpenStatusDisplayName,
-  getOpenStatusBadgeClass,
-  getStoreTypeDisplayName,
-  getStoreTypeBadgeClass,
-  getStoreTypeIcon,
-  getChangeAttributeIcon,
-  getChangeAttributeBadgeClass,
-  getLabelDisplayName,
-  getLabelBadgeClass,
-  getLabelIcon
-} from '../utils/display/storeDisplay';
-export {validateStoreSearch} from '../utils/validation/storeValidation';
-export {formatRating, formatCount} from '../utils/formatUtils';

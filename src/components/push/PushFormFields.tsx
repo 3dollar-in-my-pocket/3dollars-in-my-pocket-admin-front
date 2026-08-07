@@ -1,6 +1,7 @@
+import {getOsPlatformDisplayName} from '../../utils/display/pushDisplay';
 import {useEffect, useState} from 'react';
 import {Form, Nav, Tab, Button, Badge, InputGroup} from 'react-bootstrap';
-import {PUSH_OS_PLATFORM, getOsPlatformDisplayName} from '../../types/push';
+import {PUSH_OS_PLATFORM} from '../../types/push';
 import UserSearch from './UserSearch';
 import applicationApi, {AppScheme} from '../../api/applicationApi';
 

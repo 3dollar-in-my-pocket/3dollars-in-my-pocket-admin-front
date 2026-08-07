@@ -1,7 +1,8 @@
 import {useCallback, useRef, useState} from 'react';
 import storeReportApi from "../api/storeReportApi";
-import {getReportReasonBadgeClass} from "../types/report";
-import {getStoreTypeDisplayName, getStoreTypeBadgeClass, getStoreTypeIcon} from "../types/store";
+import {getReportReasonBadgeClass} from '../utils/display/reportDisplay';
+import {getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from '../utils/display/storeDisplay';
+
 import useCursorPagination from "../hooks/useCursorPagination";
 import {formatDateTimeShortKo as formatDateTime} from "../utils/dateUtils";
 

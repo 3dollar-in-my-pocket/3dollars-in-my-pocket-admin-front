@@ -1,5 +1,6 @@
+import {validateStoreSearch} from '../utils/validation/storeValidation';
 import storeApi from '../api/storeApi';
-import {STORE_SEARCH_TYPES, validateStoreSearch, StoreSearchType, Store, StoreType} from '../types/store';
+import {STORE_SEARCH_TYPES, StoreSearchType, Store, StoreType} from '../types/store';
 
 interface SearchParams {
   searchType: StoreSearchType;

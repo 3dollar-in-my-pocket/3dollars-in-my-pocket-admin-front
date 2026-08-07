@@ -1,17 +1,6 @@
-import {
-  formatRating,
-  getActivitiesStatusBadgeClass,
-  getActivitiesStatusDisplayName,
-  getCategoryIcon,
-  getStoreStatusBadgeClass,
-  getStoreStatusDisplayName,
-  getStoreTypeDisplayName,
-  getStoreTypeBadgeClass,
-  getStoreTypeIcon,
-  getLabelDisplayName,
-  getLabelBadgeClass,
-  getLabelIcon
-} from '../../types/store';
+
+import {formatRating} from '../../utils/formatUtils';
+import {getActivitiesStatusBadgeClass, getActivitiesStatusDisplayName, getCategoryIcon, getLabelBadgeClass, getLabelDisplayName, getLabelIcon, getStoreStatusBadgeClass, getStoreStatusDisplayName, getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from '../../utils/display/storeDisplay';
 import ItemCard from '../common/ItemCard';
 
 const StoreCard = ({store, onClick, isDeleted = false}) => {
@@ -55,7 +44,6 @@ const StoreCard = ({store, onClick, isDeleted = false}) => {
             <i className="bi bi-shop fs-6" style={{color: borderColor}}></i>
           </div>
         </div>
-
 
         {isDeleted && (
           <div className="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"

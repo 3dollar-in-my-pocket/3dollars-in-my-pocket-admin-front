@@ -1,10 +1,5 @@
 import {formatDateTimeShortKo as formatDateTime} from '../../utils/dateUtils';
-import {
-  getWriterTypeIcon,
-  getWriterTypeTextClass,
-  getWriterTypeBgClass,
-  getWriterTypeDisplayName
-} from '../../types/common';
+import {getWriterTypeBgClass, getWriterTypeDisplayName, getWriterTypeIcon, getWriterTypeTextClass} from '../../utils/display/writerDisplay';
 
 const PollCard = ({poll, onClick, onAuthorClick, onDelete}) => {
   const getPollStatus = (poll) => {
@@ -65,7 +60,6 @@ const PollCard = ({poll, onClick, onAuthorClick, onDelete}) => {
   const getPercentage = (ratio) => {
     return Math.round((ratio || 0) * 100);
   };
-
 
   // 남은 시간 계산
   const getTimeRemaining = (endDateTime: any) => {
@@ -470,7 +464,6 @@ const PollCard = ({poll, onClick, onAuthorClick, onDelete}) => {
               )}
             </div>
           </div>
-
 
           {/* 통계 정보 */}
           <div className="border-top pt-2 pt-md-3">

@@ -1,7 +1,8 @@
 import {useEffect, useState, useCallback, useRef} from 'react';
 import storeMessageApi from '../../api/storeMessageApi';
 import {StoreMessage} from '../../types/storeMessage';
-import {getStoreTypeDisplayName, getStoreTypeBadgeClass, getStoreTypeIcon} from '../../types/store';
+import {getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from '../../utils/display/storeDisplay';
+
 import StoreDetailModal from '../store/StoreDetailModal';
 import useInfiniteScroll from '../../hooks/useInfiniteScroll';
 import EmptyState from '../../components/common/EmptyState';
@@ -61,7 +62,6 @@ const StoreMessageManagement = () => {
     onLoadMore: () => fetchMessages(false),
     threshold: 0.1
   });
-
 
   const getStoreTypeBadge = (storeType: string) => {
     if (!storeType) return null;

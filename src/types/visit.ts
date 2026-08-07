@@ -33,15 +33,3 @@ export interface Visit {
 
 /** 응답 스키마가 Visit과 동일합니다. */
 export type UserVisit = Visit;
-
-/**
- * 하위 호환용 re-export
- *
- * 표시 로직은 utils/display/visitDisplay.ts로 옮겼습니다.
- * 새 코드는 원본 경로에서 직접 import하세요.
- */
-export {
-  getVisitTypeDisplayName,
-  getVisitTypeBatchClass,
-  getVisitIconClass
-} from '../utils/display/visitDisplay';

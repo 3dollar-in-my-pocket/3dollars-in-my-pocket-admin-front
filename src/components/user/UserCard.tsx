@@ -1,9 +1,5 @@
-import {
-  getSocialTypeDisplayName,
-  getSocialTypeBadgeClass,
-  getUserRoleBadgeClass,
-  getUserRoleLabel
-} from '../../types/user';
+
+import {getSocialTypeBadgeClass, getSocialTypeDisplayName, getUserRoleBadgeClass, getUserRoleLabel} from '../../utils/display/userDisplay';
 import ItemCard from '../common/ItemCard';
 
 const UserCard = ({user, onClick}) => {

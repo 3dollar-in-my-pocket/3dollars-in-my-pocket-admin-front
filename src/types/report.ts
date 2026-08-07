@@ -41,11 +41,3 @@ export const REPORT_REASON: Record<ReportReasonCode, ReportReasonCode> = {
   'OVERLAPSTORE': 'OVERLAPSTORE',
   'WRONG_CONTENT': 'WRONG_CONTENT'
 }
-
-/**
- * 하위 호환용 re-export
- *
- * 표시 로직은 utils/display/reportDisplay.ts로 옮겼습니다.
- * 새 코드는 원본 경로에서 직접 import하세요.
- */
-export {getReportReasonBadgeClass} from '../utils/display/reportDisplay';

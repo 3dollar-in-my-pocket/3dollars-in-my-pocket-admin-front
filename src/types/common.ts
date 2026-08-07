@@ -54,17 +54,3 @@ export interface CursorNavigationState {
   hasPrevious: boolean;
   previousCursors: string[];
 }
-
-/**
- * 하위 호환용 re-export
- *
- * 표시 로직은 utils/display/writerDisplay.ts로 옮겼습니다.
- * 새 코드는 원본 경로에서 직접 import하세요.
- */
-export {
-  getWriterTypeDisplayName,
-  getWriterTypeBadgeClass,
-  getWriterTypeBgClass,
-  getWriterTypeTextClass,
-  getWriterTypeIcon
-} from '../utils/display/writerDisplay';

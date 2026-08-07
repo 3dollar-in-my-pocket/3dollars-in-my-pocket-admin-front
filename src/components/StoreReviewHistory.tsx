@@ -1,7 +1,8 @@
 import {useCallback, useRef, useState} from 'react';
 import {toast} from 'react-toastify';
 import reviewApi from "../api/reviewApi";
-import {getStoreTypeDisplayName, getStoreTypeBadgeClass, getStoreTypeIcon} from "../types/store";
+import {getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from '../utils/display/storeDisplay';
+
 import useCursorPagination from "../hooks/useCursorPagination";
 import {formatDateTimeShortKo as formatDateTime} from "../utils/dateUtils";
 

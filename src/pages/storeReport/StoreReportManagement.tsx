@@ -1,8 +1,9 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import storeReportApi from '../../api/storeReportApi';
-import { AllStoreReport } from '../../types/report';
-import { getReportReasonBadgeClass } from '../../types/report';
-import { getStoreTypeDisplayName, getStoreTypeBadgeClass, getStoreTypeIcon } from '../../types/store';
+import {AllStoreReport} from '../../types/report';
+import {getReportReasonBadgeClass} from '../../utils/display/reportDisplay';
+import {getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from '../../utils/display/storeDisplay';
+
 import useInfiniteScroll from '../../hooks/useInfiniteScroll';
 import EmptyState from '../../components/common/EmptyState';
 import UserDetailModal from '../user/UserDetailModal';
@@ -56,7 +57,6 @@ const StoreReportManagement = () => {
     onLoadMore: () => fetchReports(false),
     threshold: 0.1
   });
-
 
   const getStoreStatusBadge = (status: string) => {
     const statusConfig: Record<string, { bg: string; icon: string; text: string }> = {

@@ -1,10 +1,10 @@
-import {Alert, Button, Card, Container, Form, Modal} from "react-bootstrap";
-import {usePushForm} from "../../hooks/usePushForm";
-import PushPreview from "../../components/push/PushPreview";
-import PushFormFields from "../../components/push/PushFormFields";
-import {useNavigate} from "react-router-dom";
 import {useState} from "react";
-import {getOsPlatformDisplayName} from "../../types/push";
+import {Alert, Button, Card, Container, Form, Modal} from "react-bootstrap";
+import {useNavigate} from "react-router-dom";
+import PushFormFields from "../../components/push/PushFormFields";
+import PushPreview from "../../components/push/PushPreview";
+import {usePushForm} from "../../hooks/usePushForm";
+import {getOsPlatformDisplayName} from '../../utils/display/pushDisplay';
 
 const PushManage = () => {
   const navigate = useNavigate();
@@ -30,7 +30,6 @@ const PushManage = () => {
     canSend,
     toggleOsPlatform
   } = usePushForm();
-
 
   return (
     <Container className="py-4">

@@ -1,8 +1,9 @@
 import {useEffect, useState} from "react";
-import RegistrationModal from "./RegistrationModal";
 import registrationApi from "../../api/registrationApi";
 import Loading from "../../components/common/Loading";
-import {getOsPlatformDisplayName, getOsPlatformBadgeClass, getOsPlatformIcon} from "../../types/registration";
+import {getOsPlatformDisplayName} from '../../utils/display/pushDisplay';
+import {getOsPlatformBadgeClass, getOsPlatformIcon} from '../../utils/display/registrationDisplay';
+import RegistrationModal from "./RegistrationModal";
 
 const RegistrationManagement = () => {
   const [registrationList, setRegistrationList] = useState([]);
@@ -247,7 +248,6 @@ const RegistrationManagement = () => {
           </div>
         )}
       </div>
-
 
       <RegistrationModal
         show={!!selectedRegistration}

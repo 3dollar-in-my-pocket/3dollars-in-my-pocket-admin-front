@@ -1,13 +1,7 @@
 import {useCallback, useRef, useState} from 'react';
 import {toast} from 'react-toastify';
-import {
-  getActivitiesStatusDisplayName,
-  getStoreStatusBadgeClass,
-  getStoreStatusDisplayName,
-  getStoreTypeDisplayName,
-  getStoreTypeBadgeClass,
-  getStoreTypeIcon
-} from "../types/store";
+import {getActivitiesStatusDisplayName, getStoreStatusBadgeClass, getStoreStatusDisplayName, getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from '../utils/display/storeDisplay';
+
 import reviewApi from "../api/reviewApi";
 import useCursorPagination from "../hooks/useCursorPagination";
 import {formatDateTimeKo as formatDateTime} from "../utils/dateUtils";
@@ -54,7 +48,6 @@ const UserReviewHistory = ({userId, isActive, onStoreClick}) => {
     setShowModal(false);
     setSelectedReview(null);
   };
-
 
   const getStatusBadge = (status) => {
     if (!status) return null;

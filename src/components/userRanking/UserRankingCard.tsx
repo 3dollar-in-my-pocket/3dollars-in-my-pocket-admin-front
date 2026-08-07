@@ -1,7 +1,5 @@
-import {
-  getSocialTypeDisplayName,
-  getSocialTypeBadgeClass
-} from '../../types/user';
+
+import {getSocialTypeBadgeClass, getSocialTypeDisplayName} from '../../utils/display/userDisplay';
 import ItemCard from '../common/ItemCard';
 import {UserRankingItem} from '../../types/userRanking';
 

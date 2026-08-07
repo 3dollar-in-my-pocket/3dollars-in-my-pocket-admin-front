@@ -2,7 +2,8 @@ import {useEffect, useState, useCallback, useRef} from 'react';
 import {toast} from 'react-toastify';
 import reviewApi from '../../api/reviewApi';
 import {StoreReview} from '../../types/review';
-import {getStoreTypeDisplayName, getStoreTypeBadgeClass, getStoreTypeIcon} from '../../types/store';
+import {getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from '../../utils/display/storeDisplay';
+
 import UserDetailModal from '../user/UserDetailModal';
 import StoreDetailModal from '../store/StoreDetailModal';
 import useInfiniteScroll from '../../hooks/useInfiniteScroll';
@@ -66,7 +67,6 @@ const ReviewManagement = () => {
     onLoadMore: () => fetchReviews(false),
     threshold: 0.1
   });
-
 
   const getRatingStars = (rating: number, isWhite = false) => {
     const stars = [];

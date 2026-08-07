@@ -1,13 +1,10 @@
 import {useEffect, useRef, useState, useCallback} from 'react';
 import couponApi from '../../api/couponApi';
-import {
-  StoreCoupon,
-  getCouponStatusDisplayName,
-  getCouponStatusBadgeClass,
-  formatCouponDate,
-  COUPON_STATUS
-} from '../../types/coupon';
-import {getStoreTypeDisplayName, getStoreTypeBadgeClass, getStoreTypeIcon} from '../../types/store';
+import {StoreCoupon, COUPON_STATUS} from '../../types/coupon';
+import {formatDateTimeShortKo as formatCouponDate} from '../../utils/dateUtils';
+import {getCouponStatusBadgeClass, getCouponStatusDisplayName} from '../../utils/display/couponDisplay';
+import {getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from '../../utils/display/storeDisplay';
+
 import StoreDetailModal from '../store/StoreDetailModal';
 import useInfiniteScroll from '../../hooks/useInfiniteScroll';
 import EmptyState from '../../components/common/EmptyState';

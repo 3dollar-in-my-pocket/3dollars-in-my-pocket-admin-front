@@ -1,45 +1,26 @@
+import '../../styles/mobile-tabs.css';
 import {useEffect, useState} from 'react';
 import {Button, Modal, Tab, Tabs} from 'react-bootstrap';
-import '../../styles/mobile-tabs.css';
-import {
-  formatCount,
-  formatRating,
-  getActivitiesStatusBadgeClass,
-  getActivitiesStatusDisplayName,
-  getCategoryIcon,
-  getOpenStatusBadgeClass,
-  getOpenStatusDisplayName,
-  getSalesTypeBadgeClass,
-  getSalesTypeDisplayName,
-  getStoreStatusBadgeClass,
-  getStoreStatusDisplayName,
-  getStoreTypeDisplayName,
-  getStoreTypeBadgeClass,
-  getStoreTypeIcon,
-  getWriterTypeBadgeClass,
-  isVisitsSupported,
-  isImagesSupported,
-  isReportsSupported,
-  getLabelDisplayName,
-  getLabelBadgeClass,
-  getLabelIcon
-} from '../../types/store';
-import {WRITER_TYPE} from '../../types/common';
+import {toast} from 'react-toastify';
 import storeApi from '../../api/storeApi';
 import ActivityHistory from '../../components/ActivityHistory';
-import StoreReviewHistory from '../../components/StoreReviewHistory';
-import StoreVisitHistory from '../../components/StoreVisitHistory';
-import StoreImageHistory from '../../components/StoreImageHistory';
-import StoreReportHistory from '../../components/StoreReportHistory';
-import StorePostHistory from '../../components/StorePostHistory';
-import StoreMessageHistory from '../../components/StoreMessageHistory';
-import StoreCouponHistory from '../../components/StoreCouponHistory';
-import StoreMarkerHistory from '../../components/StoreMarkerHistory';
-import StoreSettings from '../../components/StoreSettings';
 import StoreContributorHistory from '../../components/StoreContributorHistory';
+import StoreCouponHistory from '../../components/StoreCouponHistory';
 import StoreEditForm from '../../components/StoreEditForm';
-import {toast} from 'react-toastify';
+import StoreImageHistory from '../../components/StoreImageHistory';
+import StoreMarkerHistory from '../../components/StoreMarkerHistory';
+import StoreMessageHistory from '../../components/StoreMessageHistory';
+import StorePostHistory from '../../components/StorePostHistory';
+import StoreReportHistory from '../../components/StoreReportHistory';
+import StoreReviewHistory from '../../components/StoreReviewHistory';
+import StoreSettings from '../../components/StoreSettings';
+import StoreVisitHistory from '../../components/StoreVisitHistory';
+import {WRITER_TYPE} from '../../types/common';
+import {isVisitsSupported, isImagesSupported, isReportsSupported} from '../../types/store';
 import {formatDateTimeKo as formatDateTime} from '../../utils/dateUtils';
+import {getActivitiesStatusBadgeClass, getActivitiesStatusDisplayName, getCategoryIcon, getLabelBadgeClass, getLabelDisplayName, getLabelIcon, getOpenStatusBadgeClass, getOpenStatusDisplayName, getSalesTypeBadgeClass, getSalesTypeDisplayName, getStoreStatusBadgeClass, getStoreStatusDisplayName, getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from '../../utils/display/storeDisplay';
+import {getWriterTypeBadgeClass} from '../../utils/display/writerDisplay';
+import {formatCount, formatRating} from '../../utils/formatUtils';
 
 const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) => {
   const [storeDetail, setStoreDetail] = useState(null);
@@ -318,7 +299,6 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
     ));
   };
 
-
   const formatOpenStartDateTime = (dateString) => {
     if (!dateString) return '없음';
     return new Date(dateString).toLocaleString('ko-KR', {
@@ -328,7 +308,6 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
       minute: '2-digit'
     });
   };
-
 
   const formatAppearanceDays = (days) => {
     if (!days || days.length === 0) return '정보 없음';

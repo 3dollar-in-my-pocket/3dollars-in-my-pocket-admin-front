@@ -1,6 +1,7 @@
+import {getVisitIconClass, getVisitTypeBatchClass, getVisitTypeDisplayName} from '../utils/display/visitDisplay';
 import {useCallback, useRef} from 'react';
 import visitApi from "../api/visitApi";
-import {getVisitIconClass, getVisitTypeBatchClass, getVisitTypeDisplayName, VisitType} from "../types/visit";
+import {VisitType} from "../types/visit";
 import useCursorPagination from "../hooks/useCursorPagination";
 import {formatDateTimeShortKo} from "../utils/dateUtils";
 

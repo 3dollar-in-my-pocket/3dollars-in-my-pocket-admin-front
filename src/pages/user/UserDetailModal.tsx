@@ -1,29 +1,22 @@
+import '../../styles/mobile-tabs.css';
 import {useEffect, useState} from 'react';
 import {Modal, Tab, Tabs} from 'react-bootstrap';
-import '../../styles/mobile-tabs.css';
-import {
-  getMarketingConsentBadgeClass,
-  getMarketingConsentDisplayName,
-  getSocialTypeBadgeClass,
-  getSocialTypeDisplayName,
-  getUserRoleBadgeClass,
-  getUserRoleLabel,
-  getUserRoleValue,
-  UserRoleOption
-} from '../../types/user';
-import {DEVICE_OS, getOsBadgeClass,} from '../../types/device';
-import userApi from '../../api/userApi';
-import medalApi from '../../api/medalApi';
 import {toast} from 'react-toastify';
-import ActivityHistory from '../../components/ActivityHistory';
-import UserStoreHistory from '../../components/UserStoreHistory';
-import UserReviewHistory from '../../components/UserReviewHistory';
-import UserVisitHistory from '../../components/UserVisitHistory';
-import UserStoreImageHistory from '../../components/UserStoreImageHistory';
-import UserStoreReportHistory from '../../components/UserStoreReportHistory';
-import PushSendModal from '../../components/push/PushSendModal';
 import deviceApi from "../../api/deviceApi";
 import enumApi from "../../api/enumApi";
+import medalApi from '../../api/medalApi';
+import userApi from '../../api/userApi';
+import ActivityHistory from '../../components/ActivityHistory';
+import UserReviewHistory from '../../components/UserReviewHistory';
+import UserStoreHistory from '../../components/UserStoreHistory';
+import UserStoreImageHistory from '../../components/UserStoreImageHistory';
+import UserStoreReportHistory from '../../components/UserStoreReportHistory';
+import UserVisitHistory from '../../components/UserVisitHistory';
+import PushSendModal from '../../components/push/PushSendModal';
+import {DEVICE_OS} from '../../types/device';
+import {UserRoleOption} from '../../types/user';
+import {getOsBadgeClass} from '../../utils/display/deviceDisplay';
+import {getMarketingConsentBadgeClass, getMarketingConsentDisplayName, getSocialTypeBadgeClass, getSocialTypeDisplayName, getUserRoleBadgeClass, getUserRoleLabel, getUserRoleValue} from '../../utils/display/userDisplay';
 
 import {formatDateTimeKo as formatDateTime} from '../../utils/dateUtils';
 
@@ -137,7 +130,6 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
       </span>
     );
   };
-
 
   // 디바이스 삭제 핸들러
   const handleDeleteDevice = async (deviceId) => {
@@ -956,7 +948,6 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
                 </div>
               </div>
             </Tab>
-
 
             {/* 활동 이력 탭 */}
             <Tab

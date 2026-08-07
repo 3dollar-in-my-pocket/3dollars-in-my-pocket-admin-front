@@ -2,14 +2,7 @@ import {useCallback, useRef} from 'react';
 import storeApi from '../api/storeApi';
 import useCursorPagination from '../hooks/useCursorPagination';
 import {formatDateTimeKo as formatDateTime} from '../utils/dateUtils';
-import {
-  getActivitiesStatusDisplayName,
-  getStoreStatusBadgeClass,
-  getStoreStatusDisplayName,
-  getStoreTypeDisplayName,
-  getStoreTypeBadgeClass,
-  getStoreTypeIcon
-} from "../types/store";
+import {getActivitiesStatusDisplayName, getStoreStatusBadgeClass, getStoreStatusDisplayName, getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from '../utils/display/storeDisplay';
 
 const UserStoreHistory = ({userId, isActive, onStoreClick}) => {
   const scrollContainerRef = useRef(null);
@@ -45,7 +38,6 @@ const UserStoreHistory = ({userId, isActive, onStoreClick}) => {
       onStoreClick(store);
     }
   };
-
 
   const getSalesTypeBadge = (salesType) => {
     if (!salesType) return null;
