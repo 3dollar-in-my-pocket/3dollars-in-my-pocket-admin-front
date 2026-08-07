@@ -1,5 +1,4 @@
-import {getOsPlatformDisplayName} from '../../utils/display/deviceDisplay';
-import {getOsPlatformBadgeClass, getOsPlatformIcon} from '../../utils/display/deviceDisplay';
+import {getOsPlatformBadgeClass, getOsPlatformDisplayName, getOsPlatformIcon} from '../../utils/display/deviceDisplay';
 import {Button, Form, Modal} from "react-bootstrap";
 import registrationApi from "../../api/registrationApi";
 import {useEffect, useState} from "react";

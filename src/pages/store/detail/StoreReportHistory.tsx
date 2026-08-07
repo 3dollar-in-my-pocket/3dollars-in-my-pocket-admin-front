@@ -2,7 +2,6 @@ import StoreTypeBadge from '../../../components/common/badges/StoreTypeBadge';
 import {useCallback, useRef, useState} from 'react';
 import storeReportApi from "../../../api/storeReportApi";
 import {getReportReasonBadgeClass} from '../../../utils/display/reportDisplay';
-import {getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from '../../../utils/display/storeDisplay';
 
 import useCursorPagination from "../../../hooks/useCursorPagination";
 import {StoreReport, StoreReportReason} from "../../../types/report";

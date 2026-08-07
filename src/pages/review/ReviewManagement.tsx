@@ -3,7 +3,6 @@ import {useEffect, useState, useCallback, useRef} from 'react';
 import {toast} from 'react-toastify';
 import reviewApi from '../../api/reviewApi';
 import {Review} from '../../types/review';
-import {getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from '../../utils/display/storeDisplay';
 
 import UserDetailModal from '../user/UserDetailModal';
 import StoreDetailModal from '../store/StoreDetailModal';

@@ -11,12 +11,7 @@ import {formatDateTimeKo as formatDateTime} from '../../utils/dateUtils';
 import {
   getActivitiesStatusBadgeClass,
   getActivitiesStatusDisplayName,
-  getCategoryIcon,
-  getLabelBadgeClass,
-  getLabelDisplayName,
-  getLabelIcon,
-  getOpenStatusBadgeClass,
-  getOpenStatusDisplayName
+  getCategoryIcon
 } from '../../utils/display/storeDisplay';
 import {getWriterTypeBadgeClass} from '../../utils/display/writerDisplay';
 import {formatCount, formatRating} from '../../utils/formatUtils';
@@ -57,7 +52,6 @@ const StoreBasicInfoTab = ({
       </span>
     );
   };
-
 
   const getOwnerBadge = (owner?: Writer) => {
     // USER 타입이 아니거나 정보가 없으면 UI를 표시하지 않음
@@ -114,7 +108,6 @@ const StoreBasicInfoTab = ({
       </div>
     );
   };
-
 
   const formatOpenStartDateTime = (dateString?: string) => {
     if (!dateString) return '없음';

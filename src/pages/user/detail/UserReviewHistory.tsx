@@ -2,8 +2,10 @@ import StoreStatusBadge from '../../../components/common/badges/StoreStatusBadge
 import StoreTypeBadge from '../../../components/common/badges/StoreTypeBadge';
 import {useCallback, useRef, useState} from 'react';
 import {toast} from 'react-toastify';
-import {getActivitiesStatusBadgeClass,
-  getActivitiesStatusDisplayName, getStoreStatusBadgeClass, getStoreStatusDisplayName, getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from '../../../utils/display/storeDisplay';
+import {
+  getActivitiesStatusBadgeClass,
+  getActivitiesStatusDisplayName
+} from '../../../utils/display/storeDisplay';
 
 import reviewApi from "../../../api/reviewApi";
 import useCursorPagination from "../../../hooks/useCursorPagination";
@@ -62,8 +64,6 @@ const UserReviewHistory = ({userId, isActive, onStoreClick}: UserReviewHistoryPr
     setSelectedReview(null);
   };
 
-
-
   const getActivitiesStatusBadge = (activitiesStatus?: ActivitiesStatus) => {
     if (!activitiesStatus) return null;
     const badgeClass = getActivitiesStatusBadgeClass(activitiesStatus);
@@ -74,7 +74,6 @@ const UserReviewHistory = ({userId, isActive, onStoreClick}: UserReviewHistoryPr
       </span>
     );
   };
-
 
   const getReviewStatusBadge = (status?: ReviewStatus) => {
     if (!status) return null;

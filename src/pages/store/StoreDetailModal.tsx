@@ -6,7 +6,7 @@ import StoreStatusBadge from '../../components/common/badges/StoreStatusBadge';
 import StoreTypeBadge from '../../components/common/badges/StoreTypeBadge';
 import '../../styles/mobile-tabs.css';
 import {useEffect, useState} from 'react';
-import {Button, Modal, Tab, Tabs} from 'react-bootstrap';
+import {Modal, Tab, Tabs} from 'react-bootstrap';
 import {toast} from 'react-toastify';
 import storeApi from '../../api/storeApi';
 import ActivityHistory from '../../components/ActivityHistory';
@@ -21,12 +21,7 @@ import StoreReportHistory from './detail/StoreReportHistory';
 import StoreReviewHistory from './detail/StoreReviewHistory';
 import StoreSettings from './detail/StoreSettings';
 import StoreVisitHistory from './detail/StoreVisitHistory';
-import {WRITER_TYPE} from '../../types/common';
 import {StoreDetail, isVisitsSupported, isImagesSupported, isReportsSupported} from '../../types/store';
-import {formatDateTimeKo as formatDateTime} from '../../utils/dateUtils';
-import {getActivitiesStatusBadgeClass, getActivitiesStatusDisplayName, getCategoryIcon, getLabelBadgeClass, getLabelDisplayName, getLabelIcon, getOpenStatusBadgeClass, getOpenStatusDisplayName, getSalesTypeBadgeClass, getSalesTypeDisplayName, getStoreStatusBadgeClass, getStoreStatusDisplayName, getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from '../../utils/display/storeDisplay';
-import {getWriterTypeBadgeClass} from '../../utils/display/writerDisplay';
-import {formatCount, formatRating} from '../../utils/formatUtils';
 
 interface StoreDetailModalProps {
   show: boolean;

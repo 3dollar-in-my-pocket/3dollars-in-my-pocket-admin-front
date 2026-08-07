@@ -1,4 +1,4 @@
-import { CursorPaginationParams, IncludeType, ApiResponse, PaginatedResponse } from '../types/api';
+import {IncludeType, ApiResponse, PaginatedResponse} from '../types/api';
 import { PAGINATION_DEFAULTS, NONCE_HEADER } from '../constants/api';
 import { AxiosResponse } from 'axios';
 

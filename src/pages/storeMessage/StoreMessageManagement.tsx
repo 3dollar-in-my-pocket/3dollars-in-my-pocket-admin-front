@@ -2,7 +2,6 @@ import StoreTypeBadge from '../../components/common/badges/StoreTypeBadge';
 import {useEffect, useState, useCallback, useRef} from 'react';
 import storeMessageApi from '../../api/storeMessageApi';
 import {StoreMessage} from '../../types/storeMessage';
-import {getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from '../../utils/display/storeDisplay';
 
 import StoreDetailModal from '../store/StoreDetailModal';
 import useInfiniteScroll from '../../hooks/useInfiniteScroll';

@@ -1,5 +1,4 @@
 // Store related type definitions and constants
-import {WriterType} from './common';
 import { Address, Location, Writer } from './domain';
 
 // Store status types (using common STATUS constants)

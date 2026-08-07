@@ -2,7 +2,6 @@ import StoreTypeBadge from '../../../components/common/badges/StoreTypeBadge';
 import {useCallback, useRef, useState} from 'react';
 import {toast} from 'react-toastify';
 import storeImageApi from "../../../api/storeImageApi";
-import {getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from '../../../utils/display/storeDisplay';
 
 import useCursorPagination from "../../../hooks/useCursorPagination";
 import {StoreImage, StoreImageStatus} from "../../../types/storeImage";

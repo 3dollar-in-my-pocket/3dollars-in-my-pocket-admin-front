@@ -2,8 +2,10 @@ import StoreStatusBadge from '../../../components/common/badges/StoreStatusBadge
 import StoreTypeBadge from '../../../components/common/badges/StoreTypeBadge';
 import {useCallback, useRef, useState} from 'react';
 import useCursorPagination from "../../../hooks/useCursorPagination";
-import {getActivitiesStatusBadgeClass,
-  getActivitiesStatusDisplayName, getStoreStatusBadgeClass, getStoreStatusDisplayName, getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from '../../../utils/display/storeDisplay';
+import {
+  getActivitiesStatusBadgeClass,
+  getActivitiesStatusDisplayName
+} from '../../../utils/display/storeDisplay';
 import {getVisitIconClass, getVisitTypeBatchClass, getVisitTypeDisplayName} from '../../../utils/display/visitDisplay';
 
 import {Visit, VisitType} from "../../../types/visit";
@@ -59,7 +61,6 @@ const UserVisitHistory = ({userId, isActive, onStoreClick}: UserVisitHistoryProp
     setSelectedVisit(null);
   };
 
-
   const getActivitiesStatusBadge = (activitiesStatus?: ActivitiesStatus) => {
     if (!activitiesStatus) return null;
     const badgeClass = getActivitiesStatusBadgeClass(activitiesStatus);
@@ -70,7 +71,6 @@ const UserVisitHistory = ({userId, isActive, onStoreClick}: UserVisitHistoryProp
       </span>
     );
   };
-
 
   const getVisitTypeBadge = (visitType?: VisitType) => {
     if (!visitType) return null;
