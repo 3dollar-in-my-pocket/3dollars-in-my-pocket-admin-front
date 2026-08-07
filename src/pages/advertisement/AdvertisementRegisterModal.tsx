@@ -74,26 +74,22 @@ const AdvertisementRegisterModal = ({
         : {}),
     };
 
-    try {
-      const res = await advertisementApi.createAd({
-        application: "USER",
-        adData: {
-          ...formData,
-          startDateTime: `${formData.startDateTime}:00`,
-          endDateTime: `${formData.endDateTime}:00`,
-          content,
-        },
-        nonce,
-      });
+    const res = await advertisementApi.createAd({
+      application: "USER",
+      adData: {
+        ...formData,
+        startDateTime: `${formData.startDateTime}:00`,
+        endDateTime: `${formData.endDateTime}:00`,
+        content,
+      },
+      nonce,
+    });
 
-      if (res.ok) {
-        toast.success("광고 등록이 완료되었습니다.");
-        reset();
-        fetchAdvertisements()
-        onHide();
-      }
-    } catch (error) {
-      // 에러 메시지는 응답 인터셉터가 표시합니다.
+    if (res.ok) {
+      toast.success("광고 등록이 완료되었습니다.");
+      reset();
+      fetchAdvertisements()
+      onHide();
     }
   };
 

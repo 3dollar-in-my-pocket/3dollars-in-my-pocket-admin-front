@@ -49,24 +49,20 @@ const AdvertisementEditModal = ({
   };
 
   const handleSubmit = async () => {
-    try {
-      const res = await advertisementApi.updateAd({
-        application: "USER",
-        advertisementId: ad.advertisementId,
-        adData: {
-          ...formData,
-          startDateTime: `${formData.startDateTime}:00`,
-          endDateTime: `${formData.endDateTime}:00`,
-          sortNumber: formData.orderType === "RANDOM" ? null : formData.sortNumber,
-        },
-      });
-      if (res.ok) {
-        toast.success("광고가 수정되었습니다.");
-        fetchAdvertisements();
-        onHide();
-      }
-    } catch (error) {
-      // 에러 메시지는 응답 인터셉터가 표시합니다.
+    const res = await advertisementApi.updateAd({
+      application: "USER",
+      advertisementId: ad.advertisementId,
+      adData: {
+        ...formData,
+        startDateTime: `${formData.startDateTime}:00`,
+        endDateTime: `${formData.endDateTime}:00`,
+        sortNumber: formData.orderType === "RANDOM" ? null : formData.sortNumber,
+      },
+    });
+    if (res.ok) {
+      toast.success("광고가 수정되었습니다.");
+      fetchAdvertisements();
+      onHide();
     }
   };
 

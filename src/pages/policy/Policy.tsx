@@ -115,18 +115,14 @@ const Policy = () => {
       return;
     }
 
-    try {
-      const response = await policyApi.deletePolicy({
-        policyId: policyId
-      });
+    const response = await policyApi.deletePolicy({
+      policyId: policyId
+    });
 
-      if (response.ok) {
-        toast.success("정책이 삭제되었습니다.");
-        fetchPolicies(); // 목록 새로고침
-        setSelectedPolicy(null); // 모달 닫기
-      }
-    } catch (error) {
-      // 에러 메시지는 응답 인터셉터가 표시합니다.
+    if (response.ok) {
+      toast.success("정책이 삭제되었습니다.");
+      fetchPolicies(); // 목록 새로고침
+      setSelectedPolicy(null); // 모달 닫기
     }
   };
 

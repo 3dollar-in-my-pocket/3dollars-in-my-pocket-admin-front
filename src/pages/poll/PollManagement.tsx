@@ -21,17 +21,13 @@ const PollManagement = () => {
   // 카테고리 목록 조회
   useEffect(() => {
     const fetchCategories = async () => {
-      try {
-        const response = await pollApi.getPollCategories();
-        if (response.ok) {
-          setCategories(response.data.contents);
-          // 첫 번째 카테고리를 기본 선택
-          if (response.data.contents.length > 0) {
-            setSelectedCategory(response.data.contents[0].categoryId);
-          }
+      const response = await pollApi.getPollCategories();
+      if (response.ok) {
+        setCategories(response.data.contents);
+        // 첫 번째 카테고리를 기본 선택
+        if (response.data.contents.length > 0) {
+          setSelectedCategory(response.data.contents[0].categoryId);
         }
-      } catch (error) {
-        // 에러 메시지는 응답 인터셉터가 표시합니다.
       }
     };
 
@@ -159,14 +155,10 @@ const PollManagement = () => {
 
     if (!confirmed) return;
 
-    try {
-      const response = await pollApi.deletePoll(poll.pollId);
-      if (response.ok) {
-        toast.success('투표가 성공적으로 삭제되었습니다.');
-        fetchPolls(selectedCategory);
-      }
-    } catch (error) {
-      // 에러 메시지는 응답 인터셉터가 표시합니다.
+    const response = await pollApi.deletePoll(poll.pollId);
+    if (response.ok) {
+      toast.success('투표가 성공적으로 삭제되었습니다.');
+      fetchPolls(selectedCategory);
     }
   };
 
