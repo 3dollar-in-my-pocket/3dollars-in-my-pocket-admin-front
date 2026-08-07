@@ -1,5 +1,6 @@
-import React, {useState, useEffect} from "react";
+import React, {useState, useEffect, Suspense} from "react";
 import {Link, Outlet, useLocation, useNavigate} from "react-router-dom";
+import Loading from "../components/common/Loading";
 import {Bounce, toast, ToastContainer} from "react-toastify";
 import {useRecoilState} from "recoil";
 import {LoginStatus, AdminAuthState} from "../state/AdminAuthState";
@@ -183,7 +184,9 @@ const Layout = () => {
   if (!isLoginState) {
     return (
       <div className="min-vh-100 bg-light px-5 py-4">
-        <Outlet/>
+        <Suspense fallback={<Loading/>}>
+          <Outlet/>
+        </Suspense>
       </div>
     );
   }
@@ -262,7 +265,9 @@ const Layout = () => {
 
           <div className="content-wrapper p-2 p-md-4">
             <div className="bg-white rounded shadow-sm p-2 p-md-4">
-              <Outlet/>
+              <Suspense fallback={<Loading/>}>
+                <Outlet/>
+              </Suspense>
             </div>
           </div>
         </main>
