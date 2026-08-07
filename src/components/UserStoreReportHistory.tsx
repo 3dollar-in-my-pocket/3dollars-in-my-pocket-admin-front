@@ -1,3 +1,4 @@
+import StoreTypeBadge from './common/badges/StoreTypeBadge';
 import {useCallback} from 'react';
 import storeReportApi from "../api/storeReportApi";
 import {getReportReasonBadgeClass} from '../utils/display/reportDisplay';
@@ -28,15 +29,6 @@ const UserStoreReportHistory = ({userId, isActive, onStoreClick}) => {
     );
   };
 
-  const getStoreTypeBadge = (storeType) => {
-    if (!storeType) return null;
-    return (
-      <span className={`badge ${getStoreTypeBadgeClass(storeType)} text-white rounded-pill px-2 py-1 small`}>
-        <i className={`bi ${getStoreTypeIcon(storeType)} me-1`}></i>
-        {getStoreTypeDisplayName(storeType)}
-      </span>
-    );
-  };
 
   const fetchUserReports = useCallback(
     (cursor: string | null) => storeReportApi.getUserStoreReports(userId, cursor, 20),
@@ -167,7 +159,7 @@ const UserStoreReportHistory = ({userId, isActive, onStoreClick}) => {
                         </div>
                         <div className="d-flex align-items-center gap-2 mb-2">
                           {getReasonBadge(report.reason)}
-                          {report.store?.storeType && getStoreTypeBadge(report.store.storeType)}
+                          {report.store?.storeType && <StoreTypeBadge storeType={report.store.storeType}/>}
                         </div>
                       </div>
                       <span className="badge bg-light text-muted rounded-pill px-2 py-1 small">

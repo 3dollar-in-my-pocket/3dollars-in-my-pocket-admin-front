@@ -1,3 +1,4 @@
+import StoreTypeBadge from '../../components/common/badges/StoreTypeBadge';
 import {useEffect, useRef, useState, useCallback} from 'react';
 import couponApi from '../../api/couponApi';
 import {StoreCoupon, COUPON_STATUS} from '../../types/coupon';
@@ -95,18 +96,6 @@ const CouponManagement = () => {
     return Math.round((issued / max) * 100);
   };
 
-  const getStoreTypeBadge = (storeType: string, isMobile = false) => {
-    if (!storeType) return null;
-    return (
-      <span
-        className={`badge ${getStoreTypeBadgeClass(storeType as any)} text-white rounded-pill ${isMobile ? 'px-2 py-1' : 'px-3 py-1'}`}
-        style={{fontSize: isMobile ? '0.65rem' : '0.75rem', whiteSpace: 'nowrap'}}
-      >
-        <i className={`bi ${getStoreTypeIcon(storeType as any)} me-1`}></i>
-        {getStoreTypeDisplayName(storeType as any)}
-      </span>
-    );
-  };
 
   const handleStoreClick = (store: any) => {
     setSelectedStore(store);
@@ -254,7 +243,7 @@ const CouponManagement = () => {
                               <h6 className="fw-bold text-primary mb-0 text-decoration-underline">
                                 {coupon.store?.name || '가게 이름 없음'}
                               </h6>
-                              {getStoreTypeBadge(coupon.store?.storeType)}
+                              {<StoreTypeBadge storeType={coupon.store?.storeType}/>}
                             </div>
                             <div className="d-flex align-items-center gap-2 text-muted small">
                               <i className="bi bi-geo-alt"></i>

@@ -1,3 +1,5 @@
+import StoreStatusBadge from './common/badges/StoreStatusBadge';
+import StoreTypeBadge from './common/badges/StoreTypeBadge';
 import {useCallback, useRef, useState} from 'react';
 import {toast} from 'react-toastify';
 import {getActivitiesStatusDisplayName, getStoreStatusBadgeClass, getStoreStatusDisplayName, getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from '../utils/display/storeDisplay';
@@ -49,27 +51,7 @@ const UserReviewHistory = ({userId, isActive, onStoreClick}) => {
     setSelectedReview(null);
   };
 
-  const getStatusBadge = (status) => {
-    if (!status) return null;
-    const badgeClass = getStoreStatusBadgeClass(status);
-    const statusText = getStoreStatusDisplayName(status);
-    return (
-      <span className={`badge ${badgeClass} bg-opacity-10 text-dark border rounded-pill px-2 py-1 small`}>
-        {statusText}
-      </span>
-    );
-  };
 
-  const getStoreStatusBadge = (status) => {
-    if (!status) return null;
-    const badgeClass = getStoreStatusBadgeClass(status);
-    const statusText = getStoreStatusDisplayName(status)
-    return (
-      <span className={`badge ${badgeClass} bg-opacity-10 text-dark border rounded-pill px-2 py-1 small`}>
-        {statusText}
-      </span>
-    );
-  }
 
   const getActivitiesStatusBadge = (activitiesStatus) => {
     if (!activitiesStatus) return null;
@@ -82,15 +64,6 @@ const UserReviewHistory = ({userId, isActive, onStoreClick}) => {
     );
   };
 
-  const getStoreTypeBadge = (storeType) => {
-    if (!storeType) return null;
-    return (
-      <span className={`badge ${getStoreTypeBadgeClass(storeType)} text-white rounded-pill px-2 py-1 small`}>
-        <i className={`bi ${getStoreTypeIcon(storeType)} me-1`}></i>
-        {getStoreTypeDisplayName(storeType)}
-      </span>
-    );
-  };
 
   const getReviewStatusBadge = (status) => {
     if (!status) return null;
@@ -271,8 +244,8 @@ const UserReviewHistory = ({userId, isActive, onStoreClick}) => {
                         </div>
                         <div className="d-flex gap-1 flex-wrap">
                           {getReviewStatusBadge(review.status)}
-                          {getStoreStatusBadge(review.store?.status)}
-                          {review.store?.storeType && getStoreTypeBadge(review.store.storeType)}
+                          {<StoreStatusBadge status={review.store?.status}/>}
+                          {review.store?.storeType && <StoreTypeBadge storeType={review.store.storeType}/>}
                         </div>
                       </div>
 
@@ -430,7 +403,7 @@ const UserReviewHistory = ({userId, isActive, onStoreClick}) => {
                       <div>
                         <label className="form-label fw-semibold text-muted mb-1">가게 상태</label>
                         <div className="d-flex gap-2">
-                          {getStatusBadge(selectedReview?.store?.status)}
+                          <StoreStatusBadge status={selectedReview?.store?.status}/>
                           {getActivitiesStatusBadge(selectedReview?.store?.activitiesStatus)}
                         </div>
                       </div>

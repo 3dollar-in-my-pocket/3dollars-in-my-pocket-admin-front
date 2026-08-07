@@ -1,3 +1,4 @@
+import StoreTypeBadge from './common/badges/StoreTypeBadge';
 import {useCallback, useRef, useState} from 'react';
 import {toast} from 'react-toastify';
 import storeImageApi from "../api/storeImageApi";
@@ -41,15 +42,6 @@ const StoreImageHistory = ({storeId, isActive, onAuthorClick}) => {
     setIsDeleting(false);
   };
 
-  const getStoreTypeBadge = (storeType) => {
-    if (!storeType) return null;
-    return (
-      <span className={`badge ${getStoreTypeBadgeClass(storeType)} text-white rounded-pill px-2 py-1 small`}>
-        <i className={`bi ${getStoreTypeIcon(storeType)} me-1`}></i>
-        {getStoreTypeDisplayName(storeType)}
-      </span>
-    );
-  };
 
   const handleDeleteImage = async () => {
     const confirmed = window.confirm(`정말로 이 이미지를 삭제하시겠습니까?\n\n등록자: ${selectedImage.writer?.name || '익명 사용자'}\n등록일: ${formatDateTime(selectedImage.createdAt)}\n\n이 작업은 되돌릴 수 없습니다.`);
@@ -239,7 +231,7 @@ const StoreImageHistory = ({storeId, isActive, onAuthorClick}) => {
                               {image.writer.socialType}
                             </span>
                           )}
-                          {image.store?.storeType && getStoreTypeBadge(image.store.storeType)}
+                          {image.store?.storeType && <StoreTypeBadge storeType={image.store.storeType}/>}
                         </div>
                       </div>
                     </div>
@@ -371,7 +363,7 @@ const StoreImageHistory = ({storeId, isActive, onAuthorClick}) => {
                     </small>
                     {selectedImage.store?.storeType && (
                       <div className="mt-1">
-                        {getStoreTypeBadge(selectedImage.store.storeType)}
+                        {<StoreTypeBadge storeType={selectedImage.store.storeType}/>}
                         {selectedImage.store?.name && (
                           <span className="badge bg-light text-dark border rounded-pill px-2 py-1 ms-1" style={{fontSize: '0.7rem'}}>
                             <i className="bi bi-shop me-1"></i>

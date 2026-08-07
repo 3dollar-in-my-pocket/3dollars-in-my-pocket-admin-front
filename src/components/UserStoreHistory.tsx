@@ -1,3 +1,6 @@
+import SalesTypeBadge from './common/badges/SalesTypeBadge';
+import StoreStatusBadge from './common/badges/StoreStatusBadge';
+import StoreTypeBadge from './common/badges/StoreTypeBadge';
 import {useCallback, useRef} from 'react';
 import storeApi from '../api/storeApi';
 import useCursorPagination from '../hooks/useCursorPagination';
@@ -39,27 +42,7 @@ const UserStoreHistory = ({userId, isActive, onStoreClick}) => {
     }
   };
 
-  const getSalesTypeBadge = (salesType) => {
-    if (!salesType) return null;
-    const badgeClass = salesType.type === 'ROAD' ? 'bg-success' :
-      salesType.type === 'STORE' ? 'bg-primary' : 'bg-secondary';
-    return (
-      <span className={`badge ${badgeClass} bg-opacity-10 text-dark border rounded-pill px-2 py-1`}>
-        {salesType.description || salesType.type}
-      </span>
-    );
-  };
 
-  const getStatusBadge = (status) => {
-    if (!status) return null;
-    const badgeClass = getStoreStatusBadgeClass(status);
-    const statusText = getStoreStatusDisplayName(status);
-    return (
-      <span className={`badge ${badgeClass} bg-opacity-10 text-dark border rounded-pill px-2 py-1`}>
-        {statusText}
-      </span>
-    );
-  };
 
   const getActivitiesStatusBadge = (activitiesStatus) => {
     if (!activitiesStatus) return null;
@@ -72,15 +55,6 @@ const UserStoreHistory = ({userId, isActive, onStoreClick}) => {
     );
   };
 
-  const getStoreTypeBadge = (storeType) => {
-    if (!storeType) return null;
-    return (
-      <span className={`badge ${getStoreTypeBadgeClass(storeType)} text-white rounded-pill px-2 py-1 small`}>
-        <i className={`bi ${getStoreTypeIcon(storeType)} me-1`}></i>
-        {getStoreTypeDisplayName(storeType)}
-      </span>
-    );
-  };
 
   const getDayOfWeekInKorean = (dayOfWeek) => {
     const dayMap = {
@@ -193,10 +167,10 @@ const UserStoreHistory = ({userId, isActive, onStoreClick}) => {
                           <div className="flex-grow-1">
                             <h6 className="mb-1 fw-bold text-dark">{store.name || '이름 없음'}</h6>
                             <div className="d-flex flex-wrap align-items-center gap-2">
-                              {getSalesTypeBadge(store.salesType)}
-                              {getStatusBadge(store.status)}
+                              {<SalesTypeBadge salesType={store.salesType} size='md'/>}
+                              {<StoreStatusBadge status={store.status} size="md"/>}
                               {getActivitiesStatusBadge(store.activitiesStatus)}
-                              {getStoreTypeBadge(store.storeType)}
+                              {<StoreTypeBadge storeType={store.storeType}/>}
                             </div>
                           </div>
                         </div>

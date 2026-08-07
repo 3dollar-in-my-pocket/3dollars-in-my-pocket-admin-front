@@ -1,3 +1,4 @@
+import StoreTypeBadge from './common/badges/StoreTypeBadge';
 import {useCallback, useRef, useState} from 'react';
 import storeReportApi from "../api/storeReportApi";
 import {getReportReasonBadgeClass} from '../utils/display/reportDisplay';
@@ -41,15 +42,6 @@ const StoreReportHistory = ({storeId, isActive, onAuthorClick}) => {
     );
   };
 
-  const getStoreTypeBadge = (storeType) => {
-    if (!storeType) return null;
-    return (
-      <span className={`badge ${getStoreTypeBadgeClass(storeType)} text-white rounded-pill px-2 py-1 small`}>
-        <i className={`bi ${getStoreTypeIcon(storeType)} me-1`}></i>
-        {getStoreTypeDisplayName(storeType)}
-      </span>
-    );
-  };
 
   const handleReportClick = (report) => {
     setSelectedReport(report);
@@ -181,7 +173,7 @@ const StoreReportHistory = ({storeId, isActive, onAuthorClick}) => {
                             </div>
                             <div className="d-flex align-items-center gap-2 mb-2">
                               {getReportTypeBadge(report.reason)}
-                              {report.store?.storeType && getStoreTypeBadge(report.store.storeType)}
+                              {report.store?.storeType && <StoreTypeBadge storeType={report.store.storeType}/>}
                             </div>
                           </div>
                           <div className="text-end">
@@ -288,7 +280,7 @@ const StoreReportHistory = ({storeId, isActive, onAuthorClick}) => {
                     <label className="form-label fw-bold">가게 타입</label>
                     <div className="d-flex gap-2 flex-wrap">
                       {selectedReport.store?.storeType ? (
-                        getStoreTypeBadge(selectedReport.store.storeType)
+                        <StoreTypeBadge storeType={selectedReport.store.storeType}/>
                       ) : (
                         <span className="text-muted">정보 없음</span>
                       )}

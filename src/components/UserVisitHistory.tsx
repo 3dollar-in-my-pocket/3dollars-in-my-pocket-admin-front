@@ -1,3 +1,5 @@
+import StoreStatusBadge from './common/badges/StoreStatusBadge';
+import StoreTypeBadge from './common/badges/StoreTypeBadge';
 import {useCallback, useRef, useState} from 'react';
 import useCursorPagination from "../hooks/useCursorPagination";
 import {getActivitiesStatusDisplayName, getStoreStatusBadgeClass, getStoreStatusDisplayName, getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from '../utils/display/storeDisplay';
@@ -47,16 +49,6 @@ const UserVisitHistory = ({userId, isActive, onStoreClick}) => {
     setSelectedVisit(null);
   };
 
-  const getStatusBadge = (status) => {
-    if (!status) return null;
-    const badgeClass = getStoreStatusBadgeClass(status);
-    const statusText = getStoreStatusDisplayName(status);
-    return (
-      <span className={`badge ${badgeClass} bg-opacity-10 text-dark border rounded-pill px-2 py-1 small`}>
-        {statusText}
-      </span>
-    );
-  };
 
   const getActivitiesStatusBadge = (activitiesStatus) => {
     if (!activitiesStatus) return null;
@@ -69,15 +61,6 @@ const UserVisitHistory = ({userId, isActive, onStoreClick}) => {
     );
   };
 
-  const getStoreTypeBadge = (storeType) => {
-    if (!storeType) return null;
-    return (
-      <span className={`badge ${getStoreTypeBadgeClass(storeType)} text-white rounded-pill px-2 py-1 small`}>
-        <i className={`bi ${getStoreTypeIcon(storeType)} me-1`}></i>
-        {getStoreTypeDisplayName(storeType)}
-      </span>
-    );
-  };
 
   const getVisitTypeBadge = (visitType?: VisitType) => {
     if (!visitType) return null;
@@ -219,9 +202,9 @@ const UserVisitHistory = ({userId, isActive, onStoreClick}) => {
                       </div>
 
                       <div className="d-flex align-items-center gap-2 mb-2">
-                        {getStatusBadge(visit.store?.status)}
+                        {<StoreStatusBadge status={visit.store?.status}/>}
                         {getActivitiesStatusBadge(visit.store?.activitiesStatus)}
-                        {visit.store?.storeType && getStoreTypeBadge(visit.store.storeType)}
+                        {visit.store?.storeType && <StoreTypeBadge storeType={visit.store.storeType}/>}
                       </div>
 
                       <div className="d-flex align-items-center gap-2 mb-2">
@@ -367,7 +350,7 @@ const UserVisitHistory = ({userId, isActive, onStoreClick}) => {
                       <div>
                         <label className="form-label fw-semibold text-muted mb-1">가게 상태</label>
                         <div className="d-flex gap-2 flex-wrap">
-                          {getStatusBadge(selectedVisit?.store?.status)}
+                          {<StoreStatusBadge status={selectedVisit?.store?.status}/>}
                           {getActivitiesStatusBadge(selectedVisit?.store?.activitiesStatus)}
                         </div>
                       </div>

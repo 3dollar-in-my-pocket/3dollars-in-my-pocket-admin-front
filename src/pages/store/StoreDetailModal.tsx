@@ -1,3 +1,6 @@
+import SalesTypeBadge from '../../components/common/badges/SalesTypeBadge';
+import StoreStatusBadge from '../../components/common/badges/StoreStatusBadge';
+import StoreTypeBadge from '../../components/common/badges/StoreTypeBadge';
 import '../../styles/mobile-tabs.css';
 import {useEffect, useState} from 'react';
 import {Button, Modal, Tab, Tabs} from 'react-bootstrap';
@@ -178,15 +181,6 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
     }
   };
 
-  const getStatusBadge = (status) => {
-    return (
-      <span
-        className={`badge rounded-pill px-3 py-2 ${getStoreStatusBadgeClass(status)} bg-opacity-10 text-dark border`}>
-        <i className="bi bi-shop me-1"></i>
-        {getStoreStatusDisplayName(status)}
-      </span>
-    );
-  };
 
   const getActivitiesBadge = (activitiesStatus) => {
     return (
@@ -198,16 +192,6 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
     );
   };
 
-  const getSalesTypeBadge = (salesType) => {
-    if (!salesType) return null;
-    return (
-      <span
-        className={`badge rounded-pill px-3 py-2 ${getSalesTypeBadgeClass(salesType.type)} bg-opacity-10 text-dark border`}>
-        <i className="bi bi-shop me-1"></i>
-        {getSalesTypeDisplayName(salesType.type)}
-      </span>
-    );
-  };
 
   const getOpenStatusBadge = (openStatus) => {
     if (!openStatus) return null;
@@ -276,16 +260,6 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
     );
   };
 
-  const getStoreTypeBadge = (storeType) => {
-    if (!storeType) return null;
-    return (
-      <span
-        className={`badge rounded-pill px-3 py-2 ${getStoreTypeBadgeClass(storeType)} text-white border`}>
-        <i className={`bi ${getStoreTypeIcon(storeType)} me-1`}></i>
-        {getStoreTypeDisplayName(storeType)}
-      </span>
-    );
-  };
 
   const getLabelBadges = (labels) => {
     if (!labels || labels.length === 0) return null;
@@ -460,9 +434,13 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
               >
                 <i className="bi bi-shop fs-4 text-white"></i>
               </div>
-              {getStoreTypeBadge(storeDetail?.storeType || store.storeType) && (
+              {(storeDetail?.storeType || store.storeType) && (
                 <div className="position-absolute" style={{top: '-8px', right: '-8px'}}>
-                  {getStoreTypeBadge(storeDetail?.storeType || store.storeType)}
+                  <StoreTypeBadge
+                    storeType={storeDetail?.storeType || store.storeType}
+                    size="lg"
+                    bordered
+                  />
                 </div>
               )}
             </div>
@@ -476,7 +454,7 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
                 </span>
               </div>
               <div className="d-flex align-items-center gap-2 mb-2 flex-wrap">
-                {getStatusBadge(storeDetail?.status || store.status)}
+                <StoreStatusBadge status={storeDetail?.status || store.status} size="lg" withIcon/>
                 {getOpenStatusBadge(storeDetail?.openStatus)}
               </div>
               {/* 라벨 정보 (별도 줄) */}
@@ -606,9 +584,9 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
                                   <div>
                                     <h5 className="mb-1 fw-bold text-dark">{storeDetail?.name || store.name}</h5>
                                     <div className="d-flex align-items-center gap-2 flex-wrap mb-2">
-                                      {getStatusBadge(storeDetail?.status || store.status)}
+                                      <StoreStatusBadge status={storeDetail?.status || store.status} size="lg" withIcon/>
                                       {getActivitiesBadge(storeDetail?.activitiesStatus || store.activitiesStatus)}
-                                      {getSalesTypeBadge(storeDetail?.salesType)}
+                                      <SalesTypeBadge salesType={storeDetail?.salesType} size="lg" withIcon/>
                                       {getOpenStatusBadge(storeDetail?.openStatus)}
                                     </div>
                                     {/* 라벨 정보 (별도 줄) */}

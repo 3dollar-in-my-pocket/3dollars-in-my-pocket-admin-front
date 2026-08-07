@@ -1,3 +1,5 @@
+import SalesTypeBadge from './common/badges/SalesTypeBadge';
+import StoreTypeBadge from './common/badges/StoreTypeBadge';
 import {useCallback, useRef, useState} from 'react';
 import {toast} from 'react-toastify';
 import storeImageApi from "../api/storeImageApi";
@@ -71,26 +73,7 @@ const UserStoreImageHistory = ({userId, isActive, onStoreClick}) => {
     );
   };
 
-  const getStoreTypeBadge = (storeType) => {
-    if (!storeType) return null;
-    return (
-      <span className={`badge ${getStoreTypeBadgeClass(storeType)} text-white rounded-pill px-2 py-1 small`}>
-        <i className={`bi ${getStoreTypeIcon(storeType)} me-1`}></i>
-        {getStoreTypeDisplayName(storeType)}
-      </span>
-    );
-  };
 
-  const getSalesTypeBadge = (salesType) => {
-    if (!salesType) return null;
-    const badgeClass = salesType.type === 'ROAD' ? 'bg-success' :
-      salesType.type === 'STORE' ? 'bg-primary' : 'bg-secondary';
-    return (
-      <span className={`badge ${badgeClass} bg-opacity-10 text-dark border rounded-pill px-2 py-1`}>
-        {salesType.description || salesType.type}
-      </span>
-    );
-  };
 
   // 이미지 삭제 핸들러
   const handleDeleteImage = async () => {
@@ -246,10 +229,10 @@ const UserStoreImageHistory = ({userId, isActive, onStoreClick}) => {
                           <i className="bi bi-box-arrow-up-right text-primary" style={{fontSize: '0.6rem'}}></i>
                         </div>
                         <div className="d-flex flex-wrap align-items-center gap-1 mb-2">
-                          {getSalesTypeBadge(storeImage.store?.salesType)}
+                          {<SalesTypeBadge salesType={storeImage.store?.salesType} size='md'/>}
                           {getImageStatusBadge(storeImage.status)}
                           {getStoreStatusBadge(storeImage.store?.status)}
-                          {storeImage.store?.storeType && getStoreTypeBadge(storeImage.store.storeType)}
+                          {storeImage.store?.storeType && <StoreTypeBadge storeType={storeImage.store.storeType}/>}
                         </div>
                       </div>
                     </div>
@@ -397,7 +380,7 @@ const UserStoreImageHistory = ({userId, isActive, onStoreClick}) => {
                             <label className="form-label fw-semibold text-muted mb-1">가게 정보</label>
                             <p className="mb-1 fw-bold text-dark">{selectedImage.store?.name || '가게명 없음'}</p>
                             <div className="d-flex gap-2 mb-1">
-                              {getSalesTypeBadge(selectedImage.store?.salesType)}
+                              {<SalesTypeBadge salesType={selectedImage.store?.salesType} size='md'/>}
                               {getStoreStatusBadge(selectedImage.store?.status)}
                             </div>
                             <p

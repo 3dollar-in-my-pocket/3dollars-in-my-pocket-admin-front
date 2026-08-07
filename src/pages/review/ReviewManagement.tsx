@@ -1,3 +1,4 @@
+import StoreTypeBadge from '../../components/common/badges/StoreTypeBadge';
 import {useEffect, useState, useCallback, useRef} from 'react';
 import {toast} from 'react-toastify';
 import reviewApi from '../../api/reviewApi';
@@ -91,18 +92,6 @@ const ReviewManagement = () => {
     return stars;
   };
 
-  const getStoreTypeBadge = (storeType: string, isMobile = false) => {
-    if (!storeType) return null;
-    return (
-      <span
-        className={`badge ${getStoreTypeBadgeClass(storeType as any)} text-white rounded-pill ${isMobile ? 'px-2 py-1' : 'px-3 py-1'}`}
-        style={{fontSize: isMobile ? '0.65rem' : '0.75rem', whiteSpace: 'nowrap'}}
-      >
-        <i className={`bi ${getStoreTypeIcon(storeType as any)} me-1`}></i>
-        {getStoreTypeDisplayName(storeType as any)}
-      </span>
-    );
-  };
 
   const getStatusBadge = (status: string, isMobile = false) => {
     const statusConfig: Record<string, { bg: string; icon: string; text: string }> = {
@@ -332,15 +321,11 @@ const ReviewManagement = () => {
                                   <h6 className="fw-bold text-primary mb-0 text-decoration-underline">
                                     {review.store?.name || '가게 이름 없음'}
                                   </h6>
-                                  {review.store?.storeType && (
-                                    <span
-                                      className={`badge rounded-pill px-2 py-1 ${getStoreTypeBadgeClass(review.store.storeType as any)}`}
-                                      style={{fontSize: '0.65rem'}}
-                                    >
-                                      <i className={`${getStoreTypeIcon(review.store.storeType as any)} me-1`}></i>
-                                      {getStoreTypeDisplayName(review.store.storeType as any)}
-                                    </span>
-                                  )}
+                                  <StoreTypeBadge
+                                    storeType={review.store?.storeType}
+                                    size="md"
+                                    style={{fontSize: '0.65rem'}}
+                                  />
                                 </div>
                                 {review.store?.address?.fullAddress && (
                                   <div className="d-flex align-items-center gap-2 text-muted small">
@@ -421,7 +406,9 @@ const ReviewManagement = () => {
                     <div className="d-flex flex-wrap align-items-center gap-1 mb-2">
                       {getStatusBadge(review.status, true)}
                       {review.store?.storeType && (
-                        <span className="d-none d-sm-inline">{getStoreTypeBadge(review.store.storeType, true)}</span>
+                        <span className="d-none d-sm-inline">
+                          <StoreTypeBadge storeType={review.store.storeType} size="sm"/>
+                        </span>
                       )}
                       {/* 날짜 - 모바일에서는 더 작게 */}
                       <span className="text-muted ms-auto" style={{fontSize: 'clamp(0.65rem, 2vw, 0.75rem)'}}>
@@ -682,7 +669,7 @@ const ReviewManagement = () => {
                           </h6>
                         </div>
                         <div className="d-flex gap-1 flex-wrap">
-                          {selectedReview.store?.storeType && getStoreTypeBadge(selectedReview.store.storeType)}
+                          <StoreTypeBadge storeType={selectedReview.store?.storeType} size="md"/>
                           {selectedReview.store?.storeId && (
                             <span
                               className="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-2 py-1"

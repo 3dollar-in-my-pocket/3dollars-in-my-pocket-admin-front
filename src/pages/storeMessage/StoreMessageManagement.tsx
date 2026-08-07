@@ -1,3 +1,4 @@
+import StoreTypeBadge from '../../components/common/badges/StoreTypeBadge';
 import {useEffect, useState, useCallback, useRef} from 'react';
 import storeMessageApi from '../../api/storeMessageApi';
 import {StoreMessage} from '../../types/storeMessage';
@@ -63,15 +64,6 @@ const StoreMessageManagement = () => {
     threshold: 0.1
   });
 
-  const getStoreTypeBadge = (storeType: string) => {
-    if (!storeType) return null;
-    return (
-      <span className={`badge ${getStoreTypeBadgeClass(storeType as any)} text-white rounded-pill px-2 py-1 small`}>
-        <i className={`bi ${getStoreTypeIcon(storeType as any)} me-1`}></i>
-        {getStoreTypeDisplayName(storeType as any)}
-      </span>
-    );
-  };
 
   const handleMessageClick = (message: StoreMessage) => {
     setSelectedMessage(message);
@@ -176,7 +168,7 @@ const StoreMessageManagement = () => {
                             <h6 className="fw-bold text-primary mb-0 text-decoration-underline">
                               {message.store?.name || '가게 이름 없음'}
                             </h6>
-                            {message.store?.storeType && getStoreTypeBadge(message.store.storeType)}
+                            {message.store?.storeType && <StoreTypeBadge storeType={message.store.storeType}/>}
                           </div>
                           {message.store?.address?.fullAddress && (
                             <div className="d-flex align-items-center gap-2 text-muted small">
@@ -305,7 +297,7 @@ const StoreMessageManagement = () => {
                     <label className="form-label fw-bold">가게 타입</label>
                     <div>
                       {selectedMessage.store?.storeType ? (
-                        getStoreTypeBadge(selectedMessage.store.storeType)
+                        <StoreTypeBadge storeType={selectedMessage.store.storeType}/>
                       ) : (
                         <span className="text-muted">정보 없음</span>
                       )}
@@ -332,7 +324,7 @@ const StoreMessageManagement = () => {
                     <div className="d-flex gap-2 flex-wrap">
                       {selectedMessage.store ? (
                         <>
-                          {selectedMessage.store.storeType && getStoreTypeBadge(selectedMessage.store.storeType)}
+                          {selectedMessage.store.storeType && <StoreTypeBadge storeType={selectedMessage.store.storeType}/>}
                           <span className="badge bg-light text-dark border rounded-pill px-3 py-2">
                             <i className="bi bi-shop me-1"></i>
                             {selectedMessage.store.name}
