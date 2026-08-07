@@ -157,8 +157,6 @@ const ReviewManagement = () => {
         // 리뷰 목록 새로고침
         fetchReviews(true);
       }
-    } catch (error) {
-      // 에러 메시지는 응답 인터셉터가 표시합니다.
     } finally {
       setIsBlinding(false);
     }

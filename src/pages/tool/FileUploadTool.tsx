@@ -34,10 +34,13 @@ const FileUpload = () => {
 
     if (selectedFile) {
       setIsLoading(true);
-      const response = await UploadApi.uploadImage(selectedImageType, selectedFile);
-      setFileImageUrl(response.data);
-      toast.info('파일 업로드가 완료되었습니다.');
-      setIsLoading(false);
+      try {
+        const response = await UploadApi.uploadImage(selectedImageType, selectedFile);
+        setFileImageUrl(response.data);
+        toast.info('파일 업로드가 완료되었습니다.');
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 

@@ -37,8 +37,6 @@ const RegistrationModal = ({show, onHide, registration}) => {
       toast.info("가입 신청이 승인되었습니다.");
       setShowApproveModal(false);
       onHide();
-    } catch (error) {
-      // 에러 메시지는 응답 인터셉터가 표시합니다.
     } finally {
       setIsProcessing(false);
     }
@@ -66,8 +64,6 @@ const RegistrationModal = ({show, onHide, registration}) => {
       toast.info("가입 신청이 거절되었습니다.");
       setShowRejectModal(false);
       onHide();
-    } catch (error) {
-      // 에러 메시지는 응답 인터셉터가 표시합니다.
     } finally {
       setIsProcessing(false);
     }

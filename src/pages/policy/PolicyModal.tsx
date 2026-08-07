@@ -56,8 +56,6 @@ const PolicyModal = ({show, onHide, policy, categories, policies, onRefresh, onD
         onRefresh(); // 목록 새로고침
         onHide(); // 모달 닫기
       }
-    } catch (error) {
-      // 에러 메시지는 응답 인터셉터가 표시합니다.
     } finally {
       setIsLoading(false);
     }

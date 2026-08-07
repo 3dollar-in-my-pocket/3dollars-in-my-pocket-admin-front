@@ -1,7 +1,7 @@
-import { ApiResponse, PaginatedResponse } from '../types/api';
-import { Review, UserReview } from '../types/review';
-import { apiGetPaginated, apiPut } from './apiHelpers';
-import { INCLUDES } from '../constants/api';
+import {ApiResponse, PaginatedResponse} from '../types/api';
+import {Review} from '../types/review';
+import {apiGetPaginated, apiPut} from './apiHelpers';
+import {INCLUDES} from '../constants/api';
 
 export default {
   /**
@@ -18,8 +18,8 @@ export default {
   ): Promise<ApiResponse<PaginatedResponse<Review>>> => {
     return apiGetPaginated<Review>(
       `/v1/store/${storeId}/reviews`,
-      { cursor, size },
-      { includes: INCLUDES.WRITER }
+      {cursor, size},
+      {includes: INCLUDES.WRITER}
     );
   },
 
@@ -37,17 +37,17 @@ export default {
    * @param {string} userId - 사용자 ID
    * @param {string | null} [cursor] - 페이징 커서
    * @param {number} [size] - 페이지 사이즈
-   * @returns {Promise<ApiResponse<PaginatedResponse<UserReview>>>} 사용자 리뷰 목록
+   * @returns {Promise<ApiResponse<PaginatedResponse<Review>>>} 사용자 리뷰 목록
    */
   getUserReviews: async (
     userId: string,
     cursor: string | null = null,
     size?: number
-  ): Promise<ApiResponse<PaginatedResponse<UserReview>>> => {
-    return apiGetPaginated<UserReview>(
+  ): Promise<ApiResponse<PaginatedResponse<Review>>> => {
+    return apiGetPaginated<Review>(
       `/v1/user/${userId}/store-reviews`,
-      { cursor, size },
-      { includes: INCLUDES.STORE }
+      {cursor, size},
+      {includes: INCLUDES.STORE}
     );
   },
 
@@ -63,8 +63,8 @@ export default {
   ): Promise<ApiResponse<PaginatedResponse<Review>>> => {
     return apiGetPaginated<Review>(
       '/v1/store-reviews',
-      { cursor, size },
-      { includes: 'STORE,WRITER' }
+      {cursor, size},
+      {includes: 'STORE,WRITER'}
     );
   },
 };

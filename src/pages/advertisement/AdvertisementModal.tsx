@@ -44,8 +44,6 @@ const AdvertisementModal = ({
       } else {
         toast.error("❌ 광고 삭제에 실패했습니다.");
       }
-    } catch (error) {
-      // 에러 메시지는 응답 인터셉터가 표시합니다.
     } finally {
       onHide()
     }

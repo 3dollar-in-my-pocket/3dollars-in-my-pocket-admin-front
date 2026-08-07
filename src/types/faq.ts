@@ -16,11 +16,6 @@ export interface FaqCategory {
   displayName?: string;
 }
 
-export interface ListFaqsParams {
-  application: string;
-  category?: string;
-}
-
 export interface CreateFaqRequest {
   question: string;
   answer: string;

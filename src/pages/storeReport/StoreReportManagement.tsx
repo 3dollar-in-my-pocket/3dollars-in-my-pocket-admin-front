@@ -1,6 +1,6 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
+import {useCallback, useEffect, useRef, useState} from 'react';
 import storeReportApi from '../../api/storeReportApi';
-import {AllStoreReport} from '../../types/report';
+import {StoreReport} from '../../types/report';
 import {getReportReasonBadgeClass} from '../../utils/display/reportDisplay';
 import {getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from '../../utils/display/storeDisplay';
 
@@ -12,7 +12,7 @@ import StoreDetailModal from '../store/StoreDetailModal';
 import {formatDateTimeShortKo as formatDateTime} from '../../utils/dateUtils';
 
 const StoreReportManagement = () => {
-  const [reports, setReports] = useState<AllStoreReport[]>([]);
+  const [reports, setReports] = useState<StoreReport[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any>(null);
@@ -30,7 +30,10 @@ const StoreReportManagement = () => {
       const response = await storeReportApi.getAllStoreReports(reset ? null : cursorRef.current, 20);
       if (!response?.ok) return;
 
-      const { contents = [], cursor: newCursor } = response.data || { contents: [], cursor: { hasMore: false, nextCursor: null } };
+      const {contents = [], cursor: newCursor} = response.data || {
+        contents: [],
+        cursor: {hasMore: false, nextCursor: null}
+      };
 
       if (reset) {
         setReports(contents);
@@ -51,7 +54,7 @@ const StoreReportManagement = () => {
     fetchReports(true);
   }, [fetchReports]);
 
-  const { scrollContainerRef, loadMoreRef } = useInfiniteScroll({
+  const {scrollContainerRef, loadMoreRef} = useInfiniteScroll({
     hasMore,
     isLoading,
     onLoadMore: () => fetchReports(false),
@@ -60,39 +63,39 @@ const StoreReportManagement = () => {
 
   const getStoreStatusBadge = (status: string) => {
     const statusConfig: Record<string, { bg: string; icon: string; text: string }> = {
-      ACTIVE: { bg: 'bg-success', icon: 'bi-check-circle-fill', text: '활성' },
-      DELETED: { bg: 'bg-danger', icon: 'bi-trash-fill', text: '삭제됨' },
-      INACTIVE: { bg: 'bg-secondary', icon: 'bi-pause-circle-fill', text: '비활성' },
+      ACTIVE: {bg: 'bg-success', icon: 'bi-check-circle-fill', text: '활성'},
+      DELETED: {bg: 'bg-danger', icon: 'bi-trash-fill', text: '삭제됨'},
+      INACTIVE: {bg: 'bg-secondary', icon: 'bi-pause-circle-fill', text: '비활성'},
     };
-    const config = statusConfig[status] || { bg: 'bg-secondary', icon: 'bi-question-circle-fill', text: status };
+    const config = statusConfig[status] || {bg: 'bg-secondary', icon: 'bi-question-circle-fill', text: status};
     return (
-      <span className={`badge rounded-pill ${config.bg} text-white px-2 py-1`} style={{ fontSize: '0.7rem' }}>
+      <span className={`badge rounded-pill ${config.bg} text-white px-2 py-1`} style={{fontSize: '0.7rem'}}>
         <i className={`bi ${config.icon} me-1`}></i>
         {config.text}
       </span>
     );
   };
 
-  const handleReporterClick = (reporter: AllStoreReport['reporter']) => {
+  const handleReporterClick = (reporter: StoreReport['reporter']) => {
     if (!reporter) return;
     setSelectedUser(reporter);
   };
 
-  const handleStoreClick = (store: AllStoreReport['store']) => {
+  const handleStoreClick = (store: StoreReport['store']) => {
     if (!store) return;
     setSelectedStore(store);
   };
 
   const SkeletonCard = () => (
     <div className="col-12 col-lg-6">
-      <div className="card border-0 shadow-sm" style={{ background: '#f8f9fa' }}>
+      <div className="card border-0 shadow-sm" style={{background: '#f8f9fa'}}>
         <div className="card-body p-3">
           <div className="d-flex gap-2 mb-2">
-            <div className="bg-secondary bg-opacity-25 rounded-pill" style={{ width: '80px', height: '22px' }}></div>
-            <div className="bg-secondary bg-opacity-25 rounded-pill" style={{ width: '100px', height: '22px' }}></div>
+            <div className="bg-secondary bg-opacity-25 rounded-pill" style={{width: '80px', height: '22px'}}></div>
+            <div className="bg-secondary bg-opacity-25 rounded-pill" style={{width: '100px', height: '22px'}}></div>
           </div>
-          <div className="bg-secondary bg-opacity-25 rounded mb-2" style={{ width: '50%', height: '18px' }}></div>
-          <div className="bg-secondary bg-opacity-25 rounded" style={{ width: '100%', height: '40px' }}></div>
+          <div className="bg-secondary bg-opacity-25 rounded mb-2" style={{width: '50%', height: '18px'}}></div>
+          <div className="bg-secondary bg-opacity-25 rounded" style={{width: '100%', height: '40px'}}></div>
         </div>
       </div>
     </div>
@@ -117,7 +120,7 @@ const StoreReportManagement = () => {
 
       <div
         ref={scrollContainerRef}
-        style={{ maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' }}
+        style={{maxHeight: 'calc(100vh - 200px)', overflowY: 'auto'}}
       >
         {reports.length === 0 && !isLoading ? (
           <EmptyState
@@ -128,23 +131,26 @@ const StoreReportManagement = () => {
         ) : (
           <div className="row g-3">
             {isLoading && reports.length === 0
-              ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
+              ? Array.from({length: 6}).map((_, i) => <SkeletonCard key={i}/>)
               : reports.map((report) => (
                 <div key={report.reportId} className="col-12 col-lg-6">
                   <div
                     className="card border-0 shadow-sm h-100"
-                    style={{ background: 'linear-gradient(135deg, #ffffff 0%, #fdf2f2 100%)' }}
+                    style={{background: 'linear-gradient(135deg, #ffffff 0%, #fdf2f2 100%)'}}
                   >
                     <div className="card-body p-3">
                       {/* 신고 사유 + 가게 상태 */}
                       <div className="d-flex align-items-center gap-2 mb-2 flex-wrap">
-                        <span className={`badge ${getReportReasonBadgeClass(report.reason.type)} bg-opacity-10 text-dark border rounded-pill px-2 py-1`}>
+                        <span
+                          className={`badge ${getReportReasonBadgeClass(report.reason.type)} bg-opacity-10 text-dark border rounded-pill px-2 py-1`}>
                           <i className="bi bi-flag me-1"></i>
                           {report.reason.description}
                         </span>
                         {report.store?.status && getStoreStatusBadge(report.store.status)}
                         {report.store?.storeType && (
-                          <span className={`badge ${getStoreTypeBadgeClass(report.store.storeType as any)} text-white rounded-pill px-2 py-1`} style={{ fontSize: '0.7rem' }}>
+                          <span
+                            className={`badge ${getStoreTypeBadgeClass(report.store.storeType as any)} text-white rounded-pill px-2 py-1`}
+                            style={{fontSize: '0.7rem'}}>
                             <i className={`bi ${getStoreTypeIcon(report.store.storeType as any)} me-1`}></i>
                             {getStoreTypeDisplayName(report.store.storeType as any)}
                           </span>
@@ -157,12 +163,12 @@ const StoreReportManagement = () => {
                         {report.store ? (
                           <span
                             className="fw-semibold text-primary"
-                            style={{ cursor: 'pointer' }}
+                            style={{cursor: 'pointer'}}
                             onClick={() => handleStoreClick(report.store)}
                           >
                             <i className="bi bi-shop me-1"></i>
                             {report.store.name}
-                            <i className="bi bi-box-arrow-up-right ms-1" style={{ fontSize: '0.7rem' }}></i>
+                            <i className="bi bi-box-arrow-up-right ms-1" style={{fontSize: '0.7rem'}}></i>
                           </span>
                         ) : (
                           <span className="text-muted small">정보 없음 (storeId: {report.storeId})</span>
@@ -173,19 +179,22 @@ const StoreReportManagement = () => {
                       {report.store?.categories && report.store.categories.length > 0 && (
                         <div className="d-flex flex-wrap gap-1 mb-2">
                           {report.store.categories.slice(0, 3).map((cat: any) => (
-                            <span key={cat.categoryId} className="badge bg-light text-dark border rounded-pill px-2 py-1" style={{ fontSize: '0.65rem' }}>
+                            <span key={cat.categoryId}
+                                  className="badge bg-light text-dark border rounded-pill px-2 py-1"
+                                  style={{fontSize: '0.65rem'}}>
                               {cat.name}
                             </span>
                           ))}
                           {report.store.categories.length > 3 && (
-                            <span className="badge bg-light text-muted border rounded-pill px-2 py-1" style={{ fontSize: '0.65rem' }}>
+                            <span className="badge bg-light text-muted border rounded-pill px-2 py-1"
+                                  style={{fontSize: '0.65rem'}}>
                               +{report.store.categories.length - 3}
                             </span>
                           )}
                         </div>
                       )}
 
-                      <hr className="my-2" />
+                      <hr className="my-2"/>
 
                       {/* 신고자 + 일시 */}
                       <div className="d-flex justify-content-between align-items-center">
@@ -194,11 +203,11 @@ const StoreReportManagement = () => {
                           {report.reporter ? (
                             <span
                               className="text-primary small fw-semibold"
-                              style={{ cursor: 'pointer' }}
+                              style={{cursor: 'pointer'}}
                               onClick={() => handleReporterClick(report.reporter)}
                             >
                               {report.reporter.name}
-                              <i className="bi bi-box-arrow-up-right ms-1" style={{ fontSize: '0.65rem' }}></i>
+                              <i className="bi bi-box-arrow-up-right ms-1" style={{fontSize: '0.65rem'}}></i>
                             </span>
                           ) : (
                             <span className="text-muted small">알 수 없음</span>

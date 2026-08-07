@@ -42,6 +42,8 @@ const StoreEditForm = ({storeId, initialName, initialLabels, onSuccess, onCancel
       } else {
         console.warn('StoreLabel이 없거나 응답이 실패:', response);
       }
+    } catch (error) {
+      console.error('Enum 조회 실패:', error);
     } finally {
       setIsFetchingEnums(false);
     }

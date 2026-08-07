@@ -186,7 +186,7 @@ const StoreMarkerHistory: React.FC<StoreMarkerHistoryProps> = ({storeId, isActiv
         handleChange(field, response.data);
         toast.success('이미지가 업로드되었습니다.');
       } else {
-        toast.error(response?.data?.message || '이미지 업로드에 실패했습니다.');
+        toast.error('이미지 업로드에 실패했습니다.');
       }
     } catch (error) {
       toast.error('이미지 업로드 중 오류가 발생했습니다.');

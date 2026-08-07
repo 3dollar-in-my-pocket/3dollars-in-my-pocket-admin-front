@@ -1,7 +1,7 @@
-import { ApiResponse, PaginatedResponse } from '../types/api';
-import { StoreImage, UserStoreImage } from '../types/storeImage';
-import { apiGetPaginated, apiDelete } from './apiHelpers';
-import { INCLUDES } from '../constants/api';
+import {ApiResponse, PaginatedResponse} from '../types/api';
+import {StoreImage} from '../types/storeImage';
+import {apiDelete, apiGetPaginated} from './apiHelpers';
+import {INCLUDES} from '../constants/api';
 
 export default {
   /**
@@ -22,7 +22,7 @@ export default {
       params.cursor = cursor;
     }
 
-    return apiGetPaginated<StoreImage>('/v1/store-images', params, { includes: 'STORE,WRITER'});
+    return apiGetPaginated<StoreImage>('/v1/store-images', params, {includes: 'STORE,WRITER'});
   },
 
   /**
@@ -39,8 +39,8 @@ export default {
   ): Promise<ApiResponse<PaginatedResponse<StoreImage>>> => {
     return apiGetPaginated<StoreImage>(
       `/v1/store/${storeId}/images`,
-      { cursor, size },
-      { includes: INCLUDES.WRITER }
+      {cursor, size},
+      {includes: INCLUDES.WRITER}
     );
   },
 
@@ -58,17 +58,17 @@ export default {
    * @param {string} userId - 사용자 ID
    * @param {string | null} [cursor] - 페이징 커서
    * @param {number} [size] - 페이지 사이즈
-   * @returns {Promise<ApiResponse<PaginatedResponse<UserStoreImage>>>} 사용자 가게 이미지 이력
+   * @returns {Promise<ApiResponse<PaginatedResponse<StoreImage>>>} 사용자 가게 이미지 이력
    */
   getUserStoreImages: async (
     userId: string,
     cursor: string | null = null,
     size?: number
-  ): Promise<ApiResponse<PaginatedResponse<UserStoreImage>>> => {
-    return apiGetPaginated<UserStoreImage>(
+  ): Promise<ApiResponse<PaginatedResponse<StoreImage>>> => {
+    return apiGetPaginated<StoreImage>(
       `/v1/user/${userId}/store-images`,
-      { cursor, size },
-      { includes: INCLUDES.STORE }
+      {cursor, size},
+      {includes: INCLUDES.STORE}
     );
   },
 };

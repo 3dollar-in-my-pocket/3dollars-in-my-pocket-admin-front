@@ -78,7 +78,7 @@ const MedalModal = ({show, onHide, medal, onUpdate}: MedalModalProps) => {
         });
         toast.success('활성화 아이콘이 업로드되었습니다');
       } else {
-        setErrorMessage(response.data?.message || '이미지 업로드에 실패했습니다.');
+        setErrorMessage('이미지 업로드에 실패했습니다.');
       }
     } catch (error: any) {
       setErrorMessage('이미지 업로드 중 오류가 발생했습니다.');
@@ -107,7 +107,7 @@ const MedalModal = ({show, onHide, medal, onUpdate}: MedalModalProps) => {
         });
         toast.success('비활성화 아이콘이 업로드되었습니다');
       } else {
-        setErrorMessage(response.data?.message || '이미지 업로드에 실패했습니다.');
+        setErrorMessage('이미지 업로드에 실패했습니다.');
       }
     } catch (error: any) {
       setErrorMessage('이미지 업로드 중 오류가 발생했습니다.');

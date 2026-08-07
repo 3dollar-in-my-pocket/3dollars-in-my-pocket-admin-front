@@ -1,10 +1,4 @@
-/**
- * 관리자 로그인에 사용하는 소셜 타입
- *
- * 앱 유저의 소셜 타입(KAKAO/APPLE/GOOGLE/NAVER)은 types/user.ts의
- * SocialType을 사용하세요. (별개 개념)
- */
-export type AdminSocialType = 'GOOGLE';
+import {SocialType} from "@/types/user";
 
 /**
  * Google OAuth 토큰 요청 파라미터
@@ -34,7 +28,7 @@ export interface GoogleTokenResponse {
  */
 export interface LoginRequest {
   token: string;
-  socialType: AdminSocialType;
+  socialType: SocialType;
 }
 
 /**

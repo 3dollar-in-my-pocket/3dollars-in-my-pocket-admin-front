@@ -132,8 +132,6 @@ const AdvertisementContentEditModal = ({
         fetchAdvertisements();
         onHide();
       }
-    } catch (error) {
-      // 에러 메시지는 응답 인터셉터가 표시합니다.
     } finally {
       setIsSubmitting(false);
     }

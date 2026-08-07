@@ -1,6 +1,7 @@
-import { ApiResponse } from '../types/api';
-import { LoginRequest, LoginResponse, AdminSocialType } from '../types/auth';
-import { apiPost } from './apiHelpers';
+import {ApiResponse} from '../types/api';
+import {LoginRequest, LoginResponse} from '../types/auth';
+import {apiPost} from './apiHelpers';
+import {SocialType} from "@/types/user";
 
 export default {
   /**
@@ -10,11 +11,11 @@ export default {
    * @returns 로그인 응답 (JWT 토큰 포함)
    */
   login: async ({
-    accessToken,
-    socialType
-  }: {
+                  accessToken,
+                  socialType
+                }: {
     accessToken: string;
-    socialType: AdminSocialType;
+    socialType: SocialType;
   }): Promise<ApiResponse<LoginResponse>> => {
     const requestData: LoginRequest = {
       token: accessToken,

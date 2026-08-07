@@ -1,23 +1,14 @@
-import axiosInstance from "./apiBase";
+import {apiPostFormData} from "./apiHelpers";
 
 export default {
-  uploadImage: async (selectedImageType, file) => {
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
+  /**
+   * 이미지 업로드
+   * @returns data에 업로드된 이미지 URL이 담깁니다.
+   */
+  uploadImage: async (selectedImageType: string, file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
 
-      const response = await axiosInstance.post(
-        `/v2/file/${selectedImageType}`,
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        }
-      );
-      return response.data;
-    } catch (error: any) {
-      return error.response;
-    }
+    return apiPostFormData<string>(`/v2/file/${selectedImageType}`, formData);
   }
 };
