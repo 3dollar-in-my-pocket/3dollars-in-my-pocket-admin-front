@@ -151,3 +151,17 @@ export const createRandomNameResponse = ({
                                          }: Partial<RandomNameResponse>): RandomNameResponse => ({
   contents
 });
+
+/**
+ * UserResponse — 작성자/방문자/신고자 등 응답에 포함되는 사용자 요약 정보
+ *
+ * 유저 검색 응답 모델은 위의 User를 사용하세요. (별개 스키마)
+ */
+export interface SimpleUser {
+  userId?: number;
+  name: string;
+  socialType?: SocialType;
+  role?: UserRole;
+  createdAt?: string;
+  updatedAt?: string;
+}

@@ -1,5 +1,6 @@
 import axiosInstance from './apiBase';
-import {StoreChangeHistory, StoreType} from '../types/store';
+import {StoreType} from '../types/store';
+import {StoreChangeHistory} from '../types/storeChangeHistory';
 import {ApiResponse, PaginatedResponse} from '../types/api';
 import {apiGetPaginated} from './apiHelpers';
 

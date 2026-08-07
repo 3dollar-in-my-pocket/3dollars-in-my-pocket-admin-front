@@ -1,8 +1,8 @@
 import {useEffect, useState} from "react";
 import registrationApi from "../../api/registrationApi";
 import Loading from "../../components/common/Loading";
-import {getOsPlatformDisplayName} from '../../utils/display/pushDisplay';
-import {getOsPlatformBadgeClass, getOsPlatformIcon} from '../../utils/display/registrationDisplay';
+import {getOsPlatformDisplayName} from '../../utils/display/deviceDisplay';
+import {getOsPlatformBadgeClass, getOsPlatformIcon} from '../../utils/display/deviceDisplay';
 import RegistrationModal from "./RegistrationModal";
 
 const RegistrationManagement = () => {

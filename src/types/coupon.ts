@@ -1,6 +1,6 @@
 // Coupon related type definitions and constants
 
-import { SimpleStore } from './domain';
+import { SimpleStore } from './store';
 
 // Coupon status types
 export const COUPON_STATUS = {

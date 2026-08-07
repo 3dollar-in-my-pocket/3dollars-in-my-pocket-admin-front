@@ -1,6 +1,6 @@
 import {useCallback, useRef} from 'react';
 import storeApi from '../api/storeApi';
-import {StoreChangeHistory} from '../types/store';
+import {StoreChangeHistory} from '../types/storeChangeHistory';
 import {getChangeAttributeBadgeClass, getChangeAttributeIcon} from '../utils/display/storeDisplay';
 import {getWriterTypeBadgeClass} from '../utils/display/writerDisplay';
 
@@ -135,10 +135,10 @@ const StoreContributorHistory = ({storeId, isActive, onAuthorClick}: StoreContri
                           {history.changeAttributes.map((attr, attrIndex) => (
                             <span
                               key={attrIndex}
-                              className={`badge ${getChangeAttributeBadgeClass(attr.attributeType)} text-white`}
+                              className={`badge ${getChangeAttributeBadgeClass(attr.type)} text-white`}
                               style={{fontSize: '0.85rem', padding: '6px 12px'}}
                             >
-                              <i className={`bi ${getChangeAttributeIcon(attr.attributeType)} me-1`}></i>
+                              <i className={`bi ${getChangeAttributeIcon(attr.type)} me-1`}></i>
                               {attr.description}
                             </span>
                           ))}

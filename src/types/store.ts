@@ -1,5 +1,6 @@
 // Store related type definitions and constants
 import {WriterType} from './common';
+import { Address, Location } from './domain';
 
 // Store status types (using common STATUS constants)
 export const STORE_STATUS = {
@@ -94,32 +95,29 @@ export const isReportsSupported = (storeType: StoreType): boolean => {
   return supportedTypes.includes(storeType);
 };
 
-// Change attribute types
-export const CHANGE_ATTRIBUTE_TYPE = {
-  NAME: 'NAME',
-  LOCATION: 'LOCATION',
-  OPENING_DAY: 'OPENING_DAY',
-  OPENING_HOUR: 'OPENING_HOUR',
-  SALES_TYPE: 'SALES_TYPE',
-  PAYMENT_METHOD: 'PAYMENT_METHOD'
-} as const;
-
-export type ChangeAttributeType = typeof CHANGE_ATTRIBUTE_TYPE[keyof typeof CHANGE_ATTRIBUTE_TYPE];
-
-// Store change history interfaces
-export interface ChangeAttribute {
-  attributeType: ChangeAttributeType;
-  description: string;
-}
-
-export interface ChangeHistoryActor {
-  writerId: string;
-  writerType: WriterType;
+/** StoreFoodCategoryResponse */
+export interface StoreFoodCategory {
+  categoryId: string;
   name: string;
+  description: string;
+  imageUrl: string;
+  classification?: any;
+  isNew: boolean;
+  displayOrder?: number;
 }
 
-export interface StoreChangeHistory {
-  changeAttributes: ChangeAttribute[];
-  actor: ChangeHistoryActor;
-  changedAt: string;
+/** StoreSimpleResponse — 목록/이력 응답에 포함되는 가게 요약 정보 */
+export interface SimpleStore {
+  storeId: number;
+  storeType: StoreType;
+  name: string;
+  rating: number;
+  address: Address;
+  categories: StoreFoodCategory[];
+  status: StoreStatus;
+  labels: StoreLabel[];
+  activitiesStatus: ActivitiesStatus;
+  location?: Location;
+  createdAt?: string;
+  updatedAt?: string;
 }

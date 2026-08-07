@@ -1,4 +1,4 @@
-import {SimpleStore} from './domain';
+import { SimpleStore } from './store';
 
 export interface StoreMessage {
   messageId: string;

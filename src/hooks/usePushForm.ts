@@ -9,7 +9,7 @@ import {
   parseAccountIds
 } from "../utils/pushUtils";
 import {useNonce} from "./useNonce";
-import {PUSH_OS_PLATFORM, PushOsPlatform} from "../types/push";
+import {PUSH_OS_PLATFORM, PushOsPlatform} from "../types/device";
 
 export const usePushForm = () => {
   const location = useLocation();

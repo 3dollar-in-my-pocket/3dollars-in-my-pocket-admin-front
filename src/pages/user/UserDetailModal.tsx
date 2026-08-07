@@ -13,9 +13,9 @@ import UserStoreImageHistory from '../../components/UserStoreImageHistory';
 import UserStoreReportHistory from '../../components/UserStoreReportHistory';
 import UserVisitHistory from '../../components/UserVisitHistory';
 import PushSendModal from '../../components/push/PushSendModal';
-import {DEVICE_OS} from '../../types/device';
+import {OS_PLATFORM} from '../../types/device';
 import {UserRoleOption} from '../../types/user';
-import {getOsBadgeClass} from '../../utils/display/deviceDisplay';
+import {getOsPlatformBadgeClass, getOsPlatformIcon} from '../../utils/display/deviceDisplay';
 import {getMarketingConsentBadgeClass, getMarketingConsentDisplayName, getSocialTypeBadgeClass, getSocialTypeDisplayName, getUserRoleBadgeClass, getUserRoleLabel, getUserRoleValue} from '../../utils/display/userDisplay';
 
 import {formatDateTimeKo as formatDateTime} from '../../utils/dateUtils';
@@ -112,10 +112,10 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
   };
 
   const getOsBadge = (os) => {
-    const iconClass = os === DEVICE_OS.IOS ? 'bi-apple' : os === DEVICE_OS.AOS ? 'bi-google-play' : 'bi-question-circle';
+    const iconClass = getOsPlatformIcon(os);
 
     return (
-      <span className={`badge rounded-pill px-3 py-2 ${getOsBadgeClass(os)} bg-opacity-10 text-dark border`}>
+      <span className={`badge rounded-pill px-3 py-2 ${getOsPlatformBadgeClass(os)} bg-opacity-10 text-dark border`}>
         <i className={`bi ${iconClass} me-1`}></i>
         {os}
       </span>
@@ -594,17 +594,17 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
                                   <div className="position-relative">
                                     <div className="bg-primary bg-opacity-10 rounded-circle p-3" style={{
                                       border: '2px solid',
-                                      borderColor: device.os === DEVICE_OS.IOS ? '#007aff' : '#34c759'
+                                      borderColor: device.osPlatform === OS_PLATFORM.IOS ? '#007aff' : '#34c759'
                                     }}>
                                       <i
-                                        className={`bi ${device.os === DEVICE_OS.IOS ? 'bi-apple' : device.os === DEVICE_OS.AOS ? 'bi-android2' : 'bi-question-circle'} fs-3`}
-                                        style={{color: device.os === DEVICE_OS.IOS ? '#007aff' : '#34c759'}}></i>
+                                        className={`bi ${device.osPlatform === OS_PLATFORM.IOS ? 'bi-apple' : device.osPlatform === OS_PLATFORM.AOS ? 'bi-android2' : 'bi-question-circle'} fs-3`}
+                                        style={{color: device.osPlatform === OS_PLATFORM.IOS ? '#007aff' : '#34c759'}}></i>
                                     </div>
                                   </div>
                                   <div className="flex-grow-1">
                                     <div className="d-flex align-items-center gap-2 mb-2">
                                       <h6 className="mb-0 fw-bold text-dark">디바이스 {index + 1}</h6>
-                                      {getOsBadge(device.os)}
+                                      {getOsBadge(device.osPlatform)}
                                     </div>
                                     <div className="d-flex align-items-center gap-2 mb-2">
                                       <span className="text-muted small">

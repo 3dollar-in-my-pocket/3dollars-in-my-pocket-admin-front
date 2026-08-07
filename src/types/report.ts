@@ -2,7 +2,8 @@
  * 신고 관련 타입 정의
  */
 
-import { SimpleStore, SimpleUser } from './domain';
+import { SimpleStore } from './store';
+import { SimpleUser } from './user';
 
 export type ReportReasonCode = 'NOSTORE' | 'WRONGNOPOSITION' | 'OVERLAPSTORE' | 'WRONG_CONTENT';
 
@@ -14,10 +15,6 @@ export interface StoreReportReason {
 
 /**
  * StoreReportResponse
- *
- * 가게별(GET /v1/store/{storeId}/reports), 사용자별
- * (GET /v1/user/{userId}/store-reports), 전체(GET /v1/store-reports)
- * 신고 이력이 모두 동일하게 사용합니다.
  */
 export interface StoreReport {
   reportId: number;
@@ -28,12 +25,6 @@ export interface StoreReport {
   createdAt?: string;
   updatedAt?: string;
 }
-
-/** 응답 스키마가 StoreReport와 동일합니다. */
-export type UserStoreReport = StoreReport;
-
-/** 응답 스키마가 StoreReport와 동일합니다. */
-export type AllStoreReport = StoreReport;
 
 export const REPORT_REASON: Record<ReportReasonCode, ReportReasonCode> = {
   'NOSTORE': 'NOSTORE',

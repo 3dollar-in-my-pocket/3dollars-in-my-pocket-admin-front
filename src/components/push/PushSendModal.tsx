@@ -1,4 +1,4 @@
-import {getOsPlatformDisplayName} from '../../utils/display/pushDisplay';
+import {getOsPlatformDisplayName} from '../../utils/display/deviceDisplay';
 import {useEffect, useState} from 'react';
 import {Modal, Button, Form, Alert} from 'react-bootstrap';
 import {toast} from 'react-toastify';

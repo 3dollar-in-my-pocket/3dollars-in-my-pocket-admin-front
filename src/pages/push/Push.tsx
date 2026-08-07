@@ -4,7 +4,7 @@ import {useNavigate} from "react-router-dom";
 import PushFormFields from "../../components/push/PushFormFields";
 import PushPreview from "../../components/push/PushPreview";
 import {usePushForm} from "../../hooks/usePushForm";
-import {getOsPlatformDisplayName} from '../../utils/display/pushDisplay';
+import {getOsPlatformDisplayName} from '../../utils/display/deviceDisplay';
 
 const PushManage = () => {
   const navigate = useNavigate();
