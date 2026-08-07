@@ -155,7 +155,7 @@ const ContentInfoStep = ({formData, onChange}: ContentInfoStepProps) => {
           <div className="d-flex gap-2 flex-column flex-md-row">
             <Form.Control
               type="text"
-              value={content.image.url}
+              value={content.image.url ?? ''}
               onChange={(e) => handleImageChange("url", e.target.value)}
               placeholder="이미지 URL을 입력하거나 파일 업로드 버튼을 사용하세요"
               className="shadow-sm"
@@ -207,8 +207,8 @@ const ContentInfoStep = ({formData, onChange}: ContentInfoStepProps) => {
               </Form.Label>
               <Form.Control
                 type="number"
-                value={content.image.width}
-                onChange={(e) => handleImageChange("width", e.target.value as unknown as number)}
+                value={content.image.width ?? ''}
+                onChange={(e) => handleImageChange("width", e.target.value ? Number(e.target.value) : null)}
                 placeholder="ex) 36"
                 className="shadow-sm"
               />
@@ -223,8 +223,8 @@ const ContentInfoStep = ({formData, onChange}: ContentInfoStepProps) => {
               </Form.Label>
               <Form.Control
                 type="number"
-                value={content.image.height}
-                onChange={(e) => handleImageChange("height", e.target.value as unknown as number)}
+                value={content.image.height ?? ''}
+                onChange={(e) => handleImageChange("height", e.target.value ? Number(e.target.value) : null)}
                 placeholder="ex) 20"
                 className="shadow-sm"
               />
@@ -244,7 +244,7 @@ const ContentInfoStep = ({formData, onChange}: ContentInfoStepProps) => {
                 </Form.Label>
                 <Form.Control
                   type="text"
-                  value={content.title}
+                  value={content.title ?? ''}
                   onChange={(e) => handleContentChange("title", e.target.value)}
                   placeholder="ex) 가슴속 3천원 앱 홍보 캠페인"
                   className="shadow-sm"
@@ -290,7 +290,7 @@ const ContentInfoStep = ({formData, onChange}: ContentInfoStepProps) => {
                 </Form.Label>
                 <Form.Control
                   type="text"
-                  value={content.subTitle}
+                  value={content.subTitle ?? ''}
                   onChange={(e) => handleContentChange("subTitle", e.target.value)}
                   placeholder="ex) 캠페인 소개"
                   className="shadow-sm"
@@ -336,7 +336,7 @@ const ContentInfoStep = ({formData, onChange}: ContentInfoStepProps) => {
                 </Form.Label>
                 <Form.Control
                   type="text"
-                  value={content.extraContent}
+                  value={content.extraContent ?? ''}
                   onChange={(e) => handleContentChange("extraContent", e.target.value)}
                   placeholder="ex) 더보기"
                   className="shadow-sm"
@@ -411,8 +411,8 @@ const ContentInfoStep = ({formData, onChange}: ContentInfoStepProps) => {
               <span className="text-danger ms-1">*</span>
             </Form.Label>
             <Form.Select
-              value={content.link.linkType}
-              onChange={(e) => handleLinkChange("linkType", e.target.value as AdvertisementLinkType)}
+              value={content.link.linkType ?? ''}
+              onChange={(e) => handleLinkChange("linkType", (e.target.value || null) as AdvertisementLinkType | null)}
               className="shadow-sm"
             >
               <option value="">선택하세요</option>

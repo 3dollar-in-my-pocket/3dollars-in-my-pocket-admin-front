@@ -68,13 +68,18 @@ const AdvertisementRegisterModal = ({
       return;
     }
 
+    const {image, link} = formData.content;
+
     const content = {
       ...formData.content,
-      // FIXME: 문자열 "null"과 비교하고 있어 항상 참이 됩니다. (실제 초기값은 null 이므로 `!== null` 의도로 보임)
-      //        기존 동작 유지를 위해 비교식은 그대로 두고 타입만 우회합니다.
-      ...((formData.content.link.linkType as string) !== "null" && formData.content.link.linkUrl
-        ? {link: formData.content.link}
-        : {}),
+      // 입력값은 문자열로 들어오므로 서버 스펙(정수)에 맞춰 변환합니다.
+      image: {
+        ...image,
+        width: image.width ? Number(image.width) : null,
+        height: image.height ? Number(image.height) : null,
+      },
+      // 링크 유형을 고르지 않으면 link 자체를 보내지 않습니다.
+      ...(link.linkType && link.linkUrl ? {link} : {}),
     };
 
     const res = await advertisementApi.createAd({
