@@ -1,3 +1,4 @@
+/** PromptResponse */
 export interface PromptResponse {
   promptId: number;
   promptType: string;

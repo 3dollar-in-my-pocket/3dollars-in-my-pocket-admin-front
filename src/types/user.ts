@@ -60,6 +60,7 @@ export interface User {
   updatedAt: string;
 }
 
+/** UserSettingResponse */
 export interface UserSettings {
   enableActivitiesPush: boolean;
   marketingConsent: MarketingConsent;

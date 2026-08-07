@@ -8,6 +8,7 @@ export enum AdminRole {
   VIEWER = 'VIEWER'
 }
 
+/** AdminResponse */
 export interface Admin {
   adminId: string;
   name: string;

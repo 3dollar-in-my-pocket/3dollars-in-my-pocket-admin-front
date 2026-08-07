@@ -20,6 +20,7 @@ export interface StorePostSticker {
   reactedByMe: boolean;
 }
 
+/** PostResponse */
 export interface StorePost {
   postId: string;
   body: string;
