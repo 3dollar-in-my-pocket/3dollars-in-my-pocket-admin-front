@@ -2,7 +2,7 @@ import StoreTypeBadge from '../../components/common/badges/StoreTypeBadge';
 import {useEffect, useState, useCallback, useRef} from 'react';
 import {toast} from 'react-toastify';
 import reviewApi from '../../api/reviewApi';
-import {StoreReview} from '../../types/review';
+import {Review} from '../../types/review';
 import {getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from '../../utils/display/storeDisplay';
 
 import UserDetailModal from '../user/UserDetailModal';
@@ -13,10 +13,10 @@ import EmptyState from '../../components/common/EmptyState';
 import {formatDateTimeShortKo as formatDateTime} from '../../utils/dateUtils';
 
 const ReviewManagement = () => {
-  const [reviews, setReviews] = useState<StoreReview[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
-  const [selectedReview, setSelectedReview] = useState<StoreReview | null>(null);
+  const [selectedReview, setSelectedReview] = useState<Review | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [isBlinding, setIsBlinding] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any>(null);
@@ -133,7 +133,7 @@ const ReviewManagement = () => {
     </div>
   );
 
-  const handleReviewClick = (review: StoreReview) => {
+  const handleReviewClick = (review: Review) => {
     setSelectedReview(review);
     setShowModal(true);
   };
