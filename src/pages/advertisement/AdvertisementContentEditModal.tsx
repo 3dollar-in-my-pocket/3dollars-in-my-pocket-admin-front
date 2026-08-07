@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from "react";
-import PropTypes from "prop-types";
 import {Button, Form, Modal} from "react-bootstrap";
 import {toast} from "react-toastify";
 import advertisementApi from "../../api/advertisementApi";
@@ -9,7 +8,19 @@ import AdPreview from "../../components/advertisement/AdPreview";
 import {isFieldAvailable, isFieldRequired} from "../../constants/advertisementSpecs";
 import DeepLinkSelector from "../../components/common/DeepLinkSelector";
 
-const AdvertisementContentEditModal = ({show, onHide, ad, fetchAdvertisements}) => {
+interface AdvertisementContentEditModalProps {
+  show: boolean;
+  onHide: () => void;
+  ad?: any;
+  fetchAdvertisements: () => void;
+}
+
+const AdvertisementContentEditModal = ({
+                                         show,
+                                         onHide,
+                                         ad,
+                                         fetchAdvertisements
+                                       }: AdvertisementContentEditModalProps) => {
   const [formData, setFormData] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -508,13 +519,6 @@ const AdvertisementContentEditModal = ({show, onHide, ad, fetchAdvertisements}) 
       </Modal.Footer>
     </Modal>
   );
-};
-
-AdvertisementContentEditModal.propTypes = {
-  show: PropTypes.bool.isRequired,
-  onHide: PropTypes.func.isRequired,
-  ad: PropTypes.object,
-  fetchAdvertisements: PropTypes.func.isRequired,
 };
 
 export default AdvertisementContentEditModal;

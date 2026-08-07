@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from "react";
-import PropTypes from "prop-types";
 import {Button, Form, Modal} from "react-bootstrap";
 import {toast} from "react-toastify";
 import advertisementApi from "../../api/advertisementApi";
@@ -8,7 +7,19 @@ import ContentInfoStep from "./steps/ContentInfoStep";
 import {useNonce} from "../../hooks/useNonce";
 import {isFieldRequired} from "../../constants/advertisementSpecs";
 
-const AdvertisementRegisterModal = ({show, onHide, positions, fetchAdvertisements}) => {
+interface AdvertisementRegisterModalProps {
+  show: boolean;
+  onHide: () => void;
+  positions: { key: string; description: string }[];
+  fetchAdvertisements: () => void;
+}
+
+const AdvertisementRegisterModal = ({
+                                      show,
+                                      onHide,
+                                      positions,
+                                      fetchAdvertisements
+                                    }: AdvertisementRegisterModalProps) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState(getInitialFormData());
   const {nonce, issueNonce, clearNonce} = useNonce();
@@ -182,11 +193,5 @@ function getInitialFormData() {
     orderType: "RANDOM",
   };
 }
-
-AdvertisementRegisterModal.propTypes = {
-  show: PropTypes.bool.isRequired,
-  onHide: PropTypes.func.isRequired,
-  positions: PropTypes.array.isRequired,
-};
 
 export default AdvertisementRegisterModal;

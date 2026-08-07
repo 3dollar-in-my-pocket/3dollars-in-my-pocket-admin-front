@@ -1,12 +1,25 @@
 import React, {useEffect, useState} from "react";
-import PropTypes from "prop-types";
 import {Button, Form, Modal} from "react-bootstrap";
 import {toast} from "react-toastify";
 import advertisementApi from "../../api/advertisementApi";
 import BasicInfoStep from "./steps/BasicInfoStep";
 import AdTimer from "../../components/common/AdTimer";
 
-const AdvertisementEditModal = ({show, onHide, ad, positions, fetchAdvertisements}) => {
+interface AdvertisementEditModalProps {
+  show: boolean;
+  onHide: () => void;
+  ad?: any;
+  positions: { key: string; description: string }[];
+  fetchAdvertisements: () => void;
+}
+
+const AdvertisementEditModal = ({
+                                  show,
+                                  onHide,
+                                  ad,
+                                  positions,
+                                  fetchAdvertisements
+                                }: AdvertisementEditModalProps) => {
   const [formData, setFormData] = useState(null);
 
   const platforms = [
@@ -166,14 +179,6 @@ const AdvertisementEditModal = ({show, onHide, ad, positions, fetchAdvertisement
       </Modal.Footer>
     </Modal>
   );
-};
-
-AdvertisementEditModal.propTypes = {
-  show: PropTypes.bool.isRequired,
-  onHide: PropTypes.func.isRequired,
-  ad: PropTypes.object,
-  positions: PropTypes.array.isRequired,
-  fetchAdvertisements: PropTypes.func.isRequired,
 };
 
 export default AdvertisementEditModal;

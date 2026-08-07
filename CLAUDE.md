@@ -14,11 +14,14 @@
 
 ### 핵심 명령어
 
-- `yarn start` - 개발 서버 실행
-- `yarn build` - 프로덕션 빌드 생성 (TypeScript 컴파일 포함)
-- `yarn test` - react-scripts 기반 테스트 실행
+- `yarn start` (또는 `yarn dev`) - Vite 개발 서버 실행 (http://localhost:3000)
+- `yarn build` - 프로덕션 빌드 생성 (`tsc --noEmit` 타입 검사 후 `vite build`, 산출물은 `build/`)
+- `yarn preview` - 빌드 결과물 로컬 미리보기
 - `yarn outdated` - 패키지 업데이트 상태 확인
 - `yarn upgrade` - 패키지 업데이트
+
+> 빌드 도구는 **Vite**입니다. (CRA/react-scripts에서 전환 완료)
+> 환경변수는 `VITE_` 접두사를 사용하며 `import.meta.env`로 접근합니다. (`process.env` 아님)
 
 ### CI/CD
 
@@ -34,7 +37,7 @@
 
 - **언어**: TypeScript 5.9.3 (JavaScript에서 마이그레이션 완료)
 - **프론트엔드 프레임워크**: React 18.3.1 + React Router DOM 6.11.0
-- **상태 관리**: Recoil 0.7.7 (`src/state/LoginStatus.ts`)
+- **상태 관리**: Zustand 5.0.14 (`src/state/authStore.ts`)
 - **UI 프레임워크**: React Bootstrap 2.10.3 + Bootstrap 5.3.3 + Bootstrap Icons 1.10.3 + React Icons 5.5.0
 - **차트/시각화**: Recharts 3.3.0
 - **HTTP 클라이언트**: Axios 1.7.4 (커스텀 인터셉터 포함)
@@ -61,7 +64,7 @@ src/
 │   ├── authRoutes.tsx    # 인증 관련 라우트
 │   └── infoRoutes.tsx    # 정보 페이지 라우트
 ├── service/       # 비즈니스 로직 서비스 (.ts)
-├── state/         # Recoil 상태 관리 (.ts)
+├── state/         # Zustand 상태 관리 (.ts)
 ├── styles/        # 스타일 파일
 ├── types/         # TypeScript 타입 정의 (.ts)
 ├── utils/         # 유틸리티 함수 (.ts)
@@ -129,13 +132,13 @@ src/
 
 - Google OAuth: `/auth/google/callback` 리다이렉트 콜백
 - 토큰 저장: `LocalStorageService`
-- 로그인 상태: Recoil `LoginStatus` atom으로 관리
-- 환경변수: OAuth Client ID, Secret, Redirect URI
+- 로그인 상태: Zustand `useAuthStore`로 관리
+- 환경변수: OAuth Client ID, Secret, Redirect URI (`VITE_` 접두사)
 
 #### 상태 관리
 
-- Recoil 기반 전역 상태 관리
-- 주요 상태 atom: `LoginStatus`
+- Zustand 기반 전역 상태 관리
+- 주요 스토어: `useAuthStore` (`src/state/authStore.ts`)
 - LocalStorage 연동으로 데이터 지속성 유지
 
 ---
