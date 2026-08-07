@@ -42,17 +42,10 @@ export const REPORT_REASON: Record<ReportReasonCode, ReportReasonCode> = {
   'WRONG_CONTENT': 'WRONG_CONTENT'
 }
 
-export const getReportReasonBadgeClass = (reason: ReportReasonCode): string => {
-  switch (reason) {
-    case REPORT_REASON.NOSTORE:
-      return 'bg-primary';
-    case REPORT_REASON.WRONGNOPOSITION:
-      return 'bg-warning';
-    case REPORT_REASON.OVERLAPSTORE:
-      return 'bg-info';
-    case REPORT_REASON.WRONG_CONTENT:
-      return 'bg-danger';
-    default:
-      return 'bg-secondary';
-  }
-}
+/**
+ * 하위 호환용 re-export
+ *
+ * 표시 로직은 utils/display/reportDisplay.ts로 옮겼습니다.
+ * 새 코드는 원본 경로에서 직접 import하세요.
+ */
+export {getReportReasonBadgeClass} from '../utils/display/reportDisplay';

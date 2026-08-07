@@ -1,7 +1,6 @@
 // Store related type definitions and constants
 import {WRITER_TYPE, WriterType, getWriterTypeBadgeClass} from './common';
 
-
 // Store status types (using common STATUS constants)
 export const STORE_STATUS = {
   ACTIVE: 'ACTIVE',
@@ -83,193 +82,8 @@ export interface Store {
   };
 }
 
-// Utility functions
-export const getStoreStatusDisplayName = (status: string): string => {
-  switch (status) {
-    case 'ACTIVE':
-      return '활성된 가게';
-    case 'AUTO_DELETED':
-      return '자동 삭제된 가게';
-    case 'DELETED':
-      return '삭제된 가게';
-    default:
-      return '알 수 없음';
-  }
-};
-
-export const getStoreStatusBadgeClass = (status: StoreStatus): string => {
-  switch (status) {
-    case STORE_STATUS.ACTIVE:
-      return 'bg-success';
-    case STORE_STATUS.AUTO_DELETED:
-      return 'bg-danger';
-    case STORE_STATUS.DELETED:
-      return 'bg-danger';
-    default:
-      return 'bg-secondary';
-  }
-};
-
-export const getActivitiesStatusDisplayName = (activitiesStatus: ActivitiesStatus): string => {
-  switch (activitiesStatus) {
-    case ACTIVITIES_STATUS.RECENT_ACTIVITY:
-      return '최근 활동 있는 가게';
-    case ACTIVITIES_STATUS.NO_RECENT_ACTIVITY:
-      return '최근 활동 없는 가게';
-    default:
-      return '최근 활동 알 수 없는 가게';
-  }
-};
-
-export const getActivitiesStatusBadgeClass = (activitiesStatus: ActivitiesStatus): string => {
-  switch (activitiesStatus) {
-    case ACTIVITIES_STATUS.RECENT_ACTIVITY:
-      return 'bg-primary';
-    case ACTIVITIES_STATUS.NO_RECENT_ACTIVITY:
-      return 'bg-secondary';
-    default:
-      return 'bg-secondary';
-  }
-};
-
-export const formatRating = (rating?: number): string => {
-  if (!rating || rating <= 0) {
-    return '아직 리뷰가 없어요';
-  }
-  return `${rating.toFixed(1)}점`;
-};
-
-export const validateStoreSearch = (searchType: StoreSearchType, keyword: string): string | null => {
-  if (searchType === STORE_SEARCH_TYPES.KEYWORD) {
-    if (!keyword || !keyword.trim()) {
-      return '검색어를 입력해주세요.';
-    }
-  }
-
-  if (searchType === STORE_SEARCH_TYPES.STORE_ID) {
-    if (!keyword || !keyword.trim()) {
-      return '가게 ID를 입력해주세요.';
-    }
-
-    // 쉼표로 구분된 ID들 검증
-    const ids = keyword.split(',').map(id => id.trim()).filter(id => id);
-
-    if (ids.length === 0) {
-      return '가게 ID를 입력해주세요.';
-    }
-
-    if (ids.length > 5) {
-      return '최대 5개의 가게 ID만 입력 가능합니다.';
-    }
-
-    // 모든 ID가 숫자인지 확인
-    const hasInvalidId = ids.some(id => !/^\d+$/.test(id));
-    if (hasInvalidId) {
-      return '가게 ID는 숫자만 입력 가능합니다.';
-    }
-  }
-
-  return null;
-};
-
-export const getCategoryIcon = (categoryId: string): string => {
-  // 카테고리별 아이콘 매핑
-  const categoryIconMap = {
-    'JAPANESE_CUISINE': 'bi-emoji-smile',
-    'WESTERN_CUISINE': 'bi-cup-hot',
-    'GUNGOGUMA': 'bi-fire',
-    'DEFAULT': 'bi-shop'
-  };
-
-  return categoryIconMap[categoryId] || categoryIconMap['DEFAULT'];
-};
-
-export const getSalesTypeDisplayName = (salesType: SalesType): string => {
-  switch (salesType) {
-    case SALES_TYPE.ROAD:
-      return '길거리';
-    case SALES_TYPE.STORE:
-      return '매장';
-    default:
-      return '알 수 없음';
-  }
-};
-
-export const getSalesTypeBadgeClass = (salesType: SalesType): string => {
-  switch (salesType) {
-    case SALES_TYPE.ROAD:
-      return 'bg-info';
-    case SALES_TYPE.STORE:
-      return 'bg-success';
-    default:
-      return 'bg-secondary';
-  }
-};
-
-export const getOpenStatusDisplayName = (openStatus: OpenStatus): string => {
-  switch (openStatus) {
-    case OPEN_STATUS.OPEN:
-      return '영업중';
-    case OPEN_STATUS.CLOSED:
-      return '영업종료';
-    default:
-      return '알 수 없음';
-  }
-};
-
-export const getOpenStatusBadgeClass = (openStatus: OpenStatus): string => {
-  switch (openStatus) {
-    case OPEN_STATUS.OPEN:
-      return 'bg-success';
-    case OPEN_STATUS.CLOSED:
-      return 'bg-secondary';
-    default:
-      return 'bg-secondary';
-  }
-};
-
 // Re-export getWriterTypeBadgeClass for backward compatibility
 export {getWriterTypeBadgeClass};
-
-export const formatCount = (count: number): string => {
-  if (count >= 1000) {
-    return `${(count / 1000).toFixed(1)}k`;
-  }
-  return count.toLocaleString();
-};
-
-export const getStoreTypeDisplayName = (storeType: StoreType): string => {
-  switch (storeType) {
-    case STORE_TYPE.USER_STORE:
-      return '유저 제보 가게';
-    case STORE_TYPE.BOSS_STORE:
-      return '사장님 가게';
-    default:
-      return '알 수 없음';
-  }
-};
-
-export const getStoreTypeBadgeClass = (storeType: StoreType): string => {
-  switch (storeType) {
-    case STORE_TYPE.USER_STORE:
-      return 'bg-info';
-    case STORE_TYPE.BOSS_STORE:
-      return 'bg-warning';
-    default:
-      return 'bg-secondary';
-  }
-};
-
-export const getStoreTypeIcon = (storeType: StoreType): string => {
-  switch (storeType) {
-    case STORE_TYPE.USER_STORE:
-      return 'bi-people-fill';
-    case STORE_TYPE.BOSS_STORE:
-      return 'bi-person-badge-fill';
-    default:
-      return 'bi-question-circle-fill';
-  }
-};
 
 export const isVisitsSupported = (storeType: StoreType): boolean => {
   const supportedTypes: StoreType[] = [STORE_TYPE.USER_STORE];
@@ -316,68 +130,30 @@ export interface StoreChangeHistory {
   changedAt: string;
 }
 
-export const getChangeAttributeIcon = (attributeType: ChangeAttributeType): string => {
-  switch (attributeType) {
-    case CHANGE_ATTRIBUTE_TYPE.NAME:
-      return 'bi-tag-fill';
-    case CHANGE_ATTRIBUTE_TYPE.LOCATION:
-      return 'bi-geo-alt-fill';
-    case CHANGE_ATTRIBUTE_TYPE.OPENING_DAY:
-      return 'bi-calendar-week-fill';
-    case CHANGE_ATTRIBUTE_TYPE.OPENING_HOUR:
-      return 'bi-clock-fill';
-    case CHANGE_ATTRIBUTE_TYPE.SALES_TYPE:
-      return 'bi-shop';
-    case CHANGE_ATTRIBUTE_TYPE.PAYMENT_METHOD:
-      return 'bi-credit-card-fill';
-    default:
-      return 'bi-pencil-fill';
-  }
-};
-
-export const getChangeAttributeBadgeClass = (attributeType: ChangeAttributeType): string => {
-  switch (attributeType) {
-    case CHANGE_ATTRIBUTE_TYPE.NAME:
-      return 'bg-primary';
-    case CHANGE_ATTRIBUTE_TYPE.LOCATION:
-      return 'bg-success';
-    case CHANGE_ATTRIBUTE_TYPE.OPENING_DAY:
-      return 'bg-info';
-    case CHANGE_ATTRIBUTE_TYPE.OPENING_HOUR:
-      return 'bg-warning';
-    case CHANGE_ATTRIBUTE_TYPE.SALES_TYPE:
-      return 'bg-danger';
-    case CHANGE_ATTRIBUTE_TYPE.PAYMENT_METHOD:
-      return 'bg-secondary';
-    default:
-      return 'bg-dark';
-  }
-};
-
-// Store label utility functions
-export const getLabelDisplayName = (label: string): string => {
-  switch (label) {
-    case STORE_LABEL.VERIFIED:
-      return '인증된 가게';
-    default:
-      return label;
-  }
-};
-
-export const getLabelBadgeClass = (label: string): string => {
-  switch (label) {
-    case STORE_LABEL.VERIFIED:
-      return 'bg-success';
-    default:
-      return 'bg-secondary';
-  }
-};
-
-export const getLabelIcon = (label: string): string => {
-  switch (label) {
-    case STORE_LABEL.VERIFIED:
-      return 'bi-patch-check-fill';
-    default:
-      return 'bi-tag-fill';
-  }
-};
+/**
+ * 하위 호환용 re-export
+ *
+ * 표시·검증·포맷 로직은 아래 위치로 옮겼습니다. 새 코드는 원본 경로에서
+ * 직접 import하세요.
+ */
+export {
+  getStoreStatusDisplayName,
+  getStoreStatusBadgeClass,
+  getActivitiesStatusDisplayName,
+  getActivitiesStatusBadgeClass,
+  getCategoryIcon,
+  getSalesTypeDisplayName,
+  getSalesTypeBadgeClass,
+  getOpenStatusDisplayName,
+  getOpenStatusBadgeClass,
+  getStoreTypeDisplayName,
+  getStoreTypeBadgeClass,
+  getStoreTypeIcon,
+  getChangeAttributeIcon,
+  getChangeAttributeBadgeClass,
+  getLabelDisplayName,
+  getLabelBadgeClass,
+  getLabelIcon
+} from '../utils/display/storeDisplay';
+export {validateStoreSearch} from '../utils/validation/storeValidation';
+export {formatRating, formatCount} from '../utils/formatUtils';

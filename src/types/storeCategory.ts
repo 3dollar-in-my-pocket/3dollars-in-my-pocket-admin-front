@@ -28,27 +28,12 @@ export interface StoreCategoryResponse {
 }
 
 /**
- * 카테고리 분류 타입별 배지 색상
+ * 하위 호환용 re-export
+ *
+ * 표시 로직은 utils/display/storeCategoryDisplay.ts로 옮겼습니다.
+ * 새 코드는 원본 경로에서 직접 import하세요.
  */
-export const getCategoryClassificationBadgeClass = (type: string): string => {
-  const badgeMap: Record<string, string> = {
-    'TREND_SNACKS': 'bg-danger',
-    'SNACKS': 'bg-warning',
-    'MEAL': 'bg-primary',
-  };
-
-  return badgeMap[type] || 'bg-secondary';
-};
-
-/**
- * 카테고리 분류 타입별 아이콘
- */
-export const getCategoryClassificationIcon = (type: string): string => {
-  const iconMap: Record<string, string> = {
-    'TREND_SNACKS': 'bi-star-fill',
-    'SNACKS': 'bi-basket-fill',
-    'MEAL': 'bi-egg-fried',
-  };
-
-  return iconMap[type] || 'bi-question-circle-fill';
-};
+export {
+  getCategoryClassificationBadgeClass,
+  getCategoryClassificationIcon
+} from '../utils/display/storeCategoryDisplay';

@@ -33,40 +33,20 @@ export interface StoreCoupon extends Coupon {
   store?: SimpleStore;
 }
 
-// Utility functions
-export const getCouponStatusDisplayName = (status: CouponStatus): string => {
-  switch (status) {
-    case COUPON_STATUS.ACTIVE:
-      return '발급 중';
-    case COUPON_STATUS.STOPPED:
-      return '발급 중지 (사용만 가능)';
-    case COUPON_STATUS.ENDED:
-      return '사용 종료';
-    default:
-      return '알 수 없음';
-  }
-};
+/**
+ * 하위 호환용 별칭
+ *
+ * dateUtils의 formatDateTimeShortKo와 동일합니다. 새 코드는 그쪽을 사용하세요.
+ */
+export {formatDateTimeShortKo as formatCouponDate} from '../utils/dateUtils';
 
-export const getCouponStatusBadgeClass = (status: CouponStatus): string => {
-  switch (status) {
-    case COUPON_STATUS.ACTIVE:
-      return 'bg-success';
-    case COUPON_STATUS.STOPPED:
-      return 'bg-warning';
-    case COUPON_STATUS.ENDED:
-      return 'bg-secondary';
-    default:
-      return 'bg-secondary';
-  }
-};
-
-export const formatCouponDate = (dateString: string): string => {
-  if (!dateString) return '없음';
-  return new Date(dateString).toLocaleString('ko-KR', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-};
+/**
+ * 하위 호환용 re-export
+ *
+ * 표시 로직은 utils/display/couponDisplay.ts로 옮겼습니다.
+ * 새 코드는 원본 경로에서 직접 import하세요.
+ */
+export {
+  getCouponStatusDisplayName,
+  getCouponStatusBadgeClass
+} from '../utils/display/couponDisplay';

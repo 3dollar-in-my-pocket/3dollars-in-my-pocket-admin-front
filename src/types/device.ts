@@ -13,13 +13,10 @@ export const DEVICE_OS = {
   UNKNOWN: 'UNKNOWN'
 };
 
-export const getOsBadgeClass = (os: string) => {
-  switch (os) {
-    case DEVICE_OS.IOS:
-      return 'bg-primary';
-    case DEVICE_OS.AOS:
-      return 'bg-success';
-    default:
-      return 'bg-secondary';
-  }
-};
+/**
+ * 하위 호환용 re-export
+ *
+ * 표시 로직은 utils/display/deviceDisplay.ts로 옮겼습니다.
+ * 새 코드는 원본 경로에서 직접 import하세요.
+ */
+export {getOsBadgeClass} from '../utils/display/deviceDisplay';

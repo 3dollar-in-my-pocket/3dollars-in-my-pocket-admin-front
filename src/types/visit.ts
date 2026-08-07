@@ -34,38 +34,14 @@ export interface Visit {
 /** 응답 스키마가 Visit과 동일합니다. */
 export type UserVisit = Visit;
 
-// 방문 타입 표시 이름
-export const getVisitTypeDisplayName = (visitType: VisitTypeCode): string => {
-  switch (visitType) {
-    case 'EXISTS':
-      return '존재해요';
-    case 'NOT_EXISTS':
-      return '없어졌어요';
-    default:
-      return visitType;
-  }
-};
-
-// 방문 타입 배지 클래스
-export const getVisitTypeBatchClass = (visitType: VisitTypeCode): string => {
-  switch (visitType) {
-    case 'EXISTS':
-      return 'bg-success';
-    case 'NOT_EXISTS':
-      return 'bg-danger';
-    default:
-      return 'bg-secondary';
-  }
-};
-
-// 방문 타입 아이콘 클래스
-export const getVisitIconClass = (visitType: VisitTypeCode): string => {
-  switch (visitType) {
-    case 'EXISTS':
-      return 'bi-check-circle-fill';
-    case 'NOT_EXISTS':
-      return 'bi-x-circle-fill';
-    default:
-      return 'bi-question-circle-fill';
-  }
-};
+/**
+ * 하위 호환용 re-export
+ *
+ * 표시 로직은 utils/display/visitDisplay.ts로 옮겼습니다.
+ * 새 코드는 원본 경로에서 직접 import하세요.
+ */
+export {
+  getVisitTypeDisplayName,
+  getVisitTypeBatchClass,
+  getVisitIconClass
+} from '../utils/display/visitDisplay';
