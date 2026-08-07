@@ -39,7 +39,9 @@ const AdvertisementContentEditModal = ({
         imageUrl: ad.imageUrl || "",
         imageWidth: ad.imageWidth || "",
         imageHeight: ad.imageHeight || "",
-        linkType: ad.linkType || "WEB",
+        // 조회 응답(AdvertisementResponse)에는 linkType이 없고 linkUrl만 내려옵니다.
+        // 웹 링크가 아니면 앱 딥링크로 보고 기존 값을 복원합니다.
+        linkType: ad.linkUrl && !/^https?:\/\//i.test(ad.linkUrl) ? "APP_SCHEME" : "WEB",
         linkUrl: ad.linkUrl || "",
         exposureIndex: ad.exposureIndex !== null && ad.exposureIndex !== undefined ? ad.exposureIndex : null,
       });

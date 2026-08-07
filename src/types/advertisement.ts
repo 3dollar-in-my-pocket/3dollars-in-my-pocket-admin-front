@@ -60,8 +60,12 @@ export interface Advertisement {
   imageUrl: string;
   imageWidth?: number | null;
   imageHeight?: number | null;
-  /** 응답 스키마에는 명시되어 있지 않으나 콘텐츠 수정 화면에서 참조합니다. */
-  linkType?: AdvertisementLinkType | null;
+  /**
+   * 링크 주소.
+   *
+   * 응답에는 linkType이 없어 주소 형태로 유형을 추론해야 합니다.
+   * (요청 AdvertisementLinkRequest는 linkType을 함께 받습니다)
+   */
   linkUrl?: string | null;
   exposureIndex?: number | null;
   startDateTime: string;
