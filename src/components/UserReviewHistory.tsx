@@ -55,16 +55,6 @@ const UserReviewHistory = ({userId, isActive, onStoreClick}) => {
     setSelectedReview(null);
   };
 
-  const getSalesTypeBadge = (salesType) => {
-    if (!salesType) return null;
-    const badgeClass = salesType.type === 'ROAD' ? 'bg-success' :
-      salesType.type === 'STORE' ? 'bg-primary' : 'bg-secondary';
-    return (
-      <span className={`badge ${badgeClass} bg-opacity-10 text-dark border rounded-pill px-2 py-1 small`}>
-        {salesType.description || salesType.type}
-      </span>
-    );
-  };
 
   const getStatusBadge = (status) => {
     if (!status) return null;
@@ -288,7 +278,6 @@ const UserReviewHistory = ({userId, isActive, onStoreClick}) => {
                         </div>
                         <div className="d-flex gap-1 flex-wrap">
                           {getReviewStatusBadge(review.status)}
-                          {getSalesTypeBadge(review.store?.salesType)}
                           {getStoreStatusBadge(review.store?.status)}
                           {review.store?.storeType && getStoreTypeBadge(review.store.storeType)}
                         </div>
@@ -448,7 +437,6 @@ const UserReviewHistory = ({userId, isActive, onStoreClick}) => {
                       <div>
                         <label className="form-label fw-semibold text-muted mb-1">가게 상태</label>
                         <div className="d-flex gap-2">
-                          {getSalesTypeBadge(selectedReview?.store?.salesType)}
                           {getStatusBadge(selectedReview?.store?.status)}
                           {getActivitiesStatusBadge(selectedReview?.store?.activitiesStatus)}
                         </div>

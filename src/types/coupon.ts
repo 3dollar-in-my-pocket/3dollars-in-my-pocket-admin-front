@@ -1,6 +1,6 @@
 // Coupon related type definitions and constants
 
-import { StoreInfo } from './review';
+import { SimpleStore } from './domain';
 
 // Coupon status types
 export const COUPON_STATUS = {
@@ -30,7 +30,7 @@ export interface Coupon {
 }
 
 export interface StoreCoupon extends Coupon {
-  store?: StoreInfo;
+  store?: SimpleStore;
 }
 
 // Utility functions

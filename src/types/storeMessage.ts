@@ -1,9 +1,9 @@
-import {StoreInfo} from './review';
+import {SimpleStore} from './domain';
 
 export interface StoreMessage {
   messageId: string;
   body: string;
-  store?: StoreInfo;
+  store?: SimpleStore;
   createdAt: string;
   updatedAt: string;
 }

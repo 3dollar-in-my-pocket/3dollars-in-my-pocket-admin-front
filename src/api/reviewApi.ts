@@ -28,7 +28,7 @@ export default {
    * @param {string} reviewId - 블라인드할 리뷰 ID
    * @returns {Promise<ApiResponse<void>>} 블라인드 결과
    */
-  blindStoreReview: async (reviewId: string): Promise<ApiResponse<void>> => {
+  blindStoreReview: async (reviewId: number | string): Promise<ApiResponse<void>> => {
     return apiPut<void>(`/v1/store-review/${reviewId}/blind`, undefined);
   },
 

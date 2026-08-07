@@ -139,7 +139,7 @@ const StoreImageHistory = ({storeId, isActive, onAuthorClick}) => {
                   {/* 이미지 */}
                   <div className="position-relative">
                     <img
-                      src={image.imageUrl || image.url}
+                      src={image.url}
                       alt="Store"
                       className="card-img-top"
                       style={{
@@ -161,14 +161,6 @@ const StoreImageHistory = ({storeId, isActive, onAuthorClick}) => {
                         보기
                       </span>
                     </div>
-                    {/* 이미지 크기 정보 */}
-                    {(image.width && image.height) && (
-                      <div className="position-absolute bottom-0 start-0 p-2">
-                        <span className="badge bg-info bg-opacity-90 rounded-pill small">
-                          {image.width} × {image.height}
-                        </span>
-                      </div>
-                    )}
                   </div>
 
                   <div className="card-body p-3">
@@ -333,7 +325,7 @@ const StoreImageHistory = ({storeId, isActive, onAuthorClick}) => {
               </div>
               <div className="modal-body p-0 text-center">
                 <img
-                  src={selectedImage.imageUrl || selectedImage.url}
+                  src={selectedImage.url}
                   alt="Store"
                   className="img-fluid"
                   style={{maxHeight: '500px', width: 'auto'}}
@@ -376,12 +368,6 @@ const StoreImageHistory = ({storeId, isActive, onAuthorClick}) => {
                       <i className="bi bi-calendar me-1"></i>
                       등록일: {formatDateTime(selectedImage.createdAt)}
                     </small>
-                    {(selectedImage.width && selectedImage.height) && (
-                      <small className="text-muted">
-                        <i className="bi bi-aspect-ratio me-1"></i>
-                        크기: {selectedImage.width} × {selectedImage.height}px
-                      </small>
-                    )}
                     {selectedImage.store?.storeType && (
                       <div className="mt-1">
                         {getStoreTypeBadge(selectedImage.store.storeType)}

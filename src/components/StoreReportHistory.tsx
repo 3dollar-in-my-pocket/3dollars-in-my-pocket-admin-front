@@ -192,22 +192,7 @@ const StoreReportHistory = ({storeId, isActive, onAuthorClick}) => {
                         </div>
 
                         <div className="d-flex justify-content-between align-items-center">
-                          <div className="d-flex align-items-center gap-2">
-                            {report.priority && (
-                              <span className={`badge rounded-pill px-2 py-1 ${
-                                report.priority === 'HIGH' ? 'bg-danger bg-opacity-10 text-danger border border-danger' :
-                                  report.priority === 'MEDIUM' ? 'bg-warning bg-opacity-10 text-warning border border-warning' :
-                                    'bg-secondary bg-opacity-10 text-secondary border border-secondary'
-                              }`}>
-                                <i className={`bi ${
-                                  report.priority === 'HIGH' ? 'bi-exclamation-triangle' :
-                                    report.priority === 'MEDIUM' ? 'bi-exclamation-circle' :
-                                      'bi-info-circle'
-                                } me-1`}></i>
-                                {report.priority === 'HIGH' ? '높음' : report.priority === 'MEDIUM' ? '보통' : '낮음'}
-                              </span>
-                            )}
-                          </div>
+                          <div className="d-flex align-items-center gap-2"></div>
                           <button
                             className="btn btn-outline-danger btn-sm rounded-pill px-3"
                             onClick={(e) => {
