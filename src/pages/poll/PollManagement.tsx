@@ -2,6 +2,7 @@ import {useState, useEffect, useCallback, useRef} from 'react';
 import {toast} from 'react-toastify';
 import pollApi from '@/api/pollApi';
 import SearchHeader from '@/components/common/SearchHeader';
+import useCursorPagination from '@/hooks/useCursorPagination';
 import PollCard from '@/components/poll/PollCard';
 import UserDetailModal from '@/pages/user/UserDetailModal';
 
@@ -12,12 +13,7 @@ import {Writer} from '@/types/domain';
 const PollManagement = () => {
   const [categories, setCategories] = useState<PollCategory[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('');
-  const [polls, setPolls] = useState<Poll[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
-  const cursorRef = useRef<string | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
   // 카테고리 목록 조회
@@ -38,70 +34,30 @@ const PollManagement = () => {
   }, []);
 
   // 투표 목록 조회
-  const fetchPolls = useCallback(async (category: string, isLoadMore = false) => {
-    if (!category) return;
+  const fetchPollPage = useCallback(
+    (cursor: string | null) => pollApi.getPolls(selectedCategory, 30, cursor),
+    [selectedCategory]
+  );
 
-    const currentCursor = isLoadMore ? cursorRef.current : null;
-
-    if (isLoadMore) {
-      setIsLoadingMore(true);
-    } else {
-      setIsLoading(true);
-      setPolls([]);
-      cursorRef.current = null;
-      setHasMore(false);
-    }
-
-    try {
-      const response = await pollApi.getPolls(
-        category,
-        30,
-        currentCursor
-      );
-
-      if (response.ok) {
-        const newPolls = response.data.contents;
-
-        if (isLoadMore) {
-          setPolls(prev => [...prev, ...newPolls]);
-        } else {
-          setPolls(newPolls);
-        }
-
-        // 서버에서 제공하는 hasMore와 nextCursor 값 사용
-        setHasMore(response.data.cursor.hasMore);
-
-        // 서버에서 제공하는 nextCursor 값을 그대로 사용
-        if (response.data.cursor.hasMore && response.data.cursor.nextCursor) {
-          cursorRef.current = response.data.cursor.nextCursor;
-        } else {
-          cursorRef.current = null;
-        }
-      }
-    } catch (error) {
-      if (!isLoadMore) {
-        setPolls([]);
-        setHasMore(false);
-        cursorRef.current = null;
-      }
-    } finally {
-      setIsLoading(false);
-      setIsLoadingMore(false);
-    }
-  }, []);
-
-  // 카테고리 변경 시 투표 목록 새로 조회
-  useEffect(() => {
-    if (selectedCategory) {
-      fetchPolls(selectedCategory);
-    }
-  }, [selectedCategory]);
+  const {
+    items: polls,
+    isLoading,
+    isLoadingMore,
+    hasMore,
+    refresh: fetchPolls,
+    loadMore
+  } = useCursorPagination<Poll>({
+    fetcher: fetchPollPage,
+    enabled: Boolean(selectedCategory),
+    deps: [selectedCategory],
+    errorMessage: '투표 목록을 불러오지 못했습니다.'
+  });
 
   // 무한 스크롤 처리 (디바운싱 추가)
   const lastScrollTime = useRef(0);
   const handleScroll = useCallback(() => {
     const container = scrollContainerRef.current;
-    if (!container || isLoadingMore || !hasMore || !cursorRef.current) return;
+    if (!container || isLoadingMore || !hasMore) return;
 
     const now = Date.now();
     // 300ms 디바운싱으로 중복 호출 방지
@@ -113,9 +69,9 @@ const PollManagement = () => {
     // 스크롤이 하단 근처에 도달했을 때만 더보기 실행
     if (scrollHeight - scrollTop - clientHeight < threshold) {
       lastScrollTime.current = now;
-      fetchPolls(selectedCategory, true);
+      loadMore();
     }
-  }, [selectedCategory, isLoadingMore, hasMore, fetchPolls]);
+  }, [isLoadingMore, hasMore, loadMore]);
 
   // 스크롤 이벤트 등록
   useEffect(() => {
@@ -161,7 +117,7 @@ const PollManagement = () => {
     const response = await pollApi.deletePoll(poll.pollId);
     if (response.ok) {
       toast.success('투표가 성공적으로 삭제되었습니다.');
-      fetchPolls(selectedCategory);
+      fetchPolls();
     }
   };
 
@@ -271,7 +227,7 @@ const PollManagement = () => {
               WebkitOverflowScrolling: 'touch'
             }}
           >
-            {isLoading ? (
+            {isLoading && polls.length === 0 ? (
               <div className="text-center py-5">
                 <div className="spinner-border text-primary mb-3" style={{width: '3rem', height: '3rem'}} role="status">
                   <span className="visually-hidden">Loading...</span>
@@ -320,8 +276,8 @@ const PollManagement = () => {
                     ) : (
                       <button
                         className="btn btn-outline-primary rounded-pill px-4 py-2"
-                        onClick={() => fetchPolls(selectedCategory, true)}
-                        disabled={!cursorRef.current}
+                        onClick={loadMore}
+                        disabled={isLoadingMore}
                       >
                         <i className="bi bi-plus-circle me-2"></i>
                         더 많은 투표 보기

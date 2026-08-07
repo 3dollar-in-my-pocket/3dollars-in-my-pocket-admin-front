@@ -1,9 +1,10 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import { Badge } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import storeImageApi from '@/api/storeImageApi';
 import { StoreImage } from '@/types/storeImage';
 import useInfiniteScroll from '@/hooks/useInfiniteScroll';
+import useCursorPagination from '@/hooks/useCursorPagination';
 import EmptyState from '@/components/common/EmptyState';
 import StoreDetailModal from '@/pages/store/StoreDetailModal';
 import UserDetailModal from '@/pages/user/UserDetailModal';
@@ -11,57 +12,32 @@ import UserDetailModal from '@/pages/user/UserDetailModal';
 import {formatDateTimeNumeric as formatDate} from '@/utils/dateUtils';
 
 const StoreImageManage = () => {
-  const [images, setImages] = useState<StoreImage[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(false);
   const [selectedStore, setSelectedStore] = useState<any>(null);
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [selectedImage, setSelectedImage] = useState<StoreImage | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // cursor와 isLoading을 ref로 관리하여 useCallback 의존성 문제 해결
-  const cursorRef = useRef<string | null>(null);
-  const isLoadingRef = useRef(false);
+  const fetchImages = useCallback(
+    (cursor: string | null) => storeImageApi.getAllStoreImages(cursor, 20),
+    []
+  );
 
-  const fetchImages = useCallback(async (reset = false) => {
-    // 중복 호출 방지
-    if (isLoadingRef.current) return;
-
-    isLoadingRef.current = true;
-    setIsLoading(true);
-    try {
-      const response = await storeImageApi.getAllStoreImages(reset ? null : cursorRef.current, 20);
-      if (!response?.ok) {
-        return;
-      }
-
-      const { contents = [], cursor: newCursor } = response.data || { contents: [], cursor: { hasMore: false, nextCursor: null } };
-
-      if (reset) {
-        setImages(contents);
-        cursorRef.current = null; // reset 시 cursor 초기화
-      } else {
-        setImages(prev => [...prev, ...contents]);
-      }
-
-      setHasMore(newCursor.hasMore || false);
-      cursorRef.current = newCursor.nextCursor || null;
-    } finally {
-      isLoadingRef.current = false;
-      setIsLoading(false);
-    }
-  }, []);
-
-  // 초기 데이터 로드
-  useEffect(() => {
-    fetchImages(true);
-  }, [fetchImages]);
+  const {
+    items: images,
+    setItems: setImages,
+    isLoading,
+    hasMore,
+    loadMore
+  } = useCursorPagination<StoreImage>({
+    fetcher: fetchImages,
+    errorMessage: '가게 이미지를 불러오는데 실패했습니다.'
+  });
 
   // Infinite Scroll 훅 사용
   const { scrollContainerRef, loadMoreRef } = useInfiniteScroll({
     hasMore,
     isLoading,
-    onLoadMore: () => fetchImages(false),
+    onLoadMore: loadMore,
     threshold: 0.1
   });
 

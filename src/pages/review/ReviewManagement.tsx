@@ -1,5 +1,5 @@
 import StoreTypeBadge from '@/components/common/badges/StoreTypeBadge';
-import {useEffect, useState, useCallback, useRef} from 'react';
+import {useState, useCallback} from 'react';
 import {toast} from 'react-toastify';
 import reviewApi from '@/api/reviewApi';
 import {Review} from '@/types/review';
@@ -7,14 +7,12 @@ import {Review} from '@/types/review';
 import UserDetailModal from '@/pages/user/UserDetailModal';
 import StoreDetailModal from '@/pages/store/StoreDetailModal';
 import useInfiniteScroll from '@/hooks/useInfiniteScroll';
+import useCursorPagination from '@/hooks/useCursorPagination';
 import EmptyState from '@/components/common/EmptyState';
 
 import {formatDateTimeShortKo as formatDateTime} from '@/utils/dateUtils';
 
 const ReviewManagement = () => {
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(false);
   const [selectedReview, setSelectedReview] = useState<Review | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [isBlinding, setIsBlinding] = useState(false);
@@ -22,49 +20,27 @@ const ReviewManagement = () => {
   const [selectedStore, setSelectedStore] = useState<any>(null);
   const [skeletonCount] = useState(3);
 
-  // cursor와 isLoading을 ref로 관리하여 useCallback 의존성 문제 해결
-  const cursorRef = useRef<string | null>(null);
-  const isLoadingRef = useRef(false);
+  const fetchReviews = useCallback(
+    (cursor: string | null) => reviewApi.getAllStoreReviews(cursor, 20),
+    []
+  );
 
-  const fetchReviews = useCallback(async (reset = false) => {
-    // 중복 호출 방지
-    if (isLoadingRef.current) return;
-
-    isLoadingRef.current = true;
-    setIsLoading(true);
-    try {
-      const response = await reviewApi.getAllStoreReviews(reset ? null : cursorRef.current, 20);
-      if (!response?.ok) {
-        return;
-      }
-
-      const {contents = [], cursor: newCursor} = response.data || { contents: [], cursor: { hasMore: false, nextCursor: null } };
-
-      if (reset) {
-        setReviews(contents);
-        cursorRef.current = null; // reset 시 cursor 초기화
-      } else {
-        setReviews(prev => [...prev, ...contents]);
-      }
-
-      setHasMore(newCursor.hasMore || false);
-      cursorRef.current = newCursor.nextCursor || null;
-    } finally {
-      isLoadingRef.current = false;
-      setIsLoading(false);
-    }
-  }, []);
-
-  // 초기 데이터 로드
-  useEffect(() => {
-    fetchReviews(true);
-  }, [fetchReviews]);
+  const {
+    items: reviews,
+    isLoading,
+    hasMore,
+    refresh,
+    loadMore
+  } = useCursorPagination<Review>({
+    fetcher: fetchReviews,
+    errorMessage: '리뷰를 불러오는데 실패했습니다.'
+  });
 
   // Infinite Scroll 훅 사용
   const { scrollContainerRef, loadMoreRef } = useInfiniteScroll({
     hasMore,
     isLoading,
-    onLoadMore: () => fetchReviews(false),
+    onLoadMore: loadMore,
     threshold: 0.1
   });
 
@@ -154,7 +130,7 @@ const ReviewManagement = () => {
         toast.success('리뷰가 성공적으로 블라인드 처리되었습니다.');
         setShowModal(false);
         // 리뷰 목록 새로고침
-        fetchReviews(true);
+        refresh();
       }
     } finally {
       setIsBlinding(false);
@@ -187,7 +163,7 @@ const ReviewManagement = () => {
         </h2>
         <button
           className="btn btn-outline-primary btn-sm rounded-pill px-2 px-md-3"
-          onClick={() => fetchReviews(true)}
+          onClick={refresh}
           disabled={isLoading}
           style={{minHeight: '44px', minWidth: '44px'}}
         >

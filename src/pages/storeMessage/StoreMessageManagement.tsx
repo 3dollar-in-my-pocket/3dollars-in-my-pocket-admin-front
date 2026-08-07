@@ -1,65 +1,41 @@
 import StoreTypeBadge from '@/components/common/badges/StoreTypeBadge';
-import {useEffect, useState, useCallback, useRef} from 'react';
+import {useState, useCallback} from 'react';
 import storeMessageApi from '@/api/storeMessageApi';
 import {StoreMessage} from '@/types/storeMessage';
 
 import StoreDetailModal from '@/pages/store/StoreDetailModal';
 import useInfiniteScroll from '@/hooks/useInfiniteScroll';
+import useCursorPagination from '@/hooks/useCursorPagination';
 import EmptyState from '@/components/common/EmptyState';
 
 import {formatDateTimeShortKo as formatDateTime} from '@/utils/dateUtils';
 
 const StoreMessageManagement = () => {
-  const [messages, setMessages] = useState<StoreMessage[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState<StoreMessage | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [selectedStore, setSelectedStore] = useState<any>(null);
 
-  // cursor와 isLoading을 ref로 관리하여 useCallback 의존성 문제 해결
-  const cursorRef = useRef<string | null>(null);
-  const isLoadingRef = useRef(false);
+  const fetchMessages = useCallback(
+    (cursor: string | null) => storeMessageApi.getAllStoreMessages(cursor, 20),
+    []
+  );
 
-  const fetchMessages = useCallback(async (reset = false) => {
-    // 중복 호출 방지
-    if (isLoadingRef.current) return;
-
-    isLoadingRef.current = true;
-    setIsLoading(true);
-    try {
-      const response = await storeMessageApi.getAllStoreMessages(reset ? null : cursorRef.current, 20);
-      if (!response?.ok) {
-        return;
-      }
-
-      const {contents = [], cursor: newCursor} = response.data || { contents: [], cursor: { hasMore: false, nextCursor: null } };
-
-      if (reset) {
-        setMessages(contents);
-        cursorRef.current = null; // reset 시 cursor 초기화
-      } else {
-        setMessages(prev => [...prev, ...contents]);
-      }
-
-      setHasMore(newCursor.hasMore || false);
-      cursorRef.current = newCursor.nextCursor || null;
-    } finally {
-      isLoadingRef.current = false;
-      setIsLoading(false);
-    }
-  }, []);
-
-  // 초기 데이터 로드
-  useEffect(() => {
-    fetchMessages(true);
-  }, [fetchMessages]);
+  const {
+    items: messages,
+    isLoading,
+    hasMore,
+    refresh,
+    loadMore
+  } = useCursorPagination<StoreMessage>({
+    fetcher: fetchMessages,
+    errorMessage: '메시지를 불러오는데 실패했습니다.'
+  });
 
   // Infinite Scroll 훅 사용
   const { scrollContainerRef, loadMoreRef } = useInfiniteScroll({
     hasMore,
     isLoading,
-    onLoadMore: () => fetchMessages(false),
+    onLoadMore: loadMore,
     threshold: 0.1
   });
 
@@ -84,7 +60,7 @@ const StoreMessageManagement = () => {
         </h2>
         <button
           className="btn btn-outline-primary btn-sm rounded-pill px-3"
-          onClick={() => fetchMessages(true)}
+          onClick={refresh}
           disabled={isLoading}
         >
           <i className="bi bi-arrow-clockwise me-1"></i>

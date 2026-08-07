@@ -1,12 +1,12 @@
-import {FormEvent, useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {FormEvent, useCallback, useMemo, useState} from 'react';
 import {Image} from '@/types/domain';
 import storeMarkerApi from '@/api/storeMarkerApi';
 import EmptyState from '@/components/common/EmptyState';
+import useCursorPagination from '@/hooks/useCursorPagination';
 import useInfiniteScroll from '@/hooks/useInfiniteScroll';
 import StoreDetailModal from '@/pages/store/StoreDetailModal';
 import {StoreMarker} from '@/types/storeMarker';
 import {formatDateTime} from '@/utils/dateUtils';
-import {toast} from 'react-toastify';
 
 const toApiDateTime = (value: string): string => {
   if (!value) return value;
@@ -21,77 +21,54 @@ const getMarkerImageUrl = (image?: Image): string => {
 const getMarkerImageSize = (value?: number): number => Number(value || 0);
 
 const StoreMarkerManage = () => {
-  const [markers, setMarkers] = useState<StoreMarker[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(false);
   const [filterStartDateTime, setFilterStartDateTime] = useState('');
   const [filterEndDateTime, setFilterEndDateTime] = useState('');
+  // 입력 중인 필터 값. 조회 버튼을 눌러야 appliedFilter에 반영된다.
+  const [appliedFilter, setAppliedFilter] = useState({startDateTime: '', endDateTime: ''});
   const [selectedStore, setSelectedStore] = useState<any>(null);
-
-  const cursorRef = useRef<string | null>(null);
-  const isLoadingRef = useRef(false);
 
   const hasFilter = useMemo(
     () => Boolean(filterStartDateTime || filterEndDateTime),
     [filterStartDateTime, filterEndDateTime]
   );
 
-  const fetchMarkers = useCallback(async (
-    reset = false,
-    filterOverride?: {filterStartDateTime: string; filterEndDateTime: string}
-  ) => {
-    if (isLoadingRef.current) return;
+  const fetchMarkers = useCallback(
+    (cursor: string | null) => storeMarkerApi.getAllStoreMarkers(cursor, 20, {
+      filterStartDateTime: toApiDateTime(appliedFilter.startDateTime),
+      filterEndDateTime: toApiDateTime(appliedFilter.endDateTime),
+    }),
+    [appliedFilter]
+  );
 
-    const nextFilterStartDateTime = filterOverride?.filterStartDateTime ?? filterStartDateTime;
-    const nextFilterEndDateTime = filterOverride?.filterEndDateTime ?? filterEndDateTime;
-
-    isLoadingRef.current = true;
-    setIsLoading(true);
-    try {
-      const response = await storeMarkerApi.getAllStoreMarkers(
-        reset ? null : cursorRef.current,
-        20,
-        {
-          filterStartDateTime: toApiDateTime(nextFilterStartDateTime),
-          filterEndDateTime: toApiDateTime(nextFilterEndDateTime),
-        }
-      );
-
-      const {contents = [], cursor} = response.data || {};
-      setMarkers(prev => reset ? contents : [...prev, ...contents]);
-      cursorRef.current = cursor?.nextCursor || null;
-      setHasMore(cursor?.hasMore || false);
-    } catch (error: any) {
-      console.error('전체 가게 마커 조회 실패:', error);
-      toast.error(error?.message || '가게 마커 목록을 불러오지 못했습니다.');
-    } finally {
-      isLoadingRef.current = false;
-      setIsLoading(false);
-    }
-  }, [filterStartDateTime, filterEndDateTime]);
-
-  useEffect(() => {
-    fetchMarkers(true);
-  }, [fetchMarkers]);
+  const {
+    items: markers,
+    isLoading,
+    hasMore,
+    error,
+    refresh,
+    loadMore
+  } = useCursorPagination<StoreMarker>({
+    fetcher: fetchMarkers,
+    deps: [appliedFilter],
+    errorMessage: '가게 마커 목록을 불러오지 못했습니다.'
+  });
 
   const {scrollContainerRef, loadMoreRef} = useInfiniteScroll({
     hasMore,
     isLoading,
-    onLoadMore: () => fetchMarkers(false),
+    onLoadMore: loadMore,
     threshold: 0.1
   });
 
   const handleFilterSubmit = (event: FormEvent) => {
     event.preventDefault();
-    cursorRef.current = null;
-    fetchMarkers(true);
+    setAppliedFilter({startDateTime: filterStartDateTime, endDateTime: filterEndDateTime});
   };
 
   const handleClearFilter = () => {
     setFilterStartDateTime('');
     setFilterEndDateTime('');
-    cursorRef.current = null;
-    fetchMarkers(true, {filterStartDateTime: '', filterEndDateTime: ''});
+    setAppliedFilter({startDateTime: '', endDateTime: ''});
   };
 
   const openStoreDetail = (marker: StoreMarker) => {
@@ -113,7 +90,7 @@ const StoreMarkerManage = () => {
         </div>
         <button
           className="btn btn-outline-primary align-self-start"
-          onClick={() => fetchMarkers(true)}
+          onClick={refresh}
           disabled={isLoading}
         >
           <i className="bi bi-arrow-clockwise me-1"></i>
@@ -158,6 +135,18 @@ const StoreMarkerManage = () => {
           </div>
         </div>
       </form>
+
+      {error && (
+        <div className="alert alert-danger d-flex align-items-center justify-content-between gap-3" role="alert">
+          <span>
+            <i className="bi bi-exclamation-circle me-2"></i>
+            {error}
+          </span>
+          <button className="btn btn-sm btn-outline-danger" onClick={refresh} disabled={isLoading}>
+            다시 시도
+          </button>
+        </div>
+      )}
 
       <div
         ref={scrollContainerRef}

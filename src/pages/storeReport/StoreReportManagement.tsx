@@ -1,10 +1,11 @@
-import {useCallback, useEffect, useRef, useState} from 'react';
+import {useCallback, useState} from 'react';
 import storeReportApi from '@/api/storeReportApi';
 import {StoreReport} from '@/types/report';
 import {getReportReasonBadgeClass} from '@/utils/display/reportDisplay';
 import {getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from '@/utils/display/storeDisplay';
 
 import useInfiniteScroll from '@/hooks/useInfiniteScroll';
+import useCursorPagination from '@/hooks/useCursorPagination';
 import EmptyState from '@/components/common/EmptyState';
 import UserDetailModal from '@/pages/user/UserDetailModal';
 import StoreDetailModal from '@/pages/store/StoreDetailModal';
@@ -12,52 +13,29 @@ import StoreDetailModal from '@/pages/store/StoreDetailModal';
 import {formatDateTimeShortKo as formatDateTime} from '@/utils/dateUtils';
 
 const StoreReportManagement = () => {
-  const [reports, setReports] = useState<StoreReport[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [selectedStore, setSelectedStore] = useState<any>(null);
 
-  const cursorRef = useRef<string | null>(null);
-  const isLoadingRef = useRef(false);
+  const fetchReports = useCallback(
+    (cursor: string | null) => storeReportApi.getAllStoreReports(cursor, 20),
+    []
+  );
 
-  const fetchReports = useCallback(async (reset = false) => {
-    if (isLoadingRef.current) return;
-
-    isLoadingRef.current = true;
-    setIsLoading(true);
-    try {
-      const response = await storeReportApi.getAllStoreReports(reset ? null : cursorRef.current, 20);
-      if (!response?.ok) return;
-
-      const {contents = [], cursor: newCursor} = response.data || {
-        contents: [],
-        cursor: {hasMore: false, nextCursor: null}
-      };
-
-      if (reset) {
-        setReports(contents);
-        cursorRef.current = null;
-      } else {
-        setReports(prev => [...prev, ...contents]);
-      }
-
-      setHasMore(newCursor.hasMore || false);
-      cursorRef.current = newCursor.nextCursor || null;
-    } finally {
-      isLoadingRef.current = false;
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchReports(true);
-  }, [fetchReports]);
+  const {
+    items: reports,
+    isLoading,
+    hasMore,
+    refresh,
+    loadMore
+  } = useCursorPagination<StoreReport>({
+    fetcher: fetchReports,
+    errorMessage: '가게 신고 이력을 불러오는데 실패했습니다.'
+  });
 
   const {scrollContainerRef, loadMoreRef} = useInfiniteScroll({
     hasMore,
     isLoading,
-    onLoadMore: () => fetchReports(false),
+    onLoadMore: loadMore,
     threshold: 0.1
   });
 
@@ -110,7 +88,7 @@ const StoreReportManagement = () => {
         </h4>
         <button
           className="btn btn-outline-secondary btn-sm rounded-pill px-3"
-          onClick={() => fetchReports(true)}
+          onClick={refresh}
           disabled={isLoading}
         >
           <i className="bi bi-arrow-clockwise me-1"></i>

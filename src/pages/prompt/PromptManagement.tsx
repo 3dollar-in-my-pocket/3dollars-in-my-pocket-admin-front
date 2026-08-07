@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Modal } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import enumApi from '@/api/enumApi';
 import promptApi from '@/api/promptApi';
 import EmptyState from '@/components/common/EmptyState';
 import Loading from '@/components/common/Loading';
+import useCursorPagination from '@/hooks/useCursorPagination';
 import useInfiniteScroll from '@/hooks/useInfiniteScroll';
 import { formatDateTime } from '@/utils/dateUtils';
 import { AIModel, EnumOption, PromptFormRequest, PromptResponse, PromptStatus } from '@/types/prompt';
@@ -55,20 +56,30 @@ const PromptManagement = () => {
   const [promptStatuses, setPromptStatuses] = useState<EnumOption[]>([]);
   const [aiModels, setAiModels] = useState<EnumOption[]>([]);
   const [selectedPromptType, setSelectedPromptType] = useState('');
-  const [prompts, setPrompts] = useState<PromptResponse[]>([]);
   const [selectedPrompt, setSelectedPrompt] = useState<PromptResponse | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [isEnumLoading, setIsEnumLoading] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(false);
 
-  const cursorRef = useRef<string | null>(null);
-  const isLoadingRef = useRef(false);
-  const selectedPromptTypeRef = useRef('');
+  const fetchPromptPage = useCallback(
+    (cursor: string | null) => promptApi.listPrompts(selectedPromptType, {
+      cursor,
+      size: PAGE_SIZE,
+    }),
+    [selectedPromptType]
+  );
 
-  useEffect(() => {
-    selectedPromptTypeRef.current = selectedPromptType;
-  }, [selectedPromptType]);
+  const {
+    items: prompts,
+    isLoading,
+    hasMore,
+    refresh: fetchPrompts,
+    loadMore
+  } = useCursorPagination<PromptResponse>({
+    fetcher: fetchPromptPage,
+    enabled: Boolean(selectedPromptType),
+    deps: [selectedPromptType],
+    errorMessage: '프롬프트 목록을 불러오지 못했습니다.'
+  });
 
   useEffect(() => {
     const fetchPromptTypes = async () => {
@@ -118,51 +129,10 @@ const PromptManagement = () => {
     );
   }, [prompts]);
 
-  const fetchPrompts = useCallback(async (reset = false) => {
-    const promptType = selectedPromptTypeRef.current;
-    if (!promptType || isLoadingRef.current) return;
-
-    isLoadingRef.current = true;
-    setIsLoading(true);
-
-    try {
-      const response = await promptApi.listPrompts(promptType, {
-        cursor: reset ? null : cursorRef.current,
-        size: PAGE_SIZE,
-      });
-
-      if (!response?.ok) return;
-
-      const { contents = [], cursor } = response.data || {
-        contents: [],
-        cursor: { hasMore: false, nextCursor: null },
-      };
-
-      if (reset) {
-        setPrompts(contents);
-      } else {
-        setPrompts((prev) => [...prev, ...contents]);
-      }
-
-      cursorRef.current = cursor?.nextCursor || null;
-      setHasMore(Boolean(cursor?.hasMore && cursor?.nextCursor));
-    } finally {
-      isLoadingRef.current = false;
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    cursorRef.current = null;
-    setPrompts([]);
-    setHasMore(false);
-    fetchPrompts(true);
-  }, [selectedPromptType, fetchPrompts]);
-
   const { scrollContainerRef, loadMoreRef } = useInfiniteScroll({
     hasMore,
     isLoading,
-    onLoadMore: () => fetchPrompts(false),
+    onLoadMore: loadMore,
     threshold: 0.1,
   });
 
@@ -176,8 +146,7 @@ const PromptManagement = () => {
     setSelectedPrompt(null);
 
     if (shouldRefresh) {
-      cursorRef.current = null;
-      fetchPrompts(true);
+      fetchPrompts();
     }
   };
 
@@ -198,8 +167,7 @@ const PromptManagement = () => {
       const response = await promptApi.updatePrompt(selectedPromptType, prompt.promptId, { status: nextStatus });
       if (response?.ok) {
         toast.success(nextStatus === PROMPT_STATUS.ACTIVE ? '활성화되었습니다' : '초안으로 전환되었습니다');
-        cursorRef.current = null;
-        fetchPrompts(true);
+        fetchPrompts();
       }
     } catch (error: any) {
       toast.error(error.message || '상태 변경 중 오류가 발생했습니다.');
@@ -258,7 +226,7 @@ const PromptManagement = () => {
           <div className="col-12 col-md-auto">
             <button
               className="btn btn-outline-secondary prompt-icon-button"
-              onClick={() => fetchPrompts(true)}
+              onClick={fetchPrompts}
               disabled={!selectedPromptType || isLoading}
               title="새로고침"
             >

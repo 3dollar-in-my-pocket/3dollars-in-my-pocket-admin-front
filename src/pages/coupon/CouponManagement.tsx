@@ -1,5 +1,5 @@
 import StoreTypeBadge from '@/components/common/badges/StoreTypeBadge';
-import {useCallback, useEffect, useRef, useState} from 'react';
+import {useCallback, useState} from 'react';
 import couponApi from '@/api/couponApi';
 import {Coupon, COUPON_STATUS} from '@/types/coupon';
 import {formatDateTimeShortKo as formatCouponDate} from '@/utils/dateUtils';
@@ -7,79 +7,40 @@ import {getCouponStatusBadgeClass, getCouponStatusDisplayName} from '@/utils/dis
 
 import StoreDetailModal from '@/pages/store/StoreDetailModal';
 import useInfiniteScroll from '@/hooks/useInfiniteScroll';
+import useCursorPagination from '@/hooks/useCursorPagination';
 import EmptyState from '@/components/common/EmptyState';
 
 const CouponManagement = () => {
-  const [coupons, setCoupons] = useState<Coupon[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(false);
   const [selectedStore, setSelectedStore] = useState<any>(null);
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [skeletonCount] = useState(3);
-  const isInitialMount = useRef(true);
 
-  // cursor와 isLoading을 ref로 관리하여 useCallback 의존성 문제 해결
-  const cursorRef = useRef<string | null>(null);
-  const isLoadingRef = useRef(false);
-  const selectedStatusesRef = useRef<string[]>([]);
+  const fetchCoupons = useCallback(
+    (cursor: string | null) => couponApi.getAllStoreCoupons(
+      cursor,
+      20,
+      selectedStatuses.length > 0 ? selectedStatuses : undefined
+    ),
+    [selectedStatuses]
+  );
 
-  // selectedStatuses 변경 시 ref 업데이트
-  useEffect(() => {
-    selectedStatusesRef.current = selectedStatuses;
-  }, [selectedStatuses]);
-
-  const fetchCoupons = useCallback(async (reset = false) => {
-    // 중복 호출 방지
-    if (isLoadingRef.current) return;
-
-    isLoadingRef.current = true;
-    setIsLoading(true);
-    try {
-      const statusesToSend = selectedStatusesRef.current.length > 0 ? selectedStatusesRef.current : undefined;
-      const response = await couponApi.getAllStoreCoupons(reset ? null : cursorRef.current, 20, statusesToSend);
-      if (!response?.ok) {
-        return;
-      }
-
-      const {contents = [], cursor: newCursor} = response.data || {
-        contents: [],
-        cursor: {hasMore: false, nextCursor: null}
-      };
-
-      if (reset) {
-        setCoupons(contents);
-        cursorRef.current = null; // reset 시 cursor 초기화
-      } else {
-        setCoupons(prev => [...prev, ...contents]);
-      }
-
-      setHasMore(newCursor.hasMore || false);
-      cursorRef.current = newCursor.nextCursor || null;
-    } finally {
-      isLoadingRef.current = false;
-      setIsLoading(false);
-    }
-  }, []);
-
-  // 초기 데이터 로드
-  useEffect(() => {
-    fetchCoupons(true);
-  }, [fetchCoupons]);
-
-  // 상태 필터 변경 시 재조회
-  useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      return;
-    }
-    fetchCoupons(true);
-  }, [selectedStatuses, fetchCoupons]);
+  const {
+    items: coupons,
+    isLoading,
+    hasMore,
+    refresh,
+    loadMore
+  } = useCursorPagination<Coupon>({
+    fetcher: fetchCoupons,
+    deps: [selectedStatuses],
+    errorMessage: '쿠폰을 불러오는데 실패했습니다.'
+  });
 
   // Infinite Scroll 훅 사용
   const {scrollContainerRef, loadMoreRef} = useInfiniteScroll({
     hasMore,
     isLoading,
-    onLoadMore: () => fetchCoupons(false),
+    onLoadMore: loadMore,
     threshold: 0.1
   });
 
@@ -138,7 +99,7 @@ const CouponManagement = () => {
             </span>
             <button
               className="btn btn-outline-secondary btn-sm rounded-pill"
-              onClick={() => fetchCoupons(true)}
+              onClick={refresh}
               disabled={isLoading}
             >
               <i className="bi bi-arrow-clockwise me-1"></i>

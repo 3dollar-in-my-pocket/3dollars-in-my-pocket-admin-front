@@ -1,69 +1,37 @@
-import {useCallback, useEffect, useRef, useState} from 'react';
+import {useCallback, useState} from 'react';
 import {Alert, Form} from 'react-bootstrap';
 import storePostApi from '@/api/storePostApi';
 import StorePostItem from '@/components/StorePostItem';
 import EmptyState from '@/components/common/EmptyState';
 import useInfiniteScroll from '@/hooks/useInfiniteScroll';
+import useCursorPagination from '@/hooks/useCursorPagination';
 import {STORE_POST_SORT, StorePost, StorePostSort} from '@/types/storePost';
 
 const StorePostManagement = () => {
-  const [posts, setPosts] = useState<StorePost[]>([]);
   const [sortBy, setSortBy] = useState<StorePostSort>(STORE_POST_SORT.LATEST);
-  const [isLoading, setIsLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(false);
-  const [error, setError] = useState('');
 
-  const cursorRef = useRef<string | null>(null);
-  const isLoadingRef = useRef(false);
-  const requestSequenceRef = useRef(0);
+  const fetchPosts = useCallback(
+    (cursor: string | null) => storePostApi.getStorePosts(sortBy, cursor),
+    [sortBy]
+  );
 
-  const fetchPosts = useCallback(async (reset = false) => {
-    if (isLoadingRef.current && !reset) return;
-    if (!reset && !cursorRef.current) return;
-
-    const requestSequence = reset
-      ? ++requestSequenceRef.current
-      : requestSequenceRef.current;
-
-    if (reset) {
-      cursorRef.current = null;
-      setPosts([]);
-      setHasMore(false);
-      setError('');
-    }
-
-    isLoadingRef.current = true;
-    setIsLoading(true);
-
-    try {
-      const response = await storePostApi.getStorePosts(sortBy, reset ? null : cursorRef.current);
-      if (requestSequence !== requestSequenceRef.current) return;
-
-      const {contents = [], cursor} = response.data || {};
-
-      setPosts(prev => reset ? contents : [...prev, ...contents]);
-      setHasMore(cursor?.hasMore || false);
-      cursorRef.current = cursor?.nextCursor || null;
-    } catch (error) {
-      if (requestSequence === requestSequenceRef.current) {
-        setError('가게 소식을 불러오지 못했습니다.');
-      }
-    } finally {
-      if (requestSequence === requestSequenceRef.current) {
-        isLoadingRef.current = false;
-        setIsLoading(false);
-      }
-    }
-  }, [sortBy]);
-
-  useEffect(() => {
-    fetchPosts(true);
-  }, [fetchPosts]);
+  const {
+    items: posts,
+    isLoading,
+    hasMore,
+    error,
+    refresh,
+    loadMore
+  } = useCursorPagination<StorePost>({
+    fetcher: fetchPosts,
+    deps: [sortBy],
+    errorMessage: '가게 소식을 불러오지 못했습니다.'
+  });
 
   const {scrollContainerRef, loadMoreRef} = useInfiniteScroll({
     hasMore,
     isLoading,
-    onLoadMore: () => fetchPosts(false),
+    onLoadMore: loadMore,
     threshold: 0.1,
     rootMargin: '0px 0px 160px 0px',
   });
@@ -91,7 +59,7 @@ const StorePostManagement = () => {
           <button
             type="button"
             className="btn btn-outline-secondary btn-sm rounded-pill px-3"
-            onClick={() => fetchPosts(true)}
+            onClick={refresh}
             disabled={isLoading}
             style={{minHeight: '38px'}}
           >
@@ -119,7 +87,7 @@ const StorePostManagement = () => {
       {error && (
         <Alert variant="danger" className="d-flex justify-content-between align-items-center">
           <span>{error}</span>
-          <button type="button" className="btn btn-sm btn-outline-danger" onClick={() => fetchPosts(true)}>
+          <button type="button" className="btn btn-sm btn-outline-danger" onClick={refresh}>
             다시 시도
           </button>
         </Alert>

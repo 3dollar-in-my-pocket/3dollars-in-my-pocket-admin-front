@@ -3,6 +3,7 @@ import {toast} from 'react-toastify';
 import enumApi from '@/api/enumApi';
 import userRankingApi from '@/api/userRankingApi';
 import medalApi from '@/api/medalApi';
+import useCursorPagination from '@/hooks/useCursorPagination';
 import {UserRankingItem, createUserRankingRequest} from '@/types/userRanking';
 import UserRankingCard from '@/components/userRanking/UserRankingCard';
 import UserDetailModal from '@/pages/user/UserDetailModal';
@@ -16,13 +17,8 @@ const MAX_SELECTION = 500;
 const UserRankingManagement = () => {
   const [rankingTypes, setRankingTypes] = useState<any[]>([]);
   const [selectedRankingType, setSelectedRankingType] = useState<string>('');
-  const [rankingList, setRankingList] = useState<UserRankingItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [cursor, setCursor] = useState<string | null>(null);
-  const [hasMore, setHasMore] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [selectedStore, setSelectedStore] = useState(null);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [selectedUserIds, setSelectedUserIds] = useState<Set<number>>(new Set());
   const [startRankInput, setStartRankInput] = useState<number>(1);
   const [endRankInput, setEndRankInput] = useState<number>(10);
@@ -37,10 +33,9 @@ const UserRankingManagement = () => {
     loadEnums();
   }, []);
 
+  // 랭킹 타입이 바뀌면 이전 선택을 초기화한다. (목록 재조회는 훅의 deps가 처리)
   useEffect(() => {
-    if (selectedRankingType) {
-      resetAndFetchRankings();
-    }
+    setSelectedUserIds(new Set());
   }, [selectedRankingType]);
 
   const loadEnums = async () => {
@@ -52,67 +47,41 @@ const UserRankingManagement = () => {
     }
   };
 
-  const resetAndFetchRankings = () => {
-    setRankingList([]);
-    setCursor(null);
-    setHasMore(false);
-    setSelectedUserIds(new Set());
-    fetchRankings(null, true);
-  };
+  const fetchRankingPage = useCallback(async (cursor: string | null) => {
+    const request = createUserRankingRequest({
+      userRankingType: selectedRankingType,
+      cursor,
+      size: pageSize
+    });
 
-  const fetchRankings = async (nextCursor: string | null = null, isInitial: boolean = false) => {
-    if (!selectedRankingType) return;
+    const response = await userRankingApi.getUserRankings(request);
 
-    if (isInitial) {
-      setIsLoading(true);
-    } else {
-      setIsLoadingMore(true);
-    }
+    if (!response?.ok || !response.data) return response;
 
-    try {
-      const request = createUserRankingRequest({
-        userRankingType: selectedRankingType,
-        cursor: nextCursor,
-        size: pageSize
-      });
-
-      const response = await userRankingApi.getUserRankings(request);
-
-      if (response.ok && response.data) {
-        const {contents = [], cursor: newCursor} = response.data as any;
-        // 탈퇴 유저(userId가 null인 경우) 필터링
-        const filteredItems = contents.filter((item: UserRankingItem) => item.user?.userId != null);
-
-        // API 응답에서 nextCursor 추출
-        const nextCursorValue = newCursor.nextCursor || null;
-        const hasMoreValue = newCursor.hasMore || false;
-
-        if (isInitial) {
-          setRankingList(filteredItems);
-        } else {
-          setRankingList(prev => [...prev, ...filteredItems]);
-        }
-
-        setHasMore(hasMoreValue);
-        setCursor(nextCursorValue);
-
-        // 디버깅용 로그
-        console.log('랭킹 페이징 정보:', {
-          현재페이지크기: filteredItems.length,
-          다음커서: nextCursorValue,
-          더있음: hasMoreValue
-        });
-      } else {
-        if (isInitial) {
-          setRankingList([]);
-        }
-        setHasMore(false);
+    // 탈퇴 유저(userId가 null인 경우) 필터링
+    const {contents = [], cursor: newCursor} = response.data as any;
+    return {
+      ...response,
+      data: {
+        ...response.data,
+        contents: contents.filter((item: UserRankingItem) => item.user?.userId != null),
+        cursor: newCursor
       }
-    } finally {
-      setIsLoading(false);
-      setIsLoadingMore(false);
-    }
-  };
+    };
+  }, [selectedRankingType]);
+
+  const {
+    items: rankingList,
+    isLoading,
+    isLoadingMore,
+    hasMore,
+    loadMore
+  } = useCursorPagination<UserRankingItem>({
+    fetcher: fetchRankingPage,
+    enabled: Boolean(selectedRankingType),
+    deps: [selectedRankingType],
+    errorMessage: '랭킹 목록을 불러오지 못했습니다.'
+  });
 
   const handleScroll = useCallback(() => {
     if (!scrollContainerRef.current || isLoadingMore || !hasMore) return;
@@ -120,10 +89,10 @@ const UserRankingManagement = () => {
     const {scrollTop, scrollHeight, clientHeight} = scrollContainerRef.current;
     const scrollPercentage = (scrollTop + clientHeight) / scrollHeight;
 
-    if (scrollPercentage > 0.8 && hasMore && cursor) {
-      fetchRankings(cursor, false);
+    if (scrollPercentage > 0.8) {
+      loadMore();
     }
-  }, [hasMore, cursor, isLoadingMore]);
+  }, [hasMore, isLoadingMore, loadMore]);
 
   const handleUserClick = (rankingItem: UserRankingItem) => {
     const user = {
@@ -390,7 +359,7 @@ const UserRankingManagement = () => {
             overflowY: 'auto'
           }}
         >
-          {isLoading ? (
+          {isLoading && rankingList.length === 0 ? (
             <div className="text-center py-5">
               <Loading/>
               <p className="text-muted mt-3">랭킹을 불러오는 중입니다</p>
