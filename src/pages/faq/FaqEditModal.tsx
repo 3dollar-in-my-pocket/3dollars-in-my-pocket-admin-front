@@ -5,6 +5,7 @@ import faqApi from "../../api/faqApi";
 import {toast} from "react-toastify";
 import {useNonce} from "../../hooks/useNonce";
 import useModalForm from "../../hooks/useModalForm";
+import {Faq, FaqCategory} from "../../types/faq";
 
 interface FaqFormData {
   application: string;
@@ -14,7 +15,35 @@ interface FaqFormData {
   faqId?: string;
 }
 
-const FaqEditModal = ({applications, showModal, handleCloseModal, selectedApplication, selectedFaq, faqCategories}) => {
+/** 서비스(애플리케이션) 선택 옵션 — 서버 enum이 아닌 화면 상수로 관리됩니다. */
+export interface FaqApplicationOption {
+  type: string;
+  description: string;
+}
+
+/** 폼 입력 요소의 공통 onChange 핸들러 (useModalForm.handleChange와 동일 시그니처) */
+type FormChangeHandler = (
+  e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+) => void;
+
+interface FaqEditModalProps {
+  applications: FaqApplicationOption[];
+  showModal: boolean;
+  handleCloseModal: () => void;
+  selectedApplication: string;
+  /** 신규 등록 시 null */
+  selectedFaq: Faq | null;
+  faqCategories: FaqCategory[];
+}
+
+const FaqEditModal = ({
+                        applications,
+                        showModal,
+                        handleCloseModal,
+                        selectedApplication,
+                        selectedFaq,
+                        faqCategories
+                      }: FaqEditModalProps) => {
   const {nonce, issueNonce, clearNonce} = useNonce();
 
   const {
@@ -211,7 +240,15 @@ const FaqEditModal = ({applications, showModal, handleCloseModal, selectedApplic
   );
 };
 
-const ApplicationSelect = ({applications, selectedApplication, handleChange, faq}) => {
+interface ApplicationSelectProps {
+  applications: FaqApplicationOption[];
+  selectedApplication: string;
+  handleChange: FormChangeHandler;
+  /** 수정 모드면 FAQ, 신규 등록이면 null (읽기 전용 표시 여부 판단용) */
+  faq: Faq | null;
+}
+
+const ApplicationSelect = ({applications, selectedApplication, handleChange, faq}: ApplicationSelectProps) => {
   const selectedAppDescription = applications.find((a) => a.type === selectedApplication)?.description || selectedApplication;
 
   return (
@@ -243,7 +280,13 @@ const ApplicationSelect = ({applications, selectedApplication, handleChange, faq
   );
 };
 
-const CategorySelect = ({selectedCategory, handleChange, faqCategories}) => (
+interface CategorySelectProps {
+  selectedCategory: string;
+  handleChange: FormChangeHandler;
+  faqCategories: FaqCategory[];
+}
+
+const CategorySelect = ({selectedCategory, handleChange, faqCategories}: CategorySelectProps) => (
   <div className="col-12 col-md-6">
     <label className="form-label fw-semibold">카테고리</label>
     <select
@@ -262,7 +305,15 @@ const CategorySelect = ({selectedCategory, handleChange, faqCategories}) => (
   </div>
 );
 
-const InputField = ({label, name, value, handleChange, disabled = false}) => (
+interface InputFieldProps {
+  label: string;
+  name: string;
+  value?: string;
+  handleChange: FormChangeHandler;
+  disabled?: boolean;
+}
+
+const InputField = ({label, name, value, handleChange, disabled = false}: InputFieldProps) => (
   <div className="col-12">
     <label className="form-label fw-semibold">{label}</label>
     <input
@@ -276,7 +327,14 @@ const InputField = ({label, name, value, handleChange, disabled = false}) => (
   </div>
 );
 
-const TextAreaField = ({label, name, value, handleChange}) => (
+interface TextAreaFieldProps {
+  label: string;
+  name: string;
+  value?: string;
+  handleChange: FormChangeHandler;
+}
+
+const TextAreaField = ({label, name, value, handleChange}: TextAreaFieldProps) => (
   <div className="col-12">
     <label className="form-label fw-semibold">{label}</label>
     <textarea

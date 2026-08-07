@@ -7,11 +7,12 @@ import AdTimer from "../../components/common/AdTimer";
 import AdPreview from "../../components/advertisement/AdPreview";
 import {isFieldAvailable, isFieldRequired} from "../../constants/advertisementSpecs";
 import DeepLinkSelector from "../../components/common/DeepLinkSelector";
+import {Advertisement, AdvertisementContentEditForm} from "../../types/advertisement";
 
 interface AdvertisementContentEditModalProps {
   show: boolean;
   onHide: () => void;
-  ad?: any;
+  ad?: Advertisement | null;
   fetchAdvertisements: () => void;
 }
 
@@ -21,7 +22,7 @@ const AdvertisementContentEditModal = ({
                                          ad,
                                          fetchAdvertisements
                                        }: AdvertisementContentEditModalProps) => {
-  const [formData, setFormData] = useState(null);
+  const [formData, setFormData] = useState<AdvertisementContentEditForm | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -45,7 +46,7 @@ const AdvertisementContentEditModal = ({
     }
   }, [ad]);
 
-  const handleChange = (field, value) => {
+  const handleChange = (field: string, value: any) => { // 색상/숫자/문자열 등 필드별 타입이 달라 any 사용
     setFormData((prev) => ({...prev, [field]: value}));
   };
 

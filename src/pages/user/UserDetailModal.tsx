@@ -13,8 +13,9 @@ import UserStoreImageHistory from '../../components/UserStoreImageHistory';
 import UserStoreReportHistory from '../../components/UserStoreReportHistory';
 import UserVisitHistory from '../../components/UserVisitHistory';
 import PushSendModal from '../../components/push/PushSendModal';
-import {OS_PLATFORM} from '../../types/device';
-import {UserRoleOption} from '../../types/user';
+import {Device, OS_PLATFORM} from '../../types/device';
+import {Medal} from '../../types/medal';
+import {User, UserRoleOption, UserSettings} from '../../types/user';
 import {getOsPlatformBadgeClass, getOsPlatformIcon} from '../../utils/display/deviceDisplay';
 import {getMarketingConsentBadgeClass, getMarketingConsentDisplayName, getSocialTypeBadgeClass, getSocialTypeDisplayName, getUserRoleBadgeClass, getUserRoleLabel, getUserRoleValue} from '../../utils/display/userDisplay';
 

@@ -1,11 +1,25 @@
 import {useState, useEffect} from 'react';
 import {getAdStatus} from '../../utils/timeUtils';
 
+/** getAdStatus의 반환 값 (timeUtils가 JS 스타일이라 status는 string으로 내려옵니다) */
+interface AdStatus {
+  status: string;
+  label: string;
+  timeText: string;
+  badgeClass: string;
+}
+
+interface AdTimerProps {
+  startDateTime: string;
+  endDateTime: string;
+  className?: string;
+}
+
 /**
  * 광고 상태와 타이머를 표시하는 컴포넌트
  */
-const AdTimer = ({startDateTime, endDateTime, className = ""}) => {
-  const [status, setStatus] = useState(null);
+const AdTimer = ({startDateTime, endDateTime, className = ""}: AdTimerProps) => {
+  const [status, setStatus] = useState<AdStatus | null>(null);
 
   useEffect(() => {
     const updateStatus = () => {

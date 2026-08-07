@@ -169,7 +169,7 @@ const PopularNeighborhoodStores = () => {
   };
 
   // 가게 삭제 핸들러
-  const handleStoreDeleted = useCallback((deletedStoreId: string) => {
+  const handleStoreDeleted = useCallback((deletedStoreId: number) => {
     const updatedResults = storeList.map((store: any) =>
       store.storeId === deletedStoreId
         ? {...store, isDeleted: true}

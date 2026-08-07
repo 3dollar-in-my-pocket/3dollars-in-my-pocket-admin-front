@@ -5,8 +5,15 @@ import uploadApi from "../../../api/uploadApi";
 import AdPreview from "../../../components/advertisement/AdPreview";
 import {isFieldAvailable} from "../../../constants/advertisementSpecs";
 import DeepLinkSelector from "../../../components/common/DeepLinkSelector";
+import {AdvertisementForm} from "../../../types/advertisement";
 
-const ContentInfoStep = ({formData, onChange}) => {
+interface ContentInfoStepProps {
+  formData: AdvertisementForm;
+  /** 상위에서 setFormData 를 그대로 넘기므로 updater 함수를 받습니다. */
+  onChange: (updater: (prev: AdvertisementForm) => AdvertisementForm) => void;
+}
+
+const ContentInfoStep = ({formData, onChange}: ContentInfoStepProps) => {
   const content = formData.content;
   const [isUploading, setIsUploading] = useState(false);
 

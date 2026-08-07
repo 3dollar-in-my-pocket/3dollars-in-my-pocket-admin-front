@@ -1,3 +1,37 @@
+import React from 'react';
+
+export interface SearchOption {
+  value: string;
+  label: string;
+}
+
+/** 검색 방식별 부가 파라미터 (userIds, storeTypes 등 화면마다 키/값이 달라 any) */
+export type AdditionalParams = Record<string, any>;
+
+export interface SearchCustomInputsArgs {
+  searchType: string;
+  searchQuery: string;
+  handleSearchQueryChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  additionalParams: AdditionalParams;
+  handleAdditionalParamChange: (key: string, value: any) => void;
+  onKeyPress?: React.KeyboardEventHandler<HTMLInputElement>;
+}
+
+interface SearchFormProps {
+  searchType: string;
+  setSearchType: (value: string) => void;
+  searchQuery: string;
+  setSearchQuery: (value: string) => void;
+  additionalParams?: AdditionalParams;
+  setAdditionalParams?: React.Dispatch<React.SetStateAction<AdditionalParams>>;
+  searchOptions?: SearchOption[];
+  onSearch: (reset?: boolean) => void;
+  onKeyPress?: React.KeyboardEventHandler<HTMLInputElement>;
+  isSearching?: boolean;
+  placeholder?: string;
+  customInputs?: ((args: SearchCustomInputsArgs) => React.ReactNode) | null;
+}
+
 const SearchForm = ({
                       searchType,
                       setSearchType,
@@ -11,16 +45,16 @@ const SearchForm = ({
                       isSearching = false,
                       placeholder = "검색어를 입력하세요",
                       customInputs = null
-                    }) => {
-  const handleSearchTypeChange = (e) => {
+                    }: SearchFormProps) => {
+  const handleSearchTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSearchType(e.target.value);
   };
 
-  const handleSearchQueryChange = (e) => {
+  const handleSearchQueryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
 
-  const handleAdditionalParamChange = (key, value) => {
+  const handleAdditionalParamChange = (key: string, value: any) => {
     setAdditionalParams(prev => ({
       ...prev,
       [key]: value

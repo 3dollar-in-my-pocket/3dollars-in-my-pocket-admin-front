@@ -2,19 +2,21 @@ import {useCallback, useEffect, useState} from "react";
 import faqApi from "../../api/faqApi";
 import FaqEditModal from "./FaqEditModal";
 import Loading from "../../components/common/Loading";
+import {Faq, FaqCategory} from "../../types/faq";
+import {FaqApplicationOption} from "./FaqEditModal";
 
-const applications = [
+const applications: FaqApplicationOption[] = [
   {type: "USER", description: "가슴속 3천원"},
   {type: "BOSS", description: "가슴속 3천원 사장님"},
 ];
 
 const FaqManagement = () => {
-  const [faqs, setFaqs] = useState([]);
-  const [faqCategories, setFaqCategories] = useState([]);
+  const [faqs, setFaqs] = useState<Faq[]>([]);
+  const [faqCategories, setFaqCategories] = useState<FaqCategory[]>([]);
   const [selectedApplication, setSelectedApplication] = useState("");
   const [selectedFaqCategory, setSelectedFaqCategory] = useState("");
   const [showModal, setShowModal] = useState(false);
-  const [selectedFaq, setSelectedFaq] = useState(null);
+  const [selectedFaq, setSelectedFaq] = useState<Faq | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const fetchFaqs = useCallback(() => {
@@ -49,7 +51,7 @@ const FaqManagement = () => {
     }
   }, [selectedFaqCategory, fetchFaqs]);
 
-  const handleShowModal = (faq = null) => {
+  const handleShowModal = (faq: Faq | null = null) => {
     setSelectedFaq(faq);
     setShowModal(true);
   };
@@ -101,6 +103,15 @@ const FaqManagement = () => {
   );
 };
 
+interface FilterSectionProps {
+  selectedApplication: string;
+  setSelectedApplication: (application: string) => void;
+  selectedFaqCategory: string;
+  setSelectedFaqCategory: (category: string) => void;
+  faqCategories: FaqCategory[];
+  fetchFaqs: () => void;
+}
+
 const FilterSection = ({
                          selectedApplication,
                          setSelectedApplication,
@@ -108,7 +119,7 @@ const FilterSection = ({
                          setSelectedFaqCategory,
                          faqCategories,
                          fetchFaqs,
-                       }) => (
+                       }: FilterSectionProps) => (
   <div className="card shadow-sm mb-4 rounded-3">
     <div className="card-body">
       <div className="row g-3">
@@ -160,7 +171,13 @@ const FilterSection = ({
   </div>
 );
 
-const FaqTable = ({faqs, onEdit, isLoading}) => {
+interface FaqTableProps {
+  faqs: Faq[];
+  onEdit: (faq: Faq) => void;
+  isLoading: boolean;
+}
+
+const FaqTable = ({faqs, onEdit, isLoading}: FaqTableProps) => {
   if (isLoading) {
     return (
       <div className="py-5 text-center">

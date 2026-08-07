@@ -4,12 +4,42 @@ import {toast} from "react-toastify";
 import policyApi from "../../api/policyApi";
 import {formatDateTime} from "../../utils/dateUtils";
 
-const PolicyModal = ({show, onHide, policy, categories, policies, onRefresh, onDelete}) => {
+/** PolicyResponse — 정책 상세 */
+export interface Policy {
+  policyId: string;
+  categoryId: string;
+  description?: string;
+  value: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+/** enum API(PolicyCategoryType / PolicyType) 응답 항목 */
+interface PolicyEnumOption {
+  key: string;
+  description: string;
+}
+
+interface PolicyFormData {
+  value: string;
+}
+
+interface PolicyModalProps {
+  show: boolean;
+  onHide: () => void;
+  policy: Policy | null;
+  categories: PolicyEnumOption[];
+  policies: PolicyEnumOption[];
+  onRefresh: () => void;
+  onDelete: (policyId: string) => void;
+}
+
+const PolicyModal = ({show, onHide, policy, categories, policies, onRefresh, onDelete}: PolicyModalProps) => {
   const [isEditMode, setIsEditMode] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<PolicyFormData>({
     value: ""
   });
-  const [originalData, setOriginalData] = useState(null);
+  const [originalData, setOriginalData] = useState<PolicyFormData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {

@@ -2,9 +2,17 @@
 import {formatRating} from '../../utils/formatUtils';
 import {getActivitiesStatusBadgeClass, getActivitiesStatusDisplayName, getCategoryIcon, getLabelBadgeClass, getLabelDisplayName, getLabelIcon, getStoreStatusBadgeClass, getStoreStatusDisplayName, getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from '../../utils/display/storeDisplay';
 import ItemCard from '../common/ItemCard';
+import {SimpleStore} from '../../types/store';
 
-const StoreCard = ({store, onClick, isDeleted = false}) => {
-  const formatDateTime = (dateString) => {
+interface StoreCardProps {
+  store: SimpleStore;
+  onClick: (store: SimpleStore) => void;
+  /** 목록에서 삭제 처리된 가게를 비활성 상태로 표시할 때 사용 */
+  isDeleted?: boolean;
+}
+
+const StoreCard = ({store, onClick, isDeleted = false}: StoreCardProps) => {
+  const formatDateTime = (dateString?: string) => {
     if (!dateString) return '없음';
     return new Date(dateString).toLocaleDateString('ko-KR');
   };

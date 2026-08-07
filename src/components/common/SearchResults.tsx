@@ -1,4 +1,20 @@
-const SearchResults = ({
+import React from 'react';
+
+interface SearchResultsProps<T = any> {
+  /** 검색 결과 목록. 화면마다 도메인이 달라 제네릭으로 둡니다. */
+  results?: T[];
+  isLoading?: boolean;
+  hasMore?: boolean;
+  scrollContainerRef?: React.Ref<HTMLDivElement>;
+  onScroll?: React.UIEventHandler<HTMLDivElement>;
+  renderItem: (item: T, index: number) => React.ReactNode;
+  emptyMessage?: string;
+  emptyDescription?: string;
+  loadingMessage?: string;
+  title?: string;
+}
+
+const SearchResults = <T, >({
                          results = [],
                          isLoading = false,
                          hasMore = false,
@@ -9,7 +25,7 @@ const SearchResults = ({
                          emptyDescription = "다른 검색어로 시도해보세요",
                          loadingMessage = "검색 중입니다",
                          title = "검색 결과"
-                       }) => {
+                       }: SearchResultsProps<T>) => {
   const renderEmptyState = () => (
     <div className="text-center py-5 text-muted">
       <div className="mb-4">

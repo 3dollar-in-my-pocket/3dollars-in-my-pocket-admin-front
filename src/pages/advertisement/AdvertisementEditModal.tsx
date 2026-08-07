@@ -4,12 +4,13 @@ import {toast} from "react-toastify";
 import advertisementApi from "../../api/advertisementApi";
 import BasicInfoStep from "./steps/BasicInfoStep";
 import AdTimer from "../../components/common/AdTimer";
+import {Advertisement, AdvertisementBasicInfoForm, EnumOption} from "../../types/advertisement";
 
 interface AdvertisementEditModalProps {
   show: boolean;
   onHide: () => void;
-  ad?: any;
-  positions: { key: string; description: string }[];
+  ad?: Advertisement | null;
+  positions: EnumOption[];
   fetchAdvertisements: () => void;
 }
 
@@ -20,7 +21,7 @@ const AdvertisementEditModal = ({
                                   positions,
                                   fetchAdvertisements
                                 }: AdvertisementEditModalProps) => {
-  const [formData, setFormData] = useState(null);
+  const [formData, setFormData] = useState<AdvertisementBasicInfoForm | null>(null);
 
   const platforms = [
     {key: "ALL", description: "전체 플랫폼"},
@@ -44,7 +45,7 @@ const AdvertisementEditModal = ({
     }
   }, [ad]);
 
-  const handleChange = (field, value) => {
+  const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({...prev, [field]: value}));
   };
 

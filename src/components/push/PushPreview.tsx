@@ -1,6 +1,15 @@
 import {getPushTypeStyles} from "../../utils/pushUtils";
 
-const PushPreview = ({title, body, path, pushType, imageUrl}) => {
+interface PushPreviewProps {
+  title?: string;
+  body?: string;
+  path?: string;
+  /** SIMPLE | SIMPLE_MARKETING (미선택 시 빈 문자열) */
+  pushType?: string;
+  imageUrl?: string;
+}
+
+const PushPreview = ({title, body, path, pushType, imageUrl}: PushPreviewProps) => {
   const styles = getPushTypeStyles(pushType);
 
   return (

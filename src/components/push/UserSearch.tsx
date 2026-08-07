@@ -1,4 +1,31 @@
+import React from "react";
 import {Button, Form} from "react-bootstrap";
+
+/** pushApi.searchUserByNickname 응답 항목 */
+export interface PushSearchUser {
+  id: string;
+  nickname: string;
+  socialType?: string;
+  createdAt?: string;
+}
+
+/** 발송 대상으로 선택된 사용자 */
+export interface PushSelectedUser {
+  id: string;
+  nickname: string;
+}
+
+interface UserSearchProps {
+  nicknameSearch: string;
+  onNicknameChange: (value: string) => void;
+  onSearch: () => void;
+  searchLoading?: boolean;
+  searchResults: PushSearchUser[];
+  isUserSelected: (userId: string) => boolean;
+  onUserToggle: (userId: string, nickname?: string) => void;
+  selectedUsers?: PushSelectedUser[];
+  onUserRemove: (userId: string) => void;
+}
 
 const UserSearch = ({
                       nicknameSearch,
@@ -10,15 +37,15 @@ const UserSearch = ({
                       onUserToggle,
                       selectedUsers,
                       onUserRemove
-                    }) => {
-  const handleKeyPress = (e) => {
+                    }: UserSearchProps) => {
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       onSearch();
     }
   };
 
-  const handleUserClick = (user) => {
+  const handleUserClick = (user: PushSearchUser) => {
     const selected = isUserSelected(user.id);
 
     if (selected) {

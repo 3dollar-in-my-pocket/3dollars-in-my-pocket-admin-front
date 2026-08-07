@@ -8,6 +8,17 @@ import AdvertisementEditModal from "./AdvertisementEditModal";
 import AdvertisementContentEditModal from "./AdvertisementContentEditModal";
 import AdTimer from "../../components/common/AdTimer";
 import AdPreview from "../../components/advertisement/AdPreview";
+import {Advertisement, EnumOption} from "../../types/advertisement";
+
+interface AdvertisementModalProps {
+  show: boolean;
+  onHide: () => void;
+  ad: Advertisement | null;
+  getDescriptionFromKey: (key: string, type: "position" | "platform") => string;
+  formatDateTime: (dateTime?: string) => string;
+  fetchAdvertisements: () => void;
+  positions: EnumOption[];
+}
 
 const AdvertisementModal = ({
                               show,
@@ -17,7 +28,7 @@ const AdvertisementModal = ({
                               formatDateTime,
                               fetchAdvertisements,
                               positions
-                            }) => {
+                            }: AdvertisementModalProps) => {
   const [showEdit, setShowEdit] = useState(false);
   const [showContentEdit, setShowContentEdit] = useState(false);
   const [imageSize, setImageSize] = useState({width: 0, height: 0});

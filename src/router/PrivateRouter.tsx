@@ -1,10 +1,14 @@
 import {Navigate} from 'react-router-dom';
 import {useAuthStore} from "../state/authStore";
 import adminApi from "../api/adminApi";
-import {useEffect, useState} from "react";
+import {ReactElement, useEffect, useState} from "react";
 import Loading from "../components/common/Loading";
 
-const PrivateRouter = ({children}) => {
+interface PrivateRouterProps {
+  children: ReactElement;
+}
+
+const PrivateRouter = ({children}: PrivateRouterProps) => {
   const setLoggedIn = useAuthStore((state) => state.setLoggedIn);
   const setAdmin = useAuthStore((state) => state.setAdmin);
   const [isAuthenticated, setIsAuthenticated] = useState(null);

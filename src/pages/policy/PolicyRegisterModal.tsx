@@ -3,14 +3,42 @@ import {Button, Form, Modal} from "react-bootstrap";
 import {toast} from "react-toastify";
 import policyApi from "../../api/policyApi";
 
-const PolicyRegisterModal = ({show, onHide, categories, policies, onRefresh}) => {
-  const [formData, setFormData] = useState({
+/** enum API(PolicyCategoryType / PolicyType) 응답 항목 */
+interface PolicyEnumOption {
+  key: string;
+  description: string;
+}
+
+/** PolicyTypeResponse — /v1/policy-types 응답 항목 */
+interface PolicyType {
+  category: string;
+  policyId: string;
+  description: string;
+}
+
+interface PolicyRegisterFormData {
+  categoryId: string;
+  policyId: string;
+  value: string;
+}
+
+interface PolicyRegisterModalProps {
+  show: boolean;
+  onHide: () => void;
+  categories: PolicyEnumOption[];
+  /** 현재 화면에서는 사용하지 않지만 상위(Policy.tsx)에서 전달합니다. */
+  policies: PolicyEnumOption[];
+  onRefresh: () => void;
+}
+
+const PolicyRegisterModal = ({show, onHide, categories, policies, onRefresh}: PolicyRegisterModalProps) => {
+  const [formData, setFormData] = useState<PolicyRegisterFormData>({
     categoryId: "",
     policyId: "",
     value: ""
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [filteredPolicies, setFilteredPolicies] = useState([]);
+  const [filteredPolicies, setFilteredPolicies] = useState<PolicyType[]>([]);
   const [isLoadingPolicies, setIsLoadingPolicies] = useState(false);
 
   useEffect(() => {

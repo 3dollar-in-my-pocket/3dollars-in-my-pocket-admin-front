@@ -28,13 +28,27 @@ import {getActivitiesStatusBadgeClass, getActivitiesStatusDisplayName, getCatego
 import {getWriterTypeBadgeClass} from '../../utils/display/writerDisplay';
 import {formatCount, formatRating} from '../../utils/formatUtils';
 
-const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) => {
+interface StoreDetailModalProps {
+  show: boolean;
+  onHide: () => void;
+  /**
+   * 목록/이력에서 넘어온 가게 요약 정보 (상세 로딩 전 폴백).
+   * 호출부마다 SimpleStore, 마커 조회용 임시 객체 등 형태가 달라 any로 둡니다.
+   */
+  store: any;
+  /** 가게 제보자 클릭 콜백. 호출부에 따라 null/undefined가 전달됩니다. */
+  onAuthorClick?: ((author: any) => void) | null;
+  /** 가게 삭제 완료 콜백. 호출부에 따라 null/undefined가 전달됩니다. */
+  onStoreDeleted?: ((storeId: number) => void) | null;
+}
+
+const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}: StoreDetailModalProps) => {
   const [storeDetail, setStoreDetail] = useState<StoreDetail | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('basic');
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [activitySubTab, setActivitySubTab] = useState(null);
+  const [activitySubTab, setActivitySubTab] = useState<string | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isForceClosing, setIsForceClosing] = useState(false);
 

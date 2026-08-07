@@ -2,8 +2,9 @@ import {getOsPlatformDisplayName} from '../../utils/display/deviceDisplay';
 import {useEffect, useState} from 'react';
 import {Form, Nav, Tab, Button, Badge, InputGroup} from 'react-bootstrap';
 import {PUSH_OS_PLATFORM} from '../../types/device';
-import UserSearch from './UserSearch';
+import UserSearch, {PushSearchUser, PushSelectedUser} from './UserSearch';
 import applicationApi, {AppScheme} from '../../api/applicationApi';
+import {PushOsPlatform} from '../../types/device';
 
 interface PushFormFieldsProps {
   formData: {
@@ -17,15 +18,16 @@ interface PushFormFieldsProps {
   };
   searchState: {
     nicknameSearch: string;
-    searchResults: any[];
+    searchResults: PushSearchUser[];
     searchLoading: boolean;
   };
-  selectedUsers: any[];
+  selectedUsers: PushSelectedUser[];
   uiState: {
     uploading: boolean;
     loading?: boolean;
   };
-  targetOsPlatforms: Set<any>;
+  targetOsPlatforms: Set<PushOsPlatform>;
+  /** formData의 키와 값. 필드마다 값 타입이 달라 value는 any */
   updateFormData: (field: string, value: any) => void;
   updateNicknameSearch: (value: string) => void;
   searchUserByNickname: () => void;
@@ -34,7 +36,7 @@ interface PushFormFieldsProps {
   isUserSelected: (userId: string) => boolean;
   uploadImage: (file: File) => void;
   removeImage: () => void;
-  toggleOsPlatform: (platform: any) => void;
+  toggleOsPlatform: (platform: PushOsPlatform) => void;
 }
 
 const PushFormFields = ({

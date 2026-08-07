@@ -5,7 +5,8 @@ import StoreEditForm from '../../components/StoreEditForm';
 import SalesTypeBadge from '../../components/common/badges/SalesTypeBadge';
 import StoreStatusBadge from '../../components/common/badges/StoreStatusBadge';
 import {WRITER_TYPE} from '../../types/common';
-import {StoreDetail} from '../../types/store';
+import {ActivitiesStatus, StoreDetail, StoreFoodCategory} from '../../types/store';
+import {Writer} from '../../types/domain';
 import {formatDateTimeKo as formatDateTime} from '../../utils/dateUtils';
 import {
   getActivitiesStatusBadgeClass,
@@ -30,7 +31,8 @@ interface StoreBasicInfoTabProps {
   onEditSuccess: () => void;
   onReviewClick: () => void;
   onReportClick: () => void;
-  onAuthorClick?: (author: any) => void;
+  /** 호출부에 따라 null/undefined가 전달될 수 있습니다. */
+  onAuthorClick?: ((author: Writer) => void) | null;
 }
 
 /**
@@ -46,7 +48,7 @@ const StoreBasicInfoTab = ({
   onReportClick,
   onAuthorClick
 }: StoreBasicInfoTabProps) => {
-  const getActivitiesBadge = (activitiesStatus) => {
+  const getActivitiesBadge = (activitiesStatus: ActivitiesStatus) => {
     return (
       <span
         className={`badge rounded-pill px-3 py-2 ${getActivitiesStatusBadgeClass(activitiesStatus)} bg-opacity-10 text-dark border`}>
@@ -57,7 +59,7 @@ const StoreBasicInfoTab = ({
   };
 
 
-  const getOwnerBadge = (owner) => {
+  const getOwnerBadge = (owner?: Writer) => {
     // USER 타입이 아니거나 정보가 없으면 UI를 표시하지 않음
     if (!owner || !owner.name || owner.writerType !== WRITER_TYPE.USER) {
       return null;
@@ -114,7 +116,7 @@ const StoreBasicInfoTab = ({
   };
 
 
-  const formatOpenStartDateTime = (dateString) => {
+  const formatOpenStartDateTime = (dateString?: string) => {
     if (!dateString) return '없음';
     return new Date(dateString).toLocaleString('ko-KR', {
       month: 'short',
@@ -124,7 +126,7 @@ const StoreBasicInfoTab = ({
     });
   };
 
-  const formatAppearanceDays = (days) => {
+  const formatAppearanceDays = (days?: string[]) => {
     if (!days || days.length === 0) return '정보 없음';
 
     const allDays = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
@@ -144,8 +146,8 @@ const StoreBasicInfoTab = ({
     });
   };
 
-  const getPaymentMethodDisplayName = (method) => {
-    const methodMap = {
+  const getPaymentMethodDisplayName = (method: string) => {
+    const methodMap: Record<string, string> = {
       'CASH': '현금',
       'CARD': '카드',
       'TRANSFER': '계좌이체',
@@ -154,7 +156,7 @@ const StoreBasicInfoTab = ({
     return methodMap[method] || method;
   };
 
-  const formatPaymentMethods = (methods) => {
+  const formatPaymentMethods = (methods?: string[]) => {
     if (!methods || methods.length === 0) {
       return <span className="text-muted">결제 방법 정보 없음</span>;
     }
@@ -166,7 +168,7 @@ const StoreBasicInfoTab = ({
     ));
   };
 
-  const getCategoryList = (categories) => {
+  const getCategoryList = (categories?: StoreFoodCategory[]) => {
     if (!categories || categories.length === 0) {
       return (
         <div className="text-center py-4">

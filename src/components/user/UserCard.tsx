@@ -1,8 +1,14 @@
 
 import {getSocialTypeBadgeClass, getSocialTypeDisplayName, getUserRoleBadgeClass, getUserRoleLabel} from '../../utils/display/userDisplay';
 import ItemCard from '../common/ItemCard';
+import {User} from '../../types/user';
 
-const UserCard = ({user, onClick}) => {
+interface UserCardProps {
+  user: User;
+  onClick: (user: User) => void;
+}
+
+const UserCard = ({user, onClick}: UserCardProps) => {
   const getBorderColor = () => {
     const socialTypeClass = getSocialTypeBadgeClass(user.socialType);
     if (socialTypeClass.includes('warning')) return '#ffc107';

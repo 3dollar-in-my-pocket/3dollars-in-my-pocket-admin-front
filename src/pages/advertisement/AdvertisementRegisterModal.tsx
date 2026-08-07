@@ -6,11 +6,12 @@ import BasicInfoStep from "./steps/BasicInfoStep";
 import ContentInfoStep from "./steps/ContentInfoStep";
 import {useNonce} from "../../hooks/useNonce";
 import {isFieldRequired} from "../../constants/advertisementSpecs";
+import {AdvertisementForm, EnumOption} from "../../types/advertisement";
 
 interface AdvertisementRegisterModalProps {
   show: boolean;
   onHide: () => void;
-  positions: { key: string; description: string }[];
+  positions: EnumOption[];
   fetchAdvertisements: () => void;
 }
 
@@ -21,7 +22,7 @@ const AdvertisementRegisterModal = ({
                                       fetchAdvertisements
                                     }: AdvertisementRegisterModalProps) => {
   const [currentStep, setCurrentStep] = useState(1);
-  const [formData, setFormData] = useState(getInitialFormData());
+  const [formData, setFormData] = useState<AdvertisementForm>(getInitialFormData());
   const {nonce, issueNonce, clearNonce} = useNonce();
 
   const platforms = [
@@ -52,7 +53,7 @@ const AdvertisementRegisterModal = ({
     setCurrentStep(1);
   }
 
-  const handleChange = (field, value) => {
+  const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({...prev, [field]: value}));
   };
 
@@ -69,7 +70,9 @@ const AdvertisementRegisterModal = ({
 
     const content = {
       ...formData.content,
-      ...(formData.content.link.linkType !== "null" && formData.content.link.linkUrl
+      // FIXME: 문자열 "null"과 비교하고 있어 항상 참이 됩니다. (실제 초기값은 null 이므로 `!== null` 의도로 보임)
+      //        기존 동작 유지를 위해 비교식은 그대로 두고 타입만 우회합니다.
+      ...((formData.content.link.linkType as string) !== "null" && formData.content.link.linkUrl
         ? {link: formData.content.link}
         : {}),
     };
@@ -157,7 +160,7 @@ const AdvertisementRegisterModal = ({
   );
 };
 
-function getInitialFormData() {
+function getInitialFormData(): AdvertisementForm {
   return {
     groupId: null,
     description: null,

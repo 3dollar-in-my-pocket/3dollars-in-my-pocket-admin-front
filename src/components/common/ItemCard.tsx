@@ -1,11 +1,23 @@
-const ItemCard = ({
+import React from 'react';
+
+interface ItemCardProps<T = any> {
+  /** 카드가 표현하는 데이터. onClick 인자로 그대로 전달됩니다. (가게/유저/랭킹 등 도메인이 달라 제네릭) */
+  item: T;
+  onClick?: (item: T) => void;
+  borderColor?: string;
+  children?: React.ReactNode;
+  className?: string;
+  style?: React.CSSProperties;
+}
+
+const ItemCard = <T, >({
                     item,
                     onClick,
                     borderColor = '#6c757d',
                     children,
                     className = '',
                     style = {}
-                  }) => {
+                  }: ItemCardProps<T>) => {
   return (
     <div
       className={`card border-0 shadow-lg h-100 position-relative overflow-hidden ${className}`}

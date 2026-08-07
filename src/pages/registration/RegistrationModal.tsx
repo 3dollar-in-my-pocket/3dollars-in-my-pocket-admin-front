@@ -5,9 +5,52 @@ import registrationApi from "../../api/registrationApi";
 import {useEffect, useState} from "react";
 import enumApi from "../../api/enumApi";
 import {toast} from "react-toastify";
+import {OsPlatform} from "../../types/device";
 
-const RegistrationModal = ({show, onHide, registration}) => {
-  const [rejectReasons, setRejectReasons] = useState([]);
+/** BossRegistrationAccountResponse */
+interface RegistrationBoss {
+  socialType: string;
+  name: string;
+  businessNumber: string;
+}
+
+/** BossRegistrationStoreResponse */
+interface RegistrationStore {
+  name: string;
+  categories: string[];
+  certificationPhotoUrl: string;
+}
+
+/** BossRegistrationRequestContextResponse */
+interface RegistrationContext {
+  osPlatform: OsPlatform;
+  appVersion: string;
+}
+
+/** BossRegistrationResponse */
+export interface Registration {
+  registrationId: string;
+  boss: RegistrationBoss;
+  store: RegistrationStore;
+  context?: RegistrationContext | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+/** enum API(BossRegistrationRejectReason) 응답 항목 */
+interface RejectReasonOption {
+  key: string;
+  description: string;
+}
+
+interface RegistrationModalProps {
+  show: boolean;
+  onHide: () => void;
+  registration: Registration | null;
+}
+
+const RegistrationModal = ({show, onHide, registration}: RegistrationModalProps) => {
+  const [rejectReasons, setRejectReasons] = useState<RejectReasonOption[]>([]);
   const [selectedRejectReason, setSelectedRejectReason] = useState("");
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [showApproveModal, setShowApproveModal] = useState(false);

@@ -106,7 +106,7 @@ const StoreSearch = () => {
 
 
   // 가게 삭제 핸들러 (모달에서 삭제 후 목록 업데이트)
-  const handleStoreDeleted = useCallback((deletedStoreId) => {
+  const handleStoreDeleted = useCallback((deletedStoreId: number) => {
     // 결과 목록에서 해당 가게를 삭제 상태로 표시
     const updatedResults = storeList.map(store =>
       store.storeId === deletedStoreId

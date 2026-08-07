@@ -1,8 +1,41 @@
 import {formatDateTimeShortKo as formatDateTime} from '../../utils/dateUtils';
 import {getWriterTypeBgClass, getWriterTypeDisplayName, getWriterTypeIcon, getWriterTypeTextClass} from '../../utils/display/writerDisplay';
+import {DateTimeInterval, Writer} from '../../types/domain';
 
-const PollCard = ({poll, onClick, onAuthorClick, onDelete}) => {
-  const getPollStatus = (poll) => {
+/**
+ * 투표 카드에서 사용하는 응답 모델
+ *
+ * 투표(Poll)는 아직 src/types에 공용 타입이 없어 카드 렌더에 필요한 필드만 정의합니다.
+ */
+export interface PollOption {
+  optionId: number | string;
+  name: string;
+  count?: number;
+  /** 0~1 사이의 득표 비율 */
+  ratio?: number;
+}
+
+export interface PollItem {
+  pollId: number | string;
+  content: { title: string };
+  category: { title: string };
+  period: DateTimeInterval;
+  options: PollOption[];
+  writer?: Writer | null;
+  metadata?: { commentCount?: number };
+}
+
+type PollStatus = 'upcoming' | 'active' | 'ended';
+
+interface PollCardProps {
+  poll: PollItem;
+  onClick?: (poll: PollItem) => void;
+  onAuthorClick?: (writer: Writer) => void;
+  onDelete?: (poll: PollItem) => void;
+}
+
+const PollCard = ({poll, onClick, onAuthorClick, onDelete}: PollCardProps) => {
+  const getPollStatus = (poll: PollItem): PollStatus => {
     const now = new Date();
     const startDate = new Date(poll.period.startDateTime);
     const endDate = new Date(poll.period.endDateTime);
@@ -16,7 +49,7 @@ const PollCard = ({poll, onClick, onAuthorClick, onDelete}) => {
     }
   };
 
-  const getStatusConfig = (status) => {
+  const getStatusConfig = (status: PollStatus) => {
     switch (status) {
       case 'upcoming':
         return {
@@ -52,17 +85,17 @@ const PollCard = ({poll, onClick, onAuthorClick, onDelete}) => {
   };
 
   // 총 참여자 수 계산
-  const getTotalVotes = (options) => {
+  const getTotalVotes = (options: PollOption[]) => {
     return options.reduce((total, option) => total + (option.count || 0), 0);
   };
 
   // 비율을 퍼센트로 변환
-  const getPercentage = (ratio) => {
+  const getPercentage = (ratio?: number) => {
     return Math.round((ratio || 0) * 100);
   };
 
   // 남은 시간 계산
-  const getTimeRemaining = (endDateTime: any) => {
+  const getTimeRemaining = (endDateTime: string) => {
     const now = new Date();
     const end = new Date(endDateTime);
     const diff = end.getTime() - now.getTime();

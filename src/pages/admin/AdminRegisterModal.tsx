@@ -12,7 +12,13 @@ interface AdminFormData {
   role: AdminRole;
 }
 
-const AdminRegisterModal = ({show, onHide, onSuccess}: any) => {
+interface AdminRegisterModalProps {
+  show: boolean;
+  onHide: () => void;
+  onSuccess: () => void;
+}
+
+const AdminRegisterModal = ({show, onHide, onSuccess}: AdminRegisterModalProps) => {
   const { nonce, issueNonce, clearNonce } = useNonce();
 
   const {
