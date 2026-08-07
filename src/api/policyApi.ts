@@ -1,6 +1,6 @@
 import {apiDelete, apiGet, apiGetPaginated, apiPatch, apiPost} from "./apiHelpers";
-import {ContentListResponse} from "../types/api";
-import {Policy, PolicyCategoryId, PolicyId, PolicyType} from "../types/policy";
+import {ContentListResponse} from "@/types/api";
+import {Policy, PolicyCategoryId, PolicyId, PolicyType} from "@/types/policy";
 
 interface PolicyMutationParams {
   policyId: PolicyId;

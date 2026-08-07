@@ -1,20 +1,20 @@
-import OpenStatusBadge from '../../components/common/badges/OpenStatusBadge';
-import StoreLabelBadges from '../../components/common/badges/StoreLabelBadges';
+import OpenStatusBadge from '@/components/common/badges/OpenStatusBadge';
+import StoreLabelBadges from '@/components/common/badges/StoreLabelBadges';
 import {Button} from 'react-bootstrap';
 import StoreEditForm from './detail/StoreEditForm';
-import SalesTypeBadge from '../../components/common/badges/SalesTypeBadge';
-import StoreStatusBadge from '../../components/common/badges/StoreStatusBadge';
-import {WRITER_TYPE} from '../../types/common';
-import {ActivitiesStatus, StoreDetail, StoreFoodCategory} from '../../types/store';
-import {Writer} from '../../types/domain';
-import {formatDateTimeKo as formatDateTime} from '../../utils/dateUtils';
+import SalesTypeBadge from '@/components/common/badges/SalesTypeBadge';
+import StoreStatusBadge from '@/components/common/badges/StoreStatusBadge';
+import {WRITER_TYPE} from '@/types/common';
+import {ActivitiesStatus, StoreDetail, StoreFoodCategory} from '@/types/store';
+import {Writer} from '@/types/domain';
+import {formatDateTimeKo as formatDateTime} from '@/utils/dateUtils';
 import {
   getActivitiesStatusBadgeClass,
   getActivitiesStatusDisplayName,
   getCategoryIcon
-} from '../../utils/display/storeDisplay';
-import {getWriterTypeBadgeClass} from '../../utils/display/writerDisplay';
-import {formatCount, formatRating} from '../../utils/formatUtils';
+} from '@/utils/display/storeDisplay';
+import {getWriterTypeBadgeClass} from '@/utils/display/writerDisplay';
+import {formatCount, formatRating} from '@/utils/formatUtils';
 
 interface StoreBasicInfoTabProps {
   /** 목록에서 넘어온 요약 정보 (상세 로딩 전 폴백) */

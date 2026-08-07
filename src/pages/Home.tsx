@@ -1,5 +1,5 @@
 import React, {useEffect} from "react";
-import {GOOGLE_AUTH_URL} from "../constants/google";
+import {GOOGLE_AUTH_URL} from "@/constants/google";
 import {Bounce, ToastContainer} from "react-toastify";
 
 const Home = () => {

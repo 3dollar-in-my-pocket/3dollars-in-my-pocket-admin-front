@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ApiResponse, PaginatedResponse } from '../types/api';
+import { ApiResponse, PaginatedResponse } from '@/types/api';
 
 /**
  * 커서 페이지네이션 fetcher

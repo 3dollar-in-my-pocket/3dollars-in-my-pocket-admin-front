@@ -1,8 +1,8 @@
 import {useState, useEffect} from 'react';
 import {Modal, Button, Form} from 'react-bootstrap';
 import {toast} from 'react-toastify';
-import medalApi from '../../api/medalApi';
-import {Medal, getAcquisitionDescription} from '../../types/medal';
+import medalApi from '@/api/medalApi';
+import {Medal, getAcquisitionDescription} from '@/types/medal';
 
 interface MedalEditModalProps {
   show: boolean;

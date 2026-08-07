@@ -1,7 +1,7 @@
 
-import {getSocialTypeBadgeClass, getSocialTypeDisplayName, getUserRoleBadgeClass, getUserRoleLabel} from '../../utils/display/userDisplay';
-import ItemCard from '../common/ItemCard';
-import {User} from '../../types/user';
+import {getSocialTypeBadgeClass, getSocialTypeDisplayName, getUserRoleBadgeClass, getUserRoleLabel} from '@/utils/display/userDisplay';
+import ItemCard from '@/components/common/ItemCard';
+import {User} from '@/types/user';
 
 interface UserCardProps {
   user: User;

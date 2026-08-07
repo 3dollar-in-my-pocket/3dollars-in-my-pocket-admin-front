@@ -1,10 +1,10 @@
 import {useState, useEffect} from 'react';
 import AdminRegisterModal from './AdminRegisterModal';
-import adminApi from '../../api/adminApi';
+import adminApi from '@/api/adminApi';
 import {toast} from 'react-toastify';
-import {AdminRole} from '../../types/admin';
+import {AdminRole} from '@/types/admin';
 
-import {formatDateTimeNumeric as formatDate} from '../../utils/dateUtils';
+import {formatDateTimeNumeric as formatDate} from '@/utils/dateUtils';
 
 const Admin = () => {
   const [admins, setAdmins] = useState([]);

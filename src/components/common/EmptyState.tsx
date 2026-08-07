@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from 'react-bootstrap';
-import { EmptyStateProps } from '../../types/common';
+import { EmptyStateProps } from '@/types/common';
 
 /**
  * EmptyState 컴포넌트

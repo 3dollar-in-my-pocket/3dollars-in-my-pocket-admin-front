@@ -1,13 +1,13 @@
 import {useState, useEffect, useCallback, useRef} from 'react';
 import {toast} from 'react-toastify';
-import pollApi from '../../api/pollApi';
-import SearchHeader from '../../components/common/SearchHeader';
-import PollCard from '../../components/poll/PollCard';
-import UserDetailModal from '../user/UserDetailModal';
+import pollApi from '@/api/pollApi';
+import SearchHeader from '@/components/common/SearchHeader';
+import PollCard from '@/components/poll/PollCard';
+import UserDetailModal from '@/pages/user/UserDetailModal';
 
-import {formatDateTimeShortKo as formatDateTime} from '../../utils/dateUtils';
-import {Poll, PollCategory, PollOption} from '../../types/poll';
-import {Writer} from '../../types/domain';
+import {formatDateTimeShortKo as formatDateTime} from '@/utils/dateUtils';
+import {Poll, PollCategory, PollOption} from '@/types/poll';
+import {Writer} from '@/types/domain';
 
 const PollManagement = () => {
   const [categories, setCategories] = useState<PollCategory[]>([]);

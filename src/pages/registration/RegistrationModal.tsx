@@ -1,10 +1,10 @@
-import {getOsPlatformBadgeClass, getOsPlatformDisplayName, getOsPlatformIcon} from '../../utils/display/deviceDisplay';
+import {getOsPlatformBadgeClass, getOsPlatformDisplayName, getOsPlatformIcon} from '@/utils/display/deviceDisplay';
 import {Button, Form, Modal} from "react-bootstrap";
-import registrationApi from "../../api/registrationApi";
+import registrationApi from "@/api/registrationApi";
 import {useEffect, useState} from "react";
-import enumApi from "../../api/enumApi";
+import enumApi from "@/api/enumApi";
 import {toast} from "react-toastify";
-import {BossRegistration} from "../../types/registration";
+import {BossRegistration} from "@/types/registration";
 
 /** enum API(BossRegistrationRejectReason) 응답 항목 */
 interface RejectReasonOption {

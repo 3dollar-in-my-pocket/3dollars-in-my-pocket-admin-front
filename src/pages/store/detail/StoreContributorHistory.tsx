@@ -1,12 +1,12 @@
 import {useCallback, useRef} from 'react';
-import storeApi from '../../../api/storeApi';
-import {ActivityAuthor, Writer} from '../../../types/domain';
-import {StoreChangeHistory} from '../../../types/storeChangeHistory';
-import {getChangeAttributeBadgeClass, getChangeAttributeIcon} from '../../../utils/display/storeDisplay';
-import {getWriterTypeBadgeClass} from '../../../utils/display/writerDisplay';
+import storeApi from '@/api/storeApi';
+import {ActivityAuthor, Writer} from '@/types/domain';
+import {StoreChangeHistory} from '@/types/storeChangeHistory';
+import {getChangeAttributeBadgeClass, getChangeAttributeIcon} from '@/utils/display/storeDisplay';
+import {getWriterTypeBadgeClass} from '@/utils/display/writerDisplay';
 
-import useCursorPagination from '../../../hooks/useCursorPagination';
-import {formatDateTimeShortKo as formatDateTime} from '../../../utils/dateUtils';
+import useCursorPagination from '@/hooks/useCursorPagination';
+import {formatDateTimeShortKo as formatDateTime} from '@/utils/dateUtils';
 
 interface StoreContributorHistoryProps {
   storeId: string;

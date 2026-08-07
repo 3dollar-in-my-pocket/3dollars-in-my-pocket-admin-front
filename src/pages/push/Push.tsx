@@ -1,10 +1,10 @@
 import {useState} from "react";
 import {Alert, Button, Card, Container, Form, Modal} from "react-bootstrap";
 import {useNavigate} from "react-router-dom";
-import PushFormFields from "../../components/push/PushFormFields";
-import PushPreview from "../../components/push/PushPreview";
-import {usePushForm} from "../../hooks/usePushForm";
-import {getOsPlatformDisplayName} from '../../utils/display/deviceDisplay';
+import PushFormFields from "@/components/push/PushFormFields";
+import PushPreview from "@/components/push/PushPreview";
+import {usePushForm} from "@/hooks/usePushForm";
+import {getOsPlatformDisplayName} from '@/utils/display/deviceDisplay';
 
 const PushManage = () => {
   const navigate = useNavigate();

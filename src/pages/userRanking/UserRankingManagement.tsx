@@ -1,15 +1,15 @@
 import {useEffect, useState, useRef, useCallback} from 'react';
 import {toast} from 'react-toastify';
-import enumApi from '../../api/enumApi';
-import userRankingApi from '../../api/userRankingApi';
-import medalApi from '../../api/medalApi';
-import {UserRankingItem, createUserRankingRequest} from '../../types/userRanking';
-import UserRankingCard from '../../components/userRanking/UserRankingCard';
-import UserDetailModal from '../user/UserDetailModal';
-import StoreDetailModal from '../store/StoreDetailModal';
-import MedalAssignModal from '../../components/userRanking/MedalAssignModal';
-import PushSendModal from '../../components/push/PushSendModal';
-import Loading from '../../components/common/Loading';
+import enumApi from '@/api/enumApi';
+import userRankingApi from '@/api/userRankingApi';
+import medalApi from '@/api/medalApi';
+import {UserRankingItem, createUserRankingRequest} from '@/types/userRanking';
+import UserRankingCard from '@/components/userRanking/UserRankingCard';
+import UserDetailModal from '@/pages/user/UserDetailModal';
+import StoreDetailModal from '@/pages/store/StoreDetailModal';
+import MedalAssignModal from '@/components/userRanking/MedalAssignModal';
+import PushSendModal from '@/components/push/PushSendModal';
+import Loading from '@/components/common/Loading';
 
 const MAX_SELECTION = 500;
 

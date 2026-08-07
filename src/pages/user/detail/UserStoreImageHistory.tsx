@@ -1,12 +1,12 @@
-import StoreTypeBadge from '../../../components/common/badges/StoreTypeBadge';
+import StoreTypeBadge from '@/components/common/badges/StoreTypeBadge';
 import {useCallback, useRef, useState} from 'react';
 import {toast} from 'react-toastify';
-import storeImageApi from "../../../api/storeImageApi";
+import storeImageApi from "@/api/storeImageApi";
 
-import useCursorPagination from "../../../hooks/useCursorPagination";
-import {StoreImage, StoreImageStatus} from "../../../types/storeImage";
-import {SimpleStore, StoreStatus} from "../../../types/store";
-import {formatDateTimeKo as formatDateTime} from "../../../utils/dateUtils";
+import useCursorPagination from "@/hooks/useCursorPagination";
+import {StoreImage, StoreImageStatus} from "@/types/storeImage";
+import {SimpleStore, StoreStatus} from "@/types/store";
+import {formatDateTimeKo as formatDateTime} from "@/utils/dateUtils";
 
 interface UserStoreImageHistoryProps {
   userId: string;

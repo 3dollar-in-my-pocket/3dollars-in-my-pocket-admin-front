@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
-import storeApi from '../../../api/storeApi';
-import {StorePreferenceSetting} from '../../../types/store';
+import storeApi from '@/api/storeApi';
+import {StorePreferenceSetting} from '@/types/store';
 
 interface StoreSettingsProps {
   storeId: string;

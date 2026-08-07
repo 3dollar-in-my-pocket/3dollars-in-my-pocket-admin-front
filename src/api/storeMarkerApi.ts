@@ -1,5 +1,5 @@
-import {ApiResponse, PaginatedResponse} from '../types/api';
-import {StoreMarker, StoreMarkerFilter, StoreMarkerRequest} from '../types/storeMarker';
+import {ApiResponse, PaginatedResponse} from '@/types/api';
+import {StoreMarker, StoreMarkerFilter, StoreMarkerRequest} from '@/types/storeMarker';
 import {apiDelete, apiGetPaginated, apiPost, apiPut} from './apiHelpers';
 
 const storeMarkerApi = {

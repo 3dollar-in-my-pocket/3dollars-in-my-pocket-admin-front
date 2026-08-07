@@ -1,10 +1,10 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
 import {Alert, Form} from 'react-bootstrap';
-import storePostApi from '../../api/storePostApi';
-import StorePostItem from '../../components/StorePostItem';
-import EmptyState from '../../components/common/EmptyState';
-import useInfiniteScroll from '../../hooks/useInfiniteScroll';
-import {STORE_POST_SORT, StorePost, StorePostSort} from '../../types/storePost';
+import storePostApi from '@/api/storePostApi';
+import StorePostItem from '@/components/StorePostItem';
+import EmptyState from '@/components/common/EmptyState';
+import useInfiniteScroll from '@/hooks/useInfiniteScroll';
+import {STORE_POST_SORT, StorePost, StorePostSort} from '@/types/storePost';
 
 const StorePostManagement = () => {
   const [posts, setPosts] = useState<StorePost[]>([]);

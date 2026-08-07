@@ -1,4 +1,4 @@
-import {AdminRole} from '../types/admin';
+import {AdminRole} from '@/types/admin';
 
 /**
  * 역할 기반 접근 제어 유틸리티 함수들

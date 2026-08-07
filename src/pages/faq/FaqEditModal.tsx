@@ -1,11 +1,11 @@
 import {Modal} from "react-bootstrap";
 import {useEffect} from "react";
-import {formatDateTime} from "../../utils/dateUtils";
-import faqApi from "../../api/faqApi";
+import {formatDateTime} from "@/utils/dateUtils";
+import faqApi from "@/api/faqApi";
 import {toast} from "react-toastify";
-import {useNonce} from "../../hooks/useNonce";
-import useModalForm from "../../hooks/useModalForm";
-import {Faq, FaqCategory} from "../../types/faq";
+import {useNonce} from "@/hooks/useNonce";
+import useModalForm from "@/hooks/useModalForm";
+import {Faq, FaqCategory} from "@/types/faq";
 
 interface FaqFormData {
   application: string;

@@ -1,6 +1,6 @@
 // 푸시 관련 유틸리티 함수들
 
-import {PushRequest} from "../types/push";
+import {PushRequest} from "@/types/push";
 
 /** 푸시 발송 폼에서 유효성 검사에 사용하는 입력값 */
 export interface PushFormData {

@@ -2,10 +2,10 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
-import googleAuthApi from "../../../api/googleAuthApi";
-import authApi from "../../../api/authApi";
-import { useAuthStore } from "../../../state/authStore";
-import Loading from "../../../components/common/Loading";
+import googleAuthApi from "@/api/googleAuthApi";
+import authApi from "@/api/authApi";
+import { useAuthStore } from "@/state/authStore";
+import Loading from "@/components/common/Loading";
 
 const GoogleCallback = () => {
   const navigate = useNavigate();

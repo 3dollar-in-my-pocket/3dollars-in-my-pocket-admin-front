@@ -1,9 +1,9 @@
 import React, {useEffect, useState} from "react";
 import {Button, Form, Modal} from "react-bootstrap";
 import {toast} from "react-toastify";
-import policyApi from "../../api/policyApi";
-import {formatDateTime} from "../../utils/dateUtils";
-import {Policy} from "../../types/policy";
+import policyApi from "@/api/policyApi";
+import {formatDateTime} from "@/utils/dateUtils";
+import {Policy} from "@/types/policy";
 
 /** enum API(PolicyCategoryType / PolicyType) 응답 항목 */
 interface PolicyEnumOption {

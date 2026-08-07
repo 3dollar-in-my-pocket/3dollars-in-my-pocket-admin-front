@@ -1,5 +1,5 @@
 import { apiGetBlob, apiPostFormData } from './apiHelpers';
-import { StoreImportSaveResponse, StoreImportValidationResponse } from '../types/storeImport';
+import { StoreImportSaveResponse, StoreImportValidationResponse } from '@/types/storeImport';
 
 const buildImportFormData = (storesFile: File, menusFile: File): FormData => {
   const formData = new FormData();

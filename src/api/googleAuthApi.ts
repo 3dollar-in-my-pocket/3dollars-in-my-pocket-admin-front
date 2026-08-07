@@ -1,7 +1,7 @@
 import axios, { AxiosError } from "axios";
 import axiosInstance from "./apiBase";
-import { AUTH_KEY, GOOGLE_TOKEN_URL } from "../constants/google";
-import { GoogleTokenRequest, GoogleTokenResponse } from "../types/auth";
+import { AUTH_KEY, GOOGLE_TOKEN_URL } from "@/constants/google";
+import { GoogleTokenRequest, GoogleTokenResponse } from "@/types/auth";
 
 export default {
   /**

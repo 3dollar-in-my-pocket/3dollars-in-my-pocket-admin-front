@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import {Tab, Tabs} from 'react-bootstrap';
-import {ActivityAuthor} from '../types/domain';
-import {SimpleStore} from '../types/store';
+import {ActivityAuthor} from '@/types/domain';
+import {SimpleStore} from '@/types/store';
 import '../styles/mobile-tabs.css';
 
 /** ActivityHistory가 렌더링하는 탭 하나의 설정 */

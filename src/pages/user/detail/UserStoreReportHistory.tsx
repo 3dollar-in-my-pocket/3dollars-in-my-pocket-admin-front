@@ -1,14 +1,14 @@
-import StoreTypeBadge from '../../../components/common/badges/StoreTypeBadge';
+import StoreTypeBadge from '@/components/common/badges/StoreTypeBadge';
 import {useCallback} from 'react';
-import storeReportApi from "../../../api/storeReportApi";
-import {getReportReasonBadgeClass} from '../../../utils/display/reportDisplay';
+import storeReportApi from "@/api/storeReportApi";
+import {getReportReasonBadgeClass} from '@/utils/display/reportDisplay';
 
-import useCursorPagination from "../../../hooks/useCursorPagination";
+import useCursorPagination from "@/hooks/useCursorPagination";
 
-import {StoreReport, StoreReportReason} from "../../../types/report";
-import {SimpleStore} from "../../../types/store";
-import {Address} from "../../../types/domain";
-import {formatDateTimeKoNoSec as formatDateTime} from '../../../utils/dateUtils';
+import {StoreReport, StoreReportReason} from "@/types/report";
+import {SimpleStore} from "@/types/store";
+import {Address} from "@/types/domain";
+import {formatDateTimeKoNoSec as formatDateTime} from '@/utils/dateUtils';
 
 interface UserStoreReportHistoryProps {
   userId: string;

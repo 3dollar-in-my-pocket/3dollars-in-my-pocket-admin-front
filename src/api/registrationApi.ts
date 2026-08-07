@@ -1,5 +1,5 @@
 import {apiGetPaginated, apiPut} from "./apiHelpers";
-import {BossRegistration} from "../types/registration";
+import {BossRegistration} from "@/types/registration";
 
 interface ListRegistrationsParams {
   cursor?: string | null;

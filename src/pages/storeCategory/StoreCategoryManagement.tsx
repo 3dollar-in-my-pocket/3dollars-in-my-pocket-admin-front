@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import storeCategoryApi from '../../api/storeCategoryApi';
-import EmptyState from '../../components/common/EmptyState';
-import {StoreCategory} from '../../types/storeCategory';
-import {getCategoryClassificationBadgeClass, getCategoryClassificationIcon} from '../../utils/display/storeCategoryDisplay';
+import storeCategoryApi from '@/api/storeCategoryApi';
+import EmptyState from '@/components/common/EmptyState';
+import {StoreCategory} from '@/types/storeCategory';
+import {getCategoryClassificationBadgeClass, getCategoryClassificationIcon} from '@/utils/display/storeCategoryDisplay';
 
 const StoreCategoryManagement = () => {
   const [categories, setCategories] = useState<StoreCategory[]>([]);

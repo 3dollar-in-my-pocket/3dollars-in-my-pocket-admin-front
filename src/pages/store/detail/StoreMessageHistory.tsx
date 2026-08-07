@@ -1,8 +1,8 @@
 import React, {useCallback} from 'react';
-import storeApi from '../../../api/storeApi';
+import storeApi from '@/api/storeApi';
 import StoreMessageItem from './StoreMessageItem';
-import useCursorPagination from '../../../hooks/useCursorPagination';
-import {StoreMessage} from '../../../types/storeMessage';
+import useCursorPagination from '@/hooks/useCursorPagination';
+import {StoreMessage} from '@/types/storeMessage';
 
 interface StoreMessageHistoryProps {
   storeId: string;

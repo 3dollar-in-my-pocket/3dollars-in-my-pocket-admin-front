@@ -1,5 +1,5 @@
 import { apiGetPaginated } from './apiHelpers';
-import { UserRankingItem, UserRankingRequest, UserRankingResponse } from '../types/userRanking';
+import { UserRankingItem, UserRankingRequest, UserRankingResponse } from '@/types/userRanking';
 
 export default {
   /**

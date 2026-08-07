@@ -1,12 +1,12 @@
 import React, {useEffect, useState} from "react";
 import {Button, Form, Modal} from "react-bootstrap";
 import {toast} from "react-toastify";
-import advertisementApi from "../../api/advertisementApi";
+import advertisementApi from "@/api/advertisementApi";
 import BasicInfoStep from "./steps/BasicInfoStep";
 import ContentInfoStep from "./steps/ContentInfoStep";
-import {useNonce} from "../../hooks/useNonce";
-import {isFieldRequired} from "../../constants/advertisementSpecs";
-import {AdvertisementForm, EnumOption} from "../../types/advertisement";
+import {useNonce} from "@/hooks/useNonce";
+import {isFieldRequired} from "@/constants/advertisementSpecs";
+import {AdvertisementForm, EnumOption} from "@/types/advertisement";
 
 interface AdvertisementRegisterModalProps {
   show: boolean;

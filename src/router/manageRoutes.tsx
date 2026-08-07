@@ -1,7 +1,7 @@
 import { lazy } from "react";
 import PrivateRouter from "./PrivateRouter";
-import PermissionGuard from "../components/auth/PermissionGuard";
-import { AdminRole } from "../types/admin";
+import PermissionGuard from "@/components/auth/PermissionGuard";
+import { AdminRole } from "@/types/admin";
 
 // 관리 페이지는 라우트 진입 시점에 로드합니다. (Suspense fallback은 Layout에 있음)
 const Dashboard = lazy(() => import("../pages/Dashboard"));

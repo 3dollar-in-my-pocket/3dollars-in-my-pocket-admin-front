@@ -1,7 +1,7 @@
 import {useNavigate} from "react-router-dom";
 import {menuGroups} from "./Layout";
-import {useAuthStore} from "../state/authStore";
-import {filterMenuItemsByRole} from "../utils/roleUtils";
+import {useAuthStore} from "@/state/authStore";
+import {filterMenuItemsByRole} from "@/utils/roleUtils";
 
 const Dashboard = () => {
   const navigate = useNavigate();

@@ -1,7 +1,7 @@
 import {
   getOpenStatusBadgeClass,
   getOpenStatusDisplayName
-} from '../../../utils/display/storeDisplay';
+} from '@/utils/display/storeDisplay';
 
 /** 응답이 { status, isOpening } 형태로 내려옵니다. */
 export interface OpenStatusValue {

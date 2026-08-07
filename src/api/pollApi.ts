@@ -1,6 +1,6 @@
 import {apiDelete, apiGet, apiGetPaginated} from './apiHelpers';
-import {ContentListResponse} from '../types/api';
-import {Poll, PollCategory} from '../types/poll';
+import {ContentListResponse} from '@/types/api';
+import {Poll, PollCategory} from '@/types/poll';
 
 const pollApi = {
   // 투표 카테고리 목록 조회

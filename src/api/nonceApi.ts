@@ -1,4 +1,4 @@
-import {NonceData} from "../types/nonce";
+import {NonceData} from "@/types/nonce";
 import {ApiResponse} from "@/types/api";
 import {apiPost} from "./apiHelpers";
 

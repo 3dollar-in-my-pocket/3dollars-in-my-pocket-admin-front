@@ -1,6 +1,6 @@
-import { ApiResponse, PaginatedResponse } from '../types/api';
-import { StoreMessage } from '../types/storeMessage';
-import { INCLUDES } from '../constants/api';
+import { ApiResponse, PaginatedResponse } from '@/types/api';
+import { StoreMessage } from '@/types/storeMessage';
+import { INCLUDES } from '@/constants/api';
 import { apiGetPaginated } from './apiHelpers';
 
 export default {

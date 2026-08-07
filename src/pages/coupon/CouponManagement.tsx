@@ -1,13 +1,13 @@
-import StoreTypeBadge from '../../components/common/badges/StoreTypeBadge';
+import StoreTypeBadge from '@/components/common/badges/StoreTypeBadge';
 import {useCallback, useEffect, useRef, useState} from 'react';
-import couponApi from '../../api/couponApi';
-import {Coupon, COUPON_STATUS} from '../../types/coupon';
-import {formatDateTimeShortKo as formatCouponDate} from '../../utils/dateUtils';
-import {getCouponStatusBadgeClass, getCouponStatusDisplayName} from '../../utils/display/couponDisplay';
+import couponApi from '@/api/couponApi';
+import {Coupon, COUPON_STATUS} from '@/types/coupon';
+import {formatDateTimeShortKo as formatCouponDate} from '@/utils/dateUtils';
+import {getCouponStatusBadgeClass, getCouponStatusDisplayName} from '@/utils/display/couponDisplay';
 
-import StoreDetailModal from '../store/StoreDetailModal';
-import useInfiniteScroll from '../../hooks/useInfiniteScroll';
-import EmptyState from '../../components/common/EmptyState';
+import StoreDetailModal from '@/pages/store/StoreDetailModal';
+import useInfiniteScroll from '@/hooks/useInfiniteScroll';
+import EmptyState from '@/components/common/EmptyState';
 
 const CouponManagement = () => {
   const [coupons, setCoupons] = useState<Coupon[]>([]);

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { InfiniteScrollConfig } from '../types/common';
+import { InfiniteScrollConfig } from '@/types/common';
 
 /**
  * Infinite Scroll Hook

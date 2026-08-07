@@ -1,7 +1,7 @@
 
-import {getSocialTypeBadgeClass, getSocialTypeDisplayName} from '../../utils/display/userDisplay';
-import ItemCard from '../common/ItemCard';
-import {UserRankingItem} from '../../types/userRanking';
+import {getSocialTypeBadgeClass, getSocialTypeDisplayName} from '@/utils/display/userDisplay';
+import ItemCard from '@/components/common/ItemCard';
+import {UserRankingItem} from '@/types/userRanking';
 
 interface UserRankingCardProps {
   rankingItem: UserRankingItem;

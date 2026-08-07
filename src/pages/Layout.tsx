@@ -1,11 +1,11 @@
 import React, {useState, useEffect, Suspense} from "react";
 import {Link, Outlet, useLocation, useNavigate} from "react-router-dom";
-import Loading from "../components/common/Loading";
+import Loading from "@/components/common/Loading";
 import {Bounce, toast, ToastContainer} from "react-toastify";
-import {useAuthStore} from "../state/authStore";
-import { AdminRole } from "../types/admin";
-import { filterMenuItemsByRole } from "../utils/roleUtils";
-import { setGlobalNavigate } from "../api/apiBase";
+import {useAuthStore} from "@/state/authStore";
+import { AdminRole } from "@/types/admin";
+import { filterMenuItemsByRole } from "@/utils/roleUtils";
+import { setGlobalNavigate } from "@/api/apiBase";
 
 // 메뉴 항목 타입 정의
 export interface MenuItem {

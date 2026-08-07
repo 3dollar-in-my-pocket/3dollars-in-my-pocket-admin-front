@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Modal } from 'react-bootstrap';
 import { toast } from 'react-toastify';
-import enumApi from '../../api/enumApi';
-import promptApi from '../../api/promptApi';
-import EmptyState from '../../components/common/EmptyState';
-import Loading from '../../components/common/Loading';
-import useInfiniteScroll from '../../hooks/useInfiniteScroll';
-import { formatDateTime } from '../../utils/dateUtils';
-import { AIModel, EnumOption, PromptFormRequest, PromptResponse, PromptStatus } from '../../types/prompt';
+import enumApi from '@/api/enumApi';
+import promptApi from '@/api/promptApi';
+import EmptyState from '@/components/common/EmptyState';
+import Loading from '@/components/common/Loading';
+import useInfiniteScroll from '@/hooks/useInfiniteScroll';
+import { formatDateTime } from '@/utils/dateUtils';
+import { AIModel, EnumOption, PromptFormRequest, PromptResponse, PromptStatus } from '@/types/prompt';
 import './PromptManagement.css';
 
 const PAGE_SIZE = 10;

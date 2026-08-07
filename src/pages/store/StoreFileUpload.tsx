@@ -1,12 +1,12 @@
 import { ChangeEvent, useState } from 'react';
 import { toast } from 'react-toastify';
-import storeImportApi from '../../api/storeImportApi';
+import storeImportApi from '@/api/storeImportApi';
 import {
   StoreImportSaveResponse,
   StoreImportValidationResponse,
   StoreImportValidationResult,
-} from '../../types/storeImport';
-import { showConfirm } from '../../utils/confirmDialog';
+} from '@/types/storeImport';
+import { showConfirm } from '@/utils/confirmDialog';
 
 const isCsvFile = (file: File): boolean => file.name.toLowerCase().endsWith('.csv');
 

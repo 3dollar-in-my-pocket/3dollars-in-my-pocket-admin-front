@@ -2,13 +2,13 @@ import React, {useState} from "react";
 import {Button, Modal} from "react-bootstrap";
 import {BiCalendar, BiLinkExternal} from "react-icons/bi";
 import {HiOutlineSpeakerphone} from "react-icons/hi";
-import advertisementApi from "../../api/advertisementApi";
+import advertisementApi from "@/api/advertisementApi";
 import {toast} from "react-toastify";
 import AdvertisementEditModal from "./AdvertisementEditModal";
 import AdvertisementContentEditModal from "./AdvertisementContentEditModal";
-import AdTimer from "../../components/common/AdTimer";
-import AdPreview from "../../components/advertisement/AdPreview";
-import {Advertisement, EnumOption} from "../../types/advertisement";
+import AdTimer from "@/components/common/AdTimer";
+import AdPreview from "@/components/advertisement/AdPreview";
+import {Advertisement, EnumOption} from "@/types/advertisement";
 
 interface AdvertisementModalProps {
   show: boolean;

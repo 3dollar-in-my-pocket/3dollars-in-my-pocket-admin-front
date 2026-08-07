@@ -1,12 +1,12 @@
 import {useEffect, useCallback, useState} from 'react';
-import type {ActivityAuthor} from '../../types/domain';
+import type {ActivityAuthor} from '@/types/domain';
 import StoreDetailModal from './StoreDetailModal';
-import UserDetailModal from '../user/UserDetailModal';
-import {STORE_SEARCH_TYPES, STORE_TYPE, SimpleStore, StoreType} from '../../types/store';
-import useSearch from '../../hooks/useSearch';
-import {storeSearchAdapter} from '../../adapters/storeSearchAdapter';
-import SearchResults from '../../components/common/SearchResults';
-import StoreCard from '../../components/store/StoreCard';
+import UserDetailModal from '@/pages/user/UserDetailModal';
+import {STORE_SEARCH_TYPES, STORE_TYPE, SimpleStore, StoreType} from '@/types/store';
+import useSearch from '@/hooks/useSearch';
+import {storeSearchAdapter} from '@/adapters/storeSearchAdapter';
+import SearchResults from '@/components/common/SearchResults';
+import StoreCard from '@/components/store/StoreCard';
 
 /** 삭제 처리 후 목록에서 표시하기 위해 클라이언트가 isDeleted를 덧붙입니다. */
 type SearchedStore = SimpleStore & {isDeleted?: boolean};

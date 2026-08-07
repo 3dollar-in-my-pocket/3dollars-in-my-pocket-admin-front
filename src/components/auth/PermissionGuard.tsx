@@ -1,7 +1,7 @@
 import React from 'react';
-import { useAuthStore } from '../../state/authStore';
-import { AdminRole } from '../../types/admin';
-import { hasMenuAccess } from '../../utils/roleUtils';
+import { useAuthStore } from '@/state/authStore';
+import { AdminRole } from '@/types/admin';
+import { hasMenuAccess } from '@/utils/roleUtils';
 
 interface PermissionGuardProps {
   allowedRoles?: AdminRole[];

@@ -1,6 +1,6 @@
 import {apiGet} from './apiHelpers';
-import {ApiResponse} from '../types/api';
-import {StorePostList, StorePostSort} from '../types/storePost';
+import {ApiResponse} from '@/types/api';
+import {StorePostList, StorePostSort} from '@/types/storePost';
 
 const storePostApi = {
   /**

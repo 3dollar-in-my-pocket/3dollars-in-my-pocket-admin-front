@@ -12,7 +12,7 @@ import {
   USER_ROLES,
   UserRole,
   UserRoleOption
-} from '../../types/user';
+} from '@/types/user';
 
 export const getSocialTypeDisplayName = (socialType: SocialType): string => {
   switch (socialType) {

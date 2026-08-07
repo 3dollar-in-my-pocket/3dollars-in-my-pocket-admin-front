@@ -1,5 +1,5 @@
-import { ApiResponse, ContentListResponse } from '../types/api';
-import {Faq, FaqCategory} from '../types/faq';
+import { ApiResponse, ContentListResponse } from '@/types/api';
+import {Faq, FaqCategory} from '@/types/faq';
 import { apiGet, apiPost, apiPut, apiDelete } from './apiHelpers';
 
 export default {

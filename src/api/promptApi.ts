@@ -1,5 +1,5 @@
-import { ApiResponse, CursorPaginationParams, PaginatedResponse } from '../types/api';
-import { PromptFormRequest, PromptResponse, PromptUpdateRequest } from '../types/prompt';
+import { ApiResponse, CursorPaginationParams, PaginatedResponse } from '@/types/api';
+import { PromptFormRequest, PromptResponse, PromptUpdateRequest } from '@/types/prompt';
 import { apiDelete, apiGetPaginated, apiPatch, apiPost } from './apiHelpers';
 
 const promptApi = {

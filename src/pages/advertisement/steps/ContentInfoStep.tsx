@@ -1,17 +1,17 @@
 import React, {useState} from "react";
 import {Button, Col, Form, Row} from "react-bootstrap";
 import {toast} from "react-toastify";
-import uploadApi from "../../../api/uploadApi";
-import AdPreview from "../../../components/advertisement/AdPreview";
-import {isFieldAvailable} from "../../../constants/advertisementSpecs";
-import DeepLinkSelector from "../../../components/common/DeepLinkSelector";
+import uploadApi from "@/api/uploadApi";
+import AdPreview from "@/components/advertisement/AdPreview";
+import {isFieldAvailable} from "@/constants/advertisementSpecs";
+import DeepLinkSelector from "@/components/common/DeepLinkSelector";
 import {
   AdvertisementContentForm,
   AdvertisementForm,
   AdvertisementImageForm,
   AdvertisementLinkForm,
   AdvertisementLinkType
-} from "../../../types/advertisement";
+} from "@/types/advertisement";
 
 interface ContentInfoStepProps {
   formData: AdvertisementForm;

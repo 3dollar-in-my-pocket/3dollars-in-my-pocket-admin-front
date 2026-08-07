@@ -1,5 +1,5 @@
-import { ApiResponse, PagePaginatedResponse } from '../types/api';
-import { Admin, CreateAdminRequest, UpdateAdminRequest } from '../types/admin';
+import { ApiResponse, PagePaginatedResponse } from '@/types/api';
+import { Admin, CreateAdminRequest, UpdateAdminRequest } from '@/types/admin';
 import { apiGet, apiPost, apiPatch } from './apiHelpers';
 
 export default {

@@ -1,15 +1,15 @@
-import OpenStatusBadge from '../../components/common/badges/OpenStatusBadge';
-import StoreLabelBadges from '../../components/common/badges/StoreLabelBadges';
+import OpenStatusBadge from '@/components/common/badges/OpenStatusBadge';
+import StoreLabelBadges from '@/components/common/badges/StoreLabelBadges';
 import StoreBasicInfoTab from './StoreBasicInfoTab';
-import SalesTypeBadge from '../../components/common/badges/SalesTypeBadge';
-import StoreStatusBadge from '../../components/common/badges/StoreStatusBadge';
-import StoreTypeBadge from '../../components/common/badges/StoreTypeBadge';
+import SalesTypeBadge from '@/components/common/badges/SalesTypeBadge';
+import StoreStatusBadge from '@/components/common/badges/StoreStatusBadge';
+import StoreTypeBadge from '@/components/common/badges/StoreTypeBadge';
 import '../../styles/mobile-tabs.css';
 import {useEffect, useState} from 'react';
 import {Modal, Tab, Tabs} from 'react-bootstrap';
 import {toast} from 'react-toastify';
-import storeApi from '../../api/storeApi';
-import ActivityHistory from '../../components/ActivityHistory';
+import storeApi from '@/api/storeApi';
+import ActivityHistory from '@/components/ActivityHistory';
 import StoreContributorHistory from './detail/StoreContributorHistory';
 import StoreCouponHistory from './detail/StoreCouponHistory';
 import StoreEditForm from './detail/StoreEditForm';
@@ -21,7 +21,7 @@ import StoreReportHistory from './detail/StoreReportHistory';
 import StoreReviewHistory from './detail/StoreReviewHistory';
 import StoreSettings from './detail/StoreSettings';
 import StoreVisitHistory from './detail/StoreVisitHistory';
-import {StoreDetail, isVisitsSupported, isImagesSupported, isReportsSupported} from '../../types/store';
+import {StoreDetail, isVisitsSupported, isImagesSupported, isReportsSupported} from '@/types/store';
 
 interface StoreDetailModalProps {
   show: boolean;

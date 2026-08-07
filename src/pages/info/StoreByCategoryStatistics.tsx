@@ -12,10 +12,10 @@ import {
   Legend,
   ResponsiveContainer
 } from "recharts";
-import statisticsApi from "../../api/statisticsApi";
-import storeCategoryApi from "../../api/storeCategoryApi";
-import {DailyStatistic} from "../../types/statistics";
-import {StoreCategory} from "../../types/storeCategory";
+import statisticsApi from "@/api/statisticsApi";
+import storeCategoryApi from "@/api/storeCategoryApi";
+import {DailyStatistic} from "@/types/statistics";
+import {StoreCategory} from "@/types/storeCategory";
 import {toast} from "react-toastify";
 
 interface StoreByCategoryStatisticsProps {

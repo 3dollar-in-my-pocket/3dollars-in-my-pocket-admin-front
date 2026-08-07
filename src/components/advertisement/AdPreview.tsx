@@ -1,5 +1,5 @@
 import React from 'react';
-import {getAdPositionSpec} from '../../constants/advertisementSpecs';
+import {getAdPositionSpec} from '@/constants/advertisementSpecs';
 import './AdPreview.css';
 
 interface AdPreviewProps {

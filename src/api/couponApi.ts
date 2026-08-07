@@ -1,7 +1,7 @@
-import {ApiResponse, PaginatedResponse} from '../types/api';
-import {Coupon} from '../types/coupon';
-import {INCLUDES} from '../constants/api';
-import {buildArrayParam} from '../utils/apiUtils';
+import {ApiResponse, PaginatedResponse} from '@/types/api';
+import {Coupon} from '@/types/coupon';
+import {INCLUDES} from '@/constants/api';
+import {buildArrayParam} from '@/utils/apiUtils';
 import {apiGetPaginated} from './apiHelpers';
 
 export default {

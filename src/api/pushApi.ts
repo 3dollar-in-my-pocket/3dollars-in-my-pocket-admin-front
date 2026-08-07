@@ -1,7 +1,7 @@
 import {apiPost} from './apiHelpers';
 import userApi from './userApi';
-import {SEARCH_TYPES, User} from '../types/user';
-import {PushRequest} from '../types/push';
+import {SEARCH_TYPES, User} from '@/types/user';
+import {PushRequest} from '@/types/push';
 
 /** 닉네임 검색 결과에서 푸시 발송 대상으로 사용하는 사용자 정보 */
 export interface PushTargetUser {

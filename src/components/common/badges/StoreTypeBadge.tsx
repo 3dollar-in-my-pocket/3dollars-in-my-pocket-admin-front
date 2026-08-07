@@ -3,8 +3,8 @@ import {
   getStoreTypeBadgeClass,
   getStoreTypeDisplayName,
   getStoreTypeIcon
-} from '../../../utils/display/storeDisplay';
-import { StoreType } from '../../../types/store';
+} from '@/utils/display/storeDisplay';
+import { StoreType } from '@/types/store';
 
 export type BadgeSize = 'sm' | 'md' | 'lg';
 

@@ -1,9 +1,9 @@
 import {Modal} from "react-bootstrap";
-import adminApi from "../../api/adminApi";
+import adminApi from "@/api/adminApi";
 import {toast} from "react-toastify";
-import useModalForm from "../../hooks/useModalForm";
-import { AdminRole } from "../../types/admin";
-import { useNonce } from "../../hooks/useNonce";
+import useModalForm from "@/hooks/useModalForm";
+import { AdminRole } from "@/types/admin";
+import { useNonce } from "@/hooks/useNonce";
 import { useEffect } from "react";
 
 interface AdminFormData {

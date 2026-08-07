@@ -1,4 +1,4 @@
-import {getPushTypeStyles} from "../../utils/pushUtils";
+import {getPushTypeStyles} from "@/utils/pushUtils";
 
 interface PushPreviewProps {
   title?: string;

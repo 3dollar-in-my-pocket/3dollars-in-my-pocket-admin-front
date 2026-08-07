@@ -1,10 +1,10 @@
 import {useEffect, useCallback, useState, useRef} from 'react';
 import StoreDetailModal from './StoreDetailModal';
-import UserDetailModal from '../user/UserDetailModal';
-import useSearch from '../../hooks/useSearch';
-import SearchResults from '../../components/common/SearchResults';
-import StoreCard from '../../components/store/StoreCard';
-import rankingApi, {RankingCriteria, Province, District} from '../../api/rankingApi';
+import UserDetailModal from '@/pages/user/UserDetailModal';
+import useSearch from '@/hooks/useSearch';
+import SearchResults from '@/components/common/SearchResults';
+import StoreCard from '@/components/store/StoreCard';
+import rankingApi, {RankingCriteria, Province, District} from '@/api/rankingApi';
 import {toast} from 'react-toastify';
 
 const RANKING_CRITERIA = {

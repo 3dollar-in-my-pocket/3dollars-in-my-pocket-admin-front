@@ -1,5 +1,5 @@
-import { ApiResponse, ContentListResponse } from '../types/api';
-import { Medal } from '../types/medal';
+import { ApiResponse, ContentListResponse } from '@/types/api';
+import { Medal } from '@/types/medal';
 import { apiGet, apiPut, apiPost } from './apiHelpers';
 
 export interface UpdateMedalRequest {

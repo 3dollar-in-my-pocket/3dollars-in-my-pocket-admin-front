@@ -1,5 +1,5 @@
-import {ApiResponse} from '../types/api';
-import {LoginRequest, LoginResponse} from '../types/auth';
+import {ApiResponse} from '@/types/api';
+import {LoginRequest, LoginResponse} from '@/types/auth';
 import {apiPost} from './apiHelpers';
 import {SocialType} from "@/types/user";
 

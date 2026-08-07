@@ -1,9 +1,9 @@
 import {useEffect, useState} from "react";
-import registrationApi from "../../api/registrationApi";
-import Loading from "../../components/common/Loading";
-import {getOsPlatformBadgeClass, getOsPlatformDisplayName, getOsPlatformIcon} from '../../utils/display/deviceDisplay';
+import registrationApi from "@/api/registrationApi";
+import Loading from "@/components/common/Loading";
+import {getOsPlatformBadgeClass, getOsPlatformDisplayName, getOsPlatformIcon} from '@/utils/display/deviceDisplay';
 import RegistrationModal from "./RegistrationModal";
-import {BossRegistration} from "../../types/registration";
+import {BossRegistration} from "@/types/registration";
 
 const RegistrationManagement = () => {
   const [registrationList, setRegistrationList] = useState<BossRegistration[]>([]);

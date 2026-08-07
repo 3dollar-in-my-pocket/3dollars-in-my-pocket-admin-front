@@ -1,10 +1,10 @@
 import React, {useEffect, useState} from "react";
 import {Button, Form, Modal} from "react-bootstrap";
 import {toast} from "react-toastify";
-import advertisementApi from "../../api/advertisementApi";
+import advertisementApi from "@/api/advertisementApi";
 import BasicInfoStep from "./steps/BasicInfoStep";
-import AdTimer from "../../components/common/AdTimer";
-import {Advertisement, AdvertisementBasicInfoForm, EnumOption} from "../../types/advertisement";
+import AdTimer from "@/components/common/AdTimer";
+import {Advertisement, AdvertisementBasicInfoForm, EnumOption} from "@/types/advertisement";
 
 interface AdvertisementEditModalProps {
   show: boolean;

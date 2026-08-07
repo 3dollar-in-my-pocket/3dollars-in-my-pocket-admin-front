@@ -1,8 +1,8 @@
 import {useCallback, useEffect, useState} from "react";
-import faqApi from "../../api/faqApi";
+import faqApi from "@/api/faqApi";
 import FaqEditModal from "./FaqEditModal";
-import Loading from "../../components/common/Loading";
-import {Faq, FaqCategory} from "../../types/faq";
+import Loading from "@/components/common/Loading";
+import {Faq, FaqCategory} from "@/types/faq";
 import {FaqApplicationOption} from "./FaqEditModal";
 
 const applications: FaqApplicationOption[] = [

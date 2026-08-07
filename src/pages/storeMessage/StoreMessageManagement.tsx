@@ -1,13 +1,13 @@
-import StoreTypeBadge from '../../components/common/badges/StoreTypeBadge';
+import StoreTypeBadge from '@/components/common/badges/StoreTypeBadge';
 import {useEffect, useState, useCallback, useRef} from 'react';
-import storeMessageApi from '../../api/storeMessageApi';
-import {StoreMessage} from '../../types/storeMessage';
+import storeMessageApi from '@/api/storeMessageApi';
+import {StoreMessage} from '@/types/storeMessage';
 
-import StoreDetailModal from '../store/StoreDetailModal';
-import useInfiniteScroll from '../../hooks/useInfiniteScroll';
-import EmptyState from '../../components/common/EmptyState';
+import StoreDetailModal from '@/pages/store/StoreDetailModal';
+import useInfiniteScroll from '@/hooks/useInfiniteScroll';
+import EmptyState from '@/components/common/EmptyState';
 
-import {formatDateTimeShortKo as formatDateTime} from '../../utils/dateUtils';
+import {formatDateTimeShortKo as formatDateTime} from '@/utils/dateUtils';
 
 const StoreMessageManagement = () => {
   const [messages, setMessages] = useState<StoreMessage[]>([]);

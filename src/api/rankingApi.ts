@@ -1,6 +1,6 @@
 import { apiGet, apiGetPaginated } from './apiHelpers';
-import { ApiResponse, ContentListResponse, PaginatedResponse } from '../types/api';
-import { SimpleStore } from '../types/store';
+import { ApiResponse, ContentListResponse, PaginatedResponse } from '@/types/api';
+import { SimpleStore } from '@/types/store';
 
 export type RankingCriteria = 'MOST_REVIEWS' | 'MOST_VISITS';
 

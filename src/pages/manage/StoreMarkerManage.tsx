@@ -1,11 +1,11 @@
 import {FormEvent, useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {Image} from '../../types/domain';
-import storeMarkerApi from '../../api/storeMarkerApi';
-import EmptyState from '../../components/common/EmptyState';
-import useInfiniteScroll from '../../hooks/useInfiniteScroll';
-import StoreDetailModal from '../store/StoreDetailModal';
-import {StoreMarker} from '../../types/storeMarker';
-import {formatDateTime} from '../../utils/dateUtils';
+import {Image} from '@/types/domain';
+import storeMarkerApi from '@/api/storeMarkerApi';
+import EmptyState from '@/components/common/EmptyState';
+import useInfiniteScroll from '@/hooks/useInfiniteScroll';
+import StoreDetailModal from '@/pages/store/StoreDetailModal';
+import {StoreMarker} from '@/types/storeMarker';
+import {formatDateTime} from '@/utils/dateUtils';
 import {toast} from 'react-toastify';
 
 const toApiDateTime = (value: string): string => {

@@ -1,7 +1,7 @@
 import {useEffect, useState, useMemo} from 'react';
 import {Alert, Button, Col, Container, Row, Spinner, Card, Table, Badge, ButtonGroup} from 'react-bootstrap';
-import userApi from "../../api/userApi";
-import {RandomNameItem} from "../../types/user";
+import userApi from "@/api/userApi";
+import {RandomNameItem} from "@/types/user";
 
 type FilterType = 'all' | 'issued' | 'not_issued';
 

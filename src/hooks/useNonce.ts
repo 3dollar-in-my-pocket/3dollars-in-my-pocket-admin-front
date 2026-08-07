@@ -1,5 +1,5 @@
 import {useCallback, useState} from "react";
-import nonceApi from "../api/nonceApi";
+import nonceApi from "@/api/nonceApi";
 
 /**
  * Nonce 토큰 관리 훅

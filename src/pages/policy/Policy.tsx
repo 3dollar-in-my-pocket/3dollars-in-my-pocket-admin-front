@@ -1,12 +1,12 @@
 import React, {useEffect, useState} from "react";
-import policyApi from "../../api/policyApi";
-import enumApi from "../../api/enumApi";
+import policyApi from "@/api/policyApi";
+import enumApi from "@/api/enumApi";
 import PolicyModal from "./PolicyModal";
 import PolicyRegisterModal from "./PolicyRegisterModal";
 import {toast} from "react-toastify";
-import Loading from "../../components/common/Loading";
-import {Policy as PolicyItem, PolicyId} from "../../types/policy";
-import {EnumOption} from "../../types/advertisement";
+import Loading from "@/components/common/Loading";
+import {Policy as PolicyItem, PolicyId} from "@/types/policy";
+import {EnumOption} from "@/types/advertisement";
 
 const Policy = () => {
   const [policyList, setPolicyList] = useState<PolicyItem[]>([]);

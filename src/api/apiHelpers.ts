@@ -1,11 +1,11 @@
 import axiosInstance from './apiBase';
-import { ApiResponse, PaginatedResponse, CursorPaginationParams } from '../types/api';
+import { ApiResponse, PaginatedResponse, CursorPaginationParams } from '@/types/api';
 import {
   unwrapApiResponse,
   normalizeCursorResponse,
   buildCursorParams,
   buildNonceHeader
-} from '../utils/apiUtils';
+} from '@/utils/apiUtils';
 
 /**
  * 요청을 수행하고 실패는 { ok: false }로 흡수합니다.

@@ -1,5 +1,5 @@
 import {apiGet} from './apiHelpers';
-import {ContentListResponse} from '../types/api';
+import {ContentListResponse} from '@/types/api';
 
 /** AppSchemeResponse */
 export interface AppScheme {

@@ -1,8 +1,8 @@
 import React, {useState, useEffect, useMemo, useCallback} from "react";
 import {Card, Container, Form, Button, Row, Col, Alert} from "react-bootstrap";
-import { useAuthStore } from "../../state/authStore";
-import { AdminRole } from "../../types/admin";
-import enumApi from "../../api/enumApi";
+import { useAuthStore } from "@/state/authStore";
+import { AdminRole } from "@/types/admin";
+import enumApi from "@/api/enumApi";
 import RecentActivityStatistics from "./RecentActivityStatistics";
 import DefaultStatistics from "./DefaultStatistics";
 import StoreByCategoryStatistics from "./StoreByCategoryStatistics";

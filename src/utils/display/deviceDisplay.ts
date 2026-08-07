@@ -5,7 +5,7 @@
  * 타입과 상수 정의는 types/device.ts에 있습니다.
  */
 
-import { OS_PLATFORM, OsPlatform } from '../../types/device';
+import { OS_PLATFORM, OsPlatform } from '@/types/device';
 
 export const getOsPlatformDisplayName = (osPlatform: OsPlatform): string => {
   switch (osPlatform) {

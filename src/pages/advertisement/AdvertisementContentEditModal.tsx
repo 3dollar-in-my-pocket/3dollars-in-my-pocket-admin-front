@@ -1,13 +1,13 @@
 import React, {useEffect, useState} from "react";
 import {Button, Form, Modal} from "react-bootstrap";
 import {toast} from "react-toastify";
-import advertisementApi from "../../api/advertisementApi";
-import uploadApi from "../../api/uploadApi";
-import AdTimer from "../../components/common/AdTimer";
-import AdPreview from "../../components/advertisement/AdPreview";
-import {isFieldAvailable, isFieldRequired} from "../../constants/advertisementSpecs";
-import DeepLinkSelector from "../../components/common/DeepLinkSelector";
-import {Advertisement, AdvertisementContentEditForm} from "../../types/advertisement";
+import advertisementApi from "@/api/advertisementApi";
+import uploadApi from "@/api/uploadApi";
+import AdTimer from "@/components/common/AdTimer";
+import AdPreview from "@/components/advertisement/AdPreview";
+import {isFieldAvailable, isFieldRequired} from "@/constants/advertisementSpecs";
+import DeepLinkSelector from "@/components/common/DeepLinkSelector";
+import {Advertisement, AdvertisementContentEditForm} from "@/types/advertisement";
 
 interface AdvertisementContentEditModalProps {
   show: boolean;

@@ -1,9 +1,9 @@
 import React, {ChangeEvent, useEffect, useMemo, useRef, useState} from 'react';
 import {Alert, Badge, Button, Card, Col, Container, Form, Row, Spinner, Table} from 'react-bootstrap';
 import {toast} from 'react-toastify';
-import enumApi from '../../api/enumApi';
-import storeMenuApi from '../../api/storeMenuApi';
-import {StoreMenuExtractResponse} from '../../types/storeMenu';
+import enumApi from '@/api/enumApi';
+import storeMenuApi from '@/api/storeMenuApi';
+import {StoreMenuExtractResponse} from '@/types/storeMenu';
 
 interface EnumOption {
   key: string;

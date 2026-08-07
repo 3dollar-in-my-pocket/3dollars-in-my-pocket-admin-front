@@ -1,15 +1,15 @@
-import StoreTypeBadge from '../../components/common/badges/StoreTypeBadge';
+import StoreTypeBadge from '@/components/common/badges/StoreTypeBadge';
 import {useEffect, useState, useCallback, useRef} from 'react';
 import {toast} from 'react-toastify';
-import reviewApi from '../../api/reviewApi';
-import {Review} from '../../types/review';
+import reviewApi from '@/api/reviewApi';
+import {Review} from '@/types/review';
 
-import UserDetailModal from '../user/UserDetailModal';
-import StoreDetailModal from '../store/StoreDetailModal';
-import useInfiniteScroll from '../../hooks/useInfiniteScroll';
-import EmptyState from '../../components/common/EmptyState';
+import UserDetailModal from '@/pages/user/UserDetailModal';
+import StoreDetailModal from '@/pages/store/StoreDetailModal';
+import useInfiniteScroll from '@/hooks/useInfiniteScroll';
+import EmptyState from '@/components/common/EmptyState';
 
-import {formatDateTimeShortKo as formatDateTime} from '../../utils/dateUtils';
+import {formatDateTimeShortKo as formatDateTime} from '@/utils/dateUtils';
 
 const ReviewManagement = () => {
   const [reviews, setReviews] = useState<Review[]>([]);

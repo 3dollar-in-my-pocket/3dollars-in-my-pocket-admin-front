@@ -2,7 +2,7 @@
  * 유저 검색 입력값 검증
  */
 
-import { SEARCH_TYPES, SearchType } from '../../types/user';
+import { SEARCH_TYPES, SearchType } from '@/types/user';
 
 /** 쉼표로 구분된 유저 ID 문자열을 숫자 배열로 변환합니다. */
 export const formatUserIds = (userIdsString: string): number[] => {

@@ -3,17 +3,17 @@ import type {
   Advertisement as AdvertisementItem,
   AdvertisementPositionType,
   EnumOption
-} from '../../types/advertisement';
-import advertisementApi from "../../api/advertisementApi";
-import enumApi from "../../api/enumApi";
+} from '@/types/advertisement';
+import advertisementApi from "@/api/advertisementApi";
+import enumApi from "@/api/enumApi";
 import AdvertisementModal from "./AdvertisementModal";
 import AdvertisementRegisterModal from "./AdvertisementRegisterModal";
-import {formatDateTime} from "../../utils/dateUtils";
-import cacheToolApi from "../../api/cacheToolApi";
+import {formatDateTime} from "@/utils/dateUtils";
+import cacheToolApi from "@/api/cacheToolApi";
 import {toast} from "react-toastify";
-import Loading from "../../components/common/Loading";
-import AdTimer from "../../components/common/AdTimer";
-import AdPreview from "../../components/advertisement/AdPreview";
+import Loading from "@/components/common/Loading";
+import AdTimer from "@/components/common/AdTimer";
+import AdPreview from "@/components/advertisement/AdPreview";
 
 const Advertisement = () => {
     const [advertisementList, setAdvertisementList] = useState<AdvertisementItem[]>([]);

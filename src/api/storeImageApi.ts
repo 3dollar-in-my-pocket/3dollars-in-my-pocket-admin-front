@@ -1,7 +1,7 @@
-import {ApiResponse, PaginatedResponse} from '../types/api';
-import {StoreImage} from '../types/storeImage';
+import {ApiResponse, PaginatedResponse} from '@/types/api';
+import {StoreImage} from '@/types/storeImage';
 import {apiDelete, apiGetPaginated} from './apiHelpers';
-import {INCLUDES} from '../constants/api';
+import {INCLUDES} from '@/constants/api';
 
 export default {
   /**

@@ -1,7 +1,7 @@
-import {ApiResponse, PaginatedResponse} from '../types/api';
-import {Review} from '../types/review';
+import {ApiResponse, PaginatedResponse} from '@/types/api';
+import {Review} from '@/types/review';
 import {apiGetPaginated, apiPut} from './apiHelpers';
-import {INCLUDES} from '../constants/api';
+import {INCLUDES} from '@/constants/api';
 
 export default {
   /**

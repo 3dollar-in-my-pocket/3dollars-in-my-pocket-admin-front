@@ -1,6 +1,6 @@
-import userApi from '../api/userApi';
-import {SEARCH_TYPES, createUserSearchRequest, SearchType, User} from '../types/user';
-import {formatUserIds, validateUserSearch} from '../utils/validation/userValidation';
+import userApi from '@/api/userApi';
+import {SEARCH_TYPES, createUserSearchRequest, SearchType, User} from '@/types/user';
+import {formatUserIds, validateUserSearch} from '@/utils/validation/userValidation';
 
 interface UserSearchParams {
   /** useSearch는 string으로 넘기므로 여기서 좁힙니다. */

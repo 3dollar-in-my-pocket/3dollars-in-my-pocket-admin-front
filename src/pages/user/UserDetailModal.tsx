@@ -2,24 +2,24 @@ import '../../styles/mobile-tabs.css';
 import {useEffect, useState} from 'react';
 import {Modal, Tab, Tabs} from 'react-bootstrap';
 import {toast} from 'react-toastify';
-import deviceApi from "../../api/deviceApi";
-import enumApi from "../../api/enumApi";
-import medalApi from '../../api/medalApi';
-import userApi from '../../api/userApi';
-import ActivityHistory from '../../components/ActivityHistory';
+import deviceApi from "@/api/deviceApi";
+import enumApi from "@/api/enumApi";
+import medalApi from '@/api/medalApi';
+import userApi from '@/api/userApi';
+import ActivityHistory from '@/components/ActivityHistory';
 import UserReviewHistory from './detail/UserReviewHistory';
 import UserStoreHistory from './detail/UserStoreHistory';
 import UserStoreImageHistory from './detail/UserStoreImageHistory';
 import UserStoreReportHistory from './detail/UserStoreReportHistory';
 import UserVisitHistory from './detail/UserVisitHistory';
-import PushSendModal from '../../components/push/PushSendModal';
-import {Device, OS_PLATFORM, OsPlatform} from '../../types/device';
-import {Medal} from '../../types/medal';
-import {SocialType, User, UserRole, UserRoleOption, UserSettings} from '../../types/user';
-import {getOsPlatformBadgeClass, getOsPlatformIcon} from '../../utils/display/deviceDisplay';
-import {getMarketingConsentBadgeClass, getMarketingConsentDisplayName, getSocialTypeBadgeClass, getSocialTypeDisplayName, getUserRoleBadgeClass, getUserRoleLabel, getUserRoleValue} from '../../utils/display/userDisplay';
+import PushSendModal from '@/components/push/PushSendModal';
+import {Device, OS_PLATFORM, OsPlatform} from '@/types/device';
+import {Medal} from '@/types/medal';
+import {SocialType, User, UserRole, UserRoleOption, UserSettings} from '@/types/user';
+import {getOsPlatformBadgeClass, getOsPlatformIcon} from '@/utils/display/deviceDisplay';
+import {getMarketingConsentBadgeClass, getMarketingConsentDisplayName, getSocialTypeBadgeClass, getSocialTypeDisplayName, getUserRoleBadgeClass, getUserRoleLabel, getUserRoleValue} from '@/utils/display/userDisplay';
 
-import {formatDateTimeKo as formatDateTime} from '../../utils/dateUtils';
+import {formatDateTimeKo as formatDateTime} from '@/utils/dateUtils';
 
 interface UserDetailModalProps {
   show: boolean;

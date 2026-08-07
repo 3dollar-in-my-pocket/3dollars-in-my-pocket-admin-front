@@ -1,14 +1,14 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { Badge } from 'react-bootstrap';
 import { toast } from 'react-toastify';
-import storeImageApi from '../../api/storeImageApi';
-import { StoreImage } from '../../types/storeImage';
-import useInfiniteScroll from '../../hooks/useInfiniteScroll';
-import EmptyState from '../../components/common/EmptyState';
-import StoreDetailModal from '../store/StoreDetailModal';
-import UserDetailModal from '../user/UserDetailModal';
+import storeImageApi from '@/api/storeImageApi';
+import { StoreImage } from '@/types/storeImage';
+import useInfiniteScroll from '@/hooks/useInfiniteScroll';
+import EmptyState from '@/components/common/EmptyState';
+import StoreDetailModal from '@/pages/store/StoreDetailModal';
+import UserDetailModal from '@/pages/user/UserDetailModal';
 
-import {formatDateTimeNumeric as formatDate} from '../../utils/dateUtils';
+import {formatDateTimeNumeric as formatDate} from '@/utils/dateUtils';
 
 const StoreImageManage = () => {
   const [images, setImages] = useState<StoreImage[]>([]);

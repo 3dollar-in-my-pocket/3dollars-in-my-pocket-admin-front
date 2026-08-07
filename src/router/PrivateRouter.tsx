@@ -1,8 +1,8 @@
 import {Navigate} from 'react-router-dom';
-import {useAuthStore} from "../state/authStore";
-import adminApi from "../api/adminApi";
+import {useAuthStore} from "@/state/authStore";
+import adminApi from "@/api/adminApi";
 import {ReactElement, useEffect, useState} from "react";
-import Loading from "../components/common/Loading";
+import Loading from "@/components/common/Loading";
 
 interface PrivateRouterProps {
   children: ReactElement;

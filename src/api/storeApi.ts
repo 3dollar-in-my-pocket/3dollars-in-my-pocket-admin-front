@@ -1,9 +1,9 @@
-import {SimpleStore, StoreDetail, StorePreference, StoreType} from '../types/store';
-import {StoreChangeHistory} from '../types/storeChangeHistory';
-import {StorePost} from '../types/storePost';
-import {StoreMessage} from '../types/storeMessage';
-import {Coupon} from '../types/coupon';
-import {ApiResponse, PaginatedResponse} from '../types/api';
+import {SimpleStore, StoreDetail, StorePreference, StoreType} from '@/types/store';
+import {StoreChangeHistory} from '@/types/storeChangeHistory';
+import {StorePost} from '@/types/storePost';
+import {StoreMessage} from '@/types/storeMessage';
+import {Coupon} from '@/types/coupon';
+import {ApiResponse, PaginatedResponse} from '@/types/api';
 import {apiDelete, apiGet, apiGetPaginated, apiPatch} from './apiHelpers';
 
 /**

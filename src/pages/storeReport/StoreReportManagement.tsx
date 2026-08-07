@@ -1,15 +1,15 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
-import storeReportApi from '../../api/storeReportApi';
-import {StoreReport} from '../../types/report';
-import {getReportReasonBadgeClass} from '../../utils/display/reportDisplay';
-import {getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from '../../utils/display/storeDisplay';
+import storeReportApi from '@/api/storeReportApi';
+import {StoreReport} from '@/types/report';
+import {getReportReasonBadgeClass} from '@/utils/display/reportDisplay';
+import {getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from '@/utils/display/storeDisplay';
 
-import useInfiniteScroll from '../../hooks/useInfiniteScroll';
-import EmptyState from '../../components/common/EmptyState';
-import UserDetailModal from '../user/UserDetailModal';
-import StoreDetailModal from '../store/StoreDetailModal';
+import useInfiniteScroll from '@/hooks/useInfiniteScroll';
+import EmptyState from '@/components/common/EmptyState';
+import UserDetailModal from '@/pages/user/UserDetailModal';
+import StoreDetailModal from '@/pages/store/StoreDetailModal';
 
-import {formatDateTimeShortKo as formatDateTime} from '../../utils/dateUtils';
+import {formatDateTimeShortKo as formatDateTime} from '@/utils/dateUtils';
 
 const StoreReportManagement = () => {
   const [reports, setReports] = useState<StoreReport[]>([]);

@@ -1,6 +1,6 @@
 import {create} from 'zustand';
-import {Admin} from '../types/admin';
-import {LocalStorageService} from '../service/LocalStorageService';
+import {Admin} from '@/types/admin';
+import {LocalStorageService} from '@/service/LocalStorageService';
 
 interface AuthState {
   /** 현재 로그인된 관리자 정보. 미로그인 시 null */

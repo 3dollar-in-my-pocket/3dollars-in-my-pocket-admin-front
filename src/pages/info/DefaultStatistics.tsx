@@ -12,8 +12,8 @@ import {
   Legend,
   ResponsiveContainer
 } from "recharts";
-import statisticsApi from "../../api/statisticsApi";
-import {DailyStatistic} from "../../types/statistics";
+import statisticsApi from "@/api/statisticsApi";
+import {DailyStatistic} from "@/types/statistics";
 import {toast} from "react-toastify";
 
 interface DefaultStatisticsProps {

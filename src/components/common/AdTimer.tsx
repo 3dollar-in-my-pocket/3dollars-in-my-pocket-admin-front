@@ -1,5 +1,5 @@
 import {useState, useEffect} from 'react';
-import {getAdStatus} from '../../utils/timeUtils';
+import {getAdStatus} from '@/utils/timeUtils';
 
 /** getAdStatus의 반환 값 (timeUtils가 JS 스타일이라 status는 string으로 내려옵니다) */
 interface AdStatus {

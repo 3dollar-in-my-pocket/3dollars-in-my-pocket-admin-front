@@ -4,7 +4,7 @@
  * 타입과 상수 정의는 types/report.ts에 있습니다.
  */
 
-import { REPORT_REASON, ReportReasonCode } from '../../types/report';
+import { REPORT_REASON, ReportReasonCode } from '@/types/report';
 
 export const getReportReasonBadgeClass = (reason: ReportReasonCode): string => {
   switch (reason) {

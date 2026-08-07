@@ -1,9 +1,9 @@
-import {getCouponStatusBadgeClass, getCouponStatusDisplayName} from '../../../utils/display/couponDisplay';
-import {formatDateTimeShortKo as formatCouponDate} from '../../../utils/dateUtils';
+import {getCouponStatusBadgeClass, getCouponStatusDisplayName} from '@/utils/display/couponDisplay';
+import {formatDateTimeShortKo as formatCouponDate} from '@/utils/dateUtils';
 import React, {useCallback} from 'react';
-import storeApi from '../../../api/storeApi';
-import {Coupon} from '../../../types/coupon';
-import useCursorPagination from '../../../hooks/useCursorPagination';
+import storeApi from '@/api/storeApi';
+import {Coupon} from '@/types/coupon';
+import useCursorPagination from '@/hooks/useCursorPagination';
 
 interface StoreCouponHistoryProps {
   storeId: string;

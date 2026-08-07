@@ -1,9 +1,9 @@
-import {getOsPlatformDisplayName} from '../../utils/display/deviceDisplay';
+import {getOsPlatformDisplayName} from '@/utils/display/deviceDisplay';
 import {useEffect, useState} from 'react';
 import {Form, Nav, Tab, Button, Badge} from 'react-bootstrap';
-import {PUSH_OS_PLATFORM, PushOsPlatform} from '../../types/device';
+import {PUSH_OS_PLATFORM, PushOsPlatform} from '@/types/device';
 import UserSearch, {PushSearchUser, PushSelectedUser} from './UserSearch';
-import applicationApi, {AppScheme} from '../../api/applicationApi';
+import applicationApi, {AppScheme} from '@/api/applicationApi';
 
 interface PushFormFieldsProps {
   formData: {

@@ -1,8 +1,8 @@
 import {
   getStoreStatusBadgeClass,
   getStoreStatusDisplayName
-} from '../../../utils/display/storeDisplay';
-import { StoreStatus } from '../../../types/store';
+} from '@/utils/display/storeDisplay';
+import { StoreStatus } from '@/types/store';
 import { BadgeSize } from './StoreTypeBadge';
 
 interface StoreStatusBadgeProps {

@@ -1,6 +1,6 @@
 import { apiGet } from './apiHelpers';
-import { ApiResponse } from '../types/api';
-import { StoreCategoryResponse } from '../types/storeCategory';
+import { ApiResponse } from '@/types/api';
+import { StoreCategoryResponse } from '@/types/storeCategory';
 
 export default {
   /**

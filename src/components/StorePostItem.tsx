@@ -1,7 +1,7 @@
 import React from 'react';
 
-import {StorePost} from '../types/storePost';
-import {formatDateTimeKoNoSec as formatDateTime} from '../utils/dateUtils';
+import {StorePost} from '@/types/storePost';
+import {formatDateTimeKoNoSec as formatDateTime} from '@/utils/dateUtils';
 
 interface StorePostItemProps {
   post: StorePost;

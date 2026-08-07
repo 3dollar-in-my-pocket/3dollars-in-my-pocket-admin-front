@@ -1,6 +1,6 @@
 import { apiGet, apiGetPaginated, apiPut } from './apiHelpers';
-import { ApiResponse, ContentListResponse } from '../types/api';
-import { Medal } from '../types/medal';
+import { ApiResponse, ContentListResponse } from '@/types/api';
+import { Medal } from '@/types/medal';
 import {
   createUserDetailResponse,
   createUserSearchResponse,
@@ -15,7 +15,7 @@ import {
   User,
   SimpleUser,
   UserSettings
-} from '../types/user';
+} from '@/types/user';
 
 /** UserDetailResponse (서버 원본 모델) */
 interface RawUserDetailResponse {
