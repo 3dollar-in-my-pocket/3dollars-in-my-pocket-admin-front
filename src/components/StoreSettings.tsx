@@ -1,10 +1,15 @@
-import {useState, useEffect} from 'react';
+import React, {useState, useEffect} from 'react';
 import storeApi from '../api/storeApi';
+import {StorePreferenceSetting} from '../types/store';
 
-const StoreSettings = ({storeId}) => {
-  const [settings, setSettings] = useState([]);
+interface StoreSettingsProps {
+  storeId: string;
+}
+
+const StoreSettings: React.FC<StoreSettingsProps> = ({storeId}) => {
+  const [settings, setSettings] = useState<StorePreferenceSetting[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (storeId) {
@@ -30,14 +35,14 @@ const StoreSettings = ({storeId}) => {
     }
   };
 
-  const formatValue = (value) => {
+  const formatValue = (value: unknown): string => {
     if (typeof value === 'boolean') {
       return value ? '활성화' : '비활성화';
     }
     return String(value);
   };
 
-  const getValueBadgeClass = (value) => {
+  const getValueBadgeClass = (value: unknown): string => {
     if (typeof value === 'boolean') {
       return value ? 'bg-success' : 'bg-secondary';
     }

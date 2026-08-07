@@ -2,16 +2,26 @@ import StoreStatusBadge from './common/badges/StoreStatusBadge';
 import StoreTypeBadge from './common/badges/StoreTypeBadge';
 import {useCallback, useRef, useState} from 'react';
 import useCursorPagination from "../hooks/useCursorPagination";
-import {getActivitiesStatusDisplayName, getStoreStatusBadgeClass, getStoreStatusDisplayName, getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from '../utils/display/storeDisplay';
+import {getActivitiesStatusBadgeClass,
+  getActivitiesStatusDisplayName, getStoreStatusBadgeClass, getStoreStatusDisplayName, getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from '../utils/display/storeDisplay';
 import {getVisitIconClass, getVisitTypeBatchClass, getVisitTypeDisplayName} from '../utils/display/visitDisplay';
 
-import {VisitType} from "../types/visit";
+import {Visit, VisitType} from "../types/visit";
+import {ActivitiesStatus, SimpleStore} from "../types/store";
 import visitApi from "../api/visitApi";
 
-const UserVisitHistory = ({userId, isActive, onStoreClick}) => {
-  const [selectedVisit, setSelectedVisit] = useState<any>(null);
+interface UserVisitHistoryProps {
+  userId: string;
+  /** 탭이 활성 상태일 때만 조회합니다. */
+  isActive?: boolean;
+  /** 가게 클릭 핸들러. 호출부에 따라 null/undefined가 전달됩니다. */
+  onStoreClick?: ((store: SimpleStore) => void) | null;
+}
+
+const UserVisitHistory = ({userId, isActive, onStoreClick}: UserVisitHistoryProps) => {
+  const [selectedVisit, setSelectedVisit] = useState<Visit | null>(null);
   const [showModal, setShowModal] = useState(false);
-  const scrollContainerRef = useRef(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const fetchUserVisits = useCallback(
     (cursor: string | null) => visitApi.getUserVisits(userId, cursor, 20),
@@ -24,14 +34,14 @@ const UserVisitHistory = ({userId, isActive, onStoreClick}) => {
     hasMore,
     totalCount,
     loadMore
-  } = useCursorPagination({
+  } = useCursorPagination<Visit>({
     fetcher: fetchUserVisits,
     enabled: Boolean(userId && isActive),
     deps: [userId]
   });
 
-  const handleScroll = useCallback((e) => {
-    const {scrollTop, scrollHeight, clientHeight} = e.target;
+  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    const {scrollTop, scrollHeight, clientHeight} = e.currentTarget;
     const isScrolledToBottom = scrollHeight - scrollTop <= clientHeight + 100;
 
     if (isScrolledToBottom && hasMore && !isLoading) {
@@ -39,7 +49,7 @@ const UserVisitHistory = ({userId, isActive, onStoreClick}) => {
     }
   }, [hasMore, isLoading, loadMore]);
 
-  const handleVisitClick = (visit) => {
+  const handleVisitClick = (visit: Visit) => {
     setSelectedVisit(visit);
     setShowModal(true);
   };
@@ -50,9 +60,9 @@ const UserVisitHistory = ({userId, isActive, onStoreClick}) => {
   };
 
 
-  const getActivitiesStatusBadge = (activitiesStatus) => {
+  const getActivitiesStatusBadge = (activitiesStatus?: ActivitiesStatus) => {
     if (!activitiesStatus) return null;
-    const badgeClass = getStoreStatusBadgeClass(activitiesStatus);
+    const badgeClass = getActivitiesStatusBadgeClass(activitiesStatus);
     const statusText = getActivitiesStatusDisplayName(activitiesStatus);
     return (
       <span className={`badge ${badgeClass} bg-opacity-10 text-dark border rounded-pill px-2 py-1 small`}>
@@ -76,7 +86,7 @@ const UserVisitHistory = ({userId, isActive, onStoreClick}) => {
     );
   };
 
-  const formatVisitDateTime = (dateTimeString) => {
+  const formatVisitDateTime = (dateTimeString?: string): string => {
     if (!dateTimeString) return '방문 시간 없음';
     const date = new Date(dateTimeString);
     return date.toLocaleString('ko-KR', {

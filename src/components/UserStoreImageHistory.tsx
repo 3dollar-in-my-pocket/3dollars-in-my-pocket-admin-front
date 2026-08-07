@@ -5,13 +5,23 @@ import storeImageApi from "../api/storeImageApi";
 import {getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from '../utils/display/storeDisplay';
 
 import useCursorPagination from "../hooks/useCursorPagination";
+import {StoreImage, StoreImageStatus} from "../types/storeImage";
+import {SimpleStore, StoreStatus} from "../types/store";
 import {formatDateTimeKo as formatDateTime} from "../utils/dateUtils";
 
-const UserStoreImageHistory = ({userId, isActive, onStoreClick}) => {
-  const [selectedImage, setSelectedImage] = useState<any>(null);
+interface UserStoreImageHistoryProps {
+  userId: string;
+  /** 탭이 활성 상태일 때만 조회합니다. */
+  isActive?: boolean;
+  /** 가게 클릭 핸들러. 호출부에 따라 null/undefined가 전달됩니다. */
+  onStoreClick?: ((store: SimpleStore) => void) | null;
+}
+
+const UserStoreImageHistory = ({userId, isActive, onStoreClick}: UserStoreImageHistoryProps) => {
+  const [selectedImage, setSelectedImage] = useState<StoreImage | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const scrollContainerRef = useRef(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const fetchStoreImages = useCallback(
     (cursor: string | null) => storeImageApi.getUserStoreImages(userId, cursor, 20),
@@ -25,14 +35,14 @@ const UserStoreImageHistory = ({userId, isActive, onStoreClick}) => {
     totalCount,
     refresh,
     loadMore
-  } = useCursorPagination<any>({
+  } = useCursorPagination<StoreImage>({
     fetcher: fetchStoreImages,
     enabled: Boolean(userId && isActive),
     deps: [userId]
   });
 
-  const handleScroll = useCallback((e) => {
-    const {scrollTop, scrollHeight, clientHeight} = e.target;
+  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    const {scrollTop, scrollHeight, clientHeight} = e.currentTarget;
     const isScrolledToBottom = scrollHeight - scrollTop <= clientHeight + 100;
 
     if (isScrolledToBottom && hasMore && !isLoading) {
@@ -40,7 +50,7 @@ const UserStoreImageHistory = ({userId, isActive, onStoreClick}) => {
     }
   }, [hasMore, isLoading, loadMore]);
 
-  const handleImageClick = (storeImage) => {
+  const handleImageClick = (storeImage: StoreImage) => {
     setSelectedImage(storeImage);
     setShowModal(true);
   };
@@ -50,7 +60,7 @@ const UserStoreImageHistory = ({userId, isActive, onStoreClick}) => {
     setSelectedImage(null);
   };
 
-  const getImageStatusBadge = (status) => {
+  const getImageStatusBadge = (status?: StoreImageStatus) => {
     if (!status) return null;
     const badgeClass = status === 'ACTIVE' ? 'bg-success' : 'bg-secondary';
     const statusText = status === 'ACTIVE' ? '노출중인 이미지' : '삭제된 이미지';
@@ -61,7 +71,7 @@ const UserStoreImageHistory = ({userId, isActive, onStoreClick}) => {
     );
   };
 
-  const getStoreStatusBadge = (status) => {
+  const getStoreStatusBadge = (status?: StoreStatus) => {
     if (!status) return null;
     const badgeClass = status === 'ACTIVE' ? 'bg-info' : 'bg-warning';
     const statusText = status === 'ACTIVE' ? '운영 중인 가게' : '삭제된 가게'
@@ -80,7 +90,8 @@ const UserStoreImageHistory = ({userId, isActive, onStoreClick}) => {
     if (!window.confirm('정말로 이 이미지를 삭제하시겠습니까?')) return;
     setIsDeleting(true);
     try {
-      const response = await storeImageApi.deleteStoreImage(selectedImage.imageId);
+      // imageId는 number, API는 경로 파라미터를 string으로 받습니다. (StoreImageManage와 동일 처리)
+      const response = await storeImageApi.deleteStoreImage(String(selectedImage.imageId));
       if (response.status >= 400) {
         setIsDeleting(false);
         return;

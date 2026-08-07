@@ -6,27 +6,29 @@ import PollCard from '../../components/poll/PollCard';
 import UserDetailModal from '../user/UserDetailModal';
 
 import {formatDateTimeShortKo as formatDateTime} from '../../utils/dateUtils';
+import {Poll, PollCategory, PollOption} from '../../types/poll';
 
 const PollManagement = () => {
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState<PollCategory[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('');
-  const [polls, setPolls] = useState([]);
+  const [polls, setPolls] = useState<Poll[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
-  const cursorRef = useRef(null);
-  const scrollContainerRef = useRef(null);
+  const cursorRef = useRef<string | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
   // 카테고리 목록 조회
   useEffect(() => {
     const fetchCategories = async () => {
       const response = await pollApi.getPollCategories();
       if (response.ok) {
-        setCategories(response.data.contents);
+        const contents = response.data?.contents || [];
+        setCategories(contents);
         // 첫 번째 카테고리를 기본 선택
-        if (response.data.contents.length > 0) {
-          setSelectedCategory(response.data.contents[0].categoryId);
+        if (contents.length > 0) {
+          setSelectedCategory(contents[0].categoryId);
         }
       }
     };
@@ -35,7 +37,7 @@ const PollManagement = () => {
   }, []);
 
   // 투표 목록 조회
-  const fetchPolls = useCallback(async (category, isLoadMore = false) => {
+  const fetchPolls = useCallback(async (category: string, isLoadMore = false) => {
     if (!category) return;
 
     const currentCursor = isLoadMore ? cursorRef.current : null;
@@ -163,7 +165,7 @@ const PollManagement = () => {
   };
 
   // 투표 총 참여자 수 계산 (확인 메시지용)
-  const getTotalVotes = (options) => {
+  const getTotalVotes = (options: PollOption[]) => {
     return options.reduce((total, option) => total + (option.count || 0), 0);
   };
 

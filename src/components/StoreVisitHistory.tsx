@@ -1,12 +1,21 @@
 import {getVisitIconClass, getVisitTypeBatchClass, getVisitTypeDisplayName} from '../utils/display/visitDisplay';
 import {useCallback, useRef} from 'react';
 import visitApi from "../api/visitApi";
-import {VisitType} from "../types/visit";
+import {Visit, VisitType} from "../types/visit";
+import {ActivityAuthor} from "../types/domain";
 import useCursorPagination from "../hooks/useCursorPagination";
 import {formatDateTimeShortKo} from "../utils/dateUtils";
 
-const StoreVisitHistory = ({storeId, isActive, onAuthorClick}) => {
-  const scrollContainerRef = useRef(null);
+interface StoreVisitHistoryProps {
+  storeId: string;
+  /** 탭이 활성 상태일 때만 조회합니다. */
+  isActive?: boolean;
+  /** 방문자 클릭 핸들러. 호출부에 따라 null/undefined가 전달됩니다. */
+  onAuthorClick?: ((author: ActivityAuthor) => void) | null;
+}
+
+const StoreVisitHistory = ({storeId, isActive, onAuthorClick}: StoreVisitHistoryProps) => {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const fetchVisits = useCallback(
     (cursor: string | null) => visitApi.getStoreVisits(storeId, cursor, 20),
@@ -20,7 +29,7 @@ const StoreVisitHistory = ({storeId, isActive, onAuthorClick}) => {
     totalCount,
     refresh,
     loadMore
-  } = useCursorPagination({
+  } = useCursorPagination<Visit>({
     fetcher: fetchVisits,
     enabled: Boolean(storeId && isActive),
     deps: [storeId]

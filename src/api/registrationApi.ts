@@ -1,13 +1,19 @@
-import {apiGet, apiPut} from "./apiHelpers";
+import {apiGetPaginated, apiPut} from "./apiHelpers";
+import {BossRegistration} from "../types/registration";
+
+interface ListRegistrationsParams {
+  cursor?: string | null;
+  size?: number;
+}
 
 export default {
-  listRegistrations: async ({size}: any) => {
-    return apiGet<any>(`/v3/boss-registrations`, {size});
+  listRegistrations: async ({cursor, size}: ListRegistrationsParams) => {
+    return apiGetPaginated<BossRegistration>(`/v3/boss-registrations`, {cursor, size});
   },
-  approveRegistration: async ({id}: any) => {
-    return apiPut<any>(`/v3/boss-registration/${id}/apply`, undefined);
+  approveRegistration: async ({id}: { id: string }) => {
+    return apiPut<void>(`/v3/boss-registration/${id}/apply`, undefined);
   },
-  denyRegistration: async ({id, rejectReason}: any) => {
-    return apiPut<any>(`/v3/boss-registration/${id}/reject`, {rejectReason});
+  denyRegistration: async ({id, rejectReason}: { id: string; rejectReason: string }) => {
+    return apiPut<void>(`/v3/boss-registration/${id}/reject`, {rejectReason});
   },
 };

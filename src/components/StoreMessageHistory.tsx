@@ -22,7 +22,7 @@ const StoreMessageHistory: React.FC<StoreMessageHistoryProps> = ({storeId}) => {
     error,
     refresh,
     loadMore: handleLoadMore
-  } = useCursorPagination<any>({
+  } = useCursorPagination<StoreMessage>({
     fetcher: fetchMessages,
     enabled: Boolean(storeId),
     deps: [storeId],

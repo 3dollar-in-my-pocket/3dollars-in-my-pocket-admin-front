@@ -6,15 +6,26 @@ import {getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from 
 
 import useCursorPagination from "../hooks/useCursorPagination";
 
+import {StoreReport, StoreReportReason} from "../types/report";
+import {SimpleStore} from "../types/store";
+import {Address} from "../types/domain";
 import {formatDateTimeKoNoSec as formatDateTime} from '../utils/dateUtils';
 
-const UserStoreReportHistory = ({userId, isActive, onStoreClick}) => {
-  const formatAddress = (address) => {
+interface UserStoreReportHistoryProps {
+  userId: string;
+  /** 탭이 활성 상태일 때만 조회합니다. */
+  isActive?: boolean;
+  /** 가게 클릭 핸들러. 호출부에 따라 null/undefined가 전달됩니다. */
+  onStoreClick?: ((store: SimpleStore) => void) | null;
+}
+
+const UserStoreReportHistory = ({userId, isActive, onStoreClick}: UserStoreReportHistoryProps) => {
+  const formatAddress = (address?: Address): string => {
     if (!address) return '주소 없음';
     return address.fullAddress || '주소 없음';
   };
 
-  const getReasonBadge = (reason) => {
+  const getReasonBadge = (reason?: StoreReportReason) => {
     if (!reason) return null;
 
     const reasonText = reason.description
@@ -43,7 +54,7 @@ const UserStoreReportHistory = ({userId, isActive, onStoreClick}) => {
     error,
     refresh,
     loadMore: handleLoadMore
-  } = useCursorPagination({
+  } = useCursorPagination<StoreReport>({
     fetcher: fetchUserReports,
     enabled: Boolean(userId && isActive),
     deps: [userId],

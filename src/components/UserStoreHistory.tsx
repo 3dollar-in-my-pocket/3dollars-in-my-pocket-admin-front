@@ -3,11 +3,21 @@ import StoreTypeBadge from './common/badges/StoreTypeBadge';
 import {useCallback, useRef} from 'react';
 import storeApi from '../api/storeApi';
 import useCursorPagination from '../hooks/useCursorPagination';
+import {ActivitiesStatus, SimpleStore} from '../types/store';
 import {formatDateTimeKo as formatDateTime} from '../utils/dateUtils';
-import {getActivitiesStatusDisplayName, getStoreStatusBadgeClass, getStoreStatusDisplayName, getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from '../utils/display/storeDisplay';
+import {getActivitiesStatusBadgeClass,
+  getActivitiesStatusDisplayName, getStoreStatusBadgeClass, getStoreStatusDisplayName, getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from '../utils/display/storeDisplay';
 
-const UserStoreHistory = ({userId, isActive, onStoreClick}) => {
-  const scrollContainerRef = useRef(null);
+interface UserStoreHistoryProps {
+  userId: string;
+  /** 탭이 활성 상태일 때만 조회합니다. */
+  isActive?: boolean;
+  /** 가게 클릭 핸들러. 호출부에 따라 null/undefined가 전달됩니다. */
+  onStoreClick?: ((store: SimpleStore) => void) | null;
+}
+
+const UserStoreHistory = ({userId, isActive, onStoreClick}: UserStoreHistoryProps) => {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const fetchUserStores = useCallback(
     (cursor: string | null) => storeApi.getUserStores(userId, cursor, 20),
@@ -20,14 +30,14 @@ const UserStoreHistory = ({userId, isActive, onStoreClick}) => {
     hasMore,
     totalCount,
     loadMore
-  } = useCursorPagination<any>({
+  } = useCursorPagination<SimpleStore>({
     fetcher: fetchUserStores,
     enabled: Boolean(userId && isActive),
     deps: [userId]
   });
 
-  const handleScroll = useCallback((e) => {
-    const {scrollTop, scrollHeight, clientHeight} = e.target;
+  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    const {scrollTop, scrollHeight, clientHeight} = e.currentTarget;
     const isScrolledToBottom = scrollHeight - scrollTop <= clientHeight + 100;
 
     if (isScrolledToBottom && hasMore && !isLoading) {
@@ -35,7 +45,7 @@ const UserStoreHistory = ({userId, isActive, onStoreClick}) => {
     }
   }, [hasMore, isLoading, loadMore]);
 
-  const handleStoreClick = (store) => {
+  const handleStoreClick = (store: SimpleStore) => {
     if (onStoreClick) {
       onStoreClick(store);
     }
@@ -43,9 +53,9 @@ const UserStoreHistory = ({userId, isActive, onStoreClick}) => {
 
 
 
-  const getActivitiesStatusBadge = (activitiesStatus) => {
+  const getActivitiesStatusBadge = (activitiesStatus?: ActivitiesStatus) => {
     if (!activitiesStatus) return null;
-    const badgeClass = getStoreStatusBadgeClass(activitiesStatus);
+    const badgeClass = getActivitiesStatusBadgeClass(activitiesStatus);
     const statusText = getActivitiesStatusDisplayName(activitiesStatus);
     return (
       <span className={`badge ${badgeClass} bg-opacity-10 text-dark border rounded-pill px-2 py-1 small`}>
@@ -55,7 +65,7 @@ const UserStoreHistory = ({userId, isActive, onStoreClick}) => {
   };
 
 
-  const getDayOfWeekInKorean = (dayOfWeek) => {
+  const getDayOfWeekInKorean = (dayOfWeek: string): string => {
     const dayMap = {
       'MONDAY': '월요일',
       'TUESDAY': '화요일',
@@ -68,13 +78,13 @@ const UserStoreHistory = ({userId, isActive, onStoreClick}) => {
     return dayMap[dayOfWeek] || dayOfWeek;
   };
 
-  const sortDaysByWeekOrder = (days) => {
+  const sortDaysByWeekOrder = (days: string[]): string[] => {
     if (!days || !Array.isArray(days)) return [];
     const dayOrder = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
     return days.sort((a, b) => dayOrder.indexOf(a) - dayOrder.indexOf(b));
   };
 
-  const getPaymentMethodInKorean = (method) => {
+  const getPaymentMethodInKorean = (method: string): string => {
     const methodMap = {
       'CASH': '현금',
       'ACCOUNT_TRANSFER': '계좌이체',

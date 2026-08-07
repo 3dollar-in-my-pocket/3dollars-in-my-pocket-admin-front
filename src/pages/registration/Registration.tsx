@@ -4,31 +4,28 @@ import Loading from "../../components/common/Loading";
 import {getOsPlatformDisplayName} from '../../utils/display/deviceDisplay';
 import {getOsPlatformBadgeClass, getOsPlatformIcon} from '../../utils/display/deviceDisplay';
 import RegistrationModal from "./RegistrationModal";
+import {BossRegistration} from "../../types/registration";
 
 const RegistrationManagement = () => {
-  const [registrationList, setRegistrationList] = useState([]);
-  const [selectedRegistration, setSelectedRegistration] = useState(null);
+  const [registrationList, setRegistrationList] = useState<BossRegistration[]>([]);
+  const [selectedRegistration, setSelectedRegistration] = useState<BossRegistration | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     fetchRegistrations();
   }, []);
 
-  const fetchRegistrations = () => {
+  const fetchRegistrations = async () => {
     setIsLoading(true);
-    registrationApi.listRegistrations({size: 30})
-      .then((response: any) => {
-        if (!response.ok) {
-          return
-        }
-        setRegistrationList(response.data.contents);
-      })
-      .catch(() => {
-        setRegistrationList([]);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
+    try {
+      const response = await registrationApi.listRegistrations({size: 30});
+      if (!response.ok) {
+        return;
+      }
+      setRegistrationList(response.data.contents);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleRegistrationUpdate = () => {

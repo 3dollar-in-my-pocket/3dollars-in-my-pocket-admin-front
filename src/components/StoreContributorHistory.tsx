@@ -1,5 +1,6 @@
 import {useCallback, useRef} from 'react';
 import storeApi from '../api/storeApi';
+import {ActivityAuthor, Writer} from '../types/domain';
 import {StoreChangeHistory} from '../types/storeChangeHistory';
 import {getChangeAttributeBadgeClass, getChangeAttributeIcon} from '../utils/display/storeDisplay';
 import {getWriterTypeBadgeClass} from '../utils/display/writerDisplay';
@@ -9,8 +10,10 @@ import {formatDateTimeShortKo as formatDateTime} from '../utils/dateUtils';
 
 interface StoreContributorHistoryProps {
   storeId: string;
-  isActive: boolean;
-  onAuthorClick?: (author: any) => void;
+  /** 탭이 활성 상태일 때만 조회합니다. */
+  isActive?: boolean;
+  /** 기여자 클릭 핸들러. 호출부에 따라 null/undefined가 전달됩니다. */
+  onAuthorClick?: ((author: ActivityAuthor) => void) | null;
 }
 
 const StoreContributorHistory = ({storeId, isActive, onAuthorClick}: StoreContributorHistoryProps) => {
@@ -32,7 +35,7 @@ const StoreContributorHistory = ({storeId, isActive, onAuthorClick}: StoreContri
     deps: [storeId]
   });
 
-  const handleAuthorClick = (actor: any) => {
+  const handleAuthorClick = (actor: Writer) => {
     if (onAuthorClick && actor.writerType === 'USER') {
       onAuthorClick({
         userId: actor.writerId,

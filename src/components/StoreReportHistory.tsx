@@ -5,12 +5,22 @@ import {getReportReasonBadgeClass} from '../utils/display/reportDisplay';
 import {getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from '../utils/display/storeDisplay';
 
 import useCursorPagination from "../hooks/useCursorPagination";
+import {StoreReport, StoreReportReason} from "../types/report";
+import {ActivityAuthor} from "../types/domain";
 import {formatDateTimeShortKo as formatDateTime} from "../utils/dateUtils";
 
-const StoreReportHistory = ({storeId, isActive, onAuthorClick}) => {
-  const [selectedReport, setSelectedReport] = useState(null);
+interface StoreReportHistoryProps {
+  storeId: string;
+  /** 탭이 활성 상태일 때만 조회합니다. */
+  isActive?: boolean;
+  /** 신고자 클릭 핸들러. 호출부에 따라 null/undefined가 전달됩니다. */
+  onAuthorClick?: ((author: ActivityAuthor) => void) | null;
+}
+
+const StoreReportHistory = ({storeId, isActive, onAuthorClick}: StoreReportHistoryProps) => {
+  const [selectedReport, setSelectedReport] = useState<StoreReport | null>(null);
   const [showModal, setShowModal] = useState(false);
-  const scrollContainerRef = useRef(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const fetchReports = useCallback(
     (cursor: string | null) => storeReportApi.getStoreReports(storeId, cursor, 20),
@@ -24,13 +34,13 @@ const StoreReportHistory = ({storeId, isActive, onAuthorClick}) => {
     totalCount,
     refresh,
     loadMore
-  } = useCursorPagination({
+  } = useCursorPagination<StoreReport>({
     fetcher: fetchReports,
     enabled: Boolean(storeId && isActive),
     deps: [storeId]
   });
 
-  const getReportTypeBadge = (reason) => {
+  const getReportTypeBadge = (reason?: StoreReportReason) => {
     const reasonText = reason.description
     const reportBadgeClass = getReportReasonBadgeClass(reason.type)
 
@@ -43,7 +53,7 @@ const StoreReportHistory = ({storeId, isActive, onAuthorClick}) => {
   };
 
 
-  const handleReportClick = (report) => {
+  const handleReportClick = (report: StoreReport) => {
     setSelectedReport(report);
     setShowModal(true);
   };

@@ -5,13 +5,23 @@ import reviewApi from "../api/reviewApi";
 import {getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from '../utils/display/storeDisplay';
 
 import useCursorPagination from "../hooks/useCursorPagination";
+import {Review} from "../types/review";
+import {ActivityAuthor} from "../types/domain";
 import {formatDateTimeShortKo as formatDateTime} from "../utils/dateUtils";
 
-const StoreReviewHistory = ({storeId, isActive, onAuthorClick}) => {
-  const [selectedReview, setSelectedReview] = useState<any>(null);
+interface StoreReviewHistoryProps {
+  storeId: string;
+  /** 탭이 활성 상태일 때만 조회합니다. */
+  isActive?: boolean;
+  /** 작성자 클릭 핸들러. 호출부에 따라 null/undefined가 전달됩니다. */
+  onAuthorClick?: ((author: ActivityAuthor) => void) | null;
+}
+
+const StoreReviewHistory = ({storeId, isActive, onAuthorClick}: StoreReviewHistoryProps) => {
+  const [selectedReview, setSelectedReview] = useState<Review | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [isBlinding, setIsBlinding] = useState(false);
-  const scrollContainerRef = useRef(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const fetchReviews = useCallback(
     (cursor: string | null) => reviewApi.getStoreReviews(storeId, cursor, 20),
@@ -25,13 +35,13 @@ const StoreReviewHistory = ({storeId, isActive, onAuthorClick}) => {
     totalCount,
     refresh,
     loadMore
-  } = useCursorPagination({
+  } = useCursorPagination<Review>({
     fetcher: fetchReviews,
     enabled: Boolean(storeId && isActive),
     deps: [storeId]
   });
 
-  const getRatingStars = (rating) => {
+  const getRatingStars = (rating: number) => {
     const stars = [];
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 !== 0;
@@ -53,7 +63,7 @@ const StoreReviewHistory = ({storeId, isActive, onAuthorClick}) => {
   };
 
 
-  const handleReviewClick = (review) => {
+  const handleReviewClick = (review: Review) => {
     setSelectedReview(review);
     setShowModal(true);
   };

@@ -2,17 +2,11 @@ import React, {useState, useEffect} from "react";
 import {Button, Form, Modal} from "react-bootstrap";
 import {toast} from "react-toastify";
 import policyApi from "../../api/policyApi";
+import {PolicyType} from "../../types/policy";
 
 /** enum API(PolicyCategoryType / PolicyType) 응답 항목 */
 interface PolicyEnumOption {
   key: string;
-  description: string;
-}
-
-/** PolicyTypeResponse — /v1/policy-types 응답 항목 */
-interface PolicyType {
-  category: string;
-  policyId: string;
   description: string;
 }
 
@@ -67,18 +61,11 @@ const PolicyRegisterModal = ({show, onHide, categories, policies, onRefresh}: Po
     }
   }, [formData.categoryId]);
 
-  const loadPolicies = async (categoryId) => {
+  const loadPolicies = async (categoryId: string) => {
     setIsLoadingPolicies(true);
     try {
       const response = await policyApi.listPolicyTypes(categoryId);
-      if (response.data) {
-        setFilteredPolicies(response.data.contents || []);
-      } else {
-        setFilteredPolicies([]);
-      }
-    } catch (error) {
-      console.error("정책 조회 실패:", error);
-      setFilteredPolicies([]);
+      setFilteredPolicies(response.ok ? response.data?.contents || [] : []);
     } finally {
       setIsLoadingPolicies(false);
     }

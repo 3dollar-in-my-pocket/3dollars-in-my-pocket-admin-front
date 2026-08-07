@@ -2,17 +2,28 @@ import StoreStatusBadge from './common/badges/StoreStatusBadge';
 import StoreTypeBadge from './common/badges/StoreTypeBadge';
 import {useCallback, useRef, useState} from 'react';
 import {toast} from 'react-toastify';
-import {getActivitiesStatusDisplayName, getStoreStatusBadgeClass, getStoreStatusDisplayName, getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from '../utils/display/storeDisplay';
+import {getActivitiesStatusBadgeClass,
+  getActivitiesStatusDisplayName, getStoreStatusBadgeClass, getStoreStatusDisplayName, getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from '../utils/display/storeDisplay';
 
 import reviewApi from "../api/reviewApi";
 import useCursorPagination from "../hooks/useCursorPagination";
+import {Review, ReviewStatus} from "../types/review";
+import {ActivitiesStatus, SimpleStore} from "../types/store";
 import {formatDateTimeKo as formatDateTime} from "../utils/dateUtils";
 
-const UserReviewHistory = ({userId, isActive, onStoreClick}) => {
-  const [selectedReview, setSelectedReview] = useState<any>(null);
+interface UserReviewHistoryProps {
+  userId: string;
+  /** 탭이 활성 상태일 때만 조회합니다. */
+  isActive?: boolean;
+  /** 가게 클릭 핸들러. 호출부에 따라 null/undefined가 전달됩니다. */
+  onStoreClick?: ((store: SimpleStore) => void) | null;
+}
+
+const UserReviewHistory = ({userId, isActive, onStoreClick}: UserReviewHistoryProps) => {
+  const [selectedReview, setSelectedReview] = useState<Review | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const scrollContainerRef = useRef(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const fetchUserReviews = useCallback(
     (cursor: string | null) => reviewApi.getUserReviews(userId, cursor, 20),
@@ -26,14 +37,14 @@ const UserReviewHistory = ({userId, isActive, onStoreClick}) => {
     totalCount,
     refresh,
     loadMore
-  } = useCursorPagination({
+  } = useCursorPagination<Review>({
     fetcher: fetchUserReviews,
     enabled: Boolean(userId && isActive),
     deps: [userId]
   });
 
-  const handleScroll = useCallback((e) => {
-    const {scrollTop, scrollHeight, clientHeight} = e.target;
+  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    const {scrollTop, scrollHeight, clientHeight} = e.currentTarget;
     const isScrolledToBottom = scrollHeight - scrollTop <= clientHeight + 100;
 
     if (isScrolledToBottom && hasMore && !isLoading) {
@@ -41,7 +52,7 @@ const UserReviewHistory = ({userId, isActive, onStoreClick}) => {
     }
   }, [hasMore, isLoading, loadMore]);
 
-  const handleReviewClick = (review) => {
+  const handleReviewClick = (review: Review) => {
     setSelectedReview(review);
     setShowModal(true);
   };
@@ -53,9 +64,9 @@ const UserReviewHistory = ({userId, isActive, onStoreClick}) => {
 
 
 
-  const getActivitiesStatusBadge = (activitiesStatus) => {
+  const getActivitiesStatusBadge = (activitiesStatus?: ActivitiesStatus) => {
     if (!activitiesStatus) return null;
-    const badgeClass = getStoreStatusBadgeClass(activitiesStatus);
+    const badgeClass = getActivitiesStatusBadgeClass(activitiesStatus);
     const statusText = getActivitiesStatusDisplayName(activitiesStatus);
     return (
       <span className={`badge ${badgeClass} bg-opacity-10 text-dark border rounded-pill px-2 py-1 small`}>
@@ -65,7 +76,7 @@ const UserReviewHistory = ({userId, isActive, onStoreClick}) => {
   };
 
 
-  const getReviewStatusBadge = (status) => {
+  const getReviewStatusBadge = (status?: ReviewStatus) => {
     if (!status) return null;
 
     let badgeClass, statusText, iconClass;
@@ -100,7 +111,7 @@ const UserReviewHistory = ({userId, isActive, onStoreClick}) => {
     );
   };
 
-  const renderStars = (rating) => {
+  const renderStars = (rating: number) => {
     const stars = [];
     for (let i = 1; i <= 5; i++) {
       stars.push(

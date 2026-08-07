@@ -2,8 +2,13 @@ import React, {useCallback} from 'react';
 import storeApi from '../api/storeApi';
 import StorePostItem from './StorePostItem';
 import useCursorPagination from '../hooks/useCursorPagination';
+import {StorePost} from '../types/storePost';
 
-const StorePostHistory = ({storeId}) => {
+interface StorePostHistoryProps {
+  storeId: string;
+}
+
+const StorePostHistory: React.FC<StorePostHistoryProps> = ({storeId}) => {
   const fetchPosts = useCallback(
     (cursor: string | null) => storeApi.getStorePosts(storeId, cursor, 20),
     [storeId]
@@ -17,7 +22,7 @@ const StorePostHistory = ({storeId}) => {
     error,
     refresh,
     loadMore: handleLoadMore
-  } = useCursorPagination<any>({
+  } = useCursorPagination<StorePost>({
     fetcher: fetchPosts,
     enabled: Boolean(storeId),
     deps: [storeId],

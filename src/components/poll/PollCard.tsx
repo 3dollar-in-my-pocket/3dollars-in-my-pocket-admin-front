@@ -1,41 +1,17 @@
+import {Poll, PollOption} from '../../types/poll';
+import {ActivityAuthor} from '../../types/domain';
 import {formatDateTimeShortKo as formatDateTime} from '../../utils/dateUtils';
 import {getWriterTypeBgClass, getWriterTypeDisplayName, getWriterTypeIcon, getWriterTypeTextClass} from '../../utils/display/writerDisplay';
-import {DateTimeInterval, Writer} from '../../types/domain';
-
-/**
- * 투표 카드에서 사용하는 응답 모델
- *
- * 투표(Poll)는 아직 src/types에 공용 타입이 없어 카드 렌더에 필요한 필드만 정의합니다.
- */
-export interface PollOption {
-  optionId: number | string;
-  name: string;
-  count?: number;
-  /** 0~1 사이의 득표 비율 */
-  ratio?: number;
-}
-
-export interface PollItem {
-  pollId: number | string;
-  content: { title: string };
-  category: { title: string };
-  period: DateTimeInterval;
-  options: PollOption[];
-  writer?: Writer | null;
-  metadata?: { commentCount?: number };
-}
-
-type PollStatus = 'upcoming' | 'active' | 'ended';
 
 interface PollCardProps {
-  poll: PollItem;
-  onClick?: (poll: PollItem) => void;
-  onAuthorClick?: (writer: Writer) => void;
-  onDelete?: (poll: PollItem) => void;
+  poll: Poll;
+  onClick?: ((poll: Poll) => void) | null;
+  onAuthorClick?: ((author: ActivityAuthor) => void) | null;
+  onDelete?: ((poll: Poll) => void) | null;
 }
 
 const PollCard = ({poll, onClick, onAuthorClick, onDelete}: PollCardProps) => {
-  const getPollStatus = (poll: PollItem): PollStatus => {
+  const getPollStatus = (poll: Poll) => {
     const now = new Date();
     const startDate = new Date(poll.period.startDateTime);
     const endDate = new Date(poll.period.endDateTime);
@@ -49,7 +25,7 @@ const PollCard = ({poll, onClick, onAuthorClick, onDelete}: PollCardProps) => {
     }
   };
 
-  const getStatusConfig = (status: PollStatus) => {
+  const getStatusConfig = (status) => {
     switch (status) {
       case 'upcoming':
         return {

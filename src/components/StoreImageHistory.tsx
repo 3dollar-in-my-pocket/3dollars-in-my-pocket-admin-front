@@ -5,13 +5,23 @@ import storeImageApi from "../api/storeImageApi";
 import {getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from '../utils/display/storeDisplay';
 
 import useCursorPagination from "../hooks/useCursorPagination";
+import {StoreImage} from "../types/storeImage";
+import {ActivityAuthor} from "../types/domain";
 import {formatDateTimeShortKo as formatDateTime} from "../utils/dateUtils";
 
-const StoreImageHistory = ({storeId, isActive, onAuthorClick}) => {
-  const [selectedImage, setSelectedImage] = useState<any>(null);
+interface StoreImageHistoryProps {
+  storeId: string;
+  /** 탭이 활성 상태일 때만 조회합니다. */
+  isActive?: boolean;
+  /** 등록자 클릭 핸들러. 호출부에 따라 null/undefined가 전달됩니다. */
+  onAuthorClick?: ((author: ActivityAuthor) => void) | null;
+}
+
+const StoreImageHistory = ({storeId, isActive, onAuthorClick}: StoreImageHistoryProps) => {
+  const [selectedImage, setSelectedImage] = useState<StoreImage | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const scrollContainerRef = useRef(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const fetchImages = useCallback(
     (cursor: string | null) => storeImageApi.getStoreImages(storeId, cursor, 20),
@@ -25,13 +35,13 @@ const StoreImageHistory = ({storeId, isActive, onAuthorClick}) => {
     totalCount,
     refresh,
     loadMore
-  } = useCursorPagination({
+  } = useCursorPagination<StoreImage>({
     fetcher: fetchImages,
     enabled: Boolean(storeId && isActive),
     deps: [storeId]
   });
 
-  const handleImageClick = (image) => {
+  const handleImageClick = (image: StoreImage) => {
     setSelectedImage(image);
     setShowModal(true);
   };
@@ -50,7 +60,8 @@ const StoreImageHistory = ({storeId, isActive, onAuthorClick}) => {
 
     setIsDeleting(true);
     try {
-      const response = await storeImageApi.deleteStoreImage(selectedImage.imageId);
+      // imageId는 number, API는 경로 파라미터를 string으로 받습니다. (StoreImageManage와 동일 처리)
+      const response = await storeImageApi.deleteStoreImage(String(selectedImage.imageId));
 
       if (response.ok) {
         toast.success('이미지가 성공적으로 삭제되었습니다.');

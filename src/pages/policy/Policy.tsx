@@ -5,10 +5,11 @@ import PolicyModal from "./PolicyModal";
 import PolicyRegisterModal from "./PolicyRegisterModal";
 import {toast} from "react-toastify";
 import Loading from "../../components/common/Loading";
+import {Policy as PolicyItem} from "../../types/policy";
 
 const Policy = () => {
-  const [policyList, setPolicyList] = useState([]);
-  const [selectedPolicy, setSelectedPolicy] = useState(null);
+  const [policyList, setPolicyList] = useState<PolicyItem[]>([]);
+  const [selectedPolicy, setSelectedPolicy] = useState<PolicyItem | null>(null);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [cursor, setCursor] = useState(null);
@@ -49,28 +50,25 @@ const Policy = () => {
     setPreviousCursors([]);
   };
 
-  const fetchPolicies = async (nextCursor = null) => {
+  const fetchPolicies = async (nextCursor: string | null = null) => {
     setIsLoading(true);
     try {
-      const params = {
-        size: pageSize, ...(nextCursor && {cursor: nextCursor}), ...(selectedCategory && {categoryId: selectedCategory}),
-      };
+      const response = await policyApi.listPolicies({
+        size: pageSize,
+        cursor: nextCursor,
+        ...(selectedCategory && {categoryId: selectedCategory}),
+      });
 
-      const response: any = await policyApi.listPolicies(params);
-      if (response.data) {
-        const policies = response.data.contents || [];
-        const cursor = response.data.cursor || {};
-
-        setPolicyList(policies);
-        setHasMore(cursor.hasMore || false);
-        setCursor(cursor.nextCursor || null);
-      } else {
+      if (!response.ok) {
         setPolicyList([]);
         setHasMore(false);
+        return;
       }
-    } catch (error) {
-      setPolicyList([]);
-      setHasMore(false);
+
+      const {contents = [], cursor} = response.data;
+      setPolicyList(contents);
+      setHasMore(cursor?.hasMore || false);
+      setCursor(cursor?.nextCursor || null);
     } finally {
       setIsLoading(false);
     }

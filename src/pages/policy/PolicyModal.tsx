@@ -3,16 +3,7 @@ import {Button, Form, Modal} from "react-bootstrap";
 import {toast} from "react-toastify";
 import policyApi from "../../api/policyApi";
 import {formatDateTime} from "../../utils/dateUtils";
-
-/** PolicyResponse — 정책 상세 */
-export interface Policy {
-  policyId: string;
-  categoryId: string;
-  description?: string;
-  value: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
+import {Policy} from "../../types/policy";
 
 /** enum API(PolicyCategoryType / PolicyType) 응답 항목 */
 interface PolicyEnumOption {

@@ -5,37 +5,7 @@ import registrationApi from "../../api/registrationApi";
 import {useEffect, useState} from "react";
 import enumApi from "../../api/enumApi";
 import {toast} from "react-toastify";
-import {OsPlatform} from "../../types/device";
-
-/** BossRegistrationAccountResponse */
-interface RegistrationBoss {
-  socialType: string;
-  name: string;
-  businessNumber: string;
-}
-
-/** BossRegistrationStoreResponse */
-interface RegistrationStore {
-  name: string;
-  categories: string[];
-  certificationPhotoUrl: string;
-}
-
-/** BossRegistrationRequestContextResponse */
-interface RegistrationContext {
-  osPlatform: OsPlatform;
-  appVersion: string;
-}
-
-/** BossRegistrationResponse */
-export interface Registration {
-  registrationId: string;
-  boss: RegistrationBoss;
-  store: RegistrationStore;
-  context?: RegistrationContext | null;
-  createdAt?: string;
-  updatedAt?: string;
-}
+import {BossRegistration} from "../../types/registration";
 
 /** enum API(BossRegistrationRejectReason) 응답 항목 */
 interface RejectReasonOption {
@@ -46,7 +16,7 @@ interface RejectReasonOption {
 interface RegistrationModalProps {
   show: boolean;
   onHide: () => void;
-  registration: Registration | null;
+  registration: BossRegistration | null;
 }
 
 const RegistrationModal = ({show, onHide, registration}: RegistrationModalProps) => {
