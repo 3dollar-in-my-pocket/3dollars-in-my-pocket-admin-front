@@ -1,4 +1,3 @@
-import SalesTypeBadge from './common/badges/SalesTypeBadge';
 import StoreStatusBadge from './common/badges/StoreStatusBadge';
 import StoreTypeBadge from './common/badges/StoreTypeBadge';
 import {useCallback, useRef} from 'react';
@@ -167,7 +166,6 @@ const UserStoreHistory = ({userId, isActive, onStoreClick}) => {
                           <div className="flex-grow-1">
                             <h6 className="mb-1 fw-bold text-dark">{store.name || '이름 없음'}</h6>
                             <div className="d-flex flex-wrap align-items-center gap-2">
-                              {<SalesTypeBadge salesType={store.salesType} size='md'/>}
                               {<StoreStatusBadge status={store.status} size="md"/>}
                               {getActivitiesStatusBadge(store.activitiesStatus)}
                               {<StoreTypeBadge storeType={store.storeType}/>}

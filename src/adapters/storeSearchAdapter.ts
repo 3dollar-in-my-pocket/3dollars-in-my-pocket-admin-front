@@ -1,6 +1,6 @@
 import {validateStoreSearch} from '../utils/validation/storeValidation';
 import storeApi from '../api/storeApi';
-import {STORE_SEARCH_TYPES, StoreSearchType, Store, StoreType} from '../types/store';
+import {STORE_SEARCH_TYPES, SimpleStore, StoreSearchType, StoreType} from '../types/store';
 
 interface SearchParams {
   searchType: StoreSearchType;
@@ -12,7 +12,7 @@ interface SearchParams {
 interface SearchResult {
   ok: boolean;
   data: {
-    results: Store[];
+    results: SimpleStore[];
     hasMore: boolean;
     nextCursor: string | null;
   };

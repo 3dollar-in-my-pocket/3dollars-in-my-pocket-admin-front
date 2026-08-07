@@ -1,6 +1,6 @@
 // Store related type definitions and constants
 import {WriterType} from './common';
-import { Address, Location } from './domain';
+import { Address, Location, Writer } from './domain';
 
 // Store status types (using common STATUS constants)
 export const STORE_STATUS = {
@@ -32,7 +32,8 @@ export type SalesType = typeof SALES_TYPE[keyof typeof SALES_TYPE];
 // Open status
 export const OPEN_STATUS = {
   OPEN: 'OPEN',
-  CLOSED: 'CLOSED'
+  CLOSED: 'CLOSED',
+  UNKNOWN: 'UNKNOWN'
 } as const;
 
 export type OpenStatus = typeof OPEN_STATUS[keyof typeof OPEN_STATUS];
@@ -62,23 +63,6 @@ export const STORE_SEARCH_TYPES = {
 export type StoreSearchType = typeof STORE_SEARCH_TYPES[keyof typeof STORE_SEARCH_TYPES];
 
 // Store interfaces
-export interface Store {
-  storeId: number;
-  name: string;
-  status: StoreStatus;
-  activitiesStatus?: ActivitiesStatus;
-  salesType: SalesType;
-  openStatus?: OpenStatus;
-  storeType: StoreType;
-  rating?: number;
-  categoryId?: string;
-  labels?: StoreLabel[];
-  location?: {
-    latitude: number;
-    longitude: number;
-    address?: string;
-  };
-}
 
 export const isVisitsSupported = (storeType: StoreType): boolean => {
   const supportedTypes: StoreType[] = [STORE_TYPE.USER_STORE];
@@ -118,6 +102,72 @@ export interface SimpleStore {
   labels: StoreLabel[];
   activitiesStatus: ActivitiesStatus;
   location?: Location;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+/** StoreSalesTypeResponse */
+export interface StoreSalesType {
+  type: SalesType;
+  description: string;
+}
+
+/** StoreOpenResponse */
+export interface StoreOpen {
+  status: OpenStatus;
+  openStartDateTime?: string;
+  isOpening: boolean;
+}
+
+/** StoreOpeningHoursResponse */
+export interface StoreOpeningHours {
+  startTime?: string;
+  endTime?: string;
+  extra?: string;
+}
+
+/** StoreMenuResponse */
+export interface StoreMenu {
+  name: string;
+  description: string;
+  price?: number;
+  imageUrl?: string;
+  count?: number;
+  category?: StoreFoodCategory;
+}
+
+/** StoreMetadataResponse */
+export interface StoreMetadata {
+  reviewCount: number;
+  subscriberCount: number;
+  reportCount: number;
+}
+
+/**
+ * StoreDetailResponse — 가게 상세 조회(GET /v1/store/{storeId}) 응답
+ *
+ * 목록 응답(SimpleStore)에는 없는 salesType, openStatus, menus,
+ * appearanceDays, paymentMethods, metadata를 포함합니다.
+ */
+export interface StoreDetail {
+  storeId: number;
+  storeType: StoreType;
+  name: string;
+  rating: number;
+  address: Address;
+  categories: StoreFoodCategory[];
+  appearanceDays: string[];
+  paymentMethods: string[];
+  menus: StoreMenu[];
+  status: StoreStatus;
+  activitiesStatus: ActivitiesStatus;
+  labels: StoreLabel[];
+  owner?: Writer;
+  salesType?: StoreSalesType;
+  location?: Location;
+  openingHours?: StoreOpeningHours;
+  openStatus?: StoreOpen;
+  metadata?: StoreMetadata;
   createdAt?: string;
   updatedAt?: string;
 }

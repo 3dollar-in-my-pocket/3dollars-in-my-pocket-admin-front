@@ -5,6 +5,7 @@ import StoreEditForm from '../../components/StoreEditForm';
 import SalesTypeBadge from '../../components/common/badges/SalesTypeBadge';
 import StoreStatusBadge from '../../components/common/badges/StoreStatusBadge';
 import {WRITER_TYPE} from '../../types/common';
+import {StoreDetail} from '../../types/store';
 import {formatDateTimeKo as formatDateTime} from '../../utils/dateUtils';
 import {
   getActivitiesStatusBadgeClass,
@@ -23,7 +24,7 @@ interface StoreBasicInfoTabProps {
   /** 목록에서 넘어온 요약 정보 (상세 로딩 전 폴백) */
   store: any;
   /** 상세 조회 결과 */
-  storeDetail: any;
+  storeDetail: StoreDetail | null;
   isEditMode: boolean;
   setIsEditMode: (value: boolean) => void;
   onEditSuccess: () => void;

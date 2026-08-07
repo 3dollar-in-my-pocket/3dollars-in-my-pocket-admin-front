@@ -1,4 +1,3 @@
-import SalesTypeBadge from './common/badges/SalesTypeBadge';
 import StoreTypeBadge from './common/badges/StoreTypeBadge';
 import {useCallback, useRef, useState} from 'react';
 import {toast} from 'react-toastify';
@@ -229,7 +228,6 @@ const UserStoreImageHistory = ({userId, isActive, onStoreClick}) => {
                           <i className="bi bi-box-arrow-up-right text-primary" style={{fontSize: '0.6rem'}}></i>
                         </div>
                         <div className="d-flex flex-wrap align-items-center gap-1 mb-2">
-                          {<SalesTypeBadge salesType={storeImage.store?.salesType} size='md'/>}
                           {getImageStatusBadge(storeImage.status)}
                           {getStoreStatusBadge(storeImage.store?.status)}
                           {storeImage.store?.storeType && <StoreTypeBadge storeType={storeImage.store.storeType}/>}
@@ -380,7 +378,6 @@ const UserStoreImageHistory = ({userId, isActive, onStoreClick}) => {
                             <label className="form-label fw-semibold text-muted mb-1">가게 정보</label>
                             <p className="mb-1 fw-bold text-dark">{selectedImage.store?.name || '가게명 없음'}</p>
                             <div className="d-flex gap-2 mb-1">
-                              {<SalesTypeBadge salesType={selectedImage.store?.salesType} size='md'/>}
                               {getStoreStatusBadge(selectedImage.store?.status)}
                             </div>
                             <p

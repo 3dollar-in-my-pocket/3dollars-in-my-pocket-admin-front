@@ -1,8 +1,8 @@
 import axiosInstance from './apiBase';
-import {StoreType} from '../types/store';
+import {StoreDetail, StoreType} from '../types/store';
 import {StoreChangeHistory} from '../types/storeChangeHistory';
 import {ApiResponse, PaginatedResponse} from '../types/api';
-import {apiGetPaginated} from './apiHelpers';
+import {apiGet, apiGetPaginated} from './apiHelpers';
 
 export default {
   /**
@@ -96,24 +96,8 @@ export default {
    * @param {string} storeId - 가게 ID
    * @returns {Promise<Object>} 가게 상세 정보
    */
-  getStoreDetail: async (storeId: string): Promise<any> => {
-    try {
-      const response = await axiosInstance({
-        method: 'GET',
-        url: `/v1/store/${storeId}`
-      });
-
-      if (response.data.ok) {
-        return {
-          ok: response.data.ok,
-          data: response.data.data
-        };
-      } else {
-        throw new Error('API 응답 오류');
-      }
-    } catch (error: any) {
-      return error.response;
-    }
+  getStoreDetail: async (storeId: string): Promise<ApiResponse<StoreDetail>> => {
+    return apiGet<StoreDetail>(`/v1/store/${storeId}`);
   },
 
 

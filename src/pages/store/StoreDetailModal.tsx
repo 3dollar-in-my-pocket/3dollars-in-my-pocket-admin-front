@@ -22,14 +22,14 @@ import StoreReviewHistory from '../../components/StoreReviewHistory';
 import StoreSettings from '../../components/StoreSettings';
 import StoreVisitHistory from '../../components/StoreVisitHistory';
 import {WRITER_TYPE} from '../../types/common';
-import {isVisitsSupported, isImagesSupported, isReportsSupported} from '../../types/store';
+import {StoreDetail, isVisitsSupported, isImagesSupported, isReportsSupported} from '../../types/store';
 import {formatDateTimeKo as formatDateTime} from '../../utils/dateUtils';
 import {getActivitiesStatusBadgeClass, getActivitiesStatusDisplayName, getCategoryIcon, getLabelBadgeClass, getLabelDisplayName, getLabelIcon, getOpenStatusBadgeClass, getOpenStatusDisplayName, getSalesTypeBadgeClass, getSalesTypeDisplayName, getStoreStatusBadgeClass, getStoreStatusDisplayName, getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from '../../utils/display/storeDisplay';
 import {getWriterTypeBadgeClass} from '../../utils/display/writerDisplay';
 import {formatCount, formatRating} from '../../utils/formatUtils';
 
 const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) => {
-  const [storeDetail, setStoreDetail] = useState(null);
+  const [storeDetail, setStoreDetail] = useState<StoreDetail | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('basic');
   const [error, setError] = useState(null);
