@@ -20,13 +20,7 @@ const RandomNameTool = () => {
       if (response.ok) {
         setRandomNames(response.data.contents);
       } else {
-        setErrorMessage(response.data?.message || '데이터 조회에 실패했습니다.');
-      }
-    } catch (error: any) {
-      if (!error.response) {
-        setErrorMessage('서버 연결 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.');
-      } else {
-        setErrorMessage(error.response.data?.message || '예상치 못한 오류가 발생했습니다.');
+        setErrorMessage('데이터 조회에 실패했습니다.');
       }
     } finally {
       setIsLoading(false);

@@ -137,8 +137,11 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
     setIsLoading(true);
     try {
       const response = await deviceApi.deleteDevice(deviceId);
-      setDevices((prev) => prev.filter((d) => d.deviceId !== deviceId));
-      toast.success('디바이스가 성공적으로 삭제되었습니다.');
+
+      if (response.ok) {
+        setDevices((prev) => prev.filter((d) => d.deviceId !== deviceId));
+        toast.success('디바이스가 성공적으로 삭제되었습니다.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -199,13 +202,14 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
       const response = await userApi.updateUserRole(userDetail.userId, selectedRole);
 
       if (response?.ok) {
-        const updatedUser = response.data || {};
+        const updatedUser = response.data;
         setUserDetail((prev) => ({
           ...prev,
           ...updatedUser,
-          nickname: updatedUser.name || updatedUser.nickname || prev?.nickname,
+          // 서버 UserResponse에는 nickname이 없어 name을 닉네임으로 사용합니다.
+          nickname: updatedUser?.name || prev?.nickname,
         }));
-        setSelectedRole(updatedUser.role || selectedRole);
+        setSelectedRole(updatedUser?.role || selectedRole);
         toast.success('유저 권한이 변경되었습니다.');
       }
     } finally {

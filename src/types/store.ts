@@ -143,6 +143,30 @@ export interface StoreMetadata {
   reportCount: number;
 }
 
+/** PreferenceResponse — 가게 설정 항목 */
+export interface StorePreferenceSetting {
+  code: string;
+  description: string;
+  value: unknown;
+}
+
+/** StorePreferenceResponse — 가게 설정 조회(GET /v1/store/{storeId}/preference) 응답 */
+export interface StorePreference {
+  settings: StorePreferenceSetting[];
+}
+
+/** PreferenceResponse — 가게 설정 항목 */
+export interface StorePreferenceSetting {
+  code: string;
+  description: string;
+  value: unknown;
+}
+
+/** StorePreferenceResponse — 가게 설정 조회(GET /v1/store/{storeId}/preference) 응답 */
+export interface StorePreference {
+  settings: StorePreferenceSetting[];
+}
+
 /**
  * StoreDetailResponse — 가게 상세 조회(GET /v1/store/{storeId}) 응답
  *

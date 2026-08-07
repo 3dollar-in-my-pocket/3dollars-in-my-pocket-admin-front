@@ -20,16 +20,11 @@ const StoreSettings = ({storeId}) => {
       const response = await storeApi.getStorePreference(storeId);
 
       if (!response.ok) {
-        throw new Error('설정 정보를 불러오는데 실패했습니다.');
+        setError('설정 정보를 불러오는데 실패했습니다.');
+        return;
       }
 
-      setSettings(response.data.settings || []);
-    } catch (error) {
-      console.error('가게 설정 조회 실패:', error);
-      const errorMessage = error.response?.status
-        ? `서버 오류가 발생했습니다. (${error.response.status})`
-        : '설정 정보를 불러오는데 실패했습니다. 인터넷 연결을 확인해주세요.';
-      setError(errorMessage);
+      setSettings(response.data?.settings || []);
     } finally {
       setIsLoading(false);
     }

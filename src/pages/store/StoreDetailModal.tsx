@@ -51,20 +51,11 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
     try {
       const response = await storeApi.getStoreDetail(store.storeId);
       if (!response.ok) {
+        setError('가게 상세 정보를 불러오는데 실패했습니다.');
         return;
       }
 
-      // 서버 응답 구조에 맞게 직접 데이터 추출
-      const data = response.data;
-      setStoreDetail(data);
-    } catch (error) {
-      console.error('가게 상세 정보 조회 실패:', error);
-
-      // 네트워크 오류나 기타 예외 처리
-      const errorMessage = error.response?.status
-        ? `서버 오류가 발생했습니다. (${error.response.status})`
-        : '네트워크 오류가 발생했습니다. 인터넷 연결을 확인해주세요.';
-      setError(errorMessage);
+      setStoreDetail(response.data);
     } finally {
       setIsLoading(false);
     }

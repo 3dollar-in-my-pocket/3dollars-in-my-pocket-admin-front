@@ -1,8 +1,24 @@
-import axiosInstance from './apiBase';
-import {StoreDetail, StoreType} from '../types/store';
+import {SimpleStore, StoreDetail, StorePreference, StoreType} from '../types/store';
 import {StoreChangeHistory} from '../types/storeChangeHistory';
+import {StorePost} from '../types/storePost';
+import {StoreMessage} from '../types/storeMessage';
+import {Coupon} from '../types/coupon';
 import {ApiResponse, PaginatedResponse} from '../types/api';
-import {apiGet, apiGetPaginated} from './apiHelpers';
+import {apiDelete, apiGet, apiGetPaginated, apiPatch} from './apiHelpers';
+
+/**
+ * targetStores 필터를 쿼리 파라미터로 변환합니다.
+ * 비어 있으면 파라미터를 보내지 않습니다.
+ */
+const buildTargetStoresParam = (
+  targetStores: StoreType[] | null
+): Record<string, string> => {
+  if (!targetStores || targetStores.length === 0) {
+    return {};
+  }
+
+  return {targetStores: targetStores.join(',')};
+};
 
 export default {
   /**
@@ -13,128 +29,58 @@ export default {
     cursor: string | null = null,
     size = 30,
     targetStores: StoreType[] | null = null
-  ): Promise<any> => {
-    try {
-      const params: any = {
-        keyword,
-        size
-      };
-
-      if (cursor) {
-        params.cursor = cursor;
-      }
-
-      if (targetStores && targetStores.length > 0) {
-        params.targetStores = targetStores.join(',');
-      }
-
-      const response = await axiosInstance({
-        method: 'GET',
-        url: '/v1/search/stores',
-        params
-      });
-
-      if (response.data.ok) {
-        return {
-          ok: response.data.ok,
-          data: response.data.data
-        };
-      } else {
-        throw new Error('API 응답 오류');
-      }
-    } catch (error: any) {
-      return error.response;
-    }
+  ): Promise<ApiResponse<PaginatedResponse<SimpleStore>>> => {
+    return apiGetPaginated<SimpleStore>(
+      '/v1/search/stores',
+      {cursor, size},
+      {keyword, ...buildTargetStoresParam(targetStores)}
+    );
   },
 
   /**
    * 가게 목록 조회 (최신순)
    * @param {string} [cursor] - 페이징 커서
-   * @param {number} [size=20] - 페이지 사이즈
+   * @param {number} [size=30] - 페이지 사이즈
    * @param {Array<string>} [targetStores] - 필터링할 가게 타입 (USER_STORE, BOSS_STORE)
-   * @returns {Promise<Object>} 가게 목록
    */
   getStores: async (
     cursor: string | null = null,
     size = 30,
     targetStores: StoreType[] | null = null
-  ): Promise<any> => {
-    try {
-      const params: any = {
-        size
-      };
-
-      if (cursor) {
-        params.cursor = cursor;
-      }
-
-      if (targetStores && targetStores.length > 0) {
-        params.targetStores = targetStores.join(',');
-      }
-
-      const response = await axiosInstance({
-        method: 'GET',
-        url: '/v1/stores',
-        params
-      });
-
-      if (response.data.ok) {
-        return {
-          ok: response.data.ok,
-          data: response.data.data
-        };
-      } else {
-        throw new Error('API 응답 오류');
-      }
-    } catch (error: any) {
-      return error.response;
-    }
+  ): Promise<ApiResponse<PaginatedResponse<SimpleStore>>> => {
+    return apiGetPaginated<SimpleStore>(
+      '/v1/stores',
+      {cursor, size},
+      buildTargetStoresParam(targetStores)
+    );
   },
 
   /**
    * 가게 상세 정보 조회
    * @param {string} storeId - 가게 ID
-   * @returns {Promise<Object>} 가게 상세 정보
    */
   getStoreDetail: async (storeId: string): Promise<ApiResponse<StoreDetail>> => {
     return apiGet<StoreDetail>(`/v1/store/${storeId}`);
   },
 
-
   /**
    * 가게 정보 수정
    * @param {string} storeId - 수정할 가게 ID
    * @param {Object} data - 수정할 데이터 (name, labels)
-   * @returns {Promise<Object>} 수정 결과
    */
-  updateStore: async (storeId: string, data: { name?: string; labels?: string[] }): Promise<any> => {
-    try {
-      const response = await axiosInstance({
-        method: 'PATCH',
-        url: `/v1/store/${storeId}`,
-        data
-      });
-      return response;
-    } catch (error: any) {
-      return error.response;
-    }
+  updateStore: async (
+    storeId: string,
+    data: { name?: string; labels?: string[] }
+  ): Promise<ApiResponse<void>> => {
+    return apiPatch<void>(`/v1/store/${storeId}`, data);
   },
 
   /**
    * 가게 삭제
    * @param {string} storeId - 삭제할 가게 ID
-   * @returns {Promise<Object>} 삭제 결과
    */
-  deleteStore: async (storeId: string): Promise<any> => {
-    try {
-      const response = await axiosInstance({
-        method: 'DELETE',
-        url: `/v1/store/${storeId}`
-      });
-      return response;
-    } catch (error: any) {
-      return error.response;
-    }
+  deleteStore: async (storeId: string): Promise<ApiResponse<void>> => {
+    return apiDelete(`/v1/store/${storeId}`);
   },
 
   /**
@@ -142,140 +88,49 @@ export default {
    * @param {string} userId - 사용자 ID
    * @param {string} [cursor] - 페이징 커서
    * @param {number} [size=20] - 페이지 사이즈
-   * @returns {Promise<Object>} 제보한 가게 목록
    */
-  getUserStores: async (userId: string, cursor: string | null = null, size = 20): Promise<any> => {
-    try {
-      const params: any = {
-        size
-      };
-
-      if (cursor) {
-        params.cursor = cursor;
-      }
-
-      const response = await axiosInstance({
-        method: 'GET',
-        url: `/v1/user/${userId}/stores`,
-        params
-      });
-
-      if (response.data.ok) {
-        const cursor = response.data.data?.cursor || {};
-        return {
-          ok: response.data.ok,
-          data: {
-            contents: response.data.data?.contents || [],
-            cursor: {
-              hasMore: cursor.hasMore || false,
-              totalCount: cursor.totalCount || 0,
-              nextCursor: cursor.nextCursor || null
-            }
-          }
-        };
-      } else {
-        throw new Error('API 응답 오류');
-      }
-    } catch (error: any) {
-      return error.response;
-    }
+  getUserStores: async (
+    userId: string,
+    cursor: string | null = null,
+    size = 20
+  ): Promise<ApiResponse<PaginatedResponse<SimpleStore>>> => {
+    return apiGetPaginated<SimpleStore>(`/v1/user/${userId}/stores`, {cursor, size});
   },
 
   /**
    * 가게 소식 목록 조회
    * @param {string} storeId - 가게 ID
    * @param {string} [cursor] - 페이징 커서
-   * @param {number} [limit=20] - 페이지 사이즈
-   * @returns {Promise<Object>} 가게 소식 목록
+   * @param {number} [size=20] - 페이지 사이즈
    */
-  getStorePosts: async (storeId: string, cursor: string | null = null, limit = 20): Promise<any> => {
-    try {
-      const params: any = {
-        limit
-      };
-
-      if (cursor) {
-        params.cursor = cursor;
-      }
-
-      const response = await axiosInstance({
-        method: 'GET',
-        url: `/v1/store/${storeId}/posts`,
-        params
-      });
-
-      if (response.data.ok) {
-        return {
-          ok: response.data.ok,
-          data: response.data.data
-        };
-      } else {
-        throw new Error('API 응답 오류');
-      }
-    } catch (error: any) {
-      return error.response;
-    }
+  getStorePosts: async (
+    storeId: string,
+    cursor: string | null = null,
+    size = 20
+  ): Promise<ApiResponse<PaginatedResponse<StorePost>>> => {
+    return apiGetPaginated<StorePost>(`/v1/store/${storeId}/posts`, {cursor, size});
   },
 
   /**
    * 가게 메시지 목록 조회
    * @param {string} storeId - 가게 ID
    * @param {string} [cursor] - 페이징 커서
-   * @param {number} [limit=20] - 페이지 사이즈
-   * @returns {Promise<Object>} 가게 메시지 목록
+   * @param {number} [size=20] - 페이지 사이즈
    */
-  getStoreMessages: async (storeId: string, cursor: string | null = null, limit = 20): Promise<any> => {
-    try {
-      const params: any = {
-        limit
-      };
-
-      if (cursor) {
-        params.cursor = cursor;
-      }
-
-      const response = await axiosInstance({
-        method: 'GET',
-        url: `/v1/store/${storeId}/messages`,
-        params
-      });
-
-      if (response.data.ok) {
-        return {
-          ok: response.data.ok,
-          data: response.data.data
-        };
-      } else {
-        throw new Error('API 응답 오류');
-      }
-    } catch (error: any) {
-      return error.response;
-    }
+  getStoreMessages: async (
+    storeId: string,
+    cursor: string | null = null,
+    size = 20
+  ): Promise<ApiResponse<PaginatedResponse<StoreMessage>>> => {
+    return apiGetPaginated<StoreMessage>(`/v1/store/${storeId}/messages`, {cursor, size});
   },
 
   /**
    * 가게 설정 정보 조회
    * @param {string} storeId - 가게 ID
-   * @returns {Promise<Object>} 가게 설정 정보
    */
-  getStorePreference: async (storeId: string): Promise<any> => {
-    try {
-      const response = await axiosInstance({
-        method: 'GET',
-        url: `/v1/store/${storeId}/preference`
-      });
-
-      if (response.data.ok) {
-        return {
-          ok: response.data.ok,
-          data: response.data.data
-        };
-      } else {
-        throw new Error('API 응답 오류');
-      }
-    } catch (error: any) {
-      return error.response;
-    }
+  getStorePreference: async (storeId: string): Promise<ApiResponse<StorePreference>> => {
+    return apiGet<StorePreference>(`/v1/store/${storeId}/preference`);
   },
 
   /**
@@ -283,35 +138,13 @@ export default {
    * @param {string} storeId - 가게 ID
    * @param {string} [cursor] - 페이징 커서
    * @param {number} [size=20] - 페이지 사이즈
-   * @returns {Promise<Object>} 가게 쿠폰 목록
    */
-  getStoreCoupons: async (storeId: string, cursor: string | null = null, size = 20): Promise<any> => {
-    try {
-      const params: any = {
-        size
-      };
-
-      if (cursor) {
-        params.cursor = cursor;
-      }
-
-      const response = await axiosInstance({
-        method: 'GET',
-        url: `/v1/store/${storeId}/coupons`,
-        params
-      });
-
-      if (response.data.ok) {
-        return {
-          ok: response.data.ok,
-          data: response.data.data
-        };
-      } else {
-        throw new Error('API 응답 오류');
-      }
-    } catch (error: any) {
-      return error.response;
-    }
+  getStoreCoupons: async (
+    storeId: string,
+    cursor: string | null = null,
+    size = 20
+  ): Promise<ApiResponse<PaginatedResponse<Coupon>>> => {
+    return apiGetPaginated<Coupon>(`/v1/store/${storeId}/coupons`, {cursor, size});
   },
 
   /**
@@ -319,7 +152,6 @@ export default {
    * @param {string} storeId - 가게 ID
    * @param {string} [cursor] - 페이징 커서
    * @param {number} [size=20] - 페이지 사이즈
-   * @returns {Promise<Object>} 가게 변경 이력 목록
    */
   getStoreChangeHistories: async (
     storeId: string,
@@ -335,17 +167,8 @@ export default {
   /**
    * 사장님 가게 강제 영업 종료
    * @param {string} storeId - 가게 ID
-   * @returns {Promise<Object>} 강제 영업 종료 결과
    */
-  forceCloseStore: async (storeId: string): Promise<any> => {
-    try {
-      const response = await axiosInstance({
-        method: 'DELETE',
-        url: `/v1/store/${storeId}/open`
-      });
-      return response;
-    } catch (error: any) {
-      return error.response;
-    }
+  forceCloseStore: async (storeId: string): Promise<ApiResponse<void>> => {
+    return apiDelete(`/v1/store/${storeId}/open`);
   },
 };
