@@ -1,7 +1,6 @@
 import React, {useState, useEffect, useMemo, useCallback} from "react";
 import {Card, Container, Form, Button, Row, Col, Alert} from "react-bootstrap";
-import { useRecoilValue } from "recoil";
-import { AdminAuthState } from "../../state/AdminAuthState";
+import { useAuthStore } from "../../state/authStore";
 import { AdminRole } from "../../types/admin";
 import enumApi from "../../api/enumApi";
 import RecentActivityStatistics from "./RecentActivityStatistics";
@@ -9,7 +8,7 @@ import DefaultStatistics from "./DefaultStatistics";
 import StoreByCategoryStatistics from "./StoreByCategoryStatistics";
 
 const ServerStatistics = () => {
-  const adminAuth = useRecoilValue(AdminAuthState);
+  const adminAuth = useAuthStore((state) => state.admin);
   const [statisticsTypes, setStatisticsTypes] = useState<{ key: string; description: string }[]>([]);
   const [selectedType, setSelectedType] = useState<string>("");
   const [startDate, setStartDate] = useState<string>("");

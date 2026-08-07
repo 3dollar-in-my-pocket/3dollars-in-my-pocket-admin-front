@@ -1,5 +1,4 @@
-import { useRecoilValue } from 'recoil';
-import { AdminAuthState } from '../state/AdminAuthState';
+import { useAuthStore } from '../state/authStore';
 import { AdminRole } from '../types/admin';
 import { hasMenuAccess } from '../utils/roleUtils';
 
@@ -7,7 +6,7 @@ import { hasMenuAccess } from '../utils/roleUtils';
  * 권한 확인을 위한 커스텀 훅
  */
 export const usePermission = () => {
-  const adminAuth = useRecoilValue(AdminAuthState);
+  const adminAuth = useAuthStore((state) => state.admin);
 
   return {
     /**

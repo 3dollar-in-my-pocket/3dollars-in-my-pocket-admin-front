@@ -4,13 +4,10 @@ import "bootstrap"
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css'
 import App from "./App";
-import {RecoilRoot} from "recoil";
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(
-  <RecoilRoot>
-    <App/>
-  </RecoilRoot>
+  <App/>
 );
 
 // If you want to start measuring performance in your app, pass a function

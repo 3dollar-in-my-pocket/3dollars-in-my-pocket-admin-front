@@ -1,6 +1,5 @@
 import React from 'react';
-import { useRecoilValue } from 'recoil';
-import { AdminAuthState } from '../../state/AdminAuthState';
+import { useAuthStore } from '../../state/authStore';
 import { AdminRole } from '../../types/admin';
 import { hasMenuAccess } from '../../utils/roleUtils';
 
@@ -19,7 +18,7 @@ const PermissionGuard: React.FC<PermissionGuardProps> = ({
   children,
   fallback = null
 }) => {
-  const adminAuth = useRecoilValue(AdminAuthState);
+  const adminAuth = useAuthStore((state) => state.admin);
 
   if (!adminAuth?.role) {
     return <>{fallback}</>;

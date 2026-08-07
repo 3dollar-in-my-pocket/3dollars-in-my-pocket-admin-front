@@ -1,12 +1,11 @@
 import {useNavigate} from "react-router-dom";
-import {useRecoilValue} from "recoil";
 import {menuGroups} from "./Layout";
-import {AdminAuthState} from "../state/AdminAuthState";
+import {useAuthStore} from "../state/authStore";
 import {filterMenuItemsByRole} from "../utils/roleUtils";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const adminAuth = useRecoilValue(AdminAuthState);
+  const adminAuth = useAuthStore((state) => state.admin);
 
   // 현재 관리자의 역할에 따라 메뉴 필터링
   const getFilteredMenuGroups = () => {

@@ -2,12 +2,9 @@ import React, {useState, useEffect, Suspense} from "react";
 import {Link, Outlet, useLocation, useNavigate} from "react-router-dom";
 import Loading from "../components/common/Loading";
 import {Bounce, toast, ToastContainer} from "react-toastify";
-import {useRecoilState} from "recoil";
-import {LoginStatus, AdminAuthState} from "../state/AdminAuthState";
-import {LocalStorageService} from "../service/LocalStorageService";
+import {useAuthStore} from "../state/authStore";
 import { AdminRole } from "../types/admin";
-import { hasMenuAccess, filterMenuItemsByRole } from "../utils/roleUtils";
-import adminApi from "../api/adminApi";
+import { filterMenuItemsByRole } from "../utils/roleUtils";
 import { setGlobalNavigate } from "../api/apiBase";
 
 // 메뉴 항목 타입 정의
@@ -118,8 +115,9 @@ const Layout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); // 모바일용
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false); // 데스크톱용
 
-  const [isLoginState, setIsLoginState] = useRecoilState(LoginStatus);
-  const [adminAuth, setAdminAuth] = useRecoilState(AdminAuthState);
+  const isLoginState = useAuthStore((state) => state.isLoggedIn);
+  const adminAuth = useAuthStore((state) => state.admin);
+  const logout = useAuthStore((state) => state.logout);
   const navigator = useNavigate();
 
   // 전역 네비게이션 함수 설정
@@ -132,34 +130,12 @@ const Layout = () => {
       return;
     }
 
-    setIsLoginState(false);
-    setAdminAuth(null); // 관리자 정보도 초기화
-    LocalStorageService.delete("AUTH_TOKEN");
+    logout();
 
     toast.info("로그아웃 되었습니다.");
 
     navigator('/');
   };
-
-  // 로그인 상태일 때 관리자 정보 가져오기
-  useEffect(() => {
-    const fetchAdminInfo = async () => {
-      if (isLoginState && !adminAuth) {
-        try {
-          const response = await adminApi.getMyAdmin();
-          if (response?.ok && response.data) {
-            setAdminAuth(response.data);
-          }
-        } catch (error) {
-          console.error('관리자 정보 조회 실패:', error);
-          // 토큰이 유효하지 않을 경우 로그아웃 처리
-          handleLogout();
-        }
-      }
-    };
-
-    fetchAdminInfo();
-  }, [isLoginState, adminAuth, setAdminAuth]);
 
   // 현재 관리자의 역할에 따라 메뉴 필터링
   const getFilteredMenuGroups = () => {
