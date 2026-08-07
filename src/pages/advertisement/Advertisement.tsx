@@ -1,4 +1,5 @@
 import {useEffect, useState} from "react";
+import type {Advertisement as AdvertisementItem} from '../../types/advertisement';
 import advertisementApi from "../../api/advertisementApi";
 import enumApi from "../../api/enumApi";
 import AdvertisementModal from "./AdvertisementModal";
@@ -11,7 +12,7 @@ import AdTimer from "../../components/common/AdTimer";
 import AdPreview from "../../components/advertisement/AdPreview";
 
 const Advertisement = () => {
-    const [advertisementList, setAdvertisementList] = useState([]);
+    const [advertisementList, setAdvertisementList] = useState<AdvertisementItem[]>([]);
     const [selectedPosition, setSelectedPosition] = useState(null);
     const [selectedPlatform, setSelectedPlatform] = useState(null);
     const [positions, setPositions] = useState([]);
@@ -364,7 +365,7 @@ const Advertisement = () => {
                                 extraContent={info.extraContent}
                                 titleFontColor={info.titleFontColor}
                                 subTitleFontColor={info.subTitleFontColor}
-                                extraContentFontColor={info.extraContentFontColor}
+                                extraContentFontColor={info.extraFontColor}
                                 backgroundColor={info.backgroundColor}
                               />
                             </div>

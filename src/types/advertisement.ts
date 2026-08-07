@@ -49,12 +49,13 @@ export interface Advertisement {
   subTitleFontColor?: string | null;
   extraContent?: string | null;
   /**
-   * 서버 응답 스키마상 필드명은 extraFontColor 이지만
-   * 프론트 전반(AdPreview, ContentInfoStep 등)은 extraContentFontColor 를 사용합니다.
-   * 실제 응답 형태를 확인하기 전까지 두 이름을 모두 허용합니다. (서버/프론트 필드명 불일치)
+   * 부가 문구 색상.
+   *
+   * 등록/수정 요청(AdvertisementContentRequest)은 extraContentFontColor를 쓰는데
+   * 조회 응답(AdvertisementResponse)은 extraFontColor로 내려주어 이름이 다릅니다.
+   * 응답을 읽을 때는 이 필드를 사용하세요.
    */
   extraFontColor?: string | null;
-  extraContentFontColor?: string | null;
   backgroundColor?: string | null;
   imageUrl: string;
   imageWidth?: number | null;

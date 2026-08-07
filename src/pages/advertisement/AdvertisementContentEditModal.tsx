@@ -34,7 +34,7 @@ const AdvertisementContentEditModal = ({
         subTitle: ad.subTitle || "",
         subTitleFontColor: ad.subTitleFontColor || "#969696",
         extraContent: ad.extraContent || "",
-        extraContentFontColor: ad.extraContentFontColor || "#000000",
+        extraContentFontColor: ad.extraFontColor || "#000000",
         backgroundColor: ad.backgroundColor && ad.backgroundColor.trim() !== "" ? ad.backgroundColor : "#FFFFFF",
         imageUrl: ad.imageUrl || "",
         imageWidth: ad.imageWidth || "",

@@ -209,7 +209,7 @@ const AdvertisementModal = ({
                 extraContent={ad.extraContent}
                 titleFontColor={ad.titleFontColor}
                 subTitleFontColor={ad.subTitleFontColor}
-                extraContentFontColor={ad.extraContentFontColor}
+                extraContentFontColor={ad.extraFontColor}
                 backgroundColor={ad.backgroundColor}
               />
             </div>
