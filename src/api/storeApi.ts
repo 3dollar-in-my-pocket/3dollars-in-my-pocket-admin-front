@@ -1,5 +1,7 @@
 import axiosInstance from './apiBase';
-import {StoreType} from '../types/store';
+import {StoreChangeHistory, StoreType} from '../types/store';
+import {ApiResponse, PaginatedResponse} from '../types/api';
+import {apiGetPaginated} from './apiHelpers';
 
 export default {
   /**
@@ -334,33 +336,15 @@ export default {
    * @param {number} [size=20] - 페이지 사이즈
    * @returns {Promise<Object>} 가게 변경 이력 목록
    */
-  getStoreChangeHistories: async (storeId: string, cursor: string | null = null, size = 20): Promise<any> => {
-    try {
-      const params: any = {
-        size
-      };
-
-      if (cursor) {
-        params.cursor = cursor;
-      }
-
-      const response = await axiosInstance({
-        method: 'GET',
-        url: `/v1/store/${storeId}/change-histories`,
-        params
-      });
-
-      if (response.data.ok) {
-        return {
-          ok: response.data.ok,
-          data: response.data.data
-        };
-      } else {
-        throw new Error('API 응답 오류');
-      }
-    } catch (error: any) {
-      return error.response;
-    }
+  getStoreChangeHistories: async (
+    storeId: string,
+    cursor: string | null = null,
+    size = 20
+  ): Promise<ApiResponse<PaginatedResponse<StoreChangeHistory>>> => {
+    return apiGetPaginated<StoreChangeHistory>(
+      `/v1/store/${storeId}/change-histories`,
+      {cursor, size}
+    );
   },
 
   /**

@@ -1,14 +1,7 @@
-import axiosInstance from "./apiBase";
+import {apiDelete} from "./apiHelpers";
 
 export default {
   evictAll: async (cacheType: string) => {
-    try {
-      const response = await axiosInstance({
-        method: "DELETE", url: `/v2/cache/${cacheType}/all`,
-      });
-      return response.data;
-    } catch (error: any) {
-      return error.response;
-    }
+    return apiDelete(`/v2/cache/${cacheType}/all`);
   }
 }

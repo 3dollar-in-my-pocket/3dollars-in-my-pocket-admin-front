@@ -82,11 +82,13 @@ const PolicyRegisterModal = ({show, onHide, categories, policies, onRefresh}) =>
         value: formData.value.trim()
       });
 
-      if (response.data) {
+      if (response.ok) {
         toast.success("정책이 성공적으로 등록되었습니다.");
         onRefresh(); // 목록 새로고침
         onHide(); // 모달 닫기
       }
+    } catch (error) {
+      // 에러 메시지는 응답 인터셉터가 표시합니다.
     } finally {
       setIsLoading(false);
     }

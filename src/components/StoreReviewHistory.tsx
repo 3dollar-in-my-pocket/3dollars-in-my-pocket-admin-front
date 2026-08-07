@@ -80,6 +80,8 @@ const StoreReviewHistory = ({storeId, isActive, onAuthorClick}) => {
         // 리뷰 목록 새로고침
         refresh();
       }
+    } catch (error) {
+      // 에러 메시지는 응답 인터셉터가 표시합니다.
     } finally {
       setIsBlinding(false);
     }

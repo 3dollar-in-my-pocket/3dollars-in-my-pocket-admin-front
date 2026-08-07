@@ -26,11 +26,14 @@ const CacheTools = () => {
         setSelectedCacheType('');
         setErrorMessage('');
       }
-    } catch (error) {
-      if (!error.response) {
+    } catch (error: any) {
+      if (error.response) {
+        // HTTP 에러 (인터셉터가 toast까지 처리)
+        setErrorMessage(error.response.data?.message || '예상치 못한 오류가 발생했습니다.');
+      } else if (error.request) {
         setErrorMessage('서버 연결 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.');
       } else {
-        setErrorMessage(error.response.data.message || '예상치 못한 오류가 발생했습니다.');
+        setErrorMessage(error.message || '예상치 못한 오류가 발생했습니다.');
       }
     } finally {
       setIsLoading(false);

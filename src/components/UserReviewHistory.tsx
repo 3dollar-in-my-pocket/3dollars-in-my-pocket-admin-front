@@ -164,13 +164,14 @@ const UserReviewHistory = ({userId, isActive, onStoreClick}) => {
     setIsDeleting(true);
     try {
       const response = await reviewApi.blindStoreReview(selectedReview.reviewId);
-      if (response.status >= 400) {
-        setIsDeleting(false);
+      if (!response.ok) {
         return;
       }
       toast.success('리뷰가 성공적으로 삭제되었습니다.');
       handleCloseModal();
       refresh();
+    } catch (error) {
+      // 에러 메시지는 응답 인터셉터가 표시합니다.
     } finally {
       setIsDeleting(false);
     }

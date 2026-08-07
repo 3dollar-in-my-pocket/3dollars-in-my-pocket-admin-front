@@ -1,4 +1,4 @@
-import axiosInstance from './apiBase';
+import {apiPost} from './apiHelpers';
 import userApi from './userApi';
 import {SEARCH_TYPES} from '../types/user';
 import {PushRequest} from '../types/push';
@@ -13,31 +13,17 @@ const pushApi = {
     nonce?: string
   ) => {
     try {
-      const response = await axiosInstance({
-        method: 'POST',
-        url: `/v1/push/${pushType}`,
-        data: pushData,
-        headers: nonce ? {
-          'X-Nonce-Token': nonce,
-        } : {},
-      });
+      const response = await apiPost<any>(`/v1/push/${pushType}`, pushData, {nonce});
 
-      if (response.data.ok) {
-        return {
-          ok: true,
-          data: response.data.data
-        };
-      } else {
-        return {
-          ok: false,
-          error: response.data.message || "푸시 발송에 실패했습니다."
-        };
-      }
+      return {
+        ok: true,
+        data: response.data
+      };
     } catch (error: any) {
       console.error("푸시 발송 실패:", error);
       return {
         ok: false,
-        error: error.response?.data?.message || "푸시 발송 중 오류가 발생했습니다."
+        error: error.response?.data?.message || error.message || "푸시 발송 중 오류가 발생했습니다."
       };
     }
   },

@@ -56,7 +56,7 @@ const Policy = () => {
         size: pageSize, ...(nextCursor && {cursor: nextCursor}), ...(selectedCategory && {categoryId: selectedCategory}),
       };
 
-      const response = await policyApi.listPolicies(params);
+      const response: any = await policyApi.listPolicies(params);
       if (response.data) {
         const policies = response.data.contents || [];
         const cursor = response.data.cursor || {};
@@ -68,6 +68,9 @@ const Policy = () => {
         setPolicyList([]);
         setHasMore(false);
       }
+    } catch (error) {
+      setPolicyList([]);
+      setHasMore(false);
     } finally {
       setIsLoading(false);
     }
@@ -112,14 +115,18 @@ const Policy = () => {
       return;
     }
 
-    const response = await policyApi.deletePolicy({
-      policyId: policyId
-    });
+    try {
+      const response = await policyApi.deletePolicy({
+        policyId: policyId
+      });
 
-    if (response.data) {
-      toast.success("정책이 삭제되었습니다.");
-      fetchPolicies(); // 목록 새로고침
-      setSelectedPolicy(null); // 모달 닫기
+      if (response.ok) {
+        toast.success("정책이 삭제되었습니다.");
+        fetchPolicies(); // 목록 새로고침
+        setSelectedPolicy(null); // 모달 닫기
+      }
+    } catch (error) {
+      // 에러 메시지는 응답 인터셉터가 표시합니다.
     }
   };
 

@@ -16,14 +16,18 @@ const RegistrationManagement = () => {
   const fetchRegistrations = () => {
     setIsLoading(true);
     registrationApi.listRegistrations({size: 30})
-      .then((response) => {
+      .then((response: any) => {
         if (!response.ok) {
           return
         }
         setRegistrationList(response.data.contents);
-      }).finally(() => {
-      setIsLoading(false);
-    });
+      })
+      .catch(() => {
+        setRegistrationList([]);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   };
 
   const handleRegistrationUpdate = () => {

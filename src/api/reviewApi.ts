@@ -1,8 +1,7 @@
 import { ApiResponse, PaginatedResponse } from '../types/api';
 import { Review, UserReview } from '../types/review';
-import { apiGetPaginated } from './apiHelpers';
+import { apiGetPaginated, apiPut } from './apiHelpers';
 import { INCLUDES } from '../constants/api';
-import axiosInstance from './apiBase';
 
 export default {
   /**
@@ -26,19 +25,11 @@ export default {
 
   /**
    * 리뷰 블라인드
-   * @param {string} reviewId - 삭제할 리뷰 ID
-   * @returns {Promise<any>} 삭제 결과
+   * @param {string} reviewId - 블라인드할 리뷰 ID
+   * @returns {Promise<ApiResponse<void>>} 블라인드 결과
    */
-  blindStoreReview: async (reviewId: string): Promise<any> => {
-    try {
-      const response = await axiosInstance({
-        method: 'PUT',
-        url: `/v1/store-review/${reviewId}/blind`
-      });
-      return response;
-    } catch (error: any) {
-      return error.response;
-    }
+  blindStoreReview: async (reviewId: string): Promise<ApiResponse<void>> => {
+    return apiPut<void>(`/v1/store-review/${reviewId}/blind`, undefined);
   },
 
   /**
