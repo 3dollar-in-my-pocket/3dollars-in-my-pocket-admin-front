@@ -3,6 +3,9 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
+  // CRA 시절부터 사용해온 REACT_APP_ 접두사를 그대로 인식시킵니다.
+  // 배포 환경(Netlify 등)에 등록된 환경변수를 수정하지 않기 위함입니다.
+  envPrefix: ["VITE_", "REACT_APP_"],
   resolve: {
     // tsconfig.json의 baseUrl / paths(@/*) 설정을 그대로 사용
     tsconfigPaths: true,

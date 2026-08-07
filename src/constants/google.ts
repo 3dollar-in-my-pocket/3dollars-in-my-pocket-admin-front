@@ -1,13 +1,18 @@
 import qs from 'qs';
 
-const {VITE_CLIENT_ID, VITE_CLIENT_SECRET, VITE_REDIRECT_URI, VITE_API_URI} = import.meta.env;
+const {
+  REACT_APP_CLIENT_ID,
+  REACT_APP_CLIENT_SECRET,
+  REACT_APP_REDIRECT_URI,
+  REACT_APP_API_URI,
+} = import.meta.env;
 
 export const AUTH_KEY = {
-  apiUrl: VITE_API_URI,
+  apiUrl: REACT_APP_API_URI,
   google: {
-    clientId: VITE_CLIENT_ID,
-    clientSecret: VITE_CLIENT_SECRET,
-    redirectUri: VITE_REDIRECT_URI,
+    clientId: REACT_APP_CLIENT_ID,
+    clientSecret: REACT_APP_CLIENT_SECRET,
+    redirectUri: REACT_APP_REDIRECT_URI,
   },
 };
 
