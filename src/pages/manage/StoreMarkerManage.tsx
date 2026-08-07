@@ -3,7 +3,7 @@ import storeMarkerApi from '../../api/storeMarkerApi';
 import EmptyState from '../../components/common/EmptyState';
 import useInfiniteScroll from '../../hooks/useInfiniteScroll';
 import StoreDetailModal from '../store/StoreDetailModal';
-import {StoreMarker} from '../../types/storeMarker';
+import {StoreMarker, StoreMarkerImage} from '../../types/storeMarker';
 import {formatDateTime} from '../../utils/dateUtils';
 import {toast} from 'react-toastify';
 
@@ -12,29 +12,13 @@ const toApiDateTime = (value: string): string => {
   return value.length === 16 ? `${value}:00` : value;
 };
 
-const getMarkerImageUrl = (image: any): string => {
+// 서버 응답(ImageResponse)은 imageUrl, 요청(ImageRequest)은 url을 사용한다.
+const getMarkerImageUrl = (image?: StoreMarkerImage): string => {
   if (!image) return '';
-  if (typeof image === 'string') return image;
-  return image.imageUrl || image.url || image.fileUrl || image.path || '';
+  return image.imageUrl || image.url || '';
 };
 
-const getMarkerImageWidth = (image: any): number => {
-  if (!image || typeof image === 'string') return 0;
-  return Number(image.width || image.imageWidth || 0);
-};
-
-const getMarkerImageHeight = (image: any): number => {
-  if (!image || typeof image === 'string') return 0;
-  return Number(image.height || image.imageHeight || 0);
-};
-
-const getMarkerStartDateTime = (marker: any): string => {
-  return marker?.period?.startDateTime || marker?.startDateTime || '';
-};
-
-const getMarkerEndDateTime = (marker: any): string => {
-  return marker?.period?.endDateTime || marker?.endDateTime || '';
-};
+const getMarkerImageSize = (value?: number): number => Number(value || 0);
 
 const StoreMarkerManage = () => {
   const [markers, setMarkers] = useState<StoreMarker[]>([]);
@@ -228,7 +212,7 @@ const StoreMarkerManage = () => {
                                 <i className="bi bi-calendar-event me-1"></i>
                                 시작일
                               </div>
-                              <div className="fw-semibold text-dark">{formatDateTime(getMarkerStartDateTime(marker))}</div>
+                              <div className="fw-semibold text-dark">{formatDateTime(marker.period?.startDateTime)}</div>
                             </div>
                           </div>
                           <div className="col-md-6">
@@ -237,7 +221,7 @@ const StoreMarkerManage = () => {
                                 <i className="bi bi-calendar-x me-1"></i>
                                 종료일
                               </div>
-                              <div className="fw-semibold text-dark">{formatDateTime(getMarkerEndDateTime(marker))}</div>
+                              <div className="fw-semibold text-dark">{formatDateTime(marker.period?.endDateTime)}</div>
                             </div>
                           </div>
                         </div>
@@ -284,10 +268,10 @@ const StoreMarkerManage = () => {
   );
 };
 
-const MarkerImagePreview = ({title, image}: {title: string; image?: any}) => {
+const MarkerImagePreview = ({title, image}: {title: string; image?: StoreMarkerImage}) => {
   const imageUrl = getMarkerImageUrl(image);
-  const width = getMarkerImageWidth(image);
-  const height = getMarkerImageHeight(image);
+  const width = getMarkerImageSize(image?.width);
+  const height = getMarkerImageSize(image?.height);
 
   return (
     <div className="bg-white border rounded-3 p-2 text-center shadow-sm" style={{width: '92px'}}>

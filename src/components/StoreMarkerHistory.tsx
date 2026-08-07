@@ -1,9 +1,10 @@
-import React, {FormEvent, useCallback, useEffect, useMemo, useState} from 'react';
+import React, {FormEvent, useCallback, useMemo, useState} from 'react';
 import {Modal} from 'react-bootstrap';
 import {toast} from 'react-toastify';
 import storeMarkerApi from '../api/storeMarkerApi';
 import uploadApi from '../api/uploadApi';
-import {StoreMarker, StoreMarkerRequest} from '../types/storeMarker';
+import useCursorPagination from '../hooks/useCursorPagination';
+import {StoreMarker, StoreMarkerImage, StoreMarkerRequest} from '../types/storeMarker';
 import {formatDateTime} from '../utils/dateUtils';
 
 interface StoreMarkerHistoryProps {
@@ -47,121 +48,67 @@ const toApiDateTime = (value: string): string => {
   return value.length === 16 ? `${value}:00` : value;
 };
 
-const getMarkerImageUrl = (image: any): string => {
+// 서버 응답(ImageResponse)은 imageUrl, 요청(ImageRequest)은 url을 사용한다.
+const getMarkerImageUrl = (image?: StoreMarkerImage): string => {
   if (!image) return '';
-  if (typeof image === 'string') return image;
-  return image.url || image.imageUrl || image.fileUrl || image.path || '';
+  return image.imageUrl || image.url || '';
 };
 
-const getMarkerImageWidth = (image: any, fallback = 0): number => {
-  if (!image || typeof image === 'string') return fallback;
-  return Number(image.width || image.imageWidth || fallback);
-};
-
-const getMarkerImageHeight = (image: any, fallback = 0): number => {
-  if (!image || typeof image === 'string') return fallback;
-  return Number(image.height || image.imageHeight || fallback);
-};
-
-const getSelectedMarkerImage = (marker: any): any => {
-  return marker?.selectedMarkerImage || marker?.selectedImage || marker?.selectedMarker || marker?.selectedMarkerImageUrl;
-};
-
-const getUnselectedMarkerImage = (marker: any): any => {
-  return marker?.unselectedMarkerImage || marker?.unselectedImage || marker?.unselectedMarker || marker?.unselectedMarkerImageUrl;
-};
-
-const getMarkerStartDateTime = (marker: any): string => {
-  return marker?.period?.startDateTime
-    || marker?.startDateTime
-    || marker?.startAt
-    || marker?.startedAt
-    || marker?.startDate
-    || marker?.activeStartDateTime
-    || '';
-};
-
-const getMarkerEndDateTime = (marker: any): string => {
-  return marker?.period?.endDateTime
-    || marker?.endDateTime
-    || marker?.endAt
-    || marker?.endedAt
-    || marker?.endDate
-    || marker?.activeEndDateTime
-    || '';
+const getMarkerImageSize = (value: number | undefined, fallback = 0): number => {
+  return Number(value || fallback);
 };
 
 const toFormData = (marker: StoreMarker): MarkerFormData => ({
   groupId: marker.groupId || '',
-  selectedUrl: getMarkerImageUrl(getSelectedMarkerImage(marker)),
-  selectedWidth: String(getMarkerImageWidth(getSelectedMarkerImage(marker), 40)),
-  selectedHeight: String(getMarkerImageHeight(getSelectedMarkerImage(marker), 40)),
-  unselectedUrl: getMarkerImageUrl(getUnselectedMarkerImage(marker)),
-  unselectedWidth: String(getMarkerImageWidth(getUnselectedMarkerImage(marker), 32)),
-  unselectedHeight: String(getMarkerImageHeight(getUnselectedMarkerImage(marker), 32)),
-  startDateTime: toDateTimeLocal(getMarkerStartDateTime(marker)),
-  endDateTime: toDateTimeLocal(getMarkerEndDateTime(marker)),
+  selectedUrl: getMarkerImageUrl(marker.selectedMarkerImage),
+  selectedWidth: String(getMarkerImageSize(marker.selectedMarkerImage?.width, 40)),
+  selectedHeight: String(getMarkerImageSize(marker.selectedMarkerImage?.height, 40)),
+  unselectedUrl: getMarkerImageUrl(marker.unselectedMarkerImage),
+  unselectedWidth: String(getMarkerImageSize(marker.unselectedMarkerImage?.width, 32)),
+  unselectedHeight: String(getMarkerImageSize(marker.unselectedMarkerImage?.height, 32)),
+  startDateTime: toDateTimeLocal(marker.period?.startDateTime),
+  endDateTime: toDateTimeLocal(marker.period?.endDateTime),
 });
 
 const StoreMarkerHistory: React.FC<StoreMarkerHistoryProps> = ({storeId, isActive = true}) => {
-  const [markers, setMarkers] = useState<StoreMarker[]>([]);
-  const [cursor, setCursor] = useState<string | null>(null);
-  const [hasMore, setHasMore] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deletingMarkerId, setDeletingMarkerId] = useState<string | null>(null);
   const [editingMarker, setEditingMarker] = useState<StoreMarker | null>(null);
   const [showFormModal, setShowFormModal] = useState(false);
   const [formData, setFormData] = useState<MarkerFormData>(emptyForm);
   const [uploadingField, setUploadingField] = useState<MarkerImageUrlField | null>(null);
+  // 입력 중인 필터 값. 조회 버튼을 눌러야 appliedFilter에 반영된다.
   const [filterStartDateTime, setFilterStartDateTime] = useState('');
   const [filterEndDateTime, setFilterEndDateTime] = useState('');
+  const [appliedFilter, setAppliedFilter] = useState({startDateTime: '', endDateTime: ''});
 
   const hasFilter = useMemo(
     () => Boolean(filterStartDateTime || filterEndDateTime),
     [filterStartDateTime, filterEndDateTime]
   );
 
-  const fetchMarkers = useCallback(async (
-    reset = false,
-    filterOverride?: {filterStartDateTime: string; filterEndDateTime: string}
-  ) => {
-    if (!storeId || isLoading) return;
+  const fetchMarkers = useCallback(
+    (cursor: string | null) => storeMarkerApi.getStoreMarkers(storeId, cursor, 20, {
+      filterStartDateTime: toApiDateTime(appliedFilter.startDateTime),
+      filterEndDateTime: toApiDateTime(appliedFilter.endDateTime),
+    }),
+    [storeId, appliedFilter]
+  );
 
-    const nextFilterStartDateTime = filterOverride?.filterStartDateTime ?? filterStartDateTime;
-    const nextFilterEndDateTime = filterOverride?.filterEndDateTime ?? filterEndDateTime;
-
-    setIsLoading(true);
-    try {
-      const response = await storeMarkerApi.getStoreMarkers(
-        storeId,
-        reset ? null : cursor,
-        20,
-        {
-          filterStartDateTime: toApiDateTime(nextFilterStartDateTime),
-          filterEndDateTime: toApiDateTime(nextFilterEndDateTime),
-        }
-      );
-
-      const {contents = [], cursor: newCursor} = response.data || {};
-      setMarkers(prev => reset ? contents : [...prev, ...contents]);
-      setCursor(newCursor?.nextCursor || null);
-      setHasMore(newCursor?.hasMore || false);
-    } catch (error: any) {
-      console.error('가게 마커 조회 실패:', error);
-      toast.error(error?.message || '가게 마커 목록을 불러오지 못했습니다.');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [storeId, cursor, filterStartDateTime, filterEndDateTime, isLoading]);
-
-  useEffect(() => {
-    if (storeId && isActive) {
-      fetchMarkers(true);
-    }
-    // 필터 변경은 조회 버튼으로만 반영한다.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [storeId, isActive]);
+  const {
+    items: markers,
+    isLoading,
+    isLoadingMore,
+    hasMore,
+    error,
+    refresh,
+    loadMore
+  } = useCursorPagination<StoreMarker>({
+    fetcher: fetchMarkers,
+    enabled: Boolean(storeId) && isActive,
+    deps: [storeId, appliedFilter],
+    errorMessage: '가게 마커 목록을 불러오지 못했습니다.'
+  });
 
   const handleChange = (field: keyof MarkerFormData, value: string) => {
     setFormData(prev => ({...prev, [field]: value}));
@@ -186,10 +133,8 @@ const StoreMarkerHistory: React.FC<StoreMarkerHistoryProps> = ({storeId, isActiv
         handleChange(field, response.data);
         toast.success('이미지가 업로드되었습니다.');
       } else {
-        toast.error('이미지 업로드에 실패했습니다.');
+        toast.error(response?.message || '이미지 업로드에 실패했습니다.');
       }
-    } catch (error) {
-      toast.error('이미지 업로드 중 오류가 발생했습니다.');
     } finally {
       setUploadingField(null);
     }
@@ -269,21 +214,20 @@ const StoreMarkerHistory: React.FC<StoreMarkerHistoryProps> = ({storeId, isActiv
 
     setIsSubmitting(true);
     try {
-      if (editingMarker) {
-        await storeMarkerApi.updateStoreMarker(storeId, String(editingMarker.markerId), request);
-        toast.success('가게 마커가 수정되었습니다.');
-      } else {
-        await storeMarkerApi.createStoreMarker(storeId, request);
-        toast.success('가게 마커가 생성되었습니다.');
+      const response = editingMarker
+        ? await storeMarkerApi.updateStoreMarker(storeId, String(editingMarker.markerId), request)
+        : await storeMarkerApi.createStoreMarker(storeId, request);
+
+      if (!response?.ok) {
+        toast.error(response?.message || '가게 마커 저장에 실패했습니다.');
+        return;
       }
 
+      toast.success(editingMarker ? '가게 마커가 수정되었습니다.' : '가게 마커가 생성되었습니다.');
       setShowFormModal(false);
       setEditingMarker(null);
       setFormData(emptyForm);
-      fetchMarkers(true);
-    } catch (error: any) {
-      console.error('가게 마커 저장 실패:', error);
-      toast.error(error?.message || '가게 마커 저장에 실패했습니다.');
+      refresh();
     } finally {
       setIsSubmitting(false);
     }
@@ -295,12 +239,13 @@ const StoreMarkerHistory: React.FC<StoreMarkerHistoryProps> = ({storeId, isActiv
 
     setDeletingMarkerId(String(marker.markerId));
     try {
-      await storeMarkerApi.deleteStoreMarker(storeId, String(marker.markerId));
+      const response = await storeMarkerApi.deleteStoreMarker(storeId, String(marker.markerId));
+      if (!response?.ok) {
+        toast.error(response?.message || '가게 마커 삭제에 실패했습니다.');
+        return;
+      }
       toast.success('가게 마커가 삭제되었습니다.');
-      fetchMarkers(true);
-    } catch (error: any) {
-      console.error('가게 마커 삭제 실패:', error);
-      toast.error(error?.message || '가게 마커 삭제에 실패했습니다.');
+      refresh();
     } finally {
       setDeletingMarkerId(null);
     }
@@ -308,13 +253,13 @@ const StoreMarkerHistory: React.FC<StoreMarkerHistoryProps> = ({storeId, isActiv
 
   const handleFilterSubmit = (event: FormEvent) => {
     event.preventDefault();
-    fetchMarkers(true);
+    setAppliedFilter({startDateTime: filterStartDateTime, endDateTime: filterEndDateTime});
   };
 
   const handleClearFilter = () => {
     setFilterStartDateTime('');
     setFilterEndDateTime('');
-    fetchMarkers(true, {filterStartDateTime: '', filterEndDateTime: ''});
+    setAppliedFilter({startDateTime: '', endDateTime: ''});
   };
 
   if (!isActive) {
@@ -339,7 +284,7 @@ const StoreMarkerHistory: React.FC<StoreMarkerHistoryProps> = ({storeId, isActiv
           </button>
           <button
             className="btn btn-outline-primary btn-sm"
-            onClick={() => fetchMarkers(true)}
+            onClick={refresh}
             disabled={isLoading}
           >
             <i className="bi bi-arrow-clockwise me-1"></i>
@@ -385,6 +330,18 @@ const StoreMarkerHistory: React.FC<StoreMarkerHistoryProps> = ({storeId, isActiv
           </div>
         </div>
       </form>
+
+      {error && (
+        <div className="alert alert-danger d-flex align-items-center justify-content-between gap-3" role="alert">
+          <span>
+            <i className="bi bi-exclamation-circle me-2"></i>
+            {error}
+          </span>
+          <button className="btn btn-sm btn-outline-danger" onClick={refresh} disabled={isLoading}>
+            다시 시도
+          </button>
+        </div>
+      )}
 
       {markers.length === 0 && !isLoading ? (
         <div className="text-center py-5 bg-light rounded-3">
@@ -439,7 +396,7 @@ const StoreMarkerHistory: React.FC<StoreMarkerHistoryProps> = ({storeId, isActiv
                             <i className="bi bi-calendar-event me-1"></i>
                             시작일
                           </div>
-                          <div className="fw-semibold text-dark">{formatDateTime(getMarkerStartDateTime(marker))}</div>
+                          <div className="fw-semibold text-dark">{formatDateTime(marker.period?.startDateTime)}</div>
                         </div>
                       </div>
                       <div className="col-md-6">
@@ -448,7 +405,7 @@ const StoreMarkerHistory: React.FC<StoreMarkerHistoryProps> = ({storeId, isActiv
                             <i className="bi bi-calendar-x me-1"></i>
                             종료일
                           </div>
-                          <div className="fw-semibold text-dark">{formatDateTime(getMarkerEndDateTime(marker))}</div>
+                          <div className="fw-semibold text-dark">{formatDateTime(marker.period?.endDateTime)}</div>
                         </div>
                       </div>
                     </div>
@@ -458,8 +415,8 @@ const StoreMarkerHistory: React.FC<StoreMarkerHistoryProps> = ({storeId, isActiv
                     className="d-flex gap-3 align-items-center justify-content-center px-3 px-md-4 py-3 border-top border-xl-top-0 border-xl-start"
                     style={{background: '#f8fafc', minWidth: '240px'}}
                   >
-                    <MarkerImagePreview title="선택" image={getSelectedMarkerImage(marker)}/>
-                    <MarkerImagePreview title="미선택" image={getUnselectedMarkerImage(marker)}/>
+                    <MarkerImagePreview title="선택" image={marker.selectedMarkerImage}/>
+                    <MarkerImagePreview title="미선택" image={marker.unselectedMarkerImage}/>
                   </div>
 
                   <div className="d-flex flex-row flex-xl-column gap-2 justify-content-center p-3 p-md-4 border-top border-xl-top-0">
@@ -498,10 +455,10 @@ const StoreMarkerHistory: React.FC<StoreMarkerHistoryProps> = ({storeId, isActiv
           {hasMore && (
             <button
               className="btn btn-outline-primary rounded-pill align-self-center px-4"
-              onClick={() => fetchMarkers(false)}
-              disabled={isLoading}
+              onClick={loadMore}
+              disabled={isLoadingMore}
             >
-              더 많은 마커 보기
+              {isLoadingMore ? '불러오는 중...' : '더 많은 마커 보기'}
             </button>
           )}
         </div>
@@ -806,10 +763,10 @@ const MarkerFormImagePreview = ({
   );
 };
 
-const MarkerImagePreview = ({title, image}: {title: string; image?: any}) => {
+const MarkerImagePreview = ({title, image}: {title: string; image?: StoreMarkerImage}) => {
   const imageUrl = getMarkerImageUrl(image);
-  const width = getMarkerImageWidth(image);
-  const height = getMarkerImageHeight(image);
+  const width = getMarkerImageSize(image?.width);
+  const height = getMarkerImageSize(image?.height);
 
   return (
     <div
