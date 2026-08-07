@@ -2,7 +2,7 @@
  * 리뷰 관련 타입 정의
  */
 
-import { Image, SimpleStore, User } from './domain';
+import { Image, SimpleStore, SimpleUser } from './domain';
 
 export type ReviewStatus = 'POSTED' | 'FILTERED' | 'DELETED';
 
@@ -20,7 +20,7 @@ export interface Review {
   status: ReviewStatus;
   images: Image[];
   store?: SimpleStore;
-  writer?: User;
+  writer?: SimpleUser;
   createdAt?: string;
   updatedAt?: string;
 }

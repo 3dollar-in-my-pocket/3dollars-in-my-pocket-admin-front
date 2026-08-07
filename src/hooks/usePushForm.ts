@@ -9,7 +9,7 @@ import {
   parseAccountIds
 } from "../utils/pushUtils";
 import {useNonce} from "./useNonce";
-import {OS_PLATFORM, OsPlatform} from "../types/push";
+import {PUSH_OS_PLATFORM, PushOsPlatform} from "../types/push";
 
 export const usePushForm = () => {
   const location = useLocation();
@@ -47,8 +47,8 @@ export const usePushForm = () => {
     }
   }, [location.state]);
 
-  const [targetOsPlatforms, setTargetOsPlatforms] = useState<Set<OsPlatform>>(
-    new Set([OS_PLATFORM.AOS, OS_PLATFORM.IOS])
+  const [targetOsPlatforms, setTargetOsPlatforms] = useState<Set<PushOsPlatform>>(
+    new Set([PUSH_OS_PLATFORM.AOS, PUSH_OS_PLATFORM.IOS])
   );
 
   // 검색 상태
@@ -195,7 +195,7 @@ export const usePushForm = () => {
   };
 
   // OS 플랫폼 토글
-  const toggleOsPlatform = (platform: OsPlatform) => {
+  const toggleOsPlatform = (platform: PushOsPlatform) => {
     setTargetOsPlatforms(prev => {
       const newSet = new Set(prev);
       if (newSet.has(platform)) {
@@ -247,7 +247,7 @@ export const usePushForm = () => {
       searchLoading: false
     });
     setSelectedUsers([]);
-    setTargetOsPlatforms(new Set([OS_PLATFORM.AOS, OS_PLATFORM.IOS]));
+    setTargetOsPlatforms(new Set([PUSH_OS_PLATFORM.AOS, PUSH_OS_PLATFORM.IOS]));
   };
 
   // 실제 푸시 발송

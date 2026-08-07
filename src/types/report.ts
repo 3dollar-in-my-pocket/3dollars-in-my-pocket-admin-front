@@ -2,7 +2,7 @@
  * 신고 관련 타입 정의
  */
 
-import { SimpleStore, User } from './domain';
+import { SimpleStore, SimpleUser } from './domain';
 
 export type ReportReasonCode = 'NOSTORE' | 'WRONGNOPOSITION' | 'OVERLAPSTORE' | 'WRONG_CONTENT';
 
@@ -23,7 +23,7 @@ export interface StoreReport {
   reportId: number;
   storeId: number;
   store?: SimpleStore;
-  reporter?: User;
+  reporter?: SimpleUser;
   reason: StoreReportReason;
   createdAt?: string;
   updatedAt?: string;

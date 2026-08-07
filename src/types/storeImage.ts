@@ -2,7 +2,7 @@
  * 가게 이미지 타입 정의
  */
 
-import { SimpleStore, User } from './domain';
+import { SimpleStore, SimpleUser } from './domain';
 
 export type StoreImageStatus = 'ACTIVE' | 'INACTIVE';
 
@@ -18,7 +18,7 @@ export interface StoreImage {
   url: string;
   status: StoreImageStatus;
   store?: SimpleStore;
-  writer?: User;
+  writer?: SimpleUser;
   createdAt?: string;
   updatedAt?: string;
 }

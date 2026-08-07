@@ -1,3 +1,8 @@
+import { Medal } from './medal';
+
+// 유저 응답에 포함되는 메달은 메달 관리와 동일한 모델을 사용합니다.
+export type { Medal };
+
 // Social login types
 export const SOCIAL_TYPES = {
   KAKAO: 'KAKAO',
@@ -57,19 +62,6 @@ export interface User {
 export interface UserSettings {
   enableActivitiesPush: boolean;
   marketingConsent: MarketingConsent;
-}
-
-export interface Medal {
-  id: number;
-  medalId?: number;
-  name: string;
-  iconUrl?: string;
-  disableIconUrl?: string;
-  introduction?: string;
-  acquisition?: {
-    description: string;
-    createdAt: string;
-  } | null;
 }
 
 export interface UserSearchRequest {

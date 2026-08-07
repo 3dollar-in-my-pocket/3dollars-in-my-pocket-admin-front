@@ -1,5 +1,5 @@
 import { ApiResponse } from '../types/api';
-import { LoginRequest, LoginResponse, SocialType } from '../types/auth';
+import { LoginRequest, LoginResponse, AdminSocialType } from '../types/auth';
 import { apiPost } from './apiHelpers';
 
 export default {
@@ -14,7 +14,7 @@ export default {
     socialType
   }: {
     accessToken: string;
-    socialType: SocialType;
+    socialType: AdminSocialType;
   }): Promise<ApiResponse<LoginResponse>> => {
     const requestData: LoginRequest = {
       token: accessToken,

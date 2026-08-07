@@ -5,6 +5,10 @@
  * 특정 도메인에서만 쓰이는 필드는 이곳이 아니라 해당 도메인 타입 파일에 둡니다.
  */
 
+import { ActivitiesStatus, StoreLabel, StoreStatus, StoreType } from './store';
+import { SocialType, UserRole } from './user';
+import { WriterType } from './common';
+
 /** AddressResponse */
 export interface Address {
   fullAddress?: string;
@@ -41,11 +45,12 @@ export interface StoreFoodCategory {
   displayOrder?: number;
 }
 
-export type SocialType = 'KAKAO' | 'APPLE' | 'GOOGLE' | 'NAVER';
-export type UserRole = 'MEMBER' | 'MANAGER';
-
-/** UserResponse — 작성자/방문자/신고자 등 사용자 요약 정보 */
-export interface User {
+/**
+ * UserResponse — 작성자/방문자/신고자 등 응답에 포함되는 사용자 요약 정보
+ *
+ * 유저 검색 응답 모델은 types/user.ts의 User를 사용하세요. (별개 스키마)
+ */
+export interface SimpleUser {
   userId?: number;
   name: string;
   socialType?: SocialType;
@@ -54,8 +59,6 @@ export interface User {
   updatedAt?: string;
 }
 
-export type WriterType = 'STORE' | 'USER';
-
 /** WriterResponse — 리뷰/게시물 작성 주체 */
 export interface Writer {
   writerId: string;
@@ -63,20 +66,16 @@ export interface Writer {
   name: string;
 }
 
-export type StoreTypeCode = 'USER_STORE' | 'BOSS_STORE';
-export type StoreStatus = 'ACTIVE' | 'DELETED' | 'AUTO_DELETED';
-export type ActivitiesStatus = 'RECENT_ACTIVITY' | 'NO_RECENT_ACTIVITY';
-
 /** StoreSimpleResponse — 목록/이력 응답에 포함되는 가게 요약 정보 */
 export interface SimpleStore {
   storeId: number;
-  storeType: StoreTypeCode;
+  storeType: StoreType;
   name: string;
   rating: number;
   address: Address;
   categories: StoreFoodCategory[];
   status: StoreStatus;
-  labels: string[];
+  labels: StoreLabel[];
   activitiesStatus: ActivitiesStatus;
   location?: Location;
   createdAt?: string;

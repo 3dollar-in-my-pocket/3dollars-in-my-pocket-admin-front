@@ -2,7 +2,7 @@
  * 방문 관련 타입 정의
  */
 
-import { SimpleStore, User } from './domain';
+import { SimpleStore, SimpleUser } from './domain';
 
 /** 방문 유형 코드 (StoreVisitTypeResponse.type) */
 export type VisitTypeCode = 'EXISTS' | 'NOT_EXISTS';
@@ -26,7 +26,7 @@ export interface Visit {
   /** 방문 일시 */
   visitDateTime: string;
   store?: SimpleStore;
-  visitor?: User;
+  visitor?: SimpleUser;
   createdAt?: string;
   updatedAt?: string;
 }

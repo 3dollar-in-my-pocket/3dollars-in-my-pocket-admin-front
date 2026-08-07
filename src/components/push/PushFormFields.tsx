@@ -1,6 +1,6 @@
 import {useEffect, useState} from 'react';
 import {Form, Nav, Tab, Button, Badge, InputGroup} from 'react-bootstrap';
-import {OS_PLATFORM, getOsPlatformDisplayName} from '../../types/push';
+import {PUSH_OS_PLATFORM, getOsPlatformDisplayName} from '../../types/push';
 import UserSearch from './UserSearch';
 import applicationApi, {AppScheme} from '../../api/applicationApi';
 
@@ -423,7 +423,7 @@ const PushFormFields = ({
           <i className="bi bi-phone me-2"></i>대상 OS
         </Form.Label>
         <div className="d-flex gap-3">
-          {Object.values(OS_PLATFORM).map((platform) => (
+          {Object.values(PUSH_OS_PLATFORM).map((platform) => (
             <Form.Check
               key={platform}
               type="checkbox"
