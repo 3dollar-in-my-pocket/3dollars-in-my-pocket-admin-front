@@ -1,4 +1,7 @@
 import {useEffect, useState} from 'react';
+import type {SimpleStore} from '../../types/store';
+import type {User} from '../../types/user';
+import type {SearchCustomInputsArgs} from '../../components/common/SearchForm';
 import UserDetailModal from './UserDetailModal';
 import StoreDetailModal from '../store/StoreDetailModal';
 import {SEARCH_TYPES} from '../../types/user';
@@ -48,7 +51,7 @@ const UserSearch = () => {
                                 additionalParams,
                                 handleAdditionalParamChange,
                                 onKeyPress
-                              }) => {
+                              }: SearchCustomInputsArgs) => {
     if (searchType === SEARCH_TYPES.NAME) {
       return (
         <input
@@ -82,12 +85,12 @@ const UserSearch = () => {
     }
   };
 
-  const renderUserCard = (user) => (
+  const renderUserCard = (user: User) => (
     <UserCard key={user.userId} user={user} onClick={handleUserClick}/>
   );
 
   // 가게 클릭 핸들러
-  const handleStoreClick = (store) => {
+  const handleStoreClick = (store: SimpleStore) => {
     if (store && store.storeId) {
       setSelectedStore(store);
     }

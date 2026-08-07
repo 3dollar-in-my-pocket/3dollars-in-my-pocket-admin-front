@@ -3,6 +3,8 @@ import {ActivityAuthor} from '../../types/domain';
 import {formatDateTimeShortKo as formatDateTime} from '../../utils/dateUtils';
 import {getWriterTypeBgClass, getWriterTypeDisplayName, getWriterTypeIcon, getWriterTypeTextClass} from '../../utils/display/writerDisplay';
 
+type PollStatus = 'upcoming' | 'active' | 'ended';
+
 interface PollCardProps {
   poll: Poll;
   onClick?: ((poll: Poll) => void) | null;
@@ -25,7 +27,7 @@ const PollCard = ({poll, onClick, onAuthorClick, onDelete}: PollCardProps) => {
     }
   };
 
-  const getStatusConfig = (status) => {
+  const getStatusConfig = (status: PollStatus) => {
     switch (status) {
       case 'upcoming':
         return {

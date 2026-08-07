@@ -42,7 +42,7 @@ const Admin = () => {
     fetchAdmins(1);
   }, []);
 
-  const handlePageChange = (page) => {
+  const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
       fetchAdmins(page);
     }

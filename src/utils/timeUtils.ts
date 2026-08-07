@@ -1,3 +1,10 @@
+export interface AdStatus {
+  status: 'scheduled' | 'active' | 'ended';
+  label: string;
+  timeText: string;
+  badgeClass: string;
+}
+
 /**
  * 두 날짜 사이의 차이를 계산하여 사용자 친화적인 형태로 반환합니다.
  *
@@ -6,7 +13,11 @@
  * @param {string} eventType - 이벤트 타입 ('start' 또는 'end')
  * @returns {string} 포맷된 시간 차이 문자열
  */
-export const getTimeUntil = (targetDate, currentDate = new Date(), eventType = 'start') => {
+export const getTimeUntil = (
+  targetDate: string,
+  currentDate: Date = new Date(),
+  eventType: 'start' | 'end' = 'start'
+): string => {
   const target = new Date(targetDate);
   const current = currentDate;
   const diffMs = target.getTime() - current.getTime();
@@ -72,7 +83,11 @@ export const getTimeUntil = (targetDate, currentDate = new Date(), eventType = '
  * @param {Date} currentDate - 현재 날짜 (기본값: 현재 시간)
  * @returns {object} 광고 상태 정보
  */
-export const getAdStatus = (startDateTime, endDateTime, currentDate = new Date()) => {
+export const getAdStatus = (
+  startDateTime: string,
+  endDateTime: string,
+  currentDate: Date = new Date()
+): AdStatus => {
   const start = new Date(startDateTime);
   const end = new Date(endDateTime);
   const current = currentDate;

@@ -40,7 +40,7 @@ const CacheTools = () => {
     }
   };
 
-  const handleSelectedCache = (e) => {
+  const handleSelectedCache = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedCacheType(e.target.value);
     setErrorMessage('');
   };

@@ -1,6 +1,6 @@
 import {useState, useEffect} from "react";
 import {useLocation} from "react-router-dom";
-import pushApi from "../api/pushApi";
+import pushApi, {PushTargetUser} from "../api/pushApi";
 import uploadApi from "../api/uploadApi";
 import {
   validatePushData,
@@ -10,6 +10,40 @@ import {
 } from "../utils/pushUtils";
 import {useNonce} from "./useNonce";
 import {PUSH_OS_PLATFORM, PushOsPlatform} from "../types/device";
+
+/** 푸시 발송 폼 상태 */
+interface PushFormState {
+  accountIdsInput: string;
+  title: string;
+  body: string;
+  path: string;
+  pushType: string;
+  imageUrl: string;
+  /** USER 또는 BOSS */
+  targetType: string;
+}
+
+/** 선택된 발송 대상 (닉네임 표시용) */
+interface SelectedUser {
+  id: string;
+  nickname: string;
+}
+
+/** 결과 알림 메시지 (react-bootstrap Alert variant) */
+type ResultType = "success" | "danger" | "warning" | "info";
+
+interface PushUiState {
+  result: { type: ResultType; message: string } | null;
+  loading: boolean;
+  showConfirm: boolean;
+  uploading: boolean;
+}
+
+interface PushSearchState {
+  nicknameSearch: string;
+  searchResults: PushTargetUser[];
+  searchLoading: boolean;
+}
 
 export const usePushForm = () => {
   const location = useLocation();
@@ -26,7 +60,7 @@ export const usePushForm = () => {
   }, [issueNonce, clearNonce]);
 
   // 폼 상태
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<PushFormState>({
     accountIdsInput: "",
     title: "",
     body: "",
@@ -52,17 +86,17 @@ export const usePushForm = () => {
   );
 
   // 검색 상태
-  const [searchState, setSearchState] = useState({
+  const [searchState, setSearchState] = useState<PushSearchState>({
     nicknameSearch: "",
     searchResults: [],
     searchLoading: false
   });
 
   // 선택된 사용자 목록 (닉네임 포함)
-  const [selectedUsers, setSelectedUsers] = useState([]);
+  const [selectedUsers, setSelectedUsers] = useState<SelectedUser[]>([]);
 
   // UI 상태
-  const [uiState, setUiState] = useState({
+  const [uiState, setUiState] = useState<PushUiState>({
     result: null,
     loading: false,
     showConfirm: false,
@@ -70,7 +104,7 @@ export const usePushForm = () => {
   });
 
   // 폼 데이터 업데이트
-  const updateFormData = (field, value) => {
+  const updateFormData = <K extends keyof PushFormState>(field: K, value: PushFormState[K]) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -78,7 +112,7 @@ export const usePushForm = () => {
   };
 
   // 결과 메시지 설정
-  const setResult = (type, message) => {
+  const setResult = (type: ResultType, message: string) => {
     setUiState(prev => ({
       ...prev,
       result: {type, message}
@@ -128,7 +162,7 @@ export const usePushForm = () => {
   };
 
   // 검색어 업데이트
-  const updateNicknameSearch = (value) => {
+  const updateNicknameSearch = (value: string) => {
     setSearchState(prev => ({
       ...prev,
       nicknameSearch: value
@@ -136,7 +170,7 @@ export const usePushForm = () => {
   };
 
   // 대상에 사용자 추가
-  const handleAddUser = (userId, nickname) => {
+  const handleAddUser = (userId: string | number, nickname?: string) => {
     // 이미 선택된 사용자인지 확인
     if (isUserSelected(userId)) {
       return; // 중복 선택 방지
@@ -152,7 +186,7 @@ export const usePushForm = () => {
   };
 
   // 대상에서 사용자 제거
-  const handleRemoveUser = (userId) => {
+  const handleRemoveUser = (userId: string | number) => {
     const newIds = removeUserFromTarget(formData.accountIdsInput, userId.toString());
     updateFormData("accountIdsInput", newIds);
 
@@ -161,13 +195,13 @@ export const usePushForm = () => {
   };
 
   // 사용자가 선택되어 있는지 확인
-  const isUserSelected = (userId) => {
+  const isUserSelected = (userId: string | number): boolean => {
     const currentIds = parseAccountIds(formData.accountIdsInput);
     return currentIds.includes(userId.toString());
   };
 
   // 이미지 업로드
-  const uploadImage = async (file) => {
+  const uploadImage = async (file: File | null) => {
     if (!file) return;
 
     setUiState(prev => ({...prev, uploading: true}));

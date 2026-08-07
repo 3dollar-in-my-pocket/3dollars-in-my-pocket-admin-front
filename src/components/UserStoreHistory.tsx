@@ -66,7 +66,7 @@ const UserStoreHistory = ({userId, isActive, onStoreClick}: UserStoreHistoryProp
 
 
   const getDayOfWeekInKorean = (dayOfWeek: string): string => {
-    const dayMap = {
+    const dayMap: Record<string, string> = {
       'MONDAY': '월요일',
       'TUESDAY': '화요일',
       'WEDNESDAY': '수요일',
@@ -85,7 +85,7 @@ const UserStoreHistory = ({userId, isActive, onStoreClick}: UserStoreHistoryProp
   };
 
   const getPaymentMethodInKorean = (method: string): string => {
-    const methodMap = {
+    const methodMap: Record<string, string> = {
       'CASH': '현금',
       'ACCOUNT_TRANSFER': '계좌이체',
       'CARD': '카드'

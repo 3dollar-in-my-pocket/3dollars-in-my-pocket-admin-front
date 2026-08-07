@@ -37,7 +37,7 @@ const BasicInfoStep = ({
   };
 
   // 현재 시간으로 설정하는 핸들러
-  const setToCurrentTime = (fieldName) => {
+  const setToCurrentTime = (fieldName: string) => {
     onChange(fieldName, getCurrentDateTime());
   };
 

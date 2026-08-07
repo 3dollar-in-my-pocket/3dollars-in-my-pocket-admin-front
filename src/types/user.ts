@@ -9,7 +9,8 @@ export const SOCIAL_TYPES = {
   GOOGLE: 'GOOGLE',
   APPLE: 'APPLE',
   NAVER: 'NAVER',
-  ANONYMOUS: null
+  /** 익명 가입은 소셜 타입이 비어 옵니다. */
+  ANONYMOUS: null as null
 } as const;
 
 export type SocialType = typeof SOCIAL_TYPES[keyof typeof SOCIAL_TYPES];

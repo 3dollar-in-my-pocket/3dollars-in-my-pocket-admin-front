@@ -7,6 +7,7 @@ import UserDetailModal from '../user/UserDetailModal';
 
 import {formatDateTimeShortKo as formatDateTime} from '../../utils/dateUtils';
 import {Poll, PollCategory, PollOption} from '../../types/poll';
+import {Writer} from '../../types/domain';
 
 const PollManagement = () => {
   const [categories, setCategories] = useState<PollCategory[]>([]);
@@ -126,11 +127,11 @@ const PollManagement = () => {
   }, [handleScroll]);
 
   // 투표 상세보기 (일단 로그만 출력)
-  const handlePollClick = (poll) => {
+  const handlePollClick = (poll: Poll) => {
   };
 
   // 작성자 클릭 핸들러
-  const handleAuthorClick = (writer) => {
+  const handleAuthorClick = (writer: Writer | null | undefined) => {
     if (writer && writer.writerId) {
       // 유저 검색에서 사용하는 user 객체 형태로 변환
       const userForModal = {
@@ -147,7 +148,7 @@ const PollManagement = () => {
   };
 
   // 투표 삭제 핸들러
-  const handleDeletePoll = async (poll) => {
+  const handleDeletePoll = async (poll: Poll) => {
     const confirmed = window.confirm(
       `정말로 "${poll.content.title}" 투표를 삭제하시겠습니까?\n\n` +
       `투표 기간: ${formatDateTime(poll.period.startDateTime)} ~ ${formatDateTime(poll.period.endDateTime)}\n` +

@@ -90,7 +90,7 @@ const RegistrationModal = ({show, onHide, registration}: RegistrationModalProps)
     await handleApprove();
   };
 
-  const formatDate = (dateStr) => new Date(dateStr).toLocaleString("ko-KR");
+  const formatDate = (dateStr: string) => new Date(dateStr).toLocaleString("ko-KR");
 
   return (
     <>

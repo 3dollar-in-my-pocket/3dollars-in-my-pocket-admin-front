@@ -1,15 +1,8 @@
 import {ApiResponse, PaginatedResponse} from './api';
-
-export interface UserRankingUser {
-  userId: number;
-  name: string;
-  socialType: string;
-  createdAt: string;
-  updatedAt: string;
-}
+import {SimpleUser} from './user';
 
 export interface UserRankingItem {
-  user: UserRankingUser;
+  user: SimpleUser;
   score: number;
 }
 

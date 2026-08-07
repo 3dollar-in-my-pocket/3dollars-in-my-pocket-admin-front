@@ -69,7 +69,7 @@ export const getActivitiesStatusBadgeClass = (activitiesStatus: ActivitiesStatus
 
 export const getCategoryIcon = (categoryId: string): string => {
   // 카테고리별 아이콘 매핑
-  const categoryIconMap = {
+  const categoryIconMap: Record<string, string> = {
     'JAPANESE_CUISINE': 'bi-emoji-smile',
     'WESTERN_CUISINE': 'bi-cup-hot',
     'GUNGOGUMA': 'bi-fire',

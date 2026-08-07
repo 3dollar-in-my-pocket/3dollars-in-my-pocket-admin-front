@@ -35,8 +35,8 @@ const AdvertisementModal = ({
 
   if (!ad) return null;
 
-  const handleImageLoad = (e) => {
-    const {naturalWidth, naturalHeight} = e.target;
+  const handleImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const {naturalWidth, naturalHeight} = e.currentTarget;
     setImageSize({width: naturalWidth, height: naturalHeight});
   };
 

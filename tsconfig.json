@@ -29,7 +29,7 @@
         "*"
       ]
     },
-    "noImplicitAny": false
+    "noImplicitAny": true
   },
   "include": [
     "src"

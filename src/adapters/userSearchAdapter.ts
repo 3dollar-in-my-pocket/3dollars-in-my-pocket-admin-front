@@ -3,7 +3,8 @@ import {SEARCH_TYPES, createUserSearchRequest, SearchType, User} from '../types/
 import {formatUserIds, validateUserSearch} from '../utils/validation/userValidation';
 
 interface UserSearchParams {
-  searchType: SearchType;
+  /** useSearch는 string으로 넘기므로 여기서 좁힙니다. */
+  searchType: string;
   searchQuery: string;
   additionalParams: any;
   cursor: string | null;
@@ -27,7 +28,7 @@ export const userSearchAdapter = {
                            cursor
                          }: UserSearchParams): Promise<UserSearchResult> => {
     const searchRequest = createUserSearchRequest({
-      type: searchType,
+      type: searchType as SearchType,
       query: searchType === SEARCH_TYPES.NAME ? searchQuery : undefined,
       userIds: searchType === SEARCH_TYPES.USER_ID ? formatUserIds(additionalParams.userIds || '') : undefined,
       cursor,

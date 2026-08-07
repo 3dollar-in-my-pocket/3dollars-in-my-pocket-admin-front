@@ -5,7 +5,8 @@ import PolicyModal from "./PolicyModal";
 import PolicyRegisterModal from "./PolicyRegisterModal";
 import {toast} from "react-toastify";
 import Loading from "../../components/common/Loading";
-import {Policy as PolicyItem} from "../../types/policy";
+import {Policy as PolicyItem, PolicyId} from "../../types/policy";
+import {EnumOption} from "../../types/advertisement";
 
 const Policy = () => {
   const [policyList, setPolicyList] = useState<PolicyItem[]>([]);
@@ -17,8 +18,8 @@ const Policy = () => {
   const [hasPrevious, setHasPrevious] = useState(false);
   const [previousCursors, setPreviousCursors] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("");
-  const [categories, setCategories] = useState([]);
-  const [policies, setPolicies] = useState([]);
+  const [categories, setCategories] = useState<EnumOption[]>([]);
+  const [policies, setPolicies] = useState<EnumOption[]>([]);
 
   const pageSize = 20;
 
@@ -97,8 +98,8 @@ const Policy = () => {
     }
   };
 
-  const getDescriptionFromKey = (key, type) => {
-    let targetArray = [];
+  const getDescriptionFromKey = (key: string, type: "category" | "policy") => {
+    let targetArray: EnumOption[] = [];
     if (type === "category") {
       targetArray = categories;
     } else if (type === "policy") {
@@ -108,7 +109,7 @@ const Policy = () => {
     return targetArray.find((item) => item.key === key)?.description || key;
   };
 
-  const handleDeletePolicy = async (policyId) => {
+  const handleDeletePolicy = async (policyId: PolicyId) => {
     if (!window.confirm("정말로 이 정책을 삭제하시겠습니까?")) {
       return;
     }

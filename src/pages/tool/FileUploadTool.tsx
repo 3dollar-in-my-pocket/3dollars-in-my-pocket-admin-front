@@ -14,7 +14,7 @@ const FileUpload = () => {
   const [selectedImageType, setSelectedImageType] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleImageTypeChange = (e) => setSelectedImageType(e.target.value);
+  const handleImageTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => setSelectedImageType(e.target.value);
 
   const handleFileUpload = () => fileInputRef.current.click();
 

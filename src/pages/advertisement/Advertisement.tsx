@@ -1,5 +1,9 @@
 import {useEffect, useState} from "react";
-import type {Advertisement as AdvertisementItem} from '../../types/advertisement';
+import type {
+  Advertisement as AdvertisementItem,
+  AdvertisementPositionType,
+  EnumOption
+} from '../../types/advertisement';
 import advertisementApi from "../../api/advertisementApi";
 import enumApi from "../../api/enumApi";
 import AdvertisementModal from "./AdvertisementModal";
@@ -15,7 +19,7 @@ const Advertisement = () => {
     const [advertisementList, setAdvertisementList] = useState<AdvertisementItem[]>([]);
     const [selectedPosition, setSelectedPosition] = useState(null);
     const [selectedPlatform, setSelectedPlatform] = useState(null);
-    const [positions, setPositions] = useState([]);
+    const [positions, setPositions] = useState<EnumOption[]>([]);
     const [selectedAd, setSelectedAd] = useState(null);
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
@@ -28,7 +32,7 @@ const Advertisement = () => {
       {key: "IOS", description: "iOS"},
     ];
 
-    const formatDate = (date) => {
+    const formatDate = (date: Date) => {
       return date.toISOString().split("T")[0];
     };
 
@@ -73,7 +77,7 @@ const Advertisement = () => {
       });
     };
 
-    const getDescriptionFromKey = (key, type) => {
+    const getDescriptionFromKey = (key: string, type: "position" | "platform") => {
       if (type === "position") {
         return positions.find((p) => p.key === key)?.description || key;
       } else if (type === "platform") {
@@ -94,7 +98,7 @@ const Advertisement = () => {
     };
 
 // 구좌별 미리보기 스케일 - 모든 구좌 동일하게 적용
-    const getPreviewScale = (positionType) => {
+    const getPreviewScale = (positionType: AdvertisementPositionType) => {
       return 1; // imageWidth, imageHeight 비율 기반으로 이미 계산되므로 스케일 1로 통일
     };
 

@@ -1,7 +1,21 @@
 import {apiPost} from './apiHelpers';
 import userApi from './userApi';
-import {SEARCH_TYPES} from '../types/user';
+import {SEARCH_TYPES, User} from '../types/user';
 import {PushRequest} from '../types/push';
+
+/** 닉네임 검색 결과에서 푸시 발송 대상으로 사용하는 사용자 정보 */
+export interface PushTargetUser {
+  id: User['userId'];
+  nickname: User['nickname'];
+  socialType: User['socialType'];
+  createdAt: User['createdAt'];
+}
+
+interface SearchUserResult {
+  ok: boolean;
+  error?: string;
+  data: PushTargetUser[];
+}
 
 const pushApi = {
   /**
@@ -31,7 +45,7 @@ const pushApi = {
   /**
    * 사용자 닉네임 검색 (userApi의 searchUsers 활용)
    */
-  searchUserByNickname: async (nickname: string) => {
+  searchUserByNickname: async (nickname: string): Promise<SearchUserResult> => {
     try {
       const searchRequest = {
         type: SEARCH_TYPES.NAME,
@@ -43,7 +57,7 @@ const pushApi = {
 
       if (response.ok) {
         // userApi 응답을 푸시 발송에 맞는 형태로 변환
-        const users = response.data.users.map((user: any) => ({
+        const users: PushTargetUser[] = response.data.users.map((user: User) => ({
           id: user.userId,
           nickname: user.nickname,
           socialType: user.socialType,

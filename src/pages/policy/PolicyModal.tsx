@@ -44,7 +44,7 @@ const PolicyModal = ({show, onHide, policy, categories, policies, onRefresh, onD
     }
   }, [policy]);
 
-  const handleChange = (field, value) => {
+  const handleChange = <K extends keyof PolicyFormData>(field: K, value: PolicyFormData[K]) => {
     setFormData(prev => ({...prev, [field]: value}));
   };
 
@@ -88,7 +88,7 @@ const PolicyModal = ({show, onHide, policy, categories, policies, onRefresh, onD
 
   if (!policy) return null;
 
-  const getDescriptionFromKey = (key, type) => {
+  const getDescriptionFromKey = (key: string, type: "category" | "policy") => {
     if (type === "category") {
       return categories.find((cat) => cat.key === key)?.description || key;
     } else if (type === "policy") {

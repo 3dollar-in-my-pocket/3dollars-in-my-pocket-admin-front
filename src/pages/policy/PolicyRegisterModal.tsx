@@ -71,7 +71,7 @@ const PolicyRegisterModal = ({show, onHide, categories, policies, onRefresh}: Po
     }
   };
 
-  const handleChange = (field, value) => {
+  const handleChange = <K extends keyof PolicyRegisterFormData>(field: K, value: PolicyRegisterFormData[K]) => {
     setFormData(prev => ({...prev, [field]: value}));
   };
 

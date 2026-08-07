@@ -5,7 +5,13 @@ import uploadApi from "../../../api/uploadApi";
 import AdPreview from "../../../components/advertisement/AdPreview";
 import {isFieldAvailable} from "../../../constants/advertisementSpecs";
 import DeepLinkSelector from "../../../components/common/DeepLinkSelector";
-import {AdvertisementForm} from "../../../types/advertisement";
+import {
+  AdvertisementContentForm,
+  AdvertisementForm,
+  AdvertisementImageForm,
+  AdvertisementLinkForm,
+  AdvertisementLinkType
+} from "../../../types/advertisement";
 
 interface ContentInfoStepProps {
   formData: AdvertisementForm;
@@ -17,7 +23,10 @@ const ContentInfoStep = ({formData, onChange}: ContentInfoStepProps) => {
   const content = formData.content;
   const [isUploading, setIsUploading] = useState(false);
 
-  const handleContentChange = (field, value) => {
+  const handleContentChange = <K extends keyof AdvertisementContentForm>(
+    field: K,
+    value: AdvertisementContentForm[K]
+  ) => {
     onChange((prev) => ({
       ...prev,
       content: {
@@ -27,7 +36,10 @@ const ContentInfoStep = ({formData, onChange}: ContentInfoStepProps) => {
     }));
   };
 
-  const handleImageChange = (field, value) => {
+  const handleImageChange = <K extends keyof AdvertisementImageForm>(
+    field: K,
+    value: AdvertisementImageForm[K]
+  ) => {
     onChange((prev) => ({
       ...prev,
       content: {
@@ -40,7 +52,10 @@ const ContentInfoStep = ({formData, onChange}: ContentInfoStepProps) => {
     }));
   };
 
-  const handleLinkChange = (field, value) => {
+  const handleLinkChange = <K extends keyof AdvertisementLinkForm>(
+    field: K,
+    value: AdvertisementLinkForm[K]
+  ) => {
     onChange((prev) => ({
       ...prev,
       content: {
@@ -53,7 +68,7 @@ const ContentInfoStep = ({formData, onChange}: ContentInfoStepProps) => {
     }));
   };
 
-  const handleImageUpload = async (e) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -193,7 +208,7 @@ const ContentInfoStep = ({formData, onChange}: ContentInfoStepProps) => {
               <Form.Control
                 type="number"
                 value={content.image.width}
-                onChange={(e) => handleImageChange("width", e.target.value)}
+                onChange={(e) => handleImageChange("width", e.target.value as unknown as number)}
                 placeholder="ex) 36"
                 className="shadow-sm"
               />
@@ -209,7 +224,7 @@ const ContentInfoStep = ({formData, onChange}: ContentInfoStepProps) => {
               <Form.Control
                 type="number"
                 value={content.image.height}
-                onChange={(e) => handleImageChange("height", e.target.value)}
+                onChange={(e) => handleImageChange("height", e.target.value as unknown as number)}
                 placeholder="ex) 20"
                 className="shadow-sm"
               />
@@ -397,7 +412,7 @@ const ContentInfoStep = ({formData, onChange}: ContentInfoStepProps) => {
             </Form.Label>
             <Form.Select
               value={content.link.linkType}
-              onChange={(e) => handleLinkChange("linkType", e.target.value)}
+              onChange={(e) => handleLinkChange("linkType", e.target.value as AdvertisementLinkType)}
               className="shadow-sm"
             >
               <option value="">선택하세요</option>

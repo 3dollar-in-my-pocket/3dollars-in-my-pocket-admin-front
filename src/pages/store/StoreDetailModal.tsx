@@ -101,7 +101,7 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}: 
     setActivitySubTab('reports');
   };
 
-  const handleTabSelect = (tabKey) => {
+  const handleTabSelect = (tabKey: string | null) => {
     setActiveTab(tabKey);
   };
 
