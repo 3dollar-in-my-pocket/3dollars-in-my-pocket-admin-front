@@ -1,13 +1,13 @@
-import StoreTypeBadge from './common/badges/StoreTypeBadge';
+import StoreTypeBadge from '../../../components/common/badges/StoreTypeBadge';
 import {useCallback, useRef, useState} from 'react';
 import {toast} from 'react-toastify';
-import reviewApi from "../api/reviewApi";
-import {getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from '../utils/display/storeDisplay';
+import reviewApi from "../../../api/reviewApi";
+import {getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from '../../../utils/display/storeDisplay';
 
-import useCursorPagination from "../hooks/useCursorPagination";
-import {Review} from "../types/review";
-import {ActivityAuthor} from "../types/domain";
-import {formatDateTimeShortKo as formatDateTime} from "../utils/dateUtils";
+import useCursorPagination from "../../../hooks/useCursorPagination";
+import {Review} from "../../../types/review";
+import {ActivityAuthor} from "../../../types/domain";
+import {formatDateTimeShortKo as formatDateTime} from "../../../utils/dateUtils";
 
 interface StoreReviewHistoryProps {
   storeId: string;

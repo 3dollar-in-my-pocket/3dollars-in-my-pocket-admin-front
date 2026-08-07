@@ -1,12 +1,12 @@
 import React, {FormEvent, useCallback, useMemo, useState} from 'react';
-import {Image} from '../types/domain';
+import {Image} from '../../../types/domain';
 import {Modal} from 'react-bootstrap';
 import {toast} from 'react-toastify';
-import storeMarkerApi from '../api/storeMarkerApi';
-import uploadApi from '../api/uploadApi';
-import useCursorPagination from '../hooks/useCursorPagination';
-import {StoreMarker, StoreMarkerRequest} from '../types/storeMarker';
-import {formatDateTime} from '../utils/dateUtils';
+import storeMarkerApi from '../../../api/storeMarkerApi';
+import uploadApi from '../../../api/uploadApi';
+import useCursorPagination from '../../../hooks/useCursorPagination';
+import {StoreMarker, StoreMarkerRequest} from '../../../types/storeMarker';
+import {formatDateTime} from '../../../utils/dateUtils';
 
 interface StoreMarkerHistoryProps {
   storeId: string;

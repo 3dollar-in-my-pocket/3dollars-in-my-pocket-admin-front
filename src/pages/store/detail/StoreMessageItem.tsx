@@ -1,6 +1,6 @@
 import React from 'react';
-import {StoreMessage} from '../types/storeMessage';
-import {formatDateTimeKoNoSec as formatDateTime} from '../utils/dateUtils';
+import {StoreMessage} from '../../../types/storeMessage';
+import {formatDateTimeKoNoSec as formatDateTime} from '../../../utils/dateUtils';
 
 interface StoreMessageItemProps {
   message: StoreMessage;

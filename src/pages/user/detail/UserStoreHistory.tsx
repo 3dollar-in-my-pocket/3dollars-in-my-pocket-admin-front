@@ -1,12 +1,12 @@
-import StoreStatusBadge from './common/badges/StoreStatusBadge';
-import StoreTypeBadge from './common/badges/StoreTypeBadge';
+import StoreStatusBadge from '../../../components/common/badges/StoreStatusBadge';
+import StoreTypeBadge from '../../../components/common/badges/StoreTypeBadge';
 import {useCallback, useRef} from 'react';
-import storeApi from '../api/storeApi';
-import useCursorPagination from '../hooks/useCursorPagination';
-import {ActivitiesStatus, SimpleStore} from '../types/store';
-import {formatDateTimeKo as formatDateTime} from '../utils/dateUtils';
+import storeApi from '../../../api/storeApi';
+import useCursorPagination from '../../../hooks/useCursorPagination';
+import {ActivitiesStatus, SimpleStore} from '../../../types/store';
+import {formatDateTimeKo as formatDateTime} from '../../../utils/dateUtils';
 import {getActivitiesStatusBadgeClass,
-  getActivitiesStatusDisplayName, getStoreStatusBadgeClass, getStoreStatusDisplayName, getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from '../utils/display/storeDisplay';
+  getActivitiesStatusDisplayName, getStoreStatusBadgeClass, getStoreStatusDisplayName, getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from '../../../utils/display/storeDisplay';
 
 interface UserStoreHistoryProps {
   userId: string;

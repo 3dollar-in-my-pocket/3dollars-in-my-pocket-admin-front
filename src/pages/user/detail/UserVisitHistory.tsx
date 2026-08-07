@@ -1,14 +1,14 @@
-import StoreStatusBadge from './common/badges/StoreStatusBadge';
-import StoreTypeBadge from './common/badges/StoreTypeBadge';
+import StoreStatusBadge from '../../../components/common/badges/StoreStatusBadge';
+import StoreTypeBadge from '../../../components/common/badges/StoreTypeBadge';
 import {useCallback, useRef, useState} from 'react';
-import useCursorPagination from "../hooks/useCursorPagination";
+import useCursorPagination from "../../../hooks/useCursorPagination";
 import {getActivitiesStatusBadgeClass,
-  getActivitiesStatusDisplayName, getStoreStatusBadgeClass, getStoreStatusDisplayName, getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from '../utils/display/storeDisplay';
-import {getVisitIconClass, getVisitTypeBatchClass, getVisitTypeDisplayName} from '../utils/display/visitDisplay';
+  getActivitiesStatusDisplayName, getStoreStatusBadgeClass, getStoreStatusDisplayName, getStoreTypeBadgeClass, getStoreTypeDisplayName, getStoreTypeIcon} from '../../../utils/display/storeDisplay';
+import {getVisitIconClass, getVisitTypeBatchClass, getVisitTypeDisplayName} from '../../../utils/display/visitDisplay';
 
-import {Visit, VisitType} from "../types/visit";
-import {ActivitiesStatus, SimpleStore} from "../types/store";
-import visitApi from "../api/visitApi";
+import {Visit, VisitType} from "../../../types/visit";
+import {ActivitiesStatus, SimpleStore} from "../../../types/store";
+import visitApi from "../../../api/visitApi";
 
 interface UserVisitHistoryProps {
   userId: string;

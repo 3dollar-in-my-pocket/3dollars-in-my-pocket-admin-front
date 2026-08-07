@@ -1,10 +1,10 @@
-import {getVisitIconClass, getVisitTypeBatchClass, getVisitTypeDisplayName} from '../utils/display/visitDisplay';
+import {getVisitIconClass, getVisitTypeBatchClass, getVisitTypeDisplayName} from '../../../utils/display/visitDisplay';
 import {useCallback, useRef} from 'react';
-import visitApi from "../api/visitApi";
-import {Visit, VisitType} from "../types/visit";
-import {ActivityAuthor} from "../types/domain";
-import useCursorPagination from "../hooks/useCursorPagination";
-import {formatDateTimeShortKo} from "../utils/dateUtils";
+import visitApi from "../../../api/visitApi";
+import {Visit, VisitType} from "../../../types/visit";
+import {ActivityAuthor} from "../../../types/domain";
+import useCursorPagination from "../../../hooks/useCursorPagination";
+import {formatDateTimeShortKo} from "../../../utils/dateUtils";
 
 interface StoreVisitHistoryProps {
   storeId: string;
