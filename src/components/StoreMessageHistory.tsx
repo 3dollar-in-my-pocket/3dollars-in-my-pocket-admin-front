@@ -2,8 +2,13 @@ import React, {useCallback} from 'react';
 import storeApi from '../api/storeApi';
 import StoreMessageItem from './StoreMessageItem';
 import useCursorPagination from '../hooks/useCursorPagination';
+import {StoreMessage} from '../types/storeMessage';
 
-const StoreMessageHistory = ({storeId}) => {
+interface StoreMessageHistoryProps {
+  storeId: string;
+}
+
+const StoreMessageHistory: React.FC<StoreMessageHistoryProps> = ({storeId}) => {
   const fetchMessages = useCallback(
     (cursor: string | null) => storeApi.getStoreMessages(storeId, cursor, 20),
     [storeId]

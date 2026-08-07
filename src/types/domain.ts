@@ -38,3 +38,23 @@ export interface Writer {
   writerType: WriterType;
   name: string;
 }
+
+/**
+ * 활동 이력에서 "작성자 클릭"으로 전달되는 사용자 식별 정보
+ *
+ * 호출부마다 넘기는 객체 형태가 다릅니다.
+ * - StoreReviewHistory/StoreImageHistory/StoreReportHistory/StoreVisitHistory:
+ *   응답의 writer/reporter/visitor(SimpleUser)를 그대로 전달 → userId: number
+ * - StoreContributorHistory: Writer로부터 {userId: writerId, name, writerType}를 생성 → userId: string
+ *
+ * 수신부(StoreSearch.handleAuthorClick)는 `writer.userId || writer.writerId || writer.id`와
+ * `writer.name || writer.nickname`을 방어적으로 읽으므로, 위 형태들의 합집합으로 정의합니다.
+ */
+export interface ActivityAuthor {
+  userId?: number | string;
+  writerId?: string;
+  id?: number | string;
+  name?: string;
+  nickname?: string;
+  writerType?: WriterType;
+}

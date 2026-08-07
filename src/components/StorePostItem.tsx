@@ -1,9 +1,14 @@
 import React from 'react';
 
+import {StorePost} from '../types/storePost';
 import {formatDateTimeKoNoSec as formatDateTime} from '../utils/dateUtils';
 
-const StorePostItem = ({post}) => {
-  const getStickerEmoji = (stickerId) => {
+interface StorePostItemProps {
+  post: StorePost;
+}
+
+const StorePostItem: React.FC<StorePostItemProps> = ({post}) => {
+  const getStickerEmoji = (stickerId: string): string => {
     switch (stickerId) {
       case 'LIKE':
         return '👍';

@@ -13,27 +13,39 @@ import UserStoreImageHistory from '../../components/UserStoreImageHistory';
 import UserStoreReportHistory from '../../components/UserStoreReportHistory';
 import UserVisitHistory from '../../components/UserVisitHistory';
 import PushSendModal from '../../components/push/PushSendModal';
-import {Device, OS_PLATFORM} from '../../types/device';
+import {Device, OS_PLATFORM, OsPlatform} from '../../types/device';
 import {Medal} from '../../types/medal';
-import {User, UserRoleOption, UserSettings} from '../../types/user';
+import {SocialType, User, UserRole, UserRoleOption, UserSettings} from '../../types/user';
 import {getOsPlatformBadgeClass, getOsPlatformIcon} from '../../utils/display/deviceDisplay';
 import {getMarketingConsentBadgeClass, getMarketingConsentDisplayName, getSocialTypeBadgeClass, getSocialTypeDisplayName, getUserRoleBadgeClass, getUserRoleLabel, getUserRoleValue} from '../../utils/display/userDisplay';
 
 import {formatDateTimeKo as formatDateTime} from '../../utils/dateUtils';
 
-const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
-  const [userDetail, setUserDetail] = useState(null);
-  const [devices, setDevices] = useState([]);
-  const [settings, setSettings] = useState(null);
-  const [representativeMedal, setRepresentativeMedal] = useState(null);
-  const [medals, setMedals] = useState([]);
-  const [allMedals, setAllMedals] = useState([]);
+interface UserDetailModalProps {
+  show: boolean;
+  onHide: () => void;
+  /**
+   * 목록/이력에서 넘어온 유저 요약 정보 (상세 로딩 전 폴백).
+   * 호출부마다 User, 랭킹/신고 응답의 유저 객체 등 형태가 달라 any로 둡니다.
+   */
+  user: any;
+  /** 제보 가게 클릭 콜백. 호출부에 따라 null/undefined가 전달됩니다. */
+  onStoreClick?: ((store: any) => void) | null;
+}
+
+const UserDetailModal = ({show, onHide, user, onStoreClick}: UserDetailModalProps) => {
+  const [userDetail, setUserDetail] = useState<User | null>(null);
+  const [devices, setDevices] = useState<Device[]>([]);
+  const [settings, setSettings] = useState<UserSettings | null>(null);
+  const [representativeMedal, setRepresentativeMedal] = useState<Medal | null>(null);
+  const [medals, setMedals] = useState<Medal[]>([]);
+  const [allMedals, setAllMedals] = useState<Medal[]>([]);
   const [userRoleOptions, setUserRoleOptions] = useState<UserRoleOption[]>([]);
   const [selectedRole, setSelectedRole] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isUpdatingRole, setIsUpdatingRole] = useState(false);
   const [activeTab, setActiveTab] = useState('basic');
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [selectedMedalForAssign, setSelectedMedalForAssign] = useState<number | null>(null);
   const [showAssignConfirm, setShowAssignConfirm] = useState(false);
   const [isAssigningMedal, setIsAssigningMedal] = useState(false);
@@ -102,7 +114,7 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
     onHide();
   };
 
-  const getSocialTypeBadge = (socialType) => {
+  const getSocialTypeBadge = (socialType?: SocialType) => {
     return (
       <span
         className={`badge rounded-pill px-3 py-2 ${getSocialTypeBadgeClass(socialType)} bg-opacity-10 text-dark border`}>
@@ -112,7 +124,7 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
     );
   };
 
-  const getOsBadge = (os) => {
+  const getOsBadge = (os: OsPlatform) => {
     const iconClass = getOsPlatformIcon(os);
 
     return (
@@ -123,7 +135,7 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
     );
   };
 
-  const getUserRoleBadge = (role) => {
+  const getUserRoleBadge = (role?: UserRole) => {
     return (
       <span className={`badge rounded-pill px-3 py-2 ${getUserRoleBadgeClass(role)} bg-opacity-10 border`}>
         <i className="bi bi-person-gear me-1"></i>
@@ -133,7 +145,7 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
   };
 
   // 디바이스 삭제 핸들러
-  const handleDeleteDevice = async (deviceId) => {
+  const handleDeleteDevice = async (deviceId: string) => {
     if (!window.confirm('정말로 이 디바이스를 삭제하시겠습니까?')) return;
     setIsLoading(true);
     try {
@@ -207,6 +219,8 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
         setUserDetail((prev) => ({
           ...prev,
           ...updatedUser,
+          // 서버는 userId를 숫자로 내려주지만 화면에서는 문자열로 다룹니다.
+          userId: updatedUser?.userId != null ? String(updatedUser.userId) : prev?.userId,
           // 서버 UserResponse에는 nickname이 없어 name을 닉네임으로 사용합니다.
           nickname: updatedUser?.name || prev?.nickname,
         }));

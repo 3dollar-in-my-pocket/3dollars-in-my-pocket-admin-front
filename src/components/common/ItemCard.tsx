@@ -30,7 +30,7 @@ const ItemCard = <T, >({
         border: `3px solid ${borderColor}20`,
         ...style
       }}
-      onClick={() => onClick(item)}
+      onClick={() => onClick?.(item)}
       onMouseEnter={(e: any) => {
         e.currentTarget.style.transform = 'translateY(-8px) scale(1.02)';
         e.currentTarget.style.boxShadow = `0 20px 40px ${borderColor}30`;

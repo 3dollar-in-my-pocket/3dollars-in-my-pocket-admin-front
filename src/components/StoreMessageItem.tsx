@@ -1,6 +1,12 @@
+import React from 'react';
+import {StoreMessage} from '../types/storeMessage';
 import {formatDateTimeKoNoSec as formatDateTime} from '../utils/dateUtils';
 
-const StoreMessageItem = ({message}) => {
+interface StoreMessageItemProps {
+  message: StoreMessage;
+}
+
+const StoreMessageItem: React.FC<StoreMessageItemProps> = ({message}) => {
   return (
     <div className="card border-0 shadow-sm mb-3" style={{borderRadius: '16px'}}>
       <div className="card-body p-4">
