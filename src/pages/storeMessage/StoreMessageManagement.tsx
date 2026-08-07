@@ -6,6 +6,8 @@ import StoreDetailModal from '../store/StoreDetailModal';
 import useInfiniteScroll from '../../hooks/useInfiniteScroll';
 import EmptyState from '../../components/common/EmptyState';
 
+import {formatDateTimeShortKo as formatDateTime} from '../../utils/dateUtils';
+
 const StoreMessageManagement = () => {
   const [messages, setMessages] = useState<StoreMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -60,16 +62,6 @@ const StoreMessageManagement = () => {
     threshold: 0.1
   });
 
-  const formatDateTime = (dateString: string) => {
-    if (!dateString) return '없음';
-    return new Date(dateString).toLocaleString('ko-KR', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
 
   const getStoreTypeBadge = (storeType: string) => {
     if (!storeType) return null;

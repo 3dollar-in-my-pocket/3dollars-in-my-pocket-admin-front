@@ -1,17 +1,8 @@
 import React from 'react';
 
-const StorePostItem = ({post}) => {
-  const formatDateTime = (dateString) => {
-    if (!dateString) return '없음';
-    return new Date(dateString).toLocaleString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
+import {formatDateTimeKoNoSec as formatDateTime} from '../utils/dateUtils';
 
+const StorePostItem = ({post}) => {
   const getStickerEmoji = (stickerId) => {
     switch (stickerId) {
       case 'LIKE':

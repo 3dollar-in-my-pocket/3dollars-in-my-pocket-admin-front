@@ -4,18 +4,9 @@ import {getReportReasonBadgeClass} from "../types/report";
 import {getStoreTypeDisplayName, getStoreTypeBadgeClass, getStoreTypeIcon} from "../types/store";
 import useCursorPagination from "../hooks/useCursorPagination";
 
-const UserStoreReportHistory = ({userId, isActive, onStoreClick}) => {
-  const formatDateTime = (dateString) => {
-    if (!dateString) return '없음';
-    return new Date(dateString).toLocaleString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
+import {formatDateTimeKoNoSec as formatDateTime} from '../utils/dateUtils';
 
+const UserStoreReportHistory = ({userId, isActive, onStoreClick}) => {
   const formatAddress = (address) => {
     if (!address) return '주소 없음';
     return address.fullAddress || '주소 없음';

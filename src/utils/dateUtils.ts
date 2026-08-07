@@ -28,6 +28,34 @@ export const formatDateTimeKo = (dateStr: string | null | undefined): string => 
 };
 
 /**
+ * 한국 로케일 날짜시간 포맷 (초 제외): YYYY년 MM월 DD일 HH:mm
+ */
+export const formatDateTimeKoNoSec = (dateStr: string | null | undefined): string => {
+  if (!dateStr) return '없음';
+  return new Date(dateStr).toLocaleString('ko-KR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
+
+/**
+ * 숫자형 날짜시간 포맷: YYYY. MM. DD. HH:mm
+ */
+export const formatDateTimeNumeric = (dateStr: string | null | undefined): string => {
+  if (!dateStr) return '없음';
+  return new Date(dateStr).toLocaleDateString('ko-KR', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
+
+/**
  * 짧은 한국 로케일 날짜시간 포맷: YYYY. MM. DD HH:mm
  */
 export const formatDateTimeShortKo = (dateStr: string | null | undefined): string => {

@@ -1,15 +1,6 @@
-const StoreMessageItem = ({message}) => {
-  const formatDateTime = (dateString) => {
-    if (!dateString) return '없음';
-    return new Date(dateString).toLocaleString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
+import {formatDateTimeKoNoSec as formatDateTime} from '../utils/dateUtils';
 
+const StoreMessageItem = ({message}) => {
   return (
     <div className="card border-0 shadow-sm mb-3" style={{borderRadius: '16px'}}>
       <div className="card-body p-4">

@@ -8,6 +8,8 @@ import EmptyState from '../../components/common/EmptyState';
 import StoreDetailModal from '../store/StoreDetailModal';
 import UserDetailModal from '../user/UserDetailModal';
 
+import {formatDateTimeNumeric as formatDate} from '../../utils/dateUtils';
+
 const StoreImageManage = () => {
   const [images, setImages] = useState<StoreImage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -104,15 +106,6 @@ const StoreImageManage = () => {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
 
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {

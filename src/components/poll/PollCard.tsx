@@ -1,3 +1,4 @@
+import {formatDateTimeShortKo as formatDateTime} from '../../utils/dateUtils';
 import {
   getWriterTypeIcon,
   getWriterTypeTextClass,
@@ -6,18 +7,6 @@ import {
 } from '../../types/common';
 
 const PollCard = ({poll, onClick, onAuthorClick, onDelete}) => {
-  const formatDateTime = (dateString) => {
-    if (!dateString) return '없음';
-    return new Date(dateString).toLocaleString('ko-KR', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-
   const getPollStatus = (poll) => {
     const now = new Date();
     const startDate = new Date(poll.period.startDateTime);

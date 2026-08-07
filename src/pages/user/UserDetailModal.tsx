@@ -25,6 +25,8 @@ import PushSendModal from '../../components/push/PushSendModal';
 import deviceApi from "../../api/deviceApi";
 import enumApi from "../../api/enumApi";
 
+import {formatDateTimeKo as formatDateTime} from '../../utils/dateUtils';
+
 const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
   const [userDetail, setUserDetail] = useState(null);
   const [devices, setDevices] = useState([]);
@@ -136,17 +138,6 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
     );
   };
 
-  const formatDateTime = (dateString) => {
-    if (!dateString) return '없음';
-    return new Date(dateString).toLocaleString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    });
-  };
 
   // 디바이스 삭제 핸들러
   const handleDeleteDevice = async (deviceId) => {

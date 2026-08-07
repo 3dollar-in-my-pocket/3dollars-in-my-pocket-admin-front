@@ -5,6 +5,8 @@ import SearchHeader from '../../components/common/SearchHeader';
 import PollCard from '../../components/poll/PollCard';
 import UserDetailModal from '../user/UserDetailModal';
 
+import {formatDateTimeShortKo as formatDateTime} from '../../utils/dateUtils';
+
 const PollManagement = () => {
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
@@ -166,16 +168,6 @@ const PollManagement = () => {
   };
 
   // 날짜 포맷팅 (확인 메시지용)
-  const formatDateTime = (dateString) => {
-    if (!dateString) return '없음';
-    return new Date(dateString).toLocaleString('ko-KR', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
 
   return (
     <div className="container-fluid px-2 px-md-4 py-3 py-md-4">

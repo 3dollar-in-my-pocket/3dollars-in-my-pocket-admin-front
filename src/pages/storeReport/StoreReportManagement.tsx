@@ -8,6 +8,8 @@ import EmptyState from '../../components/common/EmptyState';
 import UserDetailModal from '../user/UserDetailModal';
 import StoreDetailModal from '../store/StoreDetailModal';
 
+import {formatDateTimeShortKo as formatDateTime} from '../../utils/dateUtils';
+
 const StoreReportManagement = () => {
   const [reports, setReports] = useState<AllStoreReport[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -55,16 +57,6 @@ const StoreReportManagement = () => {
     threshold: 0.1
   });
 
-  const formatDateTime = (dateString: string) => {
-    if (!dateString) return '없음';
-    return new Date(dateString).toLocaleString('ko-KR', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
 
   const getStoreStatusBadge = (status: string) => {
     const statusConfig: Record<string, { bg: string; icon: string; text: string }> = {

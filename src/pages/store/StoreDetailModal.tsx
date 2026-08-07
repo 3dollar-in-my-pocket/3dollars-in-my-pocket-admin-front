@@ -39,6 +39,7 @@ import StoreSettings from '../../components/StoreSettings';
 import StoreContributorHistory from '../../components/StoreContributorHistory';
 import StoreEditForm from '../../components/StoreEditForm';
 import {toast} from 'react-toastify';
+import {formatDateTimeKo as formatDateTime} from '../../utils/dateUtils';
 
 const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) => {
   const [storeDetail, setStoreDetail] = useState(null);
@@ -317,17 +318,6 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}) 
     ));
   };
 
-  const formatDateTime = (dateString) => {
-    if (!dateString) return '없음';
-    return new Date(dateString).toLocaleString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    });
-  };
 
   const formatOpenStartDateTime = (dateString) => {
     if (!dateString) return '없음';
