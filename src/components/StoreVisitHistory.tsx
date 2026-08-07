@@ -1,5 +1,6 @@
 import {useCallback, useRef} from 'react';
 import visitApi from "../api/visitApi";
+import {getVisitIconClass, getVisitTypeBatchClass, getVisitTypeDisplayName, VisitType} from "../types/visit";
 import useCursorPagination from "../hooks/useCursorPagination";
 import {formatDateTimeShortKo} from "../utils/dateUtils";
 
@@ -24,23 +25,14 @@ const StoreVisitHistory = ({storeId, isActive, onAuthorClick}) => {
     deps: [storeId]
   });
 
-  const getVisitTypeBadge = (visitType) => {
-    const typeMap = {
-      'EXISTS': {text: '방문 성공', class: 'bg-success', icon: 'bi-check-circle'},
-      'NOT_EXISTS': {text: '방문 실패', class: 'bg-danger', icon: 'bi-x-circle'},
-      'UNKNOWN': {text: '확인 불가', class: 'bg-warning', icon: 'bi-question-circle'}
-    };
-
-    const visitTypeInfo = typeMap[visitType?.type] || {
-      text: visitType?.description || '알 수 없음',
-      class: 'bg-secondary',
-      icon: 'bi-info-circle'
-    };
+  const getVisitTypeBadge = (visitType?: VisitType) => {
+    if (!visitType) return null;
 
     return (
-      <span className={`badge ${visitTypeInfo.class} bg-opacity-10 text-dark border rounded-pill px-2 py-1`}>
-        <i className={`bi ${visitTypeInfo.icon} me-1`}></i>
-        {visitTypeInfo.text}
+      <span
+        className={`badge ${getVisitTypeBatchClass(visitType.type)} bg-opacity-10 text-dark border rounded-pill px-2 py-1`}>
+        <i className={`bi ${getVisitIconClass(visitType.type)} me-1`}></i>
+        {visitType.description || getVisitTypeDisplayName(visitType.type)}
       </span>
     );
   };
@@ -165,16 +157,6 @@ const StoreVisitHistory = ({storeId, isActive, onAuthorClick}) => {
                             </div>
                           </div>
                         </div>
-
-                        {visit.device && (
-                          <div className="d-flex align-items-center gap-2">
-                            <span
-                              className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-2 py-1">
-                              <i className="bi bi-phone me-1"></i>
-                              {visit.device.os || 'Unknown'} {visit.device.version && `v${visit.device.version}`}
-                            </span>
-                          </div>
-                        )}
                       </div>
                     </div>
                   </div>

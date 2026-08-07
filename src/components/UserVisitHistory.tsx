@@ -8,7 +8,7 @@ import {
   getStoreTypeBadgeClass,
   getStoreTypeIcon
 } from "../types/store";
-import {getVisitIconClass, getVisitTypeBatchClass, getVisitTypeDisplayName} from "../types/visit";
+import {VisitType, getVisitIconClass, getVisitTypeBatchClass, getVisitTypeDisplayName} from "../types/visit";
 import visitApi from "../api/visitApi";
 
 const UserVisitHistory = ({userId, isActive, onStoreClick}) => {
@@ -52,15 +52,6 @@ const UserVisitHistory = ({userId, isActive, onStoreClick}) => {
     setSelectedVisit(null);
   };
 
-  const getSalesTypeBadge = (salesType) => {
-    if (!salesType) return null;
-    const badgeClass = 'bg-info';
-    return (
-      <span className={`badge ${badgeClass} bg-opacity-10 text-dark border rounded-pill px-2 py-1 small`}>
-        {salesType.description || salesType.type}
-      </span>
-    );
-  };
 
   const getStatusBadge = (status) => {
     if (!status) return null;
@@ -94,11 +85,11 @@ const UserVisitHistory = ({userId, isActive, onStoreClick}) => {
     );
   };
 
-  const getVisitTypeBadge = (visitType) => {
+  const getVisitTypeBadge = (visitType?: VisitType) => {
     if (!visitType) return null;
-    const badgeClass = getVisitTypeBatchClass(visitType);
-    const statusText = getVisitTypeDisplayName(visitType)
-    const iconClass = getVisitIconClass(visitType);
+    const badgeClass = getVisitTypeBatchClass(visitType.type);
+    const statusText = visitType.description || getVisitTypeDisplayName(visitType.type);
+    const iconClass = getVisitIconClass(visitType.type);
 
     return (
       <span className={`badge ${badgeClass} bg-opacity-10 text-dark border rounded-pill px-2 py-1`}>
@@ -179,7 +170,7 @@ const UserVisitHistory = ({userId, isActive, onStoreClick}) => {
                   style={{
                     cursor: 'pointer',
                     transition: 'all 0.2s ease',
-                    borderLeft: visit.type === 'EXISTS' ? '4px solid #28a745' : '4px solid #dc3545'
+                    borderLeft: visit.visitType?.type === 'EXISTS' ? '4px solid #28a745' : '4px solid #dc3545'
                   }}
                   onClick={() => handleVisitClick(visit)}
                   onMouseEnter={(e: any) => {
@@ -220,7 +211,7 @@ const UserVisitHistory = ({userId, isActive, onStoreClick}) => {
                           <h6 className="mb-0 fw-bold text-primary">{visit.store?.name || '가게 이름 없음'}</h6>
                           <i className="bi bi-box-arrow-up-right text-primary" style={{fontSize: '0.7rem'}}></i>
                         </div>
-                        {getVisitTypeBadge(visit.type)}
+                        {getVisitTypeBadge(visit.visitType)}
                       </div>
 
                       <div className="d-flex align-items-center gap-2 mb-2">
@@ -234,7 +225,6 @@ const UserVisitHistory = ({userId, isActive, onStoreClick}) => {
                       </div>
 
                       <div className="d-flex align-items-center gap-2 mb-2">
-                        {getSalesTypeBadge(visit.store?.salesType)}
                         {getStatusBadge(visit.store?.status)}
                         {getActivitiesStatusBadge(visit.store?.activitiesStatus)}
                         {visit.store?.storeType && getStoreTypeBadge(visit.store.storeType)}
@@ -310,7 +300,7 @@ const UserVisitHistory = ({userId, isActive, onStoreClick}) => {
           <div className="modal-dialog modal-lg modal-dialog-centered">
             <div className="modal-content border-0 shadow-lg">
               <div className="modal-header border-0 pb-0"
-                   style={{background: selectedVisit.type === 'EXISTS' ? 'linear-gradient(135deg, #28a745 0%, #20c997 100%)' : 'linear-gradient(135deg, #dc3545 0%, #fd7e14 100%)'}}>
+                   style={{background: selectedVisit.visitType?.type === 'EXISTS' ? 'linear-gradient(135deg, #28a745 0%, #20c997 100%)' : 'linear-gradient(135deg, #dc3545 0%, #fd7e14 100%)'}}>
                 <div className="w-100">
                   <div className="d-flex align-items-center gap-3 text-white">
                     <div>
@@ -363,14 +353,14 @@ const UserVisitHistory = ({userId, isActive, onStoreClick}) => {
                   <div className="col-md-6">
                     <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
                       <div
-                        className={`${selectedVisit.type === 'EXISTS' ? 'bg-success' : 'bg-danger'} bg-opacity-10 rounded-circle p-2`}>
+                        className={`${selectedVisit.visitType?.type === 'EXISTS' ? 'bg-success' : 'bg-danger'} bg-opacity-10 rounded-circle p-2`}>
                         <i
-                          className={`bi ${selectedVisit.type === 'EXISTS' ? 'bi-check-circle text-success' : 'bi-x-circle text-danger'}`}></i>
+                          className={`bi ${selectedVisit.visitType?.type === 'EXISTS' ? 'bi-check-circle text-success' : 'bi-x-circle text-danger'}`}></i>
                       </div>
                       <div>
                         <label className="form-label fw-semibold text-muted mb-1">방문 결과</label>
                         <div>
-                          {getVisitTypeBadge(selectedVisit.type)}
+                          {getVisitTypeBadge(selectedVisit.visitType)}
                         </div>
                       </div>
                     </div>
@@ -383,7 +373,6 @@ const UserVisitHistory = ({userId, isActive, onStoreClick}) => {
                       <div>
                         <label className="form-label fw-semibold text-muted mb-1">가게 상태</label>
                         <div className="d-flex gap-2 flex-wrap">
-                          {getSalesTypeBadge(selectedVisit?.store?.salesType)}
                           {getStatusBadge(selectedVisit?.store?.status)}
                           {getActivitiesStatusBadge(selectedVisit?.store?.activitiesStatus)}
                         </div>

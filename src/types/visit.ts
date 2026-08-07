@@ -2,41 +2,40 @@
  * 방문 관련 타입 정의
  */
 
+import { SimpleStore, User } from './domain';
+
+/** 방문 유형 코드 (StoreVisitTypeResponse.type) */
+export type VisitTypeCode = 'EXISTS' | 'NOT_EXISTS';
+
+/** StoreVisitTypeResponse */
+export interface VisitType {
+  type: VisitTypeCode;
+  description: string;
+}
+
+/**
+ * StoreVisitResponse
+ *
+ * 가게 방문 목록(GET /v1/store/{storeId}/visits)과
+ * 사용자 방문 이력(GET /v1/user/{userId}/store-visits)이 동일하게 사용합니다.
+ * 전자는 visitor를, 후자는 store를 채워 내려줍니다.
+ */
 export interface Visit {
   visitId: string;
+  visitType: VisitType;
   /** 방문 일시 */
   visitDateTime: string;
+  store?: SimpleStore;
+  visitor?: User;
   createdAt?: string;
-  /** 문자열 코드 또는 { type, description } 객체로 응답됩니다. */
-  visitType: string | { type?: string; description?: string };
-  /** 일부 응답에서 방문 유형이 최상위 type으로 내려옵니다. */
-  type?: string;
-  visitor?: {
-    userId: string;
-    name: string;
-  };
-  device?: {
-    os?: string;
-    version?: string;
-  };
+  updatedAt?: string;
 }
 
-export interface UserVisit extends Visit {
-  store?: {
-    storeId: string;
-    name: string;
-    storeType?: string;
-    address?: any;
-    salesType?: any;
-    status?: string;
-    activitiesStatus?: string;
-    rating?: number;
-    categories?: any[];
-  };
-}
+/** 응답 스키마가 Visit과 동일합니다. */
+export type UserVisit = Visit;
 
 // 방문 타입 표시 이름
-export const getVisitTypeDisplayName = (visitType: string): string => {
+export const getVisitTypeDisplayName = (visitType: VisitTypeCode): string => {
   switch (visitType) {
     case 'EXISTS':
       return '존재해요';
@@ -48,7 +47,7 @@ export const getVisitTypeDisplayName = (visitType: string): string => {
 };
 
 // 방문 타입 배지 클래스
-export const getVisitTypeBatchClass = (visitType: string): string => {
+export const getVisitTypeBatchClass = (visitType: VisitTypeCode): string => {
   switch (visitType) {
     case 'EXISTS':
       return 'bg-success';
@@ -60,7 +59,7 @@ export const getVisitTypeBatchClass = (visitType: string): string => {
 };
 
 // 방문 타입 아이콘 클래스
-export const getVisitIconClass = (visitType: string): string => {
+export const getVisitIconClass = (visitType: VisitTypeCode): string => {
   switch (visitType) {
     case 'EXISTS':
       return 'bi-check-circle-fill';
