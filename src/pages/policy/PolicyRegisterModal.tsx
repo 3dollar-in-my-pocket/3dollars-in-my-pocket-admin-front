@@ -1,27 +1,42 @@
-import React, {useState, useEffect} from "react";
-import {Button, Form, Modal} from "react-bootstrap";
+import {useEffect, useState} from "react";
+import {Form, Modal} from "react-bootstrap";
 import {toast} from "react-toastify";
-import policyApi from "../../api/policyApi";
+import policyApi from "@/api/policyApi";
+import {PolicyType} from "@/types/policy";
 
-const PolicyRegisterModal = ({show, onHide, categories, policies, onRefresh}) => {
-  const [formData, setFormData] = useState({
-    categoryId: "",
-    policyId: "",
-    value: ""
-  });
+/** enum API(PolicyCategoryType / PolicyType) 응답 항목 */
+interface PolicyEnumOption {
+  key: string;
+  description: string;
+}
+
+interface PolicyRegisterFormData {
+  categoryId: string;
+  policyId: string;
+  value: string;
+}
+
+interface PolicyRegisterModalProps {
+  show: boolean;
+  onHide: () => void;
+  categories: PolicyEnumOption[];
+  /** 현재 화면에서는 사용하지 않지만 상위(Policy.tsx)에서 전달합니다. */
+  policies: PolicyEnumOption[];
+  onRefresh: () => void;
+}
+
+const INITIAL_FORM: PolicyRegisterFormData = {categoryId: "", policyId: "", value: ""};
+
+const PolicyRegisterModal = ({show, onHide, categories, onRefresh}: PolicyRegisterModalProps) => {
+  const [formData, setFormData] = useState<PolicyRegisterFormData>(INITIAL_FORM);
   const [isLoading, setIsLoading] = useState(false);
-  const [filteredPolicies, setFilteredPolicies] = useState([]);
+  const [filteredPolicies, setFilteredPolicies] = useState<PolicyType[]>([]);
   const [isLoadingPolicies, setIsLoadingPolicies] = useState(false);
 
   useEffect(() => {
     if (show) {
       // 모달이 열릴 때 폼 초기화
-      setFormData({
-        categoryId: "",
-        policyId: "",
-        value: ""
-      });
-      // 정책 목록 초기화 (카테고리 선택 전까지는 빈 상태)
+      setFormData(INITIAL_FORM);
       setFilteredPolicies([]);
     }
   }, [show]);
@@ -39,42 +54,21 @@ const PolicyRegisterModal = ({show, onHide, categories, policies, onRefresh}) =>
     }
   }, [formData.categoryId]);
 
-  const loadPolicies = async (categoryId) => {
+  const loadPolicies = async (categoryId: string) => {
     setIsLoadingPolicies(true);
     try {
       const response = await policyApi.listPolicyTypes(categoryId);
-      if (response.data) {
-        setFilteredPolicies(response.data.contents || []);
-      } else {
-        setFilteredPolicies([]);
-      }
-    } catch (error) {
-      console.error("정책 조회 실패:", error);
-      setFilteredPolicies([]);
+      setFilteredPolicies(response.ok ? response.data?.contents || [] : []);
     } finally {
       setIsLoadingPolicies(false);
     }
   };
 
-  const handleChange = (field, value) => {
+  const handleChange = <K extends keyof PolicyRegisterFormData>(field: K, value: PolicyRegisterFormData[K]) => {
     setFormData(prev => ({...prev, [field]: value}));
   };
 
   const handleSubmit = async () => {
-    // 유효성 검사
-    if (!formData.categoryId) {
-      toast.error("❌ 카테고리를 먼저 선택해주세요.");
-      return;
-    }
-    if (!formData.policyId) {
-      toast.error("❌ 정책을 선택해주세요.");
-      return;
-    }
-    if (!formData.value.trim()) {
-      toast.error("값을 입력해주세요.");
-      return;
-    }
-
     setIsLoading(true);
     try {
       const response = await policyApi.createPolicy({
@@ -82,7 +76,7 @@ const PolicyRegisterModal = ({show, onHide, categories, policies, onRefresh}) =>
         value: formData.value.trim()
       });
 
-      if (response.data) {
+      if (response.ok) {
         toast.success("정책이 성공적으로 등록되었습니다.");
         onRefresh(); // 목록 새로고침
         onHide(); // 모달 닫기
@@ -98,165 +92,119 @@ const PolicyRegisterModal = ({show, onHide, categories, policies, onRefresh}) =>
     }
   };
 
+  /** 정책 선택 안내 문구 */
+  const getPolicyHelpText = () => {
+    if (!formData.categoryId) {
+      return "카테고리를 먼저 선택해주세요.";
+    }
+    if (isLoadingPolicies) {
+      return "정책 목록을 불러오는 중입니다.";
+    }
+    if (filteredPolicies.length === 0) {
+      return "이 카테고리에는 사용 가능한 정책이 없습니다.";
+    }
+    return "선택한 카테고리에 속한 정책만 표시됩니다.";
+  };
+
+  const isSubmittable = formData.categoryId && formData.policyId && formData.value.trim();
+
   return (
-    <Modal show={show} onHide={handleClose} size="lg" centered fullscreen="md-down"
-           backdrop={isLoading ? "static" : true}>
-      <Modal.Header closeButton className="bg-success text-white">
-        <Modal.Title>
-          ➕ 신규 정책 등록
+    <Modal
+      show={show}
+      onHide={handleClose}
+      centered
+      className="app-modal"
+      backdrop={isLoading ? "static" : true}
+    >
+      <Modal.Header closeButton={!isLoading}>
+        <Modal.Title as="h2">
+          <i className="bi bi-plus-circle"/>
+          신규 정책 등록
         </Modal.Title>
       </Modal.Header>
+
       <Modal.Body>
-        <Form>
-          <div className="row mb-3">
-            <div className="col-12 col-md-6 mb-3 mb-md-0">
-              <Form.Group>
-                <Form.Label>카테고리 <span className="text-danger">*</span></Form.Label>
-                <Form.Select
-                  value={formData.categoryId}
-                  onChange={(e) => handleChange("categoryId", e.target.value)}
-                  required
-                  isInvalid={!formData.categoryId && formData.categoryId !== ""}
-                >
-                  <option value="">카테고리를 선택하세요</option>
-                  {categories.filter(cat => cat.key !== "").map((category) => (
-                    <option key={category.key} value={category.key}>
-                      {category.description}
-                    </option>
-                  ))}
-                </Form.Select>
-                <Form.Control.Feedback type="invalid">
-                  카테고리를 선택해주세요.
-                </Form.Control.Feedback>
-              </Form.Group>
-            </div>
-            <div className="col-12 col-md-6">
-              <Form.Group>
-                <Form.Label>
-                  정책 <span className="text-danger">*</span>
-                  {isLoadingPolicies && (
-                    <span className="spinner-border spinner-border-sm ms-2" role="status" aria-hidden="true"></span>
-                  )}
-                </Form.Label>
-                <Form.Select
-                  value={formData.policyId}
-                  onChange={(e) => handleChange("policyId", e.target.value)}
-                  required
-                  disabled={isLoadingPolicies || !formData.categoryId}
-                  isInvalid={!formData.policyId && formData.policyId !== ""}
-                >
-                  <option value="">
-                    {!formData.categoryId
-                      ? "먼저 카테고리를 선택하세요"
-                      : filteredPolicies.length === 0
-                        ? "선택 가능한 정책이 없습니다"
-                        : "정책을 선택하세요"
-                    }
-                  </option>
-                  {filteredPolicies.map((policy) => (
-                    <option key={policy.policyId} value={policy.policyId}>
-                      {policy.description}
-                    </option>
-                  ))}
-                </Form.Select>
-                <Form.Control.Feedback type="invalid">
-                  정책을 선택해주세요.
-                </Form.Control.Feedback>
-                {!formData.categoryId ? (
-                  <Form.Text className="text-warning">
-                    ⚠️ 카테고리를 먼저 선택해주세요.
-                  </Form.Text>
-                ) : formData.categoryId && filteredPolicies.length > 0 ? (
-                  <Form.Text className="text-muted">
-                    선택된 카테고리에 맞는 정책들이 표시됩니다.
-                  </Form.Text>
-                ) : formData.categoryId && filteredPolicies.length === 0 && !isLoadingPolicies ? (
-                  <Form.Text className="text-info">
-                    💡 이 카테고리에는 사용 가능한 정책이 없습니다.
-                  </Form.Text>
-                ) : null}
-              </Form.Group>
-            </div>
-          </div>
+        <Form className="row g-3">
+          <Form.Group className="col-12">
+            <Form.Label htmlFor="new-policy-category">
+              카테고리 <span className="text-danger">*</span>
+            </Form.Label>
+            <Form.Select
+              id="new-policy-category"
+              value={formData.categoryId}
+              onChange={(e) => handleChange("categoryId", e.target.value)}
+              disabled={isLoading}
+            >
+              <option value="">카테고리를 선택하세요</option>
+              {categories.filter(cat => cat.key !== "").map((category) => (
+                <option key={category.key} value={category.key}>
+                  {category.description}
+                </option>
+              ))}
+            </Form.Select>
+          </Form.Group>
 
-          <div className="row mb-3">
-            <div className="col-12">
-              <Form.Group>
-                <Form.Label>값 <span className="text-danger">*</span></Form.Label>
-                <Form.Control
-                  type="text"
-                  value={formData.value}
-                  onChange={(e) => handleChange("value", e.target.value)}
-                  placeholder="정책 값을 입력하세요"
-                  required
-                  isInvalid={!formData.value.trim() && formData.value !== ""}
-                />
-                <Form.Control.Feedback type="invalid">
-                  값을 입력해주세요.
-                </Form.Control.Feedback>
-                <Form.Text className="text-muted">
-                  정책에 적용될 구체적인 값을 입력하세요.
-                </Form.Text>
-              </Form.Group>
-            </div>
-          </div>
+          <Form.Group className="col-12">
+            <Form.Label htmlFor="new-policy-type">
+              정책 <span className="text-danger">*</span>
+              {isLoadingPolicies && (
+                <span className="spinner-border spinner-border-sm ms-2" role="status" aria-hidden="true"/>
+              )}
+            </Form.Label>
+            <Form.Select
+              id="new-policy-type"
+              value={formData.policyId}
+              onChange={(e) => handleChange("policyId", e.target.value)}
+              disabled={isLoading || isLoadingPolicies || !formData.categoryId}
+            >
+              <option value="">
+                {!formData.categoryId
+                  ? "먼저 카테고리를 선택하세요"
+                  : filteredPolicies.length === 0
+                    ? "선택 가능한 정책이 없습니다"
+                    : "정책을 선택하세요"
+                }
+              </option>
+              {filteredPolicies.map((policy) => (
+                <option key={policy.policyId} value={policy.policyId}>
+                  {policy.description}
+                </option>
+              ))}
+            </Form.Select>
+            <Form.Text>{getPolicyHelpText()}</Form.Text>
+          </Form.Group>
 
-          {/* 입력 미리보기 */}
-          <div className="bg-light p-3 rounded mb-3">
-            <h6 className="mb-2">입력 정보 미리보기</h6>
-            <div className="row">
-              <div className="col-12 col-md-6 mb-2 mb-md-0">
-                <small className="text-muted">카테고리:</small>
-                <div className="fw-bold">
-                  {formData.categoryId ?
-                    categories.find(cat => cat.key === formData.categoryId)?.description || formData.categoryId
-                    : "-"
-                  }
-                </div>
-              </div>
-              <div className="col-12 col-md-6">
-                <small className="text-muted">정책:</small>
-                <div className="fw-bold">
-                  {!formData.categoryId
-                    ? "카테고리 선택 필요"
-                    : formData.policyId
-                      ? filteredPolicies.find(policy => policy.policyId === formData.policyId)?.description || formData.policyId
-                      : "-"
-                  }
-                </div>
-              </div>
-            </div>
-            <div className="mt-2">
-              <small className="text-muted">값:</small>
-              <div className="fw-bold">{formData.value || "-"}</div>
-            </div>
-          </div>
+          <Form.Group className="col-12">
+            <Form.Label htmlFor="new-policy-value">
+              값 <span className="text-danger">*</span>
+            </Form.Label>
+            <Form.Control
+              id="new-policy-value"
+              type="text"
+              value={formData.value}
+              onChange={(e) => handleChange("value", e.target.value)}
+              placeholder="정책 값을 입력하세요"
+              disabled={isLoading}
+            />
+            <Form.Text>정책에 적용될 구체적인 값을 입력하세요.</Form.Text>
+          </Form.Group>
         </Form>
       </Modal.Body>
-      <Modal.Footer className="d-flex flex-column flex-sm-row gap-2">
-        <Button
-          variant="secondary"
-          onClick={handleClose}
-          disabled={isLoading}
-          className="w-100 w-sm-auto"
-        >
+
+      <Modal.Footer>
+        <button className="btn btn-outline-secondary" onClick={handleClose} disabled={isLoading}>
           취소
-        </Button>
-        <Button
-          variant="success"
+        </button>
+        <button
+          className="btn btn-primary"
           onClick={handleSubmit}
-          disabled={isLoading || !formData.categoryId || !formData.policyId || !formData.value.trim()}
-          className="w-100 w-sm-auto"
+          disabled={isLoading || !isSubmittable}
         >
-          {isLoading ? (
-            <>
-              <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-              등록 중...
-            </>
-          ) : (
-            "등록"
+          {isLoading && (
+            <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"/>
           )}
-        </Button>
+          {isLoading ? "등록 중..." : "등록"}
+        </button>
       </Modal.Footer>
     </Modal>
   );

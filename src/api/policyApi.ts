@@ -1,96 +1,39 @@
-import axiosInstance from "./apiBase";
+import {apiDelete, apiGet, apiGetPaginated, apiPatch, apiPost} from "./apiHelpers";
+import {ContentListResponse} from "@/types/api";
+import {Policy, PolicyCategoryId, PolicyId, PolicyType} from "@/types/policy";
+
+interface PolicyMutationParams {
+  policyId: PolicyId;
+  value: string;
+}
+
+interface ListPoliciesParams {
+  cursor?: string | null;
+  size?: number;
+  categoryId?: PolicyCategoryId;
+}
 
 export default {
-  createPolicy: async ({policyId, value}: any) => {
-    try {
-      const response = await axiosInstance(
-        {
-          method: "POST",
-          url: `/v1/policy/${policyId}`,
-          data: {
-            value
-          }
-        }
-      )
-      return response.data
-    } catch (error: any) {
-      return error.response;
-    }
+  createPolicy: async ({policyId, value}: PolicyMutationParams) => {
+    return apiPost<void>(`/v1/policy/${policyId}`, {value});
   },
-  modifyPolicy: async ({policyId, value}: any) => {
-    try {
-      const response = await axiosInstance(
-        {
-          method: "PATCH",
-          url: `/v1/policy/${policyId}`,
-          data: {
-            value
-          }
-        }
-      )
-      return response.data
-    } catch (error: any) {
-      return error.response;
-    }
+  modifyPolicy: async ({policyId, value}: PolicyMutationParams) => {
+    return apiPatch<void>(`/v1/policy/${policyId}`, {value});
   },
-  deletePolicy: async ({policyId}: any) => {
-    try {
-      const response = await axiosInstance(
-        {
-          method: "DELETE",
-          url: `/v1/policy/${policyId}`
-        }
-      )
-      return response.data
-    } catch (error: any) {
-      return error.response;
-    }
+  deletePolicy: async ({policyId}: { policyId: PolicyId }) => {
+    return apiDelete(`/v1/policy/${policyId}`);
   },
-  getPolicy: async ({policyId}: any) => {
-    try {
-      const response = await axiosInstance(
-        {
-          method: "GET",
-          url: `/v1/policy/${policyId}`
-        }
-      )
-      return response.data
-    } catch (error: any) {
-      return error.response;
-    }
+  getPolicy: async ({policyId}: { policyId: PolicyId }) => {
+    return apiGet<Policy>(`/v1/policy/${policyId}`);
   },
-  listPolicies: async ({cursor, size, categoryId}: any) => {
-    try {
-      const response = await axiosInstance(
-        {
-          method: "GET",
-          url: `/v1/policies`,
-          params: {
-            cursor,
-            size,
-            ...(categoryId && {categoryId})
-          }
-        }
-      )
-      return response.data
-    } catch (error: any) {
-      return error.response;
-    }
+  listPolicies: async ({cursor, size, categoryId}: ListPoliciesParams) => {
+    return apiGetPaginated<Policy>(`/v1/policies`, {cursor, size}, {
+      ...(categoryId && {categoryId})
+    });
   },
-  listPolicyTypes: async (categoryId: any) => {
-    try {
-      const response = await axiosInstance(
-        {
-          method: "GET",
-          url: `/v1/policy-types`,
-          params: {
-            ...(categoryId && {categoryId})
-          }
-        }
-      )
-      return response.data
-    } catch (error: any) {
-      return error.response;
-    }
+  listPolicyTypes: async (categoryId?: PolicyCategoryId) => {
+    return apiGet<ContentListResponse<PolicyType>>(`/v1/policy-types`, {
+      ...(categoryId && {categoryId})
+    });
   }
 }

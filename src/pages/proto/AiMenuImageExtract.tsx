@@ -1,9 +1,13 @@
 import React, {ChangeEvent, useEffect, useMemo, useRef, useState} from 'react';
-import {Alert, Badge, Button, Card, Col, Container, Form, Row, Spinner, Table} from 'react-bootstrap';
+import {Button, Col, Form, Row, Spinner} from 'react-bootstrap';
+import PageHeader from '@/components/common/PageHeader';
+import SectionCard from '@/components/common/SectionCard';
+import DataTable from '@/components/common/DataTable';
+import EmptyState from '@/components/common/EmptyState';
 import {toast} from 'react-toastify';
-import enumApi from '../../api/enumApi';
-import storeMenuApi from '../../api/storeMenuApi';
-import {StoreMenuExtractResponse} from '../../types/storeMenu';
+import enumApi from '@/api/enumApi';
+import storeMenuApi from '@/api/storeMenuApi';
+import {StoreMenuExtractResponse} from '@/types/storeMenu';
 
 interface EnumOption {
   key: string;
@@ -129,32 +133,20 @@ const AiMenuImageExtract = () => {
   };
 
   return (
-    <Container fluid className="py-4">
-      <div className="mb-4">
-        <div>
-          <h2 className="fw-bold mb-2">
-            <i className="bi bi-robot me-2 text-primary"></i>
-            AI 메뉴 이미지 추출
-          </h2>
-          <p className="text-muted mb-0">
-            메뉴판 사진을 업로드해 AI가 추출한 메뉴 제안값을 확인하고 수정합니다.
-          </p>
-        </div>
-      </div>
+    <div>
+      <PageHeader description="메뉴판 사진을 업로드해 AI가 추출한 메뉴 제안값을 확인하고 수정합니다."/>
 
       {errorMessage && (
-        <Alert variant="danger" className="mb-4">
+        <div className="alert alert-danger py-2" role="alert">
           {errorMessage}
-        </Alert>
+        </div>
       )}
 
-      <Row className="g-4">
+      <Row className="g-3">
         <Col lg={4}>
-          <Card className="shadow-sm">
-            <Card.Body>
-              <Card.Title className="fw-bold mb-3">이미지 업로드</Card.Title>
-              <Form.Group className="mb-3">
-                <Form.Label className="fw-semibold">메뉴판 이미지</Form.Label>
+          <SectionCard title="이미지 업로드" icon="bi-cloud-arrow-up-fill">
+              <Form.Group className="form-field">
+                <Form.Label className="form-field__label">메뉴판 이미지</Form.Label>
                 <Form.Control
                   ref={fileInputRef}
                   type="file"
@@ -162,7 +154,7 @@ const AiMenuImageExtract = () => {
                   disabled={isExtracting}
                   onChange={handleFileChange}
                 />
-                <Form.Text className="text-muted">
+                <Form.Text className="form-field__hint">
                   이미지 분석은 시간이 걸릴 수 있습니다.
                 </Form.Text>
               </Form.Group>
@@ -212,42 +204,32 @@ const AiMenuImageExtract = () => {
                   초기화
                 </Button>
               </div>
-            </Card.Body>
-          </Card>
+          </SectionCard>
         </Col>
 
         <Col lg={8}>
-          <Card className="shadow-sm">
-            <Card.Body>
-              <div className="d-flex flex-column flex-md-row justify-content-between gap-2 mb-3">
-                <div>
-                  <Card.Title className="fw-bold mb-1">추출 결과</Card.Title>
-                  <Card.Text className="text-muted mb-0">
-                    결과는 제안값이며, 저장 전 관리자가 직접 확인해야 합니다.
-                  </Card.Text>
-                </div>
-                <Badge bg={menus.length > 0 ? 'primary' : 'secondary'} className="align-self-start px-3 py-2">
-                  {menus.length}개
-                </Badge>
-              </div>
-
+          <SectionCard
+            title="추출 결과"
+            icon="bi-card-list"
+            description="결과는 제안값이며, 저장 전 관리자가 직접 확인해야 합니다."
+            aside={<span className="page-count">{menus.length}건</span>}
+          >
               {hasInvalidSuggestion && (
-                <Alert variant="warning" className="py-2">
+                <div className="alert alert-warning py-2" role="alert">
                   이름이 비었거나 수량/가격을 추출하지 못한 항목이 있습니다.
-                </Alert>
+                </div>
               )}
 
               {menus.length === 0 ? (
-                <div className="text-center text-muted py-5 border rounded bg-light">
-                  <i className="bi bi-card-list fs-1 d-block mb-3"></i>
-                  <div className="fw-semibold">추출된 메뉴가 없습니다</div>
-                  <div className="small">좌측에서 메뉴판 이미지를 선택한 뒤 메뉴 추출을 실행해주세요.</div>
-                </div>
+                <EmptyState
+                  icon="bi-card-list"
+                  title="추출된 메뉴가 없습니다"
+                  description="메뉴판 이미지를 선택한 뒤 메뉴 추출을 실행해주세요."
+                />
               ) : (
                 <>
-                  <div className="table-responsive">
-                    <Table hover className="align-middle mb-0">
-                      <thead className="table-light">
+                  <DataTable>
+                      <thead>
                       <tr>
                         <th style={{width: 64}}>번호</th>
                         <th>메뉴 이름</th>
@@ -259,7 +241,7 @@ const AiMenuImageExtract = () => {
                       <tbody>
                       {menus.map((menu, index) => (
                         <tr key={`${menu.name}-${index}`}>
-                          <td className="text-muted">{index + 1}</td>
+                          <td className="num">{index + 1}</td>
                           <td>
                             <Form.Control
                               value={menu.name}
@@ -307,22 +289,20 @@ const AiMenuImageExtract = () => {
                         </tr>
                       ))}
                       </tbody>
-                    </Table>
-                  </div>
+                  </DataTable>
 
                   <div className="mt-4">
-                    <div className="fw-semibold mb-2">저장 API 전달 전 확인용 JSON</div>
+                    <div className="detail-field__label mb-2">저장 API 전달 전 확인용 JSON</div>
                     <pre className="bg-light border rounded p-3 small mb-0" style={{maxHeight: 260, overflow: 'auto'}}>
                       {JSON.stringify(menus, null, 2)}
                     </pre>
                   </div>
                 </>
               )}
-            </Card.Body>
-          </Card>
+          </SectionCard>
         </Col>
       </Row>
-    </Container>
+    </div>
   );
 };
 

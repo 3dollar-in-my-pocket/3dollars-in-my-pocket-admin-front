@@ -1,7 +1,7 @@
-import { ApiResponse, PaginatedResponse } from '../types/api';
-import { Visit, UserVisit } from '../types/visit';
-import { apiGetPaginated } from './apiHelpers';
-import { INCLUDES } from '../constants/api';
+import {ApiResponse, PaginatedResponse} from '@/types/api';
+import {Visit} from '@/types/visit';
+import {apiGetPaginated} from './apiHelpers';
+import {INCLUDES} from '@/constants/api';
 
 export default {
   /**
@@ -18,8 +18,8 @@ export default {
   ): Promise<ApiResponse<PaginatedResponse<Visit>>> => {
     return apiGetPaginated<Visit>(
       `/v1/store/${storeId}/visits`,
-      { cursor, size },
-      { includes: INCLUDES.VISITOR }
+      {cursor, size},
+      {includes: INCLUDES.VISITOR}
     );
   },
 
@@ -28,17 +28,17 @@ export default {
    * @param {string} userId - 사용자 ID
    * @param {string | null} [cursor] - 페이징 커서
    * @param {number} [size] - 페이지 사이즈
-   * @returns {Promise<ApiResponse<PaginatedResponse<UserVisit>>>} 사용자 방문 이력
+   * @returns {Promise<ApiResponse<PaginatedResponse<Visit>>>} 사용자 방문 이력
    */
   getUserVisits: async (
     userId: string,
     cursor: string | null = null,
     size?: number
-  ): Promise<ApiResponse<PaginatedResponse<UserVisit>>> => {
-    return apiGetPaginated<UserVisit>(
+  ): Promise<ApiResponse<PaginatedResponse<Visit>>> => {
+    return apiGetPaginated<Visit>(
       `/v1/user/${userId}/store-visits`,
-      { cursor, size },
-      { includes: INCLUDES.STORE }
+      {cursor, size},
+      {includes: INCLUDES.STORE}
     );
   },
 };

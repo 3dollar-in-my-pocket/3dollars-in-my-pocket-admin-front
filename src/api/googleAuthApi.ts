@@ -1,7 +1,7 @@
-import axios, { AxiosError } from "axios";
+import axios, {AxiosError} from "axios";
 import axiosInstance from "./apiBase";
-import { AUTH_KEY, GOOGLE_TOKEN_URL } from "../constants/google";
-import { GoogleTokenRequest, GoogleTokenResponse } from "../types/auth";
+import {AUTH_KEY, GOOGLE_TOKEN_URL} from "@/constants/google";
+import {GoogleTokenRequest, GoogleTokenResponse} from "@/types/auth";
 
 export default {
   /**
@@ -10,7 +10,7 @@ export default {
    * @returns Google 액세스 토큰
    * @throws Google OAuth API 호출 실패 시 에러
    */
-  getAccessToken: async ({ code }: { code: string }): Promise<string> => {
+  getAccessToken: async ({code}: { code: string }): Promise<string> => {
     try {
       const requestBody: GoogleTokenRequest = {
         code,
@@ -36,8 +36,8 @@ export default {
       if (axios.isAxiosError(error)) {
         const axiosError = error as AxiosError<{ error?: string; error_description?: string }>;
         const errorMessage = axiosError.response?.data?.error_description ||
-                           axiosError.response?.data?.error ||
-                           'Google OAuth 토큰 요청에 실패했습니다.';
+          axiosError.response?.data?.error ||
+          'Google OAuth 토큰 요청에 실패했습니다.';
         throw new Error(errorMessage);
       }
       throw error;

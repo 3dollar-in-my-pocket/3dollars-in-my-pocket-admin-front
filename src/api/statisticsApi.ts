@@ -1,6 +1,6 @@
-import axiosInstance from "./apiBase";
 import {ApiResponse, ContentListResponse} from "@/types/api";
 import {DailyStatistic} from "@/types/statistics";
+import {apiGet} from "./apiHelpers";
 
 export default {
   getDailyStatistics: async (
@@ -9,20 +9,11 @@ export default {
     endDate: string,
     groupId?: string
   ): Promise<ApiResponse<ContentListResponse<DailyStatistic>>> => {
-    try {
-      const response = await axiosInstance({
-        method: "GET",
-        url: `/statistics/daily`,
-        params: {
-          type: statisticsType,
-          startDate,
-          endDate,
-          ...(groupId && { groupId }),
-        },
-      });
-      return response.data;
-    } catch (error: any) {
-      throw error;
-    }
+    return apiGet<ContentListResponse<DailyStatistic>>(`/statistics/daily`, {
+      type: statisticsType,
+      startDate,
+      endDate,
+      ...(groupId && {groupId}),
+    });
   },
 };

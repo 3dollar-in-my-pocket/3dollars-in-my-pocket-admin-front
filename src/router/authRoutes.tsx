@@ -1,4 +1,4 @@
-import GoogleCallback from "../pages/auth/google/GoogleCallback";
+import GoogleCallback from "@/pages/auth/google/GoogleCallback";
 
 const authRoutes = {
   path: '/auth',

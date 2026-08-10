@@ -1,20 +1,26 @@
 import {useCallback, useEffect, useState} from "react";
-import faqApi from "../../api/faqApi";
-import FaqEditModal from "./FaqEditModal";
-import Loading from "../../components/common/Loading";
+import faqApi from "@/api/faqApi";
+import FaqEditModal, {FaqApplicationOption} from "./FaqEditModal";
+import Loading from "@/components/common/Loading";
+import EmptyState from "@/components/common/EmptyState";
+import PageHeader from "@/components/common/PageHeader";
+import FilterCard from "@/components/common/FilterCard";
+import SectionCard from "@/components/common/SectionCard";
+import DataTable from "@/components/common/DataTable";
+import {Faq, FaqCategory} from "@/types/faq";
 
-const applications = [
+const applications: FaqApplicationOption[] = [
   {type: "USER", description: "가슴속 3천원"},
   {type: "BOSS", description: "가슴속 3천원 사장님"},
 ];
 
 const FaqManagement = () => {
-  const [faqs, setFaqs] = useState([]);
-  const [faqCategories, setFaqCategories] = useState([]);
+  const [faqs, setFaqs] = useState<Faq[]>([]);
+  const [faqCategories, setFaqCategories] = useState<FaqCategory[]>([]);
   const [selectedApplication, setSelectedApplication] = useState("");
   const [selectedFaqCategory, setSelectedFaqCategory] = useState("");
   const [showModal, setShowModal] = useState(false);
-  const [selectedFaq, setSelectedFaq] = useState(null);
+  const [selectedFaq, setSelectedFaq] = useState<Faq | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const fetchFaqs = useCallback(() => {
@@ -49,7 +55,7 @@ const FaqManagement = () => {
     }
   }, [selectedFaqCategory, fetchFaqs]);
 
-  const handleShowModal = (faq = null) => {
+  const handleShowModal = (faq: Faq | null = null) => {
     setSelectedFaq(faq);
     setShowModal(true);
   };
@@ -61,33 +67,80 @@ const FaqManagement = () => {
   };
 
   return (
-    <div className="container-fluid py-4">
-      {/* 데스크톱 헤더 */}
-      <div className="d-none d-md-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
-        <h2 className="fw-bold">🎯 FAQ 관리</h2>
-        <button className="btn btn-success" onClick={() => handleShowModal()}>
-          <i className="bi bi-plus-circle me-2"></i> 신규 등록
-        </button>
-      </div>
-
-      {/* 모바일 헤더 */}
-      <div className="d-md-none mb-4 border-bottom pb-3">
-        <h2 className="fw-bold mb-3">🎯 FAQ 관리</h2>
-        <button className="btn btn-success w-100" onClick={() => handleShowModal()}>
-          <i className="bi bi-plus-circle me-2"></i> 신규 등록
-        </button>
-      </div>
-
-      <FilterSection
-        selectedApplication={selectedApplication}
-        setSelectedApplication={setSelectedApplication}
-        selectedFaqCategory={selectedFaqCategory}
-        setSelectedFaqCategory={setSelectedFaqCategory}
-        faqCategories={faqCategories}
-        fetchFaqs={fetchFaqs}
+    <div>
+      <PageHeader
+        description="서비스별 FAQ를 카테고리 단위로 조회하고 등록·수정합니다."
+        actions={
+          <button className="btn btn-primary" onClick={() => handleShowModal()}>
+            <i className="bi bi-plus-lg me-1"/>
+            신규 등록
+          </button>
+        }
       />
 
-      <FaqTable faqs={faqs} onEdit={handleShowModal} isLoading={isLoading}/>
+      <FilterCard>
+        <div className="row g-3">
+          <div className="col-12 col-md-4">
+            <label className="form-label" htmlFor="faq-application">서비스</label>
+            <select
+              id="faq-application"
+              className="form-select"
+              value={selectedApplication}
+              onChange={(e) => setSelectedApplication(e.target.value)}
+            >
+              <option value="">선택하세요</option>
+              {applications.map((app) => (
+                <option key={app.type} value={app.type}>
+                  {app.description}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="col-12 col-md-4">
+            <label className="form-label" htmlFor="faq-category">FAQ 카테고리</label>
+            <select
+              id="faq-category"
+              className="form-select"
+              value={selectedFaqCategory}
+              onChange={(e) => setSelectedFaqCategory(e.target.value)}
+              disabled={!faqCategories.length}
+            >
+              <option value="">전체</option>
+              {faqCategories.map((cat) => (
+                <option key={cat.category} value={cat.category}>
+                  {cat.description}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="col-12 col-md-4 d-flex align-items-end">
+            <button
+              className="btn btn-outline-primary w-100"
+              onClick={fetchFaqs}
+              disabled={!selectedApplication || isLoading}
+            >
+              <i className="bi bi-search me-1"/>
+              조회
+            </button>
+          </div>
+        </div>
+      </FilterCard>
+
+      <SectionCard
+        title="FAQ 목록"
+        icon="bi-question-circle-fill"
+        aside={!isLoading && faqs.length > 0 && <span className="page-count">{faqs.length}건</span>}
+        flush
+      >
+        <FaqTable
+          faqs={faqs}
+          onEdit={handleShowModal}
+          isLoading={isLoading}
+          hasApplication={!!selectedApplication}
+        />
+      </SectionCard>
 
       <FaqEditModal
         selectedApplication={selectedApplication}
@@ -101,117 +154,69 @@ const FaqManagement = () => {
   );
 };
 
-const FilterSection = ({
-                         selectedApplication,
-                         setSelectedApplication,
-                         selectedFaqCategory,
-                         setSelectedFaqCategory,
-                         faqCategories,
-                         fetchFaqs,
-                       }) => (
-  <div className="card shadow-sm mb-4 rounded-3">
-    <div className="card-body">
-      <div className="row g-3">
-        <div className="col-12 col-md-4">
-          <label className="form-label fw-semibold text-secondary">서비스</label>
-          <select
-            className="form-select"
-            value={selectedApplication}
-            onChange={(e) => setSelectedApplication(e.target.value)}
-          >
-            <option value="">선택하세요</option>
-            {applications.map((app) => (
-              <option key={app.type} value={app.type}>
-                {app.description}
-              </option>
-            ))}
-          </select>
-        </div>
+interface FaqTableProps {
+  faqs: Faq[];
+  onEdit: (faq: Faq) => void;
+  isLoading: boolean;
+  hasApplication: boolean;
+}
 
-        <div className="col-12 col-md-4">
-          <label className="form-label fw-semibold text-secondary">FAQ 카테고리</label>
-          <select
-            className="form-select"
-            value={selectedFaqCategory}
-            onChange={(e) => setSelectedFaqCategory(e.target.value)}
-            disabled={!faqCategories.length}
-          >
-            <option value="">전체</option>
-            {faqCategories.map((cat) => (
-              <option key={cat.category} value={cat.category}>
-                {cat.description}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="col-12 col-md-4">
-          <div className="d-flex align-items-end h-100">
-            <button
-              className="btn btn-primary w-100"
-              onClick={fetchFaqs}
-            >
-              <i className="bi bi-search me-1"></i> 조회
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-);
-
-const FaqTable = ({faqs, onEdit, isLoading}) => {
+const FaqTable = ({faqs, onEdit, isLoading, hasApplication}: FaqTableProps) => {
   if (isLoading) {
     return (
-      <div className="py-5 text-center">
+      <div className="py-5">
         <Loading/>
       </div>
     );
   }
 
+  if (!hasApplication) {
+    return (
+      <EmptyState
+        icon="bi-funnel"
+        title="서비스를 선택해주세요"
+        description="조회할 서비스를 먼저 선택하면 FAQ 목록이 표시됩니다."
+      />
+    );
+  }
+
   if (faqs.length === 0) {
     return (
-      <div className="py-5 text-center text-muted fs-5">
-        📭 등록된 FAQ가 존재하지 않습니다.
-      </div>
+      <EmptyState
+        icon="bi-question-circle"
+        title="등록된 FAQ가 없습니다"
+        description="선택한 조건에 해당하는 FAQ가 없습니다."
+      />
     );
   }
 
   return (
     <>
       {/* 모바일 카드 뷰 */}
-      <div className="d-block d-md-none">
-        <div className="row g-3">
+      <div className="d-md-none p-3">
+        <div className="row g-2">
           {faqs.map((faq) => (
             <div key={faq.faqId} className="col-12">
-              <div className="card shadow-sm">
-                <div className="card-body">
-                  <div className="row mb-2">
-                    <div className="col-12">
-                      <small className="text-muted">카테고리</small>
-                      <div className="fw-bold text-primary">
-                        {faq.category.description}
-                      </div>
-                    </div>
+              <div
+                className="item-card item-card--clickable"
+                role="button"
+                tabIndex={0}
+                onClick={() => onEdit(faq)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    onEdit(faq);
+                  }
+                }}
+              >
+                <div className="item-card__body">
+                  <div className="d-flex align-items-center justify-content-between gap-2 mb-2">
+                    <span className="page-count">{faq.category.description}</span>
+                    <i className="bi bi-chevron-right text-body-tertiary small"/>
                   </div>
-                  <div className="mb-3">
-                    <small className="text-muted">질문</small>
-                    <div className="fw-semibold" style={{lineHeight: '1.4'}}>
-                      {faq.question}
-                    </div>
-                  </div>
-                  <div className="mb-3">
-                    <small className="text-muted">답변 요약</small>
-                    <div className="text-truncate" title={faq.answer} style={{maxHeight: '40px'}}>
-                      {faq.answer}
-                    </div>
-                  </div>
-                  <button
-                    className="btn btn-outline-primary btn-sm w-100"
-                    onClick={() => onEdit(faq)}
-                  >
-                    상세보기
-                  </button>
+
+                  <p className="item-card__name">{faq.question}</p>
+                  <p className="item-card__desc">{faq.answer}</p>
                 </div>
               </div>
             </div>
@@ -220,12 +225,12 @@ const FaqTable = ({faqs, onEdit, isLoading}) => {
       </div>
 
       {/* 데스크톱 테이블 뷰 */}
-      <div className="d-none d-md-block table-responsive">
-        <table className="table table-bordered align-middle text-center table-hover">
-          <thead className="table-dark">
+      <div className="d-none d-md-block">
+        <DataTable>
+          <thead>
           <tr>
             <th style={{width: "180px"}}>카테고리</th>
-            <th style={{width: "500px"}}>질문</th>
+            <th style={{width: "40%"}}>질문</th>
             <th>답변 요약</th>
             <th style={{width: "120px"}}>관리</th>
           </tr>
@@ -234,9 +239,11 @@ const FaqTable = ({faqs, onEdit, isLoading}) => {
           {faqs.map((faq) => (
             <tr key={faq.faqId}>
               <td>{faq.category.description}</td>
-              <td className="text-start">{faq.question}</td>
-              <td className="text-start text-truncate" style={{maxWidth: "300px"}}>
-                {faq.answer}
+              <td className="fw-medium">{faq.question}</td>
+              <td>
+                <div className="text-truncate text-body-secondary" style={{maxWidth: "360px"}} title={faq.answer}>
+                  {faq.answer}
+                </div>
               </td>
               <td>
                 <button
@@ -249,7 +256,7 @@ const FaqTable = ({faqs, onEdit, isLoading}) => {
             </tr>
           ))}
           </tbody>
-        </table>
+        </DataTable>
       </div>
     </>
   );

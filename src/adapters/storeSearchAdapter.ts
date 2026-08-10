@@ -1,8 +1,10 @@
-import storeApi from '../api/storeApi';
-import {STORE_SEARCH_TYPES, validateStoreSearch, StoreSearchType, Store, StoreType} from '../types/store';
+import {validateStoreSearch} from '@/utils/validation/storeValidation';
+import storeApi from '@/api/storeApi';
+import {SimpleStore, STORE_SEARCH_TYPES, StoreSearchType, StoreType} from '@/types/store';
 
 interface SearchParams {
-  searchType: StoreSearchType;
+  /** useSearch는 string으로 넘기므로 여기서 좁힙니다. */
+  searchType: string;
   searchQuery: string;
   cursor: string | null;
   targetStores?: StoreType[];
@@ -11,7 +13,7 @@ interface SearchParams {
 interface SearchResult {
   ok: boolean;
   data: {
-    results: Store[];
+    results: SimpleStore[];
     hasMore: boolean;
     nextCursor: string | null;
   };

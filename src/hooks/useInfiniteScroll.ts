@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react';
-import { InfiniteScrollConfig } from '../types/common';
+import {useEffect, useRef} from 'react';
+import {InfiniteScrollConfig} from '@/types/common';
 
 /**
  * Infinite Scroll Hook
@@ -15,12 +15,12 @@ import { InfiniteScrollConfig } from '../types/common';
  * @returns loadMoreRef - 감지 대상 요소에 연결할 ref
  */
 export const useInfiniteScroll = ({
-  hasMore,
-  isLoading,
-  onLoadMore,
-  threshold = 0.1,
-  rootMargin
-}: InfiniteScrollConfig) => {
+                                    hasMore,
+                                    isLoading,
+                                    onLoadMore,
+                                    threshold = 0.1,
+                                    rootMargin
+                                  }: InfiniteScrollConfig) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);

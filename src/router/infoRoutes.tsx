@@ -1,8 +1,11 @@
+import {lazy} from "react";
 import PrivateRouter from "./PrivateRouter";
-import PushStatInfo from "../pages/info/PushStatInfo";
-import ServiceStatInfo from "../pages/info/ServiceStatInfo";
-import EtcLinkInfo from "../pages/info/EtcLinkInfo";
-import AdStatInfo from "../pages/info/AdStatInfo";
+
+// 정보 페이지는 라우트 진입 시점에 로드합니다. (Suspense fallback은 Layout에 있음)
+const PushStatInfo = lazy(() => import("../pages/info/PushStatInfo"));
+const ServiceStatInfo = lazy(() => import("../pages/info/ServiceStatInfo"));
+const EtcLinkInfo = lazy(() => import("../pages/info/EtcLinkInfo"));
+const AdStatInfo = lazy(() => import("../pages/info/AdStatInfo"));
 
 const infoRoutes = {
   path: '/info',
@@ -26,4 +29,4 @@ const infoRoutes = {
   ]
 };
 
-export default infoRoutes; 
+export default infoRoutes;

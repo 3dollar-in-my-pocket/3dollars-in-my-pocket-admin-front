@@ -1,7 +1,4 @@
-/**
- * 소셜 로그인 타입
- */
-export type SocialType = 'GOOGLE';
+import {SocialType} from "@/types/user";
 
 /**
  * Google OAuth 토큰 요청 파라미터

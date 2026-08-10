@@ -1,12 +1,27 @@
-import {Button, Form, Modal} from "react-bootstrap";
-import registrationApi from "../../api/registrationApi";
+import {getOsPlatformBadgeClass, getOsPlatformDisplayName, getOsPlatformIcon} from '@/utils/display/deviceDisplay';
+import {Form, Modal} from "react-bootstrap";
+import registrationApi from "@/api/registrationApi";
 import {useEffect, useState} from "react";
-import enumApi from "../../api/enumApi";
+import enumApi from "@/api/enumApi";
 import {toast} from "react-toastify";
-import {getOsPlatformDisplayName, getOsPlatformBadgeClass, getOsPlatformIcon} from "../../types/registration";
+import DetailField from "@/components/common/DetailField";
+import {BossRegistration} from "@/types/registration";
+import {formatDateTimeKo as formatDateTime} from "@/utils/dateUtils";
 
-const RegistrationModal = ({show, onHide, registration}) => {
-  const [rejectReasons, setRejectReasons] = useState([]);
+/** enum API(BossRegistrationRejectReason) 응답 항목 */
+interface RejectReasonOption {
+  key: string;
+  description: string;
+}
+
+interface RegistrationModalProps {
+  show: boolean;
+  onHide: () => void;
+  registration: BossRegistration | null;
+}
+
+const RegistrationModal = ({show, onHide, registration}: RegistrationModalProps) => {
+  const [rejectReasons, setRejectReasons] = useState<RejectReasonOption[]>([]);
   const [selectedRejectReason, setSelectedRejectReason] = useState("");
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [showApproveModal, setShowApproveModal] = useState(false);
@@ -30,8 +45,6 @@ const RegistrationModal = ({show, onHide, registration}) => {
     setIsProcessing(true);
     try {
       const response = await registrationApi.approveRegistration({id: registration.registrationId});
-      console.log(response);
-
       if (!response.ok) {
         return;
       }
@@ -41,10 +54,6 @@ const RegistrationModal = ({show, onHide, registration}) => {
     } finally {
       setIsProcessing(false);
     }
-  };
-
-  const handleReject = () => {
-    setShowRejectModal(true);
   };
 
   const handleConfirmReject = async () => {
@@ -70,127 +79,140 @@ const RegistrationModal = ({show, onHide, registration}) => {
     }
   };
 
-  const confirmApprove = () => {
-    setShowApproveModal(true);
-  };
-
-  const handleConfirmApprove = async () => {
-    await handleApprove();
-  };
-
-  const formatDate = (dateStr) => new Date(dateStr).toLocaleString("ko-KR");
-
   return (
     <>
-      <Modal show={show} onHide={onHide} centered size="lg">
+      <Modal show={show} onHide={onHide} centered size="lg" className="app-modal" scrollable>
         <Modal.Header closeButton>
-          <Modal.Title>📋 가입 신청 상세</Modal.Title>
+          <div className="min-w-0">
+            <Modal.Title as="h2">
+              <i className="bi bi-clipboard-check"/>
+              가입 신청 상세
+            </Modal.Title>
+            <p className="app-modal__subtitle font-monospace">{registration.registrationId}</p>
+          </div>
         </Modal.Header>
+
         <Modal.Body>
-          <section className="mb-4">
-            <h5 className="fw-bold border-bottom pb-2 mb-3">👤 대표자 정보</h5>
-            <ul className="list-unstyled ps-1">
-              <li>
-                <strong>이름:</strong> {boss.name}
-              </li>
-              <li>
-                <strong>소셜 타입:</strong> {boss.socialType}
-              </li>
-              <li>
-                <strong>사업자 번호:</strong> {boss.businessNumber}
-              </li>
-            </ul>
-          </section>
+          {/* 대표자 정보 */}
+          <div className="modal-section">
+            <h3 className="modal-section__title">
+              <i className="bi bi-person-vcard"/>
+              대표자 정보
+            </h3>
+            <div className="row g-3">
+              <DetailField label="이름" className="col-6 col-md-4">
+                {boss.name}
+              </DetailField>
+              <DetailField label="소셜 타입" className="col-6 col-md-4">
+                {boss.socialType}
+              </DetailField>
+              <DetailField label="사업자 번호" className="col-12 col-md-4" monospace>
+                {boss.businessNumber}
+              </DetailField>
+            </div>
+          </div>
 
-          <section className="mb-4">
-            <h5 className="fw-bold border-bottom pb-2 mb-3">🏪 가게 정보</h5>
-            <ul className="list-unstyled ps-1">
-              <li>
-                <strong>가게명:</strong> {store.name}
-              </li>
-              <li>
-                <strong>카테고리:</strong> {store.categories.join(", ")}
-              </li>
-              <li className="mt-3">
-                <strong>인증 사진:</strong>
-                <br/>
-                <img
-                  src={store.certificationPhotoUrl}
-                  alt="인증 사진"
-                  className="img-fluid rounded shadow-sm mt-2"
-                  style={{
-                    maxHeight: "300px",
-                    objectFit: "contain",
-                    backgroundColor: '#f8f9fa',
-                    border: '1px solid #e9ecef'
-                  }}
-                />
-              </li>
-            </ul>
-          </section>
+          {/* 가게 정보 */}
+          <div className="modal-section">
+            <h3 className="modal-section__title">
+              <i className="bi bi-shop"/>
+              가게 정보
+            </h3>
+            <div className="row g-3">
+              <DetailField label="가게명" className="col-12 col-md-6">
+                {store.name}
+              </DetailField>
+              <DetailField label="카테고리" className="col-12 col-md-6">
+                {store.categories.length > 0 ? (
+                  <span className="d-flex flex-wrap gap-1">
+                    {store.categories.map((category) => (
+                      <span key={category} className="badge text-bg-light">{category}</span>
+                    ))}
+                  </span>
+                ) : null}
+              </DetailField>
+              <DetailField label="인증 사진" className="col-12" placeholder="사진 없음">
+                {store.certificationPhotoUrl ? (
+                  <a
+                    href={store.certificationPhotoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="d-block mt-1"
+                    title="새 창에서 원본 보기"
+                  >
+                    <img
+                      src={store.certificationPhotoUrl}
+                      alt="인증 사진"
+                      className="registration-photo"
+                    />
+                  </a>
+                ) : null}
+              </DetailField>
+            </div>
+          </div>
 
-          <section>
-            <h6 className="fw-bold border-bottom pb-2 mb-3">🕒 신청 정보</h6>
-            <ul className="list-unstyled ps-1">
-              <li className="mb-2">
-                <strong>신청일:</strong> {formatDate(createdAt)}
-              </li>
-              {context && (
-                <>
-                  <li className="mb-2">
-                    <strong>OS:</strong>{' '}
-                    <span className={`badge ${getOsPlatformBadgeClass(context.osPlatform)} ms-2`}>
-                      <i className={`bi ${getOsPlatformIcon(context.osPlatform)} me-1`}></i>
-                      {getOsPlatformDisplayName(context.osPlatform)}
-                    </span>
-                  </li>
-                  {context.appVersion && (
-                    <li>
-                      <strong>앱 버전:</strong>{' '}
-                      <span className="badge bg-dark ms-2" style={{fontFamily: 'monospace'}}>
-                        v{context.appVersion}
-                      </span>
-                    </li>
-                  )}
-                </>
-              )}
-            </ul>
-          </section>
+          {/* 신청 정보 */}
+          <div className="modal-section">
+            <h3 className="modal-section__title">
+              <i className="bi bi-clock-history"/>
+              신청 정보
+            </h3>
+            <div className="row g-3">
+              <DetailField label="신청일" className="col-12 col-md-4">
+                {formatDateTime(createdAt)}
+              </DetailField>
+              <DetailField label="OS" className="col-6 col-md-4">
+                {context?.osPlatform ? (
+                  <span className={`badge ${getOsPlatformBadgeClass(context.osPlatform)}`}>
+                    <i className={`bi ${getOsPlatformIcon(context.osPlatform)} me-1`}/>
+                    {getOsPlatformDisplayName(context.osPlatform)}
+                  </span>
+                ) : null}
+              </DetailField>
+              <DetailField label="앱 버전" className="col-6 col-md-4" monospace>
+                {context?.appVersion ? `v${context.appVersion}` : null}
+              </DetailField>
+            </div>
+          </div>
         </Modal.Body>
 
         <Modal.Footer>
-          <div className="me-auto">
-            <Button
-              variant="success"
-              onClick={confirmApprove}
-              className="me-2"
-              size="lg"
-              disabled={isProcessing}
-            >
-              ✅ 승인
-            </Button>
-            <Button
-              variant="danger"
-              onClick={handleReject}
-              size="lg"
-              disabled={isProcessing}
-            >
-              ❌ 거절
-            </Button>
-          </div>
+          <button className="btn btn-outline-secondary me-auto" onClick={onHide}>
+            닫기
+          </button>
+          <button
+            className="btn btn-outline-danger"
+            onClick={() => setShowRejectModal(true)}
+            disabled={isProcessing}
+          >
+            <i className="bi bi-x-circle me-1"/>
+            거절
+          </button>
+          <button
+            className="btn btn-primary"
+            onClick={() => setShowApproveModal(true)}
+            disabled={isProcessing}
+          >
+            <i className="bi bi-check2-circle me-1"/>
+            승인
+          </button>
         </Modal.Footer>
       </Modal>
 
-      <Modal show={showRejectModal} onHide={() => setShowRejectModal(false)} centered size="lg">
+      {/* 거절 사유 선택 */}
+      <Modal show={showRejectModal} onHide={() => setShowRejectModal(false)} centered className="app-modal">
         <Modal.Header closeButton>
-          <Modal.Title>거절 사유 선택</Modal.Title>
+          <Modal.Title as="h2">
+            <i className="bi bi-x-circle"/>
+            거절 사유 선택
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
+          <label className="form-label" htmlFor="reject-reason">거절 사유</label>
           <Form.Select
+            id="reject-reason"
             value={selectedRejectReason}
             onChange={(e) => setSelectedRejectReason(e.target.value)}
-            aria-label="거절 사유 선택"
-            size="lg"
           >
             <option value="">거절 사유를 선택하세요</option>
             {rejectReasons.map((reason) => (
@@ -199,51 +221,67 @@ const RegistrationModal = ({show, onHide, registration}) => {
               </option>
             ))}
           </Form.Select>
+          <p className="form-text mt-2">
+            <strong>{store.name}</strong>의 가입 신청을 거절합니다. 거절 후에는 되돌릴 수 없습니다.
+          </p>
         </Modal.Body>
         <Modal.Footer>
-          <Button
-            variant="secondary"
+          <button
+            className="btn btn-outline-secondary"
             onClick={() => setShowRejectModal(false)}
-            size="lg"
             disabled={isProcessing}
           >
             취소
-          </Button>
-          <Button
-            variant="danger"
+          </button>
+          <button
+            className="btn btn-danger"
             onClick={handleConfirmReject}
-            size="lg"
             disabled={!selectedRejectReason || isProcessing}
           >
-            거절 확정
-          </Button>
+            {isProcessing ? (
+              <>
+                <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"/>
+                처리 중...
+              </>
+            ) : '거절 확정'}
+          </button>
         </Modal.Footer>
       </Modal>
 
-      <Modal show={showApproveModal} onHide={() => setShowApproveModal(false)} centered size="lg">
+      {/* 승인 확인 */}
+      <Modal show={showApproveModal} onHide={() => setShowApproveModal(false)} centered className="app-modal">
         <Modal.Header closeButton>
-          <Modal.Title>승인 확인</Modal.Title>
+          <Modal.Title as="h2">
+            <i className="bi bi-check2-circle"/>
+            승인 확인
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <p>정말로 이 가입 신청을 승인하시겠습니까?</p>
+          <p className="mb-0">
+            <strong>{store.name}</strong>({boss.name})의 가입 신청을 승인하시겠습니까?
+          </p>
+          <p className="form-text mt-2 mb-0">승인 후에는 되돌릴 수 없습니다.</p>
         </Modal.Body>
         <Modal.Footer>
-          <Button
-            variant="secondary"
+          <button
+            className="btn btn-outline-secondary"
             onClick={() => setShowApproveModal(false)}
-            size="lg"
             disabled={isProcessing}
           >
             취소
-          </Button>
-          <Button
-            variant="success"
-            onClick={handleConfirmApprove}
-            size="lg"
+          </button>
+          <button
+            className="btn btn-primary"
+            onClick={handleApprove}
             disabled={isProcessing}
           >
-            승인 확정
-          </Button>
+            {isProcessing ? (
+              <>
+                <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"/>
+                처리 중...
+              </>
+            ) : '승인 확정'}
+          </button>
         </Modal.Footer>
       </Modal>
     </>

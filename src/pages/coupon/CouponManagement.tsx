@@ -1,85 +1,54 @@
-import {useEffect, useRef, useState, useCallback} from 'react';
-import couponApi from '../../api/couponApi';
-import {
-  StoreCoupon,
-  getCouponStatusDisplayName,
-  getCouponStatusBadgeClass,
-  formatCouponDate,
-  COUPON_STATUS
-} from '../../types/coupon';
-import {getStoreTypeDisplayName, getStoreTypeBadgeClass, getStoreTypeIcon} from '../../types/store';
-import StoreDetailModal from '../store/StoreDetailModal';
-import useInfiniteScroll from '../../hooks/useInfiniteScroll';
-import EmptyState from '../../components/common/EmptyState';
+import StoreTypeBadge from '@/components/common/badges/StoreTypeBadge';
+import {useCallback, useState} from 'react';
+import couponApi from '@/api/couponApi';
+import {Coupon, COUPON_STATUS} from '@/types/coupon';
+import {formatDateTimeShortKo as formatCouponDate} from '@/utils/dateUtils';
+import {getCouponStatusBadgeClass, getCouponStatusDisplayName} from '@/utils/display/couponDisplay';
+
+import StoreDetailModal from '@/pages/store/StoreDetailModal';
+import useInfiniteScroll from '@/hooks/useInfiniteScroll';
+import useCursorPagination from '@/hooks/useCursorPagination';
+import EmptyState from '@/components/common/EmptyState';
+import PageHeader from '@/components/common/PageHeader';
+import FilterCard from '@/components/common/FilterCard';
+import SectionCard from '@/components/common/SectionCard';
+
+const STATUS_OPTIONS = [COUPON_STATUS.ACTIVE, COUPON_STATUS.STOPPED, COUPON_STATUS.ENDED];
+
+/** 카드에 한 번에 노출하는 카테고리 개수 */
+const VISIBLE_CATEGORIES = 2;
 
 const CouponManagement = () => {
-  const [coupons, setCoupons] = useState<StoreCoupon[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(false);
   const [selectedStore, setSelectedStore] = useState<any>(null);
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [skeletonCount] = useState(3);
-  const isInitialMount = useRef(true);
 
-  // cursor와 isLoading을 ref로 관리하여 useCallback 의존성 문제 해결
-  const cursorRef = useRef<string | null>(null);
-  const isLoadingRef = useRef(false);
-  const selectedStatusesRef = useRef<string[]>([]);
+  const fetchCoupons = useCallback(
+    (cursor: string | null) => couponApi.getAllStoreCoupons(
+      cursor,
+      20,
+      selectedStatuses.length > 0 ? selectedStatuses : undefined
+    ),
+    [selectedStatuses]
+  );
 
-  // selectedStatuses 변경 시 ref 업데이트
-  useEffect(() => {
-    selectedStatusesRef.current = selectedStatuses;
-  }, [selectedStatuses]);
-
-  const fetchCoupons = useCallback(async (reset = false) => {
-    // 중복 호출 방지
-    if (isLoadingRef.current) return;
-
-    isLoadingRef.current = true;
-    setIsLoading(true);
-    try {
-      const statusesToSend = selectedStatusesRef.current.length > 0 ? selectedStatusesRef.current : undefined;
-      const response = await couponApi.getAllStoreCoupons(reset ? null : cursorRef.current, 20, statusesToSend);
-      if (!response?.ok) {
-        return;
-      }
-
-      const {contents = [], cursor: newCursor} = response.data || { contents: [], cursor: { hasMore: false, nextCursor: null } };
-
-      if (reset) {
-        setCoupons(contents);
-        cursorRef.current = null; // reset 시 cursor 초기화
-      } else {
-        setCoupons(prev => [...prev, ...contents]);
-      }
-
-      setHasMore(newCursor.hasMore || false);
-      cursorRef.current = newCursor.nextCursor || null;
-    } finally {
-      isLoadingRef.current = false;
-      setIsLoading(false);
-    }
-  }, []);
-
-  // 초기 데이터 로드
-  useEffect(() => {
-    fetchCoupons(true);
-  }, [fetchCoupons]);
-
-  // 상태 필터 변경 시 재조회
-  useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      return;
-    }
-    fetchCoupons(true);
-  }, [selectedStatuses, fetchCoupons]);
+  const {
+    items: coupons,
+    isLoading,
+    hasMore,
+    refresh,
+    loadMore
+  } = useCursorPagination<Coupon>({
+    fetcher: fetchCoupons,
+    deps: [selectedStatuses],
+    errorMessage: '쿠폰을 불러오는데 실패했습니다.'
+  });
 
   // Infinite Scroll 훅 사용
-  const { scrollContainerRef, loadMoreRef } = useInfiniteScroll({
+  const {scrollContainerRef, loadMoreRef} = useInfiniteScroll({
     hasMore,
     isLoading,
-    onLoadMore: () => fetchCoupons(false),
+    onLoadMore: loadMore,
     threshold: 0.1
   });
 
@@ -98,18 +67,6 @@ const CouponManagement = () => {
     return Math.round((issued / max) * 100);
   };
 
-  const getStoreTypeBadge = (storeType: string, isMobile = false) => {
-    if (!storeType) return null;
-    return (
-      <span
-        className={`badge ${getStoreTypeBadgeClass(storeType as any)} text-white rounded-pill ${isMobile ? 'px-2 py-1' : 'px-3 py-1'}`}
-        style={{fontSize: isMobile ? '0.65rem' : '0.75rem', whiteSpace: 'nowrap'}}
-      >
-        <i className={`bi ${getStoreTypeIcon(storeType as any)} me-1`}></i>
-        {getStoreTypeDisplayName(storeType as any)}
-      </span>
-    );
-  };
 
   const handleStoreClick = (store: any) => {
     setSelectedStore(store);
@@ -118,323 +75,206 @@ const CouponManagement = () => {
   // 스켈레톤 로더 컴포넌트
   const SkeletonCard = () => (
     <div className="col-12">
-      <div className="card border-0 shadow-sm h-100" style={{background: '#f8f9fa'}}>
-        <div className="card-body p-2 p-md-3">
+      <div className="item-card">
+        <div className="item-card__body">
           <div className="d-flex gap-2 mb-2">
-            <div className="bg-secondary bg-opacity-25 rounded-pill" style={{width: '100px', height: '24px'}}></div>
-            <div className="bg-secondary bg-opacity-25 rounded-pill" style={{width: '80px', height: '24px'}}></div>
+            <div className="skeleton-line" style={{width: '120px'}}/>
+            <div className="skeleton-line" style={{width: '80px'}}/>
           </div>
-          <div className="bg-secondary bg-opacity-25 rounded mb-2" style={{width: '60%', height: '20px'}}></div>
-          <div className="bg-secondary bg-opacity-25 rounded mb-2" style={{width: '100%', height: '80px'}}></div>
+          <div className="skeleton-line mb-2" style={{width: '60%'}}/>
+          <div className="skeleton-line" style={{width: '100%', height: '72px'}}/>
         </div>
       </div>
     </div>
   );
 
   return (
-    <div className="container-fluid py-4">
-      <div className="mb-4 border-bottom pb-3">
-        <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
-          <div>
-            <h2 className="fw-bold mb-1">
-              <i className="bi bi-ticket-perforated text-warning me-2"></i>
-              가게 쿠폰 관리
-            </h2>
-            <p className="text-muted mb-0 small">
-              전체 가게에 등록된 쿠폰을 조회하고 관리할 수 있습니다.
-            </p>
-          </div>
-          <div className="d-flex align-items-center gap-2">
-            <span className="badge bg-warning text-dark px-3 py-2 rounded-pill">
-              총 {coupons.length}{hasMore ? '+' : ''}개
-            </span>
-            <button
-              className="btn btn-outline-secondary btn-sm rounded-pill"
-              onClick={() => fetchCoupons(true)}
-              disabled={isLoading}
-            >
-              <i className="bi bi-arrow-clockwise me-1"></i>
-              새로고침
-            </button>
-          </div>
-        </div>
-      </div>
+    <div>
+      <PageHeader
+        description="전체 가게에 등록된 쿠폰의 발급·사용 현황을 조회합니다."
+        actions={
+          <button className="btn btn-outline-primary" onClick={refresh} disabled={isLoading}>
+            <i className="bi bi-arrow-clockwise me-1"/>
+            새로고침
+          </button>
+        }
+      />
 
-      {/* 상태 필터 섹션 */}
-      <div className="mb-4">
-        <div className="d-flex align-items-center gap-2 flex-wrap">
-          <span className="text-muted small me-2">
-            <i className="bi bi-funnel me-1"></i>
-            쿠폰 상태:
-          </span>
+      <FilterCard title="쿠폰 상태" icon="bi-funnel" aside={<span className="small text-secondary">복수 선택 가능</span>}>
+        <div className="filter-chips">
           <button
-            className={`btn btn-sm rounded-pill ${selectedStatuses.length === 0 ? 'btn-primary' : 'btn-outline-secondary'}`}
+            type="button"
+            className={`filter-chip ${selectedStatuses.length === 0 ? 'filter-chip--active' : ''}`}
             onClick={() => setSelectedStatuses([])}
             disabled={isLoading}
           >
-            <i className="bi bi-list-ul me-1"></i>
             전체
           </button>
-          <button
-            className={`btn btn-sm rounded-pill ${selectedStatuses.includes(COUPON_STATUS.ACTIVE) ? 'btn-success' : 'btn-outline-success'}`}
-            onClick={() => handleStatusToggle(COUPON_STATUS.ACTIVE)}
-            disabled={isLoading}
-          >
-            {selectedStatuses.includes(COUPON_STATUS.ACTIVE) ? (
-              <i className="bi bi-check-circle-fill me-1"></i>
-            ) : (
-              <i className="bi bi-circle me-1"></i>
-            )}
-            {getCouponStatusDisplayName(COUPON_STATUS.ACTIVE)}
-          </button>
-          <button
-            className={`btn btn-sm rounded-pill ${selectedStatuses.includes(COUPON_STATUS.STOPPED) ? 'btn-warning' : 'btn-outline-warning'}`}
-            onClick={() => handleStatusToggle(COUPON_STATUS.STOPPED)}
-            disabled={isLoading}
-          >
-            {selectedStatuses.includes(COUPON_STATUS.STOPPED) ? (
-              <i className="bi bi-check-circle-fill me-1"></i>
-            ) : (
-              <i className="bi bi-circle me-1"></i>
-            )}
-            {getCouponStatusDisplayName(COUPON_STATUS.STOPPED)}
-          </button>
-          <button
-            className={`btn btn-sm rounded-pill ${selectedStatuses.includes(COUPON_STATUS.ENDED) ? 'btn-secondary' : 'btn-outline-secondary'}`}
-            onClick={() => handleStatusToggle(COUPON_STATUS.ENDED)}
-            disabled={isLoading}
-          >
-            {selectedStatuses.includes(COUPON_STATUS.ENDED) ? (
-              <i className="bi bi-check-circle-fill me-1"></i>
-            ) : (
-              <i className="bi bi-circle me-1"></i>
-            )}
-            {getCouponStatusDisplayName(COUPON_STATUS.ENDED)}
-          </button>
-          <span className="text-muted small ms-2">
-            <i className="bi bi-info-circle me-1"></i>
-            복수 선택 가능
-          </span>
+          {STATUS_OPTIONS.map((status) => (
+            <button
+              key={status}
+              type="button"
+              className={`filter-chip ${selectedStatuses.includes(status) ? 'filter-chip--active' : ''}`}
+              onClick={() => handleStatusToggle(status)}
+              disabled={isLoading}
+            >
+              {getCouponStatusDisplayName(status)}
+            </button>
+          ))}
         </div>
-      </div>
+      </FilterCard>
 
-      <div ref={scrollContainerRef} style={{maxHeight: 'calc(100vh - 280px)', overflowY: 'auto'}}>
-        <div className="row g-3">
-          {isLoading && coupons.length === 0 ? (
-            Array.from({length: skeletonCount}).map((_, idx) => <SkeletonCard key={idx}/>)
-          ) : coupons.length === 0 ? (
-            <div className="col-12">
-              <EmptyState
-                icon="bi-ticket-perforated"
-                title="등록된 쿠폰이 없습니다"
-                description="아직 가게에서 발급한 쿠폰이 없어요."
-              />
-            </div>
-          ) : (
-            coupons.map((coupon, index) => {
-              const progress = calculateProgress(coupon.currentIssuedCount, coupon.maxIssuableCount);
-              const usageRate = coupon.currentIssuedCount > 0
-                ? Math.round((coupon.currentUsedCount / coupon.currentIssuedCount) * 100)
-                : 0;
+      <SectionCard
+        title="쿠폰 목록"
+        icon="bi-ticket-perforated-fill"
+        aside={coupons.length > 0 && (
+          <span className="page-count">{coupons.length.toLocaleString()}{hasMore ? '+' : ''}건</span>
+        )}
+      >
+        <div ref={scrollContainerRef} style={{maxHeight: 'calc(100vh - 340px)', overflowY: 'auto'}}>
+          <div className="row g-3">
+            {isLoading && coupons.length === 0 ? (
+              Array.from({length: skeletonCount}).map((_, idx) => <SkeletonCard key={idx}/>)
+            ) : coupons.length === 0 ? (
+              <div className="col-12">
+                <EmptyState
+                  icon="bi-ticket-perforated"
+                  title="등록된 쿠폰이 없습니다"
+                  description="아직 가게에서 발급한 쿠폰이 없습니다."
+                />
+              </div>
+            ) : (
+              coupons.map((coupon, index) => {
+                const progress = calculateProgress(coupon.currentIssuedCount, coupon.maxIssuableCount);
+                const usageRate = coupon.currentIssuedCount > 0
+                  ? Math.round((coupon.currentUsedCount / coupon.currentIssuedCount) * 100)
+                  : 0;
 
-              return (
-                <div key={coupon.couponId || index} className="col-12">
-                  <div className="card border-0 shadow-sm h-100" style={{
-                    borderRadius: '16px',
-                    background: 'linear-gradient(135deg, #fffbea 0%, #ffffff 100%)'
-                  }}>
-                    <div className="card-body p-3 p-md-4">
-                      {/* 가게 정보 섹션 */}
-                      <div className="mb-3 pb-3 border-bottom">
-                        <div className="d-flex justify-content-between align-items-start flex-wrap gap-2">
-                          <div className="flex-grow-1">
-                            <div
-                              className="d-flex align-items-center gap-2 mb-2 cursor-pointer"
+                return (
+                  <div key={coupon.couponId || index} className="col-12">
+                    <div className="item-card">
+                      <div className="item-card__body">
+                        {/* 가게 정보 */}
+                        <div className="d-flex align-items-start justify-content-between gap-2 pb-2 mb-3 border-bottom">
+                          <div className="min-w-0">
+                            <button
+                              type="button"
+                              className="btn btn-link p-0 text-start item-card__name text-decoration-none"
                               onClick={() => handleStoreClick(coupon.store)}
-                              style={{cursor: 'pointer'}}
                             >
-                              <i className="bi bi-shop text-primary"></i>
-                              <h6 className="fw-bold text-primary mb-0 text-decoration-underline">
-                                {coupon.store?.name || '가게 이름 없음'}
-                              </h6>
-                              {getStoreTypeBadge(coupon.store?.storeType)}
-                            </div>
-                            <div className="d-flex align-items-center gap-2 text-muted small">
-                              <i className="bi bi-geo-alt"></i>
-                              <span>{coupon.store?.address?.fullAddress || '주소 정보 없음'}</span>
-                            </div>
+                              <i className="bi bi-shop me-1"/>
+                              {coupon.store?.name || '가게 이름 없음'}
+                              <i className="bi bi-box-arrow-up-right ms-1 small"/>
+                            </button>
+                            <p className="item-card__desc mb-0">
+                              <i className="bi bi-geo-alt me-1"/>
+                              {coupon.store?.address?.fullAddress || '주소 정보 없음'}
+                            </p>
                           </div>
-                          <div className="d-flex align-items-center gap-2 flex-wrap">
-                            {coupon.store?.categories?.slice(0, 2).map((category: any, idx: number) => (
-                              <span key={idx}
-                                    className="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-2 py-1"
-                                    style={{fontSize: '0.7rem'}}>
-                                <i className="bi bi-tag me-1"></i>
-                                {category.name}
-                              </span>
+                          <div className="form-chips mt-0 flex-shrink-0 justify-content-end">
+                            <StoreTypeBadge storeType={coupon.store?.storeType}/>
+                            {coupon.store?.categories?.slice(0, VISIBLE_CATEGORIES).map((category: any, idx: number) => (
+                              <span key={idx} className="form-chip">{category.name}</span>
                             ))}
-                            {coupon.store?.categories?.length > 2 && (
-                              <span
-                                className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-2 py-1"
-                                style={{fontSize: '0.7rem'}}>
-                                +{coupon.store.categories.length - 2}
+                            {coupon.store?.categories?.length > VISIBLE_CATEGORIES && (
+                              <span className="form-chip">
+                                +{coupon.store.categories.length - VISIBLE_CATEGORIES}
                               </span>
                             )}
                           </div>
                         </div>
-                      </div>
 
-                      {/* 쿠폰 정보 섹션 */}
-                      <div className="mb-3">
-                        <div className="d-flex align-items-center gap-2 mb-2">
-                          <h6 className="fw-bold text-dark mb-0">{coupon.name}</h6>
-                          <span
-                            className={`badge ${getCouponStatusBadgeClass(coupon.status)} bg-opacity-10 text-dark border px-3 py-1 rounded-pill`}>
-                            <i className="bi bi-circle-fill me-1" style={{fontSize: '0.5rem'}}></i>
+                        {/* 쿠폰 정보 */}
+                        <div className="d-flex align-items-center flex-wrap gap-2 mb-1">
+                          <h3 className="item-card__name mb-0">{coupon.name}</h3>
+                          <span className={`badge ${getCouponStatusBadgeClass(coupon.status)}`}>
                             {getCouponStatusDisplayName(coupon.status)}
                           </span>
+                          <span className="item-card__desc font-monospace">#{coupon.couponId}</span>
                         </div>
-                        <div className="d-flex align-items-center gap-2 text-muted small">
-                          <i className="bi bi-hash"></i>
-                          <span>{coupon.couponId}</span>
-                        </div>
-                      </div>
 
-                      {/* 통계 정보 */}
-                      <div className="row g-3 mb-3">
-                        <div className="col-md-6">
-                          <div className="d-flex align-items-center gap-2 p-3 bg-white rounded-3">
-                            <div className="bg-primary bg-opacity-10 rounded-circle p-2" style={{
-                              width: '40px',
-                              height: '40px',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center'
-                            }}>
-                              <i className="bi bi-ticket-detailed text-primary"></i>
+                        {/* 발급 / 사용 현황 */}
+                        <div className="row g-3 mt-2">
+                          <div className="col-12 col-md-6">
+                            <div className="stat-tile">
+                              <span className="stat-tile__label">발급 현황</span>
+                              <span className="stat-tile__value">
+                                {coupon.currentIssuedCount.toLocaleString()}
+                                <span className="text-secondary fw-normal fs-6">
+                                  {' / '}{coupon.maxIssuableCount.toLocaleString()}
+                                </span>
+                              </span>
+                              <div className="meter mt-1">
+                                <div className="meter__fill" style={{width: `${progress}%`}}/>
+                              </div>
+                              <span className="stat-tile__label">{progress}% 발급</span>
                             </div>
-                            <div className="flex-grow-1">
-                              <div className="text-muted small mb-1">발급 현황</div>
-                              <div className="fw-bold text-dark">
-                                {coupon.currentIssuedCount.toLocaleString()} / {coupon.maxIssuableCount.toLocaleString()}
+                          </div>
+
+                          <div className="col-12 col-md-6">
+                            <div className="stat-tile">
+                              <span className="stat-tile__label">사용 현황</span>
+                              <span className="stat-tile__value">
+                                {coupon.currentUsedCount.toLocaleString()}
+                                <span className="text-secondary fw-normal fs-6">
+                                  {' / '}{coupon.currentIssuedCount.toLocaleString()}
+                                </span>
+                              </span>
+                              <div className="meter mt-1">
+                                <div className="meter__fill meter__fill--success" style={{width: `${usageRate}%`}}/>
                               </div>
-                              <div className="progress mt-2" style={{height: '6px'}}>
-                                <div
-                                  className="progress-bar bg-primary"
-                                  role="progressbar"
-                                  style={{width: `${progress}%`}}
-                                  aria-valuenow={progress}
-                                  aria-valuemin={0}
-                                  aria-valuemax={100}
-                                ></div>
-                              </div>
-                              <div className="text-muted small mt-1">{progress}% 발급됨</div>
+                              <span className="stat-tile__label">{usageRate}% 사용</span>
                             </div>
                           </div>
                         </div>
 
-                        <div className="col-md-6">
-                          <div className="d-flex align-items-center gap-2 p-3 bg-white rounded-3">
-                            <div className="bg-success bg-opacity-10 rounded-circle p-2" style={{
-                              width: '40px',
-                              height: '40px',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center'
-                            }}>
-                              <i className="bi bi-check-circle text-success"></i>
-                            </div>
-                            <div className="flex-grow-1">
-                              <div className="text-muted small mb-1">사용 현황</div>
-                              <div className="fw-bold text-dark">
-                                {coupon.currentUsedCount.toLocaleString()} / {coupon.currentIssuedCount.toLocaleString()}
-                              </div>
-                              <div className="progress mt-2" style={{height: '6px'}}>
-                                <div
-                                  className="progress-bar bg-success"
-                                  role="progressbar"
-                                  style={{width: `${usageRate}%`}}
-                                  aria-valuenow={usageRate}
-                                  aria-valuemin={0}
-                                  aria-valuemax={100}
-                                ></div>
-                              </div>
-                              <div className="text-muted small mt-1">{usageRate}% 사용됨</div>
-                            </div>
+                        {/* 기간 정보 */}
+                        <div className="form-summary mt-3 pt-2 border-top">
+                          <div className="form-summary__row">
+                            <span className="form-summary__label">유효 기간</span>
+                            <span className="form-summary__value">
+                              {formatCouponDate(coupon.validityPeriod.startDateTime)}
+                              {' ~ '}
+                              {formatCouponDate(coupon.validityPeriod.endDateTime)}
+                            </span>
                           </div>
-                        </div>
-                      </div>
-
-                      {/* 날짜 정보 */}
-                      <div className="border-top pt-3">
-                        <div className="row g-2">
-                          <div className="col-12">
-                            <div className="d-flex align-items-center gap-2 p-2 bg-white rounded-3">
-                              <div className="bg-primary bg-opacity-10 rounded-circle p-2" style={{
-                                width: '32px',
-                                height: '32px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                              }}>
-                                <i className="bi bi-calendar-range text-primary" style={{fontSize: '0.9rem'}}></i>
-                              </div>
-                              <div className="d-flex align-items-center gap-2 flex-wrap">
-                                <span className="fw-semibold text-dark">유효 기간:</span>
-                                <span
-                                  className="text-dark">{formatCouponDate(coupon.validityPeriod.startDateTime)}</span>
-                                <i className="bi bi-arrow-right text-muted"></i>
-                                <span className="text-dark">{formatCouponDate(coupon.validityPeriod.endDateTime)}</span>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="col-md-6">
-                            <div className="d-flex align-items-center gap-2 text-muted small">
-                              <i className="bi bi-clock"></i>
-                              <span>생성일: {formatCouponDate(coupon.createdAt)}</span>
-                            </div>
-                          </div>
-                          <div className="col-md-6">
-                            <div className="d-flex align-items-center gap-2 text-muted small">
-                              <i className="bi bi-clock-history"></i>
-                              <span>수정일: {formatCouponDate(coupon.updatedAt)}</span>
-                            </div>
+                          <div className="form-summary__row">
+                            <span className="form-summary__label">생성 / 수정</span>
+                            <span className="form-summary__value form-summary__value--muted">
+                              {formatCouponDate(coupon.createdAt)} / {formatCouponDate(coupon.updatedAt)}
+                            </span>
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              );
-            })
-          )}
+                );
+              })
+            )}
 
-          {/* 무한 스크롤 트리거 - 항상 렌더링 */}
-          <div
-            ref={loadMoreRef}
-            className="col-12 text-center py-3"
-            style={{
-              display: hasMore ? 'block' : 'none',
-              minHeight: '50px'
-            }}
-          >
-            {isLoading && (
-              <div className="d-flex flex-column align-items-center gap-2">
-                <div className="spinner-border text-primary" role="status">
-                  <span className="visually-hidden">Loading...</span>
-                </div>
-                <span className="text-muted small">쿠폰을 불러오는 중...</span>
-              </div>
+            {/* 무한 스크롤 트리거 - 항상 렌더링 */}
+            <div
+              ref={loadMoreRef}
+              className="col-12 text-center py-3"
+              style={{display: hasMore ? 'block' : 'none'}}
+            >
+              {isLoading && (
+                <>
+                  <span className="spinner-border spinner-border-sm text-primary me-2" role="status"/>
+                  <span className="small text-muted">쿠폰을 불러오는 중...</span>
+                </>
+              )}
+            </div>
+
+            {!hasMore && coupons.length > 0 && (
+              <p className="col-12 text-center text-secondary small mb-0">
+                <i className="bi bi-check-circle me-1"/>
+                모든 쿠폰을 불러왔습니다.
+              </p>
             )}
           </div>
-
-          {!hasMore && coupons.length > 0 && (
-            <div className="col-12 text-center py-3">
-              <span className="text-muted small">모든 쿠폰을 불러왔습니다.</span>
-            </div>
-          )}
         </div>
-      </div>
+      </SectionCard>
 
       {/* 가게 상세 모달 */}
       {selectedStore && (

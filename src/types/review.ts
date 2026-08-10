@@ -2,35 +2,23 @@
  * 리뷰 관련 타입 정의
  */
 
-export interface StoreInfo {
-  storeId: string;
-  name: string;
-  storeType?: string;
-  categories?: any[];
-  address?: {
-    fullAddress?: string;
-  };
-}
+import {Image} from './domain';
+import {SimpleStore} from './store';
+import {SimpleUser} from './user';
 
+export type ReviewStatus = 'POSTED' | 'FILTERED' | 'DELETED';
+
+/**
+ * StoreReviewResponse
+ */
 export interface Review {
-  reviewId: string;
+  reviewId: number;
   rating: number;
-  contents: string;
-  createdAt: string;
+  contents?: string;
+  status: ReviewStatus;
+  images: Image[];
+  store?: SimpleStore;
+  writer?: SimpleUser;
+  createdAt?: string;
   updatedAt?: string;
-  status?: string;
-  writer?: {
-    userId: string;
-    name: string;
-    socialType?: string;
-  };
-  images?: any[];
-}
-
-export interface StoreReview extends Review {
-  store?: StoreInfo;
-}
-
-export interface UserReview extends Review {
-  store?: StoreInfo;
 }

@@ -1,43 +1,53 @@
 import {useEffect, useState} from 'react';
 import {Modal, Tab, Tabs} from 'react-bootstrap';
-import '../../styles/mobile-tabs.css';
-import {
-  getMarketingConsentBadgeClass,
-  getMarketingConsentDisplayName,
-  getSocialTypeBadgeClass,
-  getSocialTypeDisplayName,
-  getUserRoleBadgeClass,
-  getUserRoleLabel,
-  getUserRoleValue,
-  UserRoleOption
-} from '../../types/user';
-import {DEVICE_OS, getOsBadgeClass,} from '../../types/device';
-import userApi from '../../api/userApi';
-import medalApi from '../../api/medalApi';
 import {toast} from 'react-toastify';
-import ActivityHistory from '../../components/ActivityHistory';
-import UserStoreHistory from '../../components/UserStoreHistory';
-import UserReviewHistory from '../../components/UserReviewHistory';
-import UserVisitHistory from '../../components/UserVisitHistory';
-import UserStoreImageHistory from '../../components/UserStoreImageHistory';
-import UserStoreReportHistory from '../../components/UserStoreReportHistory';
-import PushSendModal from '../../components/push/PushSendModal';
-import deviceApi from "../../api/deviceApi";
-import enumApi from "../../api/enumApi";
+import deviceApi from "@/api/deviceApi";
+import enumApi from "@/api/enumApi";
+import medalApi from '@/api/medalApi';
+import userApi from '@/api/userApi';
+import ActivityHistory from '@/components/ActivityHistory';
+import DetailModalTabTitle from '@/components/common/DetailModalTabTitle';
+import ErrorState from '@/components/common/ErrorState';
+import Loading from '@/components/common/Loading';
+import UserReviewHistory from './detail/UserReviewHistory';
+import UserStoreHistory from './detail/UserStoreHistory';
+import UserStoreImageHistory from './detail/UserStoreImageHistory';
+import UserStoreReportHistory from './detail/UserStoreReportHistory';
+import UserVisitHistory from './detail/UserVisitHistory';
+import UserBasicInfoTab from './detail/UserBasicInfoTab';
+import UserDeviceTab from './detail/UserDeviceTab';
+import UserMedalTab from './detail/UserMedalTab';
+import PushSendModal from '@/components/push/PushSendModal';
+import {Device} from '@/types/device';
+import {Medal} from '@/types/medal';
+import {User, UserRoleOption, UserSettings} from '@/types/user';
+import {getUserRoleLabel} from '@/utils/display/userDisplay';
 
-const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
-  const [userDetail, setUserDetail] = useState(null);
-  const [devices, setDevices] = useState([]);
-  const [settings, setSettings] = useState(null);
-  const [representativeMedal, setRepresentativeMedal] = useState(null);
-  const [medals, setMedals] = useState([]);
-  const [allMedals, setAllMedals] = useState([]);
+interface UserDetailModalProps {
+  show: boolean;
+  onHide: () => void;
+  /**
+   * 목록/이력에서 넘어온 유저 요약 정보 (상세 로딩 전 폴백).
+   * 호출부마다 User, 랭킹/신고 응답의 유저 객체 등 형태가 달라 any로 둡니다.
+   */
+  user: any;
+  /** 제보 가게 클릭 콜백. 호출부에 따라 null/undefined가 전달됩니다. */
+  onStoreClick?: ((store: any) => void) | null;
+}
+
+const UserDetailModal = ({show, onHide, user, onStoreClick}: UserDetailModalProps) => {
+  const [userDetail, setUserDetail] = useState<User | null>(null);
+  const [devices, setDevices] = useState<Device[]>([]);
+  const [settings, setSettings] = useState<UserSettings | null>(null);
+  const [representativeMedal, setRepresentativeMedal] = useState<Medal | null>(null);
+  const [medals, setMedals] = useState<Medal[]>([]);
+  const [allMedals, setAllMedals] = useState<Medal[]>([]);
   const [userRoleOptions, setUserRoleOptions] = useState<UserRoleOption[]>([]);
   const [selectedRole, setSelectedRole] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isUpdatingRole, setIsUpdatingRole] = useState(false);
   const [activeTab, setActiveTab] = useState('basic');
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [selectedMedalForAssign, setSelectedMedalForAssign] = useState<number | null>(null);
   const [showAssignConfirm, setShowAssignConfirm] = useState(false);
   const [isAssigningMedal, setIsAssigningMedal] = useState(false);
@@ -62,7 +72,8 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
       ]);
 
       if (!userResponse.ok) {
-        return
+        setError('유저 정보를 불러오지 못했습니다.');
+        return;
       }
 
       const userData = userResponse.data;
@@ -106,56 +117,17 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
     onHide();
   };
 
-  const getSocialTypeBadge = (socialType) => {
-    return (
-      <span
-        className={`badge rounded-pill px-3 py-2 ${getSocialTypeBadgeClass(socialType)} bg-opacity-10 text-dark border`}>
-        <i className="bi bi-shield-check me-1"></i>
-        {getSocialTypeDisplayName(socialType)}
-      </span>
-    );
-  };
-
-  const getOsBadge = (os) => {
-    const iconClass = os === DEVICE_OS.IOS ? 'bi-apple' : os === DEVICE_OS.AOS ? 'bi-google-play' : 'bi-question-circle';
-
-    return (
-      <span className={`badge rounded-pill px-3 py-2 ${getOsBadgeClass(os)} bg-opacity-10 text-dark border`}>
-        <i className={`bi ${iconClass} me-1`}></i>
-        {os}
-      </span>
-    );
-  };
-
-  const getUserRoleBadge = (role) => {
-    return (
-      <span className={`badge rounded-pill px-3 py-2 ${getUserRoleBadgeClass(role)} bg-opacity-10 border`}>
-        <i className="bi bi-person-gear me-1"></i>
-        {getUserRoleLabel(role, userRoleOptions)}
-      </span>
-    );
-  };
-
-  const formatDateTime = (dateString) => {
-    if (!dateString) return '없음';
-    return new Date(dateString).toLocaleString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    });
-  };
-
   // 디바이스 삭제 핸들러
-  const handleDeleteDevice = async (deviceId) => {
+  const handleDeleteDevice = async (deviceId: string) => {
     if (!window.confirm('정말로 이 디바이스를 삭제하시겠습니까?')) return;
     setIsLoading(true);
     try {
       const response = await deviceApi.deleteDevice(deviceId);
-      setDevices((prev) => prev.filter((d) => d.deviceId !== deviceId));
-      toast.success('디바이스가 성공적으로 삭제되었습니다.');
+
+      if (response.ok) {
+        setDevices((prev) => prev.filter((d) => d.deviceId !== deviceId));
+        toast.success('디바이스가 성공적으로 삭제되었습니다.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -216,13 +188,16 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
       const response = await userApi.updateUserRole(userDetail.userId, selectedRole);
 
       if (response?.ok) {
-        const updatedUser = response.data || {};
+        const updatedUser = response.data;
         setUserDetail((prev) => ({
           ...prev,
           ...updatedUser,
-          nickname: updatedUser.name || updatedUser.nickname || prev?.nickname,
+          // 서버는 userId를 숫자로 내려주지만 화면에서는 문자열로 다룹니다.
+          userId: updatedUser?.userId != null ? String(updatedUser.userId) : prev?.userId,
+          // 서버 UserResponse에는 nickname이 없어 name을 닉네임으로 사용합니다.
+          nickname: updatedUser?.name || prev?.nickname,
         }));
-        setSelectedRole(updatedUser.role || selectedRole);
+        setSelectedRole(updatedUser?.role || selectedRole);
         toast.success('유저 권한이 변경되었습니다.');
       }
     } finally {
@@ -238,749 +213,92 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
       onHide={handleClose}
       size="xl"
       centered
-      className="user-detail-modal"
+      className="app-modal detail-modal"
       fullscreen="md-down"
-      style={{maxWidth: '98vw'}}
-      dialogClassName="modal-95w"
     >
-      <Modal.Header
-        closeButton
-        className="border-0 pb-0"
-        style={{background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'}}
-      >
-        <div className="w-100">
-          <div className="d-flex align-items-center justify-content-between gap-3 text-white">
-            <div>
-              <Modal.Title className="mb-0 fs-4 fs-md-3 fw-bold">
-                사용자 상세 정보
-              </Modal.Title>
-              <p className="mb-0 opacity-90 small">
-                {user.nickname}님의 정보를 확인하세요
-              </p>
-            </div>
-            <button
-              className="btn btn-light btn-sm d-flex align-items-center gap-2"
-              onClick={handleSendPush}
-            >
-              <i className="bi bi-send-fill"></i>
-              <span className="d-none d-md-inline">푸시 발송</span>
-            </button>
-          </div>
+      <Modal.Header closeButton>
+        <div className="detail-modal__avatar">
+          <i className="bi bi-person" aria-hidden="true"/>
         </div>
+        <div className="flex-grow-1 min-w-0">
+          <div className="detail-modal__heading">
+            <Modal.Title as="h2" className="text-truncate">
+              {user.nickname}
+            </Modal.Title>
+            <span className="detail-modal__id font-monospace">#{user.userId}</span>
+          </div>
+          <p className="app-modal__subtitle">유저 상세 정보</p>
+        </div>
+        <button
+          className="btn btn-sm btn-outline-primary flex-shrink-0"
+          onClick={handleSendPush}
+        >
+          <i className="bi bi-send me-1"/>
+          <span className="d-none d-sm-inline">푸시 발송</span>
+        </button>
       </Modal.Header>
 
-      <Modal.Body className="p-0">
+      <Modal.Body>
         {isLoading ? (
-          <div className="text-center py-5">
-            <div className="mb-3">
-              <div className="spinner-border text-primary" style={{width: '3rem', height: '3rem'}} role="status">
-                <span className="visually-hidden">Loading...</span>
-              </div>
-            </div>
-            <h5 className="text-dark mb-1">정보를 불러오는 중...</h5>
-            <p className="text-muted">잠시만 기다려주세요.</p>
+          <div className="py-5">
+            <Loading/>
           </div>
         ) : error ? (
-          <div className="text-center py-5 text-danger">
-            <div className="mb-4">
-              <div className="bg-danger bg-opacity-10 rounded-circle mx-auto" style={{
-                width: '80px',
-                height: '80px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
-                <i className="bi bi-exclamation-circle fs-1 text-danger"></i>
-              </div>
-            </div>
-            <h5 className="text-dark mb-2">오류가 발생했습니다</h5>
-            <p className="text-muted mb-3">{error}</p>
-            <button
-              className="btn btn-outline-primary rounded-pill px-4"
-              onClick={() => fetchUserDetail()}
-            >
-              <i className="bi bi-arrow-clockwise me-2"></i>
-              다시 시도
-            </button>
-          </div>
+          <ErrorState message={error} onRetry={fetchUserDetail}/>
         ) : (
           <Tabs
             activeKey={activeTab}
             onSelect={(k) => setActiveTab(k)}
-            className="nav-fill border-0 mobile-optimized-tabs"
-            style={{
-              background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
-              overflowX: 'auto',
-              flexWrap: 'nowrap'
-            }}
+            className="border-0"
           >
             {/* 기본 정보 탭 */}
             <Tab
               eventKey="basic"
-              title={
-                <span className="d-flex align-items-center gap-1 gap-md-2 px-1 py-2" style={{
-                  fontSize: window.innerWidth <= 768 ? '0.85rem' : '1rem',
-                  whiteSpace: 'nowrap',
-                  minWidth: 'fit-content'
-                }}>
-                  <i className="bi bi-person-vcard" style={{fontSize: '0.9rem'}}></i>
-                  <span className="d-none d-sm-inline fw-medium">기본 정보</span>
-                  <span className="d-sm-none fw-medium">기본</span>
-                </span>
-              }
+              title={<DetailModalTabTitle icon="bi-person-vcard" label="기본 정보"/>}
             >
-              <div className="p-1 p-sm-2 p-md-4">
-                <div className="row justify-content-center">
-                  <div className="col-12 col-md-10">
-                    {/* 일반 정보 섹션 */}
-                    <div className="card border-0 shadow-sm mb-4">
-                      <div className="card-header bg-light border-0 p-2 p-sm-3 p-md-4">
-                        <div className="d-flex align-items-center gap-2">
-                          <div className="bg-primary bg-opacity-10 rounded-circle p-2">
-                            <i className="bi bi-person-vcard text-primary"></i>
-                          </div>
-                          <h5 className="mb-0 fw-bold text-dark">일반 정보</h5>
-                        </div>
-                      </div>
-                      <div className="card-body p-2 p-sm-3 p-md-4">
-                        <div className="text-center mb-4">
-                          <h4 className="fw-bold text-dark mb-1">{userDetail?.name}</h4>
-                        </div>
-
-                        <div className="row g-3 g-md-4">
-                          <div className="col-12 col-md-6">
-                            <div
-                              className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-2 gap-sm-3 p-3 bg-light rounded-3">
-                              <div className="bg-primary bg-opacity-10 rounded-circle p-2">
-                                <i className="bi bi-hash text-primary"></i>
-                              </div>
-                              <div className="flex-grow-1">
-                                <label className="form-label fw-semibold text-muted mb-1 small">유저 ID</label>
-                                <p className="mb-0 fw-bold text-dark" style={{
-                                  fontSize: '0.9rem',
-                                  wordBreak: 'break-all'
-                                }}>{userDetail?.userId}</p>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="col-12 col-md-6">
-                            <div
-                              className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-2 gap-sm-3 p-3 bg-light rounded-3">
-                              <div className="bg-success bg-opacity-10 rounded-circle p-2">
-                                <i className="bi bi-person-badge text-success"></i>
-                              </div>
-                              <div className="flex-grow-1">
-                                <label className="form-label fw-semibold text-muted mb-1 small">닉네임</label>
-                                <p className="mb-0 fw-bold text-dark" style={{
-                                  fontSize: '0.9rem',
-                                  wordBreak: 'break-all'
-                                }}>{userDetail?.nickname}</p>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="col-12 col-md-6">
-                            <div
-                              className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-2 gap-sm-3 p-3 bg-light rounded-3">
-                              <div className="bg-warning bg-opacity-10 rounded-circle p-2">
-                                <i className="bi bi-shield-lock text-warning"></i>
-                              </div>
-                              <div className="flex-grow-1">
-                                <label className="form-label fw-semibold text-muted mb-2 small">소셜 가입 방식</label>
-                                <div>
-                                  {getSocialTypeBadge(userDetail?.socialType)}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="col-12 col-md-6">
-                            <div
-                              className="d-flex flex-column flex-sm-row align-items-start gap-2 gap-sm-3 p-3 bg-light rounded-3">
-                              <div className="bg-danger bg-opacity-10 rounded-circle p-2">
-                                <i className="bi bi-person-gear text-danger"></i>
-                              </div>
-                              <div className="flex-grow-1 w-100">
-                                <label className="form-label fw-semibold text-muted mb-2 small">유저 권한</label>
-                                <div className="mb-2">
-                                  {getUserRoleBadge(userDetail?.role)}
-                                </div>
-                                <div className="d-flex flex-column flex-sm-row gap-2">
-                                  <select
-                                    className="form-select form-select-sm flex-grow-1"
-                                    value={selectedRole}
-                                    onChange={(e) => setSelectedRole(e.target.value)}
-                                    disabled={isUpdatingRole || !userDetail?.userId || userRoleOptions.length === 0}
-                                  >
-                                    <option value="">권한 선택</option>
-                                    {userRoleOptions.map((roleOption) => {
-                                      const roleValue = getUserRoleValue(roleOption);
-                                      return (
-                                        <option key={roleValue} value={roleValue}>
-                                          {getUserRoleLabel(roleValue, userRoleOptions)}
-                                        </option>
-                                      );
-                                    })}
-                                  </select>
-                                  <button
-                                    type="button"
-                                    className="btn btn-outline-primary btn-sm d-inline-flex align-items-center justify-content-center gap-1 px-3"
-                                    onClick={handleUpdateRole}
-                                    disabled={isUpdatingRole || !selectedRole || selectedRole === userDetail?.role}
-                                    style={{whiteSpace: 'nowrap'}}
-                                  >
-                                    {isUpdatingRole ? (
-                                      <>
-                                        <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                        변경 중
-                                      </>
-                                    ) : (
-                                      <>
-                                        <i className="bi bi-check2-circle"></i>
-                                        변경
-                                      </>
-                                    )}
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="col-12 col-md-6">
-                            <div
-                              className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-2 gap-sm-3 p-3 bg-light rounded-3">
-                              <div className="bg-info bg-opacity-10 rounded-circle p-2">
-                                <i className="bi bi-calendar3 text-info"></i>
-                              </div>
-                              <div className="flex-grow-1">
-                                <label className="form-label fw-semibold text-muted mb-1 small">가입일</label>
-                                <p className="mb-0 fw-bold text-dark" style={{
-                                  fontSize: '0.85rem',
-                                  wordBreak: 'break-all'
-                                }}>{formatDateTime(userDetail?.createdAt)}</p>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* 설정 정보 섹션 */}
-                    <div className="card border-0 shadow-sm">
-                      <div className="card-header bg-light border-0 p-2 p-sm-3 p-md-4">
-                        <div className="d-flex align-items-center gap-2">
-                          <div className="bg-warning bg-opacity-10 rounded-circle p-2">
-                            <i className="bi bi-gear text-warning"></i>
-                          </div>
-                          <h5 className="mb-0 fw-bold text-dark">설정 정보</h5>
-                        </div>
-                      </div>
-                      <div className="card-body p-2 p-sm-3 p-md-4">
-                        {!settings ? (
-                          <div className="text-center py-4">
-                            <div className="bg-light rounded-circle mx-auto mb-3" style={{
-                              width: '60px',
-                              height: '60px',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center'
-                            }}>
-                              <i className="bi bi-gear fs-3 text-secondary"></i>
-                            </div>
-                            <h6 className="text-dark mb-1">설정 정보가 없습니다</h6>
-                            <p className="text-muted small">사용자 설정 정보를 불러올 수 없습니다.</p>
-                          </div>
-                        ) : (
-                          <div className="row g-3 g-md-4">
-                            <div className="col-12 col-md-6">
-                              <div
-                                className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-2 gap-sm-3 p-3 bg-light rounded-3">
-                                <div className="bg-primary bg-opacity-10 rounded-circle p-2">
-                                  <i className="bi bi-bell text-primary"></i>
-                                </div>
-                                <div className="flex-grow-1">
-                                  <label className="form-label fw-semibold text-muted mb-1 small">활동 알림</label>
-                                  <div>
-                                    <span
-                                      className={`badge rounded-pill px-2 px-md-3 py-1 py-md-2 ${settings.enableActivitiesPush ? 'bg-success bg-opacity-10 text-success border border-success' : 'bg-secondary bg-opacity-10 text-secondary border border-secondary'}`}
-                                      style={{fontSize: '0.75rem'}}>
-                                      <i
-                                        className={`bi ${settings.enableActivitiesPush ? 'bi-check-circle' : 'bi-x-circle'} me-1`}></i>
-                                      {settings.enableActivitiesPush ? 'ON' : 'OFF'}
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="col-12 col-md-6">
-                              <div
-                                className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-2 gap-sm-3 p-3 bg-light rounded-3">
-                                <div className="bg-info bg-opacity-10 rounded-circle p-2">
-                                  <i className="bi bi-envelope text-info"></i>
-                                </div>
-                                <div className="flex-grow-1">
-                                  <label className="form-label fw-semibold text-muted mb-1 small">마케팅 수신 동의</label>
-                                  <div>
-                                    <span
-                                      className={`badge rounded-pill px-2 px-md-3 py-1 py-md-2 ${getMarketingConsentBadgeClass(settings.marketingConsent)} bg-opacity-10 text-dark border`}
-                                      style={{fontSize: '0.75rem'}}>
-                                      <i className="bi bi-shield-check me-1"></i>
-                                      {getMarketingConsentDisplayName(settings.marketingConsent)}
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <UserBasicInfoTab
+                userDetail={userDetail}
+                settings={settings}
+                userRoleOptions={userRoleOptions}
+                selectedRole={selectedRole}
+                isUpdatingRole={isUpdatingRole}
+                onSelectedRoleChange={setSelectedRole}
+                onUpdateRole={handleUpdateRole}
+              />
             </Tab>
 
             {/* 디바이스 정보 탭 */}
             <Tab
               eventKey="devices"
-              title={
-                <span className="d-flex align-items-center gap-1 gap-md-2 px-1 py-2" style={{
-                  fontSize: window.innerWidth <= 768 ? '0.85rem' : '1rem',
-                  whiteSpace: 'nowrap',
-                  minWidth: 'fit-content'
-                }}>
-                  <i className="bi bi-phone" style={{fontSize: '0.9rem'}}></i>
-                  <span className="d-none d-sm-inline fw-medium">디바이스 정보</span>
-                  <span className="d-sm-none fw-medium">기기</span>
-                  {devices.length > 0 && (
-                    <span className="badge bg-info rounded-pill ms-1" style={{
-                      fontSize: '0.7rem',
-                      minWidth: '1.2rem',
-                      height: '1.2rem',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}>{devices.length}</span>
-                  )}
-                </span>
-              }
+              title={<DetailModalTabTitle icon="bi-phone" label="디바이스 정보" count={devices.length}/>}
             >
-              <div className="p-1 p-sm-2 p-md-4">
-                <div className="card border-0 shadow-sm">
-                  <div className="card-header bg-light border-0 p-4">
-                    <div className="d-flex align-items-center gap-2">
-                      <div className="bg-info bg-opacity-10 rounded-circle p-2">
-                        <i className="bi bi-phone text-info"></i>
-                      </div>
-                      <h5 className="mb-0 fw-bold text-dark">등록된 디바이스 목록</h5>
-                      {devices.length > 0 && (
-                        <span className="badge bg-info ms-auto px-3 py-2 rounded-pill">
-                          총 {devices.length}개
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="card-body p-0">
-                    {devices.length === 0 ? (
-                      <div className="text-center py-5">
-                        <div className="bg-light rounded-circle mx-auto mb-4" style={{
-                          width: '80px',
-                          height: '80px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        }}>
-                          <i className="bi bi-phone fs-1 text-secondary"></i>
-                        </div>
-                        <h5 className="text-dark mb-2">등록된 디바이스가 없습니다</h5>
-                        <p className="text-muted">아직 등록된 디바이스 정보가 없습니다.</p>
-                      </div>
-                    ) : (
-                      <div className="row g-3">
-                        {devices.map((device, index) => (
-                          <div key={device.deviceId || index} className="col-12 col-md-6">
-                            <div className="card border-0 shadow-sm h-100" style={{
-                              background: 'linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%)',
-                              border: '1px solid #e9ecef',
-                              borderRadius: '16px'
-                            }}>
-                              <div className="card-body p-2 p-sm-3 p-md-4">
-                                <div className="d-flex align-items-center gap-3 mb-3">
-                                  <div className="position-relative">
-                                    <div className="bg-primary bg-opacity-10 rounded-circle p-3" style={{
-                                      border: '2px solid',
-                                      borderColor: device.os === DEVICE_OS.IOS ? '#007aff' : '#34c759'
-                                    }}>
-                                      <i
-                                        className={`bi ${device.os === DEVICE_OS.IOS ? 'bi-apple' : device.os === DEVICE_OS.AOS ? 'bi-android2' : 'bi-question-circle'} fs-3`}
-                                        style={{color: device.os === DEVICE_OS.IOS ? '#007aff' : '#34c759'}}></i>
-                                    </div>
-                                  </div>
-                                  <div className="flex-grow-1">
-                                    <div className="d-flex align-items-center gap-2 mb-2">
-                                      <h6 className="mb-0 fw-bold text-dark">디바이스 {index + 1}</h6>
-                                      {getOsBadge(device.os)}
-                                    </div>
-                                    <div className="d-flex align-items-center gap-2 mb-2">
-                                      <span className="text-muted small">
-                                        앱 버전
-                                      </span>
-                                      <span
-                                        className="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-2 py-1 small">
-                                        v{device.appVersion}
-                                      </span>
-                                    </div>
-
-                                    {device.createdAt && (
-                                      <div className="d-flex align-items-center gap-2 mb-1">
-                                        <span className="text-muted small">
-                                          <i className="bi bi-calendar-plus me-1"></i>
-                                          최초 등록일자
-                                        </span>
-                                        <span className="text-dark small fw-medium">
-                                          {formatDateTime(device.createdAt)}
-                                        </span>
-                                      </div>
-                                    )}
-
-                                    {device.updatedAt && (
-                                      <div className="d-flex align-items-center gap-2 mb-2">
-                                        <span className="text-muted small">
-                                          <i className="bi bi-clock-history me-1"></i>
-                                          마지막 접근 일자
-                                        </span>
-                                        <span className="text-dark small fw-medium">
-                                          {formatDateTime(device.updatedAt)}
-                                        </span>
-                                      </div>
-                                    )}
-
-                                    {device.pushToken && (
-                                      <div className="d-flex align-items-center gap-2">
-                                        <span className="text-muted small">
-                                          <i className="bi bi-bell me-1"></i>
-                                          푸시 토큰
-                                        </span>
-                                        <div className="d-flex align-items-center gap-2 flex-grow-1">
-                                          <span
-                                            className="text-dark small fw-medium text-truncate flex-grow-1"
-                                            style={{
-                                              maxWidth: '200px',
-                                              fontSize: '0.75rem',
-                                              fontFamily: 'monospace'
-                                            }}
-                                            title={device.pushToken}
-                                          >
-                                            {device.pushToken}
-                                          </span>
-                                          <button
-                                            className="btn btn-outline-secondary btn-sm p-1"
-                                            style={{ fontSize: '0.7rem', lineHeight: '1' }}
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              navigator.clipboard.writeText(device.pushToken || '');
-                                              toast.success('푸시 토큰이 복사되었습니다');
-                                            }}
-                                            title="토큰 복사"
-                                          >
-                                            <i className="bi bi-clipboard"></i>
-                                          </button>
-                                        </div>
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                                <div className="d-flex justify-content-end">
-                                  <button
-                                    className="btn btn-outline-danger btn-sm rounded-pill px-3"
-                                    onClick={() => handleDeleteDevice(device.deviceId)}
-                                    disabled={isLoading}
-                                  >
-                                    <i className="bi bi-trash me-1"></i> 삭제
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
+              <UserDeviceTab
+                devices={devices}
+                isLoading={isLoading}
+                onDeleteDevice={handleDeleteDevice}
+              />
             </Tab>
 
             {/* 메달 정보 탭 */}
             <Tab
               eventKey="medals"
-              title={
-                <span className="d-flex align-items-center gap-1 gap-md-2 px-1 py-2" style={{
-                  fontSize: window.innerWidth <= 768 ? '0.85rem' : '1rem',
-                  whiteSpace: 'nowrap',
-                  minWidth: 'fit-content'
-                }}>
-                  <i className="bi bi-award" style={{fontSize: '0.9rem'}}></i>
-                  <span className="d-none d-sm-inline fw-medium">메달 정보</span>
-                  <span className="d-sm-none fw-medium">메달</span>
-                  {medals.length > 0 && (
-                    <span className="badge bg-warning rounded-pill ms-1" style={{
-                      fontSize: '0.7rem',
-                      minWidth: '1.2rem',
-                      height: '1.2rem',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}>{medals.length}</span>
-                  )}
-                </span>
-              }
+              title={<DetailModalTabTitle icon="bi-award" label="메달 정보" count={medals.length}/>}
             >
-              <div className="p-1 p-sm-2 p-md-4">
-                <div className="card border-0 shadow-sm">
-                  <div className="card-header bg-light border-0 p-4">
-                    <div className="d-flex align-items-center gap-2">
-                      <div className="bg-warning bg-opacity-10 rounded-circle p-2">
-                        <i className="bi bi-award text-warning"></i>
-                      </div>
-                      <h5 className="mb-0 fw-bold text-dark">보유 메달</h5>
-                      {medals.length > 0 && (
-                        <span className="badge bg-warning ms-auto px-3 py-2 rounded-pill">
-                          총 {medals.length}개
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="card-body p-4">
-                    {/* 대표 메달 섹션 */}
-                    {representativeMedal && (
-                      <div className="mb-4">
-                        <h6 className="fw-bold text-dark mb-3 d-flex align-items-center gap-2">
-                          <i className="bi bi-star-fill text-warning"></i>
-                          대표 메달
-                        </h6>
-                        <div className="card border-warning border-2" style={{
-                          background: 'linear-gradient(135deg, #fff3cd 0%, #ffffff 100%)',
-                          borderRadius: '16px'
-                        }}>
-                          <div className="card-body p-2 p-sm-3 p-md-4">
-                            <div className="d-flex align-items-center gap-3">
-                              <div className="position-relative">
-                                <img
-                                  src={representativeMedal.iconUrl}
-                                  alt={representativeMedal.name}
-                                  className="rounded-circle"
-                                  style={{width: '60px', height: '60px', objectFit: 'cover'}}
-                                  onError={(e: any) => {
-                                    e.target.src = representativeMedal.disableIconUrl || '/default-medal.png';
-                                  }}
-                                />
-                                <div className="position-absolute top-0 start-100 translate-middle">
-                                  <i className="bi bi-star-fill text-warning fs-5"></i>
-                                </div>
-                              </div>
-                              <div className="flex-grow-1">
-                                <h6 className="fw-bold text-dark mb-1">{representativeMedal.name}</h6>
-                                <p className="text-muted mb-2 small">{representativeMedal.introduction}</p>
-                                {representativeMedal.acquisition?.description && (
-                                  <div className="d-flex align-items-center gap-2">
-                                    <span
-                                      className="badge bg-primary bg-opacity-10 text-primary border border-primary rounded-pill px-2 py-1"
-                                      style={{fontSize: '0.7rem'}}>
-                                      <i className="bi bi-info-circle me-1"></i>
-                                      {representativeMedal.acquisition.description}
-                                    </span>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* 전체 메달 목록 */}
-                    <div>
-                      <h6 className="fw-bold text-dark mb-3 d-flex align-items-center gap-2">
-                        <i className="bi bi-collection text-primary"></i>
-                        전체 메달
-                        {allMedals.length > 0 && (
-                          <span className="badge bg-secondary ms-2">
-                            보유: {medals.length} / {allMedals.length}
-                          </span>
-                        )}
-                      </h6>
-                      {allMedals.length === 0 ? (
-                        <div className="text-center py-5">
-                          <div className="bg-light rounded-circle mx-auto mb-4" style={{
-                            width: '80px',
-                            height: '80px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                          }}>
-                            <i className="bi bi-award fs-1 text-secondary"></i>
-                          </div>
-                          <h5 className="text-dark mb-2">메달 정보를 불러오는 중입니다</h5>
-                          <p className="text-muted">잠시만 기다려주세요.</p>
-                        </div>
-                      ) : (
-                        <>
-                          <div className="row g-3">
-                            {allMedals.map((medal, index) => {
-                              const isOwned = medals.some(m => m.medalId === medal.medalId);
-                              const isRepresentative = representativeMedal?.medalId === medal.medalId;
-                              const ownedMedal = medals.find(m => m.medalId === medal.medalId);
-                              const isSelected = selectedMedalForAssign === medal.medalId;
-
-                              return (
-                                <div key={medal.medalId || index} className="col-12 col-sm-6 col-md-4 col-lg-3">
-                                  <div
-                                    className={`card border-0 shadow-sm h-100 ${
-                                      isRepresentative ? 'border-warning border-2' :
-                                        isSelected ? 'border-primary border-3' : ''
-                                    }`}
-                                    style={{
-                                      background: isRepresentative
-                                        ? 'linear-gradient(135deg, #fff3cd 0%, #ffffff 100%)'
-                                        : isSelected
-                                          ? 'linear-gradient(135deg, #cfe2ff 0%, #ffffff 100%)'
-                                          : 'linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%)',
-                                      borderRadius: '16px',
-                                      opacity: isOwned ? 1 : 0.6,
-                                      cursor: 'pointer',
-                                      transition: 'all 0.2s ease',
-                                      transform: isSelected ? 'scale(1.05)' : 'scale(1)'
-                                    }}
-                                    onClick={() => handleSelectMedal(medal.medalId)}
-                                    onMouseEnter={(e) => {
-                                      if (!isOwned && !isSelected) {
-                                        e.currentTarget.style.opacity = '0.8';
-                                      }
-                                    }}
-                                    onMouseLeave={(e) => {
-                                      if (!isOwned && !isSelected) {
-                                        e.currentTarget.style.opacity = '0.6';
-                                      }
-                                    }}
-                                  >
-                                    <div className="card-body p-3">
-                                      <div className="d-flex flex-column align-items-center text-center">
-                                        <div className="position-relative mb-3">
-                                          <img
-                                            src={isOwned ? medal.iconUrl : medal.disableIconUrl}
-                                            alt={medal.name}
-                                            className="rounded-circle"
-                                            style={{
-                                              width: '50px',
-                                              height: '50px',
-                                              objectFit: 'cover',
-                                              filter: isOwned ? 'none' : 'grayscale(100%)'
-                                            }}
-                                            onError={(e: any) => {
-                                              e.target.src = medal.disableIconUrl || '/default-medal.png';
-                                            }}
-                                          />
-                                          {isRepresentative && (
-                                            <div className="position-absolute top-0 start-100 translate-middle">
-                                              <i className="bi bi-star-fill text-warning"></i>
-                                            </div>
-                                          )}
-                                          {!isOwned && !isSelected && (
-                                            <div className="position-absolute top-0 start-0 translate-middle">
-                                              <i className="bi bi-lock-fill text-secondary"></i>
-                                            </div>
-                                          )}
-                                          {isSelected && (
-                                            <div className="position-absolute top-0 start-0 translate-middle">
-                                              <div
-                                                className="bg-primary rounded-circle d-flex align-items-center justify-content-center"
-                                                style={{width: '20px', height: '20px'}}>
-                                                <i className="bi bi-check text-white fw-bold"></i>
-                                              </div>
-                                            </div>
-                                          )}
-                                        </div>
-                                        <h6 className={`fw-bold mb-1 small ${isOwned ? 'text-dark' : 'text-muted'}`}>
-                                          {medal.name}
-                                        </h6>
-                                        <p className="text-muted mb-2 small"
-                                           style={{fontSize: '0.75rem', lineHeight: '1.2'}}>
-                                          {medal.introduction}
-                                        </p>
-                                        {isOwned ? (
-                                          ownedMedal?.acquisition?.description && (
-                                            <span
-                                              className="badge bg-primary bg-opacity-10 text-primary border border-primary rounded-pill px-2 py-1"
-                                              style={{fontSize: '0.7rem'}}>
-                                              <i className="bi bi-info-circle me-1"></i>
-                                              {ownedMedal.acquisition.description}
-                                            </span>
-                                          )
-                                        ) : isSelected ? (
-                                          <span
-                                            className="badge bg-primary text-white rounded-pill px-2 py-1"
-                                            style={{fontSize: '0.7rem'}}>
-                                            <i className="bi bi-check-circle me-1"></i>
-                                            선택됨
-                                          </span>
-                                        ) : (
-                                          <span
-                                            className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-2 py-1"
-                                            style={{fontSize: '0.7rem'}}>
-                                            <i className="bi bi-lock me-1"></i>
-                                            미획득
-                                          </span>
-                                        )}
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-
-                          {/* 메달 지급 버튼 */}
-                          {selectedMedalForAssign && (() => {
-                            const isAlreadyOwned = medals.some(m => m.medalId === selectedMedalForAssign);
-                            return (
-                              <div className="mt-4 d-flex justify-content-center">
-                                <button
-                                  className={`btn px-4 ${isAlreadyOwned ? 'btn-secondary' : 'btn-primary'}`}
-                                  onClick={handleOpenAssignConfirm}
-                                  disabled={isAssigningMedal || isAlreadyOwned}
-                                >
-                                  <i
-                                    className={`bi ${isAlreadyOwned ? 'bi-check-circle-fill' : 'bi-award-fill'} me-2`}></i>
-                                  {isAlreadyOwned ? '이미 보유한 메달입니다' : '선택한 메달 지급하기'}
-                                </button>
-                              </div>
-                            );
-                          })()}
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <UserMedalTab
+                medals={medals}
+                allMedals={allMedals}
+                representativeMedal={representativeMedal}
+                selectedMedalForAssign={selectedMedalForAssign}
+                isAssigningMedal={isAssigningMedal}
+                onSelectMedal={handleSelectMedal}
+                onOpenAssignConfirm={handleOpenAssignConfirm}
+              />
             </Tab>
-
 
             {/* 활동 이력 탭 */}
             <Tab
               eventKey="activity"
-              title={
-                <span className="d-flex align-items-center gap-1 gap-md-2 px-1 py-2" style={{
-                  fontSize: window.innerWidth <= 768 ? '0.85rem' : '1rem',
-                  whiteSpace: 'nowrap',
-                  minWidth: 'fit-content'
-                }}>
-                  <i className="bi bi-activity" style={{fontSize: '0.9rem'}}></i>
-                  <span className="d-none d-sm-inline fw-medium">활동 이력</span>
-                  <span className="d-sm-none fw-medium">활동</span>
-                </span>
-              }
+              title={<DetailModalTabTitle icon="bi-activity" label="활동 이력"/>}
             >
               <ActivityHistory
                 type="user"
@@ -1034,53 +352,49 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
         )}
       </Modal.Body>
 
-      <Modal.Footer className="border-0 bg-light">
-        <button
-          className="btn btn-secondary rounded-pill px-4"
-          onClick={handleClose}
-        >
-          <i className="bi bi-x-lg me-2"></i>
+      <Modal.Footer>
+        <button className="btn btn-outline-secondary" onClick={handleClose}>
           닫기
         </button>
       </Modal.Footer>
 
       {/* 메달 지급 확인 모달 */}
-      <Modal show={showAssignConfirm} onHide={() => setShowAssignConfirm(false)} centered>
-        <Modal.Header closeButton className="border-0">
-          <Modal.Title>
-            <i className="bi bi-award-fill me-2 text-warning"></i>
+      <Modal show={showAssignConfirm} onHide={() => setShowAssignConfirm(false)} centered className="app-modal">
+        <Modal.Header closeButton>
+          <Modal.Title as="h2">
+            <i className="bi bi-award"/>
             메달 지급 확인
           </Modal.Title>
         </Modal.Header>
-        <Modal.Body className="py-4">
+        <Modal.Body>
           {selectedMedalForAssign && (() => {
             const selectedMedal = allMedals.find(m => m.medalId === selectedMedalForAssign);
             return selectedMedal ? (
-              <div className="text-center">
-                <div className="mb-4">
+              <>
+                <div className="text-center mb-3">
                   <img
                     src={selectedMedal.iconUrl}
                     alt={selectedMedal.name}
-                    className="rounded-circle mb-3"
-                    style={{width: '80px', height: '80px', objectFit: 'cover'}}
+                    className="rounded-circle mb-2"
+                    style={{width: '72px', height: '72px', objectFit: 'cover'}}
                   />
-                  <h5 className="fw-bold text-dark mb-2">{selectedMedal.name}</h5>
-                  <p className="text-muted mb-0">{selectedMedal.introduction}</p>
+                  <h3 className="h6 fw-bold mb-1">{selectedMedal.name}</h3>
+                  <p className="text-body-secondary small mb-0">{selectedMedal.introduction}</p>
                 </div>
-                <div className="alert alert-warning d-flex align-items-center mb-0">
-                  <i className="bi bi-exclamation-triangle-fill me-2"></i>
-                  <div className="text-start">
+                <div className="alert alert-warning d-flex gap-2 mb-0">
+                  <i className="bi bi-exclamation-triangle flex-shrink-0"/>
+                  <div>
                     <strong>{user.nickname}</strong>님에게 이 메달을 지급하시겠습니까?
-                    <div className="small text-muted mt-1">지급 후 취소할 수 없습니다.</div>
+                    <div className="small mt-1">지급 후 취소할 수 없습니다.</div>
                   </div>
                 </div>
-              </div>
+              </>
             ) : null;
           })()}
         </Modal.Body>
-        <Modal.Footer className="border-0">
+        <Modal.Footer>
           <button
-            className="btn btn-secondary"
+            className="btn btn-outline-secondary"
             onClick={() => setShowAssignConfirm(false)}
             disabled={isAssigningMedal}
           >
@@ -1093,12 +407,12 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}) => {
           >
             {isAssigningMedal ? (
               <>
-                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
                 지급 중...
               </>
             ) : (
               <>
-                <i className="bi bi-award-fill me-2"></i>
+                <i className="bi bi-award me-1"/>
                 메달 지급하기
               </>
             )}

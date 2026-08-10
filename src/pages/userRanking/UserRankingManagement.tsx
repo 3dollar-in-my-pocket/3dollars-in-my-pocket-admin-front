@@ -1,28 +1,28 @@
-import {useEffect, useState, useRef, useCallback} from 'react';
+import {useCallback, useEffect, useRef, useState} from 'react';
 import {toast} from 'react-toastify';
-import enumApi from '../../api/enumApi';
-import userRankingApi from '../../api/userRankingApi';
-import medalApi from '../../api/medalApi';
-import {UserRankingItem, createUserRankingRequest} from '../../types/userRanking';
-import UserRankingCard from '../../components/userRanking/UserRankingCard';
-import UserDetailModal from '../user/UserDetailModal';
-import StoreDetailModal from '../store/StoreDetailModal';
-import MedalAssignModal from '../../components/userRanking/MedalAssignModal';
-import PushSendModal from '../../components/push/PushSendModal';
-import Loading from '../../components/common/Loading';
+import enumApi from '@/api/enumApi';
+import userRankingApi from '@/api/userRankingApi';
+import medalApi from '@/api/medalApi';
+import useCursorPagination from '@/hooks/useCursorPagination';
+import {createUserRankingRequest, UserRankingItem} from '@/types/userRanking';
+import UserRankingCard from '@/components/userRanking/UserRankingCard';
+import UserDetailModal from '@/pages/user/UserDetailModal';
+import StoreDetailModal from '@/pages/store/StoreDetailModal';
+import MedalAssignModal from '@/components/userRanking/MedalAssignModal';
+import PushSendModal from '@/components/push/PushSendModal';
+import Loading from '@/components/common/Loading';
+import EmptyState from '@/components/common/EmptyState';
+import PageHeader from '@/components/common/PageHeader';
+import FilterCard from '@/components/common/FilterCard';
+import SectionCard from '@/components/common/SectionCard';
 
 const MAX_SELECTION = 500;
 
 const UserRankingManagement = () => {
   const [rankingTypes, setRankingTypes] = useState<any[]>([]);
   const [selectedRankingType, setSelectedRankingType] = useState<string>('');
-  const [rankingList, setRankingList] = useState<UserRankingItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [cursor, setCursor] = useState<string | null>(null);
-  const [hasMore, setHasMore] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [selectedStore, setSelectedStore] = useState(null);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [selectedUserIds, setSelectedUserIds] = useState<Set<number>>(new Set());
   const [startRankInput, setStartRankInput] = useState<number>(1);
   const [endRankInput, setEndRankInput] = useState<number>(10);
@@ -37,10 +37,9 @@ const UserRankingManagement = () => {
     loadEnums();
   }, []);
 
+  // 랭킹 타입이 바뀌면 이전 선택을 초기화한다. (목록 재조회는 훅의 deps가 처리)
   useEffect(() => {
-    if (selectedRankingType) {
-      resetAndFetchRankings();
-    }
+    setSelectedUserIds(new Set());
   }, [selectedRankingType]);
 
   const loadEnums = async () => {
@@ -52,67 +51,41 @@ const UserRankingManagement = () => {
     }
   };
 
-  const resetAndFetchRankings = () => {
-    setRankingList([]);
-    setCursor(null);
-    setHasMore(false);
-    setSelectedUserIds(new Set());
-    fetchRankings(null, true);
-  };
+  const fetchRankingPage = useCallback(async (cursor: string | null) => {
+    const request = createUserRankingRequest({
+      userRankingType: selectedRankingType,
+      cursor,
+      size: pageSize
+    });
 
-  const fetchRankings = async (nextCursor: string | null = null, isInitial: boolean = false) => {
-    if (!selectedRankingType) return;
+    const response = await userRankingApi.getUserRankings(request);
 
-    if (isInitial) {
-      setIsLoading(true);
-    } else {
-      setIsLoadingMore(true);
-    }
+    if (!response?.ok || !response.data) return response;
 
-    try {
-      const request = createUserRankingRequest({
-        userRankingType: selectedRankingType,
-        cursor: nextCursor,
-        size: pageSize
-      });
-
-      const response = await userRankingApi.getUserRankings(request);
-
-      if (response.ok && response.data) {
-        const {contents = [], cursor: newCursor} = response.data as any;
-        // 탈퇴 유저(userId가 null인 경우) 필터링
-        const filteredItems = contents.filter((item: UserRankingItem) => item.user?.userId != null);
-
-        // API 응답에서 nextCursor 추출
-        const nextCursorValue = newCursor.nextCursor || null;
-        const hasMoreValue = newCursor.hasMore || false;
-
-        if (isInitial) {
-          setRankingList(filteredItems);
-        } else {
-          setRankingList(prev => [...prev, ...filteredItems]);
-        }
-
-        setHasMore(hasMoreValue);
-        setCursor(nextCursorValue);
-
-        // 디버깅용 로그
-        console.log('랭킹 페이징 정보:', {
-          현재페이지크기: filteredItems.length,
-          다음커서: nextCursorValue,
-          더있음: hasMoreValue
-        });
-      } else {
-        if (isInitial) {
-          setRankingList([]);
-        }
-        setHasMore(false);
+    // 탈퇴 유저(userId가 null인 경우) 필터링
+    const {contents = [], cursor: newCursor} = response.data as any;
+    return {
+      ...response,
+      data: {
+        ...response.data,
+        contents: contents.filter((item: UserRankingItem) => item.user?.userId != null),
+        cursor: newCursor
       }
-    } finally {
-      setIsLoading(false);
-      setIsLoadingMore(false);
-    }
-  };
+    };
+  }, [selectedRankingType]);
+
+  const {
+    items: rankingList,
+    isLoading,
+    isLoadingMore,
+    hasMore,
+    loadMore
+  } = useCursorPagination<UserRankingItem>({
+    fetcher: fetchRankingPage,
+    enabled: Boolean(selectedRankingType),
+    deps: [selectedRankingType],
+    errorMessage: '랭킹 목록을 불러오지 못했습니다.'
+  });
 
   const handleScroll = useCallback(() => {
     if (!scrollContainerRef.current || isLoadingMore || !hasMore) return;
@@ -120,10 +93,10 @@ const UserRankingManagement = () => {
     const {scrollTop, scrollHeight, clientHeight} = scrollContainerRef.current;
     const scrollPercentage = (scrollTop + clientHeight) / scrollHeight;
 
-    if (scrollPercentage > 0.8 && hasMore && cursor) {
-      fetchRankings(cursor, false);
+    if (scrollPercentage > 0.8) {
+      loadMore();
     }
-  }, [hasMore, cursor, isLoadingMore]);
+  }, [hasMore, isLoadingMore, loadMore]);
 
   const handleUserClick = (rankingItem: UserRankingItem) => {
     const user = {
@@ -250,160 +223,142 @@ const UserRankingManagement = () => {
     }
   };
 
+  const isAllSelected = selectedUserIds.size > 0
+    && selectedUserIds.size === Math.min(rankingList.length, MAX_SELECTION);
+
   return (
-    <div className="container-fluid px-4 py-4">
-      <div className="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
-        <h2 className="fw-bold">유저 랭킹 관리</h2>
-        {selectedUserIds.size > 0 && (
-          <div className="d-flex gap-2">
+    <div>
+      <PageHeader
+        description="랭킹 타입별 상위 유저를 조회하고, 선택한 유저에게 메달을 지급하거나 푸시를 발송합니다."
+        actions={selectedUserIds.size > 0 && (
+          <>
             <button
-              className="btn btn-outline-warning d-flex align-items-center gap-2"
+              className="btn btn-outline-primary"
               onClick={handleOpenMedalModal}
               disabled={isAssigningMedal}
             >
-              <i className="bi bi-award-fill"></i>
+              <i className="bi bi-award-fill me-1"/>
               메달 지급 ({selectedUserIds.size}명)
             </button>
-            <button
-              className="btn btn-primary d-flex align-items-center gap-2"
-              onClick={handleSendPush}
-            >
-              <i className="bi bi-send-fill"></i>
+            <button className="btn btn-primary" onClick={handleSendPush}>
+              <i className="bi bi-send-fill me-1"/>
               푸시 발송 ({selectedUserIds.size}명)
             </button>
+          </>
+        )}
+      />
+
+      <FilterCard
+        aside={selectedUserIds.size > 0 && (
+          <button className="form-subhead__clear" onClick={() => setSelectedUserIds(new Set())}>
+            선택 {selectedUserIds.size}명 해제
+          </button>
+        )}
+      >
+        <div className="row g-3">
+          <div className="col-12 col-md-4">
+            <label className="form-label" htmlFor="ranking-type">랭킹 타입</label>
+            <select
+              id="ranking-type"
+              className="form-select"
+              value={selectedRankingType}
+              onChange={(e) => setSelectedRankingType(e.target.value)}
+            >
+              {rankingTypes.map((type) => (
+                <option key={type.key} value={type.key}>
+                  {type.description}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="col-12 col-md-5">
+            <label className="form-label" htmlFor="rank-start">순위 범위 선택</label>
+            <div className="input-group">
+              <input
+                id="rank-start"
+                type="number"
+                className="form-control"
+                placeholder="1"
+                value={startRankInput}
+                onChange={(e) => setStartRankInput(e.target.valueAsNumber || 0)}
+                min="1"
+                aria-label="시작 순위"
+              />
+              <span className="input-group-text">~</span>
+              <input
+                type="number"
+                className="form-control"
+                placeholder="10"
+                value={endRankInput}
+                onChange={(e) => setEndRankInput(e.target.valueAsNumber || 0)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSelectByRank();
+                  }
+                }}
+                min="1"
+                aria-label="종료 순위"
+              />
+              <span className="input-group-text">등</span>
+            </div>
+          </div>
+
+          <div className="col-12 col-md-3 d-flex align-items-end">
+            <button
+              className="btn btn-outline-primary w-100"
+              onClick={handleSelectByRank}
+              disabled={rankingList.length === 0}
+              title="입력한 순위 범위의 유저들을 선택합니다"
+            >
+              <i className="bi bi-check2-square me-1"/>
+              범위 선택
+            </button>
+          </div>
+        </div>
+      </FilterCard>
+
+      <SectionCard
+        title={`${getSelectedRankingTypeName()} 랭킹`}
+        icon="bi-trophy-fill"
+        aside={
+          <>
+            {selectedUserIds.size > 0 && (
+              <span className="page-count">선택 {selectedUserIds.size}명</span>
+            )}
+            {rankingList.length > 0 && (
+              <span className="page-count">{rankingList.length.toLocaleString()}{hasMore ? '+' : ''}명</span>
+            )}
+          </>
+        }
+      >
+        {rankingList.length > 0 && (
+          <div className="form-check mb-3">
+            <input
+              className="form-check-input"
+              type="checkbox"
+              id="selectAll"
+              checked={isAllSelected}
+              onChange={handleToggleAll}
+            />
+            <label className="form-check-label small" htmlFor="selectAll">
+              현재 목록 전체 선택 (최대 {MAX_SELECTION}명)
+            </label>
           </div>
         )}
-      </div>
 
-      {/* 랭킹 타입 선택 */}
-      <div className="card shadow-sm border-0 mb-4">
-        <div className="card-body p-4">
-          <div className="row g-3 align-items-end">
-            <div className="col-md-4">
-              <label className="form-label fw-semibold text-secondary mb-2">
-                <i className="bi bi-funnel me-2"></i>랭킹 타입
-              </label>
-              <select
-                className="form-select form-select-lg border-0 shadow-sm"
-                style={{backgroundColor: '#f8f9fa', borderRadius: '12px'}}
-                value={selectedRankingType}
-                onChange={(e) => setSelectedRankingType(e.target.value)}
-              >
-                {rankingTypes.map((type) => (
-                  <option key={type.key} value={type.key}>
-                    {type.description}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 랭킹 결과 */}
-      <div className="card shadow-sm border-0">
-        <div className="card-header bg-white border-0 py-3">
-          <div className="d-flex justify-content-between align-items-center">
-            <div className="d-flex align-items-center gap-3 flex-wrap">
-              {rankingList.length > 0 && (
-                <>
-                  <div className="form-check">
-                    <input
-                      className="form-check-input"
-                      type="checkbox"
-                      id="selectAll"
-                      checked={selectedUserIds.size > 0 && selectedUserIds.size === Math.min(rankingList.length, MAX_SELECTION)}
-                      onChange={handleToggleAll}
-                    />
-                    <label className="form-check-label" htmlFor="selectAll">
-                      전체 선택
-                    </label>
-                  </div>
-                  <div className="d-flex align-items-center gap-2 flex-wrap">
-                    <div className="d-flex align-items-center gap-2">
-                      <span className="text-muted small fw-semibold">순위 범위:</span>
-                      <div className="input-group input-group-sm" style={{width: 'auto'}}>
-                        <input
-                          type="number"
-                          className="form-control"
-                          placeholder="1"
-                          value={startRankInput}
-                          onChange={(e) => setStartRankInput(e.target.valueAsNumber || 0)}
-                          style={{width: '65px'}}
-                          min="1"
-                        />
-                        <span className="input-group-text bg-white">등</span>
-                      </div>
-                      <span className="text-muted fw-bold">~</span>
-                      <div className="input-group input-group-sm" style={{width: 'auto'}}>
-                        <input
-                          type="number"
-                          className="form-control"
-                          placeholder="10"
-                          value={endRankInput}
-                          onChange={(e) => setEndRankInput(e.target.valueAsNumber || 0)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              handleSelectByRank();
-                            }
-                          }}
-                          style={{width: '65px'}}
-                          min="1"
-                        />
-                        <span className="input-group-text bg-white">등</span>
-                      </div>
-                      <button
-                        className="btn btn-sm btn-primary d-flex align-items-center gap-1"
-                        onClick={handleSelectByRank}
-                        title="입력한 순위 범위의 유저들을 선택합니다"
-                      >
-                        <i className="bi bi-check2-square"></i>
-                        선택
-                      </button>
-                    </div>
-                  </div>
-                </>
-              )}
-              <h5 className="fw-bold mb-0">
-                <i className="bi bi-trophy me-2 text-warning"></i>
-                {getSelectedRankingTypeName()} 랭킹
-              </h5>
-            </div>
-            <div className="d-flex align-items-center gap-2">
-              {selectedUserIds.size > 0 && (
-                <span className="badge bg-success rounded-pill px-3 py-2">
-                  선택: {selectedUserIds.size}명
-                </span>
-              )}
-              <span className="badge bg-primary rounded-pill px-3 py-2">
-                총 {rankingList.length}명
-              </span>
-            </div>
-          </div>
-        </div>
-        <div
-          className="card-body p-4"
-          ref={scrollContainerRef}
-          onScroll={handleScroll}
-          style={{
-            maxHeight: '70vh',
-            overflowY: 'auto'
-          }}
-        >
-          {isLoading ? (
-            <div className="text-center py-5">
-              <Loading/>
-              <p className="text-muted mt-3">랭킹을 불러오는 중입니다</p>
-            </div>
+        <div ref={scrollContainerRef} onScroll={handleScroll} style={{maxHeight: '70vh', overflowY: 'auto'}}>
+          {isLoading && rankingList.length === 0 ? (
+            <Loading/>
           ) : rankingList.length === 0 ? (
-            <div className="text-center py-5">
-              <i className="bi bi-inbox display-1 text-muted mb-3"></i>
-              <p className="text-muted fs-5">랭킹 데이터가 없습니다</p>
-              <p className="text-muted small">다른 랭킹 타입을 선택해보세요</p>
-            </div>
+            <EmptyState
+              icon="bi-trophy"
+              title="랭킹 데이터가 없습니다"
+              description="다른 랭킹 타입을 선택해보세요."
+            />
           ) : (
             <>
-              <div className="row">
+              <div className="row g-3">
                 {rankingList.map((item, index) => (
                   <UserRankingCard
                     key={`${item.user.userId}-${index}`}
@@ -415,23 +370,24 @@ const UserRankingManagement = () => {
                   />
                 ))}
               </div>
+
               {isLoadingMore && (
                 <div className="text-center py-3">
-                  <div className="spinner-border text-primary" role="status">
-                    <span className="visually-hidden">로딩 중...</span>
-                  </div>
-                  <p className="text-muted mt-2 mb-0">더 불러오는 중...</p>
+                  <span className="spinner-border spinner-border-sm text-primary me-2" role="status"/>
+                  <span className="small text-muted">더 불러오는 중...</span>
                 </div>
               )}
-              {!hasMore && rankingList.length > 0 && (
-                <div className="text-center py-3">
-                  <p className="text-muted mb-0">모든 랭킹을 불러왔습니다</p>
-                </div>
+
+              {!hasMore && (
+                <p className="text-center text-secondary small py-3 mb-0">
+                  <i className="bi bi-check-circle me-1"/>
+                  모든 랭킹을 불러왔습니다.
+                </p>
               )}
             </>
           )}
         </div>
-      </div>
+      </SectionCard>
 
       {/* 유저 상세 모달 */}
       <UserDetailModal

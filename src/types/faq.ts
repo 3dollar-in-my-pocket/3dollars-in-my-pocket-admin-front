@@ -2,23 +2,21 @@
  * FAQ 관련 타입 정의
  */
 
-export interface Faq {
-  faqId: string;
-  question: string;
-  answer: string;
-  category: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
+/** FaqCategoryResponse */
 export interface FaqCategory {
   category: string;
-  displayName?: string;
+  description: string;
 }
 
-export interface ListFaqsParams {
+/** FaqResponse */
+export interface Faq {
+  faqId: string;
   application: string;
-  category?: string;
+  question: string;
+  answer: string;
+  category: FaqCategory;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface CreateFaqRequest {

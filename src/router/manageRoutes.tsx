@@ -1,33 +1,36 @@
-import Dashboard from "../pages/Dashboard";
-import Advertisement from "../pages/advertisement/Advertisement";
-import Registration from "../pages/registration/Registration";
-import FaqManagement from "../pages/faq/Faq";
-import Policy from "../pages/policy/Policy";
-import Push from "../pages/push/Push";
-import UserSearch from "../pages/user/UserSearch";
-import StoreSearch from "../pages/store/StoreSearch";
-import PopularNeighborhoodStores from "../pages/store/PopularNeighborhoodStores";
-import ReviewManagement from "../pages/review/ReviewManagement";
-import StoreMessageManagement from "../pages/storeMessage/StoreMessageManagement";
-import StoreCategoryManagement from "../pages/storeCategory/StoreCategoryManagement";
-import CouponManagement from "../pages/coupon/CouponManagement";
-import CacheTool from "../pages/tool/CacheTool";
-import FileUploadTool from "../pages/tool/FileUploadTool";
-import RandomNameTool from "../pages/tool/RandomNameTool";
-import Admin from "../pages/admin/Admin";
-import PollManagement from "../pages/poll/PollManagement";
-import MedalManagement from "../pages/medal/MedalManagement";
-import UserRankingManagement from "../pages/userRanking/UserRankingManagement";
-import StoreImageManage from "../pages/manage/StoreImageManage";
-import StoreMarkerManage from "../pages/manage/StoreMarkerManage";
-import StoreReportManagement from "../pages/storeReport/StoreReportManagement";
-import StorePostManagement from "../pages/storePost/StorePostManagement";
-import PromptManagement from "../pages/prompt/PromptManagement";
-import AiMenuImageExtract from "../pages/proto/AiMenuImageExtract";
-import StoreFileUpload from "../pages/store/StoreFileUpload";
+import {lazy} from "react";
 import PrivateRouter from "./PrivateRouter";
-import PermissionGuard from "../components/auth/PermissionGuard";
-import { AdminRole } from "../types/admin";
+import PermissionGuard from "@/components/auth/PermissionGuard";
+import {AdminRole} from "@/types/admin";
+
+// 관리 페이지는 라우트 진입 시점에 로드합니다. (Suspense fallback은 Layout에 있음)
+const Dashboard = lazy(() => import("../pages/Dashboard"));
+const Advertisement = lazy(() => import("../pages/advertisement/Advertisement"));
+const Registration = lazy(() => import("../pages/registration/Registration"));
+const FaqManagement = lazy(() => import("../pages/faq/Faq"));
+const Policy = lazy(() => import("../pages/policy/Policy"));
+const Push = lazy(() => import("../pages/push/Push"));
+const UserSearch = lazy(() => import("../pages/user/UserSearch"));
+const StoreSearch = lazy(() => import("../pages/store/StoreSearch"));
+const PopularNeighborhoodStores = lazy(() => import("../pages/store/PopularNeighborhoodStores"));
+const ReviewManagement = lazy(() => import("../pages/review/ReviewManagement"));
+const StoreMessageManagement = lazy(() => import("../pages/storeMessage/StoreMessageManagement"));
+const StoreCategoryManagement = lazy(() => import("../pages/storeCategory/StoreCategoryManagement"));
+const CouponManagement = lazy(() => import("../pages/coupon/CouponManagement"));
+const CacheTool = lazy(() => import("../pages/tool/CacheTool"));
+const FileUploadTool = lazy(() => import("../pages/tool/FileUploadTool"));
+const RandomNameTool = lazy(() => import("../pages/tool/RandomNameTool"));
+const Admin = lazy(() => import("../pages/admin/Admin"));
+const PollManagement = lazy(() => import("../pages/poll/PollManagement"));
+const MedalManagement = lazy(() => import("../pages/medal/MedalManagement"));
+const UserRankingManagement = lazy(() => import("../pages/userRanking/UserRankingManagement"));
+const StoreImageManage = lazy(() => import("../pages/manage/StoreImageManage"));
+const StoreMarkerManage = lazy(() => import("../pages/manage/StoreMarkerManage"));
+const StoreReportManagement = lazy(() => import("../pages/storeReport/StoreReportManagement"));
+const StorePostManagement = lazy(() => import("../pages/storePost/StorePostManagement"));
+const PromptManagement = lazy(() => import("../pages/prompt/PromptManagement"));
+const AiMenuImageExtract = lazy(() => import("../pages/proto/AiMenuImageExtract"));
+const StoreFileUpload = lazy(() => import("../pages/store/StoreFileUpload"));
 
 const manageRoutes = {
   path: '/manage',

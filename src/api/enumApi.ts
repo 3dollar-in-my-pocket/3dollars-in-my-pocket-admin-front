@@ -1,17 +1,7 @@
-import axiosInstance from "./apiBase";
+import {apiGet} from "./apiHelpers";
 
 export default {
   getEnum: async () => {
-    try {
-      const response = await axiosInstance(
-        {
-          method: "GET",
-          url: `/v1/enums`,
-        }
-      );
-      return response.data;
-    } catch (error: any) {
-      return error.response;
-    }
+    return apiGet<Record<string, any[]>>(`/v1/enums`);
   },
 }

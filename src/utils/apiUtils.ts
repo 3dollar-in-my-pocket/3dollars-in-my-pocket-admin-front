@@ -1,6 +1,6 @@
-import { CursorPaginationParams, IncludeType, ApiResponse, PaginatedResponse } from '../types/api';
-import { PAGINATION_DEFAULTS, NONCE_HEADER } from '../constants/api';
-import { AxiosResponse } from 'axios';
+import {ApiResponse, IncludeType, PaginatedResponse} from '@/types/api';
+import {NONCE_HEADER, PAGINATION_DEFAULTS} from '@/constants/api';
+import {AxiosResponse} from 'axios';
 
 /**
  * 커서 기반 페이지네이션 파라미터 빌드
@@ -10,7 +10,7 @@ export function buildCursorParams(
   cursor: string | null = null,
   size: number = PAGINATION_DEFAULTS.CURSOR_SIZE
 ): Record<string, string | number> {
-  const params: Record<string, string | number> = { size };
+  const params: Record<string, string | number> = {size};
 
   if (cursor) {
     params.cursor = cursor;
@@ -72,7 +72,7 @@ export function normalizeCursorResponse<T>(data: any): PaginatedResponse<T> {
     cursor: {
       hasMore: cursor.hasMore || false,
       nextCursor: cursor.nextCursor || null,
-      ...(cursor.totalCount !== undefined && { totalCount: cursor.totalCount }),
+      ...(cursor.totalCount !== undefined && {totalCount: cursor.totalCount}),
     },
   };
 }

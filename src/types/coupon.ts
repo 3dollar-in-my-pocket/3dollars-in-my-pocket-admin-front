@@ -1,6 +1,7 @@
 // Coupon related type definitions and constants
 
-import { StoreInfo } from './review';
+import {DateTimeInterval} from './domain';
+import {SimpleStore} from './store';
 
 // Coupon status types
 export const COUPON_STATUS = {
@@ -11,62 +12,16 @@ export const COUPON_STATUS = {
 
 export type CouponStatus = typeof COUPON_STATUS[keyof typeof COUPON_STATUS];
 
-// Coupon interfaces
-export interface ValidityPeriod {
-  startDateTime: string;
-  endDateTime: string;
-}
-
+/** StoreCouponResponse */
 export interface Coupon {
   couponId: string;
   name: string;
   maxIssuableCount: number;
   currentIssuedCount: number;
   currentUsedCount: number;
-  validityPeriod: ValidityPeriod;
+  validityPeriod: DateTimeInterval;
   status: CouponStatus;
-  createdAt: string;
-  updatedAt: string;
+  store?: SimpleStore;
+  createdAt?: string;
+  updatedAt?: string;
 }
-
-export interface StoreCoupon extends Coupon {
-  store?: StoreInfo;
-}
-
-// Utility functions
-export const getCouponStatusDisplayName = (status: CouponStatus): string => {
-  switch (status) {
-    case COUPON_STATUS.ACTIVE:
-      return '발급 중';
-    case COUPON_STATUS.STOPPED:
-      return '발급 중지 (사용만 가능)';
-    case COUPON_STATUS.ENDED:
-      return '사용 종료';
-    default:
-      return '알 수 없음';
-  }
-};
-
-export const getCouponStatusBadgeClass = (status: CouponStatus): string => {
-  switch (status) {
-    case COUPON_STATUS.ACTIVE:
-      return 'bg-success';
-    case COUPON_STATUS.STOPPED:
-      return 'bg-warning';
-    case COUPON_STATUS.ENDED:
-      return 'bg-secondary';
-    default:
-      return 'bg-secondary';
-  }
-};
-
-export const formatCouponDate = (dateString: string): string => {
-  if (!dateString) return '없음';
-  return new Date(dateString).toLocaleString('ko-KR', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-};

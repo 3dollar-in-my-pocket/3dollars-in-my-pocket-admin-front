@@ -1,16 +1,32 @@
 import React, {useState} from "react";
 import {Button, Col, Form, Row} from "react-bootstrap";
 import {toast} from "react-toastify";
-import uploadApi from "../../../api/uploadApi";
-import AdPreview from "../../../components/advertisement/AdPreview";
-import {isFieldAvailable} from "../../../constants/advertisementSpecs";
-import DeepLinkSelector from "../../../components/common/DeepLinkSelector";
+import uploadApi from "@/api/uploadApi";
+import AdPreview from "@/components/advertisement/AdPreview";
+import {isFieldAvailable} from "@/constants/advertisementSpecs";
+import DeepLinkSelector from "@/components/common/DeepLinkSelector";
+import {
+  AdvertisementContentForm,
+  AdvertisementForm,
+  AdvertisementImageForm,
+  AdvertisementLinkForm,
+  AdvertisementLinkType
+} from "@/types/advertisement";
 
-const ContentInfoStep = ({formData, onChange}) => {
+interface ContentInfoStepProps {
+  formData: AdvertisementForm;
+  /** 상위에서 setFormData 를 그대로 넘기므로 updater 함수를 받습니다. */
+  onChange: (updater: (prev: AdvertisementForm) => AdvertisementForm) => void;
+}
+
+const ContentInfoStep = ({formData, onChange}: ContentInfoStepProps) => {
   const content = formData.content;
   const [isUploading, setIsUploading] = useState(false);
 
-  const handleContentChange = (field, value) => {
+  const handleContentChange = <K extends keyof AdvertisementContentForm>(
+    field: K,
+    value: AdvertisementContentForm[K]
+  ) => {
     onChange((prev) => ({
       ...prev,
       content: {
@@ -20,7 +36,10 @@ const ContentInfoStep = ({formData, onChange}) => {
     }));
   };
 
-  const handleImageChange = (field, value) => {
+  const handleImageChange = <K extends keyof AdvertisementImageForm>(
+    field: K,
+    value: AdvertisementImageForm[K]
+  ) => {
     onChange((prev) => ({
       ...prev,
       content: {
@@ -33,7 +52,10 @@ const ContentInfoStep = ({formData, onChange}) => {
     }));
   };
 
-  const handleLinkChange = (field, value) => {
+  const handleLinkChange = <K extends keyof AdvertisementLinkForm>(
+    field: K,
+    value: AdvertisementLinkForm[K]
+  ) => {
     onChange((prev) => ({
       ...prev,
       content: {
@@ -46,7 +68,7 @@ const ContentInfoStep = ({formData, onChange}) => {
     }));
   };
 
-  const handleImageUpload = async (e) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -133,7 +155,7 @@ const ContentInfoStep = ({formData, onChange}) => {
           <div className="d-flex gap-2 flex-column flex-md-row">
             <Form.Control
               type="text"
-              value={content.image.url}
+              value={content.image.url ?? ''}
               onChange={(e) => handleImageChange("url", e.target.value)}
               placeholder="이미지 URL을 입력하거나 파일 업로드 버튼을 사용하세요"
               className="shadow-sm"
@@ -185,8 +207,8 @@ const ContentInfoStep = ({formData, onChange}) => {
               </Form.Label>
               <Form.Control
                 type="number"
-                value={content.image.width}
-                onChange={(e) => handleImageChange("width", e.target.value)}
+                value={content.image.width ?? ''}
+                onChange={(e) => handleImageChange("width", e.target.value ? Number(e.target.value) : null)}
                 placeholder="ex) 36"
                 className="shadow-sm"
               />
@@ -201,8 +223,8 @@ const ContentInfoStep = ({formData, onChange}) => {
               </Form.Label>
               <Form.Control
                 type="number"
-                value={content.image.height}
-                onChange={(e) => handleImageChange("height", e.target.value)}
+                value={content.image.height ?? ''}
+                onChange={(e) => handleImageChange("height", e.target.value ? Number(e.target.value) : null)}
                 placeholder="ex) 20"
                 className="shadow-sm"
               />
@@ -222,7 +244,7 @@ const ContentInfoStep = ({formData, onChange}) => {
                 </Form.Label>
                 <Form.Control
                   type="text"
-                  value={content.title}
+                  value={content.title ?? ''}
                   onChange={(e) => handleContentChange("title", e.target.value)}
                   placeholder="ex) 가슴속 3천원 앱 홍보 캠페인"
                   className="shadow-sm"
@@ -268,7 +290,7 @@ const ContentInfoStep = ({formData, onChange}) => {
                 </Form.Label>
                 <Form.Control
                   type="text"
-                  value={content.subTitle}
+                  value={content.subTitle ?? ''}
                   onChange={(e) => handleContentChange("subTitle", e.target.value)}
                   placeholder="ex) 캠페인 소개"
                   className="shadow-sm"
@@ -314,7 +336,7 @@ const ContentInfoStep = ({formData, onChange}) => {
                 </Form.Label>
                 <Form.Control
                   type="text"
-                  value={content.extraContent}
+                  value={content.extraContent ?? ''}
                   onChange={(e) => handleContentChange("extraContent", e.target.value)}
                   placeholder="ex) 더보기"
                   className="shadow-sm"
@@ -389,8 +411,8 @@ const ContentInfoStep = ({formData, onChange}) => {
               <span className="text-danger ms-1">*</span>
             </Form.Label>
             <Form.Select
-              value={content.link.linkType}
-              onChange={(e) => handleLinkChange("linkType", e.target.value)}
+              value={content.link.linkType ?? ''}
+              onChange={(e) => handleLinkChange("linkType", (e.target.value || null) as AdvertisementLinkType | null)}
               className="shadow-sm"
             >
               <option value="">선택하세요</option>

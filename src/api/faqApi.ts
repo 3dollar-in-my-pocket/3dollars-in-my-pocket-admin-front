@@ -1,22 +1,27 @@
-import { ApiResponse, ContentListResponse } from '../types/api';
-import { Faq, FaqCategory, CreateFaqRequest, UpdateFaqRequest } from '../types/faq';
-import { apiGet, apiPost, apiPut, apiDelete } from './apiHelpers';
+import {ApiResponse, ContentListResponse} from '@/types/api';
+import {Faq, FaqCategory} from '@/types/faq';
+import {apiDelete, apiGet, apiPost, apiPut} from './apiHelpers';
 
 export default {
   /**
    * FAQ 목록 조회
    */
-  listFaqs: async ({application, category}: {application: string; category?: string}): Promise<ApiResponse<ContentListResponse<Faq>>> => {
+  listFaqs: async ({application, category}: {
+    application: string;
+    category?: string
+  }): Promise<ApiResponse<ContentListResponse<Faq>>> => {
     return apiGet<ContentListResponse<Faq>>(
       `/v1/application/${application}/faqs`,
-      category ? { category } : undefined
+      category ? {category} : undefined
     );
   },
 
   /**
    * FAQ 카테고리 목록 조회
    */
-  listFaqCategories: async ({application}: {application: string}): Promise<ApiResponse<ContentListResponse<FaqCategory>>> => {
+  listFaqCategories: async ({application}: {
+    application: string
+  }): Promise<ApiResponse<ContentListResponse<FaqCategory>>> => {
     return apiGet<ContentListResponse<FaqCategory>>(`/v1/application/${application}/faq-categories`);
   },
 
@@ -24,12 +29,12 @@ export default {
    * FAQ 생성 (nonce 보호)
    */
   createFaq: async ({
-    application,
-    question,
-    answer,
-    category,
-    nonce
-  }: {
+                      application,
+                      question,
+                      answer,
+                      category,
+                      nonce
+                    }: {
     application: string;
     question: string;
     answer: string;
@@ -38,8 +43,8 @@ export default {
   }): Promise<ApiResponse<Faq>> => {
     return apiPost<Faq>(
       `/v1/application/${application}/faq`,
-      { question, answer, category },
-      { nonce }
+      {question, answer, category},
+      {nonce}
     );
   },
 
@@ -47,12 +52,12 @@ export default {
    * FAQ 수정
    */
   updateFaq: async ({
-    application,
-    faqId,
-    question,
-    answer,
-    category
-  }: {
+                      application,
+                      faqId,
+                      question,
+                      answer,
+                      category
+                    }: {
     application: string;
     faqId: string;
     question: string;
@@ -61,7 +66,7 @@ export default {
   }): Promise<ApiResponse<Faq>> => {
     return apiPut<Faq>(
       `/v1/application/${application}/faq/${faqId}`,
-      { question, answer, category }
+      {question, answer, category}
     );
   },
 
@@ -69,9 +74,9 @@ export default {
    * FAQ 삭제
    */
   deleteFaq: async ({
-    application,
-    faqId
-  }: {
+                      application,
+                      faqId
+                    }: {
     application: string;
     faqId: string;
   }): Promise<ApiResponse<void>> => {

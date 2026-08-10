@@ -4,8 +4,6 @@ on:
     branches:
       - develop
   workflow_dispatch:
-env:
-  CI: ''
 jobs:
   ci:
     runs-on: ubuntu-latest

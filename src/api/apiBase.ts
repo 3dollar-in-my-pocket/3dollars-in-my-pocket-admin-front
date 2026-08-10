@@ -1,7 +1,7 @@
 import axios, {AxiosError, AxiosResponse, InternalAxiosRequestConfig} from 'axios';
 import {toast} from "react-toastify";
-import {LocalStorageService} from "../service/LocalStorageService";
-import {AUTH_KEY} from "../constants/google";
+import {LocalStorageService} from "@/service/LocalStorageService";
+import {AUTH_KEY} from "@/constants/google";
 
 // 전역 네비게이션 함수 - 403 에러 시 홈으로 이동용
 let globalNavigate: ((path: string) => void) | null = null;

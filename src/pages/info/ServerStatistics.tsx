@@ -1,35 +1,52 @@
-import React, {useState, useEffect, useMemo, useCallback} from "react";
-import {Card, Container, Form, Button, Row, Col, Alert} from "react-bootstrap";
-import { useRecoilValue } from "recoil";
-import { AdminAuthState } from "../../state/AdminAuthState";
-import { AdminRole } from "../../types/admin";
-import enumApi from "../../api/enumApi";
+import {useCallback, useEffect, useMemo, useState} from "react";
+import {useAuthStore} from "@/state/authStore";
+import {AdminRole} from "@/types/admin";
+import enumApi from "@/api/enumApi";
 import RecentActivityStatistics from "./RecentActivityStatistics";
 import DefaultStatistics from "./DefaultStatistics";
 import StoreByCategoryStatistics from "./StoreByCategoryStatistics";
+import FilterCard from "@/components/common/FilterCard";
+import EmptyState from "@/components/common/EmptyState";
+
+/** VIEWER 권한으로 조회 가능한 통계 타입 */
+const VIEWER_ALLOWED_STATISTICS_TYPES = [
+  'USER',
+  'BOSS',
+  'WITHDRAWAL_USER',
+  'WITHDRAWAL_BOSS',
+  'IOS_DEVICE',
+  'ANDROID_DEVICE',
+  'USER_STORE',
+  'BOSS_STORE',
+  'STORE_FAVORITE',
+  'STORE_REVIEW',
+  'STORE_VISIT',
+  'STORE_IMAGE'
+];
+
+/** 빠른 기간 선택 옵션 */
+const QUICK_RANGES = [
+  {days: 7, label: "최근 7일"},
+  {days: 30, label: "최근 30일"},
+  {days: 90, label: "최근 90일"},
+  {days: 365, label: "최근 1년"},
+];
+
+const formatDate = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
 
 const ServerStatistics = () => {
-  const adminAuth = useRecoilValue(AdminAuthState);
+  const adminAuth = useAuthStore((state) => state.admin);
   const [statisticsTypes, setStatisticsTypes] = useState<{ key: string; description: string }[]>([]);
   const [selectedType, setSelectedType] = useState<string>("");
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
   const [dateRangeError, setDateRangeError] = useState<string>("");
-
-  const VIEWER_ALLOWED_STATISTICS_TYPES = [
-    'USER',
-    'BOSS',
-    'WITHDRAWAL_USER',
-    'WITHDRAWAL_BOSS',
-    'IOS_DEVICE',
-    'ANDROID_DEVICE',
-    'USER_STORE',
-    'BOSS_STORE',
-    'STORE_FAVORITE',
-    'STORE_REVIEW',
-    'STORE_VISIT',
-    'STORE_IMAGE'
-  ];
+  const [activeQuickRange, setActiveQuickRange] = useState<number | null>(30);
 
   useEffect(() => {
     fetchStatisticsTypes();
@@ -68,13 +85,7 @@ const ServerStatistics = () => {
     setEndDate(formatDate(end));
     setStartDate(formatDate(start));
     setDateRangeError("");
-  };
-
-  const formatDate = (date: Date): string => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
+    setActiveQuickRange(days);
   };
 
   useEffect(() => {
@@ -107,16 +118,18 @@ const ServerStatistics = () => {
   }, []);
 
   const statisticsComponent = useMemo(() => {
-    // 날짜가 없으면 안내 메시지만 표시
+    // 날짜가 없거나 유효하지 않으면 안내만 표시
     if (!startDate || !endDate) {
       return (
-        <Alert variant="info">
-          조회 조건을 설정하고 통계를 확인하세요.
-        </Alert>
+        <EmptyState
+          icon="bi-calendar-range"
+          title="조회 기간을 선택해주세요"
+          description="통계 타입과 조회 기간을 설정하면 결과가 표시됩니다."
+        />
       );
     }
 
-    // RECENT_ACTIVITY 타입은 기존 컴포넌트 사용
+    // RECENT_ACTIVITY 타입은 별도 컴포넌트 사용
     if (selectedType === "RECENT_ACTIVITY_USER_STORE" || selectedType === "RECENT_ACTIVITY_BOSS_STORE") {
       return (
         <RecentActivityStatistics
@@ -152,16 +165,14 @@ const ServerStatistics = () => {
   }, [selectedType, startDate, endDate, handleFetch]);
 
   return (
-    <Container className="py-5">
-      <h2 className="fw-bold mb-4 text-primary">📊 서비스 통계 (서버)</h2>
-
-      <Card className="mb-4 shadow-sm">
-        <Card.Body>
-          <h5 className="fw-semibold mb-3">조회 조건</h5>
-
-          <Form.Group className="mb-3">
-            <Form.Label className="fw-semibold">통계 타입</Form.Label>
-            <Form.Select
+    <div>
+      <FilterCard>
+        <div className="row g-3">
+          <div className="col-12 col-lg-4">
+            <label className="form-label" htmlFor="stat-type">통계 타입</label>
+            <select
+              id="stat-type"
+              className="form-select"
               value={selectedType}
               onChange={(e) => setSelectedType(e.target.value)}
             >
@@ -170,88 +181,81 @@ const ServerStatistics = () => {
                   {type.description}
                 </option>
               ))}
-            </Form.Select>
-          </Form.Group>
+            </select>
+          </div>
 
-          <Form.Group className="mb-3">
-            <Form.Label className="fw-semibold">빠른 기간 선택</Form.Label>
-            <div className="d-flex gap-2 flex-wrap">
-              <Button
-                variant="outline-primary"
-                size="sm"
-                onClick={() => setQuickDateRange(7)}
-              >
-                최근 7일
-              </Button>
-              <Button
-                variant="outline-primary"
-                size="sm"
-                onClick={() => setQuickDateRange(30)}
-              >
-                최근 30일
-              </Button>
-              <Button
-                variant="outline-primary"
-                size="sm"
-                onClick={() => setQuickDateRange(90)}
-              >
-                최근 90일
-              </Button>
-              <Button
-                variant="outline-primary"
-                size="sm"
-                onClick={() => setQuickDateRange(365)}
-              >
-                최근 1년
-              </Button>
+          <div className="col-6 col-lg-2">
+            <label className="form-label" htmlFor="stat-start-date">시작일</label>
+            <input
+              id="stat-start-date"
+              type="date"
+              className="form-control"
+              value={startDate}
+              onChange={(e) => {
+                setStartDate(e.target.value);
+                setDateRangeError("");
+                setActiveQuickRange(null);
+              }}
+              max={endDate}
+            />
+          </div>
+
+          <div className="col-6 col-lg-2">
+            <label className="form-label" htmlFor="stat-end-date">종료일</label>
+            <input
+              id="stat-end-date"
+              type="date"
+              className="form-control"
+              value={endDate}
+              onChange={(e) => {
+                setEndDate(e.target.value);
+                setDateRangeError("");
+                setActiveQuickRange(null);
+              }}
+              min={startDate}
+            />
+          </div>
+
+          <div className="col-12 col-lg-4">
+            <label className="form-label">빠른 기간 선택</label>
+            <div className="filter-chips">
+              {QUICK_RANGES.map((range) => (
+                <button
+                  key={range.days}
+                  type="button"
+                  className={`filter-chip ${activeQuickRange === range.days ? "filter-chip--active" : ""}`}
+                  onClick={() => setQuickDateRange(range.days)}
+                >
+                  {range.label}
+                </button>
+              ))}
             </div>
-          </Form.Group>
+          </div>
+        </div>
 
-          <Row className="mb-3">
-            <Col md={6}>
-              <Form.Group>
-                <Form.Label className="fw-semibold">시작일</Form.Label>
-                <Form.Control
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => {
-                    setStartDate(e.target.value);
-                    setDateRangeError("");
-                  }}
-                />
-              </Form.Group>
-            </Col>
-            <Col md={6}>
-              <Form.Group>
-                <Form.Label className="fw-semibold">종료일</Form.Label>
-                <Form.Control
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => {
-                    setEndDate(e.target.value);
-                    setDateRangeError("");
-                  }}
-                />
-              </Form.Group>
-            </Col>
-          </Row>
-
-          {dateRangeError && (
-            <Alert variant="danger" className="mb-0">
-              {dateRangeError}
-            </Alert>
-          )}
-        </Card.Body>
-      </Card>
+        {dateRangeError && (
+          <div className="alert alert-danger py-2 px-3 mt-3 mb-0 small">
+            <i className="bi bi-exclamation-triangle me-1"/>
+            {dateRangeError}
+          </div>
+        )}
+      </FilterCard>
 
       {/* 통계 타입에 따라 적절한 컴포넌트 렌더링 */}
-      {statisticsComponent}
+      {dateRangeError ? (
+        <EmptyState
+          icon="bi-exclamation-triangle"
+          title="조회 조건을 확인해주세요"
+          description={dateRangeError}
+        />
+      ) : statisticsComponent}
 
       {/* 안내 문구 */}
-      <Alert variant="secondary" className="mt-4">
-        해당 지표는 실 데이터와는 별도로 수집·집계되며, 지표 수집을 시작한 시점 이후 데이터부터 제공됩니다.
-      </Alert>
-    </Container>
+      <div className="page-note mt-3">
+        <i className="bi bi-info-circle"/>
+        <span>해당 지표는 실 데이터와는 별도로 수집·집계되며, 지표 수집을 시작한 시점 이후 데이터부터 제공됩니다.</span>
+      </div>
+    </div>
   );
 };
 

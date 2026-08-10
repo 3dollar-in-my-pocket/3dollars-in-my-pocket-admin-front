@@ -1,20 +1,22 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {Button, Card, Container, Form, Row, Col, Spinner} from 'react-bootstrap';
-import UploadApi from "../../api/uploadApi";
-import enumApi from "../../api/enumApi";
+import UploadApi from "@/api/uploadApi";
+import enumApi from "@/api/enumApi";
 import {toast} from "react-toastify";
+import PageHeader from "@/components/common/PageHeader";
+import SectionCard from "@/components/common/SectionCard";
 
 const FileUpload = () => {
   const fileInputRef = useRef(null);
-  const urlTextAreaRef = useRef(null);
   const [selectedFile, setSelectedFile] = useState(null);
+  /** 업로드 전 로컬 미리보기용 objectURL */
+  const [localPreviewUrl, setLocalPreviewUrl] = useState('');
   const [fileImageUrl, setFileImageUrl] = useState(null);
   const [imageTypes, setImageTypes] = useState([]);
   const [copySuccess, setCopySuccess] = useState(false);
   const [selectedImageType, setSelectedImageType] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleImageTypeChange = (e) => setSelectedImageType(e.target.value);
+  const handleImageTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => setSelectedImageType(e.target.value);
 
   const handleFileUpload = () => fileInputRef.current.click();
 
@@ -34,19 +36,25 @@ const FileUpload = () => {
 
     if (selectedFile) {
       setIsLoading(true);
-      const response = await UploadApi.uploadImage(selectedImageType, selectedFile);
-      setFileImageUrl(response.data);
-      toast.info('파일 업로드가 완료되었습니다.');
-      setIsLoading(false);
+      try {
+        const response = await UploadApi.uploadImage(selectedImageType, selectedFile);
+        setFileImageUrl(response.data);
+        toast.info('파일 업로드가 완료되었습니다.');
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
-  const handleCopyUrl = () => {
-    if (urlTextAreaRef.current) {
-      urlTextAreaRef.current.select();
-      document.execCommand('copy');
+  const handleCopyUrl = async () => {
+    if (!fileImageUrl) return;
+
+    try {
+      await navigator.clipboard.writeText(fileImageUrl);
       setCopySuccess(true);
       toast.info('URL이 복사되었습니다.');
+    } catch {
+      toast.error('URL 복사에 실패했습니다. 주소를 직접 선택해 복사해주세요.');
     }
   };
 
@@ -59,6 +67,18 @@ const FileUpload = () => {
     setSelectedImageType('');
   };
 
+  // 선택한 파일의 objectURL 생성/해제
+  useEffect(() => {
+    if (!selectedFile) {
+      setLocalPreviewUrl('');
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(selectedFile);
+    setLocalPreviewUrl(objectUrl);
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [selectedFile]);
+
   useEffect(() => {
     enumApi.getEnum().then((response) => {
       if (response.ok) {
@@ -68,16 +88,22 @@ const FileUpload = () => {
   }, []);
 
   return (
-    <Container className="my-5">
-      <h2 className="text-center mb-4 fw-bold">🖼️ 이미지 업로드 툴</h2>
+    <div>
+      <PageHeader description="이미지 타입을 선택해 파일을 업로드하고, 발급된 URL을 복사해 사용합니다."/>
 
-      <Card className="p-4 shadow-sm rounded-4">
-        <Row className="mb-4">
-          <Col md={6}>
-            <Form.Group>
-              <Form.Label className="fw-semibold">1. 이미지 타입 선택</Form.Label>
-              <Form.Select
-                disabled={fileImageUrl}
+      <div className="row justify-content-center">
+        <div className="col-12 col-lg-8">
+          <SectionCard title="이미지 업로드" icon="bi-cloud-arrow-up-fill">
+            <div className="form-field">
+              <label className="form-field__label" htmlFor="image-type">
+                <i className="bi bi-collection"/>
+                이미지 타입
+                <span className="form-required">*</span>
+              </label>
+              <select
+                id="image-type"
+                className="form-select"
+                disabled={!!fileImageUrl}
                 value={selectedImageType}
                 onChange={handleImageTypeChange}
               >
@@ -87,13 +113,15 @@ const FileUpload = () => {
                     {type.description}
                   </option>
                 ))}
-              </Form.Select>
-            </Form.Group>
-          </Col>
+              </select>
+            </div>
 
-          <Col md={6} className="d-flex align-items-end">
             {!fileImageUrl && (
-              <>
+              <div className="form-field">
+                <span className="form-field__label">
+                  <i className="bi bi-file-earmark-image"/>
+                  파일 선택
+                </span>
                 <input
                   multiple
                   type="file"
@@ -102,79 +130,83 @@ const FileUpload = () => {
                   style={{display: 'none'}}
                   onChange={handleFileChange}
                 />
-                <Button
-                  variant="primary"
-                  onClick={handleFileUpload}
-                  className="w-100"
-                >
-                  📁 파일 선택하기
-                </Button>
-              </>
+                {selectedFile ? (
+                  <div className="form-image">
+                    <img
+                      src={localPreviewUrl}
+                      alt="선택한 이미지"
+                      className="form-image__thumb"
+                    />
+                    <span className="form-image__info">{selectedFile.name}</span>
+                    <button className="btn btn-sm btn-outline-secondary" onClick={handleFileUpload}>
+                      <i className="bi bi-arrow-repeat me-1"/>
+                      변경
+                    </button>
+                  </div>
+                ) : (
+                  <button className="btn btn-outline-primary w-100" onClick={handleFileUpload}>
+                    <i className="bi bi-folder2-open me-1"/>
+                    파일 선택하기
+                  </button>
+                )}
+                <p className="form-field__hint">JPG, PNG 등 이미지 파일을 업로드할 수 있습니다.</p>
+              </div>
             )}
-          </Col>
-        </Row>
 
-        {fileImageUrl ? (
-          <>
-            <div className="text-center mb-4">
-              <img
-                src={fileImageUrl}
-                alt="Uploaded"
-                className="img-fluid rounded shadow-sm"
-                style={{maxHeight: '320px', objectFit: 'cover'}}
-              />
-              <p className="text-muted small mt-3">{fileImageUrl}</p>
-            </div>
+            {fileImageUrl && (
+              <div className="form-field">
+                <span className="form-field__label">
+                  <i className="bi bi-check-circle-fill text-success"/>
+                  업로드 완료
+                </span>
+                <div className="text-center mb-2">
+                  <img
+                    src={fileImageUrl}
+                    alt="업로드된 이미지"
+                    className="img-fluid rounded"
+                    style={{maxHeight: '320px'}}
+                  />
+                </div>
+                <div className="form-code form-code--done d-block">{fileImageUrl}</div>
+              </div>
+            )}
 
-            <Row className="mb-3">
-              <Col md={6}>
-                <Button
-                  variant="success"
-                  onClick={handleCopyUrl}
-                  disabled={copySuccess}
-                  className="w-100"
-                >
-                  {copySuccess ? '✅ URL 복사 완료' : '🔗 URL 복사하기'}
-                </Button>
-              </Col>
-              <Col md={6}>
-                <Button variant="outline-danger" onClick={handleReset} className="w-100">
-                  ♻️ 초기화
-                </Button>
-              </Col>
-            </Row>
-          </>
-        ) : selectedFile ? (
-          <div className="d-grid gap-2 mb-3">
-            <Button
-              variant="secondary"
-              onClick={handleProcessFile}
-              disabled={isLoading}
-              className="w-100"
-            >
-              {isLoading ? (
-                <>
-                  <Spinner animation="border" size="sm" className="me-2"/>
-                  처리 중...
-                </>
-              ) : (
-                '🚀 파일 업로드 하기'
+            <div className="form-actions">
+              {(selectedFile || fileImageUrl) && (
+                <button className="btn btn-outline-danger" onClick={handleReset}>
+                  <i className="bi bi-arrow-counterclockwise me-1"/>
+                  초기화
+                </button>
               )}
-            </Button>
-            <Button variant="outline-danger" onClick={handleReset}>
-              ♻️ 초기화
-            </Button>
-          </div>
-        ) : null}
-      </Card>
-
-      <textarea
-        ref={urlTextAreaRef}
-        value={fileImageUrl}
-        style={{position: 'absolute', top: '-1000px', left: '-1000px'}}
-        readOnly
-      />
-    </Container>
+              {fileImageUrl ? (
+                <button className="btn btn-success" onClick={handleCopyUrl} disabled={copySuccess}>
+                  <i className={`bi ${copySuccess ? 'bi-check-lg' : 'bi-link-45deg'} me-1`}/>
+                  {copySuccess ? 'URL 복사 완료' : 'URL 복사'}
+                </button>
+              ) : (
+                <button
+                  className="btn btn-primary"
+                  onClick={handleProcessFile}
+                  disabled={isLoading || !selectedFile || !selectedImageType}
+                >
+                  {isLoading ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"/>
+                      업로드 중...
+                    </>
+                  ) : (
+                    <>
+                      <i className="bi bi-cloud-arrow-up me-1"/>
+                      업로드
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
+          </SectionCard>
+        </div>
+      </div>
+    </div>
   );
 };
 

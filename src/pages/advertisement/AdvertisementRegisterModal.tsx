@@ -1,16 +1,28 @@
-import React, {useEffect, useState} from "react";
-import PropTypes from "prop-types";
-import {Button, Form, Modal} from "react-bootstrap";
+import {useEffect, useState} from "react";
+import {Form, Modal} from "react-bootstrap";
 import {toast} from "react-toastify";
-import advertisementApi from "../../api/advertisementApi";
+import advertisementApi from "@/api/advertisementApi";
 import BasicInfoStep from "./steps/BasicInfoStep";
 import ContentInfoStep from "./steps/ContentInfoStep";
-import {useNonce} from "../../hooks/useNonce";
-import {isFieldRequired} from "../../constants/advertisementSpecs";
+import {useNonce} from "@/hooks/useNonce";
+import {isFieldRequired} from "@/constants/advertisementSpecs";
+import {AdvertisementForm, EnumOption} from "@/types/advertisement";
 
-const AdvertisementRegisterModal = ({show, onHide, positions, fetchAdvertisements}) => {
+interface AdvertisementRegisterModalProps {
+  show: boolean;
+  onHide: () => void;
+  positions: EnumOption[];
+  fetchAdvertisements: () => void;
+}
+
+const AdvertisementRegisterModal = ({
+                                      show,
+                                      onHide,
+                                      positions,
+                                      fetchAdvertisements
+                                    }: AdvertisementRegisterModalProps) => {
   const [currentStep, setCurrentStep] = useState(1);
-  const [formData, setFormData] = useState(getInitialFormData());
+  const [formData, setFormData] = useState<AdvertisementForm>(getInitialFormData());
   const {nonce, issueNonce, clearNonce} = useNonce();
 
   const platforms = [
@@ -41,7 +53,7 @@ const AdvertisementRegisterModal = ({show, onHide, positions, fetchAdvertisement
     setCurrentStep(1);
   }
 
-  const handleChange = (field, value) => {
+  const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({...prev, [field]: value}));
   };
 
@@ -56,11 +68,18 @@ const AdvertisementRegisterModal = ({show, onHide, positions, fetchAdvertisement
       return;
     }
 
+    const {image, link} = formData.content;
+
     const content = {
       ...formData.content,
-      ...(formData.content.link.linkType !== "null" && formData.content.link.linkUrl
-        ? {link: formData.content.link}
-        : {}),
+      // 입력값은 문자열로 들어오므로 서버 스펙(정수)에 맞춰 변환합니다.
+      image: {
+        ...image,
+        width: image.width ? Number(image.width) : null,
+        height: image.height ? Number(image.height) : null,
+      },
+      // 링크 유형을 고르지 않으면 link 자체를 보내지 않습니다.
+      ...(link.linkType && link.linkUrl ? {link} : {}),
     };
 
     const res = await advertisementApi.createAd({
@@ -103,50 +122,84 @@ const AdvertisementRegisterModal = ({show, onHide, positions, fetchAdvertisement
     return false;
   };
 
+  const isStep1Complete = formData.groupId
+    && formData.position
+    && formData.startDateTime
+    && formData.endDateTime
+    && formData.platform
+    && formData.orderType;
+
   return (
-    <Modal show={show} onHide={onHide} size="lg" centered>
-      <Modal.Header closeButton className="bg-primary text-white">
-        <Modal.Title>광고 등록</Modal.Title>
+    <Modal show={show} onHide={onHide} size="lg" centered className="app-modal">
+      <Modal.Header closeButton>
+        <Modal.Title as="h2">
+          <i className="bi bi-plus-circle"/>
+          신규 광고 등록
+        </Modal.Title>
       </Modal.Header>
+
       <Modal.Body>
-        <Form>
-          {StepComponent}
-          <div className="d-flex justify-content-between mt-4">
-            {currentStep > 1 && (
-              <Button variant="secondary" onClick={() => setCurrentStep((prev) => prev - 1)}>
-                이전
-              </Button>
-            )}
-            <div>
-              <Button variant="danger" className="me-2" onClick={resetForm}>
-                초기화
-              </Button>
-              {currentStep === 1 ? (
-                <Button
-                  disabled={!formData.groupId || !formData.position || !formData.startDateTime || !formData.endDateTime || !formData.platform || !formData.orderType}
-                  variant="primary"
-                  onClick={() => {
-                    setCurrentStep(2);
-                  }}
-                >
-                  다음
-                </Button>
-              ) : (
-                <Button variant="success" onClick={handleSubmit}
-                        disabled={isSubmitDisabled()}
-                >
-                  등록
-                </Button>
-              )}
-            </div>
-          </div>
-        </Form>
+        {/* 단계 표시 */}
+        <ol className="step-indicator">
+          {["기본 정보", "콘텐츠"].map((label, index) => {
+            const step = index + 1;
+            const state = currentStep === step ? "current" : currentStep > step ? "done" : "todo";
+
+            return (
+              <li key={label} className={`step-indicator__item step-indicator__item--${state}`}>
+                <span className="step-indicator__mark">
+                  {currentStep > step ? <i className="bi bi-check-lg"/> : step}
+                </span>
+                {label}
+              </li>
+            );
+          })}
+        </ol>
+
+        <Form>{StepComponent}</Form>
       </Modal.Body>
+
+      <Modal.Footer>
+        <button type="button" className="btn btn-link text-danger me-auto" onClick={resetForm}>
+          초기화
+        </button>
+
+        {currentStep > 1 && (
+          <button
+            type="button"
+            className="btn btn-outline-secondary"
+            onClick={() => setCurrentStep((prev) => prev - 1)}
+          >
+            이전
+          </button>
+        )}
+
+        {currentStep === 1 ? (
+          <button
+            type="button"
+            className="btn btn-primary"
+            disabled={!isStep1Complete}
+            onClick={() => setCurrentStep(2)}
+          >
+            다음
+            <i className="bi bi-chevron-right ms-1"/>
+          </button>
+        ) : (
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={handleSubmit}
+            disabled={isSubmitDisabled()}
+          >
+            등록
+          </button>
+        )}
+      </Modal.Footer>
     </Modal>
   );
 };
 
-function getInitialFormData() {
+function getInitialFormData(): AdvertisementForm {
   return {
     groupId: null,
     description: null,
@@ -178,11 +231,5 @@ function getInitialFormData() {
     orderType: "RANDOM",
   };
 }
-
-AdvertisementRegisterModal.propTypes = {
-  show: PropTypes.bool.isRequired,
-  onHide: PropTypes.func.isRequired,
-  positions: PropTypes.array.isRequired,
-};
 
 export default AdvertisementRegisterModal;

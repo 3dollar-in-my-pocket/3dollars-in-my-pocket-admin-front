@@ -1,50 +1,44 @@
-// Registration related type definitions
+/**
+ * 사장님 가입 신청(BossRegistration) 도메인 응답 타입
+ *
+ * api-docs.json(OpenAPI)의 BossRegistration*Response와 1:1로 대응합니다.
+ */
 
-// OS Platform types
-export const OS_PLATFORM = {
-  AOS: 'AOS',
-  IOS: 'IOS',
-  UNKNOWN: 'UNKNOWN'
-} as const;
+import {OsPlatform} from './device';
 
-export type OsPlatform = typeof OS_PLATFORM[keyof typeof OS_PLATFORM];
+/**
+ * 소셜 로그인 타입
+ *
+ * 문서상 enum이지만 값 변동이 잦아 string으로 둡니다.
+ */
+export type BossSocialType = string;
 
-// Utility functions
-export const getOsPlatformDisplayName = (osPlatform: OsPlatform): string => {
-  switch (osPlatform) {
-    case OS_PLATFORM.AOS:
-      return 'Android';
-    case OS_PLATFORM.IOS:
-      return 'iOS';
-    case OS_PLATFORM.UNKNOWN:
-      return '알 수 없음';
-    default:
-      return '알 수 없음';
-  }
-};
+/** BossRegistrationAccountResponse — 신청자(대표자) 정보 */
+export interface BossRegistrationAccount {
+  socialType: BossSocialType;
+  name: string;
+  businessNumber: string;
+}
 
-export const getOsPlatformBadgeClass = (osPlatform: OsPlatform): string => {
-  switch (osPlatform) {
-    case OS_PLATFORM.AOS:
-      return 'bg-success';
-    case OS_PLATFORM.IOS:
-      return 'bg-primary';
-    case OS_PLATFORM.UNKNOWN:
-      return 'bg-secondary';
-    default:
-      return 'bg-secondary';
-  }
-};
+/** BossRegistrationStoreResponse — 신청 가게 정보 */
+export interface BossRegistrationStore {
+  name: string;
+  categories: string[];
+  certificationPhotoUrl: string;
+}
 
-export const getOsPlatformIcon = (osPlatform: OsPlatform): string => {
-  switch (osPlatform) {
-    case OS_PLATFORM.AOS:
-      return 'bi-android2';
-    case OS_PLATFORM.IOS:
-      return 'bi-apple';
-    case OS_PLATFORM.UNKNOWN:
-      return 'bi-question-circle';
-    default:
-      return 'bi-question-circle';
-  }
-};
+/** BossRegistrationRequestContextResponse — 신청 환경 정보 */
+export interface BossRegistrationRequestContext {
+  osPlatform: OsPlatform;
+  appVersion: string;
+}
+
+/** BossRegistrationResponse — 가입 신청 상세 */
+export interface BossRegistration {
+  registrationId: string;
+  boss: BossRegistrationAccount;
+  store: BossRegistrationStore;
+  context?: BossRegistrationRequestContext | null;
+  createdAt?: string;
+  updatedAt?: string;
+}

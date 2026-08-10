@@ -1,105 +1,78 @@
-const SearchResults = ({
-                         results = [],
-                         isLoading = false,
-                         hasMore = false,
-                         scrollContainerRef,
-                         onScroll,
-                         renderItem,
-                         emptyMessage = "검색 결과가 없습니다",
-                         emptyDescription = "다른 검색어로 시도해보세요",
-                         loadingMessage = "검색 중입니다",
-                         title = "검색 결과"
-                       }) => {
-  const renderEmptyState = () => (
-    <div className="text-center py-5 text-muted">
-      <div className="mb-4">
-        <div className="mx-auto mb-4" style={{
-          width: '120px',
-          height: '120px',
-          background: 'linear-gradient(135deg, #667eea20 0%, #764ba220 100%)',
-          borderRadius: '50%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          border: '3px solid #667eea30'
-        }}>
-          <i className="bi bi-search" style={{fontSize: '3rem', color: '#667eea'}}></i>
-        </div>
-      </div>
-      <h5 className="text-dark mb-3 fw-bold">{emptyMessage}</h5>
-      <p className="text-muted mb-4">{emptyDescription}</p>
-      <div className="d-flex justify-content-center gap-2">
-        <span className="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-3 py-2">
-          <i className="bi bi-lightbulb me-1"></i>
-          팁: 키워드를 짧게 입력해보세요
-        </span>
-      </div>
-    </div>
-  );
+import React from 'react';
+import SectionCard from './SectionCard';
+import EmptyState from './EmptyState';
 
-  const renderLoadingState = () => (
-    <div className="text-center py-5">
-      <div className="mb-3">
-        <div className="spinner-border text-primary" style={{width: '3rem', height: '3rem'}} role="status">
-          <span className="visually-hidden">Loading...</span>
-        </div>
-      </div>
-      <h5 className="text-dark mb-1">{loadingMessage}</h5>
-      <p className="text-muted">잠시만 기다려주세요...</p>
-    </div>
-  );
+interface SearchResultsProps<T = any> {
+  /** 검색 결과 목록. 화면마다 도메인이 달라 제네릭으로 둡니다. */
+  results?: T[];
+  isLoading?: boolean;
+  hasMore?: boolean;
+  scrollContainerRef?: React.Ref<HTMLDivElement>;
+  onScroll?: React.UIEventHandler<HTMLDivElement>;
+  renderItem: (item: T, index: number) => React.ReactNode;
+  emptyMessage?: string;
+  emptyDescription?: string;
+  loadingMessage?: string;
+  title?: string;
+}
 
-  const renderLoadMoreIndicator = () => (
-    hasMore && results.length > 0 && isLoading && (
-      <div className="text-center p-3 bg-light">
-        <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Loading...</span>
-        </div>
-        <p className="small text-muted mt-2 mb-0">더 많은 결과를 불러오는 중...</p>
-      </div>
-    )
-  );
+const SearchResults = <T, >({
+                              results = [],
+                              isLoading = false,
+                              hasMore = false,
+                              scrollContainerRef,
+                              onScroll,
+                              renderItem,
+                              emptyMessage = "검색 결과가 없습니다",
+                              emptyDescription = "다른 검색어로 시도해보세요",
+                              loadingMessage = "검색 중입니다",
+                              title = "검색 결과"
+                            }: SearchResultsProps<T>) => {
+  const isInitialLoading = isLoading && results.length === 0;
 
   return (
-    <div className="card border-0 shadow-lg" style={{
-      background: 'rgba(255,255,255,0.95)',
-      backdropFilter: 'blur(10px)',
-      borderRadius: '20px'
-    }}>
-      <div className="card-header border-0 p-4" style={{
-        background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%)',
-        borderTopLeftRadius: '20px',
-        borderTopRightRadius: '20px'
-      }}>
-        <div className="d-flex align-items-center justify-content-between">
-          <div className="d-flex align-items-center gap-3">
-            <div className="bg-primary bg-opacity-10 rounded-circle p-3">
-              <i className="bi bi-grid-3x3-gap text-primary fs-5"></i>
-            </div>
-            <div>
-              <h4 className="mb-0 fw-bold text-dark">{title}</h4>
-            </div>
-          </div>
-        </div>
-      </div>
-
+    <SectionCard
+      title={title}
+      icon="bi-grid-3x3-gap"
+      aside={results.length > 0 && <span className="page-count">{results.length}건</span>}
+      flush
+    >
       <div
-        className="card-body p-0"
         ref={scrollContainerRef}
         onScroll={onScroll}
-        style={{maxHeight: '80vh', overflowY: 'auto'}}
+        style={{maxHeight: 'calc(100vh - 320px)', overflowY: 'auto'}}
       >
-        {results.length === 0 && !isLoading ? renderEmptyState() :
-          results.length > 0 ? (
-            <div className="row g-3 p-3">
-              {results.map((item, index) => renderItem(item, index))}
+        {isInitialLoading && (
+          <div className="text-center py-5">
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">{loadingMessage}</span>
             </div>
-          ) : null}
+            <p className="text-muted small mt-3 mb-0">{loadingMessage}</p>
+          </div>
+        )}
 
-        {renderLoadMoreIndicator()}
-        {isLoading && results.length === 0 && renderLoadingState()}
+        {!isLoading && results.length === 0 && (
+          <EmptyState
+            icon="bi-search"
+            title={emptyMessage}
+            description={emptyDescription}
+          />
+        )}
+
+        {results.length > 0 && (
+          <div className="row g-3 p-3">
+            {results.map((item, index) => renderItem(item, index))}
+          </div>
+        )}
+
+        {hasMore && results.length > 0 && isLoading && (
+          <div className="text-center py-3 border-top">
+            <span className="spinner-border spinner-border-sm text-primary me-2" role="status"/>
+            <span className="small text-muted">더 불러오는 중...</span>
+          </div>
+        )}
       </div>
-    </div>
+    </SectionCard>
   );
 };
 

@@ -1,14 +1,16 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Modal } from 'react-bootstrap';
-import { toast } from 'react-toastify';
-import enumApi from '../../api/enumApi';
-import promptApi from '../../api/promptApi';
-import EmptyState from '../../components/common/EmptyState';
-import Loading from '../../components/common/Loading';
-import useInfiniteScroll from '../../hooks/useInfiniteScroll';
-import { formatDateTime } from '../../utils/dateUtils';
-import { AIModel, EnumOption, PromptFormRequest, PromptResponse, PromptStatus } from '../../types/prompt';
+import {useCallback, useEffect, useMemo, useState} from 'react';
+import {Modal} from 'react-bootstrap';
+import {toast} from 'react-toastify';
+import enumApi from '@/api/enumApi';
+import promptApi from '@/api/promptApi';
+import EmptyState from '@/components/common/EmptyState';
+import Loading from '@/components/common/Loading';
+import useCursorPagination from '@/hooks/useCursorPagination';
+import useInfiniteScroll from '@/hooks/useInfiniteScroll';
+import {formatDateTime} from '@/utils/dateUtils';
+import {AIModel, EnumOption, PromptFormRequest, PromptResponse, PromptStatus} from '@/types/prompt';
 import './PromptManagement.css';
+import PageHeader from '@/components/common/PageHeader';
 
 const PAGE_SIZE = 10;
 const PROMPT_STATUS = {
@@ -55,20 +57,30 @@ const PromptManagement = () => {
   const [promptStatuses, setPromptStatuses] = useState<EnumOption[]>([]);
   const [aiModels, setAiModels] = useState<EnumOption[]>([]);
   const [selectedPromptType, setSelectedPromptType] = useState('');
-  const [prompts, setPrompts] = useState<PromptResponse[]>([]);
   const [selectedPrompt, setSelectedPrompt] = useState<PromptResponse | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [isEnumLoading, setIsEnumLoading] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(false);
 
-  const cursorRef = useRef<string | null>(null);
-  const isLoadingRef = useRef(false);
-  const selectedPromptTypeRef = useRef('');
+  const fetchPromptPage = useCallback(
+    (cursor: string | null) => promptApi.listPrompts(selectedPromptType, {
+      cursor,
+      size: PAGE_SIZE,
+    }),
+    [selectedPromptType]
+  );
 
-  useEffect(() => {
-    selectedPromptTypeRef.current = selectedPromptType;
-  }, [selectedPromptType]);
+  const {
+    items: prompts,
+    isLoading,
+    hasMore,
+    refresh: fetchPrompts,
+    loadMore
+  } = useCursorPagination<PromptResponse>({
+    fetcher: fetchPromptPage,
+    enabled: Boolean(selectedPromptType),
+    deps: [selectedPromptType],
+    errorMessage: '프롬프트 목록을 불러오지 못했습니다.'
+  });
 
   useEffect(() => {
     const fetchPromptTypes = async () => {
@@ -114,55 +126,14 @@ const PromptManagement = () => {
         active: counts.active + (prompt.status === PROMPT_STATUS.ACTIVE ? 1 : 0),
         draft: counts.draft + (prompt.status === PROMPT_STATUS.DRAFT ? 1 : 0),
       }),
-      { active: 0, draft: 0 }
+      {active: 0, draft: 0}
     );
   }, [prompts]);
 
-  const fetchPrompts = useCallback(async (reset = false) => {
-    const promptType = selectedPromptTypeRef.current;
-    if (!promptType || isLoadingRef.current) return;
-
-    isLoadingRef.current = true;
-    setIsLoading(true);
-
-    try {
-      const response = await promptApi.listPrompts(promptType, {
-        cursor: reset ? null : cursorRef.current,
-        size: PAGE_SIZE,
-      });
-
-      if (!response?.ok) return;
-
-      const { contents = [], cursor } = response.data || {
-        contents: [],
-        cursor: { hasMore: false, nextCursor: null },
-      };
-
-      if (reset) {
-        setPrompts(contents);
-      } else {
-        setPrompts((prev) => [...prev, ...contents]);
-      }
-
-      cursorRef.current = cursor?.nextCursor || null;
-      setHasMore(Boolean(cursor?.hasMore && cursor?.nextCursor));
-    } finally {
-      isLoadingRef.current = false;
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    cursorRef.current = null;
-    setPrompts([]);
-    setHasMore(false);
-    fetchPrompts(true);
-  }, [selectedPromptType, fetchPrompts]);
-
-  const { scrollContainerRef, loadMoreRef } = useInfiniteScroll({
+  const {scrollContainerRef, loadMoreRef} = useInfiniteScroll({
     hasMore,
     isLoading,
-    onLoadMore: () => fetchPrompts(false),
+    onLoadMore: loadMore,
     threshold: 0.1,
   });
 
@@ -176,8 +147,7 @@ const PromptManagement = () => {
     setSelectedPrompt(null);
 
     if (shouldRefresh) {
-      cursorRef.current = null;
-      fetchPrompts(true);
+      fetchPrompts();
     }
   };
 
@@ -195,11 +165,10 @@ const PromptManagement = () => {
     if (!window.confirm(message)) return;
 
     try {
-      const response = await promptApi.updatePrompt(selectedPromptType, prompt.promptId, { status: nextStatus });
+      const response = await promptApi.updatePrompt(selectedPromptType, prompt.promptId, {status: nextStatus});
       if (response?.ok) {
         toast.success(nextStatus === PROMPT_STATUS.ACTIVE ? '활성화되었습니다' : '초안으로 전환되었습니다');
-        cursorRef.current = null;
-        fetchPrompts(true);
+        fetchPrompts();
       }
     } catch (error: any) {
       toast.error(error.message || '상태 변경 중 오류가 발생했습니다.');
@@ -207,27 +176,20 @@ const PromptManagement = () => {
   };
 
   return (
-    <div className="container-fluid py-4 prompt-management">
-      <div className="prompt-page-header mb-4">
-        <div>
-          <div className="prompt-page-kicker">
-            <i className="bi bi-stars"></i>
-            운영 툴
-          </div>
-          <h2 className="prompt-page-title mb-1">AI 프롬프트 관리</h2>
-          <p className="prompt-page-description mb-0">
-            AI 기능별 프롬프트 버전을 조회하고 생성, 수정, 삭제할 수 있습니다.
-          </p>
-        </div>
-        <button
-          className="btn btn-primary prompt-primary-action"
-          onClick={() => handleShowModal()}
-          disabled={!selectedPromptType || isEnumLoading}
-        >
-          <i className="bi bi-plus-circle me-2"></i>
-          신규 등록
-        </button>
-      </div>
+    <div className="prompt-management">
+      <PageHeader
+        description="AI 기능별 프롬프트 버전을 조회하고 생성, 수정, 삭제할 수 있습니다."
+        actions={
+          <button
+            className="btn btn-primary"
+            onClick={() => handleShowModal()}
+            disabled={!selectedPromptType || isEnumLoading}
+          >
+            <i className="bi bi-plus-lg me-1"/>
+            신규 등록
+          </button>
+        }
+      />
 
       <div className="prompt-toolbar mb-4">
         <div className="row g-3 align-items-end">
@@ -258,7 +220,7 @@ const PromptManagement = () => {
           <div className="col-12 col-md-auto">
             <button
               className="btn btn-outline-secondary prompt-icon-button"
-              onClick={() => fetchPrompts(true)}
+              onClick={fetchPrompts}
               disabled={!selectedPromptType || isLoading}
               title="새로고침"
             >
@@ -356,14 +318,14 @@ const PromptManagement = () => {
 };
 
 const PromptCard = ({
-  prompt,
-  promptTypeLabel,
-  statusLabel,
-  modelLabel,
-  isApplied,
-  onStatusChange,
-  onEdit,
-}: {
+                      prompt,
+                      promptTypeLabel,
+                      statusLabel,
+                      modelLabel,
+                      isApplied,
+                      onStatusChange,
+                      onEdit,
+                    }: {
   prompt: PromptResponse;
   promptTypeLabel: string;
   statusLabel: string;
@@ -475,14 +437,14 @@ const PromptCard = ({
 };
 
 const PromptEditModal = ({
-  show,
-  promptType,
-  promptTypeLabel,
-  aiModels,
-  selectedPrompt,
-  onHide,
-  onSuccess,
-}: {
+                           show,
+                           promptType,
+                           promptTypeLabel,
+                           aiModels,
+                           selectedPrompt,
+                           onHide,
+                           onSuccess,
+                         }: {
   show: boolean;
   promptType: string;
   promptTypeLabel: string;
@@ -562,11 +524,11 @@ const PromptEditModal = ({
   };
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = event.target;
+    const {name, value} = event.target;
     const numberFields = ['maxOutputTokens', 'temperature', 'thinkingBudget'];
     const nextValue = numberFields.includes(name) ? (value === '' ? null : Number(value)) : value;
-    setFormData((prev) => ({ ...prev, [name]: nextValue }));
-    setErrors((prev) => ({ ...prev, [name]: undefined }));
+    setFormData((prev) => ({...prev, [name]: nextValue}));
+    setErrors((prev) => ({...prev, [name]: undefined}));
   };
 
   const normalizeOptionalText = (value?: string | null) => {
@@ -594,9 +556,9 @@ const PromptEditModal = ({
       const response = selectedPrompt
         ? await promptApi.updatePrompt(promptType, selectedPrompt.promptId, payload)
         : await promptApi.createPrompt(promptType, {
-            ...payload,
-            status: statusOnCreate,
-          });
+          ...payload,
+          status: statusOnCreate,
+        });
 
       if (response?.ok) {
         toast.success(selectedPrompt ? '수정되었습니다' : '등록되었습니다');
@@ -651,12 +613,12 @@ const PromptEditModal = ({
           <div className="row g-3">
             <div className="col-12 col-md-6">
               <label className="form-label prompt-label">프롬프트 타입</label>
-              <input className="form-control prompt-readonly-input" value={promptTypeLabel} disabled />
+              <input className="form-control prompt-readonly-input" value={promptTypeLabel} disabled/>
             </div>
             {selectedPrompt && (
               <div className="col-12 col-md-6">
                 <label className="form-label prompt-label">버전</label>
-                <input className="form-control prompt-readonly-input" value={`v${selectedPrompt.version}`} disabled />
+                <input className="form-control prompt-readonly-input" value={`v${selectedPrompt.version}`} disabled/>
               </div>
             )}
 
@@ -778,11 +740,13 @@ const PromptEditModal = ({
               <>
                 <div className="col-12 col-md-6">
                   <label className="form-label prompt-label">생성일자</label>
-                  <input className="form-control prompt-readonly-input" value={formatDateTime(selectedPrompt.createdAt)} disabled />
+                  <input className="form-control prompt-readonly-input" value={formatDateTime(selectedPrompt.createdAt)}
+                         disabled/>
                 </div>
                 <div className="col-12 col-md-6">
                   <label className="form-label prompt-label">수정일자</label>
-                  <input className="form-control prompt-readonly-input" value={formatDateTime(selectedPrompt.updatedAt)} disabled />
+                  <input className="form-control prompt-readonly-input" value={formatDateTime(selectedPrompt.updatedAt)}
+                         disabled/>
                 </div>
               </>
             )}

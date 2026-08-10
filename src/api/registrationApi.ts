@@ -1,47 +1,19 @@
-import axiosInstance from "./apiBase";
+import {apiGetPaginated, apiPut} from "./apiHelpers";
+import {BossRegistration} from "@/types/registration";
+
+interface ListRegistrationsParams {
+  cursor?: string | null;
+  size?: number;
+}
 
 export default {
-  listRegistrations: async ({size}: any) => {
-    try {
-      const response = await axiosInstance(
-        {
-          method: "GET",
-          url: `/v3/boss-registrations`,
-          params: {
-            size,
-          },
-        }
-      );
-      return response.data;
-    } catch (error: any) {
-      return error.response;
-    }
+  listRegistrations: async ({cursor, size}: ListRegistrationsParams) => {
+    return apiGetPaginated<BossRegistration>(`/v3/boss-registrations`, {cursor, size});
   },
-  approveRegistration: async ({id}: any) => {
-    try {
-      const response = await axiosInstance(
-        {
-          method: "PUT",
-          url: `/v3/boss-registration/${id}/apply`,
-        }
-      );
-      return await response.data;
-    } catch (error: any) {
-      return error.response;
-    }
+  approveRegistration: async ({id}: { id: string }) => {
+    return apiPut<void>(`/v3/boss-registration/${id}/apply`, undefined);
   },
-  denyRegistration: async ({id, rejectReason}: any) => {
-    try {
-      const response = await axiosInstance({
-        method: "PUT",
-        url: `/v3/boss-registration/${id}/reject`,
-        data: {
-          rejectReason,
-        },
-      });
-      return response.data;
-    } catch (error: any) {
-      return error.response;
-    }
+  denyRegistration: async ({id, rejectReason}: { id: string; rejectReason: string }) => {
+    return apiPut<void>(`/v3/boss-registration/${id}/reject`, {rejectReason});
   },
 };

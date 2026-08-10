@@ -1,206 +1,141 @@
-import axiosInstance from './apiBase';
-import { apiPut } from './apiHelpers';
+import {apiGet, apiGetPaginated, apiPut} from './apiHelpers';
+import {ApiResponse, ContentListResponse} from '@/types/api';
+import {Medal} from '@/types/medal';
 import {
+  createRandomNameResponse,
   createUserDetailResponse,
   createUserSearchResponse,
   createUserSettings,
-  UserSearchRequest,
-  createRandomNameResponse,
+  RandomNameItem,
+  RandomNameResponse,
+  SimpleUser,
+  User,
+  UserDetailResponse,
   UserRole,
-  User
-} from '../types/user';
+  UserSearchRequest,
+  UserSearchResponse,
+  UserSettings
+} from '@/types/user';
+
+/** UserDetailResponse (서버 원본 모델) */
+interface RawUserDetailResponse {
+  user: SimpleUser;
+  medals?: Medal[];
+  representativeMedal?: Medal | null;
+  setting?: UserSettings | null;
+}
+
+/**
+ * 서버의 UserResponse에는 nickname 필드가 없습니다.
+ * 화면에서는 name을 닉네임으로 표시하므로 여기서 별칭을 채워줍니다.
+ */
+const toUser = (user: SimpleUser): User => ({
+  userId: user.userId != null ? String(user.userId) : undefined,
+  name: user.name,
+  nickname: user.name,
+  socialType: user.socialType,
+  role: user.role,
+  createdAt: user.createdAt,
+  updatedAt: user.updatedAt
+});
 
 export default {
   /**
    * 사용자 검색
    */
-  searchUsers: async (searchRequest: UserSearchRequest): Promise<any> => {
-    try {
-      const params: any = {};
+  searchUsers: async (searchRequest: UserSearchRequest): Promise<ApiResponse<UserSearchResponse>> => {
+    // 이름으로 검색하는 경우 (커서 기반 페이지네이션)
+    if (searchRequest.type === 'name' && searchRequest.query) {
+      const response = await apiGetPaginated<SimpleUser>(
+        '/v1/search/users',
+        {cursor: searchRequest.cursor, size: searchRequest.size},
+        {name: searchRequest.query}
+      );
 
-      // 이름으로 검색하는 경우
-      if (searchRequest.type === 'name' && searchRequest.query) {
-        params.name = searchRequest.query;
+      const contents = response.data?.contents || [];
 
-        if (searchRequest.cursor) {
-          params.cursor = searchRequest.cursor;
-        }
-
-        const response = await axiosInstance({
-          method: 'GET',
-          url: '/v1/search/users',
-          params
-        });
-
-        // API 응답 구조에 맞게 변환
-        if (response.data.ok) {
-          const searchResponse = createUserSearchResponse({
-            users: response.data.data.contents.map(user => ({
-              userId: user.userId,
-              nickname: user.name,
-              socialType: user.socialType,
-              role: user.role,
-              createdAt: user.createdAt
-            })) || [],
-            hasMore: response.data.data.cursor.hasMore || false,
-            nextCursor: response.data.data.cursor.nextCursor || null,
-            totalCount: response.data.data.contents.length || 0
-          });
-
-          return {
-            ok: response.data.ok,
-            data: searchResponse
-          };
-        } else {
-          throw new Error('API 응답 오류');
-        }
-      }
-
-      // 유저 ID로 검색하는 경우 (쉼표로 구분된 여러 ID 지원)
-      if (searchRequest.type === 'userId' && searchRequest.userIds && searchRequest.userIds.length > 0) {
-        params.userIds = searchRequest.userIds.join(',');
-
-        const response = await axiosInstance({
-          method: 'GET',
-          url: '/v1/users',
-          params
-        });
-
-        // API 응답 구조에 맞게 변환 (커서 기반 페이지네이션 없음)
-        if (response.data.ok) {
-          const searchResponse = createUserSearchResponse({
-            users: response.data.data.contents.map(user => ({
-              userId: user.userId,
-              nickname: user.name,
-              socialType: user.socialType,
-              role: user.role,
-              createdAt: user.createdAt,
-              updatedAt: user.updatedAt
-            })) || [],
-            hasMore: false, // ID 목록 조회는 페이지네이션 없음
-            nextCursor: null,
-            totalCount: response.data.data.contents.length || 0
-          });
-
-          return {
-            ok: response.data.ok,
-            data: searchResponse
-          };
-        } else {
-          throw new Error('API 응답 오류');
-        }
-      }
-
-      throw new Error('검색 타입이 올바르지 않습니다.');
-    } catch (error: any) {
-      return error.response;
+      return {
+        ok: response.ok,
+        data: createUserSearchResponse({
+          users: contents.map(toUser),
+          hasMore: response.data?.cursor?.hasMore || false,
+          nextCursor: response.data?.cursor?.nextCursor || null,
+          totalCount: contents.length
+        })
+      };
     }
+
+    // 유저 ID로 검색하는 경우 (쉼표로 구분된 여러 ID 지원, 페이지네이션 없음)
+    if (searchRequest.type === 'userId' && searchRequest.userIds && searchRequest.userIds.length > 0) {
+      const response = await apiGet<ContentListResponse<SimpleUser>>('/v1/users', {
+        userIds: searchRequest.userIds.join(',')
+      });
+
+      const contents = response.data?.contents || [];
+
+      return {
+        ok: response.ok,
+        data: createUserSearchResponse({
+          users: contents.map(toUser),
+          hasMore: false,
+          nextCursor: null,
+          totalCount: contents.length
+        })
+      };
+    }
+
+    return {
+      ok: false,
+      data: createUserSearchResponse({}),
+      message: '검색 타입이 올바르지 않습니다.'
+    };
   },
 
   /**
    * 사용자 상세 정보 조회
    * @param {string} userId - 사용자 ID
-   * @returns {Promise<Object>} 사용자 상세 정보
+   * @returns 사용자 상세 정보
    */
-  getUserDetail: async (userId: string): Promise<any> => {
-    try {
-      const response = await axiosInstance({
-        method: 'GET',
-        url: `/v1/user/${userId}`
-      });
+  getUserDetail: async (userId: string): Promise<ApiResponse<UserDetailResponse>> => {
+    const response = await apiGet<RawUserDetailResponse>(`/v1/user/${userId}`);
 
-      // API 응답 구조에 맞게 변환
-      if (response.data.ok) {
-        const detailResponse = createUserDetailResponse({
-          user: {
-            userId: response.data.data.user.userId,
-            name: response.data.data.user.name,
-            nickname: response.data.data.user.name,
-            socialType: response.data.data.user.socialType,
-            role: response.data.data.user.role,
-            createdAt: response.data.data.user.createdAt,
-            updatedAt: response.data.data.user.updatedAt
-          } as any,
-          representativeMedal: response.data.data.representativeMedal ? {
-            medalId: response.data.data.representativeMedal.medalId,
-            name: response.data.data.representativeMedal.name,
-            iconUrl: response.data.data.representativeMedal.iconUrl,
-            disableIconUrl: response.data.data.representativeMedal.disableIconUrl,
-            introduction: response.data.data.representativeMedal.introduction,
-            acquisition: response.data.data.representativeMedal.acquisition ? {
-              description: response.data.data.representativeMedal.acquisition.description,
-              createdAt: response.data.data.representativeMedal.acquisition.createdAt
-            } : null
-          } as any : null,
-          medals: response.data.data.medals?.map((medal: any) => ({
-            medalId: medal.medalId,
-            name: medal.name,
-            iconUrl: medal.iconUrl,
-            disableIconUrl: medal.disableIconUrl,
-            introduction: medal.introduction,
-            acquisition: medal.acquisition ? {
-              description: medal.acquisition.description,
-              createdAt: medal.acquisition.createdAt
-            } : null
-          }) as any) || [],
-          setting: response.data.data.setting ? createUserSettings({
-            enableActivitiesPush: response.data.data.setting.enableActivitiesPush,
-            marketingConsent: response.data.data.setting.marketingConsent
-          }) : null
-        });
-
-        return {
-          ok: response.data.ok,
-          data: detailResponse
-        };
-      } else {
-        throw new Error('API 응답 오류');
-      }
-    } catch (error: any) {
-      return error.response;
+    if (!response.ok || !response.data) {
+      return {ok: false, data: createUserDetailResponse({})};
     }
+
+    const {user, representativeMedal, medals, setting} = response.data;
+
+    return {
+      ok: true,
+      data: createUserDetailResponse({
+        user: user ? toUser(user) : null,
+        representativeMedal: representativeMedal || null,
+        medals: medals || [],
+        setting: setting ? createUserSettings(setting) : null
+      })
+    };
   },
 
   /**
    * 사용자 권한 변경
    * @param {string} userId - 사용자 ID
    * @param {UserRole} role - 변경할 권한
-   * @returns {Promise<Object>} 변경된 사용자 정보
+   * @returns 변경된 사용자 정보
    */
-  updateUserRole: async (userId: string, role: UserRole): Promise<any> => {
-    try {
-      return await apiPut<User>(`/v1/user/${userId}/role`, { role });
-    } catch (error: any) {
-      return error.response;
-    }
+  updateUserRole: async (userId: string, role: UserRole): Promise<ApiResponse<SimpleUser>> => {
+    return apiPut<SimpleUser>(`/v1/user/${userId}/role`, {role});
   },
 
   /**
    * 유저 랜덤 이름 풀 조회
-   * @returns {Promise<Object>} 랜덤 이름 목록
+   * @returns 랜덤 이름 목록
    */
-  getRandomNames: async (): Promise<any> => {
-    try {
-      const response = await axiosInstance({
-        method: 'GET',
-        url: '/v1/user/random-names'
-      });
+  getRandomNames: async (): Promise<ApiResponse<RandomNameResponse>> => {
+    const response = await apiGet<ContentListResponse<RandomNameItem>>('/v1/user/random-names');
 
-      // API 응답 구조에 맞게 변환
-      if (response.data.ok) {
-        const randomNameResponse = createRandomNameResponse({
-          contents: response.data.data.contents || []
-        });
-
-        return {
-          ok: response.data.ok,
-          data: randomNameResponse
-        };
-      } else {
-        throw new Error('API 응답 오류');
-      }
-    } catch (error: any) {
-      return error.response;
-    }
+    return {
+      ok: response.ok,
+      data: createRandomNameResponse({contents: response.data?.contents || []})
+    };
   },
 };

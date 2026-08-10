@@ -15,8 +15,6 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '00 23 * * *' # 08:00 KST every day
-env:
-  CI: ''
 jobs:
   ci:
     runs-on: ubuntu-latest

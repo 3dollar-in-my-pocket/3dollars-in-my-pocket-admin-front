@@ -1,10 +1,12 @@
 import {Modal} from "react-bootstrap";
 import {useEffect} from "react";
-import {formatDateTime} from "../../utils/dateUtils";
-import faqApi from "../../api/faqApi";
+import {formatDateTime} from "@/utils/dateUtils";
+import faqApi from "@/api/faqApi";
 import {toast} from "react-toastify";
-import {useNonce} from "../../hooks/useNonce";
-import useModalForm from "../../hooks/useModalForm";
+import {useNonce} from "@/hooks/useNonce";
+import useModalForm from "@/hooks/useModalForm";
+import DetailField from "@/components/common/DetailField";
+import {Faq, FaqCategory} from "@/types/faq";
 
 interface FaqFormData {
   application: string;
@@ -14,7 +16,35 @@ interface FaqFormData {
   faqId?: string;
 }
 
-const FaqEditModal = ({applications, showModal, handleCloseModal, selectedApplication, selectedFaq, faqCategories}) => {
+/** 서비스(애플리케이션) 선택 옵션 — 서버 enum이 아닌 화면 상수로 관리됩니다. */
+export interface FaqApplicationOption {
+  type: string;
+  description: string;
+}
+
+/** 폼 입력 요소의 공통 onChange 핸들러 (useModalForm.handleChange와 동일 시그니처) */
+type FormChangeHandler = (
+  e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+) => void;
+
+interface FaqEditModalProps {
+  applications: FaqApplicationOption[];
+  showModal: boolean;
+  handleCloseModal: () => void;
+  selectedApplication: string;
+  /** 신규 등록 시 null */
+  selectedFaq: Faq | null;
+  faqCategories: FaqCategory[];
+}
+
+const FaqEditModal = ({
+                        applications,
+                        showModal,
+                        handleCloseModal,
+                        selectedApplication,
+                        selectedFaq,
+                        faqCategories
+                      }: FaqEditModalProps) => {
   const {nonce, issueNonce, clearNonce} = useNonce();
 
   const {
@@ -136,13 +166,13 @@ const FaqEditModal = ({applications, showModal, handleCloseModal, selectedApplic
     try {
       const response = selectedFaq
         ? await faqApi.updateFaq({
-            ...payload,
-            faqId: formData.faqId!,
-          })
+          ...payload,
+          faqId: formData.faqId!,
+        })
         : await faqApi.createFaq({
-            ...payload,
-            nonce,
-          });
+          ...payload,
+          nonce,
+        });
 
       if (response.ok) {
         toast.info(selectedFaq ? "수정되었습니다" : "등록되었습니다");
@@ -164,89 +194,126 @@ const FaqEditModal = ({applications, showModal, handleCloseModal, selectedApplic
     }
   };
 
+  const isSubmittable = formData.category
+    && formData.question?.trim()
+    && formData.answer?.trim()
+    && (selectedFaq || formData.application);
+
   return (
-    <Modal show={showModal} onHide={handleCloseModal} size="lg" centered fullscreen="md-down">
-      <Modal.Header closeButton className="border-0">
-        <Modal.Title>{selectedFaq ? "FAQ 수정" : "FAQ 신규 등록"}</Modal.Title>
+    <Modal show={showModal} onHide={handleCloseModal} size="lg" centered className="app-modal">
+      <Modal.Header closeButton>
+        <Modal.Title as="h2">
+          <i className={`bi ${selectedFaq ? "bi-pencil-square" : "bi-plus-circle"}`}/>
+          {selectedFaq ? "FAQ 수정" : "FAQ 신규 등록"}
+        </Modal.Title>
       </Modal.Header>
 
-      <Modal.Body className="p-4">
-        <div className="row g-3">
-          <ApplicationSelect applications={applications} selectedApplication={formData.application}
-                             handleChange={handleChange} faq={selectedFaq}/>
-          <CategorySelect selectedCategory={formData.category} handleChange={handleChange}
-                          faqCategories={faqCategories}/>
-          <InputField label="질문" name="question" value={formData.question} handleChange={handleChange}/>
-          <TextAreaField label="답변" name="answer" value={formData.answer} handleChange={handleChange}/>
-          {selectedFaq && (
-            <>
-              <InputField label="생성일자" name="createdAt" value={formatDateTime(selectedFaq.createdAt)}
-                          handleChange={() => {
-                          }} disabled/>
-              <InputField label="수정일자" name="updatedAt" value={formatDateTime(selectedFaq.updatedAt)}
-                          handleChange={() => {
-                          }} disabled/>
-            </>
-          )}
-        </div>
-      </Modal.Body>
+      <form onSubmit={handleSave}>
+        <Modal.Body>
+          <div className="row g-3">
+            <ApplicationSelect applications={applications} selectedApplication={formData.application}
+                               handleChange={handleChange} faq={selectedFaq}/>
+            <CategorySelect selectedCategory={formData.category} handleChange={handleChange}
+                            faqCategories={faqCategories}/>
+            <InputField label="질문" name="question" value={formData.question} handleChange={handleChange}
+                        required placeholder="유저에게 보여질 질문을 입력하세요"/>
+            <TextAreaField label="답변" name="answer" value={formData.answer} handleChange={handleChange}
+                           required placeholder="질문에 대한 답변을 입력하세요"/>
+          </div>
 
-      <Modal.Footer className="border-0">
-        <div className="w-100 d-flex flex-column flex-sm-row gap-2">
           {selectedFaq && (
-            <button className="btn btn-outline-danger w-100 w-sm-auto order-sm-1" onClick={handleDelete}>
+            <div className="modal-section">
+              <h3 className="modal-section__title">
+                <i className="bi bi-clock-history"/>
+                등록 · 수정 일시
+              </h3>
+              <div className="row g-3">
+                <DetailField label="생성일자" className="col-6">
+                  {formatDateTime(selectedFaq.createdAt)}
+                </DetailField>
+                <DetailField label="수정일자" className="col-6">
+                  {formatDateTime(selectedFaq.updatedAt)}
+                </DetailField>
+              </div>
+            </div>
+          )}
+        </Modal.Body>
+
+        <Modal.Footer>
+          {selectedFaq && (
+            <button type="button" className="btn btn-outline-danger me-auto" onClick={handleDelete}>
+              <i className="bi bi-trash me-1"/>
               삭제
             </button>
           )}
-          <button
-            className="btn btn-primary w-100 w-sm-auto order-sm-2 ms-sm-auto"
-            onClick={handleSave}
-            disabled={!formData.category || !formData.question?.trim() || !formData.answer?.trim() || (!selectedFaq && !formData.application)}
-          >
+          <button type="button" className="btn btn-outline-secondary" onClick={handleCloseModal}>
+            취소
+          </button>
+          <button type="submit" className="btn btn-primary" disabled={!isSubmittable}>
             저장
           </button>
-        </div>
-      </Modal.Footer>
+        </Modal.Footer>
+      </form>
     </Modal>
   );
 };
 
-const ApplicationSelect = ({applications, selectedApplication, handleChange, faq}) => {
+interface ApplicationSelectProps {
+  applications: FaqApplicationOption[];
+  selectedApplication: string;
+  handleChange: FormChangeHandler;
+  /** 수정 모드면 FAQ, 신규 등록이면 null (읽기 전용 표시 여부 판단용) */
+  faq: Faq | null;
+}
+
+const ApplicationSelect = ({applications, selectedApplication, handleChange, faq}: ApplicationSelectProps) => {
   const selectedAppDescription = applications.find((a) => a.type === selectedApplication)?.description || selectedApplication;
 
+  // 수정 모드에서는 서비스를 변경할 수 없으므로 값만 표시한다
+  if (faq) {
+    return (
+      <DetailField label="서비스" className="col-12 col-md-6">
+        {selectedAppDescription}
+      </DetailField>
+    );
+  }
+
   return (
-    <div className="col-12 col-md-6 mb-3 mb-md-0">
-      <label className="form-label fw-semibold">서비스</label>
-      {faq ? (
-        <input
-          type="text"
-          className="form-control"
-          value={selectedAppDescription}
-          disabled
-        />
-      ) : (
-        <select
-          name="application"
-          value={selectedApplication}
-          onChange={handleChange}
-          className="form-select"
-        >
-          <option value="">선택하세요</option>
-          {applications.map((app) => (
-            <option key={app.type} value={app.type}>
-              {app.description}
-            </option>
-          ))}
-        </select>
-      )}
+    <div className="col-12 col-md-6">
+      <label className="form-label" htmlFor="faq-form-application">
+        서비스 <span className="text-danger">*</span>
+      </label>
+      <select
+        id="faq-form-application"
+        name="application"
+        value={selectedApplication}
+        onChange={handleChange}
+        className="form-select"
+      >
+        <option value="">선택하세요</option>
+        {applications.map((app) => (
+          <option key={app.type} value={app.type}>
+            {app.description}
+          </option>
+        ))}
+      </select>
     </div>
   );
 };
 
-const CategorySelect = ({selectedCategory, handleChange, faqCategories}) => (
+interface CategorySelectProps {
+  selectedCategory: string;
+  handleChange: FormChangeHandler;
+  faqCategories: FaqCategory[];
+}
+
+const CategorySelect = ({selectedCategory, handleChange, faqCategories}: CategorySelectProps) => (
   <div className="col-12 col-md-6">
-    <label className="form-label fw-semibold">카테고리</label>
+    <label className="form-label" htmlFor="faq-form-category">
+      카테고리 <span className="text-danger">*</span>
+    </label>
     <select
+      id="faq-form-category"
       name="category"
       value={selectedCategory || ""}
       onChange={handleChange}
@@ -262,29 +329,54 @@ const CategorySelect = ({selectedCategory, handleChange, faqCategories}) => (
   </div>
 );
 
-const InputField = ({label, name, value, handleChange, disabled = false}) => (
+interface InputFieldProps {
+  label: string;
+  name: string;
+  value?: string;
+  handleChange: FormChangeHandler;
+  required?: boolean;
+  placeholder?: string;
+}
+
+const InputField = ({label, name, value, handleChange, required = false, placeholder}: InputFieldProps) => (
   <div className="col-12">
-    <label className="form-label fw-semibold">{label}</label>
+    <label className="form-label" htmlFor={`faq-form-${name}`}>
+      {label} {required && <span className="text-danger">*</span>}
+    </label>
     <input
+      id={`faq-form-${name}`}
       type="text"
       name={name}
       value={value || ""}
       onChange={handleChange}
       className="form-control"
-      disabled={disabled}
+      placeholder={placeholder}
     />
   </div>
 );
 
-const TextAreaField = ({label, name, value, handleChange}) => (
+interface TextAreaFieldProps {
+  label: string;
+  name: string;
+  value?: string;
+  handleChange: FormChangeHandler;
+  required?: boolean;
+  placeholder?: string;
+}
+
+const TextAreaField = ({label, name, value, handleChange, required = false, placeholder}: TextAreaFieldProps) => (
   <div className="col-12">
-    <label className="form-label fw-semibold">{label}</label>
+    <label className="form-label" htmlFor={`faq-form-${name}`}>
+      {label} {required && <span className="text-danger">*</span>}
+    </label>
     <textarea
+      id={`faq-form-${name}`}
       name={name}
       value={value || ""}
       onChange={handleChange}
       className="form-control"
-      rows={5}
+      rows={6}
+      placeholder={placeholder}
     />
   </div>
 );
