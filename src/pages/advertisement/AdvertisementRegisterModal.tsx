@@ -1,5 +1,5 @@
-import React, {useEffect, useState} from "react";
-import {Button, Form, Modal} from "react-bootstrap";
+import {useEffect, useState} from "react";
+import {Form, Modal} from "react-bootstrap";
 import {toast} from "react-toastify";
 import advertisementApi from "@/api/advertisementApi";
 import BasicInfoStep from "./steps/BasicInfoStep";
@@ -122,45 +122,79 @@ const AdvertisementRegisterModal = ({
     return false;
   };
 
+  const isStep1Complete = formData.groupId
+    && formData.position
+    && formData.startDateTime
+    && formData.endDateTime
+    && formData.platform
+    && formData.orderType;
+
   return (
-    <Modal show={show} onHide={onHide} size="lg" centered>
-      <Modal.Header closeButton className="bg-primary text-white">
-        <Modal.Title>광고 등록</Modal.Title>
+    <Modal show={show} onHide={onHide} size="lg" centered className="app-modal">
+      <Modal.Header closeButton>
+        <Modal.Title as="h2">
+          <i className="bi bi-plus-circle"/>
+          신규 광고 등록
+        </Modal.Title>
       </Modal.Header>
+
       <Modal.Body>
-        <Form>
-          {StepComponent}
-          <div className="d-flex justify-content-between mt-4">
-            {currentStep > 1 && (
-              <Button variant="secondary" onClick={() => setCurrentStep((prev) => prev - 1)}>
-                이전
-              </Button>
-            )}
-            <div>
-              <Button variant="danger" className="me-2" onClick={resetForm}>
-                초기화
-              </Button>
-              {currentStep === 1 ? (
-                <Button
-                  disabled={!formData.groupId || !formData.position || !formData.startDateTime || !formData.endDateTime || !formData.platform || !formData.orderType}
-                  variant="primary"
-                  onClick={() => {
-                    setCurrentStep(2);
-                  }}
-                >
-                  다음
-                </Button>
-              ) : (
-                <Button variant="success" onClick={handleSubmit}
-                        disabled={isSubmitDisabled()}
-                >
-                  등록
-                </Button>
-              )}
-            </div>
-          </div>
-        </Form>
+        {/* 단계 표시 */}
+        <ol className="step-indicator">
+          {["기본 정보", "콘텐츠"].map((label, index) => {
+            const step = index + 1;
+            const state = currentStep === step ? "current" : currentStep > step ? "done" : "todo";
+
+            return (
+              <li key={label} className={`step-indicator__item step-indicator__item--${state}`}>
+                <span className="step-indicator__mark">
+                  {currentStep > step ? <i className="bi bi-check-lg"/> : step}
+                </span>
+                {label}
+              </li>
+            );
+          })}
+        </ol>
+
+        <Form>{StepComponent}</Form>
       </Modal.Body>
+
+      <Modal.Footer>
+        <button type="button" className="btn btn-link text-danger me-auto" onClick={resetForm}>
+          초기화
+        </button>
+
+        {currentStep > 1 && (
+          <button
+            type="button"
+            className="btn btn-outline-secondary"
+            onClick={() => setCurrentStep((prev) => prev - 1)}
+          >
+            이전
+          </button>
+        )}
+
+        {currentStep === 1 ? (
+          <button
+            type="button"
+            className="btn btn-primary"
+            disabled={!isStep1Complete}
+            onClick={() => setCurrentStep(2)}
+          >
+            다음
+            <i className="bi bi-chevron-right ms-1"/>
+          </button>
+        ) : (
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={handleSubmit}
+            disabled={isSubmitDisabled()}
+          >
+            등록
+          </button>
+        )}
+      </Modal.Footer>
     </Modal>
   );
 };

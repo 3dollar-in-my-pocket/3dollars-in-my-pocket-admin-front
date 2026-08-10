@@ -1,6 +1,7 @@
 import StoreStatusBadge from '@/components/common/badges/StoreStatusBadge';
 import StoreTypeBadge from '@/components/common/badges/StoreTypeBadge';
-import {useCallback, useRef, useState} from 'react';
+import {useCallback, useState} from 'react';
+import HistoryPanel from "@/components/common/HistoryPanel";
 import useCursorPagination from "@/hooks/useCursorPagination";
 import {getActivitiesStatusBadgeClass, getActivitiesStatusDisplayName} from '@/utils/display/storeDisplay';
 import {getVisitIconClass, getVisitTypeBatchClass, getVisitTypeDisplayName} from '@/utils/display/visitDisplay';
@@ -20,7 +21,6 @@ interface UserVisitHistoryProps {
 const UserVisitHistory = ({userId, isActive, onStoreClick}: UserVisitHistoryProps) => {
   const [selectedVisit, setSelectedVisit] = useState<Visit | null>(null);
   const [showModal, setShowModal] = useState(false);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const fetchUserVisits = useCallback(
     (cursor: string | null) => visitApi.getUserVisits(userId, cursor, 20),
@@ -30,23 +30,17 @@ const UserVisitHistory = ({userId, isActive, onStoreClick}: UserVisitHistoryProp
   const {
     items: visits,
     isLoading,
+    isLoadingMore,
     hasMore,
     totalCount,
+    error,
+    refresh,
     loadMore
   } = useCursorPagination<Visit>({
     fetcher: fetchUserVisits,
     enabled: Boolean(userId && isActive),
     deps: [userId]
   });
-
-  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
-    const {scrollTop, scrollHeight, clientHeight} = e.currentTarget;
-    const isScrolledToBottom = scrollHeight - scrollTop <= clientHeight + 100;
-
-    if (isScrolledToBottom && hasMore && !isLoading) {
-      loadMore();
-    }
-  }, [hasMore, isLoading, loadMore]);
 
   const handleVisitClick = (visit: Visit) => {
     setSelectedVisit(visit);
@@ -60,10 +54,11 @@ const UserVisitHistory = ({userId, isActive, onStoreClick}: UserVisitHistoryProp
 
   const getActivitiesStatusBadge = (activitiesStatus?: ActivitiesStatus) => {
     if (!activitiesStatus) return null;
-    const badgeClass = getActivitiesStatusBadgeClass(activitiesStatus);
+    // getActivitiesStatusBadgeClass는 'bg-primary' 형태를 반환하므로 subtle 배지 클래스로 변환한다
+    const color = getActivitiesStatusBadgeClass(activitiesStatus).replace('bg-', '');
     const statusText = getActivitiesStatusDisplayName(activitiesStatus);
     return (
-      <span className={`badge ${badgeClass} bg-opacity-10 text-dark border rounded-pill px-2 py-1 small`}>
+      <span className={`badge bg-${color}-subtle text-${color}-emphasis`}>
         {statusText}
       </span>
     );
@@ -71,13 +66,14 @@ const UserVisitHistory = ({userId, isActive, onStoreClick}: UserVisitHistoryProp
 
   const getVisitTypeBadge = (visitType?: VisitType) => {
     if (!visitType) return null;
-    const badgeClass = getVisitTypeBatchClass(visitType.type);
+    // getVisitTypeBatchClass는 'bg-success' 형태를 반환하므로 subtle 배지 클래스로 변환한다
+    const color = getVisitTypeBatchClass(visitType.type).replace('bg-', '');
     const statusText = visitType.description || getVisitTypeDisplayName(visitType.type);
     const iconClass = getVisitIconClass(visitType.type);
 
     return (
-      <span className={`badge ${badgeClass} bg-opacity-10 text-dark border rounded-pill px-2 py-1`}>
-        <i className={`bi ${iconClass} me-1`}></i>
+      <span className={`badge bg-${color}-subtle text-${color}-emphasis`}>
+        <i className={`bi ${iconClass} me-1`}/>
         {statusText}
       </span>
     );
@@ -97,290 +93,170 @@ const UserVisitHistory = ({userId, isActive, onStoreClick}: UserVisitHistoryProp
   };
 
   return (
-    <div>
-      <div className="px-4 pt-4">
-        <div className="d-flex align-items-center justify-content-between mb-4 p-4 rounded-4 shadow-sm"
-             style={{
-               background: 'linear-gradient(135deg, #fff3cd 0%, #f8fffe 100%)',
-               border: '1px solid rgba(255, 193, 7, 0.2)'
-             }}>
-          <div className="d-flex align-items-center gap-3">
-            <div className="rounded-circle p-3 shadow-sm"
-                 style={{background: 'linear-gradient(135deg, #ffc107 0%, #fd7e14 100%)'}}>
-              <i className="bi bi-geo-alt text-white fs-5"></i>
-            </div>
-            <div>
-              <h6 className="mb-0 fw-bold text-dark">방문 이력</h6>
-              <small className="text-muted">사용자의 가게 방문 기록을 확인하세요</small>
-            </div>
-          </div>
-          {totalCount > 0 && (
-            <div className="d-flex align-items-center gap-2">
-              <span className="badge bg-warning px-3 py-2 rounded-pill shadow-sm" style={{fontSize: '0.9rem'}}>
-                <i className="bi bi-pin-map me-1"></i>
-                총 {totalCount}개
-              </span>
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div
-        className="px-4"
-        ref={scrollContainerRef}
-        onScroll={handleScroll}
-        style={{maxHeight: '500px', overflowY: 'auto'}}
+    <>
+      <HistoryPanel
+        title="방문 이력"
+        icon="bi-geo-alt"
+        count={visits.length}
+        totalCount={totalCount}
+        hasMore={hasMore}
+        isLoading={isLoading}
+        isLoadingMore={isLoadingMore}
+        error={error}
+        onRefresh={refresh}
+        onLoadMore={loadMore}
+        emptyTitle="방문 이력이 없습니다"
+        emptyDescription="아직 방문한 가게가 없습니다."
       >
-        {visits.length === 0 && !isLoading ? (
-          <div className="text-center py-5">
-            <div className="bg-light rounded-circle mx-auto mb-4" style={{
-              width: '80px',
-              height: '80px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              <i className="bi bi-geo-alt fs-1 text-secondary"></i>
-            </div>
-            <h5 className="text-dark mb-2">방문 이력이 없습니다</h5>
-            <p className="text-muted">아직 방문한 가게가 없습니다.</p>
-          </div>
-        ) : (
-          <div>
-            {visits.map((visit, index) => (
-              <div key={visit.visitId || index}>
-                <div
-                  className="visit-item p-3 border-bottom bg-white"
-                  style={{
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    borderLeft: visit.visitType?.type === 'EXISTS' ? '4px solid #28a745' : '4px solid #dc3545'
-                  }}
-                  onClick={() => handleVisitClick(visit)}
-                  onMouseEnter={(e: any) => {
-                    e.currentTarget.style.backgroundColor = '#f8f9fa';
-                    e.currentTarget.style.transform = 'translateX(4px)';
-                  }}
-                  onMouseLeave={(e: any) => {
-                    e.currentTarget.style.backgroundColor = '#ffffff';
-                    e.currentTarget.style.transform = 'translateX(0)';
-                  }}
-                >
-                  <div className="d-flex align-items-start gap-3">
-                    <div className="flex-grow-1">
-                      <div className="d-flex align-items-center gap-2 mb-2">
-                        <div
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (visit.store && onStoreClick) {
-                              onStoreClick(visit.store);
-                            }
-                          }}
-                          className="clickable-store d-flex align-items-center gap-1"
-                          style={{
-                            cursor: 'pointer',
-                            padding: '2px 4px',
-                            borderRadius: '4px',
-                            transition: 'all 0.2s ease'
-                          }}
-                          onMouseEnter={(e: any) => {
-                            e.currentTarget.style.backgroundColor = '#f8f9fa';
-                            e.currentTarget.style.transform = 'translateY(-1px)';
-                          }}
-                          onMouseLeave={(e: any) => {
-                            e.currentTarget.style.backgroundColor = 'transparent';
-                            e.currentTarget.style.transform = 'translateY(0)';
-                          }}
-                        >
-                          <h6 className="mb-0 fw-bold text-primary">{visit.store?.name || '가게 이름 없음'}</h6>
-                          <i className="bi bi-box-arrow-up-right text-primary" style={{fontSize: '0.7rem'}}></i>
-                        </div>
-                        {getVisitTypeBadge(visit.visitType)}
-                      </div>
-
-                      <div className="d-flex align-items-center gap-2 mb-2">
-                        <i className="bi bi-calendar3 text-muted"></i>
-                        <span className="text-dark fw-medium">{formatVisitDateTime(visit.visitDateTime)}</span>
-                      </div>
-
-                      <div className="text-muted small mb-2">
-                        <i className="bi bi-geo-alt me-1"></i>
-                        {visit.store?.address?.fullAddress || '주소 정보 없음'}
-                      </div>
-
-                      <div className="d-flex align-items-center gap-2 mb-2">
-                        {<StoreStatusBadge status={visit.store?.status}/>}
-                        {getActivitiesStatusBadge(visit.store?.activitiesStatus)}
-                        {visit.store?.storeType && <StoreTypeBadge storeType={visit.store.storeType}/>}
-                      </div>
-
-                      <div className="d-flex align-items-center gap-2 mb-2">
-                        <i className="bi bi-star text-warning"></i>
-                        <span className="text-dark small fw-medium">
-                          평점: {visit.store?.rating ? visit.store.rating.toFixed(1) : '0.0'}점
-                        </span>
-                      </div>
-
-                      <div className="d-flex flex-wrap gap-1">
-                        {visit.store?.categories?.slice(0, 2).map((category, idx) => (
-                          <span key={idx}
-                                className="badge bg-secondary bg-opacity-10 text-secondary border rounded-pill px-2 py-1"
-                                style={{fontSize: '0.7rem'}}>
-                            {category?.name || '카테고리'}
-                          </span>
-                        ))}
-                        {visit.store?.categories && visit.store.categories.length > 2 && (
-                          <span className="badge bg-light text-muted border rounded-pill px-2 py-1"
-                                style={{fontSize: '0.7rem'}}>
-                            +{visit.store.categories.length - 2}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <div className="text-end">
+        {visits.map((visit, index) => (
+          <div
+            key={visit.visitId || index}
+            className="item-card item-card--clickable mb-3"
+            role="button"
+            tabIndex={0}
+            onClick={() => handleVisitClick(visit)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                handleVisitClick(visit);
+              }
+            }}
+          >
+            <div className="item-card__body">
+              <div className="d-flex align-items-start justify-content-between gap-2">
+                <div className="min-w-0">
+                  <div className="d-flex align-items-center flex-wrap gap-2">
+                    {visit.store && onStoreClick ? (
                       <button
-                        className="btn btn-outline-warning btn-sm rounded-pill px-3"
+                        type="button"
+                        className="btn btn-link btn-sm p-0 text-decoration-none item-card__name clickable-author"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleVisitClick(visit);
+                          onStoreClick(visit.store);
                         }}
                       >
-                        <i className="bi bi-eye me-1"></i>
-                        상세보기
+                        {visit.store.name || '가게 이름 없음'}
+                        <i className="bi bi-box-arrow-up-right ms-1"/>
                       </button>
-                    </div>
+                    ) : (
+                      <h3 className="item-card__name">{visit.store?.name || '가게 이름 없음'}</h3>
+                    )}
+                    {getVisitTypeBadge(visit.visitType)}
                   </div>
+                  <p className="item-card__desc">
+                    <i className="bi bi-calendar3 me-1"/>
+                    {formatVisitDateTime(visit.visitDateTime)}
+                  </p>
+                  <p className="item-card__desc">
+                    <i className="bi bi-geo-alt me-1"/>
+                    {visit.store?.address?.fullAddress || '주소 정보 없음'}
+                  </p>
                 </div>
+                <button
+                  className="btn btn-sm btn-outline-warning flex-shrink-0"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleVisitClick(visit);
+                  }}
+                >
+                  <i className="bi bi-eye me-1"/>
+                  상세보기
+                </button>
               </div>
-            ))}
-          </div>
-        )}
 
-        {isLoading && visits.length > 0 && (
-          <div className="text-center p-3 bg-light">
-            <div className="spinner-border text-warning" role="status">
-              <span className="visually-hidden">Loading...</span>
-            </div>
-            <p className="small text-muted mt-2 mb-0">추가 데이터 로딩 중...</p>
-          </div>
-        )}
-
-        {isLoading && visits.length === 0 && (
-          <div className="text-center py-5">
-            <div className="mb-3">
-              <div className="spinner-border text-warning" style={{width: '3rem', height: '3rem'}} role="status">
-                <span className="visually-hidden">Loading...</span>
+              <div className="d-flex align-items-center flex-wrap gap-2 mt-2">
+                <StoreStatusBadge status={visit.store?.status}/>
+                {getActivitiesStatusBadge(visit.store?.activitiesStatus)}
+                {visit.store?.storeType && <StoreTypeBadge storeType={visit.store.storeType}/>}
+                <span className="rating-badge">
+                  <i className="bi bi-star-fill"/>
+                  평점: {visit.store?.rating ? visit.store.rating.toFixed(1) : '0.0'}점
+                </span>
+                {visit.store?.categories?.slice(0, 2).map((category, idx) => (
+                  <span key={idx} className="badge bg-secondary-subtle text-secondary-emphasis">
+                    {category?.name || '카테고리'}
+                  </span>
+                ))}
+                {visit.store?.categories && visit.store.categories.length > 2 && (
+                  <span className="badge bg-secondary-subtle text-secondary-emphasis">
+                    +{visit.store.categories.length - 2}
+                  </span>
+                )}
               </div>
             </div>
-            <h5 className="text-dark mb-1">방문 이력을 불러오는 중...</h5>
-            <p className="text-muted">잠시만 기다려주세요...</p>
           </div>
-        )}
-      </div>
+        ))}
+      </HistoryPanel>
 
       {/* 방문 이력 상세 모달 */}
       {showModal && selectedVisit && (
-        <div className="modal fade show d-block" tabIndex={-1} style={{backgroundColor: 'rgba(0,0,0,0.5)'}}>
-          <div className="modal-dialog modal-lg modal-dialog-centered">
-            <div className="modal-content border-0 shadow-lg">
-              <div className="modal-header border-0 pb-0"
-                   style={{background: selectedVisit.visitType?.type === 'EXISTS' ? 'linear-gradient(135deg, #28a745 0%, #20c997 100%)' : 'linear-gradient(135deg, #dc3545 0%, #fd7e14 100%)'}}>
-                <div className="w-100">
-                  <div className="d-flex align-items-center gap-3 text-white">
+        <div
+          className="modal fade show"
+          style={{display: 'block', backgroundColor: 'rgba(0,0,0,0.5)'}}
+          onClick={handleCloseModal}
+        >
+          <div className="modal-dialog modal-lg modal-dialog-centered" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">
+                  <i className="bi bi-geo-alt text-warning me-2"/>
+                  방문 이력 상세
+                </h5>
+                <button type="button" className="btn-close" onClick={handleCloseModal}/>
+              </div>
+              <div className="modal-body">
+                <div className="row g-3">
+                  <div className="col-md-6">
+                    <label className="form-label fw-bold">가게명</label>
+                    <p className="form-control-plaintext">{selectedVisit.store?.name || '가게 이름 없음'}</p>
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label fw-bold">방문 시간</label>
+                    <p className="form-control-plaintext">{formatVisitDateTime(selectedVisit.visitDateTime)}</p>
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label fw-bold">주소</label>
+                    <p className="form-control-plaintext">
+                      {selectedVisit.store?.address?.fullAddress || '주소 정보 없음'}
+                    </p>
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label fw-bold">가게 평균 평점</label>
                     <div>
-                      <h4 className="mb-0 fw-bold">{selectedVisit?.store?.name || '가게 이름 없음'}</h4>
-                      <div className="d-flex align-items-center gap-2 mt-2">
-                        <i className="bi bi-calendar3 opacity-90"></i>
-                        <span className="opacity-90">{formatVisitDateTime(selectedVisit.visitDateTime)}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <button type="button" className="btn-close btn-close-white" onClick={handleCloseModal}></button>
-              </div>
-              <div className="modal-body p-4">
-                <div className="row g-4">
-                  <div className="col-md-6">
-                    <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
-                      <div className="bg-primary bg-opacity-10 rounded-circle p-2">
-                        <i className="bi bi-geo-alt text-primary"></i>
-                      </div>
-                      <div>
-                        <label className="form-label fw-semibold text-muted mb-1">주소</label>
-                        <p className="mb-0 text-dark">{selectedVisit?.store?.address?.fullAddress || '주소 정보 없음'}</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="col-md-6">
-                    <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
-                      <div className="bg-warning bg-opacity-10 rounded-circle p-2">
-                        <i className="bi bi-star text-warning"></i>
-                      </div>
-                      <div>
-                        <label className="form-label fw-semibold text-muted mb-1">가게 평균 평점</label>
-                        <p
-                          className="mb-0 text-dark fw-bold">{selectedVisit?.store?.rating ? selectedVisit.store.rating.toFixed(1) : '0.0'}점</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="col-md-6">
-                    <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
-                      <div className="bg-info bg-opacity-10 rounded-circle p-2">
-                        <i className="bi bi-calendar-check text-info"></i>
-                      </div>
-                      <div>
-                        <label className="form-label fw-semibold text-muted mb-1">방문 시간</label>
-                        <p className="mb-0 text-dark fw-bold">{formatVisitDateTime(selectedVisit.visitDateTime)}</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="col-md-6">
-                    <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
-                      <div
-                        className={`${selectedVisit.visitType?.type === 'EXISTS' ? 'bg-success' : 'bg-danger'} bg-opacity-10 rounded-circle p-2`}>
-                        <i
-                          className={`bi ${selectedVisit.visitType?.type === 'EXISTS' ? 'bi-check-circle text-success' : 'bi-x-circle text-danger'}`}></i>
-                      </div>
-                      <div>
-                        <label className="form-label fw-semibold text-muted mb-1">방문 결과</label>
-                        <div>
-                          {getVisitTypeBadge(selectedVisit.visitType)}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="col-md-12">
-                    <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
-                      <div className="bg-success bg-opacity-10 rounded-circle p-2">
-                        <i className="bi bi-shield-check text-success"></i>
-                      </div>
-                      <div>
-                        <label className="form-label fw-semibold text-muted mb-1">가게 상태</label>
-                        <div className="d-flex gap-2 flex-wrap">
-                          {<StoreStatusBadge status={selectedVisit?.store?.status}/>}
-                          {getActivitiesStatusBadge(selectedVisit?.store?.activitiesStatus)}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-4">
-                  <h6 className="fw-bold text-dark mb-3">가게 카테고리</h6>
-                  <div className="d-flex flex-wrap gap-2">
-                    {selectedVisit?.store?.categories?.map((category, idx) => (
-                      <span key={idx}
-                            className="badge bg-primary bg-opacity-10 text-primary border rounded-pill px-3 py-2">
-                        {category?.name || '카테고리'}
+                      <span className="rating-badge">
+                        <i className="bi bi-star-fill"/>
+                        {selectedVisit.store?.rating ? selectedVisit.store.rating.toFixed(1) : '0.0'}점
                       </span>
-                    )) || <span className="text-muted">카테고리 정보 없음</span>}
+                    </div>
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label fw-bold">방문 결과</label>
+                    <div>
+                      {getVisitTypeBadge(selectedVisit.visitType)}
+                    </div>
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label fw-bold">가게 상태</label>
+                    <div className="d-flex gap-2 flex-wrap">
+                      <StoreStatusBadge status={selectedVisit.store?.status}/>
+                      {getActivitiesStatusBadge(selectedVisit.store?.activitiesStatus)}
+                    </div>
+                  </div>
+                  <div className="col-12">
+                    <label className="form-label fw-bold">가게 카테고리</label>
+                    <div className="d-flex flex-wrap gap-2">
+                      {selectedVisit.store?.categories?.map((category, idx) => (
+                        <span key={idx} className="badge bg-primary-subtle text-primary-emphasis">
+                          {category?.name || '카테고리'}
+                        </span>
+                      )) || <span className="text-muted">카테고리 정보 없음</span>}
+                    </div>
                   </div>
                 </div>
-
               </div>
-              <div className="modal-footer border-0 bg-light">
-                <button type="button" className="btn btn-secondary rounded-pill px-4" onClick={handleCloseModal}>
-                  <i className="bi bi-x-lg me-2"></i>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={handleCloseModal}>
+                  <i className="bi bi-x-lg me-2"/>
                   닫기
                 </button>
               </div>
@@ -388,7 +264,7 @@ const UserVisitHistory = ({userId, isActive, onStoreClick}: UserVisitHistoryProp
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 

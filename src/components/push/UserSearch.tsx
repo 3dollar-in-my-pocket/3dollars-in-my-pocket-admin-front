@@ -1,5 +1,4 @@
 import React from "react";
-import {Button, Form} from "react-bootstrap";
 
 /** pushApi.searchUserByNickname 응답 항목 */
 export interface PushSearchUser {
@@ -35,152 +34,113 @@ const UserSearch = ({
                       searchResults,
                       isUserSelected,
                       onUserToggle,
-                      selectedUsers,
+                      selectedUsers = [],
                       onUserRemove
                     }: UserSearchProps) => {
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
       e.preventDefault();
       onSearch();
     }
   };
 
-  const handleUserClick = (user: PushSearchUser) => {
-    const selected = isUserSelected(user.id);
-
-    if (selected) {
-      // 이미 선택된 사용자인 경우 제거
-      onUserToggle(user.id);
-    } else {
-      // 새로운 사용자인 경우 추가 (중복 방지)
-      onUserToggle(user.id, user.nickname);
-    }
-  };
-
   return (
     <>
-      <Form.Group className="mb-3">
-        <Form.Label className="fw-semibold">
-          <i className="bi bi-search me-2"></i>닉네임으로 사용자 검색
-        </Form.Label>
-        <div className="d-flex gap-2">
-          <Form.Control
+      <div className="form-field">
+        <label className="form-field__label" htmlFor="push-nickname">
+          <i className="bi bi-search"/>
+          닉네임으로 사용자 검색
+        </label>
+        <div className="form-inline-search">
+          <input
+            id="push-nickname"
             type="text"
+            className="form-control"
             placeholder="닉네임을 입력하세요"
             value={nicknameSearch}
             onChange={(e) => onNicknameChange(e.target.value)}
-            className="border-2"
-            onKeyPress={handleKeyPress}
+            onKeyDown={handleKeyDown}
           />
-          <Button
-            variant="outline-primary"
+          <button
+            type="button"
+            className="btn btn-outline-primary"
             onClick={onSearch}
             disabled={searchLoading || !nicknameSearch.trim()}
-            style={{minWidth: '100px'}}
           >
             {searchLoading ? (
-              <span className="spinner-border spinner-border-sm" role="status"></span>
+              <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"/>
             ) : (
               <>
-                <i className="bi bi-search me-1"></i>
+                <i className="bi bi-search me-1"/>
                 검색
               </>
             )}
-          </Button>
+          </button>
         </div>
-        <Form.Text className="text-muted small">
-          닉네임으로 사용자를 검색하여 대상에 추가할 수 있습니다 (중복 추가 방지)
-        </Form.Text>
-      </Form.Group>
 
-      {/* 선택된 사용자 목록 */}
-      {selectedUsers && selectedUsers.length > 0 && (
-        <div className="mb-3">
-          <div className="bg-success-subtle rounded p-3 border border-success">
-            <h6 className="fw-semibold mb-2 text-success">
-              <i className="bi bi-check-circle-fill me-1"></i>
-              선택된 사용자 ({selectedUsers.length}명)
-            </h6>
-            <div className="d-flex flex-wrap gap-2">
-              {selectedUsers.map((user) => (
-                <div
-                  key={user.id}
-                  className="d-flex align-items-center gap-2 p-2 rounded bg-white border border-success"
-                  style={{cursor: 'pointer'}}
-                >
-                  <div className="d-flex align-items-center gap-2">
-                    <i className="bi bi-person-check-fill text-success"></i>
-                    <span className="fw-medium text-success">{user.nickname}</span>
-                    <small className="text-muted">({user.id})</small>
-                    <button
-                      className="btn btn-sm btn-outline-danger rounded-circle p-1"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onUserRemove(user.id);
-                      }}
-                      style={{width: '24px', height: '24px', fontSize: '10px'}}
-                      title="선택 해제"
-                    >
-                      <i className="bi bi-x"></i>
-                    </button>
-                  </div>
-                </div>
-              ))}
+        {searchResults.length > 0 && (
+          <>
+            <div className="form-subhead">
+              <span>검색 결과 {searchResults.length}명 · 클릭하면 대상에 추가됩니다</span>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* 검색 결과 */}
-      {searchResults.length > 0 && (
-        <div className="mb-3">
-          <div className="bg-light rounded p-3 border">
-            <h6 className="fw-semibold mb-2">
-              <i className="bi bi-person-search me-1"></i>
-              검색 결과 ({searchResults.length}명)
-            </h6>
-            <div className="d-flex flex-wrap gap-2">
+            <div className="form-chips">
               {searchResults.map((user) => {
                 const selected = isUserSelected(user.id);
                 return (
-                  <div
+                  <button
                     key={user.id}
-                    className={`d-flex align-items-center gap-2 p-2 rounded border ${
-                      selected
-                        ? 'bg-success-subtle border-success'
-                        : 'bg-white border-secondary'
-                    }`}
-                    style={{
-                      cursor: selected ? 'not-allowed' : 'pointer',
-                      opacity: selected ? 0.7 : 1
-                    }}
-                    onClick={() => !selected && handleUserClick(user)}
-                    title={selected ? '이미 선택된 사용자입니다' : '클릭하여 선택'}
+                    type="button"
+                    className={`form-chip ${selected ? "form-chip--selected" : "form-chip--addable"}`}
+                    onClick={() => !selected && onUserToggle(user.id, user.nickname)}
+                    disabled={selected}
+                    title={selected ? "이미 추가된 사용자입니다" : "클릭하여 대상에 추가"}
                   >
-                    <div className="d-flex align-items-center gap-2">
-                      <i className={`bi ${
-                        selected
-                          ? 'bi-check-circle-fill text-success'
-                          : 'bi-plus-circle text-primary'
-                      }`}></i>
-                      <span className={`fw-medium ${selected ? 'text-success' : 'text-dark'}`}>
-                        {user.nickname}
-                      </span>
-                      <small className="text-muted">({user.id})</small>
-                      {selected && (
-                        <small className="text-success fw-bold">✓ 선택됨</small>
-                      )}
-                    </div>
-                  </div>
+                    <i className={`bi ${selected ? "bi-check-circle-fill" : "bi-plus-circle"}`}/>
+                    <span>{user.nickname}</span>
+                    <span className="form-chip__id">{user.id}</span>
+                  </button>
                 );
               })}
             </div>
-            {searchResults.filter(user => isUserSelected(user.id)).length > 0 && (
-              <small className="text-muted d-block mt-2">
-                <i className="bi bi-info-circle me-1"></i>
-                이미 선택된 사용자는 중복 추가되지 않습니다
-              </small>
-            )}
+          </>
+        )}
+
+        {!searchResults.length && (
+          <p className="form-field__hint">
+            검색 결과를 클릭하면 아래 대상 목록에 추가됩니다.
+          </p>
+        )}
+      </div>
+
+      {selectedUsers.length > 0 && (
+        <div className="form-field">
+          <div className="form-subhead" style={{marginTop: 0}}>
+            <span>선택된 사용자 {selectedUsers.length}명</span>
+            <button
+              type="button"
+              className="form-subhead__clear"
+              onClick={() => selectedUsers.forEach((user) => onUserRemove(user.id))}
+            >
+              전체 해제
+            </button>
+          </div>
+          <div className="form-chips">
+            {selectedUsers.map((user) => (
+              <span key={user.id} className="form-chip">
+                <i className="bi bi-person-check-fill text-success"/>
+                <span>{user.nickname}</span>
+                <span className="form-chip__id">{user.id}</span>
+                <button
+                  type="button"
+                  className="form-chip__remove"
+                  onClick={() => onUserRemove(user.id)}
+                  aria-label={`${user.nickname} 선택 해제`}
+                  title="선택 해제"
+                >
+                  <i className="bi bi-x-lg"/>
+                </button>
+              </span>
+            ))}
           </div>
         </div>
       )}

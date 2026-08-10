@@ -2,7 +2,18 @@ import {useEffect, useState} from "react";
 import {useLocation} from "react-router-dom";
 import pushApi, {PushTargetUser} from "@/api/pushApi";
 import uploadApi from "@/api/uploadApi";
-import {addUserToTarget, parseAccountIds, removeUserFromTarget, validatePushData} from "@/utils/pushUtils";
+import {
+  addUserToTarget,
+  applyAdBodySuffix,
+  applyAdTitlePrefix,
+  checkAdNotice,
+  isMarketingPush,
+  parseAccountIds,
+  removeUserFromTarget,
+  stripAdBodySuffix,
+  stripAdTitlePrefix,
+  validatePushData
+} from "@/utils/pushUtils";
 import {useNonce} from "./useNonce";
 import {PUSH_OS_PLATFORM, PushOsPlatform} from "@/types/device";
 
@@ -99,11 +110,29 @@ export const usePushForm = () => {
   });
 
   // 폼 데이터 업데이트
+  // pushType 변경 시에는 광고성 푸시 법정 표기를 제목/본문에 자동으로 넣거나 걷어낸다.
   const updateFormData = <K extends keyof PushFormState>(field: K, value: PushFormState[K]) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    setFormData(prev => {
+      if (field !== "pushType" || prev.pushType === value) {
+        return {...prev, [field]: value};
+      }
+
+      const nextPushType = value as string;
+      // 타입을 여러 번 전환해도 표기가 중복되지 않도록 항상 걷어낸 뒤 다시 붙인다.
+      const baseTitle = stripAdTitlePrefix(prev.title);
+      const baseBody = stripAdBodySuffix(prev.body);
+
+      if (!isMarketingPush(nextPushType)) {
+        return {...prev, pushType: nextPushType, title: baseTitle, body: baseBody};
+      }
+
+      return {
+        ...prev,
+        pushType: nextPushType,
+        title: applyAdTitlePrefix(baseTitle),
+        body: applyAdBodySuffix(baseBody)
+      };
+    });
   };
 
   // 결과 메시지 설정
@@ -328,6 +357,9 @@ export const usePushForm = () => {
     return validation.isValid && !uiState.loading && targetOsPlatforms.size > 0;
   };
 
+  // 광고성 푸시 법정 표기 누락 여부 (발송은 막지 않고 경고/재확인만 한다)
+  const adNotice = checkAdNotice(formData.pushType, formData.title, formData.body);
+
   return {
     // 상태
     formData,
@@ -335,6 +367,7 @@ export const usePushForm = () => {
     selectedUsers,
     uiState,
     targetOsPlatforms,
+    adNotice,
 
     // 액션
     updateFormData,

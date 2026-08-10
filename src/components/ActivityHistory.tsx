@@ -1,8 +1,10 @@
 import React, {useEffect, useState} from 'react';
 import {Tab, Tabs} from 'react-bootstrap';
+import DetailModalTabTitle from '@/components/common/DetailModalTabTitle';
+import EmptyState from '@/components/common/EmptyState';
+import Loading from '@/components/common/Loading';
 import {ActivityAuthor} from '@/types/domain';
 import {SimpleStore} from '@/types/store';
-import '../styles/mobile-tabs.css';
 
 /** ActivityHistory가 렌더링하는 탭 하나의 설정 */
 export interface ActivityTabConfig {
@@ -21,9 +23,15 @@ export interface ActivityTabConfig {
    * 공통 상위 타입인 ComponentType<any>로 둡니다.
    */
   component: React.ComponentType<any>;
-  /** 로딩 스피너 색상 클래스 (기본 'text-primary') */
+  /**
+   * 로딩 스피너 색상 클래스
+   * @deprecated 공통 Loading 컴포넌트를 사용하므로 더 이상 반영되지 않습니다.
+   */
   spinnerColor?: string;
-  /** 로딩 문구 (기본 '데이터를 불러오는 중...') */
+  /**
+   * 로딩 문구
+   * @deprecated 공통 Loading 컴포넌트를 사용하므로 더 이상 반영되지 않습니다.
+   */
   loadingText?: string;
   /** false면 탭을 비활성화하고 미지원 안내를 표시합니다. */
   isSupported?: boolean;
@@ -90,137 +98,59 @@ const ActivityHistory: React.FC<ActivityHistoryProps> = ({
     setLoadedTabs(prev => new Set([...prev, tabKey]));
   };
 
-  const getTitle = () => {
-    return type === 'user' ? '활동 이력' : '가게 활동 이력';
-  };
-
-  const getIcon = () => {
-    return type === 'user' ? 'bi-activity' : 'bi-activity';
-  };
-
   if (!tabs || tabs.length === 0) {
     return (
-      <div className="p-4">
-        <div className="text-center py-5">
-          <div className="bg-light rounded-circle mx-auto mb-4"
-               style={{width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-            <i className={`bi ${getIcon()} fs-1 text-secondary`}></i>
-          </div>
-          <h5 className="text-dark mb-2">활동 탭이 설정되지 않았습니다</h5>
-          <p className="text-muted">활동 이력을 표시할 탭을 설정해주세요.</p>
-        </div>
-      </div>
+      <EmptyState
+        icon="bi-activity"
+        title="활동 탭이 설정되지 않았습니다"
+        description="활동 이력을 표시할 탭을 설정해주세요."
+      />
     );
   }
 
   return (
-    <div className="p-1 p-sm-2 p-md-4">
-      <div className="card border-0 shadow-sm">
-        <div className="card-header bg-light border-0 p-2 p-sm-3 p-md-4">
-          <div className="d-flex align-items-center gap-2">
-            <div className="bg-info bg-opacity-10 rounded-circle p-2">
-              <i className={`bi ${getIcon()} text-info`}></i>
-            </div>
-            <h5 className="mb-0 fw-bold text-dark">{getTitle()}</h5>
-          </div>
-        </div>
-        <div className="card-body p-0">
-          <Tabs
-            activeKey={activeTab}
-            onSelect={handleTabChange}
-            className="nav-fill border-0 px-1 px-sm-2 px-md-3 pt-2 pt-md-3 mobile-sub-tabs"
-            style={{
-              background: '#ffffff',
-              overflowX: 'auto',
-              flexWrap: 'nowrap'
-            }}
+    <div className="activity-history">
+      <Tabs
+        activeKey={activeTab}
+        onSelect={handleTabChange}
+        className="border-0"
+      >
+        {tabs.map((tab) => (
+          <Tab
+            key={tab.key}
+            eventKey={tab.key}
+            disabled={tab.isSupported === false}
+            title={
+              <DetailModalTabTitle
+                icon={tab.icon}
+                label={tab.title}
+                unsupported={tab.isSupported === false}
+              />
+            }
           >
-            {tabs.map((tab) => (
-              <Tab
-                key={tab.key}
-                eventKey={tab.key}
-                disabled={tab.isSupported === false}
-                title={
-                  <span
-                    className={`d-flex align-items-center gap-1 gap-md-2 px-1 py-2 ${tab.isSupported === false ? 'text-muted' : ''}`}
-                    style={{
-                      fontSize: window.innerWidth <= 768 ? '0.8rem' : '0.9rem',
-                      whiteSpace: 'nowrap',
-                      minWidth: 'fit-content'
-                    }}>
-                    <i className={`bi ${tab.icon}`} style={{fontSize: '0.85rem'}}></i>
-                    <span className="fw-medium d-none d-sm-inline">{tab.title}</span>
-                    <span
-                      className="fw-medium d-sm-none">{tab.title.length > 4 ? tab.title.substring(0, 3) + '...' : tab.title}</span>
-                    {tab.isSupported === false && (
-                      <span className="badge bg-secondary bg-opacity-50 rounded-pill ms-1" style={{
-                        fontSize: '0.6rem',
-                        minWidth: '0.8rem',
-                        height: '0.8rem',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}>
-                        X
-                      </span>
-                    )}
-                    {tab.showBadge && tab.isSupported !== false && (
-                      <span className="badge bg-secondary rounded-pill ms-1" style={{
-                        fontSize: '0.6rem',
-                        minWidth: '0.8rem',
-                        height: '0.8rem',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}>
-                        {tab.badgeText || '준비중'}
-                      </span>
-                    )}
-                  </span>
+            {tab.isSupported === false ? (
+              <EmptyState
+                icon={tab.icon}
+                title={`${tab.title} 기능 미지원`}
+                description={
+                  `이 기능은 ${tab.key === 'posts' || tab.key === 'messages' ? '사장님 가게' : '노점상 가게'}에서만 사용할 수 있습니다.`
                 }
-              >
-                <div className="pt-0">
-                  {tab.isSupported === false ? (
-                    <div className="text-center py-5">
-                      <div className="bg-light rounded-circle mx-auto mb-3" style={{
-                        width: '80px',
-                        height: '80px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}>
-                        <i className={`bi ${tab.icon} fs-1 text-secondary`}></i>
-                      </div>
-                      <h5 className="text-dark mb-2">{tab.title} 기능 미지원</h5>
-                      <p className="text-muted mb-3">
-                        이 기능은 {tab.key === 'posts' || tab.key === 'messages' ? '사장님 가게' : '노점상 가게'}에서만 사용할 수 있습니다.
-                      </p>
-                      <div className="alert alert-info d-inline-block">
-                        <i className="bi bi-info-circle me-2"></i>
-                        가게 타입에 따라 지원되는 기능이 다릅니다.
-                      </div>
-                    </div>
-                  ) : loadedTabs.has(tab.key) ? (
-                    <tab.component
-                      {...(type === 'user' ? {userId: entityId} : {storeId: entityId})}
-                      isActive={activeTab === tab.key}
-                      onAuthorClick={onAuthorClick}
-                      onStoreClick={onStoreClick}
-                    />
-                  ) : (
-                    <div className="text-center py-5">
-                      <div className={`spinner-border ${tab.spinnerColor || 'text-primary'}`} role="status">
-                        <span className="visually-hidden">Loading...</span>
-                      </div>
-                      <p className="text-muted mt-2">{tab.loadingText || '데이터를 불러오는 중...'}</p>
-                    </div>
-                  )}
-                </div>
-              </Tab>
-            ))}
-          </Tabs>
-        </div>
-      </div>
+              />
+            ) : loadedTabs.has(tab.key) ? (
+              <tab.component
+                {...(type === 'user' ? {userId: entityId} : {storeId: entityId})}
+                isActive={activeTab === tab.key}
+                onAuthorClick={onAuthorClick}
+                onStoreClick={onStoreClick}
+              />
+            ) : (
+              <div className="py-5">
+                <Loading/>
+              </div>
+            )}
+          </Tab>
+        ))}
+      </Tabs>
     </div>
   );
 };

@@ -1,3 +1,5 @@
+import React from 'react';
+import EmptyState from '@/components/common/EmptyState';
 import {Medal} from '@/types/medal';
 
 interface UserMedalTabProps {
@@ -17,6 +19,12 @@ interface UserMedalTabProps {
   onOpenAssignConfirm: () => void;
 }
 
+/** 이미지 로드 실패 시 비활성 아이콘으로 대체 */
+const handleIconError = (event: React.SyntheticEvent<HTMLImageElement>, fallbackUrl?: string) => {
+  const target = event.target as HTMLImageElement;
+  target.src = fallbackUrl || '/default-medal.png';
+};
+
 /**
  * 유저 상세 모달의 메달 정보 탭
  */
@@ -29,232 +37,134 @@ const UserMedalTab = ({
                         onSelectMedal,
                         onOpenAssignConfirm
                       }: UserMedalTabProps) => {
+  const isAlreadyOwned = selectedMedalForAssign
+    ? medals.some((medal) => medal.medalId === selectedMedalForAssign)
+    : false;
+
   return (
-    <div className="p-1 p-sm-2 p-md-4">
-      <div className="card border-0 shadow-sm">
-        <div className="card-header bg-light border-0 p-4">
-          <div className="d-flex align-items-center gap-2">
-            <div className="bg-warning bg-opacity-10 rounded-circle p-2">
-              <i className="bi bi-award text-warning"></i>
+    <div className="history-panel">
+      <div className="history-panel__head">
+        <h3 className="history-panel__title">
+          <i className="bi bi-award"/>
+          보유 메달
+          <span className="history-panel__count">
+            {medals.length} / {allMedals.length}
+          </span>
+        </h3>
+        {selectedMedalForAssign && (
+          <div className="history-panel__aside">
+            <button
+              className="btn btn-sm btn-primary"
+              onClick={onOpenAssignConfirm}
+              disabled={isAssigningMedal || isAlreadyOwned}
+            >
+              <i className={`bi ${isAlreadyOwned ? 'bi-check-circle' : 'bi-award'} me-1`}/>
+              {isAlreadyOwned ? '이미 보유한 메달' : '선택한 메달 지급'}
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* 대표 메달 */}
+      {representativeMedal && (
+        <div className="modal-section">
+          <h4 className="modal-section__title">
+            <i className="bi bi-star-fill text-warning"/>
+            대표 메달
+          </h4>
+          <div className="item-card">
+            <div className="item-card__body d-flex align-items-center gap-3">
+              <img
+                src={representativeMedal.iconUrl}
+                alt={representativeMedal.name}
+                className="medal-tile__icon"
+                onError={(event) => handleIconError(event, representativeMedal.disableIconUrl)}
+              />
+              <div className="min-w-0">
+                <h5 className="item-card__name">{representativeMedal.name}</h5>
+                <p className="item-card__desc">{representativeMedal.introduction}</p>
+                {representativeMedal.acquisition?.description && (
+                  <span className="badge bg-primary-subtle text-primary-emphasis mt-1">
+                    <i className="bi bi-info-circle me-1"/>
+                    {representativeMedal.acquisition.description}
+                  </span>
+                )}
+              </div>
             </div>
-            <h5 className="mb-0 fw-bold text-dark">보유 메달</h5>
-            {medals.length > 0 && (
-              <span className="badge bg-warning ms-auto px-3 py-2 rounded-pill">
-                총 {medals.length}개
-              </span>
-            )}
           </div>
         </div>
-        <div className="card-body p-4">
-          {/* 대표 메달 섹션 */}
-          {representativeMedal && (
-            <div className="mb-4">
-              <h6 className="fw-bold text-dark mb-3 d-flex align-items-center gap-2">
-                <i className="bi bi-star-fill text-warning"></i>
-                대표 메달
-              </h6>
-              <div className="card border-warning border-2" style={{
-                background: 'linear-gradient(135deg, #fff3cd 0%, #ffffff 100%)',
-                borderRadius: '16px'
-              }}>
-                <div className="card-body p-2 p-sm-3 p-md-4">
-                  <div className="d-flex align-items-center gap-3">
-                    <div className="position-relative">
+      )}
+
+      {/* 전체 메달 */}
+      <div className="modal-section">
+        <h4 className="modal-section__title">
+          <i className="bi bi-collection"/>
+          전체 메달
+        </h4>
+
+        {allMedals.length === 0 ? (
+          <EmptyState
+            icon="bi-award"
+            title="메달 정보가 없습니다"
+            description="조회할 수 있는 메달이 없습니다."
+          />
+        ) : (
+          <div className="row g-2">
+            {allMedals.map((medal, index) => {
+              const isOwned = medals.some((m) => m.medalId === medal.medalId);
+              const isRepresentative = representativeMedal?.medalId === medal.medalId;
+              const isSelected = selectedMedalForAssign === medal.medalId;
+              const ownedMedal = medals.find((m) => m.medalId === medal.medalId);
+
+              const tileClass = [
+                'medal-tile',
+                isOwned ? '' : 'medal-tile--locked',
+                isSelected ? 'medal-tile--selected' : '',
+                isRepresentative ? 'medal-tile--representative' : ''
+              ].filter(Boolean).join(' ');
+
+              return (
+                <div key={medal.medalId || index} className="col-6 col-md-4 col-xl-3">
+                  <button
+                    type="button"
+                    className={tileClass}
+                    onClick={() => onSelectMedal(medal.medalId)}
+                    aria-pressed={isSelected}
+                  >
+                    <span className="medal-tile__figure">
                       <img
-                        src={representativeMedal.iconUrl}
-                        alt={representativeMedal.name}
-                        className="rounded-circle"
-                        style={{width: '60px', height: '60px', objectFit: 'cover'}}
-                        onError={(e: any) => {
-                          e.target.src = representativeMedal.disableIconUrl || '/default-medal.png';
-                        }}
+                        src={isOwned ? medal.iconUrl : medal.disableIconUrl}
+                        alt={medal.name}
+                        className="medal-tile__icon"
+                        onError={(event) => handleIconError(event, medal.disableIconUrl)}
                       />
-                      <div className="position-absolute top-0 start-100 translate-middle">
-                        <i className="bi bi-star-fill text-warning fs-5"></i>
-                      </div>
-                    </div>
-                    <div className="flex-grow-1">
-                      <h6 className="fw-bold text-dark mb-1">{representativeMedal.name}</h6>
-                      <p className="text-muted mb-2 small">{representativeMedal.introduction}</p>
-                      {representativeMedal.acquisition?.description && (
-                        <div className="d-flex align-items-center gap-2">
-                          <span
-                            className="badge bg-primary bg-opacity-10 text-primary border border-primary rounded-pill px-2 py-1"
-                            style={{fontSize: '0.7rem'}}>
-                            <i className="bi bi-info-circle me-1"></i>
-                            {representativeMedal.acquisition.description}
-                          </span>
-                        </div>
+                      {isRepresentative && (
+                        <i className="bi bi-star-fill medal-tile__mark text-warning" title="대표 메달"/>
                       )}
-                    </div>
-                  </div>
+                      {isSelected && (
+                        <i className="bi bi-check-circle-fill medal-tile__mark text-primary" title="선택됨"/>
+                      )}
+                    </span>
+                    <span className="medal-tile__name">{medal.name}</span>
+                    <span className="medal-tile__desc">{medal.introduction}</span>
+                    {isOwned ? (
+                      ownedMedal?.acquisition?.description && (
+                        <span className="badge bg-primary-subtle text-primary-emphasis">
+                          {ownedMedal.acquisition.description}
+                        </span>
+                      )
+                    ) : (
+                      <span className="badge bg-secondary-subtle text-secondary-emphasis">
+                        <i className="bi bi-lock me-1"/>
+                        미획득
+                      </span>
+                    )}
+                  </button>
                 </div>
-              </div>
-            </div>
-          )}
-
-          {/* 전체 메달 목록 */}
-          <div>
-            <h6 className="fw-bold text-dark mb-3 d-flex align-items-center gap-2">
-              <i className="bi bi-collection text-primary"></i>
-              전체 메달
-              {allMedals.length > 0 && (
-                <span className="badge bg-secondary ms-2">
-                  보유: {medals.length} / {allMedals.length}
-                </span>
-              )}
-            </h6>
-            {allMedals.length === 0 ? (
-              <div className="text-center py-5">
-                <div className="bg-light rounded-circle mx-auto mb-4" style={{
-                  width: '80px',
-                  height: '80px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  <i className="bi bi-award fs-1 text-secondary"></i>
-                </div>
-                <h5 className="text-dark mb-2">메달 정보를 불러오는 중입니다</h5>
-                <p className="text-muted">잠시만 기다려주세요.</p>
-              </div>
-            ) : (
-              <>
-                <div className="row g-3">
-                  {allMedals.map((medal, index) => {
-                    const isOwned = medals.some(m => m.medalId === medal.medalId);
-                    const isRepresentative = representativeMedal?.medalId === medal.medalId;
-                    const ownedMedal = medals.find(m => m.medalId === medal.medalId);
-                    const isSelected = selectedMedalForAssign === medal.medalId;
-
-                    return (
-                      <div key={medal.medalId || index} className="col-12 col-sm-6 col-md-4 col-lg-3">
-                        <div
-                          className={`card border-0 shadow-sm h-100 ${
-                            isRepresentative ? 'border-warning border-2' :
-                              isSelected ? 'border-primary border-3' : ''
-                          }`}
-                          style={{
-                            background: isRepresentative
-                              ? 'linear-gradient(135deg, #fff3cd 0%, #ffffff 100%)'
-                              : isSelected
-                                ? 'linear-gradient(135deg, #cfe2ff 0%, #ffffff 100%)'
-                                : 'linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%)',
-                            borderRadius: '16px',
-                            opacity: isOwned ? 1 : 0.6,
-                            cursor: 'pointer',
-                            transition: 'all 0.2s ease',
-                            transform: isSelected ? 'scale(1.05)' : 'scale(1)'
-                          }}
-                          onClick={() => onSelectMedal(medal.medalId)}
-                          onMouseEnter={(e) => {
-                            if (!isOwned && !isSelected) {
-                              e.currentTarget.style.opacity = '0.8';
-                            }
-                          }}
-                          onMouseLeave={(e) => {
-                            if (!isOwned && !isSelected) {
-                              e.currentTarget.style.opacity = '0.6';
-                            }
-                          }}
-                        >
-                          <div className="card-body p-3">
-                            <div className="d-flex flex-column align-items-center text-center">
-                              <div className="position-relative mb-3">
-                                <img
-                                  src={isOwned ? medal.iconUrl : medal.disableIconUrl}
-                                  alt={medal.name}
-                                  className="rounded-circle"
-                                  style={{
-                                    width: '50px',
-                                    height: '50px',
-                                    objectFit: 'cover',
-                                    filter: isOwned ? 'none' : 'grayscale(100%)'
-                                  }}
-                                  onError={(e: any) => {
-                                    e.target.src = medal.disableIconUrl || '/default-medal.png';
-                                  }}
-                                />
-                                {isRepresentative && (
-                                  <div className="position-absolute top-0 start-100 translate-middle">
-                                    <i className="bi bi-star-fill text-warning"></i>
-                                  </div>
-                                )}
-                                {!isOwned && !isSelected && (
-                                  <div className="position-absolute top-0 start-0 translate-middle">
-                                    <i className="bi bi-lock-fill text-secondary"></i>
-                                  </div>
-                                )}
-                                {isSelected && (
-                                  <div className="position-absolute top-0 start-0 translate-middle">
-                                    <div
-                                      className="bg-primary rounded-circle d-flex align-items-center justify-content-center"
-                                      style={{width: '20px', height: '20px'}}>
-                                      <i className="bi bi-check text-white fw-bold"></i>
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                              <h6 className={`fw-bold mb-1 small ${isOwned ? 'text-dark' : 'text-muted'}`}>
-                                {medal.name}
-                              </h6>
-                              <p className="text-muted mb-2 small"
-                                 style={{fontSize: '0.75rem', lineHeight: '1.2'}}>
-                                {medal.introduction}
-                              </p>
-                              {isOwned ? (
-                                ownedMedal?.acquisition?.description && (
-                                  <span
-                                    className="badge bg-primary bg-opacity-10 text-primary border border-primary rounded-pill px-2 py-1"
-                                    style={{fontSize: '0.7rem'}}>
-                                    <i className="bi bi-info-circle me-1"></i>
-                                    {ownedMedal.acquisition.description}
-                                  </span>
-                                )
-                              ) : isSelected ? (
-                                <span
-                                  className="badge bg-primary text-white rounded-pill px-2 py-1"
-                                  style={{fontSize: '0.7rem'}}>
-                                  <i className="bi bi-check-circle me-1"></i>
-                                  선택됨
-                                </span>
-                              ) : (
-                                <span
-                                  className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-2 py-1"
-                                  style={{fontSize: '0.7rem'}}>
-                                  <i className="bi bi-lock me-1"></i>
-                                  미획득
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* 메달 지급 버튼 */}
-                {selectedMedalForAssign && (() => {
-                  const isAlreadyOwned = medals.some(m => m.medalId === selectedMedalForAssign);
-                  return (
-                    <div className="mt-4 d-flex justify-content-center">
-                      <button
-                        className={`btn px-4 ${isAlreadyOwned ? 'btn-secondary' : 'btn-primary'}`}
-                        onClick={onOpenAssignConfirm}
-                        disabled={isAssigningMedal || isAlreadyOwned}
-                      >
-                        <i
-                          className={`bi ${isAlreadyOwned ? 'bi-check-circle-fill' : 'bi-award-fill'} me-2`}></i>
-                        {isAlreadyOwned ? '이미 보유한 메달입니다' : '선택한 메달 지급하기'}
-                      </button>
-                    </div>
-                  );
-                })()}
-              </>
-            )}
+              );
+            })}
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

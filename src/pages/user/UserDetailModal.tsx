@@ -1,4 +1,3 @@
-import '../../styles/mobile-tabs.css';
 import {useEffect, useState} from 'react';
 import {Modal, Tab, Tabs} from 'react-bootstrap';
 import {toast} from 'react-toastify';
@@ -7,6 +6,9 @@ import enumApi from "@/api/enumApi";
 import medalApi from '@/api/medalApi';
 import userApi from '@/api/userApi';
 import ActivityHistory from '@/components/ActivityHistory';
+import DetailModalTabTitle from '@/components/common/DetailModalTabTitle';
+import ErrorState from '@/components/common/ErrorState';
+import Loading from '@/components/common/Loading';
 import UserReviewHistory from './detail/UserReviewHistory';
 import UserStoreHistory from './detail/UserStoreHistory';
 import UserStoreImageHistory from './detail/UserStoreImageHistory';
@@ -211,96 +213,48 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}: UserDetailModalProp
       onHide={handleClose}
       size="xl"
       centered
-      className="user-detail-modal"
+      className="app-modal detail-modal"
       fullscreen="md-down"
-      style={{maxWidth: '98vw'}}
-      dialogClassName="modal-95w"
     >
-      <Modal.Header
-        closeButton
-        className="border-0 pb-0"
-        style={{background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'}}
-      >
-        <div className="w-100">
-          <div className="d-flex align-items-center justify-content-between gap-3 text-white">
-            <div>
-              <Modal.Title className="mb-0 fs-4 fs-md-3 fw-bold">
-                사용자 상세 정보
-              </Modal.Title>
-              <p className="mb-0 opacity-90 small">
-                {user.nickname}님의 정보를 확인하세요
-              </p>
-            </div>
-            <button
-              className="btn btn-light btn-sm d-flex align-items-center gap-2"
-              onClick={handleSendPush}
-            >
-              <i className="bi bi-send-fill"></i>
-              <span className="d-none d-md-inline">푸시 발송</span>
-            </button>
-          </div>
+      <Modal.Header closeButton>
+        <div className="detail-modal__avatar">
+          <i className="bi bi-person" aria-hidden="true"/>
         </div>
+        <div className="flex-grow-1 min-w-0">
+          <div className="detail-modal__heading">
+            <Modal.Title as="h2" className="text-truncate">
+              {user.nickname}
+            </Modal.Title>
+            <span className="detail-modal__id font-monospace">#{user.userId}</span>
+          </div>
+          <p className="app-modal__subtitle">유저 상세 정보</p>
+        </div>
+        <button
+          className="btn btn-sm btn-outline-primary flex-shrink-0"
+          onClick={handleSendPush}
+        >
+          <i className="bi bi-send me-1"/>
+          <span className="d-none d-sm-inline">푸시 발송</span>
+        </button>
       </Modal.Header>
 
-      <Modal.Body className="p-0">
+      <Modal.Body>
         {isLoading ? (
-          <div className="text-center py-5">
-            <div className="mb-3">
-              <div className="spinner-border text-primary" style={{width: '3rem', height: '3rem'}} role="status">
-                <span className="visually-hidden">Loading...</span>
-              </div>
-            </div>
-            <h5 className="text-dark mb-1">정보를 불러오는 중...</h5>
-            <p className="text-muted">잠시만 기다려주세요.</p>
+          <div className="py-5">
+            <Loading/>
           </div>
         ) : error ? (
-          <div className="text-center py-5 text-danger">
-            <div className="mb-4">
-              <div className="bg-danger bg-opacity-10 rounded-circle mx-auto" style={{
-                width: '80px',
-                height: '80px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
-                <i className="bi bi-exclamation-circle fs-1 text-danger"></i>
-              </div>
-            </div>
-            <h5 className="text-dark mb-2">오류가 발생했습니다</h5>
-            <p className="text-muted mb-3">{error}</p>
-            <button
-              className="btn btn-outline-primary rounded-pill px-4"
-              onClick={() => fetchUserDetail()}
-            >
-              <i className="bi bi-arrow-clockwise me-2"></i>
-              다시 시도
-            </button>
-          </div>
+          <ErrorState message={error} onRetry={fetchUserDetail}/>
         ) : (
           <Tabs
             activeKey={activeTab}
             onSelect={(k) => setActiveTab(k)}
-            className="nav-fill border-0 mobile-optimized-tabs"
-            style={{
-              background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
-              overflowX: 'auto',
-              flexWrap: 'nowrap'
-            }}
+            className="border-0"
           >
             {/* 기본 정보 탭 */}
             <Tab
               eventKey="basic"
-              title={
-                <span className="d-flex align-items-center gap-1 gap-md-2 px-1 py-2" style={{
-                  fontSize: window.innerWidth <= 768 ? '0.85rem' : '1rem',
-                  whiteSpace: 'nowrap',
-                  minWidth: 'fit-content'
-                }}>
-                  <i className="bi bi-person-vcard" style={{fontSize: '0.9rem'}}></i>
-                  <span className="d-none d-sm-inline fw-medium">기본 정보</span>
-                  <span className="d-sm-none fw-medium">기본</span>
-                </span>
-              }
+              title={<DetailModalTabTitle icon="bi-person-vcard" label="기본 정보"/>}
             >
               <UserBasicInfoTab
                 userDetail={userDetail}
@@ -316,27 +270,7 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}: UserDetailModalProp
             {/* 디바이스 정보 탭 */}
             <Tab
               eventKey="devices"
-              title={
-                <span className="d-flex align-items-center gap-1 gap-md-2 px-1 py-2" style={{
-                  fontSize: window.innerWidth <= 768 ? '0.85rem' : '1rem',
-                  whiteSpace: 'nowrap',
-                  minWidth: 'fit-content'
-                }}>
-                  <i className="bi bi-phone" style={{fontSize: '0.9rem'}}></i>
-                  <span className="d-none d-sm-inline fw-medium">디바이스 정보</span>
-                  <span className="d-sm-none fw-medium">기기</span>
-                  {devices.length > 0 && (
-                    <span className="badge bg-info rounded-pill ms-1" style={{
-                      fontSize: '0.7rem',
-                      minWidth: '1.2rem',
-                      height: '1.2rem',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}>{devices.length}</span>
-                  )}
-                </span>
-              }
+              title={<DetailModalTabTitle icon="bi-phone" label="디바이스 정보" count={devices.length}/>}
             >
               <UserDeviceTab
                 devices={devices}
@@ -348,27 +282,7 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}: UserDetailModalProp
             {/* 메달 정보 탭 */}
             <Tab
               eventKey="medals"
-              title={
-                <span className="d-flex align-items-center gap-1 gap-md-2 px-1 py-2" style={{
-                  fontSize: window.innerWidth <= 768 ? '0.85rem' : '1rem',
-                  whiteSpace: 'nowrap',
-                  minWidth: 'fit-content'
-                }}>
-                  <i className="bi bi-award" style={{fontSize: '0.9rem'}}></i>
-                  <span className="d-none d-sm-inline fw-medium">메달 정보</span>
-                  <span className="d-sm-none fw-medium">메달</span>
-                  {medals.length > 0 && (
-                    <span className="badge bg-warning rounded-pill ms-1" style={{
-                      fontSize: '0.7rem',
-                      minWidth: '1.2rem',
-                      height: '1.2rem',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}>{medals.length}</span>
-                  )}
-                </span>
-              }
+              title={<DetailModalTabTitle icon="bi-award" label="메달 정보" count={medals.length}/>}
             >
               <UserMedalTab
                 medals={medals}
@@ -384,17 +298,7 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}: UserDetailModalProp
             {/* 활동 이력 탭 */}
             <Tab
               eventKey="activity"
-              title={
-                <span className="d-flex align-items-center gap-1 gap-md-2 px-1 py-2" style={{
-                  fontSize: window.innerWidth <= 768 ? '0.85rem' : '1rem',
-                  whiteSpace: 'nowrap',
-                  minWidth: 'fit-content'
-                }}>
-                  <i className="bi bi-activity" style={{fontSize: '0.9rem'}}></i>
-                  <span className="d-none d-sm-inline fw-medium">활동 이력</span>
-                  <span className="d-sm-none fw-medium">활동</span>
-                </span>
-              }
+              title={<DetailModalTabTitle icon="bi-activity" label="활동 이력"/>}
             >
               <ActivityHistory
                 type="user"
@@ -448,53 +352,49 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}: UserDetailModalProp
         )}
       </Modal.Body>
 
-      <Modal.Footer className="border-0 bg-light">
-        <button
-          className="btn btn-secondary rounded-pill px-4"
-          onClick={handleClose}
-        >
-          <i className="bi bi-x-lg me-2"></i>
+      <Modal.Footer>
+        <button className="btn btn-outline-secondary" onClick={handleClose}>
           닫기
         </button>
       </Modal.Footer>
 
       {/* 메달 지급 확인 모달 */}
-      <Modal show={showAssignConfirm} onHide={() => setShowAssignConfirm(false)} centered>
-        <Modal.Header closeButton className="border-0">
-          <Modal.Title>
-            <i className="bi bi-award-fill me-2 text-warning"></i>
+      <Modal show={showAssignConfirm} onHide={() => setShowAssignConfirm(false)} centered className="app-modal">
+        <Modal.Header closeButton>
+          <Modal.Title as="h2">
+            <i className="bi bi-award"/>
             메달 지급 확인
           </Modal.Title>
         </Modal.Header>
-        <Modal.Body className="py-4">
+        <Modal.Body>
           {selectedMedalForAssign && (() => {
             const selectedMedal = allMedals.find(m => m.medalId === selectedMedalForAssign);
             return selectedMedal ? (
-              <div className="text-center">
-                <div className="mb-4">
+              <>
+                <div className="text-center mb-3">
                   <img
                     src={selectedMedal.iconUrl}
                     alt={selectedMedal.name}
-                    className="rounded-circle mb-3"
-                    style={{width: '80px', height: '80px', objectFit: 'cover'}}
+                    className="rounded-circle mb-2"
+                    style={{width: '72px', height: '72px', objectFit: 'cover'}}
                   />
-                  <h5 className="fw-bold text-dark mb-2">{selectedMedal.name}</h5>
-                  <p className="text-muted mb-0">{selectedMedal.introduction}</p>
+                  <h3 className="h6 fw-bold mb-1">{selectedMedal.name}</h3>
+                  <p className="text-body-secondary small mb-0">{selectedMedal.introduction}</p>
                 </div>
-                <div className="alert alert-warning d-flex align-items-center mb-0">
-                  <i className="bi bi-exclamation-triangle-fill me-2"></i>
-                  <div className="text-start">
+                <div className="alert alert-warning d-flex gap-2 mb-0">
+                  <i className="bi bi-exclamation-triangle flex-shrink-0"/>
+                  <div>
                     <strong>{user.nickname}</strong>님에게 이 메달을 지급하시겠습니까?
-                    <div className="small text-muted mt-1">지급 후 취소할 수 없습니다.</div>
+                    <div className="small mt-1">지급 후 취소할 수 없습니다.</div>
                   </div>
                 </div>
-              </div>
+              </>
             ) : null;
           })()}
         </Modal.Body>
-        <Modal.Footer className="border-0">
+        <Modal.Footer>
           <button
-            className="btn btn-secondary"
+            className="btn btn-outline-secondary"
             onClick={() => setShowAssignConfirm(false)}
             disabled={isAssigningMedal}
           >
@@ -507,12 +407,12 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}: UserDetailModalProp
           >
             {isAssigningMedal ? (
               <>
-                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
                 지급 중...
               </>
             ) : (
               <>
-                <i className="bi bi-award-fill me-2"></i>
+                <i className="bi bi-award me-1"/>
                 메달 지급하기
               </>
             )}

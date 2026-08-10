@@ -10,6 +10,7 @@ import useSearch from '@/hooks/useSearch';
 import {userSearchAdapter} from '@/adapters/userSearchAdapter';
 import SearchResults from '@/components/common/SearchResults';
 import UserCard from '@/components/user/UserCard';
+import PageHeader from '@/components/common/PageHeader';
 
 const UserSearch = () => {
   const [selectedStore, setSelectedStore] = useState(null);
@@ -56,8 +57,7 @@ const UserSearch = () => {
       return (
         <input
           type="text"
-          className="form-control form-control-lg border-0 shadow-sm"
-          style={{backgroundColor: '#f8f9fa', borderRadius: '12px', padding: '12px 16px'}}
+          className="form-control"
           placeholder="닉네임을 입력하세요"
           value={searchQuery}
           onChange={handleSearchQueryChange}
@@ -67,22 +67,21 @@ const UserSearch = () => {
           }}
         />
       );
-    } else {
-      return (
-        <input
-          type="text"
-          className="form-control form-control-lg border-0 shadow-sm"
-          style={{backgroundColor: '#f8f9fa', borderRadius: '12px', padding: '12px 16px'}}
-          placeholder="1, 2, 3"
-          value={additionalParams.userIds || ''}
-          onChange={(e) => handleAdditionalParamChange('userIds', e.target.value)}
-          onKeyPress={onKeyPress}
-          onCompositionEnd={(e: any) => {
-            handleAdditionalParamChange('userIds', e.target.value);
-          }}
-        />
-      );
     }
+
+    return (
+      <input
+        type="text"
+        className="form-control"
+        placeholder="유저 ID를 쉼표로 구분해 입력하세요 (예: 1, 2, 3)"
+        value={additionalParams.userIds || ''}
+        onChange={(e) => handleAdditionalParamChange('userIds', e.target.value)}
+        onKeyPress={onKeyPress}
+        onCompositionEnd={(e: any) => {
+          handleAdditionalParamChange('userIds', e.target.value);
+        }}
+      />
+    );
   };
 
   const renderUserCard = (user: User) => (
@@ -102,10 +101,8 @@ const UserSearch = () => {
   };
 
   return (
-    <div className="container-fluid px-4 py-4">
-      <div className="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
-        <h2 className="fw-bold">유저 검색</h2>
-      </div>
+    <div>
+      <PageHeader description="닉네임 또는 유저 ID로 회원을 검색하고 상세 정보를 확인합니다."/>
 
       <SearchForm
         searchType={searchType}

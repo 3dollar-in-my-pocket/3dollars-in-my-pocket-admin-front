@@ -1,9 +1,9 @@
 import React, {useCallback} from 'react';
 import storeApi from '@/api/storeApi';
 import StoreMessageItem from './StoreMessageItem';
+import HistoryPanel from '@/components/common/HistoryPanel';
 import useCursorPagination from '@/hooks/useCursorPagination';
 import {StoreMessage} from '@/types/storeMessage';
-import ErrorState from '@/components/common/ErrorState';
 
 interface StoreMessageHistoryProps {
   storeId: string;
@@ -22,7 +22,7 @@ const StoreMessageHistory: React.FC<StoreMessageHistoryProps> = ({storeId}) => {
     hasMore,
     error,
     refresh,
-    loadMore: handleLoadMore
+    loadMore
   } = useCursorPagination<StoreMessage>({
     fetcher: fetchMessages,
     enabled: Boolean(storeId),
@@ -30,100 +30,24 @@ const StoreMessageHistory: React.FC<StoreMessageHistoryProps> = ({storeId}) => {
     errorMessage: '메시지를 불러오는데 실패했습니다.'
   });
 
-  if (isLoading && messages.length === 0) {
-    return (
-      <div className="text-center py-5">
-        <div className="mb-3">
-          <div className="spinner-border text-success" style={{width: '3rem', height: '3rem'}} role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-        </div>
-        <h5 className="text-dark mb-1">메시지를 불러오는 중...</h5>
-        <p className="text-muted">잠시만 기다려주세요.</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return <ErrorState message={error} onRetry={refresh}/>;
-  }
-
-  if (messages.length === 0) {
-    return (
-      <div className="text-center py-5">
-        <div className="bg-light rounded-circle mx-auto mb-3"
-             style={{width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-          <i className="bi bi-chat-dots fs-1 text-secondary"></i>
-        </div>
-        <h5 className="text-dark mb-2">등록된 메시지가 없습니다</h5>
-        <p className="text-muted">아직 가게에서 보낸 메시지가 없어요.</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="p-4">
-      <div className="d-flex align-items-center justify-content-between mb-4">
-        <div className="d-flex align-items-center gap-2">
-          <div className="bg-success bg-opacity-10 rounded-circle p-2">
-            <i className="bi bi-chat-dots text-success"></i>
-          </div>
-          <h5 className="mb-0 fw-bold text-dark">가게 메시지</h5>
-          <span className="badge bg-success ms-2 px-3 py-2 rounded-pill">
-            {messages.length}{hasMore ? '+' : ''}개
-          </span>
-        </div>
-        <button
-          className="btn btn-outline-secondary btn-sm rounded-pill"
-          onClick={refresh}
-          disabled={isLoading}
-        >
-          <i className="bi bi-arrow-clockwise me-1"></i>
-          새로고침
-        </button>
-      </div>
-
-      <div className="messages-container">
-        {messages.map((message, index) => (
-          <StoreMessageItem key={message.messageId || index} message={message}/>
-        ))}
-      </div>
-
-      {hasMore && (
-        <div className="text-center mt-4">
-          <button
-            className="btn btn-outline-success rounded-pill px-4 py-2"
-            onClick={handleLoadMore}
-            disabled={isLoadingMore}
-            style={{
-              transition: 'all 0.3s ease',
-              fontWeight: '600'
-            }}
-          >
-            {isLoadingMore ? (
-              <>
-                <span className="spinner-border spinner-border-sm me-2"></span>
-                더 불러오는 중...
-              </>
-            ) : (
-              <>
-                <i className="bi bi-plus-circle me-2"></i>
-                더보기
-              </>
-            )}
-          </button>
-        </div>
-      )}
-
-      {!hasMore && messages.length > 0 && (
-        <div className="text-center mt-4 py-3">
-          <div className="bg-light rounded-pill px-4 py-2 d-inline-flex align-items-center gap-2">
-            <i className="bi bi-check-circle text-success"></i>
-            <span className="text-muted">모든 메시지를 불러왔습니다</span>
-          </div>
-        </div>
-      )}
-    </div>
+    <HistoryPanel
+      title="가게 메시지"
+      icon="bi-chat-dots"
+      count={messages.length}
+      hasMore={hasMore}
+      isLoading={isLoading}
+      isLoadingMore={isLoadingMore}
+      error={error}
+      onRefresh={refresh}
+      onLoadMore={loadMore}
+      emptyTitle="등록된 메시지가 없습니다"
+      emptyDescription="아직 가게에서 보낸 메시지가 없어요."
+    >
+      {messages.map((message, index) => (
+        <StoreMessageItem key={message.messageId || index} message={message}/>
+      ))}
+    </HistoryPanel>
   );
 };
 

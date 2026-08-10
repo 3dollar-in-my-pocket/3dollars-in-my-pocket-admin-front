@@ -1,5 +1,4 @@
-import React, {useState} from "react";
-import {Alert, Card, Table} from "react-bootstrap";
+import React, {useEffect, useState} from "react";
 import {
   Bar,
   BarChart,
@@ -15,6 +14,22 @@ import {
 import statisticsApi from "@/api/statisticsApi";
 import {DailyStatistic} from "@/types/statistics";
 import {toast} from "react-toastify";
+import Loading from "@/components/common/Loading";
+import EmptyState from "@/components/common/EmptyState";
+import SectionCard from "@/components/common/SectionCard";
+import DataTable from "@/components/common/DataTable";
+import {
+  CHART_AXIS_PROPS,
+  CHART_COLORS,
+  CHART_GRID_PROPS,
+  CHART_HEIGHT,
+  CHART_LEGEND_PROPS,
+  CHART_TOOLTIP_PROPS,
+  formatAxisNumber,
+  formatDateWithDay,
+  formatNumber,
+  formatShortDateWithDay,
+} from "@/constants/chart";
 
 interface DefaultStatisticsProps {
   statisticsType: string;
@@ -55,132 +70,117 @@ const DefaultStatistics: React.FC<DefaultStatisticsProps> = ({
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (startDate && endDate) {
       fetchData();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [statisticsType, startDate, endDate]);
 
-  const formatNumber = (num: number): string => {
-    return num.toLocaleString("ko-KR");
-  };
+  const chartData = data.map((item) => ({
+    date: formatShortDateWithDay(item.date),
+    "신규": item.newCount ?? 0,
+    "누적": item.totalCount,
+  }));
 
-  const formatDateWithDay = (dateStr: string): string => {
-    const date = new Date(dateStr);
-    const days = ["일", "월", "화", "수", "목", "금", "토"];
-    const dayOfWeek = days[date.getDay()];
-    return `${dateStr} (${dayOfWeek})`;
-  };
-
-  const formatYAxisTick = (value: number): string => {
-    if (value >= 1000000) {
-      return `${(value / 1000000).toFixed(2)}M`;
-    }
-    if (value >= 1000) {
-      return `${(value / 1000).toFixed(2)}K`;
-    }
-    return value.toString();
-  };
-
-  const getChartData = () => {
-    return data.map((item) => {
-      const date = new Date(item.date);
-      const days = ["일", "월", "화", "수", "목", "금", "토"];
-      const dayOfWeek = days[date.getDay()];
-      const dateStr = item.date.substring(5); // MM-DD
-
-      return {
-        date: `${dateStr} (${dayOfWeek})`,
-        "신규": item.newCount ?? 0,
-        "누적": item.totalCount,
-      };
-    });
-  };
+  // 요약 지표
+  const totalNew = data.reduce((sum, item) => sum + (item.newCount ?? 0), 0);
+  const latestTotal = data.length > 0 ? data[data.length - 1].totalCount : 0;
+  const dailyAverage = data.length > 0 ? Math.round(totalNew / data.length) : 0;
 
   if (loading) {
     return (
-      <div className="text-center py-5">
-        <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">조회 중...</span>
-        </div>
+      <div className="py-5">
+        <Loading/>
       </div>
     );
   }
 
   if (data.length === 0) {
     return (
-      <Alert variant="info">
-        조회 조건을 설정하고 <strong>통계 조회</strong> 버튼을 클릭하세요.
-      </Alert>
+      <EmptyState
+        icon="bi-bar-chart-line"
+        title="조회된 데이터가 없습니다"
+        description="선택한 기간에 집계된 통계가 없습니다. 조회 기간을 변경해보세요."
+      />
     );
   }
 
   return (
     <>
-      {/* 일자별 신규 건수 추이 */}
-      <Card className="mb-4 shadow-sm">
-        <Card.Body>
-          <h5 className="fw-semibold mb-3">일자별 신규 건수 추이</h5>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={getChartData()}>
-              <CartesianGrid strokeDasharray="3 3"/>
-              <XAxis dataKey="date"/>
-              <YAxis tickFormatter={formatYAxisTick}/>
-              <Tooltip/>
-              <Legend/>
-              <Bar dataKey="신규" fill="#0d6efd"/>
-            </BarChart>
-          </ResponsiveContainer>
-        </Card.Body>
-      </Card>
-
-      {/* 누적 건수 추이 */}
-      <Card className="mb-4 shadow-sm">
-        <Card.Body>
-          <h5 className="fw-semibold mb-3">누적 건수 추이</h5>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={getChartData()}>
-              <CartesianGrid strokeDasharray="3 3"/>
-              <XAxis dataKey="date"/>
-              <YAxis domain={["auto", "auto"]} tickFormatter={formatYAxisTick}/>
-              <Tooltip/>
-              <Legend/>
-              <Line type="monotone" dataKey="누적" stroke="#198754" strokeWidth={2}/>
-            </LineChart>
-          </ResponsiveContainer>
-        </Card.Body>
-      </Card>
-
-      {/* 테이블 영역 */}
-      <Card className="shadow-sm">
-        <Card.Body>
-          <h5 className="fw-semibold mb-3">일자별 상세 데이터</h5>
-          <p className="text-muted mb-3">
-            총 <strong>{data.length}일</strong>의 데이터가 조회되었습니다.
-          </p>
-          <div style={{maxHeight: "500px", overflowY: "auto"}}>
-            <Table striped bordered hover>
-              <thead className="table-light" style={{position: "sticky", top: 0}}>
-              <tr>
-                <th>날짜</th>
-                <th className="text-end">신규 건수</th>
-                <th className="text-end">누적 건수</th>
-              </tr>
-              </thead>
-              <tbody>
-              {[...data].reverse().map((item, index) => (
-                <tr key={index}>
-                  <td>{formatDateWithDay(item.date)}</td>
-                  <td className="text-end">{formatNumber(item.newCount ?? 0)}</td>
-                  <td className="text-end">{formatNumber(item.totalCount)}</td>
-                </tr>
-              ))}
-              </tbody>
-            </Table>
+      {/* 요약 지표 */}
+      <div className="row g-3 mb-3">
+        <div className="col-4">
+          <div className="stat-tile">
+            <span className="stat-tile__label">기간 내 신규</span>
+            <strong className="stat-tile__value">{formatNumber(totalNew)}</strong>
           </div>
-        </Card.Body>
-      </Card>
+        </div>
+        <div className="col-4">
+          <div className="stat-tile">
+            <span className="stat-tile__label">일 평균 신규</span>
+            <strong className="stat-tile__value">{formatNumber(dailyAverage)}</strong>
+          </div>
+        </div>
+        <div className="col-4">
+          <div className="stat-tile">
+            <span className="stat-tile__label">최종 누적</span>
+            <strong className="stat-tile__value">{formatNumber(latestTotal)}</strong>
+          </div>
+        </div>
+      </div>
+
+      <SectionCard title="일자별 신규 건수 추이" icon="bi-bar-chart-fill">
+        <ResponsiveContainer width="100%" height={CHART_HEIGHT}>
+          <BarChart data={chartData}>
+            <CartesianGrid {...CHART_GRID_PROPS}/>
+            <XAxis dataKey="date" {...CHART_AXIS_PROPS}/>
+            <YAxis tickFormatter={formatAxisNumber} {...CHART_AXIS_PROPS}/>
+            <Tooltip {...CHART_TOOLTIP_PROPS}/>
+            <Legend {...CHART_LEGEND_PROPS}/>
+            <Bar dataKey="신규" fill={CHART_COLORS.primary} radius={[4, 4, 0, 0]}/>
+          </BarChart>
+        </ResponsiveContainer>
+      </SectionCard>
+
+      <SectionCard title="누적 건수 추이" icon="bi-graph-up">
+        <ResponsiveContainer width="100%" height={CHART_HEIGHT}>
+          <LineChart data={chartData}>
+            <CartesianGrid {...CHART_GRID_PROPS}/>
+            <XAxis dataKey="date" {...CHART_AXIS_PROPS}/>
+            <YAxis domain={["auto", "auto"]} tickFormatter={formatAxisNumber} {...CHART_AXIS_PROPS}/>
+            <Tooltip {...CHART_TOOLTIP_PROPS}/>
+            <Legend {...CHART_LEGEND_PROPS}/>
+            <Line type="monotone" dataKey="누적" stroke={CHART_COLORS.success} strokeWidth={2} dot={false}/>
+          </LineChart>
+        </ResponsiveContainer>
+      </SectionCard>
+
+      <SectionCard
+        title="일자별 상세 데이터"
+        icon="bi-table"
+        description={`총 ${data.length}일의 데이터가 조회되었습니다.`}
+        flush
+      >
+        <DataTable maxHeight="440px">
+          <thead>
+          <tr>
+            <th>날짜</th>
+            <th className="num">신규 건수</th>
+            <th className="num">누적 건수</th>
+          </tr>
+          </thead>
+          <tbody>
+          {[...data].reverse().map((item) => (
+            <tr key={item.date}>
+              <td>{formatDateWithDay(item.date)}</td>
+              <td className="num">{formatNumber(item.newCount ?? 0)}</td>
+              <td className="num">{formatNumber(item.totalCount)}</td>
+            </tr>
+          ))}
+          </tbody>
+        </DataTable>
+      </SectionCard>
     </>
   );
 };

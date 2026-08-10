@@ -1,129 +1,127 @@
-import {useNavigate} from "react-router-dom";
-import {menuGroups} from "./Layout";
+import {useMemo, useState} from "react";
+import {Link} from "react-router-dom";
 import {useAuthStore} from "@/state/authStore";
-import {filterMenuItemsByRole} from "@/utils/roleUtils";
+import useMenuGroups from "@/hooks/useMenuGroups";
+import useRecentMenus from "@/hooks/useRecentMenus";
+import EmptyState from "@/components/common/EmptyState";
 
 const Dashboard = () => {
-  const navigate = useNavigate();
   const adminAuth = useAuthStore((state) => state.admin);
+  const menuGroups = useMenuGroups();
+  const recentMenus = useRecentMenus(menuGroups);
+  const [keyword, setKeyword] = useState("");
 
-  // 현재 관리자의 역할에 따라 메뉴 필터링
-  const getFilteredMenuGroups = () => {
-    if (!adminAuth?.role) {
-      // 역할 정보가 없으면 모든 메뉴 숨김
-      return [];
+  const trimmedKeyword = keyword.trim().toLowerCase();
+
+  const filteredGroups = useMemo(() => {
+    if (!trimmedKeyword) {
+      return menuGroups;
     }
 
-    return menuGroups.map(group => {
-      const filteredItems = filterMenuItemsByRole(group.items, adminAuth.role);
-      return {
+    return menuGroups
+      .map(group => ({
         ...group,
-        items: filteredItems
-      };
-    }).filter(group => group.items.length > 0); // 접근 가능한 항목이 하나도 없는 그룹은 제외
-  };
+        items: group.items.filter(item =>
+          item.label.toLowerCase().includes(trimmedKeyword) || group.title.toLowerCase().includes(trimmedKeyword)
+        ),
+      }))
+      .filter(group => group.items.length > 0);
+  }, [menuGroups, trimmedKeyword]);
 
-  // 메뉴 그룹별 색상 및 설명 매핑
-  const groupStyles: Record<string, { color: string; icon: string; description: string }> = {
-    "유저 관리": {
-      color: "primary",
-      icon: "bi-people-fill",
-      description: "유저와 사장님 정보를 조회하고 관리합니다"
-    },
-    "사장님 관리": {
-      color: "success",
-      icon: "bi-person-badge-fill",
-      description: "사장님 가입 신청을 관리합니다"
-    },
-    "가게 관리": {
-      color: "success",
-      icon: "bi-shop",
-      description: "등록된 가게 정보를 검색하고 관리합니다"
-    },
-    "커뮤니티 관리": {
-      color: "info",
-      icon: "bi-chat-dots-fill",
-      description: "투표 등 커뮤니티 기능을 관리합니다"
-    },
-    "콘텐츠 & 마케팅": {
-      color: "warning",
-      icon: "bi-megaphone-fill",
-      description: "광고, 푸시, 쿠폰 등 마케팅 기능을 관리합니다"
-    },
-    "운영 툴": {
-      color: "secondary",
-      icon: "bi-tools",
-      description: "정책, 캐시, 이미지 업로드 등 운영 도구를 관리합니다"
-    },
-    "PoC": {
-      color: "primary",
-      icon: "bi-stars",
-      description: "출시 전 기능을 테스트합니다"
-    },
-    "통계 & 분석": {
-      color: "danger",
-      icon: "bi-graph-up",
-      description: "서비스 사용 통계와 광고 성과를 확인합니다"
-    },
-    "시스템 설정": {
-      color: "dark",
-      icon: "bi-gear-fill",
-      description: "관리자 계정 및 시스템 설정을 관리합니다"
-    }
-  };
+  const totalMenuCount = useMemo(
+    () => menuGroups.reduce((sum, group) => sum + group.items.length, 0),
+    [menuGroups]
+  );
 
   return (
-    <div className="container-fluid py-4">
-      {/* 환영 메시지 */}
-      <div className="mb-5 text-center">
-        <h1 className="fw-bold mb-3">가슴속 3천원 어드민</h1>
-        <p className="text-muted mb-0">관리자 대시보드에 오신 것을 환영합니다. 아래의 주요 기능과 빠른 링크를 통해 다양한 관리 작업을 수행할 수 있습니다.</p>
-      </div>
-
-      {/* 주요 기능 카테고리 */}
-      <div className="mb-5">
-        <h4 className="fw-semibold mb-4">주요 기능</h4>
-        <div className="row g-4">
-          {getFilteredMenuGroups().map((group, idx) => {
-            const style = groupStyles[group.title] || {
-              color: "secondary",
-              icon: "bi-folder-fill",
-              description: group.title
-            };
-
-            return (
-              <div className="col-md-6 col-lg-4" key={idx}>
-                <div className="card border-0 shadow-sm h-100">
-                  <div className="card-body">
-                    <div className="d-flex align-items-center mb-3">
-                      <div className={`bg-${style.color} bg-opacity-10 p-3 rounded me-3`}>
-                        <i className={`bi ${style.icon} fs-3 text-${style.color}`}></i>
-                      </div>
-                      <div>
-                        <h5 className="card-title fw-bold mb-1">{group.title}</h5>
-                        <p className="text-muted small mb-0">{style.description}</p>
-                      </div>
-                    </div>
-                    <ul className="list-unstyled mb-0">
-                      {group.items.map((item, itemIdx) => (
-                        <li key={itemIdx} className="mb-2">
-                          <button
-                            className="btn btn-link text-decoration-none p-0 text-start"
-                            onClick={() => navigate(item.path)}
-                          >
-                            <i className={`bi ${item.icon} me-2`}></i>
-                            {item.label}
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+    <div className="dashboard">
+      {/* 헤더 */}
+      <div className="dashboard__hero">
+        <img src="/favicon.ico" alt="" className="dashboard__hero-logo"/>
+        <div className="min-w-0">
+          <h2 className="dashboard__title">
+            안녕하세요, {adminAuth?.name || "관리자"}님 👋
+          </h2>
+          <p className="dashboard__subtitle">
+            가슴속 3천원 어드민 콘솔입니다. 접근 가능한 메뉴 {totalMenuCount}개를 아래에서 바로 이동할 수 있습니다.
+          </p>
         </div>
       </div>
+
+      {/* 최근 사용한 메뉴 */}
+      {recentMenus.length > 0 && (
+        <section className="mb-4">
+          <h3 className="dashboard__section-title">
+            <i className="bi bi-clock-history"/>
+            최근 사용한 메뉴
+          </h3>
+          <div className="dashboard__chips">
+            {recentMenus.map(item => (
+              <Link to={item.path} key={item.path} className="dashboard__chip">
+                <i className={`bi ${item.icon}`}/>
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* 메뉴 검색 */}
+      <div className="dashboard__search">
+        <i className="bi bi-search"/>
+        <input
+          type="search"
+          value={keyword}
+          onChange={(e) => setKeyword(e.target.value)}
+          placeholder="메뉴 이름으로 검색"
+          aria-label="메뉴 검색"
+        />
+        {keyword && (
+          <button type="button" onClick={() => setKeyword("")} aria-label="검색어 지우기">
+            <i className="bi bi-x-lg"/>
+          </button>
+        )}
+      </div>
+
+      {/* 메뉴 그룹 카드 */}
+      {filteredGroups.length === 0 ? (
+        <EmptyState
+          icon="bi-search"
+          title="일치하는 메뉴가 없습니다"
+          description={trimmedKeyword ? `"${keyword.trim()}" 검색 결과가 없습니다.` : "접근 가능한 메뉴가 없습니다. 관리자에게 문의해주세요."}
+        />
+      ) : (
+        <div className="row g-3">
+          {filteredGroups.map(group => (
+            <div className="col-md-6 col-xl-4" key={group.title}>
+              <div className="dashboard__card">
+                <div className="dashboard__card-head">
+                  <span className="dashboard__card-icon">
+                    <i className={`bi ${group.icon}`}/>
+                  </span>
+                  <div className="min-w-0">
+                    <h4 className="dashboard__card-title">{group.title}</h4>
+                    <p className="dashboard__card-desc">{group.description}</p>
+                  </div>
+                  <span className="dashboard__card-count">{group.items.length}</span>
+                </div>
+
+                <ul className="dashboard__card-list">
+                  {group.items.map(item => (
+                    <li key={item.path}>
+                      <Link to={item.path} className="dashboard__card-link">
+                        <i className={`bi ${item.icon}`}/>
+                        <span>{item.label}</span>
+                        <i className="bi bi-chevron-right dashboard__card-link-arrow"/>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

@@ -1,9 +1,10 @@
 import {useEffect, useRef, useState} from 'react';
-import {Alert, Button, Card, Col, Form, Modal, Row, Spinner} from 'react-bootstrap';
+import {Form, Modal} from 'react-bootstrap';
 import medalApi from '@/api/medalApi';
 import uploadApi from '@/api/uploadApi';
 import {getAcquisitionDescription, Medal} from '@/types/medal';
 import {toast} from 'react-toastify';
+import DetailField from '@/components/common/DetailField';
 
 interface MedalModalProps {
   show: boolean;
@@ -12,17 +13,39 @@ interface MedalModalProps {
   onUpdate: () => void;
 }
 
+interface MedalFormData {
+  name: string;
+  introduction: string;
+  activationIconUrl: string;
+  disableIconUrl: string;
+  acquisitionDescription: string;
+}
+
+/** 아이콘 미리보기 */
+const IconPreview = ({label, src, muted = false}: { label: string; src: string; muted?: boolean }) => (
+  <div className={`medal-icon-preview ${muted ? 'medal-icon-preview--muted' : ''}`}>
+    <span className="item-card__label">{label}</span>
+    <img
+      src={src}
+      alt=""
+      onError={(e: any) => {
+        e.target.style.visibility = 'hidden';
+      }}
+    />
+  </div>
+);
+
 const MedalModal = ({show, onHide, medal, onUpdate}: MedalModalProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const [isUploadingActivation, setIsUploadingActivation] = useState(false);
-  const [isUploadingDisable, setIsUploadingDisable] = useState(false);
+  /** 업로드 중인 아이콘 종류 (null이면 업로드 중이 아님) */
+  const [uploadingIcon, setUploadingIcon] = useState<'activation' | 'disable' | null>(null);
 
   const activationFileInputRef = useRef<HTMLInputElement>(null);
   const disableFileInputRef = useRef<HTMLInputElement>(null);
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<MedalFormData>({
     name: '',
     introduction: '',
     activationIconUrl: '',
@@ -30,15 +53,17 @@ const MedalModal = ({show, onHide, medal, onUpdate}: MedalModalProps) => {
     acquisitionDescription: ''
   });
 
+  const buildFormData = (target: Medal): MedalFormData => ({
+    name: target.name,
+    introduction: target.introduction,
+    activationIconUrl: target.iconUrl,
+    disableIconUrl: target.disableIconUrl,
+    acquisitionDescription: getAcquisitionDescription(target) || ''
+  });
+
   useEffect(() => {
     if (medal) {
-      setFormData({
-        name: medal.name,
-        introduction: medal.introduction,
-        activationIconUrl: medal.iconUrl,
-        disableIconUrl: medal.disableIconUrl,
-        acquisitionDescription: getAcquisitionDescription(medal) || ''
-      });
+      setFormData(buildFormData(medal));
       setIsEditing(false);
       setErrorMessage('');
     }
@@ -47,74 +72,39 @@ const MedalModal = ({show, onHide, medal, onUpdate}: MedalModalProps) => {
   if (!medal) return null;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    setFormData(prev => ({...prev, [e.target.name]: e.target.value}));
   };
 
-  const handleActivationIconUpload = () => {
-    activationFileInputRef.current?.click();
-  };
-
-  const handleDisableIconUpload = () => {
-    disableFileInputRef.current?.click();
-  };
-
-  const handleActivationFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  /** 활성화/비활성화 아이콘 업로드 공통 처리 */
+  const handleFileChange = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    kind: 'activation' | 'disable'
+  ) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setIsUploadingActivation(true);
+    const field = kind === 'activation' ? 'activationIconUrl' : 'disableIconUrl';
+    const inputRef = kind === 'activation' ? activationFileInputRef : disableFileInputRef;
+    const label = kind === 'activation' ? '활성화' : '비활성화';
+
+    setUploadingIcon(kind);
     setErrorMessage('');
 
     try {
       const response = await uploadApi.uploadImage('MEDAL_IMAGE', file);
 
       if (response.ok) {
-        setFormData({
-          ...formData,
-          activationIconUrl: response.data
-        });
-        toast.success('활성화 아이콘이 업로드되었습니다');
+        setFormData(prev => ({...prev, [field]: response.data}));
+        toast.success(`${label} 아이콘이 업로드되었습니다`);
       } else {
         setErrorMessage('이미지 업로드에 실패했습니다.');
       }
     } catch (error: any) {
       setErrorMessage('이미지 업로드 중 오류가 발생했습니다.');
     } finally {
-      setIsUploadingActivation(false);
-      if (activationFileInputRef.current) {
-        activationFileInputRef.current.value = '';
-      }
-    }
-  };
-
-  const handleDisableFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setIsUploadingDisable(true);
-    setErrorMessage('');
-
-    try {
-      const response = await uploadApi.uploadImage('MEDAL_IMAGE', file);
-
-      if (response.ok) {
-        setFormData({
-          ...formData,
-          disableIconUrl: response.data
-        });
-        toast.success('비활성화 아이콘이 업로드되었습니다');
-      } else {
-        setErrorMessage('이미지 업로드에 실패했습니다.');
-      }
-    } catch (error: any) {
-      setErrorMessage('이미지 업로드 중 오류가 발생했습니다.');
-    } finally {
-      setIsUploadingDisable(false);
-      if (disableFileInputRef.current) {
-        disableFileInputRef.current.value = '';
+      setUploadingIcon(null);
+      if (inputRef.current) {
+        inputRef.current.value = '';
       }
     }
   };
@@ -173,255 +163,197 @@ const MedalModal = ({show, onHide, medal, onUpdate}: MedalModalProps) => {
   };
 
   const handleCancel = () => {
-    setFormData({
-      name: medal.name,
-      introduction: medal.introduction,
-      activationIconUrl: medal.iconUrl,
-      disableIconUrl: medal.disableIconUrl,
-      acquisitionDescription: getAcquisitionDescription(medal) || ''
-    });
+    setFormData(buildFormData(medal));
     setIsEditing(false);
     setErrorMessage('');
   };
 
+  const isBusy = isProcessing || uploadingIcon !== null;
+
+  /** 아이콘 URL 입력 + 업로드 버튼 */
+  const renderIconUrlField = (kind: 'activation' | 'disable') => {
+    const isActivation = kind === 'activation';
+    const field = isActivation ? 'activationIconUrl' : 'disableIconUrl';
+    const inputRef = isActivation ? activationFileInputRef : disableFileInputRef;
+    const label = isActivation ? '활성화 아이콘 URL' : '비활성화 아이콘 URL';
+
+    return (
+      <Form.Group className="col-12">
+        <Form.Label htmlFor={`medal-${field}`}>
+          {label} <span className="text-danger">*</span>
+        </Form.Label>
+        <div className="d-flex gap-2">
+          <Form.Control
+            id={`medal-${field}`}
+            type="text"
+            name={field}
+            value={formData[field]}
+            onChange={handleChange}
+            disabled={isBusy}
+            placeholder="https://example.com/icon.png"
+          />
+          <input
+            type="file"
+            accept="image/*"
+            ref={inputRef}
+            style={{display: 'none'}}
+            onChange={(e) => handleFileChange(e, kind)}
+          />
+          <button
+            type="button"
+            className="btn btn-outline-secondary flex-shrink-0"
+            onClick={() => inputRef.current?.click()}
+            disabled={isBusy}
+          >
+            {uploadingIcon === kind ? (
+              <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"/>
+            ) : (
+              <i className="bi bi-cloud-upload"/>
+            )}
+          </button>
+        </div>
+      </Form.Group>
+    );
+  };
+
   return (
-    <Modal show={show} onHide={onHide} size="lg" centered>
-      <Modal.Header closeButton>
-        <Modal.Title>🏅 메달 상세 정보</Modal.Title>
+    <Modal
+      show={show}
+      onHide={isBusy ? undefined : onHide}
+      size="lg"
+      centered
+      className="app-modal"
+      backdrop={isBusy ? "static" : true}
+    >
+      <Modal.Header closeButton={!isBusy}>
+        <div className="min-w-0">
+          <Modal.Title as="h2">
+            <i className={`bi ${isEditing ? 'bi-pencil-square' : 'bi-award-fill'}`}/>
+            {isEditing ? '메달 수정' : '메달 상세'}
+          </Modal.Title>
+          <p className="app-modal__subtitle font-monospace">{medal.medalId}</p>
+        </div>
       </Modal.Header>
 
       <Modal.Body>
         {errorMessage && (
-          <Alert variant="danger" onClose={() => setErrorMessage('')} dismissible>
+          <div className="alert alert-danger py-2 px-3 small" role="alert">
+            <i className="bi bi-exclamation-triangle me-1"/>
             {errorMessage}
-          </Alert>
+          </div>
         )}
 
-        <Form onSubmit={handleSubmit}>
-          {/* 메달 아이콘 표시 */}
-          <Row className="mb-4">
-            <Col md={6}>
-              <Card className="text-center p-3">
-                <Card.Body>
-                  <p className="text-muted small mb-2">활성화 아이콘</p>
-                  <img
-                    src={isEditing ? formData.activationIconUrl : medal.iconUrl}
-                    alt={medal.name}
-                    className="img-fluid mb-2"
-                    style={{
-                      width: '120px',
-                      height: '120px',
-                      objectFit: 'contain'
-                    }}
-                    onError={(e: any) => {
-                      e.target.style.display = 'none';
-                    }}
-                  />
-                </Card.Body>
-              </Card>
-            </Col>
-            <Col md={6}>
-              <Card className="text-center p-3 bg-light">
-                <Card.Body>
-                  <p className="text-muted small mb-2">비활성화 아이콘 (미획득)</p>
-                  <img
-                    src={isEditing ? formData.disableIconUrl : medal.disableIconUrl}
-                    alt={`${medal.name} - 비활성화`}
-                    className="img-fluid mb-2"
-                    style={{
-                      width: '120px',
-                      height: '120px',
-                      objectFit: 'contain'
-                    }}
-                    onError={(e: any) => {
-                      e.target.style.display = 'none';
-                    }}
-                  />
-                </Card.Body>
-              </Card>
-            </Col>
-          </Row>
-
-          {/* 메달 ID */}
-          <Form.Group className="mb-3">
-            <Form.Label className="fw-bold">메달 ID</Form.Label>
-            <Form.Control
-              type="text"
-              value={medal.medalId}
-              disabled
-              className="bg-light"
+        {/* 아이콘 미리보기 */}
+        <div className="row g-3 mb-1">
+          <div className="col-6">
+            <IconPreview
+              label="활성화 (획득)"
+              src={isEditing ? formData.activationIconUrl : medal.iconUrl}
             />
-          </Form.Group>
-
-          {/* 메달 이름 */}
-          <Form.Group className="mb-3">
-            <Form.Label className="fw-bold">메달 이름</Form.Label>
-            <Form.Control
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              disabled={!isEditing || isProcessing}
-              placeholder="메달 이름을 입력하세요"
+          </div>
+          <div className="col-6">
+            <IconPreview
+              label="비활성화 (미획득)"
+              src={isEditing ? formData.disableIconUrl : medal.disableIconUrl}
+              muted
             />
-          </Form.Group>
+          </div>
+        </div>
 
-          {/* 메달 설명 */}
-          <Form.Group className="mb-3">
-            <Form.Label className="fw-bold">메달 설명</Form.Label>
-            <Form.Control
-              as="textarea"
-              rows={3}
-              name="introduction"
-              value={formData.introduction}
-              onChange={handleChange}
-              disabled={!isEditing || isProcessing}
-              placeholder="메달 설명을 입력하세요"
-            />
-          </Form.Group>
+        {isEditing ? (
+          <Form onSubmit={handleSubmit} className="modal-section row g-3">
+            <Form.Group className="col-12">
+              <Form.Label htmlFor="medal-name">
+                메달 이름 <span className="text-danger">*</span>
+              </Form.Label>
+              <Form.Control
+                id="medal-name"
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                disabled={isBusy}
+                placeholder="메달 이름을 입력하세요"
+              />
+            </Form.Group>
 
-          {/* 활성화 아이콘 URL */}
-          <Form.Group className="mb-3">
-            <Form.Label className="fw-bold">활성화 아이콘 URL</Form.Label>
-            <Form.Control
-              type="text"
-              name="activationIconUrl"
-              value={formData.activationIconUrl}
-              onChange={handleChange}
-              disabled={!isEditing || isProcessing}
-              placeholder="https://example.com/icon.png"
-            />
-            {isEditing && (
-              <>
-                <input
-                  type="file"
-                  accept="image/*"
-                  ref={activationFileInputRef}
-                  style={{display: 'none'}}
-                  onChange={handleActivationFileChange}
-                />
-                <Button
-                  variant="outline-primary"
-                  size="sm"
-                  className="mt-2"
-                  onClick={handleActivationIconUpload}
-                  disabled={isProcessing || isUploadingActivation || isUploadingDisable}
-                >
-                  {isUploadingActivation ? (
-                    <>
-                      <Spinner animation="border" size="sm" className="me-2"/>
-                      업로드 중...
-                    </>
-                  ) : (
-                    <>
-                      <i className="bi bi-cloud-upload me-2"></i>
-                      이미지 업로드
-                    </>
-                  )}
-                </Button>
-              </>
-            )}
-          </Form.Group>
+            <Form.Group className="col-12">
+              <Form.Label htmlFor="medal-introduction">
+                메달 설명 <span className="text-danger">*</span>
+              </Form.Label>
+              <Form.Control
+                id="medal-introduction"
+                as="textarea"
+                rows={3}
+                name="introduction"
+                value={formData.introduction}
+                onChange={handleChange}
+                disabled={isBusy}
+                placeholder="메달 설명을 입력하세요"
+              />
+            </Form.Group>
 
-          {/* 비활성화 아이콘 URL */}
-          <Form.Group className="mb-3">
-            <Form.Label className="fw-bold">비활성화 아이콘 URL</Form.Label>
-            <Form.Control
-              type="text"
-              name="disableIconUrl"
-              value={formData.disableIconUrl}
-              onChange={handleChange}
-              disabled={!isEditing || isProcessing}
-              placeholder="https://example.com/disabled-icon.png"
-            />
-            {isEditing && (
-              <>
-                <input
-                  type="file"
-                  accept="image/*"
-                  ref={disableFileInputRef}
-                  style={{display: 'none'}}
-                  onChange={handleDisableFileChange}
-                />
-                <Button
-                  variant="outline-primary"
-                  size="sm"
-                  className="mt-2"
-                  onClick={handleDisableIconUpload}
-                  disabled={isProcessing || isUploadingActivation || isUploadingDisable}
-                >
-                  {isUploadingDisable ? (
-                    <>
-                      <Spinner animation="border" size="sm" className="me-2"/>
-                      업로드 중...
-                    </>
-                  ) : (
-                    <>
-                      <i className="bi bi-cloud-upload me-2"></i>
-                      이미지 업로드
-                    </>
-                  )}
-                </Button>
-              </>
-            )}
-          </Form.Group>
+            {renderIconUrlField('activation')}
+            {renderIconUrlField('disable')}
 
-          {/* 획득 조건 설명 */}
-          <Form.Group className="mb-3">
-            <Form.Label className="fw-bold">획득 조건 설명</Form.Label>
-            <Form.Control
-              as="textarea"
-              rows={3}
-              name="acquisitionDescription"
-              value={formData.acquisitionDescription}
-              onChange={handleChange}
-              disabled={!isEditing || isProcessing}
-              placeholder="메달 획득 조건을 입력하세요 (선택사항)"
-            />
-            <Form.Text className="text-muted">
-              유저가 메달을 획득하기 위한 조건을 설명합니다.
-            </Form.Text>
-          </Form.Group>
-        </Form>
+            <Form.Group className="col-12">
+              <Form.Label htmlFor="medal-acquisition">획득 조건 설명</Form.Label>
+              <Form.Control
+                id="medal-acquisition"
+                as="textarea"
+                rows={3}
+                name="acquisitionDescription"
+                value={formData.acquisitionDescription}
+                onChange={handleChange}
+                disabled={isBusy}
+                placeholder="메달 획득 조건을 입력하세요 (선택사항)"
+              />
+              <Form.Text>유저가 메달을 획득하기 위한 조건을 설명합니다.</Form.Text>
+            </Form.Group>
+          </Form>
+        ) : (
+          <div className="modal-section row g-3">
+            <DetailField label="메달 이름" className="col-12">
+              {medal.name}
+            </DetailField>
+            <DetailField label="메달 설명" className="col-12">
+              {medal.introduction}
+            </DetailField>
+            <DetailField label="획득 조건" className="col-12" placeholder="기본 메달 (획득 조건 없음)">
+              {getAcquisitionDescription(medal)}
+            </DetailField>
+            <DetailField label="활성화 아이콘 URL" className="col-12" monospace>
+              {medal.iconUrl}
+            </DetailField>
+            <DetailField label="비활성화 아이콘 URL" className="col-12" monospace>
+              {medal.disableIconUrl}
+            </DetailField>
+          </div>
+        )}
       </Modal.Body>
 
       <Modal.Footer>
-        {!isEditing ? (
+        {isEditing ? (
           <>
-            <Button variant="secondary" onClick={onHide}>
-              닫기
-            </Button>
-            <Button variant="primary" onClick={() => setIsEditing(true)}>
-              <i className="bi bi-pencil me-2"></i>
-              수정하기
-            </Button>
+            <button className="btn btn-outline-secondary" onClick={handleCancel} disabled={isBusy}>
+              취소
+            </button>
+            <button className="btn btn-primary" onClick={handleSubmit} disabled={isBusy}>
+              {isProcessing && (
+                <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"/>
+              )}
+              {isProcessing ? '저장 중...' : '저장'}
+            </button>
           </>
         ) : (
           <>
-            <Button
-              variant="secondary"
-              onClick={handleCancel}
-              disabled={isProcessing || isUploadingActivation || isUploadingDisable}
-            >
-              취소
-            </Button>
-            <Button
-              variant="success"
-              onClick={handleSubmit}
-              disabled={isProcessing || isUploadingActivation || isUploadingDisable}
-            >
-              {isProcessing ? (
-                <>
-                  <Spinner animation="border" size="sm" className="me-2"/>
-                  저장 중...
-                </>
-              ) : (
-                <>
-                  <i className="bi bi-check-lg me-2"></i>
-                  저장
-                </>
-              )}
-            </Button>
+            <button className="btn btn-outline-secondary" onClick={onHide}>
+              닫기
+            </button>
+            <button className="btn btn-primary" onClick={() => setIsEditing(true)}>
+              <i className="bi bi-pencil me-1"/>
+              수정
+            </button>
           </>
         )}
       </Modal.Footer>

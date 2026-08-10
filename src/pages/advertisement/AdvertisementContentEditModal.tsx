@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {Button, Form, Modal} from "react-bootstrap";
+import {Form, Modal} from "react-bootstrap";
 import {toast} from "react-toastify";
 import advertisementApi from "@/api/advertisementApi";
 import uploadApi from "@/api/uploadApi";
@@ -152,117 +152,81 @@ const AdvertisementContentEditModal = ({
   const showExposureIndex = ad?.positionType === 'MENU_CATEGORY_ICON' || ad?.positionType === 'POLL_CARD';
 
   return (
-    <Modal show={show} onHide={onHide} size="xl" centered fullscreen="lg-down">
-      <Modal.Header closeButton className="border-0"
-                    style={{background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'}}>
-        <Modal.Title className="text-white d-flex align-items-center gap-2">
-          <i className="bi bi-pencil-square"></i>
-          광고 컨텐츠 수정
-        </Modal.Title>
+    <Modal show={show} onHide={onHide} size="xl" centered className="app-modal">
+      <Modal.Header closeButton>
+        <div className="min-w-0">
+          <Modal.Title as="h2">
+            <i className="bi bi-palette"/>
+            콘텐츠 수정
+          </Modal.Title>
+          <p className="app-modal__subtitle font-monospace">{ad.advertisementId}</p>
+        </div>
       </Modal.Header>
-      <Modal.Body className="p-0">
-        <div className="container-fluid">
-          {/* 현재 상태 섹션 */}
-          <div className="bg-light border-bottom p-4">
-            <div className="d-flex align-items-center mb-3">
-              <div className="bg-info-subtle rounded-circle p-2 me-3">
-                <i className="bi bi-clock text-info fs-5"></i>
-              </div>
-              <h5 className="mb-0 text-info fw-bold">현재 광고 정보</h5>
-            </div>
-            <div className="row align-items-center">
-              <div className="col-12 col-md-4 text-center mb-3 mb-md-0">
-                <AdTimer
-                  startDateTime={ad.startDateTime}
-                  endDateTime={ad.endDateTime}
-                  className=""
+
+      <Modal.Body>
+        <div className="row g-4">
+          {/* 미리보기 - 데스크톱에서는 스크롤을 따라다니며 편집 결과를 즉시 확인한다 */}
+          <div className="col-12 col-lg-5">
+            <div className="content-edit__preview">
+              <h3 className="modal-section__title">
+                <i className="bi bi-eye"/>
+                미리보기
+              </h3>
+              <div className="ad-preview-container">
+                <AdPreview
+                  positionType={ad.positionType}
+                  imageUrl={formData.imageUrl}
+                  title={formData.title}
+                  subTitle={formData.subTitle}
+                  extraContent={formData.extraContent}
+                  titleFontColor={formData.titleFontColor}
+                  subTitleFontColor={formData.subTitleFontColor}
+                  extraContentFontColor={formData.extraContentFontColor}
+                  backgroundColor={formData.backgroundColor}
                 />
               </div>
-              <div className="col-12 col-md-8">
-                <div className="row g-2">
-                  <div className="col-6">
-                    <div className="text-center p-2 bg-white rounded border">
-                      <small className="text-muted d-block">광고 ID</small>
-                      <strong className="text-primary">{ad.advertisementId}</strong>
-                    </div>
-                  </div>
-                  <div className="col-6">
-                    <div className="text-center p-2 bg-white rounded border">
-                      <small className="text-muted d-block">캠페인</small>
-                      <strong>{ad.groupId}</strong>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* 미리보기 섹션 */}
-          <div className="bg-white border-bottom p-4">
-            <div className="d-flex align-items-center mb-3">
-              <div className="bg-info-subtle rounded-circle p-2 me-3">
-                <i className="bi bi-eye text-info fs-5"></i>
-              </div>
-              <h5 className="mb-0 text-info fw-bold">미리보기</h5>
-            </div>
-            <div className="bg-light rounded p-4">
-              <AdPreview
-                positionType={ad.positionType}
-                imageUrl={formData.imageUrl}
-                title={formData.title}
-                subTitle={formData.subTitle}
-                extraContent={formData.extraContent}
-                titleFontColor={formData.titleFontColor}
-                subTitleFontColor={formData.subTitleFontColor}
-                extraContentFontColor={formData.extraContentFontColor}
-                backgroundColor={formData.backgroundColor}
+              <AdTimer
+                startDateTime={ad.startDateTime}
+                endDateTime={ad.endDateTime}
+                className="mt-3"
               />
             </div>
           </div>
 
-          {/* 수정 폼 섹션 */}
-          <div className="bg-white p-4">
-            <div className="d-flex align-items-center mb-4">
-              <div className="bg-warning-subtle rounded-circle p-2 me-3">
-                <i className="bi bi-palette text-warning fs-5"></i>
-              </div>
-              <h5 className="mb-0 text-warning fw-bold">컨텐츠 수정</h5>
-            </div>
+          {/* 수정 폼 */}
+          <div className="col-12 col-lg-7">
             <Form>
-              {/* 이미지 섹션 */}
-              <div className="bg-light rounded p-4 mb-4">
-                <h6 className="text-primary fw-bold mb-3">
-                  <i className="bi bi-image me-2"></i>이미지 설정
-                </h6>
+              {/* 이미지 */}
+              <div className="modal-section">
+                <h3 className="modal-section__title">
+                  <i className="bi bi-image"/>
+                  이미지
+                </h3>
+
                 <Form.Group className="mb-3">
-                  <Form.Label className="fw-semibold">
-                    이미지 <span className="text-danger">*</span>
+                  <Form.Label htmlFor="content-image-url">
+                    이미지 URL <span className="text-danger">*</span>
                   </Form.Label>
                   <div className="d-flex gap-2">
                     <Form.Control
+                      id="content-image-url"
                       type="text"
                       value={formData.imageUrl}
                       onChange={(e) => handleChange("imageUrl", e.target.value)}
                       placeholder="이미지 URL 또는 업로드 버튼 사용"
                     />
-                    <Button
-                      variant="primary"
+                    <button
+                      type="button"
+                      className="btn btn-outline-secondary flex-shrink-0"
                       disabled={isUploading}
                       onClick={() => document.getElementById('content-edit-image-upload').click()}
-                      style={{minWidth: '130px', whiteSpace: 'nowrap'}}
                     >
                       {isUploading ? (
-                        <>
-                          <span className="spinner-border spinner-border-sm me-1"/>
-                          업로드 중...
-                        </>
+                        <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"/>
                       ) : (
-                        <>
-                          <i className="bi bi-upload me-1"></i>
-                          파일 업로드
-                        </>
+                        <i className="bi bi-cloud-upload"/>
                       )}
-                    </Button>
+                    </button>
                     <input
                       id="content-edit-image-upload"
                       type="file"
@@ -271,148 +235,152 @@ const AdvertisementContentEditModal = ({
                       onChange={handleImageUpload}
                     />
                   </div>
-                  <small className="text-muted">이미지 URL을 직접 입력하거나 파일을 업로드하세요 (최대 10MB)</small>
+                  <Form.Text>URL을 직접 입력하거나 파일을 업로드하세요 (최대 10MB).</Form.Text>
                 </Form.Group>
+
                 <div className="row g-3">
-                  <div className="col-md-6">
-                    <Form.Group>
-                      <Form.Label className="fw-semibold">이미지 가로 (px)</Form.Label>
-                      <Form.Control
-                        type="number"
-                        value={formData.imageWidth}
-                        onChange={(e) => handleChange("imageWidth", e.target.value)}
-                        placeholder="57"
-                      />
-                    </Form.Group>
-                  </div>
-                  <div className="col-md-6">
-                    <Form.Group>
-                      <Form.Label className="fw-semibold">이미지 세로 (px)</Form.Label>
-                      <Form.Control
-                        type="number"
-                        value={formData.imageHeight}
-                        onChange={(e) => handleChange("imageHeight", e.target.value)}
-                        placeholder="36"
-                      />
-                    </Form.Group>
-                  </div>
+                  <Form.Group className="col-6">
+                    <Form.Label htmlFor="content-image-width">가로 (px)</Form.Label>
+                    <Form.Control
+                      id="content-image-width"
+                      type="number"
+                      value={formData.imageWidth}
+                      onChange={(e) => handleChange("imageWidth", e.target.value)}
+                      placeholder="57"
+                    />
+                  </Form.Group>
+                  <Form.Group className="col-6">
+                    <Form.Label htmlFor="content-image-height">세로 (px)</Form.Label>
+                    <Form.Control
+                      id="content-image-height"
+                      type="number"
+                      value={formData.imageHeight}
+                      onChange={(e) => handleChange("imageHeight", e.target.value)}
+                      placeholder="36"
+                    />
+                  </Form.Group>
                 </div>
               </div>
 
-              {/* 텍스트 컨텐츠 섹션 (구좌별로 필요한 필드만 표시) */}
+              {/* 텍스트 컨텐츠 (구좌별로 필요한 필드만 표시) */}
               {(showTitle || showSubTitle || showExtraContent || showBackgroundColor) && (
-                <div className="bg-light rounded p-4 mb-4">
-                  <h6 className="text-success fw-bold mb-3">
-                    <i className="bi bi-card-text me-2"></i>텍스트 컨텐츠
-                  </h6>
-                  {showTitle && (
-                    <div className="row g-3 mb-3">
-                      <div className="col-md-8">
-                        <Form.Group>
-                          <Form.Label className="fw-semibold">제목</Form.Label>
+                <div className="modal-section">
+                  <h3 className="modal-section__title">
+                    <i className="bi bi-card-text"/>
+                    텍스트
+                  </h3>
+
+                  <div className="row g-3">
+                    {showTitle && (
+                      <>
+                        <Form.Group className="col-8">
+                          <Form.Label htmlFor="content-title">제목</Form.Label>
                           <Form.Control
+                            id="content-title"
                             type="text"
                             value={formData.title}
                             onChange={(e) => handleChange("title", e.target.value)}
-                            placeholder="📣 사장님 전용 앱 출시 📣"
+                            placeholder="사장님 전용 앱 출시"
                           />
                         </Form.Group>
-                      </div>
-                      <div className="col-md-4">
-                        <Form.Group>
-                          <Form.Label className="fw-semibold">제목 글자 색상</Form.Label>
+                        <Form.Group className="col-4">
+                          <Form.Label htmlFor="content-title-color">글자 색상</Form.Label>
                           <Form.Control
+                            id="content-title-color"
                             type="color"
                             value={formData.titleFontColor}
                             onChange={(e) => handleChange("titleFontColor", e.target.value)}
                           />
                         </Form.Group>
-                      </div>
-                    </div>
-                  )}
-                  {showSubTitle && (
-                    <div className="row g-3 mb-3">
-                      <div className="col-md-8">
-                        <Form.Group>
-                          <Form.Label className="fw-semibold">부제목</Form.Label>
+                      </>
+                    )}
+
+                    {showSubTitle && (
+                      <>
+                        <Form.Group className="col-8">
+                          <Form.Label htmlFor="content-subtitle">부제목</Form.Label>
                           <Form.Control
+                            id="content-subtitle"
                             type="text"
                             value={formData.subTitle}
                             onChange={(e) => handleChange("subTitle", e.target.value)}
-                            placeholder="100만 명에게 가게를 홍보하고 싶은 사장님은 클릭!"
+                            placeholder="가게를 홍보하고 싶은 사장님은 클릭!"
                           />
                         </Form.Group>
-                      </div>
-                      <div className="col-md-4">
-                        <Form.Group>
-                          <Form.Label className="fw-semibold">부제목 글자 색상</Form.Label>
+                        <Form.Group className="col-4">
+                          <Form.Label htmlFor="content-subtitle-color">글자 색상</Form.Label>
                           <Form.Control
+                            id="content-subtitle-color"
                             type="color"
                             value={formData.subTitleFontColor}
                             onChange={(e) => handleChange("subTitleFontColor", e.target.value)}
                           />
                         </Form.Group>
-                      </div>
-                    </div>
-                  )}
-                  {showExtraContent && (
-                    <div className="row g-3 mb-3">
-                      <div className="col-md-8">
-                        <Form.Group>
-                          <Form.Label className="fw-semibold">추가 컨텐츠 (버튼 텍스트)</Form.Label>
+                      </>
+                    )}
+
+                    {showExtraContent && (
+                      <>
+                        <Form.Group className="col-8">
+                          <Form.Label htmlFor="content-extra">버튼 텍스트</Form.Label>
                           <Form.Control
+                            id="content-extra"
                             type="text"
                             value={formData.extraContent}
                             onChange={(e) => handleChange("extraContent", e.target.value)}
                             placeholder="더보기"
                           />
                         </Form.Group>
-                      </div>
-                      <div className="col-md-4">
-                        <Form.Group>
-                          <Form.Label className="fw-semibold">버튼 글자 색상</Form.Label>
+                        <Form.Group className="col-4">
+                          <Form.Label htmlFor="content-extra-color">글자 색상</Form.Label>
                           <Form.Control
+                            id="content-extra-color"
                             type="color"
                             value={formData.extraContentFontColor}
                             onChange={(e) => handleChange("extraContentFontColor", e.target.value)}
                           />
                         </Form.Group>
-                      </div>
-                    </div>
-                  )}
-                  {showBackgroundColor && (
-                    <Form.Group>
-                      <Form.Label className="fw-semibold">배경 색상</Form.Label>
-                      <Form.Control
-                        type="color"
-                        value={formData.backgroundColor}
-                        onChange={(e) => handleChange("backgroundColor", e.target.value)}
-                      />
-                    </Form.Group>
-                  )}
+                      </>
+                    )}
+
+                    {showBackgroundColor && (
+                      <Form.Group className="col-4">
+                        <Form.Label htmlFor="content-bg-color">배경 색상</Form.Label>
+                        <Form.Control
+                          id="content-bg-color"
+                          type="color"
+                          value={formData.backgroundColor}
+                          onChange={(e) => handleChange("backgroundColor", e.target.value)}
+                        />
+                      </Form.Group>
+                    )}
+                  </div>
                 </div>
               )}
 
-              {/* 링크 섹션 (구좌별로 필요한 경우만 표시) */}
+              {/* 링크 (구좌별로 필요한 경우만 표시) */}
               {showLink && (
-                <div className="bg-light rounded p-4">
-                  <h6 className="text-warning fw-bold mb-3">
-                    <i className="bi bi-link-45deg me-2"></i>링크 설정
-                  </h6>
+                <div className="modal-section">
+                  <h3 className="modal-section__title">
+                    <i className="bi bi-link-45deg"/>
+                    링크
+                  </h3>
+
                   <Form.Group className="mb-3">
-                    <Form.Label className="fw-semibold">
+                    <Form.Label htmlFor="content-link-type">
                       링크 유형 {isLinkRequired && <span className="text-danger">*</span>}
                     </Form.Label>
                     <Form.Select
+                      id="content-link-type"
                       value={formData.linkType}
                       onChange={(e) => handleChange("linkType", e.target.value)}
                     >
-                      <option value="WEB">🌐 웹 링크</option>
-                      <option value="APP_SCHEME">📱 앱 딥링크</option>
+                      <option value="WEB">웹 링크</option>
+                      <option value="APP_SCHEME">앱 딥링크</option>
                     </Form.Select>
                   </Form.Group>
 
-                  {formData.linkType === 'APP_SCHEME' && (
+                  {formData.linkType === 'APP_SCHEME' ? (
                     <DeepLinkSelector
                       value={formData.linkUrl}
                       onChange={(value) => handleChange("linkUrl", value)}
@@ -422,40 +390,35 @@ const AdvertisementContentEditModal = ({
                       placeholder="/home, /event 등"
                       helpText="광고 클릭 시 이동할 앱 화면 경로를 선택하거나 직접 입력하세요"
                     />
-                  )}
-
-                  {formData.linkType === 'WEB' && (
+                  ) : (
                     <Form.Group>
-                      <Form.Label className="fw-semibold">
+                      <Form.Label htmlFor="content-link-url">
                         링크 주소 {isLinkRequired && <span className="text-danger">*</span>}
                       </Form.Label>
                       <Form.Control
+                        id="content-link-url"
                         type="text"
                         value={formData.linkUrl}
                         onChange={(e) => handleChange("linkUrl", e.target.value)}
                         placeholder="https://example.com"
                       />
-                      <Form.Text className="text-muted">
-                        예: https://example.com
-                      </Form.Text>
                     </Form.Group>
                   )}
                 </div>
               )}
 
-              {/* 인덱스 섹션 (MENU_CATEGORY_ICON, POLL_CARD 구좌만) */}
+              {/* 노출 인덱스 (MENU_CATEGORY_ICON, POLL_CARD 구좌만) */}
               {showExposureIndex && (
-                <div className="bg-light rounded p-4">
-                  <h6 className="text-warning fw-bold mb-3">
-                    <i className="bi bi-list-ol me-2"></i>인덱스 설정
-                  </h6>
-                  <Form.Group className="mb-0">
-                    <Form.Label className="fw-semibold d-flex align-items-center">
-                      <i className="bi bi-sort-numeric-down text-warning me-2"></i>
-                      인덱스 (0부터 시작)
-                      <span className="badge bg-warning ms-2" style={{fontSize: '0.65rem'}}>선택</span>
-                    </Form.Label>
+                <div className="modal-section">
+                  <h3 className="modal-section__title">
+                    <i className="bi bi-list-ol"/>
+                    노출 인덱스
+                  </h3>
+
+                  <Form.Group>
+                    <Form.Label htmlFor="content-exposure-index">인덱스 (선택)</Form.Label>
                     <Form.Control
+                      id="content-exposure-index"
                       type="number"
                       value={formData.exposureIndex !== null && formData.exposureIndex !== undefined ? formData.exposureIndex : ""}
                       onChange={(e) => {
@@ -468,15 +431,12 @@ const AdvertisementContentEditModal = ({
                         }
                       }}
                       placeholder="0, 1, 2, 3..."
-                      style={{maxWidth: '200px'}}
+                      style={{maxWidth: '160px'}}
                       min="0"
                       max="99"
                     />
-                    <Form.Text className="text-muted d-flex align-items-center mt-2">
-                      <i className="bi bi-info-circle me-1"></i>
-                      <div>
-                        몇 번째 인덱스에 광고를 노출시킬지 인덱스로 지정합니다. (0부터 시작)<br/>
-                      </div>
+                    <Form.Text>
+                      몇 번째 위치에 광고를 노출할지 지정합니다. 비워두면 앱 기본값이 적용됩니다. (0부터 시작)
                     </Form.Text>
                   </Form.Group>
                 </div>
@@ -485,38 +445,21 @@ const AdvertisementContentEditModal = ({
           </div>
         </div>
       </Modal.Body>
-      <Modal.Footer className="border-0 bg-light p-4">
-        <div className="d-flex w-100 gap-2 flex-column flex-sm-row">
-          <Button
-            variant="outline-secondary"
-            onClick={onHide}
-            disabled={isSubmitting}
-            className="flex-fill d-flex align-items-center justify-content-center gap-2"
-            style={{padding: '12px 24px'}}
-          >
-            <i className="bi bi-x-lg"></i>
-            취소
-          </Button>
-          <Button
-            variant="success"
-            onClick={handleSubmit}
-            disabled={isSubmitting || !formData.imageUrl || (isLinkRequired && (!formData.linkType || !formData.linkUrl))}
-            className="flex-fill d-flex align-items-center justify-content-center gap-2"
-            style={{padding: '12px 24px'}}
-          >
-            {isSubmitting ? (
-              <>
-                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                저장 중...
-              </>
-            ) : (
-              <>
-                <i className="bi bi-check-lg"></i>
-                저장
-              </>
-            )}
-          </Button>
-        </div>
+
+      <Modal.Footer>
+        <button className="btn btn-outline-secondary" onClick={onHide} disabled={isSubmitting}>
+          취소
+        </button>
+        <button
+          className="btn btn-primary"
+          onClick={handleSubmit}
+          disabled={isSubmitting || !formData.imageUrl || (isLinkRequired && (!formData.linkType || !formData.linkUrl))}
+        >
+          {isSubmitting && (
+            <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"/>
+          )}
+          {isSubmitting ? '저장 중...' : '저장'}
+        </button>
       </Modal.Footer>
     </Modal>
   );

@@ -1,8 +1,9 @@
-import React, {useEffect, useState} from "react";
-import {Button, Form, Modal} from "react-bootstrap";
+import {useEffect, useState} from "react";
+import {Form, Modal} from "react-bootstrap";
 import {toast} from "react-toastify";
 import policyApi from "@/api/policyApi";
 import {formatDateTime} from "@/utils/dateUtils";
+import DetailField from "@/components/common/DetailField";
 import {Policy} from "@/types/policy";
 
 /** enum API(PolicyCategoryType / PolicyType) 응답 항목 */
@@ -27,30 +28,18 @@ interface PolicyModalProps {
 
 const PolicyModal = ({show, onHide, policy, categories, policies, onRefresh, onDelete}: PolicyModalProps) => {
   const [isEditMode, setIsEditMode] = useState(false);
-  const [formData, setFormData] = useState<PolicyFormData>({
-    value: ""
-  });
+  const [formData, setFormData] = useState<PolicyFormData>({value: ""});
   const [originalData, setOriginalData] = useState<PolicyFormData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (policy) {
-      const data = {
-        value: policy.value || ""
-      };
+      const data = {value: policy.value || ""};
       setFormData(data);
       setOriginalData(data);
       setIsEditMode(false);
     }
   }, [policy]);
-
-  const handleChange = <K extends keyof PolicyFormData>(field: K, value: PolicyFormData[K]) => {
-    setFormData(prev => ({...prev, [field]: value}));
-  };
-
-  const handleEdit = () => {
-    setIsEditMode(true);
-  };
 
   const handleCancel = () => {
     setFormData(originalData);
@@ -82,10 +71,6 @@ const PolicyModal = ({show, onHide, policy, categories, policies, onRefresh, onD
     }
   };
 
-  const handleDelete = () => {
-    onDelete(policy.policyId);
-  };
-
   if (!policy) return null;
 
   const getDescriptionFromKey = (key: string, type: "category" | "policy") => {
@@ -98,216 +83,123 @@ const PolicyModal = ({show, onHide, policy, categories, policies, onRefresh, onD
   };
 
   return (
-    <Modal show={show} onHide={onHide} size="xl" centered fullscreen="lg-down">
-      <Modal.Header closeButton className="border-0"
-                    style={{
-                      background: 'linear-gradient(135deg, #28a745 0%, #20c997 100%)',
-                      minHeight: '80px'
-                    }}>
-        <Modal.Title className="text-white d-flex align-items-center gap-3 w-100 justify-content-center">
-          <div className="bg-white bg-opacity-20 rounded-circle p-3">
-            <i className={`bi ${isEditMode ? 'bi-pencil-square' : 'bi-shield-check'} fs-4`}></i>
-          </div>
-          <div>
-            <h3 className="mb-0 fw-bold">
-              {isEditMode ? "정책 수정" : "정책 상세 정보"}
-            </h3>
-            <small className="text-white-75 opacity-75">ID: {policy.policyId}</small>
-          </div>
-        </Modal.Title>
+    <Modal
+      show={show}
+      onHide={isLoading ? undefined : onHide}
+      centered
+      className="app-modal"
+      backdrop={isLoading ? "static" : true}
+    >
+      <Modal.Header closeButton={!isLoading}>
+        <div className="min-w-0">
+          <Modal.Title as="h2">
+            <i className={`bi ${isEditMode ? "bi-pencil-square" : "bi-shield-fill-check"}`}/>
+            {isEditMode ? "정책 수정" : "정책 상세"}
+          </Modal.Title>
+          <p className="app-modal__subtitle font-monospace">{policy.policyId}</p>
+        </div>
       </Modal.Header>
-      <Modal.Body className="p-0" style={{backgroundColor: '#f8f9fa'}}>
-        {/* 정책 기본 정보 섹션 */}
-        <div className="bg-white border-bottom px-4 py-3">
-          <div className="d-flex align-items-center mb-3">
-            <div className="bg-primary-subtle rounded-circle p-2 me-3">
-              <i className="bi bi-info-circle text-primary fs-5"></i>
-            </div>
-            <h5 className="mb-0 text-primary fw-bold">정책 기본 정보</h5>
-          </div>
+
+      <Modal.Body>
+        {/* 기본 정보 */}
+        <div className="modal-section">
+          <h3 className="modal-section__title">
+            <i className="bi bi-info-circle"/>
+            기본 정보
+          </h3>
+
           <div className="row g-3">
-            <div className="col-12 col-md-6">
-              <div className="bg-light rounded p-3">
-                <small className="text-muted d-block mb-1">
-                  <i className="bi bi-hash me-1"></i>정책 ID
-                </small>
-                <span className="fw-bold">{policy.policyId}</span>
-              </div>
-            </div>
-            <div className="col-12 col-md-6">
-              <div className="bg-light rounded p-3">
-                <small className="text-muted d-block mb-1">
-                  <i className="bi bi-folder me-1"></i>카테고리
-                </small>
-                <span className="fw-bold">{getDescriptionFromKey(policy.categoryId, "category")}</span>
-              </div>
-            </div>
-            {policy.description && (
-              <div className="col-12">
-                <div className="border-start border-info border-3 ps-3">
-                  <small className="text-muted d-block mb-1">
-                    <i className="bi bi-file-text me-1"></i>설명
-                  </small>
-                  <p className="mb-0">{policy.description}</p>
-                </div>
-              </div>
-            )}
+            <DetailField label="카테고리" className="col-12 col-sm-6">
+              {getDescriptionFromKey(policy.categoryId, "category")}
+            </DetailField>
+            <DetailField label="정책 ID" className="col-12 col-sm-6" monospace>
+              {policy.policyId}
+            </DetailField>
+            <DetailField label="설명" className="col-12" placeholder="설명 없음">
+              {policy.description}
+            </DetailField>
           </div>
         </div>
 
-        {/* 정책 값 섹션 */}
-        <div className="bg-white border-bottom px-4 py-4">
-          <div className="d-flex align-items-center mb-3">
-            <div className="bg-success-subtle rounded-circle p-2 me-3">
-              <i className="bi bi-gear text-success fs-5"></i>
-            </div>
-            <h5 className="mb-0 text-success fw-bold">정책 값 {isEditMode && "(수정 모드)"}</h5>
-          </div>
-          <div className="row">
-            <div className="col-12">
-              <Form.Group>
-                <Form.Label className="fw-semibold mb-2">
-                  <i className="bi bi-sliders me-1"></i>
-                  현재 값 {isEditMode && <span className="text-danger">*</span>}
-                </Form.Label>
-                {isEditMode ? (
-                  <div>
-                    <Form.Control
-                      type="text"
-                      value={formData.value}
-                      onChange={(e) => handleChange("value", e.target.value)}
-                      className="form-control-lg"
-                      style={{borderRadius: '8px'}}
-                      placeholder="정책 값을 입력하세요"
-                    />
-                    <Form.Text className="text-info">
-                      <i className="bi bi-info-circle me-1"></i>
-                      정책에 적용될 새로운 값을 입력하세요.
-                    </Form.Text>
-                  </div>
-                ) : (
-                  <div className="bg-light rounded p-4 border-start border-success border-3">
-                    <div className="d-flex align-items-center gap-2">
-                      <i className="bi bi-check-circle text-success fs-5"></i>
-                      <span className="fs-4 fw-bold text-dark">{policy.value}</span>
-                    </div>
-                  </div>
-                )}
-              </Form.Group>
-            </div>
-          </div>
+        {/* 정책 값 */}
+        <div className="modal-section">
+          <h3 className="modal-section__title">
+            <i className="bi bi-sliders"/>
+            정책 값
+          </h3>
+
+          {isEditMode ? (
+            <Form.Group>
+              <Form.Label htmlFor="policy-value">
+                값 <span className="text-danger">*</span>
+              </Form.Label>
+              <Form.Control
+                id="policy-value"
+                type="text"
+                value={formData.value}
+                onChange={(e) => setFormData({value: e.target.value})}
+                placeholder="정책 값을 입력하세요"
+                autoFocus
+                disabled={isLoading}
+              />
+              <Form.Text>정책에 적용될 새로운 값을 입력하세요.</Form.Text>
+            </Form.Group>
+          ) : (
+            <div className="detail-value-strong">{policy.value}</div>
+          )}
         </div>
 
-        {/* 일시 정보 섹션 */}
+        {/* 일시 정보 */}
         {!isEditMode && (
-          <div className="bg-white px-4 py-4">
-            <div className="d-flex align-items-center mb-3">
-              <div className="bg-warning-subtle rounded-circle p-2 me-3">
-                <i className="bi bi-clock text-warning fs-5"></i>
-              </div>
-              <h5 className="mb-0 text-warning fw-bold">생성 및 수정 일시</h5>
-            </div>
+          <div className="modal-section">
+            <h3 className="modal-section__title">
+              <i className="bi bi-clock-history"/>
+              등록 · 수정 일시
+            </h3>
+
             <div className="row g-3">
-              <div className="col-12 col-md-6">
-                <div className="bg-light rounded p-3 text-center">
-                  <small className="text-muted d-block mb-1">
-                    <i className="bi bi-plus-circle me-1"></i>등록일
-                  </small>
-                  <span className="fw-bold text-success">{formatDateTime(policy.createdAt)}</span>
-                </div>
-              </div>
-              <div className="col-12 col-md-6">
-                <div className="bg-light rounded p-3 text-center">
-                  <small className="text-muted d-block mb-1">
-                    <i className="bi bi-arrow-repeat me-1"></i>수정일
-                  </small>
-                  <span className="fw-bold text-info">{formatDateTime(policy.updatedAt)}</span>
-                </div>
-              </div>
+              <DetailField label="등록일" className="col-6">
+                {formatDateTime(policy.createdAt)}
+              </DetailField>
+              <DetailField label="수정일" className="col-6">
+                {formatDateTime(policy.updatedAt)}
+              </DetailField>
             </div>
           </div>
         )}
       </Modal.Body>
-      <Modal.Footer className="border-0 p-4" style={{background: 'linear-gradient(45deg, #f8f9fa 0%, #e9ecef 100%)'}}>
-        <div className="d-flex w-100 gap-3 flex-column flex-sm-row">
-          {isEditMode ? (
-            <>
-              <Button
-                variant="outline-secondary"
-                onClick={handleCancel}
-                disabled={isLoading}
-                className="flex-fill d-flex align-items-center justify-content-center gap-2 fw-semibold"
-                style={{
-                  padding: '15px 24px',
-                  borderRadius: '12px',
-                  borderWidth: '2px'
-                }}
-              >
-                <i className="bi bi-x-lg fs-5"></i>
-                취소
-              </Button>
-              <Button
-                variant="success"
-                onClick={handleSave}
-                disabled={isLoading}
-                className="flex-fill d-flex align-items-center justify-content-center gap-2 fw-semibold"
-                style={{
-                  padding: '15px 24px',
-                  borderRadius: '12px',
-                  background: 'linear-gradient(135deg, #28a745 0%, #20c997 100%)',
-                  border: 'none'
-                }}
-              >
-                <i
-                  className={`bi ${isLoading ? 'bi-arrow-repeat' : 'bi-check-lg'} fs-5 ${isLoading ? 'spinner-border spinner-border-sm' : ''}`}></i>
-                {isLoading ? "저장중..." : "저장"}
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button
-                variant="outline-danger"
-                onClick={handleDelete}
-                className="flex-fill d-flex align-items-center justify-content-center gap-2 fw-semibold"
-                style={{
-                  padding: '15px 24px',
-                  borderRadius: '12px',
-                  borderWidth: '2px'
-                }}
-              >
-                <i className="bi bi-trash fs-5"></i>
-                삭제
-              </Button>
-              <Button
-                variant="outline-secondary"
-                onClick={onHide}
-                className="flex-fill d-flex align-items-center justify-content-center gap-2 fw-semibold"
-                style={{
-                  padding: '15px 24px',
-                  borderRadius: '12px',
-                  borderWidth: '2px'
-                }}
-              >
-                <i className="bi bi-x-lg fs-5"></i>
-                닫기
-              </Button>
-              <Button
-                variant="primary"
-                onClick={handleEdit}
-                className="flex-fill d-flex align-items-center justify-content-center gap-2 fw-semibold"
-                style={{
-                  padding: '15px 24px',
-                  borderRadius: '12px',
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  border: 'none'
-                }}
-              >
-                <i className="bi bi-pencil fs-5"></i>
-                수정
-              </Button>
-            </>
-          )}
-        </div>
+
+      <Modal.Footer>
+        {isEditMode ? (
+          <>
+            <button className="btn btn-outline-secondary" onClick={handleCancel} disabled={isLoading}>
+              취소
+            </button>
+            <button className="btn btn-primary" onClick={handleSave} disabled={isLoading}>
+              {isLoading && (
+                <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"/>
+              )}
+              {isLoading ? "저장 중..." : "저장"}
+            </button>
+          </>
+        ) : (
+          <>
+            <button
+              className="btn btn-outline-danger me-auto"
+              onClick={() => onDelete(policy.policyId)}
+            >
+              <i className="bi bi-trash me-1"/>
+              삭제
+            </button>
+            <button className="btn btn-outline-secondary" onClick={onHide}>
+              닫기
+            </button>
+            <button className="btn btn-primary" onClick={() => setIsEditMode(true)}>
+              <i className="bi bi-pencil me-1"/>
+              수정
+            </button>
+          </>
+        )}
       </Modal.Footer>
     </Modal>
   );

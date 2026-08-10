@@ -72,11 +72,11 @@ export const getUserRoleLabel = (role: UserRole, roleOptions: UserRoleOption[] =
 export const getUserRoleBadgeClass = (role: UserRole): string => {
   switch (role) {
     case USER_ROLES.MANAGER:
-      return 'bg-danger text-danger border-danger';
+      return 'bg-danger bg-opacity-10 text-danger border border-danger';
     case USER_ROLES.MEMBER:
-      return 'bg-primary text-primary border-primary';
+      return 'bg-primary bg-opacity-10 text-primary border border-primary';
     default:
-      return 'bg-secondary text-secondary border-secondary';
+      return 'bg-secondary bg-opacity-10 text-secondary border border-secondary';
   }
 };
 

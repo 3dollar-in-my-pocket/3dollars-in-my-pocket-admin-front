@@ -2,11 +2,16 @@ import {FormEvent, useCallback, useMemo, useState} from 'react';
 import {Image} from '@/types/domain';
 import storeMarkerApi from '@/api/storeMarkerApi';
 import EmptyState from '@/components/common/EmptyState';
+import PageHeader from '@/components/common/PageHeader';
+import FilterCard from '@/components/common/FilterCard';
+import SectionCard from '@/components/common/SectionCard';
 import useCursorPagination from '@/hooks/useCursorPagination';
 import useInfiniteScroll from '@/hooks/useInfiniteScroll';
 import StoreDetailModal from '@/pages/store/StoreDetailModal';
+import StoreMarkerDetailModal from '@/components/StoreMarkerDetailModal';
 import {StoreMarker} from '@/types/storeMarker';
 import {formatDateTime} from '@/utils/dateUtils';
+import {getAdStatus} from '@/utils/timeUtils';
 
 const toApiDateTime = (value: string): string => {
   if (!value) return value;
@@ -26,6 +31,7 @@ const StoreMarkerManage = () => {
   // 입력 중인 필터 값. 조회 버튼을 눌러야 appliedFilter에 반영된다.
   const [appliedFilter, setAppliedFilter] = useState({startDateTime: '', endDateTime: ''});
   const [selectedStore, setSelectedStore] = useState<any>(null);
+  const [selectedMarker, setSelectedMarker] = useState<StoreMarker | null>(null);
 
   const hasFilter = useMemo(
     () => Boolean(filterStartDateTime || filterEndDateTime),
@@ -71,181 +77,124 @@ const StoreMarkerManage = () => {
     setAppliedFilter({startDateTime: '', endDateTime: ''});
   };
 
-  const openStoreDetail = (marker: StoreMarker) => {
+  const openStoreDetail = (storeId: number) => {
     setSelectedStore({
-      storeId: marker.storeId,
-      name: `가게 ${marker.storeId}`,
+      storeId,
+      name: `가게 ${storeId}`,
     });
+    setSelectedMarker(null);
   };
 
   return (
-    <div className="container-fluid py-4">
-      <div className="d-flex flex-column flex-md-row justify-content-between gap-3 mb-4">
-        <div>
-          <h2 className="fw-bold mb-1 text-primary">
-            <i className="bi bi-geo-alt-fill me-2"></i>
-            가게 지도 핀 관리
-          </h2>
-          <div className="text-muted">전체 가게에 등록된 커스텀 지도 핀 마커를 조회합니다.</div>
-        </div>
-        <button
-          className="btn btn-outline-primary align-self-start"
-          onClick={refresh}
-          disabled={isLoading}
-        >
-          <i className="bi bi-arrow-clockwise me-1"></i>
-          새로고침
-        </button>
-      </div>
+    <div>
+      <PageHeader
+        description="전체 가게에 등록된 커스텀 지도 핀 마커를 조회합니다."
+        actions={
+          <button className="btn btn-outline-primary" onClick={refresh} disabled={isLoading}>
+            <i className="bi bi-arrow-clockwise me-1"/>
+            새로고침
+          </button>
+        }
+      />
 
-      <form className="card border-0 shadow-sm mb-3" onSubmit={handleFilterSubmit}>
-        <div className="card-body p-3">
-          <div className="row g-2 align-items-end">
-            <div className="col-md-5">
-              <label className="form-label small fw-semibold">활성 기간 시작일 선택</label>
+      <FilterCard
+        aside={hasFilter && (
+          <button className="form-subhead__clear" onClick={handleClearFilter}>
+            초기화
+          </button>
+        )}
+      >
+        <form onSubmit={handleFilterSubmit}>
+          <div className="row g-3">
+            <div className="col-12 col-md-4">
+              <label className="form-label" htmlFor="marker-start">활성 기간 시작일</label>
               <input
+                id="marker-start"
                 type="datetime-local"
                 className="form-control"
                 value={filterStartDateTime}
                 onChange={(event) => setFilterStartDateTime(event.target.value)}
               />
             </div>
-            <div className="col-md-5">
-              <label className="form-label small fw-semibold">활성 기간 종료일 선택</label>
+            <div className="col-12 col-md-4">
+              <label className="form-label" htmlFor="marker-end">활성 기간 종료일</label>
               <input
+                id="marker-end"
                 type="datetime-local"
                 className="form-control"
                 value={filterEndDateTime}
                 onChange={(event) => setFilterEndDateTime(event.target.value)}
               />
             </div>
-            <div className="col-md-2 d-flex gap-2">
-              <button type="submit" className="btn btn-dark flex-fill" disabled={isLoading}>
+            <div className="col-12 col-md-4 d-flex align-items-end">
+              <button type="submit" className="btn btn-primary w-100" disabled={isLoading}>
+                <i className="bi bi-search me-1"/>
                 조회
               </button>
-              {hasFilter && (
-                <button type="button" className="btn btn-outline-secondary" onClick={handleClearFilter}>
-                  초기화
-                </button>
-              )}
+            </div>
+            <div className="col-12">
+              <p className="form-field__hint mt-0">
+                시작일과 종료일은 선택 입력입니다. 입력한 기간 안에 활성화되는 마커만 조회합니다.
+              </p>
             </div>
           </div>
-          <div className="text-muted small mt-2">
-            시작일과 종료일은 선택 입력입니다. 입력한 기간 안에 활성화되는 마커만 조회합니다.
-          </div>
-        </div>
-      </form>
+        </form>
+      </FilterCard>
 
       {error && (
-        <div className="alert alert-danger d-flex align-items-center justify-content-between gap-3" role="alert">
-          <span>
-            <i className="bi bi-exclamation-circle me-2"></i>
-            {error}
-          </span>
+        <div className="alert alert-danger d-flex align-items-center justify-content-between gap-3 py-2" role="alert">
+          <span>{error}</span>
           <button className="btn btn-sm btn-outline-danger" onClick={refresh} disabled={isLoading}>
             다시 시도
           </button>
         </div>
       )}
 
-      <div
-        ref={scrollContainerRef}
-        style={{maxHeight: 'calc(100vh - 290px)', overflowY: 'auto'}}
+      <SectionCard
+        title="가게 지도 핀 목록"
+        icon="bi-geo-alt-fill"
+        aside={markers.length > 0 && (
+          <span className="page-count">{markers.length.toLocaleString()}{hasMore ? '+' : ''}건</span>
+        )}
       >
-        {markers.length === 0 && !isLoading ? (
-          <EmptyState
-            icon="bi-geo-alt"
-            title="등록된 가게 마커가 없습니다"
-            description="전체 가게 범위에서 조회된 마커가 없습니다."
-          />
-        ) : (
-          <div className="row g-3">
-            {markers.map((marker) => (
-              <div key={marker.markerId} className="col-12 col-xl-6">
-                <div className="card border-0 shadow-sm h-100" style={{borderRadius: '12px', overflow: 'hidden'}}>
-                  <div className="card-body p-0">
-                    <div className="d-flex flex-column flex-lg-row h-100">
-                      <div className="flex-grow-1 p-3 p-md-4">
-                        <div className="d-flex align-items-start justify-content-between gap-3 mb-3">
-                          <div className="d-flex align-items-center gap-2 min-w-0">
-                            <span
-                              className="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-circle flex-shrink-0"
-                              style={{width: '36px', height: '36px'}}
-                            >
-                              <i className="bi bi-geo-alt-fill"></i>
-                            </span>
-                            <div className="min-w-0">
-                              <h6 className="fw-bold text-dark mb-1 text-truncate">{marker.groupId}</h6>
-                              <div className="text-muted small">마커 ID {marker.markerId}</div>
-                            </div>
-                          </div>
-                          <button
-                            className="btn btn-outline-primary btn-sm flex-shrink-0"
-                            onClick={() => openStoreDetail(marker)}
-                          >
-                            <i className="bi bi-shop me-1"></i>
-                            가게 상세
-                          </button>
-                        </div>
-
-                        <div className="d-flex flex-wrap gap-2 mb-3">
-                          <span className="badge bg-secondary bg-opacity-10 text-dark border rounded-pill px-3 py-2">
-                            Store ID {marker.storeId || '-'}
-                          </span>
-                        </div>
-
-                        <div className="row g-2">
-                          <div className="col-md-6">
-                            <div className="bg-light rounded-3 border p-3 h-100">
-                              <div className="text-muted small mb-1">
-                                <i className="bi bi-calendar-event me-1"></i>
-                                시작일
-                              </div>
-                              <div
-                                className="fw-semibold text-dark">{formatDateTime(marker.period?.startDateTime)}</div>
-                            </div>
-                          </div>
-                          <div className="col-md-6">
-                            <div className="bg-light rounded-3 border p-3 h-100">
-                              <div className="text-muted small mb-1">
-                                <i className="bi bi-calendar-x me-1"></i>
-                                종료일
-                              </div>
-                              <div className="fw-semibold text-dark">{formatDateTime(marker.period?.endDateTime)}</div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div
-                        className="d-flex gap-3 align-items-center justify-content-center px-3 px-md-4 py-3 border-top border-lg-top-0 border-lg-start"
-                        style={{background: '#f8fafc', minWidth: '220px'}}
-                      >
-                        <MarkerImagePreview title="선택" image={marker.selectedMarkerImage}/>
-                        <MarkerImagePreview title="미선택" image={marker.unselectedMarkerImage}/>
-                      </div>
-                    </div>
-                  </div>
+        <div ref={scrollContainerRef} style={{maxHeight: 'calc(100vh - 360px)', overflowY: 'auto'}}>
+          {markers.length === 0 && !isLoading ? (
+            <EmptyState
+              icon="bi-geo-alt"
+              title="등록된 가게 마커가 없습니다"
+              description="조회 조건에 맞는 마커가 없습니다."
+            />
+          ) : (
+            <div className="row g-3">
+              {markers.map((marker) => (
+                <div key={marker.markerId} className="col-12 col-xl-6">
+                  <MarkerCard
+                    marker={marker}
+                    onClick={setSelectedMarker}
+                    onStoreClick={openStoreDetail}
+                  />
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {isLoading && (
-          <div className="text-center py-4">
-            <div className="spinner-border text-primary" role="status">
-              <span className="visually-hidden">Loading...</span>
+              ))}
             </div>
-          </div>
-        )}
+          )}
 
-        {hasMore && markers.length > 0 && (
-          <div ref={loadMoreRef} className="text-center py-4">
-            <span className="text-muted">더 많은 마커를 불러오는 중...</span>
-          </div>
-        )}
-      </div>
+          {isLoading && (
+            <div className="text-center py-4">
+              <span className="spinner-border spinner-border-sm text-primary me-2" role="status"/>
+              <span className="small text-muted">불러오는 중...</span>
+            </div>
+          )}
+
+          {hasMore && markers.length > 0 && <div ref={loadMoreRef} style={{minHeight: '1px'}}/>}
+        </div>
+      </SectionCard>
+
+      <StoreMarkerDetailModal
+        show={Boolean(selectedMarker)}
+        onHide={() => setSelectedMarker(null)}
+        marker={selectedMarker}
+        onStoreClick={openStoreDetail}
+      />
 
       <StoreDetailModal
         show={Boolean(selectedStore)}
@@ -258,35 +207,105 @@ const StoreMarkerManage = () => {
   );
 };
 
+interface MarkerCardProps {
+  marker: StoreMarker;
+  /** 카드 클릭 시 마커 상세 열기 */
+  onClick: (marker: StoreMarker) => void;
+  /** 가게 상세 열기 */
+  onStoreClick: (storeId: number) => void;
+}
+
+/**
+ * 가게 지도 핀 카드
+ *
+ * 마커 이미지가 핵심 정보이므로 카드 상단에 크게 배치하고,
+ * 활성 기간은 상태 배지로 한눈에 구분한다.
+ */
+const MarkerCard = ({marker, onClick, onStoreClick}: MarkerCardProps) => {
+  const status = getAdStatus(marker.period?.startDateTime, marker.period?.endDateTime);
+
+  return (
+    <div
+      className="item-card item-card--clickable marker-card h-100"
+      onClick={() => onClick(marker)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          onClick(marker);
+        }
+      }}
+    >
+      <div className="item-card__body">
+        <div className="d-flex align-items-start justify-content-between gap-2 mb-3">
+          <div className="min-w-0">
+            <div className="d-flex align-items-center gap-2 mb-1">
+              <span className={`badge ${status.badgeClass}`}>{status.label}</span>
+              {status.status !== 'ended' && (
+                <span className="marker-card__countdown">{status.timeText}</span>
+              )}
+            </div>
+            <h3 className="item-card__name text-truncate">{marker.groupId}</h3>
+            <p className="item-card__desc mb-0 font-monospace">
+              마커 {marker.markerId} · 가게 {marker.storeId || '-'}
+            </p>
+          </div>
+          <button
+            className="btn btn-sm btn-outline-primary flex-shrink-0"
+            onClick={(event) => {
+              event.stopPropagation();
+              onStoreClick(marker.storeId);
+            }}
+          >
+            <i className="bi bi-shop me-1"/>
+            가게 상세
+          </button>
+        </div>
+
+        <div className="marker-card__previews">
+          <MarkerImagePreview title="선택" image={marker.selectedMarkerImage}/>
+          <MarkerImagePreview title="미선택" image={marker.unselectedMarkerImage}/>
+        </div>
+
+        <div className="form-summary mt-3">
+          <div className="form-summary__row">
+            <span className="form-summary__label">시작일</span>
+            <span className="form-summary__value">
+              {formatDateTime(marker.period?.startDateTime)}
+            </span>
+          </div>
+          <div className="form-summary__row">
+            <span className="form-summary__label">종료일</span>
+            <span className="form-summary__value">
+              {formatDateTime(marker.period?.endDateTime)}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const MarkerImagePreview = ({title, image}: { title: string; image?: Image }) => {
   const imageUrl = getMarkerImageUrl(image);
   const width = getMarkerImageSize(image?.width);
   const height = getMarkerImageSize(image?.height);
 
   return (
-    <div className="bg-white border rounded-3 p-2 text-center shadow-sm" style={{width: '92px'}}>
-      <div className="mb-2 d-flex align-items-center justify-content-center" style={{
-        width: '100%',
-        height: '58px',
-        overflow: 'hidden'
-      }}>
+    <div className="marker-preview marker-preview--lg">
+      {/* 밝은/어두운 마커 모두 보이도록 체커보드 배경 위에 올린다 */}
+      <div className="marker-preview__frame marker-preview__frame--checker">
         {imageUrl ? (
-          <img
-            src={imageUrl}
-            alt={`${title} 마커`}
-            style={{maxWidth: '100%', maxHeight: '100%', objectFit: 'contain'}}
-          />
+          <img src={imageUrl} alt={`${title} 마커`} loading="lazy"/>
         ) : (
-          <div className="text-muted small">
-            <i className="bi bi-image d-block"></i>
-            없음
-          </div>
+          <i className="bi bi-image text-body-tertiary"/>
         )}
       </div>
-      <div className="small fw-bold text-dark">{title}</div>
-      <div className="text-muted" style={{fontSize: '0.72rem'}}>
-        {width || 0} x {height || 0}
-      </div>
+      <span className="marker-preview__title">{title}</span>
+      <span className="marker-preview__size">
+        {width || height ? `${width || 0} × ${height || 0}` : '크기 정보 없음'}
+      </span>
     </div>
   );
 };

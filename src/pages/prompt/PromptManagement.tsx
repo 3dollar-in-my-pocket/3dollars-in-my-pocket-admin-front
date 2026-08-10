@@ -10,6 +10,7 @@ import useInfiniteScroll from '@/hooks/useInfiniteScroll';
 import {formatDateTime} from '@/utils/dateUtils';
 import {AIModel, EnumOption, PromptFormRequest, PromptResponse, PromptStatus} from '@/types/prompt';
 import './PromptManagement.css';
+import PageHeader from '@/components/common/PageHeader';
 
 const PAGE_SIZE = 10;
 const PROMPT_STATUS = {
@@ -175,27 +176,20 @@ const PromptManagement = () => {
   };
 
   return (
-    <div className="container-fluid py-4 prompt-management">
-      <div className="prompt-page-header mb-4">
-        <div>
-          <div className="prompt-page-kicker">
-            <i className="bi bi-stars"></i>
-            운영 툴
-          </div>
-          <h2 className="prompt-page-title mb-1">AI 프롬프트 관리</h2>
-          <p className="prompt-page-description mb-0">
-            AI 기능별 프롬프트 버전을 조회하고 생성, 수정, 삭제할 수 있습니다.
-          </p>
-        </div>
-        <button
-          className="btn btn-primary prompt-primary-action"
-          onClick={() => handleShowModal()}
-          disabled={!selectedPromptType || isEnumLoading}
-        >
-          <i className="bi bi-plus-circle me-2"></i>
-          신규 등록
-        </button>
-      </div>
+    <div className="prompt-management">
+      <PageHeader
+        description="AI 기능별 프롬프트 버전을 조회하고 생성, 수정, 삭제할 수 있습니다."
+        actions={
+          <button
+            className="btn btn-primary"
+            onClick={() => handleShowModal()}
+            disabled={!selectedPromptType || isEnumLoading}
+          >
+            <i className="bi bi-plus-lg me-1"/>
+            신규 등록
+          </button>
+        }
+      />
 
       <div className="prompt-toolbar mb-4">
         <div className="row g-3 align-items-end">

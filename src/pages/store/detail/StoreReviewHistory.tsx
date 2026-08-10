@@ -1,8 +1,9 @@
 import StoreTypeBadge from '@/components/common/badges/StoreTypeBadge';
-import {useCallback, useRef, useState} from 'react';
+import {useCallback, useState} from 'react';
 import {toast} from 'react-toastify';
 import reviewApi from "@/api/reviewApi";
 
+import HistoryPanel from "@/components/common/HistoryPanel";
 import useCursorPagination from "@/hooks/useCursorPagination";
 import {Review} from "@/types/review";
 import {ActivityAuthor} from "@/types/domain";
@@ -20,7 +21,6 @@ const StoreReviewHistory = ({storeId, isActive, onAuthorClick}: StoreReviewHisto
   const [selectedReview, setSelectedReview] = useState<Review | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [isBlinding, setIsBlinding] = useState(false);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const fetchReviews = useCallback(
     (cursor: string | null) => reviewApi.getStoreReviews(storeId, cursor, 20),
@@ -30,14 +30,17 @@ const StoreReviewHistory = ({storeId, isActive, onAuthorClick}: StoreReviewHisto
   const {
     items: reviews,
     isLoading,
-    hasMore,
+    isLoadingMore,
     totalCount,
+    hasMore,
+    error,
     refresh,
     loadMore
   } = useCursorPagination<Review>({
     fetcher: fetchReviews,
     enabled: Boolean(storeId && isActive),
-    deps: [storeId]
+    deps: [storeId],
+    errorMessage: '리뷰를 불러오는데 실패했습니다.'
   });
 
   const getRatingStars = (rating: number) => {
@@ -61,6 +64,26 @@ const StoreReviewHistory = ({storeId, isActive, onAuthorClick}: StoreReviewHisto
     return stars;
   };
 
+  const getReviewStatusBadgeClass = (status?: string) => {
+    if (status === 'POSTED') return 'bg-success-subtle text-success-emphasis';
+    if (status === 'DELETED') return 'bg-danger-subtle text-danger-emphasis';
+    if (status === 'FILTERED') return 'bg-warning-subtle text-warning-emphasis';
+    return 'bg-secondary-subtle text-secondary-emphasis';
+  };
+
+  const getReviewStatusIcon = (status?: string) => {
+    if (status === 'POSTED') return 'bi-eye-fill';
+    if (status === 'DELETED') return 'bi-trash-fill';
+    if (status === 'FILTERED') return 'bi-eye-slash-fill';
+    return 'bi-question-circle-fill';
+  };
+
+  const getReviewStatusText = (status?: string) => {
+    if (status === 'POSTED') return '활성';
+    if (status === 'DELETED') return '삭제됨';
+    if (status === 'FILTERED') return '블라인드';
+    return '알 수 없음';
+  };
 
   const handleReviewClick = (review: Review) => {
     setSelectedReview(review);
@@ -92,253 +115,128 @@ const StoreReviewHistory = ({storeId, isActive, onAuthorClick}: StoreReviewHisto
   }
 
   return (
-    <div className="p-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <div className="d-flex align-items-center gap-2">
-          {totalCount > 0 && (
-            <span className="badge bg-primary rounded-pill">
-              {totalCount.toLocaleString()}개
-            </span>
-          )}
-        </div>
-        {totalCount > 0 && (
-          <button
-            className="btn btn-outline-primary btn-sm rounded-pill px-3"
-            onClick={refresh}
-            disabled={isLoading}
-          >
-            <i className="bi bi-arrow-clockwise me-1"></i>
-            새로고침
-          </button>
-        )}
-      </div>
-
-      <div
-        ref={scrollContainerRef}
-        className="review-container"
-        style={{maxHeight: '600px', overflowY: 'auto'}}
+    <>
+      <HistoryPanel
+        title="리뷰"
+        icon="bi-chat-square-text"
+        count={reviews.length}
+        totalCount={totalCount}
+        hasMore={hasMore}
+        isLoading={isLoading}
+        isLoadingMore={isLoadingMore}
+        error={error}
+        onRefresh={refresh}
+        onLoadMore={loadMore}
+        emptyTitle="등록된 리뷰가 없습니다"
+        emptyDescription="아직 이 가게에 작성된 리뷰가 없습니다."
       >
-        {reviews.length === 0 && !isLoading ? (
-          <div className="text-center py-5">
-            <div className="bg-light rounded-circle mx-auto mb-4" style={{
-              width: '80px',
-              height: '80px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              <i className="bi bi-chat-square-text fs-1 text-secondary"></i>
-            </div>
-            <h5 className="text-dark mb-2">등록된 리뷰가 없습니다</h5>
-            <p className="text-muted">아직 이 가게에 작성된 리뷰가 없습니다.</p>
-          </div>
-        ) : (
-          <div className="row g-3">
-            {reviews.map((review) => (
-              <div key={review.reviewId} className="col-12">
-                <div
-                  className="card border-0 shadow-sm h-100"
-                  style={{
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)'
-                  }}
-                  onClick={() => handleReviewClick(review)}
-                  onMouseEnter={(e: any) => {
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.1)';
-                  }}
-                  onMouseLeave={(e: any) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
-                  }}
-                >
-                  <div className="card-body p-4">
-                    <div className="d-flex align-items-start">
-                      <div className="flex-grow-1">
-                        <div className="d-flex justify-content-between align-items-start mb-2">
-                          <div>
-                            <div className="d-flex align-items-center gap-2 mb-1">
-                              <div className="d-flex align-items-center gap-2">
-                                <div className="bg-primary bg-opacity-10 rounded-circle p-1">
-                                  <i className="bi bi-person-fill text-primary" style={{fontSize: '0.8rem'}}></i>
-                                </div>
-                                <div
-                                  className={`d-flex align-items-center gap-1 ${review.writer && onAuthorClick ? 'clickable-author' : ''}`}
-                                  style={{
-                                    cursor: review.writer && onAuthorClick ? 'pointer' : 'default',
-                                    padding: '4px 8px',
-                                    borderRadius: '6px',
-                                    transition: 'all 0.2s ease',
-                                    backgroundColor: 'transparent'
-                                  }}
-                                  onClick={(e) => {
-                                    if (review.writer && onAuthorClick) {
-                                      e.stopPropagation();
-                                      onAuthorClick(review.writer);
-                                    }
-                                  }}
-                                  onMouseEnter={(e: any) => {
-                                    if (review.writer && onAuthorClick) {
-                                      e.currentTarget.style.backgroundColor = 'rgba(13, 110, 253, 0.1)';
-                                      e.currentTarget.style.transform = 'scale(1.02)';
-                                    }
-                                  }}
-                                  onMouseLeave={(e: any) => {
-                                    if (review.writer && onAuthorClick) {
-                                      e.currentTarget.style.backgroundColor = 'transparent';
-                                      e.currentTarget.style.transform = 'scale(1)';
-                                    }
-                                  }}
-                                >
-                                  <span className="text-muted small">작성자:</span>
-                                  <h6
-                                    className={`fw-bold mb-0 ${review.writer && onAuthorClick ? 'text-primary' : 'text-dark'}`}>
-                                    {review.writer?.name || '익명 사용자'}
-                                  </h6>
-                                  {review.writer && onAuthorClick && (
-                                    <i className="bi bi-box-arrow-up-right text-primary"
-                                       style={{fontSize: '0.7rem'}}></i>
-                                  )}
-                                </div>
-                              </div>
-                              {/* 리뷰 상태 표시 */}
-                              <span className={`badge rounded-pill ${
-                                review.status === 'POSTED' ? 'bg-success' :
-                                  review.status === 'DELETED' ? 'bg-danger' :
-                                    review.status === 'FILTERED' ? 'bg-warning' : 'bg-secondary'
-                              } text-white px-2 py-1`} style={{fontSize: '0.7rem'}}>
-                                <i className={`bi ${
-                                  review.status === 'POSTED' ? 'bi-eye-fill' :
-                                    review.status === 'DELETED' ? 'bi-trash-fill' :
-                                      review.status === 'FILTERED' ? 'bi-eye-slash-fill' : 'bi-question-circle-fill'
-                                } me-1`}></i>
-                                {review.status === 'POSTED' ? '활성' :
-                                  review.status === 'DELETED' ? '삭제됨' :
-                                    review.status === 'FILTERED' ? '블라인드' : '알 수 없음'}
-                              </span>
-                            </div>
-                            <div className="d-flex align-items-center gap-2 mb-2">
-                              <div className="d-flex align-items-center">
-                                {getRatingStars(review.rating)}
-                                <span className="ms-2 text-muted small">
-                                  {review.rating?.toFixed(1)}점
-                                </span>
-                              </div>
-                              {review.store?.storeType && <StoreTypeBadge storeType={review.store.storeType}/>}
-                            </div>
-                          </div>
-                          <div className="text-end">
-                            <span className="text-muted small">
-                              <i className="bi bi-clock me-1"></i>
-                              {formatDateTime(review.createdAt)}
-                            </span>
-                          </div>
-                        </div>
+        {reviews.map((review) => (
+          <div
+            key={review.reviewId}
+            className="item-card item-card--clickable mb-3"
+            role="button"
+            tabIndex={0}
+            onClick={() => handleReviewClick(review)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                handleReviewClick(review);
+              }
+            }}
+          >
+            <div className="item-card__body">
+              <div className="d-flex align-items-center justify-content-between gap-2">
+                <div className="d-flex align-items-center flex-wrap gap-2 min-w-0">
+                  <span className="item-card__desc mt-0">작성자</span>
+                  {review.writer && onAuthorClick ? (
+                    <button
+                      type="button"
+                      className="btn btn-link btn-sm p-0 text-decoration-none item-card__name clickable-author"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onAuthorClick(review.writer);
+                      }}
+                    >
+                      {review.writer.name}
+                      <i className="bi bi-box-arrow-up-right ms-1"/>
+                    </button>
+                  ) : (
+                    <h3 className="item-card__name">{review.writer?.name || '익명 사용자'}</h3>
+                  )}
+                  <span className={`badge ${getReviewStatusBadgeClass(review.status)}`}>
+                    <i className={`bi ${getReviewStatusIcon(review.status)} me-1`}/>
+                    {getReviewStatusText(review.status)}
+                  </span>
+                </div>
+                <span className="item-card__desc mt-0 flex-shrink-0">
+                  <i className="bi bi-clock me-1"/>
+                  {formatDateTime(review.createdAt)}
+                </span>
+              </div>
 
-                        {review.contents && (
-                          <p className="text-dark mb-3" style={{lineHeight: '1.6'}}>
-                            {review.contents.length > 100
-                              ? `${review.contents.substring(0, 100)}...`
-                              : review.contents
-                            }
-                          </p>
-                        )}
+              <div className="d-flex align-items-center flex-wrap gap-2 mt-2">
+                <span className="rating-badge">
+                  {getRatingStars(review.rating)}
+                  {review.rating?.toFixed(1)}점
+                </span>
+                {review.store?.storeType && <StoreTypeBadge storeType={review.store.storeType}/>}
+              </div>
 
-                        {/* 리뷰 이미지들 */}
-                        {review.images && review.images.length > 0 && (
-                          <div className="mb-3">
-                            <div className="d-flex gap-2 flex-wrap">
-                              {review.images.slice(0, 3).map((image, imgIndex) => (
-                                <div key={imgIndex} className="position-relative">
-                                  <img
-                                    src={image.imageUrl}
-                                    alt={`Review ${imgIndex + 1}`}
-                                    className="rounded"
-                                    style={{
-                                      width: '60px',
-                                      height: '60px',
-                                      objectFit: 'cover',
-                                      cursor: 'pointer'
-                                    }}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleReviewClick(review);
-                                    }}
-                                    onError={(e: any) => {
-                                      e.target.style.display = 'none';
-                                    }}
-                                  />
-                                  {imgIndex === 2 && review.images.length > 3 && (
-                                    <div
-                                      className="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-dark bg-opacity-75 rounded text-white"
-                                      style={{fontSize: '0.8rem'}}
-                                    >
-                                      +{review.images.length - 3}
-                                    </div>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
+              {review.contents && (
+                <div className="detail-value-strong detail-value-strong--text mt-2">
+                  {review.contents.length > 100
+                    ? `${review.contents.substring(0, 100)}...`
+                    : review.contents
+                  }
+                </div>
+              )}
+
+              {/* 리뷰 이미지들 */}
+              {review.images && review.images.length > 0 && (
+                <div className="row g-2 mt-2">
+                  {review.images.slice(0, 3).map((image, imgIndex) => (
+                    <div key={imgIndex} className="col-4 col-md-3">
+                      <div className="store-post__image position-relative" style={{aspectRatio: 1}}>
+                        <img
+                          src={image.imageUrl}
+                          alt={`리뷰 이미지 ${imgIndex + 1}`}
+                          loading="lazy"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleReviewClick(review);
+                          }}
+                          onError={(e: any) => {
+                            e.target.style.display = 'none';
+                          }}
+                        />
+                        {imgIndex === 2 && review.images.length > 3 && (
+                          <div
+                            className="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-dark bg-opacity-75 text-white small">
+                            +{review.images.length - 3}
                           </div>
                         )}
-
-                        <div className="d-flex justify-content-between align-items-center">
-                          <button
-                            className="btn btn-outline-primary btn-sm rounded-pill px-3"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleReviewClick(review);
-                            }}
-                          >
-                            <i className="bi bi-eye me-1"></i>
-                            상세보기
-                          </button>
-                        </div>
                       </div>
                     </div>
-                  </div>
+                  ))}
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* 더보기 버튼 */}
-        {hasMore && reviews.length > 0 && (
-          <div className="text-center mt-4">
-            <button
-              className="btn btn-outline-primary rounded-pill px-4 py-2"
-              onClick={loadMore}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <span className="spinner-border spinner-border-sm me-2" role="status"></span>
-                  로딩 중...
-                </>
-              ) : (
-                <>
-                  <i className="bi bi-arrow-down-circle me-2"></i>
-                  더 많은 리뷰 보기
-                </>
               )}
-            </button>
-          </div>
-        )}
 
-        {/* 로딩 인디케이터 */}
-        {isLoading && reviews.length === 0 && (
-          <div className="text-center py-5">
-            <div className="mb-3">
-              <div className="spinner-border text-primary" style={{width: '2rem', height: '2rem'}} role="status">
-                <span className="visually-hidden">Loading...</span>
+              <div className="d-flex justify-content-end mt-2">
+                <button
+                  className="btn btn-sm btn-outline-primary"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleReviewClick(review);
+                  }}
+                >
+                  <i className="bi bi-eye me-1"/>
+                  상세보기
+                </button>
               </div>
             </div>
-            <p className="text-muted">리뷰를 불러오는 중...</p>
           </div>
-        )}
-      </div>
+        ))}
+      </HistoryPanel>
 
       {/* 리뷰 상세 모달 */}
       {showModal && selectedReview && (
@@ -369,8 +267,10 @@ const StoreReviewHistory = ({storeId, isActive, onAuthorClick}: StoreReviewHisto
                   <div className="col-md-6">
                     <label className="form-label fw-bold">평균 평점</label>
                     <div className="d-flex align-items-center gap-2">
-                      {getRatingStars(selectedReview.rating)}
-                      <span className="fw-bold text-warning">{selectedReview.rating?.toFixed(1)}점</span>
+                      <span className="rating-badge">
+                        {getRatingStars(selectedReview.rating)}
+                        {selectedReview.rating?.toFixed(1)}점
+                      </span>
                     </div>
                   </div>
                   <div className="col-md-6">
@@ -383,8 +283,8 @@ const StoreReviewHistory = ({storeId, isActive, onAuthorClick}: StoreReviewHisto
                   </div>
                   <div className="col-12">
                     <label className="form-label fw-bold">리뷰 내용</label>
-                    <div className="border rounded p-3 bg-light">
-                      <p className="mb-0">{selectedReview.contents || '내용이 없습니다.'}</p>
+                    <div className="detail-value-strong detail-value-strong--text">
+                      {selectedReview.contents || '내용이 없습니다.'}
                     </div>
                   </div>
                   {selectedReview.images && selectedReview.images.length > 0 && (
@@ -393,28 +293,22 @@ const StoreReviewHistory = ({storeId, isActive, onAuthorClick}: StoreReviewHisto
                       <div className="row g-2">
                         {selectedReview.images.map((image, index) => (
                           <div key={index} className="col-6 col-md-4 col-lg-3">
-                            <div className="card">
-                              <img
-                                src={image.imageUrl}
-                                alt={`Review image ${index + 1}`}
-                                className="card-img-top"
-                                style={{
-                                  height: '150px',
-                                  objectFit: 'cover',
-                                  cursor: 'pointer'
-                                }}
-                                onClick={() => window.open(image.imageUrl, '_blank')}
-                                onError={(e: any) => {
-                                  e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjRjVGNUY1Ii8+CjxwYXRoIGQ9Ik0yMCAzMkMxNi42ODYzIDMyIDEzLjUwNTQgMzAuNjgzOSAxMS4yNzI3IDI4LjQ1MTNDOS4wNDAwNyAyNi4yMTg2IDcuNzI0IDIzLjAzNzYgNy43MjQgMTkuNzIzOUM3LjcyNCAxNi40MTAzIDkuMDQwMDcgMTMuMjI5MyAxMS4yNzI3IDEwLjk5NjdDMTMuNTA1NCA4Ljc2NDA0IDE2LjY4NjMgNy40NDggMjAgNy40NDhDMjMuMzEzNyA3LjQ0OCAyNi40OTQ2IDguNzY0MDQgMjguNzI3MyAxMC45OTY3QzMwLjk1OTkgMTMuMjI5MyAzMi4yNzYgMTYuNDEwMyAzMi4yNzYgMTkuNzIzOUMzMi4yNzYgMjMuMDM3NiAzMC45NTk5IDI2LjIxODYgMjguNzI3MyAyOC40NTEzQzI2LjQ5NDYgMzAuNjgzOSAyMy4zMTM3IDMyIDIwIDMyWk0yMCA5LjI0NzlDMTcuMTY1NSA5LjI0NzkgMTQuNDI3MyAxMC4zNzY0IDEyLjM2ODkgMTIuNDM0OEMxMC4zMTA1IDE0LjQ5MzIgOS4xODE5OSAxNy4yMzE0IDkuMTgxOTkgMjAuMDc1OUM5LjE4MTk5IDIyLjkyMDQgMTAuMzEwNSAyNS42NTg2IDEyLjM2ODkgMjcuNzE3QzE0LjQyNzMgMjkuNzc1MyAxNy4xNjU1IDMwLjkwMzkgMjAgMzAuOTAzOUMyMi44MzQ1IDMwLjkwMzkgMjUuNTcyNyAyOS43NzUzIDI3LjYzMTEgMjcuNzE3QzI5LjY4OTUgMjUuNjU4NiAzMC44MTggMjIuOTIwNCAzMC44MTggMjAuMDc1OUMzMC44MTggMTcuMjMxNCAyOS42ODk1IDE0LjQ5MzIgMjcuNjMxMSAxMi40MzQ4QzI1LjU3MjcgMTAuMzc2NCAyMi44MzQ1IDkuMjQ3OSAyMCA5LjI0NzlaIiBmaWxsPSIjOTk5OTk5Ii8+CjxwYXRoIGQ9Ik0yMCAyNi4yNzZDMjEuOTMzIDI2LjI3NiAyMy40NzYgMjQuNzMzIDIzLjQ3NiAyMi44QzIzLjQ3NiAyMC44NjcgMjEuOTMzIDE5LjMyNCAyMCAxOS4zMjRDMTguMDY3IDE5LjMyNCAxNi41MjQgMjAuODY3IDE2LjUyNCAyMi44QzE2LjUyNCAyNC43MzMgMTguMDY3IDI2LjI3NiAyMCAyNi4yNzZaIiBmaWxsPSIjOTk5OTk5Ii8+Cjwvc3ZnPgo=';
-                                  e.target.style.height = '150px';
-                                  e.target.style.objectFit = 'contain';
-                                  e.target.style.backgroundColor = '#f8f9fa';
-                                }}
-                              />
-                              <div className="card-body p-2">
-                                <small className="text-muted">
+                            <div className="item-card">
+                              <div className="store-post__image" style={{aspectRatio: 1}}>
+                                <img
+                                  src={image.imageUrl}
+                                  alt={`리뷰 이미지 ${index + 1}`}
+                                  loading="lazy"
+                                  onClick={() => window.open(image.imageUrl, '_blank')}
+                                  onError={(e: any) => {
+                                    e.target.style.objectFit = 'contain';
+                                  }}
+                                />
+                              </div>
+                              <div className="item-card__body">
+                                <span className="item-card__desc mt-0">
                                   {image.width} × {image.height}
-                                </small>
+                                </span>
                               </div>
                             </div>
                           </div>
@@ -425,13 +319,12 @@ const StoreReviewHistory = ({storeId, isActive, onAuthorClick}: StoreReviewHisto
                   <div className="col-md-6">
                     <label className="form-label fw-bold">작성자 정보</label>
                     <div className="d-flex gap-2 flex-wrap">
-                      <span className="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-3 py-2">
-                        <i className="bi bi-hash me-1"></i>
+                      <span className="badge bg-info-subtle text-info-emphasis">
+                        <i className="bi bi-hash me-1"/>
                         {selectedReview.writer?.userId || '없음'}
                       </span>
-                      <span
-                        className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-3 py-2">
-                        <i className="bi bi-share me-1"></i>
+                      <span className="badge bg-secondary-subtle text-secondary-emphasis">
+                        <i className="bi bi-share me-1"/>
                         {selectedReview.writer?.socialType || '없음'}
                       </span>
                     </div>
@@ -445,8 +338,8 @@ const StoreReviewHistory = ({storeId, isActive, onAuthorClick}: StoreReviewHisto
                         <span className="text-muted">정보 없음</span>
                       )}
                       {selectedReview.store?.name && (
-                        <span className="badge bg-light text-dark border rounded-pill px-3 py-2">
-                          <i className="bi bi-shop me-1"></i>
+                        <span className="badge bg-light text-dark border">
+                          <i className="bi bi-shop me-1"/>
                           {selectedReview.store.name}
                         </span>
                       )}
@@ -456,7 +349,7 @@ const StoreReviewHistory = ({storeId, isActive, onAuthorClick}: StoreReviewHisto
               </div>
               <div className="modal-footer d-flex justify-content-between">
                 <button
-                  className="btn btn-danger rounded-pill px-4"
+                  className="btn btn-danger"
                   onClick={handleBlindReview}
                   disabled={isBlinding}
                 >
@@ -467,13 +360,13 @@ const StoreReviewHistory = ({storeId, isActive, onAuthorClick}: StoreReviewHisto
                     </>
                   ) : (
                     <>
-                      <i className="bi bi-eye-slash me-2"></i>
+                      <i className="bi bi-eye-slash me-2"/>
                       리뷰 블라인드
                     </>
                   )}
                 </button>
-                <button className="btn btn-secondary rounded-pill px-4" onClick={() => setShowModal(false)}>
-                  <i className="bi bi-x-lg me-2"></i>
+                <button className="btn btn-secondary" onClick={() => setShowModal(false)}>
+                  <i className="bi bi-x-lg me-2"/>
                   닫기
                 </button>
               </div>
@@ -481,7 +374,7 @@ const StoreReviewHistory = ({storeId, isActive, onAuthorClick}: StoreReviewHisto
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 

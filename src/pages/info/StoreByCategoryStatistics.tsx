@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from "react";
-import {Alert, Card, Form, Table} from "react-bootstrap";
 import {
   Bar,
   BarChart,
@@ -17,6 +16,23 @@ import storeCategoryApi from "@/api/storeCategoryApi";
 import {DailyStatistic} from "@/types/statistics";
 import {StoreCategory} from "@/types/storeCategory";
 import {toast} from "react-toastify";
+import Loading from "@/components/common/Loading";
+import EmptyState from "@/components/common/EmptyState";
+import FilterCard from "@/components/common/FilterCard";
+import SectionCard from "@/components/common/SectionCard";
+import DataTable from "@/components/common/DataTable";
+import {
+  CHART_AXIS_PROPS,
+  CHART_COLORS,
+  CHART_GRID_PROPS,
+  CHART_HEIGHT,
+  CHART_LEGEND_PROPS,
+  CHART_TOOLTIP_PROPS,
+  formatAxisNumber,
+  formatDateWithDay,
+  formatNumber,
+  formatShortDateWithDay,
+} from "@/constants/chart";
 
 interface StoreByCategoryStatisticsProps {
   statisticsType: string;
@@ -26,11 +42,11 @@ interface StoreByCategoryStatisticsProps {
 }
 
 const StoreByCategoryStatistics: React.FC<StoreByCategoryStatisticsProps> = ({
-                                                                               statisticsType,
-                                                                               startDate,
-                                                                               endDate,
-                                                                               onFetch
-                                                                             }) => {
+                                                                              statisticsType,
+                                                                              startDate,
+                                                                              endDate,
+                                                                              onFetch
+                                                                            }) => {
   const [data, setData] = useState<DailyStatistic[]>([]);
   const [loading, setLoading] = useState(false);
   const [storeCategories, setStoreCategories] = useState<StoreCategory[]>([]);
@@ -91,55 +107,99 @@ const StoreByCategoryStatistics: React.FC<StoreByCategoryStatisticsProps> = ({
     }
   };
 
-  const formatNumber = (num: number): string => {
-    return num.toLocaleString("ko-KR");
-  };
+  const chartData = data.map((item) => ({
+    date: formatShortDateWithDay(item.date),
+    "신규": item.newCount ?? 0,
+    "누적": item.totalCount,
+  }));
 
-  const formatDateWithDay = (dateStr: string): string => {
-    const date = new Date(dateStr);
-    const days = ["일", "월", "화", "수", "목", "금", "토"];
-    const dayOfWeek = days[date.getDay()];
-    return `${dateStr} (${dayOfWeek})`;
-  };
+  const categoryName = storeCategories.find(c => c.categoryId === selectedCategory)?.name || "";
 
-  const formatYAxisTick = (value: number): string => {
-    if (value >= 1000000) {
-      return `${(value / 1000000).toFixed(2)}M`;
+  const renderResult = () => {
+    if (loading) {
+      return (
+        <div className="py-5">
+          <Loading/>
+        </div>
+      );
     }
-    if (value >= 1000) {
-      return `${(value / 1000).toFixed(2)}K`;
+
+    if (data.length === 0) {
+      return (
+        <EmptyState
+          icon="bi-bar-chart-line"
+          title="조회된 데이터가 없습니다"
+          description="선택한 카테고리와 기간에 집계된 통계가 없습니다."
+        />
+      );
     }
-    return value.toString();
-  };
 
-  const getChartData = () => {
-    return data.map((item) => {
-      const date = new Date(item.date);
-      const days = ["일", "월", "화", "수", "목", "금", "토"];
-      const dayOfWeek = days[date.getDay()];
-      const dateStr = item.date.substring(5); // MM-DD
+    return (
+      <>
+        <SectionCard title={`일자별 신규 가게 수 추이`} icon="bi-bar-chart-fill" description={categoryName}>
+          <ResponsiveContainer width="100%" height={CHART_HEIGHT}>
+            <BarChart data={chartData}>
+              <CartesianGrid {...CHART_GRID_PROPS}/>
+              <XAxis dataKey="date" {...CHART_AXIS_PROPS}/>
+              <YAxis tickFormatter={formatAxisNumber} {...CHART_AXIS_PROPS}/>
+              <Tooltip {...CHART_TOOLTIP_PROPS}/>
+              <Legend {...CHART_LEGEND_PROPS}/>
+              <Bar dataKey="신규" fill={CHART_COLORS.primary} radius={[4, 4, 0, 0]}/>
+            </BarChart>
+          </ResponsiveContainer>
+        </SectionCard>
 
-      return {
-        date: `${dateStr} (${dayOfWeek})`,
-        "신규": item.newCount ?? 0,
-        "누적": item.totalCount,
-      };
-    });
-  };
+        <SectionCard title="누적 가게 수 추이" icon="bi-graph-up" description={categoryName}>
+          <ResponsiveContainer width="100%" height={CHART_HEIGHT}>
+            <LineChart data={chartData}>
+              <CartesianGrid {...CHART_GRID_PROPS}/>
+              <XAxis dataKey="date" {...CHART_AXIS_PROPS}/>
+              <YAxis domain={["auto", "auto"]} tickFormatter={formatAxisNumber} {...CHART_AXIS_PROPS}/>
+              <Tooltip {...CHART_TOOLTIP_PROPS}/>
+              <Legend {...CHART_LEGEND_PROPS}/>
+              <Line type="monotone" dataKey="누적" stroke={CHART_COLORS.success} strokeWidth={2} dot={false}/>
+            </LineChart>
+          </ResponsiveContainer>
+        </SectionCard>
 
-  const getSelectedCategoryName = () => {
-    const category = storeCategories.find(c => c.categoryId === selectedCategory);
-    return category?.name || "";
+        <SectionCard
+          title="일자별 상세 데이터"
+          icon="bi-table"
+          description={`${categoryName} · 총 ${data.length}일의 데이터가 조회되었습니다.`}
+          flush
+        >
+          <DataTable maxHeight="440px">
+            <thead>
+            <tr>
+              <th>날짜</th>
+              <th className="num">신규 가게 수</th>
+              <th className="num">누적 가게 수</th>
+            </tr>
+            </thead>
+            <tbody>
+            {[...data].reverse().map((item) => (
+              <tr key={item.date}>
+                <td>{formatDateWithDay(item.date)}</td>
+                <td className="num">{formatNumber(item.newCount ?? 0)}</td>
+                <td className="num">{formatNumber(item.totalCount)}</td>
+              </tr>
+            ))}
+            </tbody>
+          </DataTable>
+        </SectionCard>
+      </>
+    );
   };
 
   return (
     <>
-      {/* 카테고리 선택 */}
-      <Card className="mb-4 shadow-sm">
-        <Card.Body>
-          <Form.Group>
-            <Form.Label className="fw-semibold">카테고리 선택</Form.Label>
-            <Form.Select
+      <FilterCard title="카테고리 선택" icon="bi-grid-3x3-gap">
+        <div className="row g-3">
+          <div className="col-12 col-md-6">
+            <label className="form-label" htmlFor="stat-store-category">가게 카테고리</label>
+            <select
+              id="stat-store-category"
+              className="form-select"
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
               disabled={loading}
@@ -149,99 +209,12 @@ const StoreByCategoryStatistics: React.FC<StoreByCategoryStatisticsProps> = ({
                   {category.name}
                 </option>
               ))}
-            </Form.Select>
-            {selectedCategory && (
-              <Form.Text className="text-muted">
-                현재 선택된 카테고리: <strong>{getSelectedCategoryName()}</strong>
-              </Form.Text>
-            )}
-          </Form.Group>
-        </Card.Body>
-      </Card>
-
-      {loading ? (
-        <div className="text-center py-5">
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">조회 중...</span>
+            </select>
           </div>
         </div>
-      ) : data.length === 0 ? (
-        <Alert variant="info">
-          카테고리를 선택하면 해당 카테고리의 가게 통계가 표시됩니다.
-        </Alert>
-      ) : (
-        <>
-          {/* 일자별 신규 가게 수 추이 */}
-          <Card className="mb-4 shadow-sm">
-            <Card.Body>
-              <h5 className="fw-semibold mb-3">
-                [{getSelectedCategoryName()}] 일자별 신규 가게 수 추이
-              </h5>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={getChartData()}>
-                  <CartesianGrid strokeDasharray="3 3"/>
-                  <XAxis dataKey="date"/>
-                  <YAxis tickFormatter={formatYAxisTick}/>
-                  <Tooltip/>
-                  <Legend/>
-                  <Bar dataKey="신규" fill="#0d6efd"/>
-                </BarChart>
-              </ResponsiveContainer>
-            </Card.Body>
-          </Card>
+      </FilterCard>
 
-          {/* 누적 가게 수 추이 */}
-          <Card className="mb-4 shadow-sm">
-            <Card.Body>
-              <h5 className="fw-semibold mb-3">
-                [{getSelectedCategoryName()}] 누적 가게 수 추이
-              </h5>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={getChartData()}>
-                  <CartesianGrid strokeDasharray="3 3"/>
-                  <XAxis dataKey="date"/>
-                  <YAxis domain={["auto", "auto"]} tickFormatter={formatYAxisTick}/>
-                  <Tooltip/>
-                  <Legend/>
-                  <Line type="monotone" dataKey="누적" stroke="#198754" strokeWidth={2}/>
-                </LineChart>
-              </ResponsiveContainer>
-            </Card.Body>
-          </Card>
-
-          {/* 테이블 영역 */}
-          <Card className="shadow-sm">
-            <Card.Body>
-              <h5 className="fw-semibold mb-3">
-                [{getSelectedCategoryName()}] 일자별 상세 데이터
-              </h5>
-              <p className="text-muted mb-3">
-                총 <strong>{data.length}일</strong>의 데이터가 조회되었습니다.
-              </p>
-              <div style={{maxHeight: "500px", overflowY: "auto"}}>
-                <Table striped bordered hover>
-                  <thead className="table-light" style={{position: "sticky", top: 0}}>
-                  <tr>
-                    <th>날짜</th>
-                    <th className="text-end">신규 가게 수</th>
-                    <th className="text-end">누적 가게 수</th>
-                  </tr>
-                  </thead>
-                  <tbody>
-                  {[...data].reverse().map((item, index) => (
-                    <tr key={index}>
-                      <td>{formatDateWithDay(item.date)}</td>
-                      <td className="text-end">{formatNumber(item.newCount ?? 0)}</td>
-                      <td className="text-end">{formatNumber(item.totalCount)}</td>
-                    </tr>
-                  ))}
-                  </tbody>
-                </Table>
-              </div>
-            </Card.Body>
-          </Card>
-        </>
-      )}
+      {renderResult()}
     </>
   );
 };

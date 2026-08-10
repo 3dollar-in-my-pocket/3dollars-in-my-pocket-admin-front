@@ -1,10 +1,11 @@
 import StoreStatusBadge from '@/components/common/badges/StoreStatusBadge';
 import StoreTypeBadge from '@/components/common/badges/StoreTypeBadge';
-import {useCallback, useRef, useState} from 'react';
+import {useCallback, useState} from 'react';
 import {toast} from 'react-toastify';
 import {getActivitiesStatusBadgeClass, getActivitiesStatusDisplayName} from '@/utils/display/storeDisplay';
 
 import reviewApi from "@/api/reviewApi";
+import HistoryPanel from "@/components/common/HistoryPanel";
 import useCursorPagination from "@/hooks/useCursorPagination";
 import {Review, ReviewStatus} from "@/types/review";
 import {ActivitiesStatus, SimpleStore} from "@/types/store";
@@ -22,7 +23,6 @@ const UserReviewHistory = ({userId, isActive, onStoreClick}: UserReviewHistoryPr
   const [selectedReview, setSelectedReview] = useState<Review | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const fetchUserReviews = useCallback(
     (cursor: string | null) => reviewApi.getUserReviews(userId, cursor, 20),
@@ -32,8 +32,10 @@ const UserReviewHistory = ({userId, isActive, onStoreClick}: UserReviewHistoryPr
   const {
     items: reviews,
     isLoading,
+    isLoadingMore,
     hasMore,
     totalCount,
+    error,
     refresh,
     loadMore
   } = useCursorPagination<Review>({
@@ -41,15 +43,6 @@ const UserReviewHistory = ({userId, isActive, onStoreClick}: UserReviewHistoryPr
     enabled: Boolean(userId && isActive),
     deps: [userId]
   });
-
-  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
-    const {scrollTop, scrollHeight, clientHeight} = e.currentTarget;
-    const isScrolledToBottom = scrollHeight - scrollTop <= clientHeight + 100;
-
-    if (isScrolledToBottom && hasMore && !isLoading) {
-      loadMore();
-    }
-  }, [hasMore, isLoading, loadMore]);
 
   const handleReviewClick = (review: Review) => {
     setSelectedReview(review);
@@ -63,10 +56,11 @@ const UserReviewHistory = ({userId, isActive, onStoreClick}: UserReviewHistoryPr
 
   const getActivitiesStatusBadge = (activitiesStatus?: ActivitiesStatus) => {
     if (!activitiesStatus) return null;
-    const badgeClass = getActivitiesStatusBadgeClass(activitiesStatus);
+    // getActivitiesStatusBadgeClass는 'bg-primary' 형태를 반환하므로 subtle 배지 클래스로 변환한다
+    const color = getActivitiesStatusBadgeClass(activitiesStatus).replace('bg-', '');
     const statusText = getActivitiesStatusDisplayName(activitiesStatus);
     return (
-      <span className={`badge ${badgeClass} bg-opacity-10 text-dark border rounded-pill px-2 py-1 small`}>
+      <span className={`badge bg-${color}-subtle text-${color}-emphasis`}>
         {statusText}
       </span>
     );
@@ -79,29 +73,29 @@ const UserReviewHistory = ({userId, isActive, onStoreClick}: UserReviewHistoryPr
 
     switch (status) {
       case 'POSTED':
-        badgeClass = 'bg-success';
+        badgeClass = 'bg-success-subtle text-success-emphasis';
         statusText = '활성화된 리뷰';
         iconClass = 'bi-check-circle';
         break;
       case 'FILTERED':
-        badgeClass = 'bg-warning';
+        badgeClass = 'bg-warning-subtle text-warning-emphasis';
         statusText = '블라인드된 리뷰';
         iconClass = 'bi-eye-slash';
         break;
       case 'DELETED':
-        badgeClass = 'bg-danger';
+        badgeClass = 'bg-danger-subtle text-danger-emphasis';
         statusText = '삭제된 리뷰';
         iconClass = 'bi-x-circle';
         break;
       default:
-        badgeClass = 'bg-secondary';
+        badgeClass = 'bg-secondary-subtle text-secondary-emphasis';
         statusText = '알 수 없음';
         iconClass = 'bi-question-circle';
     }
 
     return (
-      <span className={`badge ${badgeClass} bg-opacity-10 text-dark border rounded-pill px-2 py-1 small`}>
-        <i className={`bi ${iconClass} me-1`}></i>
+      <span className={`badge ${badgeClass}`}>
+        <i className={`bi ${iconClass} me-1`}/>
         {statusText}
       </span>
     );
@@ -114,7 +108,7 @@ const UserReviewHistory = ({userId, isActive, onStoreClick}: UserReviewHistoryPr
         <i
           key={i}
           className={`bi ${i <= rating ? 'bi-star-fill text-warning' : 'bi-star text-muted'}`}
-        ></i>
+        />
       );
     }
     return stars;
@@ -139,402 +133,259 @@ const UserReviewHistory = ({userId, isActive, onStoreClick}: UserReviewHistoryPr
   };
 
   return (
-    <div>
-      <div className="px-2 px-sm-3 px-md-4 pt-2 pt-md-4">
-        <div
-          className="d-flex align-items-center justify-content-between mb-3 mb-md-4 p-2 p-sm-3 p-md-4 rounded-4 shadow-sm"
-          style={{
-            background: 'linear-gradient(135deg, #e3f2fd 0%, #f8fffe 100%)',
-            border: '1px solid rgba(13, 110, 253, 0.1)'
-          }}>
-          <div className="d-flex align-items-center gap-3">
-            <div className="rounded-circle p-3 shadow-sm"
-                 style={{background: 'linear-gradient(135deg, #0d6efd 0%, #6610f2 100%)'}}>
-              <i className="bi bi-chat-square-text text-white fs-5"></i>
-            </div>
-            <div>
-              <h6 className="mb-0 fw-bold text-dark">작성한 리뷰</h6>
-              <small className="text-muted">사용자가 작성한 가게 리뷰를 확인하세요</small>
-            </div>
-          </div>
-          {totalCount > 0 && (
-            <div className="d-flex align-items-center gap-2">
-              <span className="badge bg-primary px-3 py-2 rounded-pill shadow-sm" style={{fontSize: '0.9rem'}}>
-                <i className="bi bi-chat-dots me-1"></i>
-                총 {totalCount}개
-              </span>
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div
-        className="px-2 px-sm-3 px-md-4"
-        ref={scrollContainerRef}
-        onScroll={handleScroll}
-        style={{maxHeight: '500px', overflowY: 'auto'}}
+    <>
+      <HistoryPanel
+        title="작성한 리뷰"
+        icon="bi-chat-square-text"
+        count={reviews.length}
+        totalCount={totalCount}
+        hasMore={hasMore}
+        isLoading={isLoading}
+        isLoadingMore={isLoadingMore}
+        error={error}
+        onRefresh={refresh}
+        onLoadMore={loadMore}
+        emptyTitle="작성한 리뷰가 없습니다"
+        emptyDescription="아직 작성한 리뷰가 없습니다."
       >
-        {reviews.length === 0 && !isLoading ? (
-          <div className="text-center py-5">
-            <div className="bg-light rounded-circle mx-auto mb-4" style={{
-              width: '80px',
-              height: '80px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              <i className="bi bi-chat-square-text fs-1 text-secondary"></i>
-            </div>
-            <h5 className="text-dark mb-2">작성한 리뷰가 없습니다</h5>
-            <p className="text-muted">아직 작성한 리뷰가 없습니다.</p>
-          </div>
-        ) : (
-          <div>
-            {reviews.map((review, index) => (
-              <div key={review.reviewId}>
-                <div
-                  className="review-item p-3 border-bottom bg-white"
-                  style={{
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    borderLeft: '4px solid #0d6efd'
-                  }}
-                  onClick={() => handleReviewClick(review)}
-                  onMouseEnter={(e: any) => {
-                    e.currentTarget.style.backgroundColor = '#f8f9fa';
-                    e.currentTarget.style.transform = 'translateX(4px)';
-                  }}
-                  onMouseLeave={(e: any) => {
-                    e.currentTarget.style.backgroundColor = '#ffffff';
-                    e.currentTarget.style.transform = 'translateX(0)';
-                  }}
-                >
-                  <div className="d-flex align-items-start gap-3">
-                    <div className="flex-grow-1">
-                      <div className="d-flex align-items-start gap-2 mb-2 flex-wrap">
-                        <div
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (review.store && onStoreClick) {
-                              onStoreClick(review.store);
-                            }
-                          }}
-                          className="clickable-store d-flex align-items-center gap-1"
-                          style={{
-                            cursor: 'pointer',
-                            padding: '2px 4px',
-                            borderRadius: '4px',
-                            transition: 'all 0.2s ease',
-                            minWidth: 'fit-content',
-                            flexShrink: 0
-                          }}
-                          onMouseEnter={(e: any) => {
-                            e.currentTarget.style.backgroundColor = '#f8f9fa';
-                            e.currentTarget.style.transform = 'translateY(-1px)';
-                          }}
-                          onMouseLeave={(e: any) => {
-                            e.currentTarget.style.backgroundColor = 'transparent';
-                            e.currentTarget.style.transform = 'translateY(0)';
-                          }}
-                        >
-                          <h6 className="mb-0 fw-bold text-primary" style={{
-                            wordBreak: 'break-word',
-                            whiteSpace: 'normal',
-                            lineHeight: '1.3',
-                            maxWidth: window.innerWidth <= 768 ? '150px' : '200px'
-                          }}>
-                            {review.store?.name || '가게 이름 없음'}
-                          </h6>
-                          <i className="bi bi-box-arrow-up-right text-primary" style={{fontSize: '0.7rem'}}></i>
-                        </div>
-                        <div className="d-flex gap-1 flex-wrap">
-                          {getReviewStatusBadge(review.status)}
-                          {<StoreStatusBadge status={review.store?.status}/>}
-                          {review.store?.storeType && <StoreTypeBadge storeType={review.store.storeType}/>}
-                        </div>
-                      </div>
-
-                      <div className="d-flex align-items-center gap-2 mb-2">
-                        <div className="d-flex align-items-center">
-                          {renderStars(review.rating)}
-                        </div>
-                        <span className="text-muted small">({review.rating}점)</span>
-                      </div>
-
-                      <div className="text-muted small mb-2">
-                        <i className="bi bi-geo-alt me-1"></i>
-                        {review.store?.address?.fullAddress || '주소 정보 없음'}
-                      </div>
-
-                      <div className="text-dark mb-2">
-                        <p className="mb-0" style={{
-                          display: '-webkit-box',
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: 'vertical',
-                          overflow: 'hidden'
-                        }}>
-                          {review.contents || '리뷰 내용이 없습니다.'}
-                        </p>
-                      </div>
-
-                      {review.images && review.images.length > 0 && (
-                        <div className="d-flex gap-1 mb-2">
-                          {review.images.slice(0, 3).map((image, idx) => (
-                            <div key={idx} className="position-relative">
-                              <img
-                                src={image.imageUrl}
-                                alt={`리뷰 이미지 ${idx + 1}`}
-                                className="rounded"
-                                style={{width: '40px', height: '40px', objectFit: 'cover'}}
-                                onError={(e: any) => {
-                                  e.target.style.display = 'none';
-                                }}
-                              />
-                            </div>
-                          ))}
-                          {review.images.length > 3 && (
-                            <div className="d-flex align-items-center justify-content-center rounded bg-light"
-                                 style={{width: '40px', height: '40px'}}>
-                              <span className="text-muted small">+{review.images.length - 3}</span>
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      <div className="d-flex flex-wrap gap-1 mb-2">
-                        {review.store?.categories?.slice(0, 2).map((category, idx) => (
-                          <span key={idx}
-                                className="badge bg-secondary bg-opacity-10 text-secondary border rounded-pill px-2 py-1"
-                                style={{fontSize: '0.7rem'}}>
-                            {category?.name || '카테고리'}
-                          </span>
-                        ))}
-                        {review.store?.categories && review.store.categories.length > 2 && (
-                          <span className="badge bg-light text-muted border rounded-pill px-2 py-1"
-                                style={{fontSize: '0.7rem'}}>
-                            +{review.store.categories.length - 2}
-                          </span>
-                        )}
-                      </div>
-
-                      {review.createdAt && (
-                        <div className="d-flex align-items-center gap-2 text-muted small">
-                          <i className="bi bi-clock me-1"></i>
-                          작성일: {formatDateTime(review.createdAt)}
-                        </div>
-                      )}
-                    </div>
-                    <div className="text-end">
+        {reviews.map((review) => (
+          <div
+            key={review.reviewId}
+            className="item-card item-card--clickable mb-3"
+            role="button"
+            tabIndex={0}
+            onClick={() => handleReviewClick(review)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                handleReviewClick(review);
+              }
+            }}
+          >
+            <div className="item-card__body">
+              <div className="d-flex align-items-start justify-content-between gap-2">
+                <div className="min-w-0">
+                  <div className="d-flex align-items-center flex-wrap gap-2">
+                    {review.store && onStoreClick ? (
                       <button
-                        className="btn btn-outline-primary btn-sm rounded-pill px-3"
+                        type="button"
+                        className="btn btn-link btn-sm p-0 text-decoration-none item-card__name clickable-author"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleReviewClick(review);
+                          onStoreClick(review.store);
                         }}
                       >
-                        <i className="bi bi-eye me-1"></i>
-                        상세보기
+                        {review.store.name || '가게 이름 없음'}
+                        <i className="bi bi-box-arrow-up-right ms-1"/>
                       </button>
-                    </div>
+                    ) : (
+                      <h3 className="item-card__name">{review.store?.name || '가게 이름 없음'}</h3>
+                    )}
+                    {getReviewStatusBadge(review.status)}
+                    <StoreStatusBadge status={review.store?.status}/>
+                    {review.store?.storeType && <StoreTypeBadge storeType={review.store.storeType}/>}
                   </div>
+                  <p className="item-card__desc">
+                    <i className="bi bi-geo-alt me-1"/>
+                    {review.store?.address?.fullAddress || '주소 정보 없음'}
+                  </p>
                 </div>
+                <button
+                  className="btn btn-sm btn-outline-primary flex-shrink-0"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleReviewClick(review);
+                  }}
+                >
+                  <i className="bi bi-eye me-1"/>
+                  상세보기
+                </button>
               </div>
-            ))}
-          </div>
-        )}
 
-        {isLoading && reviews.length > 0 && (
-          <div className="text-center p-3 bg-light">
-            <div className="spinner-border text-primary" role="status">
-              <span className="visually-hidden">Loading...</span>
-            </div>
-            <p className="small text-muted mt-2 mb-0">추가 데이터 로딩 중...</p>
-          </div>
-        )}
-
-        {isLoading && reviews.length === 0 && (
-          <div className="text-center py-5">
-            <div className="mb-3">
-              <div className="spinner-border text-primary" style={{width: '3rem', height: '3rem'}} role="status">
-                <span className="visually-hidden">Loading...</span>
+              <div className="d-flex align-items-center flex-wrap gap-2 mt-2">
+                <span className="rating-badge">
+                  {renderStars(review.rating)}
+                  {review.rating}점
+                </span>
+                {review.store?.categories?.slice(0, 2).map((category, idx) => (
+                  <span key={idx} className="badge bg-secondary-subtle text-secondary-emphasis">
+                    {category?.name || '카테고리'}
+                  </span>
+                ))}
+                {review.store?.categories && review.store.categories.length > 2 && (
+                  <span className="badge bg-secondary-subtle text-secondary-emphasis">
+                    +{review.store.categories.length - 2}
+                  </span>
+                )}
               </div>
+
+              <div className="detail-value-strong detail-value-strong--text mt-2">
+                {review.contents || '리뷰 내용이 없습니다.'}
+              </div>
+
+              {review.images && review.images.length > 0 && (
+                <div className="row g-2 mt-2">
+                  {review.images.slice(0, 3).map((image, idx) => (
+                    <div key={idx} className="col-4 col-md-3">
+                      <div className="store-post__image position-relative" style={{aspectRatio: 1}}>
+                        <img
+                          src={image.imageUrl}
+                          alt={`리뷰 이미지 ${idx + 1}`}
+                          loading="lazy"
+                          onError={(e: any) => {
+                            e.target.style.display = 'none';
+                          }}
+                        />
+                        {idx === 2 && review.images.length > 3 && (
+                          <div
+                            className="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-dark bg-opacity-75 text-white small">
+                            +{review.images.length - 3}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {review.createdAt && (
+                <p className="item-card__desc">
+                  <i className="bi bi-clock me-1"/>
+                  작성일: {formatDateTime(review.createdAt)}
+                </p>
+              )}
             </div>
-            <h5 className="text-dark mb-1">리뷰를 불러오는 중...</h5>
-            <p className="text-muted">잠시만 기다려주세요...</p>
           </div>
-        )}
-      </div>
+        ))}
+      </HistoryPanel>
+
       {/* 리뷰 상세 모달 */}
       {showModal && selectedReview && (
-        <div className="modal fade show d-block" tabIndex={-1} style={{backgroundColor: 'rgba(0,0,0,0.5)'}}>
-          <div className="modal-dialog modal-lg modal-dialog-centered">
-            <div className="modal-content border-0 shadow-lg">
-              <div className="modal-header border-0 pb-0"
-                   style={{background: 'linear-gradient(135deg, #0d6efd 0%, #6610f2 100%)'}}>
-                <div className="w-100">
-                  <div className="d-flex align-items-center gap-3 text-white">
-                    <div>
-                      <h4 className="mb-0 fw-bold">{selectedReview?.store?.name || '가게 이름 없음'}</h4>
-                      <div className="d-flex align-items-center gap-2 mt-2">
-                        <div className="d-flex align-items-center">
-                          {renderStars(selectedReview.rating)}
-                        </div>
-                        <span className="opacity-90">({selectedReview.rating}점)</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <button type="button" className="btn-close btn-close-white" onClick={handleCloseModal}></button>
+        <div
+          className="modal fade show"
+          style={{display: 'block', backgroundColor: 'rgba(0,0,0,0.5)'}}
+          onClick={handleCloseModal}
+        >
+          <div className="modal-dialog modal-lg modal-dialog-centered" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">
+                  <i className="bi bi-chat-square-text text-primary me-2"/>
+                  리뷰 상세 정보
+                </h5>
+                <button type="button" className="btn-close" onClick={handleCloseModal} disabled={isDeleting}/>
               </div>
-              <div className="modal-body p-4">
-                <div className="row g-4">
+              <div className="modal-body">
+                <div className="row g-3">
                   <div className="col-md-6">
-                    <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
-                      <div className="bg-primary bg-opacity-10 rounded-circle p-2">
-                        <i className="bi bi-geo-alt text-primary"></i>
-                      </div>
-                      <div>
-                        <label className="form-label fw-semibold text-muted mb-1">주소</label>
-                        <p className="mb-0 text-dark">{selectedReview?.store?.address?.fullAddress || '주소 정보 없음'}</p>
-                      </div>
-                    </div>
+                    <label className="form-label fw-bold">가게명</label>
+                    <p className="form-control-plaintext">{selectedReview.store?.name || '가게 이름 없음'}</p>
                   </div>
-
-                  <div className="col-md-12">
-                    <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
-                      <div className="bg-success bg-opacity-10 rounded-circle p-2">
-                        <i className="bi bi-shield-check text-success"></i>
-                      </div>
-                      <div>
-                        <label className="form-label fw-semibold text-muted mb-1">가게 상태</label>
-                        <div className="d-flex gap-2">
-                          <StoreStatusBadge status={selectedReview?.store?.status}/>
-                          {getActivitiesStatusBadge(selectedReview?.store?.activitiesStatus)}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-4">
-                    <h6 className="fw-bold text-dark mb-3">가게 카테고리</h6>
-                    <div className="d-flex flex-wrap gap-2">
-                      {selectedReview?.store?.categories?.map((category, idx) => (
-                        <span key={idx}
-                              className="badge bg-primary bg-opacity-10 text-primary border rounded-pill px-3 py-2">
-                        {category?.name || '카테고리'}
+                  <div className="col-md-6">
+                    <label className="form-label fw-bold">리뷰 평점</label>
+                    <div>
+                      <span className="rating-badge">
+                        {renderStars(selectedReview.rating)}
+                        {selectedReview.rating ? selectedReview.rating.toFixed(1) : '0.0'}점
                       </span>
+                    </div>
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label fw-bold">주소</label>
+                    <p className="form-control-plaintext">
+                      {selectedReview.store?.address?.fullAddress || '주소 정보 없음'}
+                    </p>
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label fw-bold">리뷰 상태</label>
+                    <div>
+                      {getReviewStatusBadge(selectedReview.status)}
+                    </div>
+                  </div>
+                  <div className="col-12">
+                    <label className="form-label fw-bold">가게 상태</label>
+                    <div className="d-flex gap-2 flex-wrap">
+                      <StoreStatusBadge status={selectedReview.store?.status}/>
+                      {getActivitiesStatusBadge(selectedReview.store?.activitiesStatus)}
+                    </div>
+                  </div>
+                  <div className="col-12">
+                    <label className="form-label fw-bold">가게 카테고리</label>
+                    <div className="d-flex flex-wrap gap-2">
+                      {selectedReview.store?.categories?.map((category, idx) => (
+                        <span key={idx} className="badge bg-primary-subtle text-primary-emphasis">
+                          {category?.name || '카테고리'}
+                        </span>
                       )) || <span className="text-muted">카테고리 정보 없음</span>}
                     </div>
                   </div>
-                </div>
-
-                <div className="mt-4">
-                  <h6 className="fw-bold text-dark mb-3">리뷰 내용</h6>
-                  <div className="p-3 bg-light rounded-3">
-                    <p className="mb-0 text-dark" style={{whiteSpace: 'pre-wrap', lineHeight: '1.6'}}>
-                      {selectedReview?.contents || '리뷰 내용이 없습니다.'}
-                    </p>
+                  <div className="col-12">
+                    <label className="form-label fw-bold">리뷰 내용</label>
+                    <div className="detail-value-strong detail-value-strong--text">
+                      {selectedReview.contents || '리뷰 내용이 없습니다.'}
+                    </div>
                   </div>
-                </div>
-
-                {selectedReview?.images && selectedReview.images.length > 0 && (
-                  <div className="mt-4">
-                    <h6 className="fw-bold text-dark mb-3">리뷰 이미지</h6>
-                    <div className="row g-3">
-                      {selectedReview.images.map((image, idx) => (
-                        <div key={idx} className="col-md-4">
-                          <div className="position-relative">
-                            <img
-                              src={image.imageUrl}
-                              alt={`리뷰 이미지 ${idx + 1}`}
-                              className="img-fluid rounded shadow-sm"
-                              style={{width: '100%', height: '150px', objectFit: 'cover'}}
-                              onError={(e: any) => {
-                                e.target.src = '/placeholder-image.png';
-                              }}
-                            />
+                  {selectedReview.images && selectedReview.images.length > 0 && (
+                    <div className="col-12">
+                      <label className="form-label fw-bold">리뷰 이미지 ({selectedReview.images.length}개)</label>
+                      <div className="row g-2">
+                        {selectedReview.images.map((image, idx) => (
+                          <div key={idx} className="col-6 col-md-4">
+                            <div className="store-post__image" style={{aspectRatio: 1}}>
+                              <img
+                                src={image.imageUrl}
+                                alt={`리뷰 이미지 ${idx + 1}`}
+                                loading="lazy"
+                                onError={(e: any) => {
+                                  e.target.src = '/placeholder-image.png';
+                                }}
+                              />
+                            </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <div className="mt-4">
-                  <h6 className="fw-bold text-dark mb-3">리뷰 평점</h6>
-                  <div className="p-3 bg-light rounded-3">
-                    <p
-                      className="mb-0 text-dark fw-bold">{selectedReview.rating ? selectedReview.rating.toFixed(1) : '0.0'}점</p>
-                  </div>
-                </div>
-
-                <div className="col-md-6">
-                  <h6 className="fw-bold text-dark mb-3">리뷰 상태</h6>
-                  <div className="p-3 bg-light rounded-3">
-                    {getReviewStatusBadge(selectedReview?.status)}
-                  </div>
-                </div>
-
-                <div className="mt-4">
-                  <h6 className="fw-bold text-dark mb-3">리뷰 등록/수정 일시</h6>
-                  <div className="row g-3">
-                    <div className="col-md-6">
-                      <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
-                        <div className="bg-warning bg-opacity-10 rounded-circle p-2">
-                          <i className="bi bi-calendar3 text-warning"></i>
-                        </div>
-                        <div>
-                          <label className="form-label fw-semibold text-muted mb-1">등록일시</label>
-                          <p className="mb-0 fw-bold text-dark">{formatDateTime(selectedReview.createdAt)}</p>
-                        </div>
+                        ))}
                       </div>
                     </div>
-                    <div className="col-md-6">
-                      <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
-                        <div className="bg-info bg-opacity-10 rounded-circle p-2">
-                          <i className="bi bi-clock-history text-info"></i>
-                        </div>
-                        <div>
-                          <label className="form-label fw-semibold text-muted mb-1">수정일시</label>
-                          <p className="mb-0 fw-bold text-dark">{formatDateTime(selectedReview.updatedAt)}</p>
-                        </div>
-                      </div>
-                    </div>
+                  )}
+                  <div className="col-md-6">
+                    <label className="form-label fw-bold">등록일시</label>
+                    <p className="form-control-plaintext">{formatDateTime(selectedReview.createdAt)}</p>
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label fw-bold">수정일시</label>
+                    <p className="form-control-plaintext">{formatDateTime(selectedReview.updatedAt)}</p>
                   </div>
                 </div>
               </div>
-              <div className="modal-footer border-0 bg-light">
-                <button type="button" className="btn btn-secondary rounded-pill px-4" onClick={handleCloseModal}
-                        disabled={isDeleting}>
-                  <i className="bi bi-x-lg me-2"></i>
-                  닫기
-                </button>
+              <div className="modal-footer d-flex justify-content-between">
                 <button
                   type="button"
-                  className="btn btn-danger rounded-pill px-4 ms-2"
+                  className="btn btn-danger"
                   onClick={handleDeleteReview}
                   disabled={isDeleting || selectedReview?.status !== 'POSTED'}
                 >
                   {isDeleting ? (
-                    <span>
-                      <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    <>
+                      <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"/>
                       블라인드 중...
-                    </span>
+                    </>
                   ) : (
-                    <span>
-                      <i className="bi bi-eye-slash me-2"></i>
+                    <>
+                      <i className="bi bi-eye-slash me-2"/>
                       리뷰 블라인드
-                    </span>
+                    </>
                   )}
+                </button>
+                <button type="button" className="btn btn-secondary" onClick={handleCloseModal} disabled={isDeleting}>
+                  <i className="bi bi-x-lg me-2"/>
+                  닫기
                 </button>
               </div>
             </div>
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 
 export default UserReviewHistory;
-

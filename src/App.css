@@ -5,34 +5,6 @@
 /*}*/
 
 /*
- * Sidebar
- */
-@media (min-width: 768px) {
-  .sidebar .offcanvas-lg {
-    position: -webkit-sticky;
-    position: sticky;
-    top: 48px;
-  }
-
-  .navbar-search {
-    display: block;
-  }
-}
-
-.sidebar .nav-link {
-  font-size: .875rem;
-  font-weight: 500;
-}
-
-.sidebar .nav-link.active {
-  color: #2470dc;
-}
-
-.sidebar-heading {
-  font-size: .75rem;
-}
-
-/*
  * Navbar
  */
 .navbar-brand {
@@ -67,130 +39,11 @@
   -webkit-overflow-scrolling: touch;
 }
 
-/* Mobile Sidebar Styles */
-.sidebar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 280px;
-  height: 100vh;
-  z-index: 1050;
-  transform: translateX(-100%);
-  transition: transform 0.3s ease-in-out;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-.sidebar.sidebar-open {
-  transform: translateX(0);
-}
-
-.main-content {
-  transition: margin-left 0.3s ease-in-out;
-}
-
-/* Desktop styles */
-@media (min-width: 768px) {
-  .sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    transform: translateX(0);
-    width: 280px;
-    height: 100vh;
-    z-index: 1000;
-    overflow-y: auto;
-    transition: transform 0.3s ease-in-out;
-  }
-
-  .sidebar.sidebar-collapsed {
-    transform: translateX(-100%);
-  }
-
-  .main-content {
-    flex: 1;
-    margin-left: 280px;
-    width: calc(100% - 280px);
-    transition: margin-left 0.3s ease-in-out, width 0.3s ease-in-out;
-  }
-
-  .main-content.main-content-expanded {
-    margin-left: 0;
-    width: 100%;
-  }
-
-  .mobile-header {
-    display: none !important;
-  }
-
-  .toggle-sidebar-btn-fixed {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    z-index: 1050;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    transition: left 0.3s ease-in-out;
-    padding: 0;
-  }
-
-  .main-content:not(.main-content-expanded) .toggle-sidebar-btn-fixed {
-    left: 290px;
-  }
-
-  .toggle-sidebar-btn-fixed:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-  }
-}
-
-/* Backdrop for mobile sidebar */
-.sidebar-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 1040;
-}
-
 @media (max-width: 767px) {
-  .main-content {
-    width: 100%;
-  }
-
-  .content-wrapper {
-    padding: 0.5rem !important;
-  }
-
   /* 컨테이너 폭 최적화 */
   .container-fluid {
     padding-left: 0.5rem !important;
     padding-right: 0.5rem !important;
-  }
-
-  /* Mobile user detail modal styles */
-  .user-detail-modal .modal-dialog {
-    margin: 0;
-    max-width: 100%;
-    height: 100vh;
-  }
-
-  .user-detail-modal .modal-content {
-    height: 100vh;
-    border-radius: 0;
-  }
-
-  .user-detail-modal .modal-body {
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .user-detail-modal .nav-tabs .nav-link {
-    font-size: 0.8rem;
-    padding: 0.5rem 0.75rem;
   }
 
   /* Card responsive improvements */

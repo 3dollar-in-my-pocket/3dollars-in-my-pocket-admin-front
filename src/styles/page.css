@@ -1,0 +1,1611 @@
+/* =========================================================
+   관리 페이지 공통 UI (헤더 / 필터 / 섹션 / 테이블)
+   대시보드·사이드바와 동일한 디자인 토큰을 사용한다.
+   ========================================================= */
+:root {
+  --page-border: #e9edf3;
+  --page-border-soft: #f1f5f9;
+  --page-text: #0f172a;
+  --page-text-muted: #64748b;
+  --page-text-subtle: #94a3b8;
+  --page-radius: 14px;
+}
+
+/* ---------- 페이지 헤더 ---------- */
+.page-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-bottom: 0.875rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--page-border);
+}
+
+.page-header__desc {
+  margin: 0;
+  color: var(--page-text-muted);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+.page-header__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem;
+  margin-top: 0.5rem;
+}
+
+.page-header__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.page-header__actions > .btn {
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .page-header {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .page-header__actions {
+    flex: 0 0 auto;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .page-header__actions > .btn {
+    width: auto;
+  }
+}
+
+/* ---------- 페이지 내 탭 ---------- */
+.page-tabs {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.125rem;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--page-border);
+  -webkit-overflow-scrolling: touch;
+}
+
+.page-tab {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.875rem;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--page-text-muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.page-tab > .bi {
+  color: var(--page-text-subtle);
+}
+
+.page-tab:hover {
+  color: var(--page-text);
+}
+
+.page-tab--active {
+  border-bottom-color: var(--app-accent, #3b82f6);
+  color: #1d4ed8;
+}
+
+.page-tab--active > .bi {
+  color: #1d4ed8;
+}
+
+/* ---------- 건수 배지 ---------- */
+.page-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.1875rem 0.5rem;
+  border-radius: 999px;
+  background-color: var(--page-border-soft);
+  color: var(--page-text-muted);
+  font-size: 0.6875rem;
+  font-weight: 700;
+}
+
+/* ---------- 필터 카드 ---------- */
+.filter-card {
+  margin-bottom: 1rem;
+  border: 1px solid var(--page-border);
+  border-radius: var(--page-radius);
+  background-color: #fff;
+}
+
+.filter-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--page-border-soft);
+}
+
+.filter-card__title {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin: 0;
+  color: var(--page-text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.filter-card__title > .bi {
+  color: var(--page-text-subtle);
+  font-size: 0.875rem;
+}
+
+.filter-card__aside {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filter-card__body {
+  padding: 1rem;
+}
+
+/* 필터 내부 폼 요소 규격 */
+.filter-card .form-label {
+  margin-bottom: 0.3125rem;
+  color: var(--page-text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.filter-card .form-select,
+.filter-card .form-control {
+  border-color: #e2e8f0;
+  border-radius: 10px;
+  background-color: #f8fafc;
+  font-size: 0.875rem;
+}
+
+.filter-card .form-select:focus,
+.filter-card .form-control:focus {
+  border-color: var(--app-accent, #3b82f6);
+  background-color: #fff;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.14);
+}
+
+/* 빠른 기간 선택 칩 */
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.filter-chip {
+  padding: 0.3125rem 0.6875rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  background-color: #fff;
+  color: #475569;
+  font-size: 0.75rem;
+  font-weight: 500;
+  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+}
+
+.filter-chip:hover {
+  border-color: var(--app-accent, #3b82f6);
+  background-color: #eff6ff;
+  color: #1d4ed8;
+}
+
+.filter-chip--active {
+  border-color: var(--app-accent, #3b82f6);
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 700;
+}
+
+/* ---------- 섹션 카드 ---------- */
+.section-card {
+  margin-bottom: 1rem;
+  border: 1px solid var(--page-border);
+  border-radius: var(--page-radius);
+  background-color: #fff;
+}
+
+.section-card:last-child {
+  margin-bottom: 0;
+}
+
+.section-card__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid var(--page-border-soft);
+}
+
+.section-card__title {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin: 0;
+  color: var(--page-text);
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+
+.section-card__title > .bi {
+  color: var(--page-text-subtle);
+  font-size: 0.9375rem;
+}
+
+.section-card__desc {
+  margin: 0.25rem 0 0;
+  color: var(--page-text-subtle);
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.section-card__aside {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.section-card__body {
+  padding: 1rem;
+}
+
+/* ---------- 요약 지표 타일 ---------- */
+.stat-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  height: 100%;
+  padding: 0.875rem;
+  border: 1px solid var(--page-border);
+  border-radius: var(--page-radius);
+  background-color: #fff;
+}
+
+.stat-tile__label {
+  color: var(--page-text-subtle);
+  font-size: 0.6875rem;
+  font-weight: 600;
+}
+
+.stat-tile__value {
+  color: var(--page-text);
+  font-size: 1.125rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+/* ---------- 데이터 테이블 ---------- */
+.data-table__scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+table.data-table {
+  margin-bottom: 0;
+  color: #334155;
+  font-size: 0.8125rem;
+  vertical-align: middle;
+}
+
+table.data-table > thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+table.data-table > thead th {
+  padding: 0.625rem 0.875rem;
+  border-bottom: 1px solid var(--page-border);
+  background-color: #f8fafc;
+  color: var(--page-text-muted);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+table.data-table > tbody td {
+  padding: 0.625rem 0.875rem;
+  border-bottom: 1px solid var(--page-border-soft);
+}
+
+table.data-table > tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+table.data-table > tbody tr:hover td {
+  background-color: #f8fafc;
+}
+
+/* 숫자 컬럼 정렬용 */
+table.data-table .num {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* ---------- 클릭 가능한 항목 카드 ---------- */
+.item-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border: 1px solid var(--page-border);
+  border-radius: var(--page-radius);
+  background-color: #fff;
+  text-align: left;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.item-card--clickable {
+  cursor: pointer;
+}
+
+.item-card--clickable:hover {
+  border-color: #c7d2fe;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  transform: translateY(-2px);
+}
+
+.item-card--muted {
+  background-color: #f8fafc;
+}
+
+.item-card--muted .item-card__name {
+  color: var(--page-text-muted);
+}
+
+.item-card__body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  padding: 0.875rem;
+}
+
+.item-card__name {
+  margin: 0;
+  color: var(--page-text);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.item-card__desc {
+  margin: 0.25rem 0 0;
+  color: var(--page-text-subtle);
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+/* 카드 내부 라벨/값 쌍 */
+.item-card__field + .item-card__field {
+  margin-top: 0.625rem;
+}
+
+.item-card__label {
+  display: block;
+  margin-bottom: 0.125rem;
+  color: var(--page-text-subtle);
+  font-size: 0.6875rem;
+  font-weight: 600;
+}
+
+.item-card__value {
+  color: #334155;
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+/* ---------- 광고 상태별 강조 ---------- */
+/* 카드 왼쪽 컬러 바로 진행중 / 예정 / 종료를 한눈에 구분한다 */
+.ad-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.ad-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+}
+
+.ad-card--active::before {
+  background-color: #10b981;
+}
+
+.ad-card--scheduled::before {
+  background-color: #f59e0b;
+}
+
+.ad-card--ended::before {
+  background-color: #cbd5e1;
+}
+
+/* 종료된 광고는 채도를 낮춰 진행중 광고와 구분한다 */
+.ad-card--ended {
+  background-color: #fbfcfd;
+}
+
+.ad-card--ended .ad-preview-container {
+  opacity: 0.55;
+}
+
+.ad-card--ended .item-card__name {
+  color: var(--page-text-muted);
+}
+
+/* 상태 배지 */
+.ad-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.1875rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+}
+
+.ad-status__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+.ad-status--active {
+  background-color: #ecfdf5;
+  color: #047857;
+}
+
+.ad-status--scheduled {
+  background-color: #fffbeb;
+  color: #b45309;
+}
+
+.ad-status--ended {
+  background-color: #f1f5f9;
+  color: #64748b;
+}
+
+/* ---------- 광고 미리보기 ---------- */
+.ad-preview-container {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  min-height: 200px;
+  max-height: 420px;
+  padding: 0.875rem;
+  overflow: auto;
+  border: 1px solid var(--page-border-soft);
+  border-radius: 10px;
+  background-color: #f8fafc;
+}
+
+@media (min-width: 768px) {
+  .ad-preview-container {
+    min-height: 240px;
+    max-height: 460px;
+  }
+}
+
+/* ---------- 그룹 구분 헤더 ---------- */
+.group-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.group-heading__label {
+  color: var(--page-text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ---------- 안내 문구 ---------- */
+.page-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.75rem 0.875rem;
+  border: 1px solid var(--page-border);
+  border-radius: 10px;
+  background-color: #f8fafc;
+  color: var(--page-text-muted);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.page-note > .bi {
+  flex: 0 0 auto;
+  margin-top: 0.0625rem;
+  color: var(--page-text-subtle);
+}
+
+/* ---------- 모달 공통 ---------- */
+.app-modal .modal-content {
+  border: 0;
+  border-radius: var(--page-radius);
+}
+
+.app-modal .modal-header {
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem 1.125rem;
+  border-bottom: 1px solid var(--page-border-soft);
+}
+
+.app-modal .modal-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--page-text);
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+
+.app-modal .modal-title > .bi {
+  color: var(--page-text-subtle);
+}
+
+/* 제목 아래 보조 정보 (ID 등) */
+.app-modal__subtitle {
+  margin: 0.1875rem 0 0;
+  color: var(--page-text-subtle);
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+
+.app-modal .modal-body {
+  padding: 1.125rem;
+}
+
+.app-modal .modal-footer {
+  gap: 0.5rem;
+  padding: 0.875rem 1.125rem;
+  border-top: 1px solid var(--page-border-soft);
+}
+
+.app-modal .modal-footer > * {
+  margin: 0;
+}
+
+/* 모달 내 폼 요소 */
+.app-modal .form-label {
+  margin-bottom: 0.3125rem;
+  color: var(--page-text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.app-modal .form-control,
+.app-modal .form-select {
+  border-color: #e2e8f0;
+  border-radius: 10px;
+  font-size: 0.875rem;
+}
+
+.app-modal .form-control:focus,
+.app-modal .form-select:focus {
+  border-color: var(--app-accent, #3b82f6);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.14);
+}
+
+.app-modal .form-text {
+  color: var(--page-text-subtle);
+  font-size: 0.75rem;
+}
+
+/* 모달 내 섹션 구분 */
+.modal-section + .modal-section {
+  padding-top: 1rem;
+  margin-top: 1rem;
+  border-top: 1px solid var(--page-border-soft);
+}
+
+/* 폼 컬럼의 첫 섹션은 구분선이 필요 없다 */
+.modal-section:first-child {
+  border-top: 0;
+  padding-top: 0;
+  margin-top: 0;
+}
+
+/* 콘텐츠 수정 모달 - 데스크톱에서 미리보기 고정 */
+@media (min-width: 992px) {
+  .content-edit__preview {
+    position: sticky;
+    top: 0;
+  }
+}
+
+.modal-section__title {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-bottom: 0.75rem;
+  color: var(--page-text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.modal-section__title > .bi {
+  color: var(--page-text-subtle);
+}
+
+/* 라벨 / 값 목록 */
+.detail-field__label {
+  display: block;
+  margin-bottom: 0.125rem;
+  color: var(--page-text-subtle);
+  font-size: 0.6875rem;
+  font-weight: 600;
+}
+
+.detail-field__value {
+  color: var(--page-text);
+  font-size: 0.875rem;
+  font-weight: 500;
+  word-break: break-word;
+}
+
+/* 강조 값 (정책 값 등) */
+.detail-value-strong {
+  padding: 0.75rem 0.875rem;
+  border: 1px solid var(--page-border);
+  border-radius: 10px;
+  background-color: #f8fafc;
+  color: var(--page-text);
+  font-size: 1rem;
+  font-weight: 700;
+  word-break: break-all;
+}
+
+/* 본문 성격의 긴 텍스트 (리뷰 내용, 메시지 본문 등) */
+.detail-value-strong--text {
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* 단계 표시 (다단계 폼) */
+.step-indicator {
+  display: flex;
+  gap: 1.25rem;
+  margin: 0 0 1rem;
+  padding: 0 0 0.875rem;
+  border-bottom: 1px solid var(--page-border-soft);
+  list-style: none;
+}
+
+.step-indicator__item {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  color: var(--page-text-subtle);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.step-indicator__mark {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: var(--page-border-soft);
+  color: var(--page-text-muted);
+  font-size: 0.6875rem;
+  font-weight: 700;
+}
+
+.step-indicator__item--current {
+  color: #1d4ed8;
+}
+
+.step-indicator__item--current .step-indicator__mark {
+  background-color: var(--app-accent, #3b82f6);
+  color: #fff;
+}
+
+.step-indicator__item--done {
+  color: #047857;
+}
+
+.step-indicator__item--done .step-indicator__mark {
+  background-color: #10b981;
+  color: #fff;
+}
+
+/* ---------- 상세 모달 (유저 / 가게) ----------
+   탭이 있는 대형 상세 모달. app-modal을 함께 사용한다. */
+.detail-modal .modal-content {
+  overflow: hidden;
+}
+
+/* 헤더/푸터는 고정, 본문만 늘어나도록 (전체 화면 모달 대응) */
+.detail-modal .modal-header,
+.detail-modal .modal-footer {
+  flex: 0 0 auto;
+}
+
+/* 헤더 아이콘 (가게 타입 배지 등을 겹쳐 올릴 수 있게 relative) */
+.detail-modal__avatar {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--page-border);
+  border-radius: 12px;
+  background-color: #f8fafc;
+  color: var(--page-text-muted);
+  font-size: 1.125rem;
+}
+
+.detail-modal__avatar-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+}
+
+/* 헤더 제목 줄 (제목 + ID 배지) */
+.detail-modal__heading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.detail-modal__heading .modal-title {
+  min-width: 0;
+  font-size: 1.0625rem;
+}
+
+.detail-modal__id {
+  flex: 0 0 auto;
+  color: var(--page-text-subtle);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 헤더 부가 정보 줄 (배지, 주소 등) */
+.detail-modal__meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin-top: 0.375rem;
+}
+
+.detail-modal__address {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 0;
+  margin: 0.375rem 0 0;
+  color: var(--page-text-muted);
+  font-size: 0.75rem;
+}
+
+/* 본문: 탭이 스크롤 컨테이너를 차지하도록 패딩 제거 */
+.detail-modal .modal-body {
+  padding: 0;
+}
+
+/* 탭바 */
+.detail-modal .nav-tabs {
+  gap: 0.125rem;
+  padding: 0 0.625rem;
+  border-bottom: 1px solid var(--page-border);
+  background-color: #f8fafc;
+  overflow-x: auto;
+  flex-wrap: nowrap;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.detail-modal .nav-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.detail-modal .nav-tabs .nav-item {
+  flex: 0 0 auto;
+}
+
+.detail-modal .nav-tabs .nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: 42px;
+  padding: 0 0.75rem;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  color: var(--page-text-muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.detail-modal .nav-tabs .nav-link:hover:not(.disabled) {
+  color: var(--page-text);
+  background-color: transparent;
+}
+
+.detail-modal .nav-tabs .nav-link.active {
+  border-bottom-color: var(--app-accent, #3b82f6);
+  background-color: transparent;
+  color: var(--app-accent, #3b82f6);
+}
+
+.detail-modal .nav-tabs .nav-link.disabled {
+  color: var(--page-text-subtle);
+  opacity: 0.6;
+}
+
+/* 탭 라벨 옆 건수 배지 */
+.detail-modal__tab-count {
+  display: inline-block;
+  min-width: 1.25rem;
+  padding: 0 0.3125rem;
+  border-radius: 999px;
+  background-color: var(--page-border);
+  color: var(--page-text-muted);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.detail-modal .nav-link.active .detail-modal__tab-count {
+  background-color: rgba(59, 130, 246, 0.14);
+  color: var(--app-accent, #3b82f6);
+}
+
+/* 탭 패널: 모달 높이를 넘지 않도록 내부 스크롤 */
+.detail-modal .tab-content {
+  max-height: min(68vh, 720px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 좁은 화면에서는 라벨을 줄이되 탭바 자체는 항상 보이게 유지한다.
+   react-bootstrap Tabs는 nav과 .tab-content를 형제로 렌더링하므로
+   nav이 flex 컨테이너 안에서 찌그러지지 않도록 flex-shrink를 막는다. */
+@media (max-width: 767.98px) {
+  .detail-modal .modal-body {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    /* 전체 화면 모달에서 본문이 남은 높이를 모두 차지 */
+    overflow: hidden;
+  }
+
+  .detail-modal .nav-tabs {
+    flex: 0 0 auto;
+    /* 스크롤 가능한 탭바임을 알리는 여백 */
+    padding: 0 0.375rem;
+  }
+
+  .detail-modal .tab-content {
+    flex: 1 1 auto;
+    max-height: none;
+    min-height: 0;
+    overflow-y: auto;
+  }
+
+  .detail-modal .nav-tabs .nav-link {
+    padding: 0 0.625rem;
+    font-size: 0.78125rem;
+  }
+}
+
+/* 아주 좁은 화면에서만 메인 탭바의 라벨을 감추고 아이콘만 남긴다.
+   하위 탭(activity-history)은 알약 형태라 라벨이 없으면 구분이 어려워 유지한다. */
+@media (max-width: 419.98px) {
+  .detail-modal .nav-tabs .detail-modal__tab-label {
+    display: none;
+  }
+
+  /* 하위 탭은 라벨 유지 */
+  .activity-history .detail-modal__tab-label {
+    display: inline;
+  }
+
+  .activity-history > .nav-tabs .nav-link {
+    padding: 0 0.5rem;
+    font-size: 0.75rem;
+  }
+}
+
+/* ---------- 메달 타일 (유저 상세 메달 탭) ---------- */
+.medal-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  width: 100%;
+  height: 100%;
+  padding: 0.75rem 0.625rem;
+  border: 1px solid var(--page-border);
+  border-radius: 12px;
+  background-color: #fff;
+  text-align: center;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.medal-tile:hover {
+  border-color: #c7d2fe;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.07);
+}
+
+.medal-tile--locked {
+  background-color: #f8fafc;
+}
+
+.medal-tile--locked .medal-tile__icon {
+  filter: grayscale(100%);
+  opacity: 0.65;
+}
+
+.medal-tile--locked .medal-tile__name {
+  color: var(--page-text-muted);
+}
+
+.medal-tile--selected {
+  border-color: var(--app-accent, #3b82f6);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.16);
+}
+
+.medal-tile--representative {
+  border-color: #fcd34d;
+  background-color: #fffbeb;
+}
+
+.medal-tile__figure {
+  position: relative;
+  display: inline-flex;
+}
+
+.medal-tile__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.medal-tile__mark {
+  position: absolute;
+  top: -4px;
+  right: -6px;
+  font-size: 0.875rem;
+}
+
+.medal-tile__name {
+  color: var(--page-text);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.medal-tile__desc {
+  color: var(--page-text-subtle);
+  font-size: 0.6875rem;
+  line-height: 1.35;
+}
+
+/* 메달 아이콘 미리보기 */
+.medal-icon-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.875rem;
+  border: 1px solid var(--page-border);
+  border-radius: 10px;
+  background-color: #fff;
+}
+
+.medal-icon-preview--muted {
+  background-color: #f8fafc;
+}
+
+.medal-icon-preview img {
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+}
+
+/* ---------- 페이지네이션 ---------- */
+.page-pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.page-pager__status {
+  color: var(--page-text-muted);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- 가입 신청 카드 인증 사진 ---------- */
+/* 가입 신청 상세 모달의 인증 사진 */
+.registration-photo {
+  display: block;
+  width: 100%;
+  max-height: 320px;
+  border: 1px solid var(--page-border);
+  border-radius: 10px;
+  background-color: #f8fafc;
+  object-fit: contain;
+}
+
+.registration-card__photo {
+  width: 100%;
+  height: 132px;
+  border-bottom: 1px solid var(--page-border-soft);
+  border-radius: var(--page-radius) var(--page-radius) 0 0;
+  background-color: #f8fafc;
+  object-fit: contain;
+}
+
+.registration-card__photo--empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  color: var(--page-text-subtle);
+  font-size: 0.75rem;
+}
+
+.registration-card__photo--empty > .bi {
+  font-size: 1.25rem;
+}
+
+/* ---------- 스켈레톤 로딩 ---------- */
+.skeleton-line {
+  height: 18px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-line {
+    animation: none;
+  }
+}
+
+/* ---------- 여러 줄 말줄임 ---------- */
+.text-clamp-2,
+.text-clamp-3 {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+}
+
+.text-clamp-2 {
+  -webkit-line-clamp: 2;
+}
+
+.text-clamp-3 {
+  -webkit-line-clamp: 3;
+}
+
+/* ---------- 진행률 미터 ---------- */
+.meter {
+  overflow: hidden;
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background-color: var(--page-border-soft);
+}
+
+.meter__fill {
+  height: 100%;
+  border-radius: 999px;
+  background-color: var(--app-accent, #3b82f6);
+  transition: width 0.3s ease;
+}
+
+.meter__fill--success {
+  background-color: #16a34a;
+}
+
+/* ---------- 평점 배지 ---------- */
+.rating-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.1875rem 0.5rem;
+  border-radius: 999px;
+  background-color: #fef3c7;
+  color: #92400e;
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- 리뷰 이미지 썸네일 ---------- */
+.review-thumb {
+  position: relative;
+  overflow: hidden;
+  width: 64px;
+  height: 64px;
+  border: 1px solid var(--page-border);
+  border-radius: 8px;
+  background-color: #f8fafc;
+}
+
+.review-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.review-thumb__more {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(15, 23, 42, 0.68);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+/* 모달 내 이미지 갤러리 */
+.review-figure {
+  display: block;
+  overflow: hidden;
+  width: 100%;
+  padding: 0;
+  border: 1px solid var(--page-border);
+  border-radius: 10px;
+  background-color: #f8fafc;
+  transition: border-color 0.15s ease;
+}
+
+.review-figure:hover {
+  border-color: var(--app-accent, #3b82f6);
+}
+
+.review-figure img {
+  display: block;
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+}
+
+.review-figure__meta {
+  display: block;
+  padding: 0.25rem 0.5rem;
+  border-top: 1px solid var(--page-border-soft);
+  color: var(--page-text-subtle);
+  font-size: 0.6875rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- 지도 핀 마커 미리보기 ---------- */
+.marker-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.125rem;
+  width: 76px;
+  padding: 0.375rem;
+  border: 1px solid var(--page-border);
+  border-radius: 10px;
+  background-color: #f8fafc;
+  text-align: center;
+}
+
+.marker-preview__frame {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 48px;
+  overflow: hidden;
+}
+
+/* 큰 미리보기 (마커 관리 카드) */
+.marker-preview--lg {
+  width: auto;
+  gap: 0.25rem;
+  padding: 0.625rem 0.5rem;
+  background-color: #fff;
+}
+
+.marker-preview--lg .marker-preview__frame {
+  height: 72px;
+  margin-bottom: 0.125rem;
+  border-radius: 8px;
+}
+
+/* 상세 모달용 큰 미리보기 */
+.marker-preview--xl {
+  width: auto;
+  gap: 0.25rem;
+  padding: 0.875rem 0.75rem;
+  background-color: #fff;
+}
+
+.marker-preview--xl .marker-preview__frame {
+  height: 132px;
+  margin-bottom: 0.25rem;
+  border-radius: 10px;
+}
+
+/* 흰색/어두운 마커 모두 식별되도록 체커보드 배경 */
+.marker-preview__frame--checker {
+  background-color: #fff;
+  background-image:
+    linear-gradient(45deg, #eef2f7 25%, transparent 25%, transparent 75%, #eef2f7 75%),
+    linear-gradient(45deg, #eef2f7 25%, transparent 25%, transparent 75%, #eef2f7 75%);
+  background-position: 0 0, 6px 6px;
+  background-size: 12px 12px;
+}
+
+/* 마커 카드 */
+.marker-card__previews {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.marker-card__countdown {
+  color: var(--page-text-muted);
+  font-size: 0.6875rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.marker-preview__frame img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.marker-preview__title {
+  color: var(--page-text);
+  font-size: 0.6875rem;
+  font-weight: 700;
+}
+
+.marker-preview__size {
+  color: var(--page-text-subtle);
+  font-size: 0.625rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 클릭 가능한 작성자/제보자 이름 */
+.clickable-author {
+  color: #1d4ed8;
+  cursor: pointer;
+}
+
+.clickable-author:hover {
+  text-decoration: underline;
+}
+
+/* ---------- 활동 이력 하위 탭 ----------
+   상세 모달 탭 안에 한 단계 더 들어가는 탭바. 메인 탭바보다 약하게 표현한다. */
+.activity-history > .nav-tabs {
+  gap: 0.25rem;
+  padding: 0.5rem 0.75rem 0;
+  border-bottom: 1px solid var(--page-border-soft);
+  background-color: #fff;
+  overflow-x: auto;
+  flex-wrap: nowrap;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.activity-history > .nav-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.activity-history > .nav-tabs .nav-item {
+  flex: 0 0 auto;
+}
+
+.activity-history > .nav-tabs .nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.3125rem;
+  min-height: 34px;
+  padding: 0 0.625rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  color: var(--page-text-muted);
+  font-size: 0.78125rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.activity-history > .nav-tabs .nav-link:hover:not(.disabled) {
+  background-color: #f1f5f9;
+  color: var(--page-text);
+}
+
+.activity-history > .nav-tabs .nav-link.active {
+  border-color: #bfdbfe;
+  background-color: #eff6ff;
+  color: #1d4ed8;
+}
+
+.activity-history > .nav-tabs .nav-link.disabled {
+  color: var(--page-text-subtle);
+  opacity: 0.6;
+}
+
+/* ---------- 상세 모달 탭 안의 이력 패널 ---------- */
+.history-panel {
+  padding: 1rem 1.125rem 1.25rem;
+}
+
+.history-panel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding-bottom: 0.625rem;
+  margin-bottom: 0.875rem;
+  border-bottom: 1px solid var(--page-border-soft);
+}
+
+.history-panel__title {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin: 0;
+  color: var(--page-text);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.history-panel__title > .bi {
+  color: var(--page-text-subtle);
+}
+
+.history-panel__count {
+  padding: 0.0625rem 0.4375rem;
+  border-radius: 999px;
+  background-color: var(--page-border-soft);
+  color: var(--page-text-muted);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.history-panel__aside {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.history-panel__end {
+  margin: 1rem 0 0;
+  color: var(--page-text-subtle);
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+/* ---------- 가게 소식 ---------- */
+.store-post__body {
+  color: #334155;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.store-post__image {
+  overflow: hidden;
+  border-radius: 10px;
+  background-color: #f1f5f9;
+}
+
+.store-post__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.store-post__stickers {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  padding-top: 0.625rem;
+  margin-top: 0.625rem;
+  border-top: 1px solid var(--page-border-soft);
+}
+
+.store-post__sticker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  border: 1px solid var(--page-border);
+  border-radius: 999px;
+  background-color: #f8fafc;
+  color: var(--page-text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.store-post__sticker--reacted {
+  border-color: #bfdbfe;
+  background-color: #eff6ff;
+  color: #1d4ed8;
+}
+
+/* ---------- 가게 이미지 카드 ---------- */
+.store-image {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--page-radius) var(--page-radius) 0 0;
+  background-color: #f1f5f9;
+}
+
+.store-image img {
+  display: block;
+  width: 100%;
+  height: 208px;
+  object-fit: cover;
+}
+
+.store-image--contain {
+  border-radius: var(--page-radius);
+}
+
+.store-image--contain img {
+  height: 420px;
+  object-fit: contain;
+}
+
+.store-image__status {
+  position: absolute;
+  top: 0.625rem;
+  right: 0.625rem;
+}
+
+.store-image__id {
+  position: absolute;
+  bottom: 0.625rem;
+  left: 0.625rem;
+  padding: 0.1875rem 0.5rem;
+  border-radius: 999px;
+  background-color: rgba(15, 23, 42, 0.72);
+  color: #fff;
+  font-size: 0.6875rem;
+  font-weight: 600;
+}
+
+/* ---------- 선택된 항목 카드 ---------- */
+.item-card--selected {
+  border-color: var(--app-accent, #3b82f6);
+  background-color: #eff6ff;
+}
+
+/* ---------- 순위 배지 ---------- */
+.rank-badge {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 24px;
+  padding: 0 0.375rem;
+  border-radius: 8px;
+  background-color: var(--page-border-soft);
+  color: var(--page-text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.rank-badge--gold {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.rank-badge--silver {
+  background-color: #e2e8f0;
+  color: #334155;
+}
+
+.rank-badge--bronze {
+  background-color: #fde4d0;
+  color: #9a3412;
+}
+
+/* ---------- 투표 옵션 ---------- */
+.poll-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  margin-top: 0.875rem;
+}
+
+.poll-option__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.poll-option__name {
+  overflow: hidden;
+  color: var(--page-text);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.poll-option__value {
+  flex: 0 0 auto;
+  color: var(--page-text-muted);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.poll-option__pct {
+  margin-left: 0.375rem;
+  color: #1d4ed8;
+  font-weight: 700;
+}

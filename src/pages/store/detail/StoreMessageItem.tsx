@@ -7,42 +7,31 @@ interface StoreMessageItemProps {
 }
 
 const StoreMessageItem: React.FC<StoreMessageItemProps> = ({message}) => {
-  return (
-    <div className="card border-0 shadow-sm mb-3" style={{borderRadius: '16px'}}>
-      <div className="card-body p-4">
-        <div className="d-flex align-items-start gap-3">
-          <div className="bg-success bg-opacity-10 rounded-circle p-2">
-            <i className="bi bi-chat-dots text-success"></i>
-          </div>
-          <div className="flex-grow-1">
-            <div className="d-flex align-items-center gap-2 mb-2">
-              <h6 className="mb-0 fw-bold text-dark">가게 메시지</h6>
-              <span className="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-2 py-1"
-                    style={{fontSize: '0.7rem'}}>
-                <i className="bi bi-person-badge me-1"></i>
-                사장님
-              </span>
-            </div>
-            <div className="d-flex align-items-center gap-2 text-muted small mb-3">
-              <i className="bi bi-clock"></i>
-              <span>{formatDateTime(message.createdAt)}</span>
-              {message.updatedAt !== message.createdAt && (
-                <>
-                  <span>•</span>
-                  <span>수정됨</span>
-                </>
-              )}
-            </div>
+  const isEdited = Boolean(message.updatedAt && message.updatedAt !== message.createdAt);
 
-            {message.body && (
-              <div className="bg-light rounded-3 p-3" style={{borderLeft: '4px solid #198754'}}>
-                <p className="text-dark mb-0" style={{lineHeight: '1.6', whiteSpace: 'pre-wrap'}}>
-                  {message.body}
-                </p>
-              </div>
-            )}
+  return (
+    <div className="item-card mb-3">
+      <div className="item-card__body">
+        <div className="d-flex align-items-center justify-content-between gap-2 mb-2">
+          <div className="d-flex align-items-center flex-wrap gap-2 min-w-0">
+            <h3 className="item-card__name">가게 메시지</h3>
+            <span className="badge bg-success-subtle text-success-emphasis">
+              <i className="bi bi-person-badge me-1"/>
+              사장님
+            </span>
           </div>
+          <span className="item-card__desc mt-0 flex-shrink-0">
+            <i className="bi bi-clock me-1"/>
+            {formatDateTime(message.createdAt)}
+            {isEdited && ' · 수정됨'}
+          </span>
         </div>
+
+        {message.body && (
+          <div className="detail-value-strong detail-value-strong--text">
+            {message.body}
+          </div>
+        )}
       </div>
     </div>
   );

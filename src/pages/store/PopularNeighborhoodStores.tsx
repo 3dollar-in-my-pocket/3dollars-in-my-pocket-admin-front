@@ -3,6 +3,8 @@ import StoreDetailModal from './StoreDetailModal';
 import UserDetailModal from '@/pages/user/UserDetailModal';
 import useSearch from '@/hooks/useSearch';
 import SearchResults from '@/components/common/SearchResults';
+import PageHeader from '@/components/common/PageHeader';
+import FilterCard from '@/components/common/FilterCard';
 import StoreCard from '@/components/store/StoreCard';
 import rankingApi, {District, Province, RankingCriteria} from '@/api/rankingApi';
 import {toast} from 'react-toastify';
@@ -11,6 +13,11 @@ const RANKING_CRITERIA = {
   MOST_REVIEWS: 'MOST_REVIEWS' as RankingCriteria,
   MOST_VISITS: 'MOST_VISITS' as RankingCriteria
 };
+
+const CRITERIA_OPTIONS = [
+  {value: RANKING_CRITERIA.MOST_REVIEWS, label: '리뷰 많은 순', icon: 'bi-chat-square-text'},
+  {value: RANKING_CRITERIA.MOST_VISITS, label: '이번 주 방문 많은 순', icon: 'bi-people'}
+];
 
 const PopularNeighborhoodStores = () => {
   const [selectedUser, setSelectedUser] = useState(null);
@@ -179,143 +186,63 @@ const PopularNeighborhoodStores = () => {
   }, [storeList, setResults]);
 
   return (
-    <div className="container-fluid px-2 px-md-4 py-3 py-md-4">
-      <div className="d-flex justify-content-between align-items-center mb-3 mb-md-4 pb-2 border-bottom">
-        <h2 className="fw-bold">동네 인기 가게</h2>
-      </div>
+    <div>
+      <PageHeader description="지역별로 리뷰·방문이 많은 인기 가게를 조회합니다."/>
 
-      {/* 검색 폼 */}
-      <div className="card border-0 shadow-sm mb-3 mb-md-4">
-        <div className="card-body p-3 p-md-4">
-          {/* 정렬 기준 선택 */}
-          <div className="mb-3 mb-md-4">
-            <label className="form-label fw-semibold text-muted mb-2 d-flex align-items-center">
-              <i className="bi bi-funnel me-2"></i>
-              정렬 기준
-            </label>
-            <div className="d-flex flex-wrap gap-2">
-              <button
-                type="button"
-                className={`btn rounded-pill ${
-                  selectedCriteria === RANKING_CRITERIA.MOST_REVIEWS
-                    ? 'btn-primary'
-                    : 'btn-outline-primary'
-                }`}
-                onClick={() => setSelectedCriteria(RANKING_CRITERIA.MOST_REVIEWS)}
-                style={{
-                  fontSize: '0.9rem',
-                  padding: '8px 20px',
-                  fontWeight: '600',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                <i className="bi bi-chat-square-text me-2"></i>
-                리뷰 많은 순
-              </button>
-              <button
-                type="button"
-                className={`btn rounded-pill ${
-                  selectedCriteria === RANKING_CRITERIA.MOST_VISITS
-                    ? 'btn-primary'
-                    : 'btn-outline-primary'
-                }`}
-                onClick={() => setSelectedCriteria(RANKING_CRITERIA.MOST_VISITS)}
-                style={{
-                  fontSize: '0.9rem',
-                  padding: '8px 20px',
-                  fontWeight: '600',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                <i className="bi bi-people me-2"></i>
-                이번 주 많이 왔다 갔어요
-              </button>
+      <FilterCard>
+        <div className="row g-3">
+          <div className="col-12">
+            <span className="form-label d-block">정렬 기준</span>
+            <div className="filter-chips">
+              {CRITERIA_OPTIONS.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  className={`filter-chip ${selectedCriteria === option.value ? 'filter-chip--active' : ''}`}
+                  onClick={() => setSelectedCriteria(option.value)}
+                >
+                  <i className={`bi ${option.icon} me-1`}/>
+                  {option.label}
+                </button>
+              ))}
             </div>
           </div>
 
-          {/* 지역 선택 */}
-          <div className="row g-3">
-            <div className="col-12 col-md-6">
-              <label htmlFor="provinceSelect" className="form-label fw-semibold text-muted mb-2">
-                <i className="bi bi-geo-alt me-2"></i>
-                도/시
-              </label>
-              <select
-                id="provinceSelect"
-                className="form-select form-select-lg border-0 shadow-sm"
-                style={{
-                  backgroundColor: '#f8f9fa',
-                  borderRadius: '12px',
-                  padding: '12px 16px',
-                  border: '2px solid transparent',
-                  fontSize: '15px'
-                }}
-                value={selectedProvince}
-                onChange={(e) => setSelectedProvince(e.target.value)}
-                disabled={isLoadingProvinces}
-              >
-                {provinces.map((province) => (
-                  <option key={province.province} value={province.province}>
-                    {province.description}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="col-12 col-md-6">
-              <label htmlFor="districtSelect" className="form-label fw-semibold text-muted mb-2">
-                <i className="bi bi-geo me-2"></i>
-                구/군
-              </label>
-              <select
-                id="districtSelect"
-                className="form-select form-select-lg border-0 shadow-sm"
-                style={{
-                  backgroundColor: '#f8f9fa',
-                  borderRadius: '12px',
-                  padding: '12px 16px',
-                  border: '2px solid transparent',
-                  fontSize: '15px'
-                }}
-                value={selectedDistrict}
-                onChange={(e) => setSelectedDistrict(e.target.value)}
-                disabled={isLoadingProvinces || availableDistricts.length === 0}
-              >
-                {availableDistricts.map((district) => (
-                  <option key={district.district} value={district.district}>
-                    {district.description}
-                  </option>
-                ))}
-              </select>
-            </div>
+          <div className="col-12 col-md-6">
+            <label htmlFor="provinceSelect" className="form-label">도/시</label>
+            <select
+              id="provinceSelect"
+              className="form-select"
+              value={selectedProvince}
+              onChange={(e) => setSelectedProvince(e.target.value)}
+              disabled={isLoadingProvinces}
+            >
+              {provinces.map((province) => (
+                <option key={province.province} value={province.province}>
+                  {province.description}
+                </option>
+              ))}
+            </select>
           </div>
 
-          {/* 현재 검색 상태 표시 */}
-          <div className="mt-3">
-            <small className="text-muted d-flex align-items-center" style={{fontSize: '0.75rem'}}>
-              <i className="bi bi-info-circle me-2"></i>
-              <span className="d-none d-md-inline">
-                {selectedCriteria === RANKING_CRITERIA.MOST_REVIEWS
-                  ? '리뷰가 많은 가게 순으로 조회합니다'
-                  : '이번 주 방문이 많은 가게 순으로 조회합니다'}
-                {selectedDistrict && availableDistricts.length > 0 && (
-                  <span className="ms-2 text-primary">
-                    | 지역: {availableDistricts.find(d => d.district === selectedDistrict)?.description}
-                  </span>
-                )}
-              </span>
-              <span className="d-inline d-md-none">
-                {selectedCriteria === RANKING_CRITERIA.MOST_REVIEWS ? '리뷰순' : '방문순'}
-                {selectedDistrict && (
-                  <span className="ms-1 text-primary">
-                    | {availableDistricts.find(d => d.district === selectedDistrict)?.description}
-                  </span>
-                )}
-              </span>
-            </small>
+          <div className="col-12 col-md-6">
+            <label htmlFor="districtSelect" className="form-label">구/군</label>
+            <select
+              id="districtSelect"
+              className="form-select"
+              value={selectedDistrict}
+              onChange={(e) => setSelectedDistrict(e.target.value)}
+              disabled={isLoadingProvinces || availableDistricts.length === 0}
+            >
+              {availableDistricts.map((district) => (
+                <option key={district.district} value={district.district}>
+                  {district.description}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
-      </div>
+      </FilterCard>
 
       <SearchResults
         results={storeList}

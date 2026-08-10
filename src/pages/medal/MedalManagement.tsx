@@ -1,8 +1,12 @@
 import {useEffect, useState} from 'react';
-import {Alert, Badge, Button, Card, Col, Container, Row, Spinner} from 'react-bootstrap';
 import medalApi from "@/api/medalApi";
 import {getAcquisitionDescription, hasAcquisition, Medal} from "@/types/medal";
 import MedalModal from "./MedalModal";
+import Loading from "@/components/common/Loading";
+import EmptyState from "@/components/common/EmptyState";
+import ErrorState from "@/components/common/ErrorState";
+import PageHeader from "@/components/common/PageHeader";
+import SectionCard from "@/components/common/SectionCard";
 
 const MedalManagement = () => {
   const [medals, setMedals] = useState<Medal[]>([]);
@@ -36,10 +40,6 @@ const MedalManagement = () => {
     fetchMedals();
   }, []);
 
-  const handleMedalClick = (medal: Medal) => {
-    setSelectedMedal(medal);
-  };
-
   const handleModalClose = () => {
     setSelectedMedal(null);
   };
@@ -49,109 +49,103 @@ const MedalManagement = () => {
     setSelectedMedal(null);
   };
 
-  return (
-    <Container className="py-4">
-      <div className="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
-        <h2 className="fw-bold">🏅 메달 관리</h2>
-        <Button variant="primary" onClick={fetchMedals} disabled={isLoading}>
-          {isLoading ? (
-            <>
-              <Spinner animation="border" size="sm" className="me-2"/>
-              조회 중...
-            </>
-          ) : (
-            '새로고침'
-          )}
-        </Button>
-      </div>
-
-      {errorMessage && (
-        <Alert variant="danger" className="text-center">
-          {errorMessage}
-        </Alert>
-      )}
-
-      <div className="mb-3">
-        <Badge bg="secondary" className="me-2">총 {medals.length}개</Badge>
-      </div>
-
-      {isLoading && medals.length === 0 ? (
-        <div className="text-center py-5">
-          <Spinner animation="border" variant="primary"/>
-          <p className="mt-3 text-muted">메달 목록을 불러오는 중...</p>
+  const renderBody = () => {
+    if (isLoading && medals.length === 0) {
+      return (
+        <div className="py-5">
+          <Loading/>
         </div>
-      ) : medals.length === 0 ? (
-        <div className="text-center py-5">
-          <div className="bg-light rounded-circle mx-auto mb-3"
-               style={{width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-            <i className="bi bi-award fs-1 text-secondary"></i>
+      );
+    }
+
+    if (errorMessage) {
+      return <ErrorState message={errorMessage} onRetry={fetchMedals}/>;
+    }
+
+    if (medals.length === 0) {
+      return (
+        <EmptyState
+          icon="bi-award"
+          title="등록된 메달이 없습니다"
+          description="획득 조건을 갖춘 메달이 아직 없습니다."
+        />
+      );
+    }
+
+    return (
+      <div className="row g-3">
+        {medals.map((medal) => (
+          <div key={medal.medalId} className="col-6 col-md-4 col-xl-3">
+            <div
+              className="item-card item-card--clickable"
+              role="button"
+              tabIndex={0}
+              onClick={() => setSelectedMedal(medal)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  setSelectedMedal(medal);
+                }
+              }}
+            >
+              <div className="item-card__body text-center">
+                <img
+                  src={medal.iconUrl}
+                  alt=""
+                  className="mx-auto mb-2"
+                  style={{width: '72px', height: '72px', objectFit: 'contain'}}
+                  onError={(e: any) => {
+                    e.target.src = medal.disableIconUrl;
+                  }}
+                />
+
+                <p className="item-card__name">{medal.name}</p>
+                <p className="item-card__desc">{medal.introduction}</p>
+
+                <div className="mt-auto pt-2">
+                  {hasAcquisition(medal) ? (
+                    <div className="page-note text-start">
+                      <i className="bi bi-trophy-fill"/>
+                      <span>{getAcquisitionDescription(medal)}</span>
+                    </div>
+                  ) : (
+                    <div className="page-note text-start">
+                      <i className="bi bi-info-circle"/>
+                      <span>기본 메달</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
-          <h5 className="text-muted">메달이 없습니다.</h5>
-        </div>
-      ) : (
-        <Row className="g-3 g-md-4">
-          {medals.map((medal) => (
-            <Col key={medal.medalId} xs={12} sm={6} md={4} lg={3}>
-              <Card
-                className="h-100 shadow-sm hover-shadow"
-                style={{cursor: 'pointer', transition: 'all 0.3s'}}
-                onClick={() => handleMedalClick(medal)}
-              >
-                <Card.Body className="d-flex flex-column">
-                  <div className="text-center mb-3">
-                    <img
-                      src={medal.iconUrl}
-                      alt={medal.name}
-                      className="img-fluid"
-                      style={{
-                        width: '100px',
-                        height: '100px',
-                        objectFit: 'contain'
-                      }}
-                      onError={(e: any) => {
-                        e.target.src = medal.disableIconUrl;
-                      }}
-                    />
-                  </div>
+        ))}
+      </div>
+    );
+  };
 
-                  <div className="text-center mb-2">
-                    <h6 className="fw-bold mb-1">{medal.name}</h6>
-                  </div>
+  return (
+    <div>
+      <PageHeader
+        description="유저에게 지급되는 메달의 아이콘과 획득 조건을 관리합니다. 메달을 선택하면 상세 정보를 수정할 수 있습니다."
+        actions={
+          <button className="btn btn-outline-secondary" onClick={fetchMedals} disabled={isLoading}>
+            {isLoading ? (
+              <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"/>
+            ) : (
+              <i className="bi bi-arrow-clockwise me-1"/>
+            )}
+            {isLoading ? '조회 중...' : '새로고침'}
+          </button>
+        }
+      />
 
-                  <p className="text-muted small text-center mb-3" style={{minHeight: '40px'}}>
-                    {medal.introduction}
-                  </p>
-
-                  {hasAcquisition(medal) && (
-                    <div className="mt-auto">
-                      <div className="bg-light rounded p-2 border border-success border-opacity-25">
-                        <small className="text-success fw-semibold d-block mb-1">
-                          <i className="bi bi-trophy-fill me-1"></i>
-                          획득 조건
-                        </small>
-                        <small className="text-dark">
-                          {getAcquisitionDescription(medal)}
-                        </small>
-                      </div>
-                    </div>
-                  )}
-
-                  {!hasAcquisition(medal) && (
-                    <div className="mt-auto">
-                      <div className="bg-light rounded p-2 border">
-                        <small className="text-muted fst-italic">
-                          <i className="bi bi-info-circle me-1"></i>
-                          기본 메달
-                        </small>
-                      </div>
-                    </div>
-                  )}
-                </Card.Body>
-              </Card>
-            </Col>
-          ))}
-        </Row>
-      )}
+      <SectionCard
+        title="메달 목록"
+        icon="bi-award-fill"
+        aside={!isLoading && medals.length > 0 && <span className="page-count">총 {medals.length}개</span>}
+      >
+        {renderBody()}
+      </SectionCard>
 
       <MedalModal
         show={!!selectedMedal}
@@ -159,7 +153,7 @@ const MedalManagement = () => {
         medal={selectedMedal}
         onUpdate={handleMedalUpdate}
       />
-    </Container>
+    </div>
   );
 };
 

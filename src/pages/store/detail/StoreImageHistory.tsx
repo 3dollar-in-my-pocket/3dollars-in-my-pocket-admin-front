@@ -1,8 +1,11 @@
 import StoreTypeBadge from '@/components/common/badges/StoreTypeBadge';
-import {useCallback, useRef, useState} from 'react';
+import {useCallback, useState} from 'react';
+import {Modal} from 'react-bootstrap';
 import {toast} from 'react-toastify';
 import storeImageApi from "@/api/storeImageApi";
 
+import DetailField from "@/components/common/DetailField";
+import HistoryPanel from "@/components/common/HistoryPanel";
 import useCursorPagination from "@/hooks/useCursorPagination";
 import {StoreImage} from "@/types/storeImage";
 import {ActivityAuthor} from "@/types/domain";
@@ -16,11 +19,24 @@ interface StoreImageHistoryProps {
   onAuthorClick?: ((author: ActivityAuthor) => void) | null;
 }
 
+/** 이미지 상태 코드를 배지 표기로 변환 */
+const getImageStatusBadge = (status?: string) => {
+  if (status === 'ACTIVE') {
+    return {className: 'bg-success-subtle text-success-emphasis', icon: 'bi-image-fill', label: '활성'};
+  }
+  if (status === 'INACTIVE') {
+    return {className: 'bg-danger-subtle text-danger-emphasis', icon: 'bi-image-alt', label: '비활성'};
+  }
+  return {className: 'bg-secondary-subtle text-secondary-emphasis', icon: 'bi-question-circle-fill', label: '알 수 없음'};
+};
+
+/** 이미지 로드 실패 시 표시하는 대체 이미지 */
+const FALLBACK_IMAGE = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjRjVGNUY1Ii8+CjxwYXRoIGQ9Ik0yMCAzMkMxNi42ODYzIDMyIDEzLjUwNTQgMzAuNjgzOSAxMS4yNzI3IDI4LjQ1MTNDOS4wNDAwNyAyNi4yMTg2IDcuNzI0IDIzLjAzNzYgNy43MjQgMTkuNzIzOUM3LjcyNCAxNi40MTAzIDkuMDQwMDcgMTMuMjI5MyAxMS4yNzI3IDEwLjk5NjdDMTMuNTA1NCA4Ljc2NDA0IDE2LjY4NjMgNy40NDggMjAgNy40NDhDMjMuMzEzNyA7LjQ0OCAyNi40OTQ2IDguNzY0MDQgMjguNzI3MyAxMC45OTY3QzMwLjk1OTkgMTMuMjI5MyAzMi4yNzYgMTYuNDEwMyAzMi4yNzYgMTkuNzIzOUMzMi4yNzYgMjMuMDM3NiAzMC45NTk5IDI2LjIxODYgMjguNzI3MyAyOC40NTEzQzI2LjQ5NDYgMzAuNjgzOSAyMy4zMTM3IDMyIDIwIDMyWk0yMCA5LjI0NzlDMTcuMTY1NSA5LjI0NzkgMTQuNDI3MyAxMC4zNzY0IDEyLjM2ODkgMTIuNDM0OEMxMC4zMTA1IDE0LjQ5MzIgOS4xODE5OSAxNy4yMzE0IDkuMTgxOTkgMjAuMDc1OUM5LjE4MTk5IDIyLjkyMDQgMTAuMzEwNSAyNS42NTg2IDEyLjM2ODkgMjcuNzE3QzE0LjQyNzMgMjkuNzc1MyAxNy4xNjU1IDMwLjkwMzkgMjAgMzAuOTAzOUMyMi44MzQ1IDMwLjkwMzkgMjUuNTcyNyAyOS43NzUzIDI3LjYzMTEgMjcuNzE3QzI5LjY4OTUgMjUuNjU4NiAzMC44MTggMjIuOTIwNCAzMC44MTggMjAuMDc1OUMzMC44MTggMTcuMjMxNCAyOS42ODk1IDE0LjQ5MzIgMjcuNjMxMSAxMi40MzQ4QzI1LjU3MjcgMTAuMzc2NCAyMi44MzQ1IDkuMjQ3OSAyMCA5LjI0NzlaIiBmaWxsPSIjOTk5OTk5Ii8+CjxwYXRoIGQ9Ik0yMCAyNi4yNzZDMjEuOTMzIDI2LjI3NiAyMy40NzYgMjQuNzMzIDIzLjQ3NiAyMi44QzIzLjQ3NiAyMC44NjcgMjEuOTMzIDE5LjMyNCAyMCAxOS4zMjRDMTguMDY3IDE5LjMyNCAxNi41MjQgMjAuODY3IDE2LjUyNCAyMi44QzE2LjUyNCAyNC43MzMgMTguMDY3IDI2LjI3NiAyMCAyNi4yNzZaIiBmaWxsPSIjOTk5OTk5Ii8+Cjwvc3ZnPgo=';
+
 const StoreImageHistory = ({storeId, isActive, onAuthorClick}: StoreImageHistoryProps) => {
   const [selectedImage, setSelectedImage] = useState<StoreImage | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const fetchImages = useCallback(
     (cursor: string | null) => storeImageApi.getStoreImages(storeId, cursor, 20),
@@ -30,6 +46,7 @@ const StoreImageHistory = ({storeId, isActive, onAuthorClick}: StoreImageHistory
   const {
     items: images,
     isLoading,
+    isLoadingMore,
     hasMore,
     totalCount,
     refresh,
@@ -78,325 +95,206 @@ const StoreImageHistory = ({storeId, isActive, onAuthorClick}: StoreImageHistory
   }
 
   return (
-    <div className="p-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <div className="d-flex align-items-center gap-2">
-          {totalCount > 0 && (
-            <span className="badge bg-info rounded-pill">
-              총 {totalCount.toLocaleString()}개
-            </span>
-          )}
-        </div>
-        {totalCount > 0 && (
-          <button
-            className="btn btn-outline-info btn-sm rounded-pill px-3"
-            onClick={refresh}
-            disabled={isLoading}
-          >
-            <i className="bi bi-arrow-clockwise me-1"></i>
-            새로고침
-          </button>
-        )}
-      </div>
-
-      <div
-        ref={scrollContainerRef}
-        className="image-container"
-        style={{maxHeight: '600px', overflowY: 'auto'}}
+    <>
+      <HistoryPanel
+        title="가게 이미지"
+        icon="bi-images"
+        count={images.length}
+        totalCount={totalCount}
+        hasMore={hasMore}
+        isLoading={isLoading}
+        isLoadingMore={isLoadingMore}
+        onRefresh={refresh}
+        onLoadMore={loadMore}
+        emptyTitle="등록된 이미지가 없습니다"
+        emptyDescription="아직 이 가게에 등록된 이미지가 없습니다."
       >
-        {images.length === 0 && !isLoading ? (
-          <div className="text-center py-5">
-            <div className="bg-light rounded-circle mx-auto mb-4" style={{
-              width: '80px',
-              height: '80px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              <i className="bi bi-image fs-1 text-secondary"></i>
-            </div>
-            <h5 className="text-dark mb-2">등록된 이미지가 없습니다</h5>
-            <p className="text-muted">아직 이 가게에 등록된 이미지가 없습니다.</p>
-          </div>
-        ) : (
-          <div className="row g-3">
-            {images.map((image, index) => (
-              <div key={image.imageId || index} className="col-lg-4 col-md-6 col-12">
+        <div className="row g-3">
+          {images.map((image, index) => {
+            const statusBadge = getImageStatusBadge(image.status);
+
+            return (
+              <div key={image.imageId || index} className="col-12 col-md-6 col-xl-4">
                 <div
-                  className="card border-0 shadow-sm h-100"
-                  style={{
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    background: 'linear-gradient(135deg, #ffffff 0%, #f0f8ff 100%)'
-                  }}
+                  className="item-card item-card--clickable h-100"
                   onClick={() => handleImageClick(image)}
-                  onMouseEnter={(e: any) => {
-                    e.currentTarget.style.transform = 'translateY(-4px)';
-                    e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)';
-                  }}
-                  onMouseLeave={(e: any) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      handleImageClick(image);
+                    }
                   }}
                 >
-                  {/* 이미지 */}
-                  <div className="position-relative">
+                  <div className="store-image">
                     <img
                       src={image.url}
-                      alt="Store"
-                      className="card-img-top"
-                      style={{
-                        height: '200px',
-                        objectFit: 'cover',
-                        borderTopLeftRadius: '8px',
-                        borderTopRightRadius: '8px'
-                      }}
+                      alt="가게 이미지"
                       onError={(e: any) => {
-                        e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjRjVGNUY1Ii8+CjxwYXRoIGQ9Ik0yMCAzMkMxNi42ODYzIDMyIDEzLjUwNTQgMzAuNjgzOSAxMS4yNzI3IDI4LjQ1MTNDOS4wNDAwNyAyNi4yMTg2IDcuNzI0IDIzLjAzNzYgNy43MjQgMTkuNzIzOUM3LjcyNCAxNi40MTAzIDkuMDQwMDcgMTMuMjI5MyAxMS4yNzI3IDEwLjk5NjdDMTMuNTA1NCA4Ljc2NDA0IDE2LjY4NjMgNy40NDggMjAgNy40NDhDMjMuMzEzNyA7LjQ0OCAyNi40OTQ2IDguNzY0MDQgMjguNzI3MyAxMC45OTY3QzMwLjk1OTkgMTMuMjI5MyAzMi4yNzYgMTYuNDEwMyAzMi4yNzYgMTkuNzIzOUMzMi4yNzYgMjMuMDM3NiAzMC45NTk5IDI2LjIxODYgMjguNzI3MyAyOC40NTEzQzI2LjQ5NDYgMzAuNjgzOSAyMy4zMTM3IDMyIDIwIDMyWk0yMCA5LjI0NzlDMTcuMTY1NSA5LjI0NzkgMTQuNDI3MyAxMC4zNzY0IDEyLjM2ODkgMTIuNDM0OEMxMC4zMTA1IDE0LjQ5MzIgOS4xODE5OSAxNy4yMzE0IDkuMTgxOTkgMjAuMDc1OUM5LjE4MTk5IDIyLjkyMDQgMTAuMzEwNSAyNS42NTg2IDEyLjM2ODkgMjcuNzE3QzE0LjQyNzMgMjkuNzc1MyAxNy4xNjU1IDMwLjkwMzkgMjAgMzAuOTAzOUMyMi44MzQ1IDMwLjkwMzkgMjUuNTcyNyAyOS43NzUzIDI3LjYzMTEgMjcuNzE3QzI5LjY4OTUgMjUuNjU4NiAzMC44MTggMjIuOTIwNCAzMC44MTggMjAuMDc1OUMzMC44MTggMTcuMjMxNCAyOS42ODk1IDE0LjQ5MzIgMjcuNjMxMSAxMi40MzQ4QzI1LjU3MjcgMTAuMzc2NCAyMi44MzQ1IDkuMjQ3OSAyMCA5LjI0NzlaIiBmaWxsPSIjOTk5OTk5Ii8+CjxwYXRoIGQ9Ik0yMCAyNi4yNzZDMjEuOTMzIDI2LjI3NiAyMy40NzYgMjQuNzMzIDIzLjQ3NiAyMi44QzIzLjQ3NiAyMC44NjcgMjEuOTMzIDE5LjMyNCAyMCAxOS4zMjRDMTguMDY3IDE5LjMyNCAxNi41MjQgMjAuODY3IDE2LjUyNCAyMi44QzE2LjUyNCAyNC43MzMgMTguMDY3IDI2LjI3NiAyMCAyNi4yNzZaIiBmaWxsPSIjOTk5OTk5Ii8+Cjwvc3ZnPgo=';
-                        e.target.style.height = '200px';
+                        e.target.src = FALLBACK_IMAGE;
                         e.target.style.objectFit = 'contain';
-                        e.target.style.backgroundColor = '#f8f9fa';
                       }}
                     />
-                    <div className="position-absolute top-0 end-0 p-2">
-                      <span className="badge bg-dark bg-opacity-75 rounded-pill">
-                        <i className="bi bi-eye me-1"></i>
-                        보기
-                      </span>
-                    </div>
+                    <span className={`badge store-image__status ${statusBadge.className}`}>
+                      <i className={`bi ${statusBadge.icon} me-1`}/>
+                      {statusBadge.label}
+                    </span>
+                    {image.imageId && <span className="store-image__id">ID {image.imageId}</span>}
                   </div>
 
-                  <div className="card-body p-3">
-                    <div className="d-flex align-items-start gap-2 mb-2">
-                      <div className="flex-shrink-0">
-                        <div className="bg-info bg-opacity-10 rounded-circle p-1">
-                          <i className="bi bi-person-fill text-info"></i>
-                        </div>
-                      </div>
-                      <div className="flex-grow-1">
-                        <div className="d-flex align-items-center gap-2 mb-1">
-                          <div
-                            className={`d-flex align-items-center gap-1 ${image.writer && onAuthorClick ? 'clickable-author' : ''}`}
-                            style={{
-                              cursor: image.writer && onAuthorClick ? 'pointer' : 'default',
-                              padding: '3px 6px',
-                              borderRadius: '5px',
-                              transition: 'all 0.2s ease',
-                              backgroundColor: 'transparent'
-                            }}
-                            onClick={(e) => {
-                              if (image.writer && onAuthorClick) {
-                                e.stopPropagation();
-                                onAuthorClick(image.writer);
-                              }
-                            }}
-                            onMouseEnter={(e: any) => {
-                              if (image.writer && onAuthorClick) {
-                                e.currentTarget.style.backgroundColor = 'rgba(13, 110, 253, 0.1)';
-                                e.currentTarget.style.transform = 'scale(1.02)';
-                              }
-                            }}
-                            onMouseLeave={(e: any) => {
-                              if (image.writer && onAuthorClick) {
-                                e.currentTarget.style.backgroundColor = 'transparent';
-                                e.currentTarget.style.transform = 'scale(1)';
-                              }
-                            }}
-                          >
-                            <span className="text-muted small">등록자:</span>
-                            <h6
-                              className={`fw-bold mb-0 ${image.writer && onAuthorClick ? 'text-primary' : 'text-dark'}`}
-                              style={{fontSize: '0.9rem'}}>
-                              {image.writer?.name || '익명 사용자'}
-                            </h6>
-                            {image.writer && onAuthorClick && (
-                              <i className="bi bi-box-arrow-up-right text-primary" style={{fontSize: '0.6rem'}}></i>
-                            )}
-                          </div>
-                          {/* 이미지 상태 표시 */}
-                          <span className={`badge rounded-pill ${
-                            image.status === 'ACTIVE' ? 'bg-success' :
-                              image.status === 'INACTIVE' ? 'bg-danger' : 'bg-secondary'
-                          } text-white px-2 py-1`} style={{fontSize: '0.65rem'}}>
-                            <i className={`bi ${
-                              image.status === 'ACTIVE' ? 'bi-image-fill' :
-                                image.status === 'INACTIVE' ? 'bi-image-alt' : 'bi-question-circle-fill'
-                            } me-1`}></i>
-                            {image.status === 'ACTIVE' ? '활성' :
-                              image.status === 'INACTIVE' ? '비활성' : '알 수 없음'}
-                          </span>
-                        </div>
-                        <div className="d-flex gap-1 flex-wrap">
-                          {image.writer?.userId && (
-                            <span
-                              className="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-2 py-1"
-                              style={{fontSize: '0.7rem'}}>
-                              <i className="bi bi-person me-1"></i>
-                              ID: {image.writer.userId}
-                            </span>
-                          )}
-                          {image.writer?.socialType && (
-                            <span
-                              className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-2 py-1"
-                              style={{fontSize: '0.7rem'}}>
-                              <i className="bi bi-share me-1"></i>
-                              {image.writer.socialType}
-                            </span>
-                          )}
-                          {image.store?.storeType && <StoreTypeBadge storeType={image.store.storeType}/>}
-                        </div>
-                      </div>
+                  <div className="item-card__body">
+                    <div className="d-flex align-items-center flex-wrap gap-2">
+                      <span className="item-card__desc mt-0">등록자</span>
+                      {image.writer && onAuthorClick ? (
+                        <button
+                          type="button"
+                          className="btn btn-link btn-sm p-0 text-decoration-none item-card__name clickable-author"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onAuthorClick(image.writer);
+                          }}
+                        >
+                          {image.writer.name}
+                          <i className="bi bi-box-arrow-up-right ms-1"/>
+                        </button>
+                      ) : (
+                        <h3 className="item-card__name">{image.writer?.name || '익명 사용자'}</h3>
+                      )}
                     </div>
 
-                    <div className="d-flex justify-content-between align-items-center">
-                      <span className="text-muted" style={{fontSize: '0.8rem'}}>
-                        <i className="bi bi-clock me-1"></i>
+                    <div className="form-chips">
+                      {image.writer?.userId && (
+                        <span className="form-chip">
+                          <i className="bi bi-person me-1"/>
+                          ID: {image.writer.userId}
+                        </span>
+                      )}
+                      {image.writer?.socialType && (
+                        <span className="form-chip">
+                          <i className="bi bi-share me-1"/>
+                          {image.writer.socialType}
+                        </span>
+                      )}
+                      {image.store?.storeType && <StoreTypeBadge storeType={image.store.storeType}/>}
+                    </div>
+
+                    <div className="d-flex justify-content-between align-items-center gap-2 mt-3 pt-2 border-top">
+                      <span className="item-card__desc mt-0">
+                        <i className="bi bi-clock me-1"/>
                         {formatDateTime(image.createdAt)}
                       </span>
                       <button
-                        className="btn btn-outline-info btn-sm rounded-pill px-2 py-1"
-                        style={{fontSize: '0.7rem'}}
+                        className="btn btn-outline-secondary btn-sm"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleImageClick(image);
                         }}
                       >
-                        <i className="bi bi-zoom-in me-1"></i>
+                        <i className="bi bi-zoom-in me-1"/>
                         확대
                       </button>
                     </div>
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
-        )}
-
-        {/* 더보기 버튼 */}
-        {hasMore && images.length > 0 && (
-          <div className="text-center mt-4">
-            <button
-              className="btn btn-outline-info rounded-pill px-4 py-2"
-              onClick={loadMore}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <span className="spinner-border spinner-border-sm me-2" role="status"></span>
-                  로딩 중...
-                </>
-              ) : (
-                <>
-                  <i className="bi bi-arrow-down-circle me-2"></i>
-                  더 많은 이미지 보기
-                </>
-              )}
-            </button>
-          </div>
-        )}
-
-        {/* 로딩 인디케이터 */}
-        {isLoading && images.length === 0 && (
-          <div className="text-center py-5">
-            <div className="mb-3">
-              <div className="spinner-border text-info" style={{width: '2rem', height: '2rem'}} role="status">
-                <span className="visually-hidden">Loading...</span>
-              </div>
-            </div>
-            <p className="text-muted">이미지를 불러오는 중...</p>
-          </div>
-        )}
-      </div>
+            );
+          })}
+        </div>
+      </HistoryPanel>
 
       {/* 이미지 확대 모달 */}
-      {showModal && selectedImage && (
-        <div
-          className="modal fade show"
-          style={{display: 'block', backgroundColor: 'rgba(0,0,0,0.5)'}}
-          onClick={handleCloseModal}
-        >
-          <div className="modal-dialog modal-lg modal-dialog-centered" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">
-                  <i className="bi bi-image me-2"></i>
-                  이미지 상세보기
-                </h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={handleCloseModal}
-                ></button>
-              </div>
-              <div className="modal-body p-0 text-center">
-                <img
-                  src={selectedImage.url}
-                  alt="Store"
-                  className="img-fluid"
-                  style={{maxHeight: '500px', width: 'auto'}}
-                />
-              </div>
-              <div className="modal-footer d-flex justify-content-between">
-                <button
-                  className="btn btn-danger rounded-pill px-4"
-                  onClick={handleDeleteImage}
-                  disabled={isDeleting}
-                >
-                  {isDeleting ? (
-                    <>
-                      <span className="spinner-border spinner-border-sm me-2"></span>
-                      삭제 중...
-                    </>
-                  ) : (
-                    <>
-                      <i className="bi bi-trash me-2"></i>
-                      이미지 삭제
-                    </>
-                  )}
-                </button>
-                <div className="flex-grow-1 px-3">
-                  <div className="d-flex flex-column gap-1">
-                    <div className="d-flex gap-2 align-items-center">
-                      <small className="text-muted">
-                        <i className="bi bi-person me-1"></i>
-                        등록자: {selectedImage.writer?.name || '익명 사용자'}
-                      </small>
-                      {selectedImage.writer?.socialType && (
-                        <span
-                          className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-2 py-1"
-                          style={{fontSize: '0.7rem'}}>
-                          {selectedImage.writer.socialType}
+      <Modal
+        show={showModal && Boolean(selectedImage)}
+        onHide={handleCloseModal}
+        centered
+        size="lg"
+        scrollable
+        className="app-modal"
+      >
+        <Modal.Header closeButton>
+          <div className="min-w-0">
+            <Modal.Title as="h2">
+              <i className="bi bi-image"/>
+              이미지 상세보기
+            </Modal.Title>
+            {selectedImage?.imageId && (
+              <p className="app-modal__subtitle font-monospace">{selectedImage.imageId}</p>
+            )}
+          </div>
+        </Modal.Header>
+
+        {selectedImage && (
+          <Modal.Body>
+            <div className="store-image store-image--contain mb-3">
+              <img
+                src={selectedImage.url}
+                alt="가게 이미지"
+                onError={(e: any) => {
+                  e.target.src = FALLBACK_IMAGE;
+                }}
+              />
+            </div>
+
+            <div className="modal-section">
+              <h3 className="modal-section__title">
+                <i className="bi bi-info-circle"/>
+                등록 정보
+              </h3>
+              <div className="row g-3">
+                <DetailField label="등록자" className="col-12 col-md-6">
+                  <span className="d-flex align-items-center flex-wrap gap-2">
+                    {selectedImage.writer?.name || '익명 사용자'}
+                    {selectedImage.writer?.socialType && (
+                      <span className="form-chip">{selectedImage.writer.socialType}</span>
+                    )}
+                  </span>
+                </DetailField>
+                <DetailField label="등록일" className="col-12 col-md-6">
+                  {formatDateTime(selectedImage.createdAt)}
+                </DetailField>
+                {selectedImage.store?.storeType && (
+                  <DetailField label="가게" className="col-12">
+                    <span className="d-flex align-items-center flex-wrap gap-2">
+                      <StoreTypeBadge storeType={selectedImage.store.storeType}/>
+                      {selectedImage.store?.name && (
+                        <span className="form-chip">
+                          <i className="bi bi-shop me-1"/>
+                          {selectedImage.store.name}
                         </span>
                       )}
-                    </div>
-                    <small className="text-muted">
-                      <i className="bi bi-calendar me-1"></i>
-                      등록일: {formatDateTime(selectedImage.createdAt)}
-                    </small>
-                    {selectedImage.store?.storeType && (
-                      <div className="mt-1">
-                        {<StoreTypeBadge storeType={selectedImage.store.storeType}/>}
-                        {selectedImage.store?.name && (
-                          <span className="badge bg-light text-dark border rounded-pill px-2 py-1 ms-1"
-                                style={{fontSize: '0.7rem'}}>
-                            <i className="bi bi-shop me-1"></i>
-                            {selectedImage.store.name}
-                          </span>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <button className="btn btn-secondary rounded-pill px-4" onClick={handleCloseModal}>
-                  <i className="bi bi-x-lg me-2"></i>
-                  닫기
-                </button>
+                    </span>
+                  </DetailField>
+                )}
               </div>
             </div>
-          </div>
-        </div>
-      )}
-    </div>
+          </Modal.Body>
+        )}
+
+        <Modal.Footer className="justify-content-between">
+          <button
+            className="btn btn-outline-danger"
+            onClick={handleDeleteImage}
+            disabled={isDeleting}
+          >
+            {isDeleting ? (
+              <>
+                <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"/>
+                삭제 중...
+              </>
+            ) : (
+              <>
+                <i className="bi bi-trash me-1"/>
+                이미지 삭제
+              </>
+            )}
+          </button>
+          <button className="btn btn-outline-secondary" onClick={handleCloseModal}>
+            닫기
+          </button>
+        </Modal.Footer>
+      </Modal>
+    </>
   );
 };
 

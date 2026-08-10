@@ -1,5 +1,6 @@
 import StoreTypeBadge from '@/components/common/badges/StoreTypeBadge';
 import {useCallback, useState} from 'react';
+import {Modal} from 'react-bootstrap';
 import storeMessageApi from '@/api/storeMessageApi';
 import {StoreMessage} from '@/types/storeMessage';
 
@@ -8,12 +9,17 @@ import useInfiniteScroll from '@/hooks/useInfiniteScroll';
 import useCursorPagination from '@/hooks/useCursorPagination';
 import EmptyState from '@/components/common/EmptyState';
 import ErrorState from '@/components/common/ErrorState';
+import PageHeader from '@/components/common/PageHeader';
+import SectionCard from '@/components/common/SectionCard';
+import DetailField from '@/components/common/DetailField';
 
 import {formatDateTimeShortKo as formatDateTime} from '@/utils/dateUtils';
 
+/** 카드에 한 번에 노출하는 카테고리 개수 */
+const VISIBLE_CATEGORIES = 2;
+
 const StoreMessageManagement = () => {
   const [selectedMessage, setSelectedMessage] = useState<StoreMessage | null>(null);
-  const [showModal, setShowModal] = useState(false);
   const [selectedStore, setSelectedStore] = useState<any>(null);
 
   const fetchMessages = useCallback(
@@ -41,12 +47,6 @@ const StoreMessageManagement = () => {
     threshold: 0.1
   });
 
-
-  const handleMessageClick = (message: StoreMessage) => {
-    setSelectedMessage(message);
-    setShowModal(true);
-  };
-
   const handleStoreClick = (store: any) => {
     if (store?.storeId) {
       setSelectedStore(store);
@@ -54,286 +54,208 @@ const StoreMessageManagement = () => {
   };
 
   return (
-    <div className="container-fluid px-2 px-md-4 py-3 py-md-4">
-      <div className="d-flex justify-content-between align-items-center mb-3 mb-md-4 pb-2 border-bottom">
-        <h2 className="fw-bold">
-          <i className="bi bi-chat-left-text text-primary me-2"></i>
-          가게 메시지 발송 이력
-        </h2>
-        <button
-          className="btn btn-outline-primary btn-sm rounded-pill px-3"
-          onClick={refresh}
-          disabled={isLoading}
-        >
-          <i className="bi bi-arrow-clockwise me-1"></i>
-          새로고침
-        </button>
-      </div>
+    <div>
+      <PageHeader
+        description="전체 가게에서 발송한 메시지를 조회합니다. 스크롤하면 다음 메시지를 자동으로 불러옵니다."
+        actions={
+          <button className="btn btn-outline-primary" onClick={refresh} disabled={isLoading}>
+            <i className="bi bi-arrow-clockwise me-1"/>
+            새로고침
+          </button>
+        }
+      />
 
-      <div className="card border-0 shadow-sm mb-3 mb-md-4">
-        <div className="card-body p-3 p-md-4">
-          <div className="d-flex align-items-center gap-2">
-            <i className="bi bi-info-circle text-muted"></i>
-            <small className="text-muted">
-              전체 가게에서 발송한 모든 메시지를 조회합니다. 스크롤하여 더 많은 메시지를 자동으로 불러옵니다.
-            </small>
-          </div>
-          {messages.length > 0 && (
-            <div className="mt-2">
-              <span className="badge bg-primary rounded-pill">
-                현재 {messages.length.toLocaleString()}개 조회됨
-              </span>
-              {hasMore && (
-                <span className="badge bg-secondary rounded-pill ms-2">
-                  더 많은 메시지 있음
-                </span>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div
-        ref={scrollContainerRef}
-        className="message-container"
-        style={{maxHeight: 'calc(100vh - 280px)', overflowY: 'auto'}}
+      <SectionCard
+        title="가게 메시지 발송 이력"
+        icon="bi-chat-left-text-fill"
+        aside={messages.length > 0 && (
+          <span className="page-count">{messages.length.toLocaleString()}{hasMore ? '+' : ''}건</span>
+        )}
       >
-        {error ? (
-          <ErrorState message={error} onRetry={refresh}/>
-        ) : messages.length === 0 && !isLoading ? (
-          <EmptyState
-            icon="bi-chat-left-text"
-            title="등록된 메시지가 없습니다"
-            description="아직 등록된 메시지가 없습니다."
-          />
-        ) : (
-          <div className="row g-3">
-            {messages.map((message) => (
-              <div key={message.messageId} className="col-12 col-lg-6">
-                {/* iOS 푸시 알림 스타일 */}
-                <div
-                  className="card border-0 shadow-sm h-100"
-                  style={{
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    background: 'rgba(255, 255, 255, 0.95)',
-                    backdropFilter: 'blur(20px)',
-                    borderRadius: '16px'
-                  }}
-                  onClick={() => handleMessageClick(message)}
-                  onMouseEnter={(e: any) => {
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.boxShadow = '0 12px 30px rgba(0,0,0,0.15)';
-                  }}
-                  onMouseLeave={(e: any) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 4px 15px rgba(0,0,0,0.08)';
-                  }}
-                >
-                  <div className="card-body p-3 p-md-4">
-                    {/* 가게 정보 섹션 */}
-                    <div className="mb-3 pb-3 border-bottom">
-                      <div className="d-flex justify-content-between align-items-start flex-wrap gap-2">
-                        <div className="flex-grow-1">
-                          <div
-                            className="d-flex align-items-center gap-2 mb-2"
+        <div ref={scrollContainerRef} style={{maxHeight: 'calc(100vh - 300px)', overflowY: 'auto'}}>
+          {error ? (
+            <ErrorState message={error} onRetry={refresh}/>
+          ) : messages.length === 0 && !isLoading ? (
+            <EmptyState
+              icon="bi-chat-left-text"
+              title="등록된 메시지가 없습니다"
+              description="아직 발송된 가게 메시지가 없습니다."
+            />
+          ) : (
+            <div className="row g-3">
+              {messages.map((message) => (
+                <div key={message.messageId} className="col-12 col-lg-6">
+                  <div
+                    className="item-card item-card--clickable h-100"
+                    onClick={() => setSelectedMessage(message)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setSelectedMessage(message);
+                      }
+                    }}
+                  >
+                    <div className="item-card__body">
+                      <div className="d-flex align-items-start justify-content-between gap-2">
+                        <div className="min-w-0">
+                          <button
+                            type="button"
+                            className="btn btn-link p-0 text-start item-card__name text-decoration-none"
                             onClick={(e) => {
                               e.stopPropagation();
                               handleStoreClick(message.store);
                             }}
-                            style={{cursor: 'pointer'}}
                           >
-                            <i className="bi bi-shop text-primary"></i>
-                            <h6 className="fw-bold text-primary mb-0 text-decoration-underline">
-                              {message.store?.name || '가게 이름 없음'}
-                            </h6>
-                            {message.store?.storeType && <StoreTypeBadge storeType={message.store.storeType}/>}
-                          </div>
+                            <i className="bi bi-shop me-1"/>
+                            {message.store?.name || '가게 이름 없음'}
+                            <i className="bi bi-box-arrow-up-right ms-1 small"/>
+                          </button>
                           {message.store?.address?.fullAddress && (
-                            <div className="d-flex align-items-center gap-2 text-muted small">
-                              <i className="bi bi-geo-alt"></i>
-                              <span>{message.store.address.fullAddress}</span>
-                            </div>
+                            <p className="item-card__desc mb-0">
+                              <i className="bi bi-geo-alt me-1"/>
+                              {message.store.address.fullAddress}
+                            </p>
                           )}
                         </div>
-                        <div className="d-flex align-items-center gap-2 flex-wrap">
-                          {message.store?.categories?.slice(0, 2).map((category: any, idx: number) => (
-                            <span key={idx}
-                                  className="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-2 py-1"
-                                  style={{fontSize: '0.7rem'}}>
-                              <i className="bi bi-tag me-1"></i>
-                              {category.name}
-                            </span>
-                          ))}
-                          {message.store?.categories?.length > 2 && (
-                            <span
-                              className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-2 py-1"
-                              style={{fontSize: '0.7rem'}}>
-                              +{message.store.categories.length - 2}
-                            </span>
-                          )}
-                        </div>
+                        <span className="small text-secondary flex-shrink-0">
+                          {formatDateTime(message.createdAt)}
+                        </span>
                       </div>
-                    </div>
 
-                    {/* 시간 */}
-                    <div className="d-flex align-items-center justify-content-end mb-3">
-                      <div className="text-muted" style={{fontSize: '0.75rem'}}>
-                        <i className="bi bi-clock me-1"></i>
-                        {formatDateTime(message.createdAt)}
+                      <div className="form-chips">
+                        {message.store?.storeType && <StoreTypeBadge storeType={message.store.storeType}/>}
+                        {message.store?.categories?.slice(0, VISIBLE_CATEGORIES).map((category: any, idx: number) => (
+                          <span key={idx} className="form-chip">{category.name}</span>
+                        ))}
+                        {message.store?.categories?.length > VISIBLE_CATEGORIES && (
+                          <span className="form-chip">
+                            +{message.store.categories.length - VISIBLE_CATEGORIES}
+                          </span>
+                        )}
                       </div>
-                    </div>
 
-                    {/* 메시지 제목 */}
-                    <div className="mb-2">
-                      <h6 className="fw-bold text-dark mb-0" style={{fontSize: '1rem', lineHeight: '1.4'}}>
-                        <i className="bi bi-chat-left-text text-success me-2"></i>
-                        가게 메시지
-                      </h6>
+                      {message.body && (
+                        <p className="item-card__desc mt-3 mb-0 text-clamp-3">{message.body}</p>
+                      )}
                     </div>
-
-                    {/* 메시지 내용 */}
-                    {message.body && (
-                      <div className="p-3 bg-light rounded-3">
-                        <p
-                          className="text-dark mb-0"
-                          style={{
-                            fontSize: '0.9rem',
-                            lineHeight: '1.5',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            display: '-webkit-box',
-                            WebkitLineClamp: 3,
-                            WebkitBoxOrient: 'vertical'
-                          }}
-                        >
-                          {message.body}
-                        </p>
-                      </div>
-                    )}
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Intersection Observer 타겟 - 항상 렌더링 */}
-        <div
-          ref={loadMoreRef}
-          className="text-center mt-4 mb-4"
-          style={{
-            display: hasMore && messages.length > 0 ? 'block' : 'none',
-            minHeight: '50px'
-          }}
-        >
-          {isLoading && (
-            <div className="py-3">
-              <div className="spinner-border text-primary" style={{width: '2rem', height: '2rem'}} role="status">
-                <span className="visually-hidden">Loading...</span>
-              </div>
-              <p className="text-muted mt-2 mb-0">메시지를 불러오는 중...</p>
+              ))}
             </div>
           )}
-        </div>
 
-        {/* 초기 로딩 인디케이터 */}
-        {isLoading && messages.length === 0 && (
-          <div className="text-center py-5">
-            <div className="mb-3">
-              <div className="spinner-border text-primary" style={{width: '2rem', height: '2rem'}} role="status">
-                <span className="visually-hidden">Loading...</span>
+          {isLoading && messages.length === 0 && (
+            <div className="text-center py-5">
+              <div className="spinner-border text-primary" role="status">
+                <span className="visually-hidden">불러오는 중</span>
               </div>
+              <p className="text-muted small mt-3 mb-0">메시지를 불러오는 중...</p>
             </div>
-            <p className="text-muted">메시지를 불러오는 중...</p>
+          )}
+
+          {/* Intersection Observer 타겟 - 항상 렌더링 */}
+          <div
+            ref={loadMoreRef}
+            className="text-center py-3"
+            style={{display: hasMore && messages.length > 0 ? 'block' : 'none'}}
+          >
+            {isLoading && (
+              <>
+                <span className="spinner-border spinner-border-sm text-primary me-2" role="status"/>
+                <span className="small text-muted">더 불러오는 중...</span>
+              </>
+            )}
           </div>
-        )}
-      </div>
+        </div>
+      </SectionCard>
 
       {/* 메시지 상세 모달 */}
-      {showModal && selectedMessage && (
-        <div
-          className="modal fade show"
-          style={{display: 'block', backgroundColor: 'rgba(0,0,0,0.5)'}}
-          onClick={() => setShowModal(false)}
-        >
-          <div className="modal-dialog modal-lg modal-dialog-centered" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">
-                  <i className="bi bi-chat-left-text text-primary me-2"></i>
-                  메시지 상세 정보
-                </h5>
-                <button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
-              </div>
-              <div className="modal-body">
-                <div className="row g-3">
-                  <div className="col-md-6">
-                    <label className="form-label fw-bold">가게 이름</label>
-                    <p className="form-control-plaintext">{selectedMessage.store?.name || '정보 없음'}</p>
-                  </div>
-                  <div className="col-md-6">
-                    <label className="form-label fw-bold">가게 타입</label>
-                    <div>
-                      {selectedMessage.store?.storeType ? (
-                        <StoreTypeBadge storeType={selectedMessage.store.storeType}/>
-                      ) : (
-                        <span className="text-muted">정보 없음</span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="col-md-6">
-                    <label className="form-label fw-bold">등록일</label>
-                    <p className="form-control-plaintext">{formatDateTime(selectedMessage.createdAt)}</p>
-                  </div>
-                  <div className="col-md-6">
-                    <label className="form-label fw-bold">수정일</label>
-                    <p className="form-control-plaintext">{formatDateTime(selectedMessage.updatedAt)}</p>
-                  </div>
-                  <div className="col-12">
-                    <label className="form-label fw-bold">메시지 내용</label>
-                    <div className="border rounded p-3 bg-light">
-                      <p className="mb-0" style={{whiteSpace: 'pre-wrap'}}>
-                        {selectedMessage.body || '내용이 없습니다.'}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="col-12">
-                    <label className="form-label fw-bold">가게 정보</label>
-                    <div className="d-flex gap-2 flex-wrap">
-                      {selectedMessage.store ? (
-                        <>
-                          {selectedMessage.store.storeType &&
-                            <StoreTypeBadge storeType={selectedMessage.store.storeType}/>}
-                          <span className="badge bg-light text-dark border rounded-pill px-3 py-2">
-                            <i className="bi bi-shop me-1"></i>
-                            {selectedMessage.store.name}
-                          </span>
-                          {selectedMessage.store.storeId && (
-                            <span
-                              className="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-3 py-2">
-                              <i className="bi bi-hash me-1"></i>
-                              {selectedMessage.store.storeId}
-                            </span>
-                          )}
-                        </>
-                      ) : (
-                        <span className="text-muted">정보 없음</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="modal-footer d-flex justify-content-end">
-                <button className="btn btn-secondary rounded-pill px-4" onClick={() => setShowModal(false)}>
-                  <i className="bi bi-x-lg me-2"></i>
-                  닫기
-                </button>
+      <Modal
+        show={!!selectedMessage}
+        onHide={() => setSelectedMessage(null)}
+        centered
+        size="lg"
+        scrollable
+        className="app-modal"
+      >
+        <Modal.Header closeButton>
+          <div className="min-w-0">
+            <Modal.Title as="h2">
+              <i className="bi bi-chat-left-text"/>
+              메시지 상세
+            </Modal.Title>
+            {selectedMessage && (
+              <p className="app-modal__subtitle font-monospace">{selectedMessage.messageId}</p>
+            )}
+          </div>
+        </Modal.Header>
+        {selectedMessage && (
+          <Modal.Body>
+            {/* 메시지 본문이 핵심 정보이므로 먼저 보여준다 */}
+            <div className="modal-section">
+              <h3 className="modal-section__title">
+                <i className="bi bi-chat-left-text"/>
+                메시지 내용
+              </h3>
+              <div className="detail-value-strong detail-value-strong--text">
+                {selectedMessage.body || <span className="text-body-tertiary">내용 없음</span>}
               </div>
             </div>
-          </div>
-        </div>
-      )}
+
+            <div className="modal-section">
+              <h3 className="modal-section__title">
+                <i className="bi bi-shop"/>
+                가게 정보
+              </h3>
+              <div className="row g-3">
+                <DetailField label="가게 이름" className="col-12 col-md-6" placeholder="삭제된 가게">
+                  {selectedMessage.store ? (
+                    <button
+                      type="button"
+                      className="btn btn-link p-0 align-baseline"
+                      onClick={() => {
+                        handleStoreClick(selectedMessage.store);
+                        setSelectedMessage(null);
+                      }}
+                    >
+                      {selectedMessage.store.name}
+                      <i className="bi bi-box-arrow-up-right ms-1 small"/>
+                    </button>
+                  ) : null}
+                </DetailField>
+                <DetailField label="가게 ID" className="col-6 col-md-3" monospace>
+                  {selectedMessage.store?.storeId}
+                </DetailField>
+                <DetailField label="가게 타입" className="col-6 col-md-3">
+                  <StoreTypeBadge storeType={selectedMessage.store?.storeType}/>
+                </DetailField>
+              </div>
+            </div>
+
+            <div className="modal-section">
+              <h3 className="modal-section__title">
+                <i className="bi bi-clock-history"/>
+                등록 정보
+              </h3>
+              <div className="row g-3">
+                <DetailField label="등록일" className="col-12 col-md-6">
+                  {formatDateTime(selectedMessage.createdAt)}
+                </DetailField>
+                <DetailField label="수정일" className="col-12 col-md-6">
+                  {formatDateTime(selectedMessage.updatedAt)}
+                </DetailField>
+              </div>
+            </div>
+          </Modal.Body>
+        )}
+        <Modal.Footer>
+          <button className="btn btn-outline-secondary" onClick={() => setSelectedMessage(null)}>
+            닫기
+          </button>
+        </Modal.Footer>
+      </Modal>
 
       {/* 가게 상세 모달 */}
       <StoreDetailModal

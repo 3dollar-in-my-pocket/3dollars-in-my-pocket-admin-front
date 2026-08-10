@@ -1,9 +1,19 @@
 import {useEffect, useMemo, useState} from 'react';
-import {Alert, Badge, Button, ButtonGroup, Card, Col, Container, Row, Spinner, Table} from 'react-bootstrap';
 import userApi from "@/api/userApi";
 import {RandomNameItem} from "@/types/user";
+import PageHeader from "@/components/common/PageHeader";
+import FilterCard from "@/components/common/FilterCard";
+import SectionCard from "@/components/common/SectionCard";
+import DataTable from "@/components/common/DataTable";
+import EmptyState from "@/components/common/EmptyState";
 
 type FilterType = 'all' | 'issued' | 'not_issued';
+
+const FILTER_OPTIONS: { value: FilterType; label: string }[] = [
+  {value: 'all', label: '전체'},
+  {value: 'issued', label: '발급된 닉네임'},
+  {value: 'not_issued', label: '발급 이력 없음'}
+];
 
 const RandomNameTool = () => {
   const [randomNames, setRandomNames] = useState<RandomNameItem[]>([]);
@@ -73,174 +83,120 @@ const RandomNameTool = () => {
     };
   }, [randomNames]);
 
+  const stats = [
+    {label: '총 발급', value: `${statistics.total.toLocaleString()}회`},
+    {label: '최대 발급', value: `${statistics.max}회`},
+    {label: '평균 발급', value: `${statistics.average.toFixed(1)}회`},
+    {label: '최소 발급', value: `${statistics.min}회`}
+  ];
+
   return (
-    <Container className="py-5">
-      <Row className="justify-content-center">
-        <Col md={10} lg={10}>
-          <Card className="p-4 shadow rounded-4">
-            <div className="text-center mb-4">
-              <h2 className="fw-bold text-primary">랜덤 닉네임 관리</h2>
-              <p className="text-muted small">유저에게 할당되는 랜덤 닉네임의 현황을 확인할 수 있습니다.</p>
+    <div>
+      <PageHeader description="유저에게 할당되는 랜덤 닉네임의 발급 현황을 확인합니다."/>
+
+      {errorMessage && (
+        <div className="alert alert-danger py-2" role="alert">
+          {errorMessage}
+        </div>
+      )}
+
+      <div className="row g-3 mb-3">
+        {stats.map((stat) => (
+          <div key={stat.label} className="col-6 col-md-3">
+            <div className="stat-tile">
+              <span className="stat-tile__label">{stat.label}</span>
+              <span className="stat-tile__value">{stat.value}</span>
             </div>
+          </div>
+        ))}
+      </div>
 
-            {errorMessage && (
-              <Alert variant="danger" className="text-center">
-                {errorMessage}
-              </Alert>
-            )}
-
-            <div className="mb-3">
-              <div className="d-flex justify-content-between align-items-center mb-3">
-                <div>
-                  <Badge bg="secondary" className="me-2">
-                    전체 {randomNames.length}개
-                  </Badge>
-                  {filterType !== 'all' && (
-                    <Badge bg="info">
-                      필터링 결과 {filteredRandomNames.length}개
-                    </Badge>
-                  )}
-                </div>
-                <Button
-                  variant="primary"
-                  onClick={fetchRandomNames}
-                  disabled={isLoading}
-                  className="shadow-sm"
-                >
-                  {isLoading ? (
-                    <>
-                      <Spinner animation="border" size="sm" className="me-2"/>
-                      조회 중...
-                    </>
-                  ) : (
-                    '새로고침'
-                  )}
-                </Button>
-              </div>
-
-              <Card className="bg-light border-0 mb-3">
-                <Card.Body className="p-3">
-                  <h6 className="fw-bold mb-3">
-                    <i className="bi bi-graph-up me-2"></i>
-                    발급 통계 (전체 기준)
-                  </h6>
-                  <Row>
-                    <Col xs={6} md={3}>
-                      <div className="text-center mb-3 mb-md-0">
-                        <small className="text-muted d-block mb-1">총 발급</small>
-                        <h5 className="mb-0 text-dark fw-bold">
-                          {statistics.total.toLocaleString()}
-                          <small className="text-muted ms-1">회</small>
-                        </h5>
-                      </div>
-                    </Col>
-                    <Col xs={6} md={3}>
-                      <div className="text-center mb-3 mb-md-0">
-                        <small className="text-muted d-block mb-1">최대 발급</small>
-                        <h5 className="mb-0 text-danger">
-                          {statistics.max}
-                          <small className="text-muted ms-1">회</small>
-                        </h5>
-                      </div>
-                    </Col>
-                    <Col xs={6} md={3}>
-                      <div className="text-center">
-                        <small className="text-muted d-block mb-1">평균 발급</small>
-                        <h5 className="mb-0 text-primary">
-                          {statistics.average.toFixed(1)}
-                          <small className="text-muted ms-1">회</small>
-                        </h5>
-                      </div>
-                    </Col>
-                    <Col xs={6} md={3}>
-                      <div className="text-center">
-                        <small className="text-muted d-block mb-1">최소 발급</small>
-                        <h5 className="mb-0 text-success">
-                          {statistics.min}
-                          <small className="text-muted ms-1">회</small>
-                        </h5>
-                      </div>
-                    </Col>
-                  </Row>
-                </Card.Body>
-              </Card>
-
-              <ButtonGroup className="w-100">
-                <Button
-                  variant={filterType === 'all' ? 'primary' : 'outline-primary'}
-                  onClick={() => setFilterType('all')}
-                  disabled={isLoading}
-                >
-                  전체보기
-                </Button>
-                <Button
-                  variant={filterType === 'issued' ? 'primary' : 'outline-primary'}
-                  onClick={() => setFilterType('issued')}
-                  disabled={isLoading}
-                >
-                  발급된 닉네임만
-                </Button>
-                <Button
-                  variant={filterType === 'not_issued' ? 'primary' : 'outline-primary'}
-                  onClick={() => setFilterType('not_issued')}
-                  disabled={isLoading}
-                >
-                  발급 이력 없는 닉네임만
-                </Button>
-              </ButtonGroup>
-            </div>
-
-            {isLoading && randomNames.length === 0 ? (
-              <div className="text-center py-5">
-                <Spinner animation="border" variant="primary"/>
-                <p className="mt-3 text-muted">데이터를 불러오는 중...</p>
-              </div>
-            ) : filteredRandomNames.length === 0 ? (
-              <div className="text-center py-5">
-                <p className="text-muted">
-                  {randomNames.length === 0 ? '랜덤 이름 데이터가 없습니다.' : '필터 조건에 맞는 데이터가 없습니다.'}
-                </p>
-              </div>
+      <FilterCard
+        aside={
+          <button className="btn btn-sm btn-outline-primary" onClick={fetchRandomNames} disabled={isLoading}>
+            {isLoading ? (
+              <>
+                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"/>
+                조회 중...
+              </>
             ) : (
-              <div className="table-responsive" style={{maxHeight: '600px', overflowY: 'auto'}}>
-                <Table striped bordered hover>
-                  <thead className="table-light sticky-top">
-                  <tr>
-                    <th style={{width: '10%'}} className="text-center">번호</th>
-                    <th style={{width: '40%'}}>접두사</th>
-                    <th style={{width: '20%'}} className="text-center">발급 횟수</th>
-                    <th style={{width: '30%'}}>마지막 발급 닉네임</th>
-                  </tr>
-                  </thead>
-                  <tbody>
-                  {filteredRandomNames.map((item, index) => (
-                    <tr key={index}>
-                      <td className="text-center">{index + 1}</td>
-                      <td className="fw-bold">{item.prefix}</td>
-                      <td className="text-center">
-                        {item.sequence === 0 ? (
-                          <span className="text-muted fst-italic">발급 이력 없음</span>
-                        ) : (
-                          <Badge bg="info">{item.sequence}</Badge>
-                        )}
-                      </td>
-                      <td>
-                        {item.sequence === 0 ? (
-                          <span className="text-muted fst-italic">발급 이력 없음</span>
-                        ) : (
-                          <code className="text-primary">{formatNickname(item.prefix, item.sequence)}</code>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                  </tbody>
-                </Table>
-              </div>
+              <>
+                <i className="bi bi-arrow-clockwise me-1"/>
+                새로고침
+              </>
             )}
-          </Card>
-        </Col>
-      </Row>
-    </Container>
+          </button>
+        }
+      >
+        <span className="form-label d-block">발급 상태</span>
+        <div className="filter-chips">
+          {FILTER_OPTIONS.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              className={`filter-chip ${filterType === option.value ? 'filter-chip--active' : ''}`}
+              onClick={() => setFilterType(option.value)}
+              disabled={isLoading}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      </FilterCard>
+
+      <SectionCard
+        title="랜덤 닉네임 목록"
+        icon="bi-shuffle"
+        aside={<span className="page-count">{filteredRandomNames.length}건</span>}
+        flush
+      >
+        {isLoading && randomNames.length === 0 ? (
+          <div className="text-center py-5">
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">불러오는 중</span>
+            </div>
+            <p className="text-muted small mt-3 mb-0">데이터를 불러오는 중...</p>
+          </div>
+        ) : filteredRandomNames.length === 0 ? (
+          <EmptyState
+            icon="bi-inbox"
+            title={randomNames.length === 0 ? '랜덤 닉네임 데이터가 없습니다' : '조건에 맞는 데이터가 없습니다'}
+            description={randomNames.length === 0 ? undefined : '다른 발급 상태를 선택해보세요.'}
+          />
+        ) : (
+          <DataTable maxHeight="600px">
+            <thead>
+            <tr>
+              <th style={{width: '10%'}}>번호</th>
+              <th style={{width: '40%'}}>접두사</th>
+              <th style={{width: '20%'}} className="num">발급 횟수</th>
+              <th style={{width: '30%'}}>마지막 발급 닉네임</th>
+            </tr>
+            </thead>
+            <tbody>
+            {filteredRandomNames.map((item, index) => (
+              <tr key={item.prefix}>
+                <td className="num">{index + 1}</td>
+                <td className="fw-semibold">{item.prefix}</td>
+                <td className="num">
+                  {item.sequence === 0
+                    ? <span className="text-secondary">-</span>
+                    : item.sequence.toLocaleString()}
+                </td>
+                <td>
+                  {item.sequence === 0 ? (
+                    <span className="text-secondary">발급 이력 없음</span>
+                  ) : (
+                    <code>{formatNickname(item.prefix, item.sequence)}</code>
+                  )}
+                </td>
+              </tr>
+            ))}
+            </tbody>
+          </DataTable>
+        )}
+      </SectionCard>
+    </div>
   );
 };
 
