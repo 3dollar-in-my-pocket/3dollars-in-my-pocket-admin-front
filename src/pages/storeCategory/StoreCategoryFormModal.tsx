@@ -23,6 +23,8 @@ const markerFields = [
   ['verifiedStoreMarkerImageUnfocusedUrl', '인증 가게 미선택 마커'],
 ] as const;
 
+const FORM_ID = 'store-category-form';
+
 type MarkerField = typeof markerFields[number][0];
 type FormData = Record<MarkerField, string> & {
   categoryType: string;
@@ -186,9 +188,9 @@ const StoreCategoryFormModal = ({show, category, onHide, onSuccess}: Props) => {
 
   return (
     <Modal show={show} onHide={() => !isSubmitting && onHide()} size="lg" centered scrollable>
-      <form onSubmit={handleSubmit}>
-        <Modal.Header closeButton><Modal.Title className="fs-6 fw-bold">카테고리 {isEdit ? '수정' : '등록'}</Modal.Title></Modal.Header>
-        <Modal.Body>
+      <Modal.Header closeButton><Modal.Title className="fs-6 fw-bold">카테고리 {isEdit ? '수정' : '등록'}</Modal.Title></Modal.Header>
+      <Modal.Body>
+        <form id={FORM_ID} onSubmit={handleSubmit}>
           <div className="row g-3">
             <Field col="col-md-6" label="카테고리 타입" required error={errors.categoryType}>
               {isEdit ? (
@@ -286,14 +288,14 @@ const StoreCategoryFormModal = ({show, category, onHide, onSuccess}: Props) => {
               </Field>
             ))}
           </div>
-        </Modal.Body>
-        <Modal.Footer>
-          <button type="button" className="btn btn-secondary" onClick={onHide} disabled={isSubmitting}>취소</button>
-          <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
-            {isSubmitting && <span className="spinner-border spinner-border-sm me-1"/>}{isEdit ? '수정' : '등록'}
-          </button>
-        </Modal.Footer>
-      </form>
+        </form>
+      </Modal.Body>
+      <Modal.Footer>
+        <button type="button" className="btn btn-secondary" onClick={onHide} disabled={isSubmitting}>취소</button>
+        <button type="submit" form={FORM_ID} className="btn btn-primary" disabled={isSubmitting}>
+          {isSubmitting && <span className="spinner-border spinner-border-sm me-1"/>}{isEdit ? '수정' : '등록'}
+        </button>
+      </Modal.Footer>
     </Modal>
   );
 };
