@@ -1,6 +1,11 @@
-import {apiGet} from './apiHelpers';
+import {apiGet, apiPatch, apiPost} from './apiHelpers';
 import {ApiResponse} from '@/types/api';
-import {StoreCategoryResponse} from '@/types/storeCategory';
+import {
+  CreateStoreCategoryRequest,
+  StoreCategory,
+  StoreCategoryResponse,
+  UpdateStoreCategoryRequest
+} from '@/types/storeCategory';
 
 export default {
   /**
@@ -9,5 +14,16 @@ export default {
    */
   getAllStoreCategories: async (): Promise<ApiResponse<StoreCategoryResponse>> => {
     return apiGet<StoreCategoryResponse>('/v1/store-categories');
+  },
+
+  createStoreCategory: async (data: CreateStoreCategoryRequest): Promise<ApiResponse<StoreCategory>> => {
+    return apiPost<StoreCategory>('/v1/store-categories', data);
+  },
+
+  updateStoreCategory: async (
+    categoryType: string,
+    data: UpdateStoreCategoryRequest
+  ): Promise<ApiResponse<StoreCategory>> => {
+    return apiPatch<StoreCategory>(`/v1/store-categories/${encodeURIComponent(categoryType)}`, data);
   },
 };
