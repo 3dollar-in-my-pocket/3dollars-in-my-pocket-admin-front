@@ -1,0 +1,118 @@
+/* =========================================================
+   로그인 랜딩 화면 (미로그인 사용자용 홈)
+   ========================================================= */
+.login-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  /* 사이드바와 동일한 다크 톤을 사용해 브랜드 일관성을 유지한다. */
+  background: radial-gradient(120% 120% at 15% 0%, #1e293b 0%, var(--app-sidebar-bg, #141a24) 55%, #0b0f16 100%);
+  padding: 2rem 1rem;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 2.5rem 2rem;
+  border-radius: 20px;
+  background: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+  text-align: center;
+}
+
+.login-card__brand-mark {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  object-fit: cover;
+  margin-bottom: 1rem;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.18);
+}
+
+.login-card__title {
+  margin-bottom: 0.375rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.login-card__subtitle {
+  margin-bottom: 1.75rem;
+  font-size: 0.8125rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+/* ---------- Google 로그인 버튼 ---------- */
+.login-card__google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #dadce0;
+  border-radius: 12px;
+  background: #fff;
+  color: #3c4043;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.login-card__google:hover,
+.login-card__google:focus-visible {
+  background: #f8f9fa;
+  border-color: #c6c9ce;
+  box-shadow: 0 2px 8px rgba(60, 64, 67, 0.18);
+  color: #3c4043;
+}
+
+.login-card__google:focus-visible {
+  outline: 2px solid var(--app-accent, #3b82f6);
+  outline-offset: 2px;
+}
+
+.login-card__google--loading {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.login-card__google img {
+  width: 18px;
+  height: 18px;
+}
+
+.login-card__divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.5rem 0 1rem;
+  color: #cbd5e1;
+  font-size: 0.75rem;
+}
+
+.login-card__divider::before,
+.login-card__divider::after {
+  content: "";
+  flex: 1 1 auto;
+  height: 1px;
+  background: #e2e8f0;
+}
+
+.login-card__help {
+  margin-bottom: 0;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: #94a3b8;
+}
+
+@media (max-width: 400px) {
+  .login-card {
+    padding: 2rem 1.25rem;
+  }
+}

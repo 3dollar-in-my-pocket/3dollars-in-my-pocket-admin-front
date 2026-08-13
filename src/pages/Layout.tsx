@@ -80,11 +80,26 @@ const Layout = () => {
 
   if (!isLoginState) {
     return (
-      <div className="min-vh-100 bg-light px-3 px-md-5 py-4">
-        <Suspense fallback={<Loading/>}>
-          <Outlet/>
-        </Suspense>
-      </div>
+      <>
+        <div className="min-vh-100">
+          <Suspense fallback={<Loading/>}>
+            <Outlet/>
+          </Suspense>
+        </div>
+
+        {/* 로그인 실패 등 미인증 상태의 알림도 노출되어야 한다. */}
+        <ToastContainer
+          position="top-right"
+          limit={1}
+          autoClose={2000}
+          newestOnTop={false}
+          closeOnClick
+          pauseOnHover
+          theme="colored"
+          transition={Bounce}
+          style={{zIndex: 9999}}
+        />
+      </>
     );
   }
 
