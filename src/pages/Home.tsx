@@ -1,47 +1,62 @@
-import React, {useEffect} from "react";
+import React, {useState} from "react";
+import {Navigate} from "react-router-dom";
 import {GOOGLE_AUTH_URL} from "@/constants/google";
-import {Bounce, ToastContainer} from "react-toastify";
+import {LocalStorageService} from "@/service/LocalStorageService";
+import {useAuthStore} from "@/state/authStore";
+import "@/styles/login.css";
 
+/**
+ * 미로그인 사용자를 위한 로그인 랜딩 화면.
+ * 이미 인증된 상태(또는 토큰 보유 상태)라면 대시보드로 이동합니다.
+ */
 const Home = () => {
-  useEffect(() => {
-    return () => {
-    };
-  }, []);
+  const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
+  // 새로고침 직후에는 스토어가 비어 있으므로 토큰 존재 여부로 판단하고,
+  // 실제 검증은 이동 대상인 PrivateRouter가 수행합니다.
+  const [hasToken] = useState(() => Boolean(LocalStorageService.get("AUTH_TOKEN")));
+  const [isRedirecting, setIsRedirecting] = useState(false);
+
+  if (isLoggedIn || hasToken) {
+    return <Navigate to="/manage" replace/>;
+  }
 
   return (
-    <div className="d-flex justify-content-center align-items-center min-vh-100 bg-gradient">
-      <div className="login-card bg-white shadow-lg rounded-4 p-5 text-center">
-        <h1 className="fw-bold mb-2 text-primary fs-3">🚀 가슴속 3천원 관리자</h1>
-        <p className="text-muted mb-4">Google 계정으로 시작하세요</p>
-
-        <ToastContainer
-          position="top-right"
-          limit={1}
-          autoClose={2000}
-          newestOnTop={false}
-          closeOnClick
-          pauseOnHover
-          theme="colored"
-          transition={Bounce}
-        />
+    <div className="login-page">
+      <main className="login-card">
+        <img src="/favicon.ico" alt="" className="login-card__brand-mark"/>
+        <h1 className="login-card__title">가슴속 3천원 관리자</h1>
+        <p className="login-card__subtitle">Admin Console</p>
 
         <a
           href={GOOGLE_AUTH_URL}
-          className="btn btn-primary d-flex align-items-center justify-content-center gap-2 py-2 px-3 rounded shadow-sm"
-          style={{fontSize: "1rem", fontWeight: 500}}
+          className={`login-card__google ${isRedirecting ? "login-card__google--loading" : ""}`}
+          // 중복 클릭으로 OAuth 요청이 반복되지 않도록 이동 중에는 잠근다.
+          onClick={() => setIsRedirecting(true)}
+          aria-disabled={isRedirecting || undefined}
         >
-          <img
-            src="https://developers.google.com/identity/images/g-logo.png"
-            alt="Google logo"
-            style={{width: 20, height: 20}}
-          />
-          Google로 로그인
+          {isRedirecting ? (
+            <>
+              <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"/>
+              이동 중...
+            </>
+          ) : (
+            <>
+              <img
+                src="https://developers.google.com/identity/images/g-logo.png"
+                alt=""
+              />
+              Google 계정으로 로그인
+            </>
+          )}
         </a>
 
-        <p className="text-muted mt-4 mb-0" style={{fontSize: "0.85rem"}}>
-          계정이 없으신가요? <br/> 관리자에게 문의해주세요.
+        <div className="login-card__divider">도움이 필요하신가요?</div>
+
+        <p className="login-card__help">
+          계정이 없거나 접근 권한이 필요하면<br/>
+          관리자에게 문의해 주세요.
         </p>
-      </div>
+      </main>
     </div>
   );
 };
