@@ -23,7 +23,7 @@ const Home = () => {
   return (
     <div className="login-page">
       <main className="login-card">
-        <img src="/favicon.ico" alt="" className="login-card__brand-mark"/>
+        <img src="/favicon.png" alt="" className="login-card__brand-mark"/>
         <h1 className="login-card__title">가슴속 3천원 관리자</h1>
         <p className="login-card__subtitle">Admin Console</p>
 

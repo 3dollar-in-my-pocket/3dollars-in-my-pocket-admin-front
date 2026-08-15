@@ -35,7 +35,7 @@ const PushPreview = ({title, body, path, pushType, imageUrl}: PushPreviewProps) 
           }}
         >
           <div className="push-phone__app">
-            <img src="/favicon.ico" alt="" className="push-phone__app-icon"/>
+            <img src="/favicon.png" alt="" className="push-phone__app-icon"/>
             <span className="push-phone__app-name">
               가슴속 3천원{styles.appNameSuffix}
             </span>

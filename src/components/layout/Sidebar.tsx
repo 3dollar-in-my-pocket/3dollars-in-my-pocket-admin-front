@@ -81,7 +81,7 @@ const Sidebar = ({groups, admin, isOpen, isCollapsed = false, onClose, onLogout}
     >
       <div className="app-sidebar__header">
         <Link to="/manage" className="app-sidebar__brand" onClick={onClose}>
-          <img src="/favicon.ico" alt="" className="app-sidebar__brand-mark"/>
+          <img src="/favicon.png" alt="" className="app-sidebar__brand-mark"/>
           <span className="app-sidebar__brand-text">
             <strong>가슴속 3천원</strong>
             <small>ADMIN CONSOLE</small>
