@@ -37,7 +37,7 @@ const Dashboard = () => {
     <div className="dashboard">
       {/* 헤더 */}
       <div className="dashboard__hero">
-        <img src="/favicon.ico" alt="" className="dashboard__hero-logo"/>
+        <img src="/favicon.png" alt="" className="dashboard__hero-logo"/>
         <div className="min-w-0">
           <h2 className="dashboard__title">
             안녕하세요, {adminAuth?.name || "관리자"}님 👋
