@@ -10,13 +10,15 @@ import {User} from '@/types/user';
 interface UserCardProps {
   user: User;
   onClick: (user: User) => void;
+  selected?: boolean;
+  onSelect?: (userId: string) => void;
 }
 
-const UserCard = ({user, onClick}: UserCardProps) => (
+const UserCard = ({user, onClick, selected = false, onSelect}: UserCardProps) => (
   <div className="col-12 col-sm-6 col-lg-4 col-xxl-3">
-    <ItemCard item={user} onClick={onClick} className="h-100">
-      <div className="d-flex align-items-start gap-2">
-        <i className="bi bi-person-circle fs-5 text-body-tertiary"/>
+    <ItemCard item={user} onClick={onClick} className={`h-100 ${selected ? 'border border-primary border-2' : ''}`}>
+      <div className="d-flex align-items-start justify-content-between gap-2">
+        <div className="d-flex align-items-start gap-2 min-w-0"><i className="bi bi-person-circle fs-5 text-body-tertiary"/>
         <div className="min-w-0">
           <h3 className="item-card__name text-truncate" title={user.nickname}>
             {user.nickname}
@@ -25,6 +27,11 @@ const UserCard = ({user, onClick}: UserCardProps) => (
             #{user.userId}
           </p>
         </div>
+        </div>
+        {onSelect && user.userId && <button type="button" className={`btn btn-sm flex-shrink-0 ${selected ? 'btn-primary' : 'btn-outline-secondary'}`}
+          aria-pressed={selected} onClick={event => { event.stopPropagation(); onSelect(user.userId!); }}>
+          <i className={`bi ${selected ? 'bi-check-square-fill' : 'bi-square'} me-1`}/>{selected ? '선택됨' : '선택'}
+        </button>}
       </div>
 
       <div className="form-chips">

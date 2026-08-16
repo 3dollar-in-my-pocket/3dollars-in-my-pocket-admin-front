@@ -23,6 +23,7 @@ const StoreImageManage = () => {
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [selectedImage, setSelectedImage] = useState<StoreImage | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
   const fetchImages = useCallback(
     (cursor: string | null) => storeImageApi.getAllStoreImages(cursor, 20),
@@ -91,6 +92,23 @@ const StoreImageManage = () => {
     }
   };
 
+  const toggleSelected = (id: number) => setSelectedIds(prev =>
+    prev.includes(id) ? prev.filter(value => value !== id) : prev.length < 30 ? [...prev, id] : prev
+  );
+
+  const handleBulkDelete = async () => {
+    if (!window.confirm(`선택한 이미지 ${selectedIds.length}개를 삭제하시겠습니까?`)) return;
+    setIsDeleting(true);
+    try {
+      const response = await storeImageApi.deleteStoreImagesBulk(selectedIds);
+      if (response.ok) {
+        toast.success('선택한 이미지 삭제 요청이 완료되었습니다.');
+        setSelectedIds([]);
+        refresh();
+      }
+    } finally { setIsDeleting(false); }
+  };
+
 
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
@@ -117,6 +135,11 @@ const StoreImageManage = () => {
           <span className="page-count">{images.length.toLocaleString()}{hasMore ? '+' : ''}건</span>
         )}
       >
+        {selectedIds.length > 0 && <div className="alert alert-primary d-flex align-items-center justify-content-between gap-2 py-2">
+          <strong>{selectedIds.length}개 선택됨</strong><div className="d-flex gap-2">
+          <button className="btn btn-sm btn-outline-danger" onClick={handleBulkDelete} disabled={isDeleting}>{isDeleting ? '삭제 중...' : '일괄 삭제'}</button>
+          <button className="btn btn-sm btn-outline-secondary" onClick={() => setSelectedIds([])}>선택 해제</button></div>
+        </div>}
         <div ref={scrollContainerRef} style={{maxHeight: 'calc(100vh - 300px)', overflowY: 'auto'}}>
           {error ? (
             <ErrorState message={error} onRetry={refresh}/>
@@ -131,7 +154,7 @@ const StoreImageManage = () => {
               {images.map((image) => (
                 <div key={image.imageId} className="col-12 col-md-6 col-xl-4">
                   <div
-                    className="item-card item-card--clickable h-100"
+                    className={`item-card item-card--clickable h-100 ${selectedIds.includes(image.imageId) ? 'border border-primary border-2' : ''}`}
                     onClick={() => handleImageClick(image)}
                     role="button"
                     tabIndex={0}
@@ -154,6 +177,14 @@ const StoreImageManage = () => {
                         {image.status}
                       </Badge>
                       <span className="store-image__id">ID {image.imageId}</span>
+                      <button type="button"
+                              className={`btn btn-sm position-absolute top-0 start-0 m-2 ${selectedIds.includes(image.imageId) ? 'btn-primary' : 'btn-light'}`}
+                              aria-pressed={selectedIds.includes(image.imageId)}
+                              aria-label={`이미지 ${image.imageId} ${selectedIds.includes(image.imageId) ? '선택 해제' : '선택'}`}
+                              onClick={e => { e.stopPropagation(); toggleSelected(image.imageId); }}>
+                        <i className={`bi ${selectedIds.includes(image.imageId) ? 'bi-check-square-fill' : 'bi-square'} me-1`}/>
+                        {selectedIds.includes(image.imageId) ? '선택됨' : '선택'}
+                      </button>
                     </div>
 
                     <div className="item-card__body">

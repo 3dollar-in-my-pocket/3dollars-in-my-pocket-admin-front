@@ -75,6 +75,16 @@ export default {
     return apiPatch<void>(`/v1/store/${storeId}`, data);
   },
 
+  updateStoreLabelsBulk: async (
+    storeIds: number[],
+    labels?: string[]
+  ): Promise<ApiResponse<void>> => {
+    return apiPatch<void>('/v1/stores', {
+      storeIds,
+      ...(labels !== undefined && {labels})
+    });
+  },
+
   /**
    * 가게 삭제
    * @param {string} storeId - 삭제할 가게 ID

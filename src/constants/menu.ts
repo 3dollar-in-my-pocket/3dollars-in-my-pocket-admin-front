@@ -46,6 +46,12 @@ export const menuGroups: MenuGroup[] = [
     description: "등록된 가게 정보와 리뷰·쿠폰·신고를 관리합니다",
     items: [
       {
+        path: "/manage/store-file-upload",
+        label: "신규 가게 등록",
+        icon: "bi-file-earmark-arrow-up",
+        allowedRoles: [AdminRole.OPERATOR]
+      },
+      {
         path: "/manage/store-search",
         label: "가게 검색",
         icon: "bi-shop",
@@ -152,12 +158,6 @@ export const menuGroups: MenuGroup[] = [
         label: "AI 메뉴 이미지 추출",
         icon: "bi-stars",
         allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]
-      },
-      {
-        path: "/manage/store-file-upload",
-        label: "신규 가게 등록",
-        icon: "bi-file-earmark-arrow-up",
-        allowedRoles: [AdminRole.OPERATOR]
       },
     ],
   },

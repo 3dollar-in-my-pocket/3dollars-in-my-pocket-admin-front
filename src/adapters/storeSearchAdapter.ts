@@ -115,6 +115,6 @@ export const storeSearchAdapter = {
   ],
 
   // 기본 설정
-  defaultSearchType: STORE_SEARCH_TYPES.RECENT,
+  defaultSearchType: STORE_SEARCH_TYPES.KEYWORD,
   errorMessage: '가게 정보를 불러오는 중 오류가 발생했습니다.'
 };

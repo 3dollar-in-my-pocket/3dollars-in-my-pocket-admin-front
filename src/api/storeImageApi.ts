@@ -53,6 +53,10 @@ export default {
     return apiDelete(`/v1/store-image/${imageId}`);
   },
 
+  deleteStoreImagesBulk: async (storeImageIds: number[]): Promise<ApiResponse<void>> => {
+    return apiDelete<void>('/v1/store-images', {storeImageIds});
+  },
+
   /**
    * 사용자가 등록한 가게 이미지 이력 조회
    * @param {string} userId - 사용자 ID

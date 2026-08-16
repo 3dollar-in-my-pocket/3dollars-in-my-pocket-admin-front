@@ -1,4 +1,8 @@
-import {useCallback, useEffect, useState} from 'react';
+import {FormEvent, useCallback, useEffect, useState} from 'react';
+import {Modal} from 'react-bootstrap';
+import {toast} from 'react-toastify';
+import storeApi from '@/api/storeApi';
+import BulkMarkerFormModal from '@/components/store/BulkMarkerFormModal';
 import type {ActivityAuthor} from '@/types/domain';
 import StoreDetailModal from './StoreDetailModal';
 import UserDetailModal from '@/pages/user/UserDetailModal';
@@ -9,12 +13,12 @@ import SearchResults from '@/components/common/SearchResults';
 import StoreCard from '@/components/store/StoreCard';
 import PageHeader from '@/components/common/PageHeader';
 import FilterCard from '@/components/common/FilterCard';
+import enumApi from '@/api/enumApi';
 
 /** 삭제 처리 후 목록에서 표시하기 위해 클라이언트가 isDeleted를 덧붙입니다. */
 type SearchedStore = SimpleStore & { isDeleted?: boolean };
 
 const SEARCH_TYPE_OPTIONS = [
-  {value: STORE_SEARCH_TYPES.RECENT, label: '최신순 조회', icon: 'bi-clock-history'},
   {value: STORE_SEARCH_TYPES.KEYWORD, label: '가게 이름', icon: 'bi-search'},
   {value: STORE_SEARCH_TYPES.STORE_ID, label: '가게 ID', icon: 'bi-hash'}
 ];
@@ -28,6 +32,14 @@ const StoreSearch = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [isComposing, setIsComposing] = useState(false);
   const [selectedStoreTypes, setSelectedStoreTypes] = useState([]);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [showLabels, setShowLabels] = useState(false);
+  const [showMarker, setShowMarker] = useState(false);
+  const [labels, setLabels] = useState<string[]>([]);
+  const [customLabelInput, setCustomLabelInput] = useState('');
+  const [availableLabels, setAvailableLabels] = useState<{key: string; description: string}[]>([]);
+  const [isFetchingEnums, setIsFetchingEnums] = useState(false);
+  const [isBulkSubmitting, setIsBulkSubmitting] = useState(false);
 
   const {
     searchQuery,
@@ -53,14 +65,21 @@ const StoreSearch = () => {
       targetStores: selectedStoreTypes.length > 0 ? selectedStoreTypes : null
     }),
     resetFunction: null,
-    errorMessage: storeSearchAdapter.errorMessage,
-    autoSearchTypes: [STORE_SEARCH_TYPES.RECENT] // 최신순 조회시 자동 검색
+    errorMessage: storeSearchAdapter.errorMessage
   });
 
-  // 초기 검색 타입 설정 (기본값: 최신순)
+  // 기본 검색 조건은 가게 이름입니다.
   useEffect(() => {
-    setSearchType(STORE_SEARCH_TYPES.RECENT);
+    setSearchType(STORE_SEARCH_TYPES.KEYWORD);
   }, [setSearchType]);
+
+  useEffect(() => {
+    if (!showLabels || availableLabels.length > 0) return;
+    setIsFetchingEnums(true);
+    enumApi.getEnum().then(response => {
+      if (response.ok && response.data?.StoreLabel) setAvailableLabels(response.data.StoreLabel);
+    }).finally(() => setIsFetchingEnums(false));
+  }, [showLabels, availableLabels.length]);
 
   // 가게 타입 필터 변경 핸들러
   const handleStoreTypeToggle = useCallback((storeType: StoreType) => {
@@ -75,12 +94,7 @@ const StoreSearch = () => {
 
   // 검색 실행 핸들러
   const handleSearchSubmit = useCallback(() => {
-    // 검색 타입에 따라 검색 실행
-    if (searchType === STORE_SEARCH_TYPES.KEYWORD || searchType === STORE_SEARCH_TYPES.STORE_ID) {
-      // 키워드 또는 ID 검색인 경우 수동으로 검색 실행
-      handleSearch(true);
-    }
-    // 최신순 조회는 자동 검색이므로 여기서는 별도 처리 불필요
+    handleSearch(true);
   }, [searchType, handleSearch]);
 
   // 가게 타입 필터가 변경되면 검색 재실행
@@ -98,6 +112,8 @@ const StoreSearch = () => {
       store={store}
       onClick={handleStoreClick}
       isDeleted={store.isDeleted}
+      selected={selectedIds.includes(store.storeId)}
+      onSelect={(id) => setSelectedIds(prev => prev.includes(id) ? prev.filter(value => value !== id) : prev.length < 30 ? [...prev, id] : prev)}
     />
   );
 
@@ -135,7 +151,24 @@ const StoreSearch = () => {
     setResults(updatedResults);
   }, [storeList, setResults]);
 
-  const isRecentSearch = searchType === STORE_SEARCH_TYPES.RECENT;
+  const submitLabels = async (event: FormEvent) => {
+    event.preventDefault();
+    setIsBulkSubmitting(true);
+    try {
+      const response = await storeApi.updateStoreLabelsBulk(selectedIds, labels);
+      if (response.ok) {
+        toast.success('선택한 가게의 라벨 변경 요청이 완료되었습니다.');
+        setShowLabels(false); setSelectedIds([]); handleSearch(true);
+      }
+    } finally { setIsBulkSubmitting(false); }
+  };
+
+  const addLabel = (value: string) => {
+    const label = value.trim();
+    if (!label) return toast.warning('라벨을 입력해주세요.');
+    if (labels.includes(label)) return toast.warning('이미 추가된 라벨입니다.');
+    setLabels(prev => [...prev, label]);
+  };
 
   return (
     <div>
@@ -144,7 +177,7 @@ const StoreSearch = () => {
       <FilterCard>
         <div className="row g-3">
           <div className="col-12">
-            <span className="form-label d-block">검색 방식</span>
+            <span className="form-label d-block">검색 조건</span>
             <div className="filter-chips">
               {SEARCH_TYPE_OPTIONS.map((option) => (
                 <button
@@ -163,9 +196,20 @@ const StoreSearch = () => {
             </div>
           </div>
 
+          <div className="col-12">
+            <span className="form-label d-block">정렬 조건</span>
+            <div className="filter-chips">
+              <span className="filter-chip filter-chip--active" aria-label="최신 등록순 정렬">
+                <i className="bi bi-clock-history me-1"/>
+                최신 등록순
+              </span>
+            </div>
+            <p className="form-field__hint mb-0">현재 API에서 제공하는 최신 등록순으로 조회합니다.</p>
+          </div>
+
           <div className="col-12 col-md">
             <label className="form-label" htmlFor="store-search-query">
-              {isRecentSearch ? '최신순 조회' : searchType === STORE_SEARCH_TYPES.STORE_ID ? '가게 ID' : '가게 이름'}
+              {searchType === STORE_SEARCH_TYPES.STORE_ID ? '가게 ID' : '가게 이름'}
             </label>
             <input
               id="store-search-query"
@@ -174,9 +218,7 @@ const StoreSearch = () => {
               placeholder={
                 searchType === STORE_SEARCH_TYPES.STORE_ID
                   ? '가게 ID를 쉼표로 구분해 입력하세요 (최대 5개)'
-                  : isRecentSearch
-                    ? '최신순 조회에는 검색어가 필요하지 않습니다'
-                    : '가게 이름을 입력하세요'
+                  : '가게 이름을 입력하세요'
               }
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -190,7 +232,6 @@ const StoreSearch = () => {
                 setIsComposing(false);
                 setSearchQuery(e.target.value);
               }}
-              disabled={isRecentSearch}
             />
           </div>
 
@@ -198,7 +239,7 @@ const StoreSearch = () => {
             <button
               className="btn btn-primary w-100"
               onClick={handleSearchSubmit}
-              disabled={isSearching || isRecentSearch}
+              disabled={isSearching}
             >
               {isSearching ? (
                 <>
@@ -252,9 +293,32 @@ const StoreSearch = () => {
         renderItem={renderStoreCard}
         emptyMessage="검색 결과가 없습니다"
         emptyDescription="다른 검색어로 시도해보시거나 검색 조건을 변경해보세요"
-        loadingMessage={searchQuery.trim() ? '검색 중입니다' : '조회 중입니다'}
+        loadingMessage="검색 중입니다"
         title="가게 검색 결과"
       />
+      {selectedIds.length > 0 && <div className="position-sticky bottom-0 alert alert-primary shadow d-flex flex-wrap align-items-center justify-content-between gap-2 mt-3">
+        <strong>{selectedIds.length}개 가게 선택됨</strong><div className="d-flex gap-2">
+        <button className="btn btn-sm btn-primary" onClick={() => { setLabels([]); setCustomLabelInput(''); setShowLabels(true); }}>라벨 일괄 변경</button>
+        <button className="btn btn-sm btn-primary" onClick={() => setShowMarker(true)}>마커 일괄 생성</button>
+        <button className="btn btn-sm btn-outline-secondary" onClick={() => setSelectedIds([])}>선택 해제</button></div>
+      </div>}
+
+      <Modal show={showLabels} onHide={() => setShowLabels(false)} centered className="app-modal"><form onSubmit={submitLabels}>
+        <Modal.Header closeButton><Modal.Title>가게 라벨 일괄 변경</Modal.Title></Modal.Header>
+        <Modal.Body><div className="alert alert-info py-2">선택한 {selectedIds.length}개 활성 가게에 동일한 라벨을 적용합니다.</div>
+          <div className="form-field"><span className="form-field__label"><i className="bi bi-tags"/>선택된 라벨</span>
+            {labels.length > 0 ? <div className="form-chips">{labels.map(label => <span key={label} className="form-chip form-chip--selected"><i className="bi bi-tag-fill"/><span>{label}</span><button type="button" className="form-chip__remove" onClick={() => setLabels(prev => prev.filter(value => value !== label))} aria-label={`${label} 라벨 삭제`}><i className="bi bi-x-lg"/></button></span>)}</div> : <p className="form-field__hint">선택된 라벨이 없습니다. 이 상태로 저장하면 모든 라벨을 제거합니다.</p>}
+          </div>
+          <div className="form-params"><p className="form-params__head">라벨 추가하기</p>
+            <div className="form-field"><label className="form-field__label" htmlFor="bulk-label-select"><i className="bi bi-list-ul"/>목록에서 선택</label>
+              <select id="bulk-label-select" className="form-select form-select-sm" value="" disabled={isFetchingEnums || isBulkSubmitting} onChange={e => e.target.value && addLabel(e.target.value)}><option value="">{isFetchingEnums ? '목록 불러오는 중...' : '라벨을 선택하세요...'}</option>{availableLabels.map(option => <option key={option.key} value={option.key} disabled={labels.includes(option.key)}>{option.description} ({option.key}){labels.includes(option.key) ? ' ✓ 이미 추가됨' : ''}</option>)}</select>
+            </div>
+            <div className="form-field"><label className="form-field__label" htmlFor="bulk-custom-label"><i className="bi bi-pencil"/>직접 입력</label><div className="form-inline-search"><input id="bulk-custom-label" className="form-control" value={customLabelInput} onChange={e => setCustomLabelInput(e.target.value)} placeholder="커스텀 라벨 입력 (예: MY_CUSTOM_LABEL)" onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addLabel(customLabelInput); setCustomLabelInput(''); } }}/><button type="button" className="btn btn-primary" disabled={!customLabelInput.trim()} onClick={() => { addLabel(customLabelInput); setCustomLabelInput(''); }}><i className="bi bi-plus-lg me-1"/>추가</button></div><p className="form-field__hint"><i className="bi bi-info-circle me-1"/>Enum에 없는 새로운 라벨을 직접 입력할 수 있습니다</p></div>
+          </div></Modal.Body>
+        <Modal.Footer><button type="button" className="btn btn-outline-secondary" onClick={() => setShowLabels(false)}>취소</button><button className="btn btn-primary" disabled={isBulkSubmitting}>{isBulkSubmitting ? '처리 중...' : `${selectedIds.length}개 적용`}</button></Modal.Footer>
+      </form></Modal>
+      <BulkMarkerFormModal show={showMarker} mode="create" targetIds={selectedIds} onHide={() => setShowMarker(false)}
+                            onSuccess={() => { setSelectedIds([]); handleSearch(true); }}/>
 
       <StoreDetailModal
         show={!!selectedStore}

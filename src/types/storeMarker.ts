@@ -31,6 +31,23 @@ export interface StoreMarkerRequest {
   endDateTime: string;
 }
 
+export interface BulkStoreMarkerCreateRequest extends StoreMarkerRequest {
+  storeIds: number[];
+}
+
+export interface BulkStoreMarkerUpdateRequest extends StoreMarkerRequest {
+  markerIds: number[];
+}
+
+export interface CreatedStoreMarker {
+  storeId: number;
+  markerId: number;
+}
+
+export interface BulkStoreMarkerCreateResponse {
+  markers: CreatedStoreMarker[];
+}
+
 export interface StoreMarkerFilter {
   filterStartDateTime?: string;
   filterEndDateTime?: string;
