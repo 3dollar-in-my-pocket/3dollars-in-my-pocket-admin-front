@@ -73,6 +73,13 @@ const StoreSearch = () => {
     setSearchType(STORE_SEARCH_TYPES.KEYWORD);
   }, [setSearchType]);
 
+  // 가게 이름 조건으로 진입하거나 전환했을 때 검색어가 없으면 전체 가게를 바로 조회합니다.
+  useEffect(() => {
+    if (searchType === STORE_SEARCH_TYPES.KEYWORD && !searchQuery.trim()) {
+      handleSearch(true);
+    }
+  }, [searchType]);
+
   useEffect(() => {
     if (!showLabels || availableLabels.length > 0) return;
     setIsFetchingEnums(true);
@@ -218,7 +225,7 @@ const StoreSearch = () => {
               placeholder={
                 searchType === STORE_SEARCH_TYPES.STORE_ID
                   ? '가게 ID를 쉼표로 구분해 입력하세요 (최대 5개)'
-                  : '가게 이름을 입력하세요'
+                  : '가게 이름을 입력하세요 (비워두면 전체 조회)'
               }
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -255,9 +262,7 @@ const StoreSearch = () => {
             </button>
           </div>
 
-          {/* 가게 타입 필터 (가게 ID 검색이 아닐 때만 표시) */}
-          {searchType !== STORE_SEARCH_TYPES.STORE_ID && (
-            <div className="col-12">
+          <div className="col-12">
               <span className="form-label d-block">가게 종류</span>
               <div className="filter-chips">
                 <button
@@ -279,8 +284,7 @@ const StoreSearch = () => {
                   </button>
                 ))}
               </div>
-            </div>
-          )}
+          </div>
         </div>
       </FilterCard>
 

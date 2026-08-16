@@ -25,7 +25,9 @@ export const storeSearchAdapter = {
     let response: any;
 
     if (searchType === STORE_SEARCH_TYPES.KEYWORD) {
-      response = await storeApi.searchStores(searchQuery, cursor, 20, targetStores);
+      response = searchQuery.trim()
+        ? await storeApi.searchStores(searchQuery.trim(), cursor, 20, targetStores)
+        : await storeApi.getStores(cursor, 20, targetStores);
 
       if (!response.ok) {
         throw new Error('Store search failed');
@@ -60,7 +62,8 @@ export const storeSearchAdapter = {
       // 성공한 결과만 필터링
       const stores = storeResponses
         .filter(res => res?.ok && res?.data)
-        .map(res => res.data);
+        .map(res => res.data)
+        .filter(store => !targetStores?.length || targetStores.includes(store.storeType));
 
       // ID 검색은 페이징 없음 (한 번에 모든 결과 반환)
       return {
