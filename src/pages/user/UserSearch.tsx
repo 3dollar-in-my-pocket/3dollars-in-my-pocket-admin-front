@@ -11,9 +11,21 @@ import {userSearchAdapter} from '@/adapters/userSearchAdapter';
 import SearchResults from '@/components/common/SearchResults';
 import UserCard from '@/components/user/UserCard';
 import PageHeader from '@/components/common/PageHeader';
+import {Modal} from 'react-bootstrap';
+import {toast} from 'react-toastify';
+import PushSendModal from '@/components/push/PushSendModal';
+import medalApi from '@/api/medalApi';
+import {Medal} from '@/types/medal';
 
 const UserSearch = () => {
   const [selectedStore, setSelectedStore] = useState(null);
+  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
+  const [showPushModal, setShowPushModal] = useState(false);
+  const [showMedalModal, setShowMedalModal] = useState(false);
+  const [medals, setMedals] = useState<Medal[]>([]);
+  const [selectedMedalId, setSelectedMedalId] = useState<number | null>(null);
+  const [isLoadingMedals, setIsLoadingMedals] = useState(false);
+  const [isAssigningMedal, setIsAssigningMedal] = useState(false);
 
   const {
     searchQuery,
@@ -85,8 +97,34 @@ const UserSearch = () => {
   };
 
   const renderUserCard = (user: User) => (
-    <UserCard key={user.userId} user={user} onClick={handleUserClick}/>
+    <UserCard key={user.userId} user={user} onClick={handleUserClick}
+              selected={Boolean(user.userId && selectedUserIds.includes(user.userId))}
+              onSelect={(id) => setSelectedUserIds(prev => prev.includes(id) ? prev.filter(value => value !== id) : [...prev, id])}/>
   );
+
+  const openMedalModal = async () => {
+    setShowMedalModal(true);
+    setSelectedMedalId(null);
+    if (medals.length > 0) return;
+    setIsLoadingMedals(true);
+    try {
+      const response = await medalApi.getMedals();
+      if (response.ok) setMedals(response.data?.contents || []);
+    } finally { setIsLoadingMedals(false); }
+  };
+
+  const assignMedal = async () => {
+    if (!selectedMedalId || isAssigningMedal) return;
+    setIsAssigningMedal(true);
+    try {
+      const userIds = selectedUserIds.map(Number).filter(Number.isFinite);
+      const response = await medalApi.assignMedalToUsers(selectedMedalId, userIds);
+      if (response.ok) {
+        toast.success(`${userIds.length}명에게 메달 지급 요청이 완료되었습니다.`);
+        setShowMedalModal(false); setSelectedMedalId(null); setSelectedUserIds([]);
+      }
+    } finally { setIsAssigningMedal(false); }
+  };
 
   // 가게 클릭 핸들러
   const handleStoreClick = (store: SimpleStore) => {
@@ -130,6 +168,13 @@ const UserSearch = () => {
         loadingMessage="검색 중입니다"
         title="유저 검색 결과"
       />
+      {selectedUserIds.length > 0 && <div className="position-sticky bottom-0 alert alert-primary shadow bulk-action-bar mt-3">
+        <strong>{selectedUserIds.length}명 선택됨</strong><div className="bulk-action-bar__actions">
+          <button className="btn btn-sm btn-primary" onClick={openMedalModal}><i className="bi bi-award me-1"/>메달 지급</button>
+          <button className="btn btn-sm btn-primary" onClick={() => setShowPushModal(true)}><i className="bi bi-send-fill me-1"/>푸시 발송</button>
+          <button className="btn btn-sm btn-outline-secondary" onClick={() => setSelectedUserIds([])}>선택 해제</button>
+        </div>
+      </div>}
       <UserDetailModal
         show={!!selectedUser}
         onHide={handleCloseModal}
@@ -147,6 +192,20 @@ const UserSearch = () => {
         onStoreDeleted={() => {
         }}
       />
+
+      <PushSendModal show={showPushModal} onHide={() => setShowPushModal(false)}
+                     initialUserIds={selectedUserIds.map(Number).filter(Number.isFinite)}/>
+
+      <Modal show={showMedalModal} onHide={() => !isAssigningMedal && setShowMedalModal(false)} centered scrollable className="app-modal">
+        <Modal.Header closeButton><Modal.Title as="h2"><i className="bi bi-award"/>메달 일괄 지급</Modal.Title></Modal.Header>
+        <Modal.Body><div className="alert alert-info py-2">선택한 유저 {selectedUserIds.length}명에게 동일한 메달을 지급합니다.</div>
+          {isLoadingMedals ? <div className="text-center py-5"><span className="spinner-border text-primary"/><p className="small text-muted mt-2">메달 목록을 불러오는 중...</p></div> :
+            <div className="d-grid gap-2">{medals.map(medal => <button type="button" key={medal.medalId}
+              className={`btn text-start p-3 d-flex align-items-center gap-3 ${selectedMedalId === medal.medalId ? 'btn-primary' : 'btn-outline-secondary'}`}
+              onClick={() => setSelectedMedalId(medal.medalId)}><img src={medal.iconUrl} alt="" className="rounded-circle flex-shrink-0" style={{width: 48, height: 48, objectFit: 'cover'}}/><span><strong className="d-block">{medal.name}</strong><small>{medal.introduction}</small></span></button>)}</div>}
+        </Modal.Body>
+        <Modal.Footer><button className="btn btn-outline-secondary" onClick={() => setShowMedalModal(false)} disabled={isAssigningMedal}>취소</button><button className="btn btn-primary" onClick={assignMedal} disabled={!selectedMedalId || isAssigningMedal}>{isAssigningMedal ? '지급 중...' : `${selectedUserIds.length}명에게 지급`}</button></Modal.Footer>
+      </Modal>
     </div>
   );
 };

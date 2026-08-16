@@ -33,6 +33,7 @@ const ReviewManagement = () => {
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [selectedStore, setSelectedStore] = useState<any>(null);
   const [skeletonCount] = useState(4);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
   const fetchReviews = useCallback(
     (cursor: string | null) => reviewApi.getAllStoreReviews(cursor, 20),
@@ -115,6 +116,23 @@ const ReviewManagement = () => {
     }
   };
 
+  const toggleSelected = (id: number) => setSelectedIds(prev =>
+    prev.includes(id) ? prev.filter(value => value !== id) : prev.length < 30 ? [...prev, id] : prev
+  );
+
+  const handleBulkBlind = async () => {
+    if (!window.confirm(`선택한 리뷰 ${selectedIds.length}개를 블라인드 처리하시겠습니까?`)) return;
+    setIsBlinding(true);
+    try {
+      const response = await reviewApi.blindStoreReviewsBulk(selectedIds);
+      if (response.ok) {
+        toast.success('선택한 리뷰 블라인드 요청이 완료되었습니다.');
+        setSelectedIds([]);
+        refresh();
+      }
+    } finally { setIsBlinding(false); }
+  };
+
   const handleAuthorClick = (writer: any) => {
     if (writer?.userId) {
       setSelectedUser({
@@ -149,6 +167,11 @@ const ReviewManagement = () => {
           <span className="page-count">{reviews.length.toLocaleString()}{hasMore ? '+' : ''}건</span>
         )}
       >
+        {selectedIds.length > 0 && <div className="alert alert-primary bulk-action-bar py-2">
+          <strong>{selectedIds.length}개 선택됨</strong><div className="bulk-action-bar__actions">
+          <button className="btn btn-sm btn-outline-danger" onClick={handleBulkBlind} disabled={isBlinding}>{isBlinding ? '처리 중...' : '일괄 블라인드'}</button>
+          <button className="btn btn-sm btn-outline-secondary" onClick={() => setSelectedIds([])}>선택 해제</button></div>
+        </div>}
         <div ref={scrollContainerRef} style={{maxHeight: 'calc(100vh - 300px)', overflowY: 'auto'}}>
           {error ? (
             <ErrorState message={error} onRetry={refresh}/>
@@ -163,7 +186,7 @@ const ReviewManagement = () => {
               {reviews.map((review) => (
                 <div key={review.reviewId} className="col-12 col-lg-6">
                   <div
-                    className="item-card item-card--clickable h-100"
+                    className={`item-card item-card--clickable h-100 ${selectedIds.includes(review.reviewId) ? 'border border-primary border-2' : ''}`}
                     onClick={() => setSelectedReview(review)}
                     role="button"
                     tabIndex={0}
@@ -175,6 +198,14 @@ const ReviewManagement = () => {
                     }}
                   >
                     <div className="item-card__body">
+                      <button type="button"
+                              className={`btn btn-sm float-end ms-2 review-select-button ${selectedIds.includes(review.reviewId) ? 'btn-primary' : 'btn-outline-secondary'}`}
+                              disabled={review.status === 'DELETED'} aria-pressed={selectedIds.includes(review.reviewId)}
+                              aria-label={`리뷰 ${review.reviewId} ${selectedIds.includes(review.reviewId) ? '선택 해제' : '선택'}`}
+                              onClick={e => { e.stopPropagation(); toggleSelected(review.reviewId); }}>
+                        <i className={`bi ${selectedIds.includes(review.reviewId) ? 'bi-check-square-fill' : 'bi-square'} me-1`}/>
+                        {review.status === 'DELETED' ? '선택 불가' : selectedIds.includes(review.reviewId) ? '선택됨' : '선택'}
+                      </button>
                       {/* 가게 + 평점 */}
                       <div className="d-flex align-items-start justify-content-between gap-2">
                         <div className="min-w-0">

@@ -32,6 +32,10 @@ export default {
     return apiPut<void>(`/v1/store-review/${reviewId}/blind`, undefined);
   },
 
+  blindStoreReviewsBulk: async (reviewIds: number[]): Promise<ApiResponse<void>> => {
+    return apiPut<void>('/v1/store-reviews/blind', {reviewIds});
+  },
+
   /**
    * 사용자가 작성한 리뷰 목록 조회
    * @param {string} userId - 사용자 ID

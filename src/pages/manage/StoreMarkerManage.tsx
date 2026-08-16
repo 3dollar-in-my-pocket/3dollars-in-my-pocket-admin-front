@@ -12,6 +12,8 @@ import StoreMarkerDetailModal from '@/components/StoreMarkerDetailModal';
 import {StoreMarker} from '@/types/storeMarker';
 import {formatDateTime} from '@/utils/dateUtils';
 import {getAdStatus} from '@/utils/timeUtils';
+import {toast} from 'react-toastify';
+import BulkMarkerFormModal from '@/components/store/BulkMarkerFormModal';
 
 const toApiDateTime = (value: string): string => {
   if (!value) return value;
@@ -32,6 +34,9 @@ const StoreMarkerManage = () => {
   const [appliedFilter, setAppliedFilter] = useState({startDateTime: '', endDateTime: ''});
   const [selectedStore, setSelectedStore] = useState<any>(null);
   const [selectedMarker, setSelectedMarker] = useState<StoreMarker | null>(null);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [showBulkEdit, setShowBulkEdit] = useState(false);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
 
   const hasFilter = useMemo(
     () => Boolean(filterStartDateTime || filterEndDateTime),
@@ -83,6 +88,23 @@ const StoreMarkerManage = () => {
       name: `가게 ${storeId}`,
     });
     setSelectedMarker(null);
+  };
+
+  const toggleSelected = (markerId: number) => setSelectedIds(prev =>
+    prev.includes(markerId) ? prev.filter(id => id !== markerId) : prev.length < 30 ? [...prev, markerId] : prev
+  );
+
+  const deleteSelected = async () => {
+    if (!window.confirm(`선택한 마커 ${selectedIds.length}개를 삭제하시겠습니까?`)) return;
+    setIsBulkDeleting(true);
+    try {
+      const response = await storeMarkerApi.deleteStoreMarkersBulk(selectedIds);
+      if (response.ok) {
+        toast.success('선택한 마커 삭제 요청이 완료되었습니다.');
+        setSelectedIds([]);
+        refresh();
+      }
+    } finally { setIsBulkDeleting(false); }
   };
 
   return (
@@ -157,6 +179,14 @@ const StoreMarkerManage = () => {
           <span className="page-count">{markers.length.toLocaleString()}{hasMore ? '+' : ''}건</span>
         )}
       >
+        {selectedIds.length > 0 && <div className="alert alert-primary bulk-action-bar py-2">
+          <strong>{selectedIds.length}개 선택됨</strong>
+          <div className="bulk-action-bar__actions">
+            <button className="btn btn-sm btn-primary" onClick={() => setShowBulkEdit(true)}>일괄 수정</button>
+            <button className="btn btn-sm btn-outline-danger" onClick={deleteSelected} disabled={isBulkDeleting}>{isBulkDeleting ? '삭제 중...' : '일괄 삭제'}</button>
+            <button className="btn btn-sm btn-outline-secondary" onClick={() => setSelectedIds([])}>선택 해제</button>
+          </div>
+        </div>}
         <div ref={scrollContainerRef} style={{maxHeight: 'calc(100vh - 360px)', overflowY: 'auto'}}>
           {markers.length === 0 && !isLoading ? (
             <EmptyState
@@ -172,6 +202,8 @@ const StoreMarkerManage = () => {
                     marker={marker}
                     onClick={setSelectedMarker}
                     onStoreClick={openStoreDetail}
+                    selected={selectedIds.includes(marker.markerId)}
+                    onSelect={toggleSelected}
                   />
                 </div>
               ))}
@@ -203,6 +235,9 @@ const StoreMarkerManage = () => {
         onAuthorClick={undefined}
         onStoreDeleted={undefined}
       />
+      <BulkMarkerFormModal show={showBulkEdit} mode="update" targetIds={selectedIds}
+                           initialMarker={markers.find(marker => marker.markerId === selectedIds[0])}
+                           onHide={() => setShowBulkEdit(false)} onSuccess={() => { setSelectedIds([]); refresh(); }}/>
     </div>
   );
 };
@@ -213,6 +248,8 @@ interface MarkerCardProps {
   onClick: (marker: StoreMarker) => void;
   /** 가게 상세 열기 */
   onStoreClick: (storeId: number) => void;
+  selected: boolean;
+  onSelect: (markerId: number) => void;
 }
 
 /**
@@ -221,12 +258,12 @@ interface MarkerCardProps {
  * 마커 이미지가 핵심 정보이므로 카드 상단에 크게 배치하고,
  * 활성 기간은 상태 배지로 한눈에 구분한다.
  */
-const MarkerCard = ({marker, onClick, onStoreClick}: MarkerCardProps) => {
+const MarkerCard = ({marker, onClick, onStoreClick, selected, onSelect}: MarkerCardProps) => {
   const status = getAdStatus(marker.period?.startDateTime, marker.period?.endDateTime);
 
   return (
     <div
-      className="item-card item-card--clickable marker-card h-100"
+      className={`item-card item-card--clickable marker-card h-100 ${selected ? 'border border-primary border-2' : ''}`}
       onClick={() => onClick(marker)}
       role="button"
       tabIndex={0}
@@ -238,7 +275,7 @@ const MarkerCard = ({marker, onClick, onStoreClick}: MarkerCardProps) => {
       }}
     >
       <div className="item-card__body">
-        <div className="d-flex align-items-start justify-content-between gap-2 mb-3">
+        <div className="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-start justify-content-between gap-2 mb-3">
           <div className="min-w-0">
             <div className="d-flex align-items-center gap-2 mb-1">
               <span className={`badge ${status.badgeClass}`}>{status.label}</span>
@@ -251,6 +288,13 @@ const MarkerCard = ({marker, onClick, onStoreClick}: MarkerCardProps) => {
               마커 {marker.markerId} · 가게 {marker.storeId || '-'}
             </p>
           </div>
+          <div className="d-flex flex-wrap gap-2 align-items-center justify-content-end">
+          <button type="button" className={`btn btn-sm ${selected ? 'btn-primary' : 'btn-outline-secondary'}`}
+                  aria-pressed={selected} aria-label={`마커 ${marker.markerId} ${selected ? '선택 해제' : '선택'}`}
+                  onClick={event => { event.stopPropagation(); onSelect(marker.markerId); }}>
+            <i className={`bi ${selected ? 'bi-check-square-fill' : 'bi-square'} me-1`}/>
+            {selected ? '선택됨' : '선택'}
+          </button>
           <button
             className="btn btn-sm btn-outline-primary flex-shrink-0"
             onClick={(event) => {
@@ -261,6 +305,7 @@ const MarkerCard = ({marker, onClick, onStoreClick}: MarkerCardProps) => {
             <i className="bi bi-shop me-1"/>
             가게 상세
           </button>
+          </div>
         </div>
 
         <div className="marker-card__previews">

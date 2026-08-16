@@ -20,12 +20,14 @@ interface StoreCardProps {
   onClick: (store: SimpleStore) => void;
   /** 목록에서 삭제 처리된 가게를 비활성 상태로 표시할 때 사용 */
   isDeleted?: boolean;
+  selected?: boolean;
+  onSelect?: (storeId: number) => void;
 }
 
 /** 카드에 한 번에 노출하는 카테고리 개수 */
 const VISIBLE_CATEGORIES = 2;
 
-const StoreCard = ({store, onClick, isDeleted = false}: StoreCardProps) => {
+const StoreCard = ({store, onClick, isDeleted = false, selected = false, onSelect}: StoreCardProps) => {
   const formatDateTime = (dateString?: string) => {
     if (!dateString) return '없음';
     return new Date(dateString).toLocaleDateString('ko-KR');
@@ -37,9 +39,9 @@ const StoreCard = ({store, onClick, isDeleted = false}: StoreCardProps) => {
         item={store}
         onClick={isDeleted ? undefined : onClick}
         muted={isDeleted}
-        className="h-100"
+        className={`h-100 ${selected ? 'border border-primary border-2' : ''}`}
       >
-        <div className="d-flex align-items-start justify-content-between gap-2">
+        <div className="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-start justify-content-between gap-2">
           <div className="min-w-0">
             <h3 className="item-card__name text-truncate" title={store.name}>
               <i className="bi bi-shop me-1 text-body-tertiary"/>
@@ -50,10 +52,18 @@ const StoreCard = ({store, onClick, isDeleted = false}: StoreCardProps) => {
               {store.address?.fullAddress || '주소 정보 없음'}
             </p>
           </div>
-          <span className="rating-badge flex-shrink-0">
+          <div className="d-flex align-items-center justify-content-between justify-content-sm-end gap-2 flex-shrink-0">
+          {onSelect && !isDeleted && <button type="button"
+            className={`btn btn-sm ${selected ? 'btn-primary' : 'btn-outline-secondary'}`}
+            aria-pressed={selected} aria-label={`가게 ${store.storeId} ${selected ? '선택 해제' : '선택'}`}
+            onClick={event => { event.stopPropagation(); onSelect(store.storeId); }}>
+            <i className={`bi ${selected ? 'bi-check-square-fill' : 'bi-square'} me-1`}/>
+            {selected ? '선택됨' : '선택'}
+          </button>}<span className="rating-badge flex-shrink-0">
             <i className="bi bi-star-fill"/>
             {formatRating(store.rating)}
           </span>
+          </div>
         </div>
 
         <div className="form-chips">

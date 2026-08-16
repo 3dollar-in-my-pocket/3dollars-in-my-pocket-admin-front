@@ -140,11 +140,12 @@ export async function apiPut<T>(
 /**
  * 타입 안전한 DELETE 요청
  */
-export async function apiDelete<T = void>(url: string): Promise<ApiResponse<T>> {
+export async function apiDelete<T = void>(url: string, data?: any): Promise<ApiResponse<T>> {
   return request<T>(async () => {
     const response = await axiosInstance({
       method: 'DELETE',
       url,
+      data,
     });
 
     return unwrapApiResponse<T>(response);

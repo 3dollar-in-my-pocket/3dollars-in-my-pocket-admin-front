@@ -1,5 +1,12 @@
 import {ApiResponse, PaginatedResponse} from '@/types/api';
-import {StoreMarker, StoreMarkerFilter, StoreMarkerRequest} from '@/types/storeMarker';
+import {
+  BulkStoreMarkerCreateRequest,
+  BulkStoreMarkerCreateResponse,
+  BulkStoreMarkerUpdateRequest,
+  StoreMarker,
+  StoreMarkerFilter,
+  StoreMarkerRequest
+} from '@/types/storeMarker';
 import {apiDelete, apiGetPaginated, apiPost, apiPut} from './apiHelpers';
 
 const storeMarkerApi = {
@@ -54,6 +61,20 @@ const storeMarkerApi = {
     markerId: string
   ): Promise<ApiResponse<void>> => {
     return apiDelete<void>(`/v1/store/${storeId}/marker/${markerId}`);
+  },
+
+  createStoreMarkersBulk: async (
+    data: BulkStoreMarkerCreateRequest
+  ): Promise<ApiResponse<BulkStoreMarkerCreateResponse>> => {
+    return apiPost<BulkStoreMarkerCreateResponse>('/v1/stores/markers', data);
+  },
+
+  updateStoreMarkersBulk: async (data: BulkStoreMarkerUpdateRequest): Promise<ApiResponse<void>> => {
+    return apiPut<void>('/v1/stores/markers', data);
+  },
+
+  deleteStoreMarkersBulk: async (markerIds: number[]): Promise<ApiResponse<void>> => {
+    return apiDelete<void>('/v1/stores/markers', {markerIds});
   },
 };
 
