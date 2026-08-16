@@ -126,7 +126,7 @@ const StoreFileUpload = () => {
           <dt className="col-sm-4 col-lg-3">가게명</dt>
           <dd className="col-sm-8 col-lg-9">{data.storeName || '-'}</dd>
           <dt className="col-sm-4 col-lg-3">주소</dt>
-          <dd className="col-sm-8 col-lg-9">{data.address || '-'}</dd>
+          <dd className="col-sm-8 col-lg-9 text-break">{data.address || '-'}</dd>
           <dt className="col-sm-4 col-lg-3">위도</dt>
           <dd className="col-sm-8 col-lg-9">{data.latitude ?? '-'}</dd>
           <dt className="col-sm-4 col-lg-3">경도</dt>
@@ -184,7 +184,7 @@ const StoreFileUpload = () => {
           샘플 ZIP 다운로드
         </button>}/>
 
-      <div className="row g-2 mb-4" aria-label="등록 진행 단계">
+      <div className="row g-2 mb-4 store-import-steps" aria-label="등록 진행 단계">
         {[['1', '파일 준비'], ['2', '사전 검증'], ['3', '가게 등록']].map(([step, label]) => {
           const number = Number(step);
           const active = currentStep >= number;
@@ -287,7 +287,7 @@ const FilePicker = ({id, title, expectedName, file, disabled, onChange}: {id: st
   <label htmlFor={id} className={`d-flex flex-column align-items-center justify-content-center text-center border border-2 border-dashed rounded-3 p-4 h-100 ${file ? 'border-success bg-success-subtle' : 'bg-body-tertiary'} ${disabled ? 'opacity-50' : ''}`} style={{cursor: disabled ? 'not-allowed' : 'pointer', minHeight: 190}}>
     <i className={`bi ${file ? 'bi-file-earmark-check-fill text-success' : 'bi-cloud-arrow-up text-primary'} fs-1 mb-2`}/>
     <strong>{title}</strong><span className="small text-body-secondary font-monospace">{expectedName}</span>
-    {file ? <span className="badge text-bg-success mt-3">{file.name} · {formatFileSize(file.size)}</span> : <span className="btn btn-sm btn-outline-primary mt-3">CSV 파일 선택</span>}
+    {file ? <span className="badge text-bg-success mt-3 store-import-file-name">{file.name} · {formatFileSize(file.size)}</span> : <span className="btn btn-sm btn-outline-primary mt-3">CSV 파일 선택</span>}
     <input id={id} type="file" accept=".csv,text/csv" hidden disabled={disabled} onChange={onChange}/>
   </label>
 );

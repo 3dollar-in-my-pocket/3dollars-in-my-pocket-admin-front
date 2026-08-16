@@ -300,8 +300,8 @@ const StoreSearch = () => {
         loadingMessage="검색 중입니다"
         title="가게 검색 결과"
       />
-      {selectedIds.length > 0 && <div className="position-sticky bottom-0 alert alert-primary shadow d-flex flex-wrap align-items-center justify-content-between gap-2 mt-3">
-        <strong>{selectedIds.length}개 가게 선택됨</strong><div className="d-flex gap-2">
+      {selectedIds.length > 0 && <div className="position-sticky bottom-0 alert alert-primary shadow bulk-action-bar mt-3">
+        <strong>{selectedIds.length}개 가게 선택됨</strong><div className="bulk-action-bar__actions">
         <button className="btn btn-sm btn-primary" onClick={() => { setLabels([]); setCustomLabelInput(''); setShowLabels(true); }}>라벨 일괄 변경</button>
         <button className="btn btn-sm btn-primary" onClick={() => setShowMarker(true)}>마커 일괄 생성</button>
         <button className="btn btn-sm btn-outline-secondary" onClick={() => setSelectedIds([])}>선택 해제</button></div>

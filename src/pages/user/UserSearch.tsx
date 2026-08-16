@@ -168,8 +168,8 @@ const UserSearch = () => {
         loadingMessage="검색 중입니다"
         title="유저 검색 결과"
       />
-      {selectedUserIds.length > 0 && <div className="position-sticky bottom-0 alert alert-primary shadow d-flex flex-wrap align-items-center justify-content-between gap-2 mt-3">
-        <strong>{selectedUserIds.length}명 선택됨</strong><div className="d-flex gap-2">
+      {selectedUserIds.length > 0 && <div className="position-sticky bottom-0 alert alert-primary shadow bulk-action-bar mt-3">
+        <strong>{selectedUserIds.length}명 선택됨</strong><div className="bulk-action-bar__actions">
           <button className="btn btn-sm btn-primary" onClick={openMedalModal}><i className="bi bi-award me-1"/>메달 지급</button>
           <button className="btn btn-sm btn-primary" onClick={() => setShowPushModal(true)}><i className="bi bi-send-fill me-1"/>푸시 발송</button>
           <button className="btn btn-sm btn-outline-secondary" onClick={() => setSelectedUserIds([])}>선택 해제</button>

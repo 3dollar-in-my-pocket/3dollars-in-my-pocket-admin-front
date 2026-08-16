@@ -179,9 +179,9 @@ const StoreMarkerManage = () => {
           <span className="page-count">{markers.length.toLocaleString()}{hasMore ? '+' : ''}건</span>
         )}
       >
-        {selectedIds.length > 0 && <div className="alert alert-primary d-flex flex-wrap align-items-center justify-content-between gap-2 py-2">
+        {selectedIds.length > 0 && <div className="alert alert-primary bulk-action-bar py-2">
           <strong>{selectedIds.length}개 선택됨</strong>
-          <div className="d-flex gap-2">
+          <div className="bulk-action-bar__actions">
             <button className="btn btn-sm btn-primary" onClick={() => setShowBulkEdit(true)}>일괄 수정</button>
             <button className="btn btn-sm btn-outline-danger" onClick={deleteSelected} disabled={isBulkDeleting}>{isBulkDeleting ? '삭제 중...' : '일괄 삭제'}</button>
             <button className="btn btn-sm btn-outline-secondary" onClick={() => setSelectedIds([])}>선택 해제</button>
@@ -275,7 +275,7 @@ const MarkerCard = ({marker, onClick, onStoreClick, selected, onSelect}: MarkerC
       }}
     >
       <div className="item-card__body">
-        <div className="d-flex align-items-start justify-content-between gap-2 mb-3">
+        <div className="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-start justify-content-between gap-2 mb-3">
           <div className="min-w-0">
             <div className="d-flex align-items-center gap-2 mb-1">
               <span className={`badge ${status.badgeClass}`}>{status.label}</span>
@@ -288,7 +288,7 @@ const MarkerCard = ({marker, onClick, onStoreClick, selected, onSelect}: MarkerC
               마커 {marker.markerId} · 가게 {marker.storeId || '-'}
             </p>
           </div>
-          <div className="d-flex gap-2 align-items-center">
+          <div className="d-flex flex-wrap gap-2 align-items-center justify-content-end">
           <button type="button" className={`btn btn-sm ${selected ? 'btn-primary' : 'btn-outline-secondary'}`}
                   aria-pressed={selected} aria-label={`마커 ${marker.markerId} ${selected ? '선택 해제' : '선택'}`}
                   onClick={event => { event.stopPropagation(); onSelect(marker.markerId); }}>

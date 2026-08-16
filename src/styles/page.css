@@ -1534,10 +1534,72 @@ table.data-table .num {
   font-weight: 600;
 }
 
+@media (max-width: 575.98px) {
+  .store-image__select {
+    position: static !important;
+    width: calc(100% - 1rem);
+  }
+}
+
 /* ---------- 선택된 항목 카드 ---------- */
 .item-card--selected {
   border-color: var(--app-accent, #3b82f6);
   background-color: #eff6ff;
+}
+
+/* ---------- 일괄 선택 액션 / 가게 CSV 등록 ---------- */
+.bulk-action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  z-index: 5;
+}
+
+.bulk-action-bar__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.store-import-file-name {
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.35;
+}
+
+@media (max-width: 575.98px) {
+  .bulk-action-bar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .bulk-action-bar__actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+  }
+
+  .bulk-action-bar__actions .btn {
+    min-width: 0;
+    white-space: normal;
+  }
+
+  .store-import-steps > .col {
+    flex: 0 0 100%;
+  }
+
+  .store-import-steps .rounded-3 {
+    padding: 0.75rem !important;
+  }
+
+  .review-select-button {
+    float: none !important;
+    display: block;
+    margin: 0 0 0.75rem auto !important;
+  }
 }
 
 /* ---------- 순위 배지 ---------- */

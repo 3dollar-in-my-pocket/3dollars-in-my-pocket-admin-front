@@ -135,8 +135,8 @@ const StoreImageManage = () => {
           <span className="page-count">{images.length.toLocaleString()}{hasMore ? '+' : ''}건</span>
         )}
       >
-        {selectedIds.length > 0 && <div className="alert alert-primary d-flex align-items-center justify-content-between gap-2 py-2">
-          <strong>{selectedIds.length}개 선택됨</strong><div className="d-flex gap-2">
+        {selectedIds.length > 0 && <div className="alert alert-primary bulk-action-bar py-2">
+          <strong>{selectedIds.length}개 선택됨</strong><div className="bulk-action-bar__actions">
           <button className="btn btn-sm btn-outline-danger" onClick={handleBulkDelete} disabled={isDeleting}>{isDeleting ? '삭제 중...' : '일괄 삭제'}</button>
           <button className="btn btn-sm btn-outline-secondary" onClick={() => setSelectedIds([])}>선택 해제</button></div>
         </div>}
@@ -178,7 +178,7 @@ const StoreImageManage = () => {
                       </Badge>
                       <span className="store-image__id">ID {image.imageId}</span>
                       <button type="button"
-                              className={`btn btn-sm position-absolute top-0 start-0 m-2 ${selectedIds.includes(image.imageId) ? 'btn-primary' : 'btn-light'}`}
+                              className={`btn btn-sm position-absolute top-0 start-0 m-2 store-image__select ${selectedIds.includes(image.imageId) ? 'btn-primary' : 'btn-light'}`}
                               aria-pressed={selectedIds.includes(image.imageId)}
                               aria-label={`이미지 ${image.imageId} ${selectedIds.includes(image.imageId) ? '선택 해제' : '선택'}`}
                               onClick={e => { e.stopPropagation(); toggleSelected(image.imageId); }}>

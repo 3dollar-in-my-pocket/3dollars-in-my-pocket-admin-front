@@ -17,7 +17,7 @@ interface UserCardProps {
 const UserCard = ({user, onClick, selected = false, onSelect}: UserCardProps) => (
   <div className="col-12 col-sm-6 col-lg-4 col-xxl-3">
     <ItemCard item={user} onClick={onClick} className={`h-100 ${selected ? 'border border-primary border-2' : ''}`}>
-      <div className="d-flex align-items-start justify-content-between gap-2">
+      <div className="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-start justify-content-between gap-2">
         <div className="d-flex align-items-start gap-2 min-w-0"><i className="bi bi-person-circle fs-5 text-body-tertiary"/>
         <div className="min-w-0">
           <h3 className="item-card__name text-truncate" title={user.nickname}>
@@ -28,7 +28,7 @@ const UserCard = ({user, onClick, selected = false, onSelect}: UserCardProps) =>
           </p>
         </div>
         </div>
-        {onSelect && user.userId && <button type="button" className={`btn btn-sm flex-shrink-0 ${selected ? 'btn-primary' : 'btn-outline-secondary'}`}
+        {onSelect && user.userId && <button type="button" className={`btn btn-sm flex-shrink-0 align-self-end align-self-sm-start ${selected ? 'btn-primary' : 'btn-outline-secondary'}`}
           aria-pressed={selected} onClick={event => { event.stopPropagation(); onSelect(user.userId!); }}>
           <i className={`bi ${selected ? 'bi-check-square-fill' : 'bi-square'} me-1`}/>{selected ? '선택됨' : '선택'}
         </button>}

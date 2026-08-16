@@ -167,8 +167,8 @@ const ReviewManagement = () => {
           <span className="page-count">{reviews.length.toLocaleString()}{hasMore ? '+' : ''}건</span>
         )}
       >
-        {selectedIds.length > 0 && <div className="alert alert-primary d-flex align-items-center justify-content-between gap-2 py-2">
-          <strong>{selectedIds.length}개 선택됨</strong><div className="d-flex gap-2">
+        {selectedIds.length > 0 && <div className="alert alert-primary bulk-action-bar py-2">
+          <strong>{selectedIds.length}개 선택됨</strong><div className="bulk-action-bar__actions">
           <button className="btn btn-sm btn-outline-danger" onClick={handleBulkBlind} disabled={isBlinding}>{isBlinding ? '처리 중...' : '일괄 블라인드'}</button>
           <button className="btn btn-sm btn-outline-secondary" onClick={() => setSelectedIds([])}>선택 해제</button></div>
         </div>}
@@ -199,12 +199,12 @@ const ReviewManagement = () => {
                   >
                     <div className="item-card__body">
                       <button type="button"
-                              className={`btn btn-sm float-end ms-2 ${selectedIds.includes(review.reviewId) ? 'btn-primary' : 'btn-outline-secondary'}`}
-                              disabled={review.status !== 'POSTED'} aria-pressed={selectedIds.includes(review.reviewId)}
+                              className={`btn btn-sm float-end ms-2 review-select-button ${selectedIds.includes(review.reviewId) ? 'btn-primary' : 'btn-outline-secondary'}`}
+                              disabled={review.status === 'DELETED'} aria-pressed={selectedIds.includes(review.reviewId)}
                               aria-label={`리뷰 ${review.reviewId} ${selectedIds.includes(review.reviewId) ? '선택 해제' : '선택'}`}
                               onClick={e => { e.stopPropagation(); toggleSelected(review.reviewId); }}>
                         <i className={`bi ${selectedIds.includes(review.reviewId) ? 'bi-check-square-fill' : 'bi-square'} me-1`}/>
-                        {review.status !== 'POSTED' ? '선택 불가' : selectedIds.includes(review.reviewId) ? '선택됨' : '선택'}
+                        {review.status === 'DELETED' ? '선택 불가' : selectedIds.includes(review.reviewId) ? '선택됨' : '선택'}
                       </button>
                       {/* 가게 + 평점 */}
                       <div className="d-flex align-items-start justify-content-between gap-2">

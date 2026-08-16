@@ -41,7 +41,7 @@ const StoreCard = ({store, onClick, isDeleted = false, selected = false, onSelec
         muted={isDeleted}
         className={`h-100 ${selected ? 'border border-primary border-2' : ''}`}
       >
-        <div className="d-flex align-items-start justify-content-between gap-2">
+        <div className="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-start justify-content-between gap-2">
           <div className="min-w-0">
             <h3 className="item-card__name text-truncate" title={store.name}>
               <i className="bi bi-shop me-1 text-body-tertiary"/>
@@ -52,7 +52,7 @@ const StoreCard = ({store, onClick, isDeleted = false, selected = false, onSelec
               {store.address?.fullAddress || '주소 정보 없음'}
             </p>
           </div>
-          <div className="d-flex align-items-center gap-2">
+          <div className="d-flex align-items-center justify-content-between justify-content-sm-end gap-2 flex-shrink-0">
           {onSelect && !isDeleted && <button type="button"
             className={`btn btn-sm ${selected ? 'btn-primary' : 'btn-outline-secondary'}`}
             aria-pressed={selected} aria-label={`가게 ${store.storeId} ${selected ? '선택 해제' : '선택'}`}
