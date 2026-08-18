@@ -138,41 +138,6 @@ export const useBulkSelection = <T, K extends string | number>({
     }
   }, [selectableKeys, max]);
 
-  /**
-   * 1-based 순번 범위로 선택합니다. (모바일 등 Shift 키를 쓸 수 없는 환경용)
-   * 유효하지 않은 입력이면 toast로 안내하고 false를 반환합니다.
-   */
-  const selectRange = useCallback((start: number, end: number) => {
-    if (!Number.isFinite(start) || start <= 0) {
-      toast.warning('시작 순번은 1 이상의 숫자를 입력해주세요.');
-      return false;
-    }
-    if (!Number.isFinite(end) || end <= 0) {
-      toast.warning('종료 순번은 1 이상의 숫자를 입력해주세요.');
-      return false;
-    }
-    if (start > end) {
-      toast.warning('시작 순번은 종료 순번보다 작거나 같아야 합니다.');
-      return false;
-    }
-    if (start > selectableKeys.length) {
-      toast.warning(`현재 목록에는 ${selectableKeys.length}개만 있습니다.`);
-      return false;
-    }
-
-    const sliced = selectableKeys.slice(start - 1, Math.min(end, selectableKeys.length));
-    const limited = max ? sliced.slice(0, max) : sliced;
-    setSelectedKeys(new Set(limited));
-    anchorIndexRef.current = null;
-
-    if (max && sliced.length > max) {
-      toast.info(`최대 ${max}개까지만 선택되었습니다.`);
-    } else {
-      toast.success(`${start}번부터 ${start + limited.length - 1}번까지 ${limited.length}개가 선택되었습니다.`);
-    }
-    return true;
-  }, [selectableKeys, max]);
-
   const isSelected = useCallback((key: K) => selectedKeys.has(key), [selectedKeys]);
 
   const selectableCount = max
@@ -203,7 +168,6 @@ export const useBulkSelection = <T, K extends string | number>({
     toggle,
     toggleAll,
     selectAll,
-    selectRange,
     clear,
     max
   };

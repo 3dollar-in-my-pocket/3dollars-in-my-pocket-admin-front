@@ -1598,25 +1598,6 @@ table.data-table .num {
   font-size: 0.75rem;
 }
 
-.bulk-select-toolbar__range {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.bulk-select-toolbar__range .form-control {
-  width: 5.5rem;
-  min-width: 0;
-}
-
-@media (max-width: 575.98px) {
-  .bulk-select-toolbar__range .form-control {
-    flex: 1 1 0;
-    width: auto;
-  }
-}
-
 .store-import-file-name {
   max-width: 100%;
   white-space: normal;

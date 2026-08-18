@@ -25,8 +25,6 @@ const UserRankingManagement = () => {
   const [selectedRankingType, setSelectedRankingType] = useState<string>('');
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [selectedStore, setSelectedStore] = useState(null);
-  const [startRankInput, setStartRankInput] = useState<number>(1);
-  const [endRankInput, setEndRankInput] = useState<number>(10);
   const [showMedalModal, setShowMedalModal] = useState(false);
   const [isAssigningMedal, setIsAssigningMedal] = useState(false);
   const [showPushModal, setShowPushModal] = useState(false);
@@ -132,11 +130,6 @@ const UserRankingManagement = () => {
   });
   const selectedUserIds = selection.selectedKeys;
 
-  const handleSelectByRank = () => {
-    selection.selectRange(startRankInput, endRankInput);
-    // 선택 후 입력값 유지 (재사용 가능하도록)
-  };
-
   const handleSendPush = () => {
     if (selectedUserIds.size === 0) {
       toast.warning('푸시를 발송할 유저를 선택해주세요.');
@@ -200,7 +193,7 @@ const UserRankingManagement = () => {
         )}
       >
         <div className="row g-3">
-          <div className="col-12 col-md-4">
+          <div className="col-12">
             <label className="form-label" htmlFor="ranking-type">랭킹 타입</label>
             <select
               id="ranking-type"
@@ -216,49 +209,6 @@ const UserRankingManagement = () => {
             </select>
           </div>
 
-          <div className="col-12 col-md-5">
-            <label className="form-label" htmlFor="rank-start">순위 범위 선택</label>
-            <div className="input-group">
-              <input
-                id="rank-start"
-                type="number"
-                className="form-control"
-                placeholder="1"
-                value={startRankInput}
-                onChange={(e) => setStartRankInput(e.target.valueAsNumber || 0)}
-                min="1"
-                aria-label="시작 순위"
-              />
-              <span className="input-group-text">~</span>
-              <input
-                type="number"
-                className="form-control"
-                placeholder="10"
-                value={endRankInput}
-                onChange={(e) => setEndRankInput(e.target.valueAsNumber || 0)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    handleSelectByRank();
-                  }
-                }}
-                min="1"
-                aria-label="종료 순위"
-              />
-              <span className="input-group-text">등</span>
-            </div>
-          </div>
-
-          <div className="col-12 col-md-3 d-flex align-items-end">
-            <button
-              className="btn btn-outline-primary w-100"
-              onClick={handleSelectByRank}
-              disabled={rankingList.length === 0}
-              title="입력한 순위 범위의 유저들을 선택합니다"
-            >
-              <i className="bi bi-check2-square me-1"/>
-              범위 선택
-            </button>
-          </div>
         </div>
       </FilterCard>
 

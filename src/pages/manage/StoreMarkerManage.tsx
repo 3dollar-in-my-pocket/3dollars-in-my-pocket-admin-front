@@ -207,7 +207,6 @@ const StoreMarkerManage = () => {
             isPartiallySelected={selection.isPartiallySelected}
             onToggleAll={selection.toggleAll}
             onClear={selection.clear}
-            onSelectRange={selection.selectRange}
             max={MAX_BULK_SELECTION}
           />
         )}
