@@ -14,12 +14,17 @@ import ErrorState from '@/components/common/ErrorState';
 import PageHeader from '@/components/common/PageHeader';
 import SectionCard from '@/components/common/SectionCard';
 import DetailField from '@/components/common/DetailField';
+import BulkSelectionToolbar from '@/components/common/BulkSelectionToolbar';
+import useBulkSelection from '@/hooks/useBulkSelection';
 
 import {formatDateTimeShortKo as formatDateTime} from '@/utils/dateUtils';
 
 /** 카드에 한 번에 노출하는 카테고리 / 이미지 개수 */
 const VISIBLE_CATEGORIES = 2;
 const VISIBLE_IMAGES = 4;
+
+/** 블라인드 일괄 처리 API가 한 번에 받을 수 있는 최대 리뷰 수 */
+const MAX_BULK_SELECTION = 50;
 
 const STATUS_CONFIG: Record<string, { className: string; icon: string; text: string }> = {
   POSTED: {className: 'bg-success-subtle text-success-emphasis', icon: 'bi-eye-fill', text: '활성'},
@@ -33,7 +38,6 @@ const ReviewManagement = () => {
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [selectedStore, setSelectedStore] = useState<any>(null);
   const [skeletonCount] = useState(4);
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
   const fetchReviews = useCallback(
     (cursor: string | null) => reviewApi.getAllStoreReviews(cursor, 20),
@@ -116,9 +120,14 @@ const ReviewManagement = () => {
     }
   };
 
-  const toggleSelected = (id: number) => setSelectedIds(prev =>
-    prev.includes(id) ? prev.filter(value => value !== id) : prev.length < 30 ? [...prev, id] : prev
-  );
+  const selection = useBulkSelection<Review, number>({
+    items: reviews,
+    getKey: review => review.reviewId,
+    max: MAX_BULK_SELECTION,
+    // 삭제된 리뷰는 블라인드 대상이 아닙니다.
+    isSelectable: review => review.status !== 'DELETED'
+  });
+  const selectedIds = selection.selectedList;
 
   const handleBulkBlind = async () => {
     if (!window.confirm(`선택한 리뷰 ${selectedIds.length}개를 블라인드 처리하시겠습니까?`)) return;
@@ -127,7 +136,7 @@ const ReviewManagement = () => {
       const response = await reviewApi.blindStoreReviewsBulk(selectedIds);
       if (response.ok) {
         toast.success('선택한 리뷰 블라인드 요청이 완료되었습니다.');
-        setSelectedIds([]);
+        selection.clear();
         refresh();
       }
     } finally { setIsBlinding(false); }
@@ -170,8 +179,22 @@ const ReviewManagement = () => {
         {selectedIds.length > 0 && <div className="alert alert-primary bulk-action-bar py-2">
           <strong>{selectedIds.length}개 선택됨</strong><div className="bulk-action-bar__actions">
           <button className="btn btn-sm btn-outline-danger" onClick={handleBulkBlind} disabled={isBlinding}>{isBlinding ? '처리 중...' : '일괄 블라인드'}</button>
-          <button className="btn btn-sm btn-outline-secondary" onClick={() => setSelectedIds([])}>선택 해제</button></div>
+          <button className="btn btn-sm btn-outline-secondary" onClick={selection.clear}>선택 해제</button></div>
         </div>}
+        {reviews.length > 0 && (
+          <BulkSelectionToolbar
+            id="review-bulk-select"
+            unit="개"
+            selectedCount={selection.selectedCount}
+            selectableCount={selection.selectableCount}
+            isAllSelected={selection.isAllSelected}
+            isPartiallySelected={selection.isPartiallySelected}
+            onToggleAll={selection.toggleAll}
+            onClear={selection.clear}
+            onSelectRange={selection.selectRange}
+            max={MAX_BULK_SELECTION}
+          />
+        )}
         <div ref={scrollContainerRef} style={{maxHeight: 'calc(100vh - 300px)', overflowY: 'auto'}}>
           {error ? (
             <ErrorState message={error} onRetry={refresh}/>
@@ -183,10 +206,10 @@ const ReviewManagement = () => {
             />
           ) : (
             <div className="row g-3">
-              {reviews.map((review) => (
+              {reviews.map((review, index) => (
                 <div key={review.reviewId} className="col-12 col-lg-6">
                   <div
-                    className={`item-card item-card--clickable h-100 ${selectedIds.includes(review.reviewId) ? 'border border-primary border-2' : ''}`}
+                    className={`item-card item-card--clickable h-100 ${selection.isSelected(review.reviewId) ? 'border border-primary border-2' : ''}`}
                     onClick={() => setSelectedReview(review)}
                     role="button"
                     tabIndex={0}
@@ -199,12 +222,12 @@ const ReviewManagement = () => {
                   >
                     <div className="item-card__body">
                       <button type="button"
-                              className={`btn btn-sm float-end ms-2 review-select-button ${selectedIds.includes(review.reviewId) ? 'btn-primary' : 'btn-outline-secondary'}`}
-                              disabled={review.status === 'DELETED'} aria-pressed={selectedIds.includes(review.reviewId)}
-                              aria-label={`리뷰 ${review.reviewId} ${selectedIds.includes(review.reviewId) ? '선택 해제' : '선택'}`}
-                              onClick={e => { e.stopPropagation(); toggleSelected(review.reviewId); }}>
-                        <i className={`bi ${selectedIds.includes(review.reviewId) ? 'bi-check-square-fill' : 'bi-square'} me-1`}/>
-                        {review.status === 'DELETED' ? '선택 불가' : selectedIds.includes(review.reviewId) ? '선택됨' : '선택'}
+                              className={`btn btn-sm float-end ms-2 review-select-button ${selection.isSelected(review.reviewId) ? 'btn-primary' : 'btn-outline-secondary'}`}
+                              disabled={review.status === 'DELETED'} aria-pressed={selection.isSelected(review.reviewId)}
+                              aria-label={`리뷰 ${review.reviewId} ${selection.isSelected(review.reviewId) ? '선택 해제' : '선택'}`}
+                              onClick={e => { e.stopPropagation(); selection.toggle(review.reviewId, index, e); }}>
+                        <i className={`bi ${selection.isSelected(review.reviewId) ? 'bi-check-square-fill' : 'bi-square'} me-1`}/>
+                        {review.status === 'DELETED' ? '선택 불가' : selection.isSelected(review.reviewId) ? '선택됨' : '선택'}
                       </button>
                       {/* 가게 + 평점 */}
                       <div className="d-flex align-items-start justify-content-between gap-2">

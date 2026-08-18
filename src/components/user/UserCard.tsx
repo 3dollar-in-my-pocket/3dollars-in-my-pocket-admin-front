@@ -6,15 +6,18 @@ import {
 } from '@/utils/display/userDisplay';
 import ItemCard from '@/components/common/ItemCard';
 import {User} from '@/types/user';
+import {BulkSelectHandler} from '@/types/common';
 
 interface UserCardProps {
   user: User;
   onClick: (user: User) => void;
   selected?: boolean;
-  onSelect?: (userId: string) => void;
+  onSelect?: BulkSelectHandler<string>;
+  /** 목록 내 순서 (Shift + 클릭 범위 선택에 사용) */
+  index?: number;
 }
 
-const UserCard = ({user, onClick, selected = false, onSelect}: UserCardProps) => (
+const UserCard = ({user, onClick, selected = false, onSelect, index}: UserCardProps) => (
   <div className="col-12 col-sm-6 col-lg-4 col-xxl-3">
     <ItemCard item={user} onClick={onClick} className={`h-100 ${selected ? 'border border-primary border-2' : ''}`}>
       <div className="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-start justify-content-between gap-2">
@@ -29,7 +32,7 @@ const UserCard = ({user, onClick, selected = false, onSelect}: UserCardProps) =>
         </div>
         </div>
         {onSelect && user.userId && <button type="button" className={`btn btn-sm flex-shrink-0 align-self-end align-self-sm-start ${selected ? 'btn-primary' : 'btn-outline-secondary'}`}
-          aria-pressed={selected} onClick={event => { event.stopPropagation(); onSelect(user.userId!); }}>
+          aria-pressed={selected} onClick={event => { event.stopPropagation(); onSelect(user.userId!, index, event); }}>
           <i className={`bi ${selected ? 'bi-check-square-fill' : 'bi-square'} me-1`}/>{selected ? '선택됨' : '선택'}
         </button>}
       </div>

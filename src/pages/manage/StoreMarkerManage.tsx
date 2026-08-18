@@ -14,6 +14,9 @@ import {formatDateTime} from '@/utils/dateUtils';
 import {getAdStatus} from '@/utils/timeUtils';
 import {toast} from 'react-toastify';
 import BulkMarkerFormModal from '@/components/store/BulkMarkerFormModal';
+import BulkSelectionToolbar from '@/components/common/BulkSelectionToolbar';
+import useBulkSelection from '@/hooks/useBulkSelection';
+import type {BulkSelectHandler} from '@/types/common';
 
 const toApiDateTime = (value: string): string => {
   if (!value) return value;
@@ -27,6 +30,9 @@ const getMarkerImageUrl = (image?: Image): string => {
 
 const getMarkerImageSize = (value?: number): number => Number(value || 0);
 
+/** 마커 일괄 수정/삭제 API가 한 번에 받을 수 있는 최대 개수 */
+const MAX_BULK_SELECTION = 50;
+
 const StoreMarkerManage = () => {
   const [filterStartDateTime, setFilterStartDateTime] = useState('');
   const [filterEndDateTime, setFilterEndDateTime] = useState('');
@@ -34,7 +40,6 @@ const StoreMarkerManage = () => {
   const [appliedFilter, setAppliedFilter] = useState({startDateTime: '', endDateTime: ''});
   const [selectedStore, setSelectedStore] = useState<any>(null);
   const [selectedMarker, setSelectedMarker] = useState<StoreMarker | null>(null);
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [showBulkEdit, setShowBulkEdit] = useState(false);
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
 
@@ -90,9 +95,14 @@ const StoreMarkerManage = () => {
     setSelectedMarker(null);
   };
 
-  const toggleSelected = (markerId: number) => setSelectedIds(prev =>
-    prev.includes(markerId) ? prev.filter(id => id !== markerId) : prev.length < 30 ? [...prev, markerId] : prev
-  );
+  const selection = useBulkSelection<StoreMarker, number>({
+    items: markers,
+    getKey: marker => marker.markerId,
+    max: MAX_BULK_SELECTION,
+    // 조회 조건이 바뀌면 화면에서 사라진 마커가 선택된 채 남지 않도록 초기화합니다.
+    resetDeps: [appliedFilter]
+  });
+  const selectedIds = selection.selectedList;
 
   const deleteSelected = async () => {
     if (!window.confirm(`선택한 마커 ${selectedIds.length}개를 삭제하시겠습니까?`)) return;
@@ -101,7 +111,7 @@ const StoreMarkerManage = () => {
       const response = await storeMarkerApi.deleteStoreMarkersBulk(selectedIds);
       if (response.ok) {
         toast.success('선택한 마커 삭제 요청이 완료되었습니다.');
-        setSelectedIds([]);
+        selection.clear();
         refresh();
       }
     } finally { setIsBulkDeleting(false); }
@@ -184,9 +194,23 @@ const StoreMarkerManage = () => {
           <div className="bulk-action-bar__actions">
             <button className="btn btn-sm btn-primary" onClick={() => setShowBulkEdit(true)}>일괄 수정</button>
             <button className="btn btn-sm btn-outline-danger" onClick={deleteSelected} disabled={isBulkDeleting}>{isBulkDeleting ? '삭제 중...' : '일괄 삭제'}</button>
-            <button className="btn btn-sm btn-outline-secondary" onClick={() => setSelectedIds([])}>선택 해제</button>
+            <button className="btn btn-sm btn-outline-secondary" onClick={selection.clear}>선택 해제</button>
           </div>
         </div>}
+        {markers.length > 0 && (
+          <BulkSelectionToolbar
+            id="store-marker-bulk-select"
+            unit="개"
+            selectedCount={selection.selectedCount}
+            selectableCount={selection.selectableCount}
+            isAllSelected={selection.isAllSelected}
+            isPartiallySelected={selection.isPartiallySelected}
+            onToggleAll={selection.toggleAll}
+            onClear={selection.clear}
+            onSelectRange={selection.selectRange}
+            max={MAX_BULK_SELECTION}
+          />
+        )}
         <div ref={scrollContainerRef} style={{maxHeight: 'calc(100vh - 360px)', overflowY: 'auto'}}>
           {markers.length === 0 && !isLoading ? (
             <EmptyState
@@ -196,14 +220,15 @@ const StoreMarkerManage = () => {
             />
           ) : (
             <div className="row g-3">
-              {markers.map((marker) => (
+              {markers.map((marker, index) => (
                 <div key={marker.markerId} className="col-12 col-xl-6">
                   <MarkerCard
                     marker={marker}
                     onClick={setSelectedMarker}
                     onStoreClick={openStoreDetail}
-                    selected={selectedIds.includes(marker.markerId)}
-                    onSelect={toggleSelected}
+                    index={index}
+                    selected={selection.isSelected(marker.markerId)}
+                    onSelect={selection.toggle}
                   />
                 </div>
               ))}
@@ -237,7 +262,7 @@ const StoreMarkerManage = () => {
       />
       <BulkMarkerFormModal show={showBulkEdit} mode="update" targetIds={selectedIds}
                            initialMarker={markers.find(marker => marker.markerId === selectedIds[0])}
-                           onHide={() => setShowBulkEdit(false)} onSuccess={() => { setSelectedIds([]); refresh(); }}/>
+                           onHide={() => setShowBulkEdit(false)} onSuccess={() => { selection.clear(); refresh(); }}/>
     </div>
   );
 };
@@ -249,7 +274,9 @@ interface MarkerCardProps {
   /** 가게 상세 열기 */
   onStoreClick: (storeId: number) => void;
   selected: boolean;
-  onSelect: (markerId: number) => void;
+  onSelect: BulkSelectHandler<number>;
+  /** 목록 내 순서 (Shift + 클릭 범위 선택에 사용) */
+  index?: number;
 }
 
 /**
@@ -258,7 +285,7 @@ interface MarkerCardProps {
  * 마커 이미지가 핵심 정보이므로 카드 상단에 크게 배치하고,
  * 활성 기간은 상태 배지로 한눈에 구분한다.
  */
-const MarkerCard = ({marker, onClick, onStoreClick, selected, onSelect}: MarkerCardProps) => {
+const MarkerCard = ({marker, onClick, onStoreClick, selected, onSelect, index}: MarkerCardProps) => {
   const status = getAdStatus(marker.period?.startDateTime, marker.period?.endDateTime);
 
   return (
@@ -291,7 +318,7 @@ const MarkerCard = ({marker, onClick, onStoreClick, selected, onSelect}: MarkerC
           <div className="d-flex flex-wrap gap-2 align-items-center justify-content-end">
           <button type="button" className={`btn btn-sm ${selected ? 'btn-primary' : 'btn-outline-secondary'}`}
                   aria-pressed={selected} aria-label={`마커 ${marker.markerId} ${selected ? '선택 해제' : '선택'}`}
-                  onClick={event => { event.stopPropagation(); onSelect(marker.markerId); }}>
+                  onClick={event => { event.stopPropagation(); onSelect(marker.markerId, index, event); }}>
             <i className={`bi ${selected ? 'bi-check-square-fill' : 'bi-square'} me-1`}/>
             {selected ? '선택됨' : '선택'}
           </button>

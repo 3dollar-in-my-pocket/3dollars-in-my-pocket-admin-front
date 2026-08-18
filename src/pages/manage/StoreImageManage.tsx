@@ -9,6 +9,8 @@ import EmptyState from '@/components/common/EmptyState';
 import ErrorState from '@/components/common/ErrorState';
 import PageHeader from '@/components/common/PageHeader';
 import SectionCard from '@/components/common/SectionCard';
+import BulkSelectionToolbar from '@/components/common/BulkSelectionToolbar';
+import useBulkSelection from '@/hooks/useBulkSelection';
 import DetailField from '@/components/common/DetailField';
 import StoreDetailModal from '@/pages/store/StoreDetailModal';
 import UserDetailModal from '@/pages/user/UserDetailModal';
@@ -18,12 +20,14 @@ import {formatDateTimeNumeric as formatDate} from '@/utils/dateUtils';
 /** 카드에 한 번에 노출하는 카테고리 개수 */
 const VISIBLE_CATEGORIES = 3;
 
+/** 이미지 일괄 삭제 API가 한 번에 받을 수 있는 최대 개수 */
+const MAX_BULK_SELECTION = 50;
+
 const StoreImageManage = () => {
   const [selectedStore, setSelectedStore] = useState<any>(null);
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [selectedImage, setSelectedImage] = useState<StoreImage | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
   const fetchImages = useCallback(
     (cursor: string | null) => storeImageApi.getAllStoreImages(cursor, 20),
@@ -92,9 +96,12 @@ const StoreImageManage = () => {
     }
   };
 
-  const toggleSelected = (id: number) => setSelectedIds(prev =>
-    prev.includes(id) ? prev.filter(value => value !== id) : prev.length < 30 ? [...prev, id] : prev
-  );
+  const selection = useBulkSelection<StoreImage, number>({
+    items: images,
+    getKey: image => image.imageId,
+    max: MAX_BULK_SELECTION
+  });
+  const selectedIds = selection.selectedList;
 
   const handleBulkDelete = async () => {
     if (!window.confirm(`선택한 이미지 ${selectedIds.length}개를 삭제하시겠습니까?`)) return;
@@ -103,7 +110,7 @@ const StoreImageManage = () => {
       const response = await storeImageApi.deleteStoreImagesBulk(selectedIds);
       if (response.ok) {
         toast.success('선택한 이미지 삭제 요청이 완료되었습니다.');
-        setSelectedIds([]);
+        selection.clear();
         refresh();
       }
     } finally { setIsDeleting(false); }
@@ -138,8 +145,22 @@ const StoreImageManage = () => {
         {selectedIds.length > 0 && <div className="alert alert-primary bulk-action-bar py-2">
           <strong>{selectedIds.length}개 선택됨</strong><div className="bulk-action-bar__actions">
           <button className="btn btn-sm btn-outline-danger" onClick={handleBulkDelete} disabled={isDeleting}>{isDeleting ? '삭제 중...' : '일괄 삭제'}</button>
-          <button className="btn btn-sm btn-outline-secondary" onClick={() => setSelectedIds([])}>선택 해제</button></div>
+          <button className="btn btn-sm btn-outline-secondary" onClick={selection.clear}>선택 해제</button></div>
         </div>}
+        {images.length > 0 && (
+          <BulkSelectionToolbar
+            id="store-image-bulk-select"
+            unit="개"
+            selectedCount={selection.selectedCount}
+            selectableCount={selection.selectableCount}
+            isAllSelected={selection.isAllSelected}
+            isPartiallySelected={selection.isPartiallySelected}
+            onToggleAll={selection.toggleAll}
+            onClear={selection.clear}
+            onSelectRange={selection.selectRange}
+            max={MAX_BULK_SELECTION}
+          />
+        )}
         <div ref={scrollContainerRef} style={{maxHeight: 'calc(100vh - 300px)', overflowY: 'auto'}}>
           {error ? (
             <ErrorState message={error} onRetry={refresh}/>
@@ -151,10 +172,10 @@ const StoreImageManage = () => {
             />
           ) : (
             <div className="row g-3">
-              {images.map((image) => (
+              {images.map((image, index) => (
                 <div key={image.imageId} className="col-12 col-md-6 col-xl-4">
                   <div
-                    className={`item-card item-card--clickable h-100 ${selectedIds.includes(image.imageId) ? 'border border-primary border-2' : ''}`}
+                    className={`item-card item-card--clickable h-100 ${selection.isSelected(image.imageId) ? 'border border-primary border-2' : ''}`}
                     onClick={() => handleImageClick(image)}
                     role="button"
                     tabIndex={0}
@@ -178,12 +199,12 @@ const StoreImageManage = () => {
                       </Badge>
                       <span className="store-image__id">ID {image.imageId}</span>
                       <button type="button"
-                              className={`btn btn-sm position-absolute top-0 start-0 m-2 store-image__select ${selectedIds.includes(image.imageId) ? 'btn-primary' : 'btn-light'}`}
-                              aria-pressed={selectedIds.includes(image.imageId)}
-                              aria-label={`이미지 ${image.imageId} ${selectedIds.includes(image.imageId) ? '선택 해제' : '선택'}`}
-                              onClick={e => { e.stopPropagation(); toggleSelected(image.imageId); }}>
-                        <i className={`bi ${selectedIds.includes(image.imageId) ? 'bi-check-square-fill' : 'bi-square'} me-1`}/>
-                        {selectedIds.includes(image.imageId) ? '선택됨' : '선택'}
+                              className={`btn btn-sm position-absolute top-0 start-0 m-2 store-image__select ${selection.isSelected(image.imageId) ? 'btn-primary' : 'btn-light'}`}
+                              aria-pressed={selection.isSelected(image.imageId)}
+                              aria-label={`이미지 ${image.imageId} ${selection.isSelected(image.imageId) ? '선택 해제' : '선택'}`}
+                              onClick={e => { e.stopPropagation(); selection.toggle(image.imageId, index, e); }}>
+                        <i className={`bi ${selection.isSelected(image.imageId) ? 'bi-check-square-fill' : 'bi-square'} me-1`}/>
+                        {selection.isSelected(image.imageId) ? '선택됨' : '선택'}
                       </button>
                     </div>
 

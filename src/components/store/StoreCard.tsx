@@ -14,6 +14,7 @@ import {
 } from '@/utils/display/storeDisplay';
 import ItemCard from '@/components/common/ItemCard';
 import {SimpleStore} from '@/types/store';
+import {BulkSelectHandler} from '@/types/common';
 
 interface StoreCardProps {
   store: SimpleStore;
@@ -21,13 +22,15 @@ interface StoreCardProps {
   /** 목록에서 삭제 처리된 가게를 비활성 상태로 표시할 때 사용 */
   isDeleted?: boolean;
   selected?: boolean;
-  onSelect?: (storeId: number) => void;
+  onSelect?: BulkSelectHandler<number>;
+  /** 목록 내 순서 (Shift + 클릭 범위 선택에 사용) */
+  index?: number;
 }
 
 /** 카드에 한 번에 노출하는 카테고리 개수 */
 const VISIBLE_CATEGORIES = 2;
 
-const StoreCard = ({store, onClick, isDeleted = false, selected = false, onSelect}: StoreCardProps) => {
+const StoreCard = ({store, onClick, isDeleted = false, selected = false, onSelect, index}: StoreCardProps) => {
   const formatDateTime = (dateString?: string) => {
     if (!dateString) return '없음';
     return new Date(dateString).toLocaleDateString('ko-KR');
@@ -56,7 +59,7 @@ const StoreCard = ({store, onClick, isDeleted = false, selected = false, onSelec
           {onSelect && !isDeleted && <button type="button"
             className={`btn btn-sm ${selected ? 'btn-primary' : 'btn-outline-secondary'}`}
             aria-pressed={selected} aria-label={`가게 ${store.storeId} ${selected ? '선택 해제' : '선택'}`}
-            onClick={event => { event.stopPropagation(); onSelect(store.storeId); }}>
+            onClick={event => { event.stopPropagation(); onSelect(store.storeId, index, event); }}>
             <i className={`bi ${selected ? 'bi-check-square-fill' : 'bi-square'} me-1`}/>
             {selected ? '선택됨' : '선택'}
           </button>}<span className="rating-badge flex-shrink-0">
