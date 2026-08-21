@@ -1,13 +1,14 @@
 import {getSocialTypeBadgeClass, getSocialTypeDisplayName} from '@/utils/display/userDisplay';
 import ItemCard from '@/components/common/ItemCard';
 import {UserRankingItem} from '@/types/userRanking';
+import {BulkSelectHandler} from '@/types/common';
 
 interface UserRankingCardProps {
   rankingItem: UserRankingItem;
   rank: number;
   onClick: (rankingItem: UserRankingItem) => void;
   isSelected?: boolean;
-  onToggleSelect?: (userId: number) => void;
+  onToggleSelect?: BulkSelectHandler<number>;
 }
 
 /** 상위 3위는 메달 색으로 구분한다. */
@@ -33,8 +34,12 @@ const UserRankingCard = ({rankingItem, rank, onClick, isSelected = false, onTogg
               className="form-check-input mt-1 flex-shrink-0"
               type="checkbox"
               checked={isSelected}
-              onChange={() => onToggleSelect(user.userId)}
-              onClick={(e) => e.stopPropagation()}
+              onChange={() => {}}
+              onClick={(e) => {
+                e.stopPropagation();
+                // rank는 1-based이므로 배열 인덱스로 변환합니다.
+                onToggleSelect(user.userId, rank - 1, e);
+              }}
               aria-label={`${user.name} 선택`}
             />
           )}

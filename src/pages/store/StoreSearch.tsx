@@ -13,6 +13,8 @@ import SearchResults from '@/components/common/SearchResults';
 import StoreCard from '@/components/store/StoreCard';
 import PageHeader from '@/components/common/PageHeader';
 import FilterCard from '@/components/common/FilterCard';
+import BulkSelectionToolbar from '@/components/common/BulkSelectionToolbar';
+import useBulkSelection from '@/hooks/useBulkSelection';
 import enumApi from '@/api/enumApi';
 
 /** 삭제 처리 후 목록에서 표시하기 위해 클라이언트가 isDeleted를 덧붙입니다. */
@@ -23,6 +25,9 @@ const SEARCH_TYPE_OPTIONS = [
   {value: STORE_SEARCH_TYPES.STORE_ID, label: '가게 ID', icon: 'bi-hash'}
 ];
 
+/** 라벨/마커 일괄 처리 API가 한 번에 받을 수 있는 최대 가게 수 */
+const MAX_BULK_SELECTION = 50;
+
 const STORE_TYPE_OPTIONS = [
   {value: STORE_TYPE.USER_STORE, label: '일반 가게', icon: 'bi-people-fill'},
   {value: STORE_TYPE.BOSS_STORE, label: '사장님 직영점', icon: 'bi-person-badge-fill'}
@@ -32,7 +37,6 @@ const StoreSearch = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [isComposing, setIsComposing] = useState(false);
   const [selectedStoreTypes, setSelectedStoreTypes] = useState([]);
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [showLabels, setShowLabels] = useState(false);
   const [showMarker, setShowMarker] = useState(false);
   const [labels, setLabels] = useState<string[]>([]);
@@ -67,6 +71,17 @@ const StoreSearch = () => {
     resetFunction: null,
     errorMessage: storeSearchAdapter.errorMessage
   });
+
+  const selection = useBulkSelection<SearchedStore, number>({
+    items: storeList,
+    getKey: store => store.storeId,
+    max: MAX_BULK_SELECTION,
+    // 삭제된 가게는 일괄 처리 대상이 아닙니다.
+    isSelectable: store => !store.isDeleted,
+    // 검색 조건이 바뀌면 화면에서 사라진 가게가 선택된 채 남지 않도록 초기화합니다.
+    resetDeps: [searchType, searchQuery, selectedStoreTypes]
+  });
+  const selectedIds = selection.selectedList;
 
   // 기본 검색 조건은 가게 이름입니다.
   useEffect(() => {
@@ -113,14 +128,15 @@ const StoreSearch = () => {
   }, [selectedStoreTypes]);
 
 
-  const renderStoreCard = (store: SearchedStore) => (
+  const renderStoreCard = (store: SearchedStore, index: number) => (
     <StoreCard
       key={store.storeId}
       store={store}
       onClick={handleStoreClick}
       isDeleted={store.isDeleted}
-      selected={selectedIds.includes(store.storeId)}
-      onSelect={(id) => setSelectedIds(prev => prev.includes(id) ? prev.filter(value => value !== id) : prev.length < 30 ? [...prev, id] : prev)}
+      index={index}
+      selected={selection.isSelected(store.storeId)}
+      onSelect={selection.toggle}
     />
   );
 
@@ -165,7 +181,7 @@ const StoreSearch = () => {
       const response = await storeApi.updateStoreLabelsBulk(selectedIds, labels);
       if (response.ok) {
         toast.success('선택한 가게의 라벨 변경 요청이 완료되었습니다.');
-        setShowLabels(false); setSelectedIds([]); handleSearch(true);
+        setShowLabels(false); selection.clear(); handleSearch(true);
       }
     } finally { setIsBulkSubmitting(false); }
   };
@@ -299,12 +315,25 @@ const StoreSearch = () => {
         emptyDescription="다른 검색어로 시도해보시거나 검색 조건을 변경해보세요"
         loadingMessage="검색 중입니다"
         title="가게 검색 결과"
+        toolbar={
+          <BulkSelectionToolbar
+            id="store-bulk-select"
+            unit="개"
+            selectedCount={selection.selectedCount}
+            selectableCount={selection.selectableCount}
+            isAllSelected={selection.isAllSelected}
+            isPartiallySelected={selection.isPartiallySelected}
+            onToggleAll={selection.toggleAll}
+            onClear={selection.clear}
+            max={MAX_BULK_SELECTION}
+          />
+        }
       />
       {selectedIds.length > 0 && <div className="position-sticky bottom-0 alert alert-primary shadow bulk-action-bar mt-3">
         <strong>{selectedIds.length}개 가게 선택됨</strong><div className="bulk-action-bar__actions">
         <button className="btn btn-sm btn-primary" onClick={() => { setLabels([]); setCustomLabelInput(''); setShowLabels(true); }}>라벨 일괄 변경</button>
         <button className="btn btn-sm btn-primary" onClick={() => setShowMarker(true)}>마커 일괄 생성</button>
-        <button className="btn btn-sm btn-outline-secondary" onClick={() => setSelectedIds([])}>선택 해제</button></div>
+        <button className="btn btn-sm btn-outline-secondary" onClick={selection.clear}>선택 해제</button></div>
       </div>}
 
       <Modal show={showLabels} onHide={() => setShowLabels(false)} centered className="app-modal"><form onSubmit={submitLabels}>
@@ -322,7 +351,7 @@ const StoreSearch = () => {
         <Modal.Footer><button type="button" className="btn btn-outline-secondary" onClick={() => setShowLabels(false)}>취소</button><button className="btn btn-primary" disabled={isBulkSubmitting}>{isBulkSubmitting ? '처리 중...' : `${selectedIds.length}개 적용`}</button></Modal.Footer>
       </form></Modal>
       <BulkMarkerFormModal show={showMarker} mode="create" targetIds={selectedIds} onHide={() => setShowMarker(false)}
-                            onSuccess={() => { setSelectedIds([]); handleSearch(true); }}/>
+                            onSuccess={() => { selection.clear(); handleSearch(true); }}/>
 
       <StoreDetailModal
         show={!!selectedStore}

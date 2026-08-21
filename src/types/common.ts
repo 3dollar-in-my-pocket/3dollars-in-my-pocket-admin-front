@@ -54,3 +54,15 @@ export interface CursorNavigationState {
   hasPrevious: boolean;
   previousCursors: string[];
 }
+
+/**
+ * 일괄 선택 가능한 카드의 선택 핸들러
+ *
+ * index는 목록 내 순서, event는 Shift 키 판정에 사용합니다.
+ * (Shift + 클릭 시 앵커부터 해당 항목까지 범위 선택)
+ */
+export type BulkSelectHandler<K extends string | number> = (
+  key: K,
+  index?: number,
+  event?: {shiftKey?: boolean}
+) => void;

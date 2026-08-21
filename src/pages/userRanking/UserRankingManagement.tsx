@@ -15,6 +15,8 @@ import EmptyState from '@/components/common/EmptyState';
 import PageHeader from '@/components/common/PageHeader';
 import FilterCard from '@/components/common/FilterCard';
 import SectionCard from '@/components/common/SectionCard';
+import BulkSelectionToolbar from '@/components/common/BulkSelectionToolbar';
+import useBulkSelection from '@/hooks/useBulkSelection';
 
 const MAX_SELECTION = 500;
 
@@ -23,9 +25,6 @@ const UserRankingManagement = () => {
   const [selectedRankingType, setSelectedRankingType] = useState<string>('');
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [selectedStore, setSelectedStore] = useState(null);
-  const [selectedUserIds, setSelectedUserIds] = useState<Set<number>>(new Set());
-  const [startRankInput, setStartRankInput] = useState<number>(1);
-  const [endRankInput, setEndRankInput] = useState<number>(10);
   const [showMedalModal, setShowMedalModal] = useState(false);
   const [isAssigningMedal, setIsAssigningMedal] = useState(false);
   const [showPushModal, setShowPushModal] = useState(false);
@@ -36,11 +35,6 @@ const UserRankingManagement = () => {
   useEffect(() => {
     loadEnums();
   }, []);
-
-  // 랭킹 타입이 바뀌면 이전 선택을 초기화한다. (목록 재조회는 훅의 deps가 처리)
-  useEffect(() => {
-    setSelectedUserIds(new Set());
-  }, [selectedRankingType]);
 
   const loadEnums = async () => {
     const enumResponse = await enumApi.getEnum();
@@ -127,68 +121,14 @@ const UserRankingManagement = () => {
     return type ? type.description : '전체';
   };
 
-  const handleToggleUser = (userId: number) => {
-    setSelectedUserIds(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(userId)) {
-        newSet.delete(userId);
-      } else {
-        if (newSet.size >= MAX_SELECTION) {
-          toast.warning(`최대 ${MAX_SELECTION}명까지만 선택할 수 있습니다.`);
-          return prev;
-        }
-        newSet.add(userId);
-      }
-      return newSet;
-    });
-  };
-
-  const handleToggleAll = () => {
-    if (selectedUserIds.size > 0) {
-      setSelectedUserIds(new Set());
-    } else {
-      const idsToSelect = rankingList.slice(0, MAX_SELECTION).map(item => item.user.userId);
-      setSelectedUserIds(new Set(idsToSelect));
-      if (rankingList.length > MAX_SELECTION) {
-        toast.info(`최대 ${MAX_SELECTION}명까지만 선택되었습니다.`);
-      }
-    }
-  };
-
-  const handleSelectByRank = () => {
-    if (isNaN(startRankInput) || startRankInput <= 0) {
-      toast.warning('시작 순위는 1 이상의 숫자를 입력해주세요.');
-      return;
-    }
-
-    if (isNaN(endRankInput) || endRankInput <= 0) {
-      toast.warning('종료 순위는 1 이상의 숫자를 입력해주세요.');
-      return;
-    }
-
-    if (startRankInput > endRankInput) {
-      toast.warning('시작 순위는 종료 순위보다 작거나 같아야 합니다.');
-      return;
-    }
-
-    if (endRankInput > rankingList.length) {
-      toast.warning(`현재 랭킹에는 ${rankingList.length}명만 있습니다.`);
-      return;
-    }
-
-    const count = endRankInput - startRankInput + 1;
-    if (count > MAX_SELECTION) {
-      toast.warning(`최대 ${MAX_SELECTION}명까지만 선택할 수 있습니다.`);
-      return;
-    }
-
-    // 배열 인덱스는 0부터 시작하므로 -1
-    const idsToSelect = rankingList.slice(startRankInput - 1, endRankInput).map(item => item.user.userId);
-    setSelectedUserIds(new Set(idsToSelect));
-
-    toast.success(`${startRankInput}등부터 ${endRankInput}등까지 ${count}명이 선택되었습니다.`);
-    // 선택 후 입력값 유지 (재사용 가능하도록)
-  };
+  const selection = useBulkSelection<UserRankingItem, number>({
+    items: rankingList,
+    getKey: item => item.user.userId,
+    max: MAX_SELECTION,
+    // 랭킹 타입이 바뀌면 이전 선택을 초기화한다.
+    resetDeps: [selectedRankingType]
+  });
+  const selectedUserIds = selection.selectedKeys;
 
   const handleSendPush = () => {
     if (selectedUserIds.size === 0) {
@@ -216,15 +156,12 @@ const UserRankingManagement = () => {
       if (response.ok) {
         toast.success(`${selectedUserIds.size}명에게 메달이 지급되었습니다.`);
         setShowMedalModal(false);
-        setSelectedUserIds(new Set());
+        selection.clear();
       }
     } finally {
       setIsAssigningMedal(false);
     }
   };
-
-  const isAllSelected = selectedUserIds.size > 0
-    && selectedUserIds.size === Math.min(rankingList.length, MAX_SELECTION);
 
   return (
     <div>
@@ -250,13 +187,13 @@ const UserRankingManagement = () => {
 
       <FilterCard
         aside={selectedUserIds.size > 0 && (
-          <button className="form-subhead__clear" onClick={() => setSelectedUserIds(new Set())}>
+          <button className="form-subhead__clear" onClick={selection.clear}>
             선택 {selectedUserIds.size}명 해제
           </button>
         )}
       >
         <div className="row g-3">
-          <div className="col-12 col-md-4">
+          <div className="col-12">
             <label className="form-label" htmlFor="ranking-type">랭킹 타입</label>
             <select
               id="ranking-type"
@@ -272,49 +209,6 @@ const UserRankingManagement = () => {
             </select>
           </div>
 
-          <div className="col-12 col-md-5">
-            <label className="form-label" htmlFor="rank-start">순위 범위 선택</label>
-            <div className="input-group">
-              <input
-                id="rank-start"
-                type="number"
-                className="form-control"
-                placeholder="1"
-                value={startRankInput}
-                onChange={(e) => setStartRankInput(e.target.valueAsNumber || 0)}
-                min="1"
-                aria-label="시작 순위"
-              />
-              <span className="input-group-text">~</span>
-              <input
-                type="number"
-                className="form-control"
-                placeholder="10"
-                value={endRankInput}
-                onChange={(e) => setEndRankInput(e.target.valueAsNumber || 0)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    handleSelectByRank();
-                  }
-                }}
-                min="1"
-                aria-label="종료 순위"
-              />
-              <span className="input-group-text">등</span>
-            </div>
-          </div>
-
-          <div className="col-12 col-md-3 d-flex align-items-end">
-            <button
-              className="btn btn-outline-primary w-100"
-              onClick={handleSelectByRank}
-              disabled={rankingList.length === 0}
-              title="입력한 순위 범위의 유저들을 선택합니다"
-            >
-              <i className="bi bi-check2-square me-1"/>
-              범위 선택
-            </button>
-          </div>
         </div>
       </FilterCard>
 
@@ -333,18 +227,17 @@ const UserRankingManagement = () => {
         }
       >
         {rankingList.length > 0 && (
-          <div className="form-check mb-3">
-            <input
-              className="form-check-input"
-              type="checkbox"
-              id="selectAll"
-              checked={isAllSelected}
-              onChange={handleToggleAll}
-            />
-            <label className="form-check-label small" htmlFor="selectAll">
-              현재 목록 전체 선택 (최대 {MAX_SELECTION}명)
-            </label>
-          </div>
+          <BulkSelectionToolbar
+            id="user-ranking-bulk-select"
+            unit="명"
+            selectedCount={selection.selectedCount}
+            selectableCount={selection.selectableCount}
+            isAllSelected={selection.isAllSelected}
+            isPartiallySelected={selection.isPartiallySelected}
+            onToggleAll={selection.toggleAll}
+            onClear={selection.clear}
+            max={MAX_SELECTION}
+          />
         )}
 
         <div ref={scrollContainerRef} onScroll={handleScroll} style={{maxHeight: '70vh', overflowY: 'auto'}}>
@@ -365,8 +258,8 @@ const UserRankingManagement = () => {
                     rankingItem={item}
                     rank={index + 1}
                     onClick={handleUserClick}
-                    isSelected={selectedUserIds.has(item.user.userId)}
-                    onToggleSelect={handleToggleUser}
+                    isSelected={selection.isSelected(item.user.userId)}
+                    onToggleSelect={selection.toggle}
                   />
                 ))}
               </div>

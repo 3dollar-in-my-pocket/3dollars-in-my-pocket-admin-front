@@ -1563,6 +1563,41 @@ table.data-table .num {
   gap: 0.5rem;
 }
 
+.bulk-select-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--bs-border-color, #dee2e6);
+  border-radius: 0.5rem;
+  background-color: var(--bs-tertiary-bg, #f8f9fa);
+}
+
+.bulk-select-toolbar__main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.bulk-select-toolbar__status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.bulk-select-toolbar__hint {
+  font-size: 0.8125rem;
+  color: var(--bs-secondary-color, #6c757d);
+}
+
+.bulk-select-toolbar__hint kbd {
+  padding: 0.1rem 0.3rem;
+  font-size: 0.75rem;
+}
+
 .store-import-file-name {
   max-width: 100%;
   white-space: normal;

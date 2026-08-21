@@ -14,6 +14,8 @@ interface SearchResultsProps<T = any> {
   emptyDescription?: string;
   loadingMessage?: string;
   title?: string;
+  /** 목록 위에 고정 표시할 영역 (예: 일괄 선택 툴바) */
+  toolbar?: React.ReactNode;
 }
 
 const SearchResults = <T, >({
@@ -26,7 +28,8 @@ const SearchResults = <T, >({
                               emptyMessage = "검색 결과가 없습니다",
                               emptyDescription = "다른 검색어로 시도해보세요",
                               loadingMessage = "검색 중입니다",
-                              title = "검색 결과"
+                              title = "검색 결과",
+                              toolbar
                             }: SearchResultsProps<T>) => {
   const isInitialLoading = isLoading && results.length === 0;
 
@@ -37,6 +40,10 @@ const SearchResults = <T, >({
       aside={results.length > 0 && <span className="page-count">{results.length}건</span>}
       flush
     >
+      {toolbar && results.length > 0 && (
+        <div className="px-3 pt-3">{toolbar}</div>
+      )}
+
       <div
         ref={scrollContainerRef}
         onScroll={onScroll}

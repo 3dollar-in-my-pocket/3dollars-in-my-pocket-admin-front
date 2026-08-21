@@ -11,6 +11,8 @@ import {userSearchAdapter} from '@/adapters/userSearchAdapter';
 import SearchResults from '@/components/common/SearchResults';
 import UserCard from '@/components/user/UserCard';
 import PageHeader from '@/components/common/PageHeader';
+import BulkSelectionToolbar from '@/components/common/BulkSelectionToolbar';
+import useBulkSelection from '@/hooks/useBulkSelection';
 import {Modal} from 'react-bootstrap';
 import {toast} from 'react-toastify';
 import PushSendModal from '@/components/push/PushSendModal';
@@ -19,7 +21,6 @@ import {Medal} from '@/types/medal';
 
 const UserSearch = () => {
   const [selectedStore, setSelectedStore] = useState(null);
-  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [showPushModal, setShowPushModal] = useState(false);
   const [showMedalModal, setShowMedalModal] = useState(false);
   const [medals, setMedals] = useState<Medal[]>([]);
@@ -96,10 +97,18 @@ const UserSearch = () => {
     );
   };
 
-  const renderUserCard = (user: User) => (
-    <UserCard key={user.userId} user={user} onClick={handleUserClick}
-              selected={Boolean(user.userId && selectedUserIds.includes(user.userId))}
-              onSelect={(id) => setSelectedUserIds(prev => prev.includes(id) ? prev.filter(value => value !== id) : [...prev, id])}/>
+  const selection = useBulkSelection<User, string>({
+    items: userList,
+    getKey: user => user.userId,
+    // 검색 조건이 바뀌면 화면에서 사라진 유저가 선택된 채 남지 않도록 초기화합니다.
+    resetDeps: [searchType, searchQuery]
+  });
+  const selectedUserIds = selection.selectedList;
+
+  const renderUserCard = (user: User, index: number) => (
+    <UserCard key={user.userId} user={user} onClick={handleUserClick} index={index}
+              selected={Boolean(user.userId && selection.isSelected(user.userId))}
+              onSelect={selection.toggle}/>
   );
 
   const openMedalModal = async () => {
@@ -121,7 +130,7 @@ const UserSearch = () => {
       const response = await medalApi.assignMedalToUsers(selectedMedalId, userIds);
       if (response.ok) {
         toast.success(`${userIds.length}명에게 메달 지급 요청이 완료되었습니다.`);
-        setShowMedalModal(false); setSelectedMedalId(null); setSelectedUserIds([]);
+        setShowMedalModal(false); setSelectedMedalId(null); selection.clear();
       }
     } finally { setIsAssigningMedal(false); }
   };
@@ -167,12 +176,24 @@ const UserSearch = () => {
         emptyDescription="다른 검색어로 시도해보세요"
         loadingMessage="검색 중입니다"
         title="유저 검색 결과"
+        toolbar={
+          <BulkSelectionToolbar
+            id="user-bulk-select"
+            unit="명"
+            selectedCount={selection.selectedCount}
+            selectableCount={selection.selectableCount}
+            isAllSelected={selection.isAllSelected}
+            isPartiallySelected={selection.isPartiallySelected}
+            onToggleAll={selection.toggleAll}
+            onClear={selection.clear}
+          />
+        }
       />
       {selectedUserIds.length > 0 && <div className="position-sticky bottom-0 alert alert-primary shadow bulk-action-bar mt-3">
         <strong>{selectedUserIds.length}명 선택됨</strong><div className="bulk-action-bar__actions">
           <button className="btn btn-sm btn-primary" onClick={openMedalModal}><i className="bi bi-award me-1"/>메달 지급</button>
           <button className="btn btn-sm btn-primary" onClick={() => setShowPushModal(true)}><i className="bi bi-send-fill me-1"/>푸시 발송</button>
-          <button className="btn btn-sm btn-outline-secondary" onClick={() => setSelectedUserIds([])}>선택 해제</button>
+          <button className="btn btn-sm btn-outline-secondary" onClick={selection.clear}>선택 해제</button>
         </div>
       </div>}
       <UserDetailModal
