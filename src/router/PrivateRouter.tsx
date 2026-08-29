@@ -11,7 +11,8 @@ interface PrivateRouterProps {
 const PrivateRouter = ({children}: PrivateRouterProps) => {
   const setLoggedIn = useAuthStore((state) => state.setLoggedIn);
   const setAdmin = useAuthStore((state) => state.setAdmin);
-  const [isAuthenticated, setIsAuthenticated] = useState(null);
+  const logout = useAuthStore((state) => state.logout);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,11 +25,13 @@ const PrivateRouter = ({children}: PrivateRouterProps) => {
           setAdmin(response.data ?? null);
           setIsAuthenticated(true);
         } else {
-          setLoggedIn(false);
+          // 만료되거나 유효하지 않은 토큰을 남겨두면 Home과 이 라우트 사이에서
+          // 리다이렉트가 반복되며 내 관리자 정보를 무한 조회하게 됩니다.
+          logout();
           setIsAuthenticated(false);
         }
       } catch (e) {
-        setLoggedIn(false);
+        logout();
         setIsAuthenticated(false);
       } finally {
         setLoading(false);
@@ -36,7 +39,7 @@ const PrivateRouter = ({children}: PrivateRouterProps) => {
     };
 
     checkLogin();
-  }, [setLoggedIn, setAdmin]);
+  }, [setLoggedIn, setAdmin, logout]);
 
   if (loading) {
     return <Loading loading={true}/>
