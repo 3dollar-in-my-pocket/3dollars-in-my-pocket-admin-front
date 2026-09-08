@@ -8,6 +8,7 @@ import useCursorPagination from "@/hooks/useCursorPagination";
 import {Review} from "@/types/review";
 import {ActivityAuthor} from "@/types/domain";
 import {formatDateTimeShortKo as formatDateTime} from "@/utils/dateUtils";
+import useConfirm from "@/hooks/useConfirm";
 
 interface StoreReviewHistoryProps {
   storeId: string;
@@ -21,6 +22,7 @@ const StoreReviewHistory = ({storeId, isActive, onAuthorClick}: StoreReviewHisto
   const [selectedReview, setSelectedReview] = useState<Review | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [isBlinding, setIsBlinding] = useState(false);
+  const confirm = useConfirm();
 
   const fetchReviews = useCallback(
     (cursor: string | null) => reviewApi.getStoreReviews(storeId, cursor, 20),
@@ -91,7 +93,17 @@ const StoreReviewHistory = ({storeId, isActive, onAuthorClick}: StoreReviewHisto
   };
 
   const handleBlindReview = async () => {
-    const confirmed = window.confirm(`정말로 이 리뷰를 블라인드 처리하시겠습니까?\n\n작성자: ${selectedReview.writer?.name || '익명 사용자'}\n내용: ${selectedReview.contents?.substring(0, 50)}...\n\n이 작업은 되돌릴 수 없습니다.`);
+    const confirmed = await confirm({
+      title: '리뷰 블라인드',
+      message: '정말로 이 리뷰를 블라인드 처리하시겠습니까?',
+      details: [
+        {label: '작성자', value: selectedReview.writer?.name || '익명 사용자'},
+        {label: '내용', value: `${selectedReview.contents?.substring(0, 50)}...`}
+      ],
+      confirmLabel: '블라인드 처리',
+      variant: 'danger',
+      irreversible: true
+    });
 
     if (!confirmed) return;
 

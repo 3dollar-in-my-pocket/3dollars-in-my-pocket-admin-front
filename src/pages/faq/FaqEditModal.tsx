@@ -7,6 +7,7 @@ import {useNonce} from "@/hooks/useNonce";
 import useModalForm from "@/hooks/useModalForm";
 import DetailField from "@/components/common/DetailField";
 import {Faq, FaqCategory} from "@/types/faq";
+import useConfirm from "@/hooks/useConfirm";
 
 interface FaqFormData {
   application: string;
@@ -46,6 +47,7 @@ const FaqEditModal = ({
                         faqCategories
                       }: FaqEditModalProps) => {
   const {nonce, issueNonce, clearNonce} = useNonce();
+  const confirm = useConfirm();
 
   const {
     formData,
@@ -183,14 +185,22 @@ const FaqEditModal = ({
     }
   };
 
-  const handleDelete = () => {
-    if (selectedFaq && window.confirm("정말 삭제하시겠습니까?")) {
-      faqApi.deleteFaq({application: formData.application, faqId: selectedFaq.faqId}).then((response) => {
-        if (response.ok) {
-          toast.info("삭제되었습니다");
-          handleCloseModal();
-        }
-      });
+  const handleDelete = async () => {
+    if (!selectedFaq) return;
+
+    const confirmed = await confirm({
+      title: "FAQ 삭제",
+      message: "정말 삭제하시겠습니까?",
+      confirmLabel: "삭제",
+      variant: "danger",
+      irreversible: true
+    });
+    if (!confirmed) return;
+
+    const response = await faqApi.deleteFaq({application: formData.application, faqId: selectedFaq.faqId});
+    if (response.ok) {
+      toast.info("삭제되었습니다");
+      handleCloseModal();
     }
   };
 

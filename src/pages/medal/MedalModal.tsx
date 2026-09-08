@@ -1,10 +1,10 @@
 import {useEffect, useRef, useState} from 'react';
 import {Form, Modal} from 'react-bootstrap';
 import medalApi from '@/api/medalApi';
-import uploadApi from '@/api/uploadApi';
 import {getAcquisitionDescription, Medal} from '@/types/medal';
 import {toast} from 'react-toastify';
 import DetailField from '@/components/common/DetailField';
+import useImageUpload from '@/hooks/useImageUpload';
 
 interface MedalModalProps {
   show: boolean;
@@ -39,8 +39,6 @@ const MedalModal = ({show, onHide, medal, onUpdate}: MedalModalProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  /** 업로드 중인 아이콘 종류 (null이면 업로드 중이 아님) */
-  const [uploadingIcon, setUploadingIcon] = useState<'activation' | 'disable' | null>(null);
 
   const activationFileInputRef = useRef<HTMLInputElement>(null);
   const disableFileInputRef = useRef<HTMLInputElement>(null);
@@ -51,6 +49,16 @@ const MedalModal = ({show, onHide, medal, onUpdate}: MedalModalProps) => {
     activationIconUrl: '',
     disableIconUrl: '',
     acquisitionDescription: ''
+  });
+
+  const {handleFileChange: handleIconFileChange, uploadingField: uploadingIcon} = useImageUpload({
+    imageType: 'MEDAL_IMAGE',
+    onUploaded: (url, kind) => {
+      const field = kind === 'activation' ? 'activationIconUrl' : 'disableIconUrl';
+      setFormData(prev => ({...prev, [field]: url}));
+    },
+    onError: setErrorMessage,
+    successMessage: '아이콘이 업로드되었습니다'
   });
 
   const buildFormData = (target: Medal): MedalFormData => ({
@@ -80,33 +88,8 @@ const MedalModal = ({show, onHide, medal, onUpdate}: MedalModalProps) => {
     e: React.ChangeEvent<HTMLInputElement>,
     kind: 'activation' | 'disable'
   ) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const field = kind === 'activation' ? 'activationIconUrl' : 'disableIconUrl';
-    const inputRef = kind === 'activation' ? activationFileInputRef : disableFileInputRef;
-    const label = kind === 'activation' ? '활성화' : '비활성화';
-
-    setUploadingIcon(kind);
     setErrorMessage('');
-
-    try {
-      const response = await uploadApi.uploadImage('MEDAL_IMAGE', file);
-
-      if (response.ok) {
-        setFormData(prev => ({...prev, [field]: response.data}));
-        toast.success(`${label} 아이콘이 업로드되었습니다`);
-      } else {
-        setErrorMessage('이미지 업로드에 실패했습니다.');
-      }
-    } catch (error: any) {
-      setErrorMessage('이미지 업로드 중 오류가 발생했습니다.');
-    } finally {
-      setUploadingIcon(null);
-      if (inputRef.current) {
-        inputRef.current.value = '';
-      }
-    }
+    await handleIconFileChange(e, kind);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

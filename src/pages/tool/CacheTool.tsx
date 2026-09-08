@@ -4,12 +4,14 @@ import cacheToolApi from "@/api/cacheToolApi";
 import {toast} from "react-toastify";
 import PageHeader from "@/components/common/PageHeader";
 import SectionCard from "@/components/common/SectionCard";
+import useConfirm from "@/hooks/useConfirm";
 
 const CacheTools = () => {
   const [cacheTypes, setCacheTypes] = useState([]);
   const [selectedCacheType, setSelectedCacheType] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const confirm = useConfirm();
 
   const evictCaches = async () => {
     if (!selectedCacheType) {
@@ -17,7 +19,13 @@ const CacheTools = () => {
       return;
     }
 
-    if (!window.confirm('정말로 캐시를 제거하겠습니까?')) return;
+    const confirmed = await confirm({
+      title: '캐시 제거',
+      message: '정말로 캐시를 제거하겠습니까?',
+      confirmLabel: '제거',
+      variant: 'danger'
+    });
+    if (!confirmed) return;
 
     try {
       setIsLoading(true);

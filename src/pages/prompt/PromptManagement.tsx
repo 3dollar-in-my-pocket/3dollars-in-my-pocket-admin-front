@@ -11,6 +11,7 @@ import {formatDateTime} from '@/utils/dateUtils';
 import {AIModel, EnumOption, PromptFormRequest, PromptResponse, PromptStatus} from '@/types/prompt';
 import './PromptManagement.css';
 import PageHeader from '@/components/common/PageHeader';
+import useConfirm from '@/hooks/useConfirm';
 
 const PAGE_SIZE = 10;
 const PROMPT_STATUS = {
@@ -53,6 +54,7 @@ const formatOptionalValue = (value?: string | number | null): string => {
 type PromptFormErrors = Partial<Record<keyof PromptFormRequest, string>>;
 
 const PromptManagement = () => {
+  const confirm = useConfirm();
   const [promptTypes, setPromptTypes] = useState<EnumOption[]>([]);
   const [promptStatuses, setPromptStatuses] = useState<EnumOption[]>([]);
   const [aiModels, setAiModels] = useState<EnumOption[]>([]);
@@ -162,7 +164,11 @@ const PromptManagement = () => {
       ? `v${prompt.version} 프롬프트를 활성화하시겠습니까?`
       : `v${prompt.version} 프롬프트를 초안으로 전환하시겠습니까?`;
 
-    if (!window.confirm(message)) return;
+    if (!await confirm({
+      title: '프롬프트 상태 변경',
+      message,
+      confirmLabel: '변경'
+    })) return;
 
     try {
       const response = await promptApi.updatePrompt(selectedPromptType, prompt.promptId, {status: nextStatus});
@@ -462,6 +468,7 @@ const PromptEditModal = ({
     temperature: null,
     thinkingBudget: null,
   });
+  const confirm = useConfirm();
   const [errors, setErrors] = useState<PromptFormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isEdit = Boolean(selectedPrompt);
@@ -578,7 +585,13 @@ const PromptEditModal = ({
 
   const handleDelete = async () => {
     if (!selectedPrompt || isSubmitting) return;
-    if (!window.confirm('정말 삭제하시겠습니까?')) return;
+    if (!await confirm({
+      title: '프롬프트 삭제',
+      message: '정말 삭제하시겠습니까?',
+      confirmLabel: '삭제',
+      variant: 'danger',
+      irreversible: true
+    })) return;
 
     setIsSubmitting(true);
     try {

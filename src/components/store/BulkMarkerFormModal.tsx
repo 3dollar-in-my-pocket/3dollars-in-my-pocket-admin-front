@@ -3,7 +3,7 @@ import {Modal} from 'react-bootstrap';
 import {toast} from 'react-toastify';
 import storeMarkerApi from '@/api/storeMarkerApi';
 import {StoreMarker, StoreMarkerRequest} from '@/types/storeMarker';
-import uploadApi from '@/api/uploadApi';
+import useImageUpload from '@/hooks/useImageUpload';
 
 interface Props {
   show: boolean;
@@ -26,7 +26,11 @@ const toApi = (value: string) => value.length === 16 ? `${value}:00` : value;
 const BulkMarkerFormModal = ({show, mode, targetIds, initialMarker, onHide, onSuccess}: Props) => {
   const [form, setForm] = useState(emptyForm);
   const [submitting, setSubmitting] = useState(false);
-  const [uploadingField, setUploadingField] = useState<'selectedUrl' | 'unselectedUrl' | null>(null);
+  const {upload, uploadingField: uploadingFieldRaw} = useImageUpload({
+    imageType: 'ADVERTISEMENT_IMAGE',
+    onUploaded: (url, field) => setForm(prev => ({...prev, [field as 'selectedUrl' | 'unselectedUrl']: url}))
+  });
+  const uploadingField = uploadingFieldRaw as 'selectedUrl' | 'unselectedUrl' | null;
 
   useEffect(() => {
     if (!show) return;
@@ -46,16 +50,7 @@ const BulkMarkerFormModal = ({show, mode, targetIds, initialMarker, onHide, onSu
   const change = (key: keyof typeof form, value: string) => setForm(prev => ({...prev, [key]: value}));
 
   const uploadImage = async (field: 'selectedUrl' | 'unselectedUrl', file: File) => {
-    if (!file.type.startsWith('image/')) return toast.error('이미지 파일만 업로드 가능합니다.');
-    if (file.size > 10 * 1024 * 1024) return toast.error('파일 크기는 10MB 이하여야 합니다.');
-    setUploadingField(field);
-    try {
-      const response = await uploadApi.uploadImage('ADVERTISEMENT_IMAGE', file);
-      if (response.ok && response.data) {
-        change(field, response.data);
-        toast.success('이미지가 업로드되었습니다.');
-      }
-    } finally { setUploadingField(null); }
+    await upload(file, field);
   };
 
   const submit = async (event: FormEvent) => {

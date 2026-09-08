@@ -6,11 +6,20 @@ import {Bounce, toast, ToastContainer} from "react-toastify";
 import {useAuthStore} from "@/state/authStore";
 import {setGlobalNavigate} from "@/api/apiBase";
 import useMenuGroups from "@/hooks/useMenuGroups";
+import useConfirm from "@/hooks/useConfirm";
 
 const SIDEBAR_COLLAPSED_KEY = "admin.sidebarCollapsed";
+const ENVIRONMENT = import.meta.env.REACT_APP_ENV?.toUpperCase();
+const ENVIRONMENT_WATERMARK: Record<string, string> = {
+  PROD: 'PRODUCTION',
+  STAGE: 'STAGING',
+  DEV: 'DEVELOPMENT',
+};
+const environmentWatermark = ENVIRONMENT ? ENVIRONMENT_WATERMARK[ENVIRONMENT] : undefined;
 
 const Layout = () => {
   const location = useLocation();
+  const confirm = useConfirm();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); // 모바일용
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(
     () => window.localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "true"
@@ -66,8 +75,8 @@ const Layout = () => {
     return null;
   }, [menuGroups, location.pathname]);
 
-  const handleLogout = () => {
-    if (!window.confirm("정말로 로그아웃 하시겠습니까?")) {
+  const handleLogout = async () => {
+    if (!await confirm({title: "로그아웃", message: "정말로 로그아웃 하시겠습니까?", confirmLabel: "로그아웃"})) {
       return;
     }
 
@@ -118,7 +127,12 @@ const Layout = () => {
         <div className="app-backdrop d-lg-none" onClick={closeSidebar} aria-hidden="true"/>
       )}
 
-      <main className={`app-main ${isSidebarCollapsed ? "app-main--expanded" : ""}`}>
+      <main
+        className={`app-main ${isSidebarCollapsed ? "app-main--expanded" : ""} ${
+          environmentWatermark ? `env-watermark env-${ENVIRONMENT?.toLowerCase()}` : ""
+        }`}
+        data-environment={environmentWatermark}
+      >
         <header className="app-topbar">
           <button
             type="button"

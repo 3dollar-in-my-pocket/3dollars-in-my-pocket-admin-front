@@ -2,11 +2,11 @@ import React, {useEffect, useState} from "react";
 import {Form, Modal} from "react-bootstrap";
 import {toast} from "react-toastify";
 import advertisementApi from "@/api/advertisementApi";
-import uploadApi from "@/api/uploadApi";
 import AdTimer from "@/components/common/AdTimer";
 import AdPreview from "@/components/advertisement/AdPreview";
 import {isFieldAvailable, isFieldRequired} from "@/constants/advertisementSpecs";
 import DeepLinkSelector from "@/components/common/DeepLinkSelector";
+import useImageUpload from "@/hooks/useImageUpload";
 import {Advertisement, AdvertisementContentEditForm} from "@/types/advertisement";
 
 interface AdvertisementContentEditModalProps {
@@ -24,7 +24,11 @@ const AdvertisementContentEditModal = ({
                                        }: AdvertisementContentEditModalProps) => {
   const [formData, setFormData] = useState<AdvertisementContentEditForm | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
+  const {handleFileChange: handleImageUpload, isUploading} = useImageUpload({
+    imageType: 'ADVERTISEMENT_IMAGE',
+    onUploaded: (url) => handleChange('imageUrl', url),
+    successMessage: "이미지가 업로드되었습니다!"
+  });
 
   useEffect(() => {
     if (ad) {
@@ -52,38 +56,6 @@ const AdvertisementContentEditModal = ({
     setFormData((prev) => ({...prev, [field]: value}));
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error("파일 크기는 10MB 이하여야 합니다.");
-      return;
-    }
-
-    if (!file.type.startsWith('image/')) {
-      toast.error("이미지 파일만 업로드 가능합니다.");
-      return;
-    }
-
-    setIsUploading(true);
-    try {
-      const response = await uploadApi.uploadImage('ADVERTISEMENT_IMAGE', file);
-
-      if (response.ok && response.data) {
-        handleChange('imageUrl', response.data);
-        toast.success("이미지가 업로드되었습니다!");
-      } else {
-        const errorMsg = response?.message || "이미지 업로드에 실패했습니다.";
-        toast.error(errorMsg);
-      }
-    } catch (error) {
-      console.error('Upload error:', error);
-      toast.error("이미지 업로드 중 오류가 발생했습니다.");
-    } finally {
-      setIsUploading(false);
-    }
-  };
 
   const handleSubmit = async () => {
     if (isSubmitting) return;

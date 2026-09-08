@@ -1,7 +1,6 @@
 import {useEffect, useState} from "react";
 import {useLocation} from "react-router-dom";
 import pushApi, {PushTargetUser} from "@/api/pushApi";
-import uploadApi from "@/api/uploadApi";
 import {
   addUserToTarget,
   applyAdBodySuffix,
@@ -15,6 +14,7 @@ import {
   validatePushData
 } from "@/utils/pushUtils";
 import {useNonce} from "./useNonce";
+import useImageUpload from "./useImageUpload";
 import {PUSH_OS_PLATFORM, PushOsPlatform} from "@/types/device";
 
 /** 푸시 발송 폼 상태 */
@@ -225,25 +225,19 @@ export const usePushForm = () => {
   };
 
   // 이미지 업로드
+  const {upload: uploadPushImage, isUploading} = useImageUpload({
+    imageType: "PUSH_IMAGE",
+    onUploaded: (url) => {
+      updateFormData("imageUrl", url);
+      setResult("success", "이미지가 성공적으로 업로드되었습니다.");
+    },
+    onError: (message) => setResult("danger", message),
+    successMessage: null
+  });
+
   const uploadImage = async (file: File | null) => {
     if (!file) return;
-
-    setUiState(prev => ({...prev, uploading: true}));
-
-    try {
-      const response = await uploadApi.uploadImage("PUSH_IMAGE", file);
-
-      if (response.ok) {
-        updateFormData("imageUrl", response.data);
-        setResult("success", "이미지가 성공적으로 업로드되었습니다.");
-      } else {
-        setResult("danger", response.message || "이미지 업로드에 실패했습니다.");
-      }
-    } catch (error) {
-      setResult("danger", "이미지 업로드 중 오류가 발생했습니다.");
-    } finally {
-      setUiState(prev => ({...prev, uploading: false}));
-    }
+    await uploadPushImage(file);
   };
 
   // 이미지 제거
@@ -365,7 +359,8 @@ export const usePushForm = () => {
     formData,
     searchState,
     selectedUsers,
-    uiState,
+    // 업로드 상태는 useImageUpload가 관리하므로 uiState에 합쳐 노출합니다.
+    uiState: {...uiState, uploading: isUploading},
     targetOsPlatforms,
     adNotice,
 

@@ -4,6 +4,7 @@ import enumApi from "@/api/enumApi";
 import {toast} from "react-toastify";
 import PageHeader from "@/components/common/PageHeader";
 import SectionCard from "@/components/common/SectionCard";
+import useConfirm from "@/hooks/useConfirm";
 
 const FileUpload = () => {
   const fileInputRef = useRef(null);
@@ -15,6 +16,7 @@ const FileUpload = () => {
   const [copySuccess, setCopySuccess] = useState(false);
   const [selectedImageType, setSelectedImageType] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const confirm = useConfirm();
 
   const handleImageTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => setSelectedImageType(e.target.value);
 
@@ -58,8 +60,8 @@ const FileUpload = () => {
     }
   };
 
-  const handleReset = () => {
-    if (!window.confirm('정말로 초기화 하시겠습니까?')) return;
+  const handleReset = async () => {
+    if (!await confirm({title: '초기화', message: '정말로 초기화 하시겠습니까?', confirmLabel: '초기화'})) return;
 
     setSelectedFile(null);
     setFileImageUrl(null);

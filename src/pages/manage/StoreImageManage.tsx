@@ -16,6 +16,7 @@ import StoreDetailModal from '@/pages/store/StoreDetailModal';
 import UserDetailModal from '@/pages/user/UserDetailModal';
 
 import {formatDateTimeNumeric as formatDate} from '@/utils/dateUtils';
+import useConfirm from '@/hooks/useConfirm';
 
 /** 카드에 한 번에 노출하는 카테고리 개수 */
 const VISIBLE_CATEGORIES = 3;
@@ -24,6 +25,7 @@ const VISIBLE_CATEGORIES = 3;
 const MAX_BULK_SELECTION = 50;
 
 const StoreImageManage = () => {
+  const confirm = useConfirm();
   const [selectedStore, setSelectedStore] = useState<any>(null);
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [selectedImage, setSelectedImage] = useState<StoreImage | null>(null);
@@ -72,7 +74,13 @@ const StoreImageManage = () => {
   };
 
   const handleDeleteImage = async (imageId: number) => {
-    if (!window.confirm('정말로 이 이미지를 삭제하시겠습니까?\n삭제된 이미지는 복구할 수 없습니다.')) {
+    const confirmed = await confirm({
+      title: '이미지 삭제',
+      message: '정말로 이 이미지를 삭제하시겠습니까?\n삭제된 이미지는 복구할 수 없습니다.',
+      confirmLabel: '삭제',
+      variant: 'danger'
+    });
+    if (!confirmed) {
       return;
     }
 
@@ -104,7 +112,13 @@ const StoreImageManage = () => {
   const selectedIds = selection.selectedList;
 
   const handleBulkDelete = async () => {
-    if (!window.confirm(`선택한 이미지 ${selectedIds.length}개를 삭제하시겠습니까?`)) return;
+    if (!await confirm({
+      title: '이미지 일괄 삭제',
+      message: `선택한 이미지 ${selectedIds.length}개를 삭제하시겠습니까?`,
+      confirmLabel: '삭제',
+      variant: 'danger',
+      irreversible: true
+    })) return;
     setIsDeleting(true);
     try {
       const response = await storeImageApi.deleteStoreImagesBulk(selectedIds);

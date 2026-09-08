@@ -18,6 +18,7 @@ import BulkSelectionToolbar from '@/components/common/BulkSelectionToolbar';
 import useBulkSelection from '@/hooks/useBulkSelection';
 
 import {formatDateTimeShortKo as formatDateTime} from '@/utils/dateUtils';
+import useConfirm from '@/hooks/useConfirm';
 
 /** 카드에 한 번에 노출하는 카테고리 / 이미지 개수 */
 const VISIBLE_CATEGORIES = 2;
@@ -34,6 +35,7 @@ const STATUS_CONFIG: Record<string, { className: string; icon: string; text: str
 
 const ReviewManagement = () => {
   const [selectedReview, setSelectedReview] = useState<Review | null>(null);
+  const confirm = useConfirm();
   const [isBlinding, setIsBlinding] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [selectedStore, setSelectedStore] = useState<any>(null);
@@ -99,9 +101,17 @@ const ReviewManagement = () => {
   const handleBlindReview = async () => {
     if (!selectedReview) return;
 
-    const confirmed = window.confirm(
-      `정말로 이 리뷰를 블라인드 처리하시겠습니까?\n\n작성자: ${selectedReview.writer?.name || '익명 사용자'}\n내용: ${selectedReview.contents?.substring(0, 50)}...\n\n이 작업은 되돌릴 수 없습니다.`
-    );
+    const confirmed = await confirm({
+      title: '리뷰 블라인드',
+      message: '정말로 이 리뷰를 블라인드 처리하시겠습니까?',
+      details: [
+        {label: '작성자', value: selectedReview.writer?.name || '익명 사용자'},
+        {label: '내용', value: `${selectedReview.contents?.substring(0, 50)}...`}
+      ],
+      confirmLabel: '블라인드 처리',
+      variant: 'danger',
+      irreversible: true
+    });
 
     if (!confirmed) return;
 
@@ -130,7 +140,13 @@ const ReviewManagement = () => {
   const selectedIds = selection.selectedList;
 
   const handleBulkBlind = async () => {
-    if (!window.confirm(`선택한 리뷰 ${selectedIds.length}개를 블라인드 처리하시겠습니까?`)) return;
+    if (!await confirm({
+      title: '리뷰 일괄 블라인드',
+      message: `선택한 리뷰 ${selectedIds.length}개를 블라인드 처리하시겠습니까?`,
+      confirmLabel: '블라인드 처리',
+      variant: 'danger',
+      irreversible: true
+    })) return;
     setIsBlinding(true);
     try {
       const response = await reviewApi.blindStoreReviewsBulk(selectedIds);

@@ -1,0 +1,29 @@
+.app-main.env-watermark::before {
+  content: attr(data-environment);
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 9999;
+  font-size: clamp(3rem, 10vw, 8rem);
+  font-weight: bold;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+  transform: translate(-50%, -50%) rotate(-30deg);
+  transform-style: flat;
+  -webkit-font-smoothing: subpixel-antialiased;
+  will-change: transform;
+}
+
+.app-main.env-prod::before {
+  color: rgba(220, 53, 69, 0.07);
+}
+
+.app-main.env-stage::before {
+  color: rgba(111, 66, 193, 0.07);
+}
+
+.app-main.env-dev::before {
+  color: rgba(13, 110, 253, 0.07);
+}

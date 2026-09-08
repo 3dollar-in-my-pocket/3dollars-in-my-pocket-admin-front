@@ -49,7 +49,6 @@ const UserSearch = () => {
   } = useSearch({
     validateSearch: userSearchAdapter.validateSearch,
     searchFunction: userSearchAdapter.searchFunction,
-    resetFunction: null,
     errorMessage: userSearchAdapter.errorMessage
   });
 

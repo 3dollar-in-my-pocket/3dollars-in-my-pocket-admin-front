@@ -7,9 +7,14 @@ import './styles/form.css'
 import './styles/push.css'
 import {RouterProvider} from "react-router-dom";
 import router from "./router/Router";
+import {ConfirmProvider} from "./hooks/useConfirm";
 
 const App: React.FC = () => {
-  return <RouterProvider router={router}/>;
+  return (
+    <ConfirmProvider>
+      <RouterProvider router={router}/>
+    </ConfirmProvider>
+  );
 };
 
 export default App;

@@ -6,9 +6,9 @@ import {
   StoreImportValidationResponse,
   StoreImportValidationResult,
 } from '@/types/storeImport';
-import {showConfirm} from '@/utils/confirmDialog';
 import PageHeader from '@/components/common/PageHeader';
 import SectionCard from '@/components/common/SectionCard';
+import useConfirm from '@/hooks/useConfirm';
 
 const isCsvFile = (file: File): boolean => file.name.toLowerCase().endsWith('.csv');
 const formatFileSize = (bytes: number) => bytes < 1024 * 1024
@@ -16,6 +16,7 @@ const formatFileSize = (bytes: number) => bytes < 1024 * 1024
   : `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 
 const StoreFileUpload = () => {
+  const confirm = useConfirm();
   const [storesFile, setStoresFile] = useState<File | null>(null);
   const [menusFile, setMenusFile] = useState<File | null>(null);
   const [validation, setValidation] = useState<StoreImportValidationResponse | null>(null);
@@ -91,9 +92,11 @@ const StoreFileUpload = () => {
     const failedMessage = validation.failedCount > 0
       ? `\n검증 실패 ${validation.failedCount}건은 저장되지 않을 수 있습니다.`
       : '';
-    if (!showConfirm(
-      `검증을 통과한 가게 ${validation.readyCount}건을 등록하시겠습니까?${failedMessage}`
-    )) return;
+    if (!await confirm({
+      title: '가게 일괄 등록',
+      message: `검증을 통과한 가게 ${validation.readyCount}건을 등록하시겠습니까?${failedMessage}`,
+      confirmLabel: '등록'
+    })) return;
 
     setIsSaving(true);
     try {

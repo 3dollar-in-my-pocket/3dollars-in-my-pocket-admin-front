@@ -10,6 +10,7 @@ import useCursorPagination from "@/hooks/useCursorPagination";
 import {Review, ReviewStatus} from "@/types/review";
 import {ActivitiesStatus, SimpleStore} from "@/types/store";
 import {formatDateTimeKo as formatDateTime} from "@/utils/dateUtils";
+import useConfirm from "@/hooks/useConfirm";
 
 interface UserReviewHistoryProps {
   userId: string;
@@ -21,6 +22,7 @@ interface UserReviewHistoryProps {
 
 const UserReviewHistory = ({userId, isActive, onStoreClick}: UserReviewHistoryProps) => {
   const [selectedReview, setSelectedReview] = useState<Review | null>(null);
+  const confirm = useConfirm();
   const [showModal, setShowModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -117,7 +119,13 @@ const UserReviewHistory = ({userId, isActive, onStoreClick}: UserReviewHistoryPr
   // 리뷰 삭제 핸들러
   const handleDeleteReview = async () => {
     if (!selectedReview) return;
-    if (!window.confirm('정말로 이 리뷰를 삭제하시겠습니까?')) return;
+    if (!await confirm({
+      title: '리뷰 삭제',
+      message: '정말로 이 리뷰를 삭제하시겠습니까?',
+      confirmLabel: '삭제',
+      variant: 'danger',
+      irreversible: true
+    })) return;
     setIsDeleting(true);
     try {
       const response = await reviewApi.blindStoreReview(selectedReview.reviewId);

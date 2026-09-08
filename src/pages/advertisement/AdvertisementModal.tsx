@@ -8,6 +8,7 @@ import AdTimer from "@/components/common/AdTimer";
 import AdPreview from "@/components/advertisement/AdPreview";
 import DetailField from "@/components/common/DetailField";
 import {Advertisement, EnumOption} from "@/types/advertisement";
+import useConfirm from "@/hooks/useConfirm";
 
 interface AdvertisementModalProps {
   show: boolean;
@@ -31,11 +32,19 @@ const AdvertisementModal = ({
   const [showEdit, setShowEdit] = useState(false);
   const [showContentEdit, setShowContentEdit] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const confirm = useConfirm();
 
   if (!ad) return null;
 
   const handleDelete = async () => {
-    if (!window.confirm("정말로 삭제하시겠습니까?")) {
+    const confirmed = await confirm({
+      title: "광고 삭제",
+      message: "정말로 삭제하시겠습니까?",
+      confirmLabel: "삭제",
+      variant: "danger",
+      irreversible: true
+    });
+    if (!confirmed) {
       return;
     }
 

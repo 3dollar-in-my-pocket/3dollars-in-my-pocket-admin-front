@@ -8,6 +8,7 @@ import useCursorPagination from "@/hooks/useCursorPagination";
 import {StoreImage, StoreImageStatus} from "@/types/storeImage";
 import {SimpleStore, StoreStatus} from "@/types/store";
 import {formatDateTimeKo as formatDateTime} from "@/utils/dateUtils";
+import useConfirm from "@/hooks/useConfirm";
 
 interface UserStoreImageHistoryProps {
   userId: string;
@@ -19,6 +20,7 @@ interface UserStoreImageHistoryProps {
 
 const UserStoreImageHistory = ({userId, isActive, onStoreClick}: UserStoreImageHistoryProps) => {
   const [selectedImage, setSelectedImage] = useState<StoreImage | null>(null);
+  const confirm = useConfirm();
   const [showModal, setShowModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -82,7 +84,13 @@ const UserStoreImageHistory = ({userId, isActive, onStoreClick}: UserStoreImageH
   // 이미지 삭제 핸들러
   const handleDeleteImage = async () => {
     if (!selectedImage) return;
-    if (!window.confirm('정말로 이 이미지를 삭제하시겠습니까?')) return;
+    if (!await confirm({
+      title: '이미지 삭제',
+      message: '정말로 이 이미지를 삭제하시겠습니까?',
+      confirmLabel: '삭제',
+      variant: 'danger',
+      irreversible: true
+    })) return;
     setIsDeleting(true);
     try {
       // imageId는 number, API는 경로 파라미터를 string으로 받습니다. (StoreImageManage와 동일 처리)

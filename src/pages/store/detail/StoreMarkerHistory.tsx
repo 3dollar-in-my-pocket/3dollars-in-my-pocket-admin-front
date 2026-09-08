@@ -3,12 +3,13 @@ import {Image} from '@/types/domain';
 import {Modal} from 'react-bootstrap';
 import {toast} from 'react-toastify';
 import storeMarkerApi from '@/api/storeMarkerApi';
-import uploadApi from '@/api/uploadApi';
 import HistoryPanel from '@/components/common/HistoryPanel';
 import useCursorPagination from '@/hooks/useCursorPagination';
+import useImageUpload from '@/hooks/useImageUpload';
 import {StoreMarker, StoreMarkerRequest} from '@/types/storeMarker';
 import {formatDateTime} from '@/utils/dateUtils';
 import {getAdStatus} from '@/utils/timeUtils';
+import useConfirm from '@/hooks/useConfirm';
 
 interface StoreMarkerHistoryProps {
   storeId: string;
@@ -73,12 +74,17 @@ const toFormData = (marker: StoreMarker): MarkerFormData => ({
 });
 
 const StoreMarkerHistory: React.FC<StoreMarkerHistoryProps> = ({storeId, isActive = true}) => {
+  const confirm = useConfirm();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deletingMarkerId, setDeletingMarkerId] = useState<string | null>(null);
   const [editingMarker, setEditingMarker] = useState<StoreMarker | null>(null);
   const [showFormModal, setShowFormModal] = useState(false);
   const [formData, setFormData] = useState<MarkerFormData>(emptyForm);
-  const [uploadingField, setUploadingField] = useState<MarkerImageUrlField | null>(null);
+  const {upload, uploadingField: uploadingFieldRaw} = useImageUpload({
+    imageType: 'ADVERTISEMENT_IMAGE',
+    onUploaded: (url, field) => setFormData(prev => ({...prev, [field as MarkerImageUrlField]: url}))
+  });
+  const uploadingField = uploadingFieldRaw as MarkerImageUrlField | null;
   // 입력 중인 필터 값. 조회 버튼을 눌러야 appliedFilter에 반영된다.
   const [filterStartDateTime, setFilterStartDateTime] = useState('');
   const [filterEndDateTime, setFilterEndDateTime] = useState('');
@@ -117,29 +123,7 @@ const StoreMarkerHistory: React.FC<StoreMarkerHistoryProps> = ({storeId, isActiv
   };
 
   const handleImageUpload = async (field: MarkerImageUrlField, file: File) => {
-    if (!file.type.startsWith('image/')) {
-      toast.error('이미지 파일만 업로드 가능합니다.');
-      return;
-    }
-
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error('파일 크기는 10MB 이하여야 합니다.');
-      return;
-    }
-
-    setUploadingField(field);
-    try {
-      const response = await uploadApi.uploadImage('ADVERTISEMENT_IMAGE', file);
-
-      if (response?.ok && response.data) {
-        handleChange(field, response.data);
-        toast.success('이미지가 업로드되었습니다.');
-      } else {
-        toast.error(response?.message || '이미지 업로드에 실패했습니다.');
-      }
-    } finally {
-      setUploadingField(null);
-    }
+    await upload(file, field);
   };
 
   const buildRequest = (): StoreMarkerRequest | null => {
@@ -236,7 +220,13 @@ const StoreMarkerHistory: React.FC<StoreMarkerHistoryProps> = ({storeId, isActiv
   };
 
   const handleDelete = async (marker: StoreMarker) => {
-    const confirmed = window.confirm(`정말로 "${marker.groupId}" 마커를 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.`);
+    const confirmed = await confirm({
+      title: '마커 삭제',
+      message: `정말로 "${marker.groupId}" 마커를 삭제하시겠습니까?`,
+      confirmLabel: '삭제',
+      variant: 'danger',
+      irreversible: true
+    });
     if (!confirmed) return;
 
     setDeletingMarkerId(String(marker.markerId));
