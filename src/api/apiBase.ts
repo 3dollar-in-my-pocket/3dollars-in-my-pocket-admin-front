@@ -46,6 +46,12 @@ axiosInstance.interceptors.response.use(
   (error: AxiosError<ApiErrorData>) => {
     const config = error.config as CustomAxiosRequestConfig;
 
+    // 만료된 토큰 정리는 토스트 억제 여부와 무관하게 항상 수행합니다.
+    // 남겨두면 이후 모든 요청이 계속 401로 실패합니다.
+    if (error.response?.status === 401) {
+      LocalStorageService.delete("AUTH_TOKEN");
+    }
+
     if (config?.suppressToast) {
       return Promise.reject(error);
     }
@@ -76,6 +82,15 @@ const handleAxiosError = (error: AxiosError<ApiErrorData>): void => {
       409: "중복된 요청입니다.",
       500: `서버 오류가 발생하였습니다`,
     };
+
+    // 401 인증 만료 시 로그인 화면으로 이동합니다. (토큰 정리는 인터셉터에서 이미 수행)
+    if (status === 401) {
+      toast.error("세션이 만료되었습니다. 다시 로그인해주세요.");
+      if (globalNavigate) {
+        globalNavigate('/');
+      }
+      return;
+    }
 
     // 403 권한 에러 시 홈으로 이동
     if (status === 403 && globalNavigate) {

@@ -1,4 +1,4 @@
-import {FormEvent, useCallback, useEffect, useState} from 'react';
+import {FormEvent, useCallback, useEffect, useRef, useState} from 'react';
 import {Modal} from 'react-bootstrap';
 import {toast} from 'react-toastify';
 import storeApi from '@/api/storeApi';
@@ -119,11 +119,15 @@ const StoreSearch = () => {
   }, [searchType, handleSearch]);
 
   // 가게 타입 필터가 변경되면 검색 재실행
+  // 마운트 시에는 위의 searchType effect가 이미 첫 검색을 수행하므로 건너뜁니다.
+  const isInitialStoreTypeRender = useRef(true);
   useEffect(() => {
-    if (searchType) {
-      resetSearch();
-      handleSearch(true);
+    if (isInitialStoreTypeRender.current) {
+      isInitialStoreTypeRender.current = false;
+      return;
     }
+    if (!searchType) return;
+    handleSearch(true);
   }, [selectedStoreTypes]);
 
 

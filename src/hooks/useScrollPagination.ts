@@ -23,8 +23,17 @@ export const useScrollPagination = ({hasMore, isLoading, onLoadMore}: UseScrollP
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lastLoadTime = useRef(0);
 
+  // 최신 값을 ref로 유지해 handleScroll의 참조를 안정화합니다.
+  // 하위 컴포넌트가 handleScroll을 메모이제이션해도 낡은 hasMore/isLoading을 보지 않습니다.
+  const hasMoreRef = useRef(hasMore);
+  const isLoadingRef = useRef(isLoading);
+  const onLoadMoreRef = useRef(onLoadMore);
+  hasMoreRef.current = hasMore;
+  isLoadingRef.current = isLoading;
+  onLoadMoreRef.current = onLoadMore;
+
   const handleScroll = useCallback((event: React.UIEvent<HTMLElement>) => {
-    if (!hasMore || isLoading) return;
+    if (!hasMoreRef.current || isLoadingRef.current) return;
 
     const now = Date.now();
     if (now - lastLoadTime.current < SCROLL_DEBOUNCE_MS) return;
@@ -36,8 +45,8 @@ export const useScrollPagination = ({hasMore, isLoading, onLoadMore}: UseScrollP
     if (scrollRatio < LOAD_MORE_THRESHOLD) return;
 
     lastLoadTime.current = now;
-    onLoadMore();
-  }, [hasMore, isLoading, onLoadMore]);
+    onLoadMoreRef.current();
+  }, []);
 
   return {scrollContainerRef, handleScroll};
 };

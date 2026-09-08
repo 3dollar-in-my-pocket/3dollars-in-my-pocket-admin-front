@@ -46,17 +46,32 @@ export const useBulkSelection = <T, K extends string | number>({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, resetDeps);
 
-  /** 선택 가능한 항목의 키만 순서대로 추출 */
-  const selectableKeys = useMemo(() => {
+  // 호출부가 getKey/isSelectable을 인라인 함수로 넘기므로 매 렌더링마다 참조가 바뀝니다.
+  // ref로 최신 값을 유지해 메모이제이션과 콜백 참조를 안정화합니다.
+  const getKeyRef = useRef(getKey);
+  const isSelectableRef = useRef(isSelectable);
+  const itemsRef = useRef(items);
+  getKeyRef.current = getKey;
+  isSelectableRef.current = isSelectable;
+  itemsRef.current = items;
+
+  /** 항목 목록에서 선택 가능한 키만 순서대로 추출 */
+  const collectSelectableKeys = useCallback((source: T[]): K[] => {
     const keys: K[] = [];
-    items.forEach(item => {
-      if (isSelectable && !isSelectable(item)) return;
-      const key = getKey(item);
+    source.forEach(item => {
+      const selectable = isSelectableRef.current;
+      if (selectable && !selectable(item)) return;
+      const key = getKeyRef.current(item);
       if (key !== null && key !== undefined) keys.push(key as K);
     });
     return keys;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [items]);
+  }, []);
+
+  /** 선택 가능한 항목의 키만 순서대로 추출 */
+  const selectableKeys = useMemo(
+    () => collectSelectableKeys(items),
+    [items, collectSelectableKeys]
+  );
 
   const notifyLimit = useCallback(() => {
     if (max) toast.info(`최대 ${max}개까지만 선택할 수 있습니다.`);
@@ -85,12 +100,7 @@ export const useBulkSelection = <T, K extends string | number>({
       const to = Math.max(anchorIndex!, index!);
 
       // 범위 내에서 선택 가능한 항목의 키만 수집
-      const rangeKeys: K[] = [];
-      items.slice(from, to + 1).forEach(item => {
-        if (isSelectable && !isSelectable(item)) return;
-        const itemKey = getKey(item);
-        if (itemKey !== null && itemKey !== undefined) rangeKeys.push(itemKey as K);
-      });
+      const rangeKeys = collectSelectableKeys(itemsRef.current.slice(from, to + 1));
 
       setSelectedKeys(prev => {
         const next = new Set(prev);
@@ -126,7 +136,7 @@ export const useBulkSelection = <T, K extends string | number>({
       next.add(key);
       return next;
     });
-  }, [items, getKey, isSelectable, max, notifyLimit]);
+  }, [collectSelectableKeys, max, notifyLimit]);
 
   /** 현재 목록 전체를 선택합니다 (max까지). */
   const selectAll = useCallback(() => {
@@ -144,7 +154,13 @@ export const useBulkSelection = <T, K extends string | number>({
     ? Math.min(selectableKeys.length, max)
     : selectableKeys.length;
 
-  const isAllSelected = selectableCount > 0 && selectedKeys.size >= selectableCount;
+  // 선택 개수만 비교하면 이전 페이지에서 선택한 키가 남아 있거나 선택 불가 항목이 섞였을 때
+  // 실제로는 전체 선택이 아닌데 전체 선택으로 오판정됩니다. 현재 목록의 키를 직접 확인합니다.
+  const isAllSelected = useMemo(() => {
+    if (selectableCount === 0) return false;
+    return selectableKeys.slice(0, selectableCount).every(key => selectedKeys.has(key));
+  }, [selectableKeys, selectableCount, selectedKeys]);
+
   const isPartiallySelected = selectedKeys.size > 0 && !isAllSelected;
 
   /** 전체 선택 체크박스용 토글 (선택된 것이 있으면 해제, 없으면 전체 선택) */

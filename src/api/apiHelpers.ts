@@ -1,4 +1,5 @@
-import axiosInstance from './apiBase';
+import {isAxiosError} from 'axios';
+import axiosInstance, {CustomAxiosRequestConfig} from './apiBase';
 import {ApiResponse, CursorPaginationParams, PaginatedResponse} from '@/types/api';
 import {buildCursorParams, buildNonceHeader, normalizeCursorResponse, unwrapApiResponse} from '@/utils/apiUtils';
 
@@ -12,8 +13,21 @@ async function request<T>(run: () => Promise<ApiResponse<T>>): Promise<ApiRespon
   try {
     return await run();
   } catch (error) {
-    return {ok: false, data: null as T};
+    // 호출부가 response.message로 실패 사유를 표시할 수 있도록 메시지를 보존합니다.
+    return {ok: false, data: null as T, message: extractErrorMessage(error)};
   }
+}
+
+/** 서버 응답 메시지 > 예외 메시지 순으로 실패 사유를 추출합니다. */
+function extractErrorMessage(error: unknown): string | undefined {
+  if (isAxiosError(error)) {
+    const serverMessage = (error.response?.data as { message?: string } | undefined)?.message;
+    if (serverMessage) return serverMessage;
+  }
+
+  if (error instanceof Error && error.message) return error.message;
+
+  return undefined;
 }
 
 /**
@@ -21,14 +35,17 @@ async function request<T>(run: () => Promise<ApiResponse<T>>): Promise<ApiRespon
  */
 export async function apiGet<T>(
   url: string,
-  params?: Record<string, any>
+  params?: Record<string, any>,
+  options?: { suppressToast?: boolean }
 ): Promise<ApiResponse<T>> {
   return request<T>(async () => {
     const response = await axiosInstance({
       method: 'GET',
       url,
       params,
-    });
+      // 실패를 화면에서 직접 처리하는 호출(예: 인증 확인)은 공통 에러 토스트를 끕니다.
+      suppressToast: options?.suppressToast,
+    } as CustomAxiosRequestConfig);
 
     return unwrapApiResponse<T>(response);
   });

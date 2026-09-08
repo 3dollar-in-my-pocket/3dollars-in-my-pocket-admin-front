@@ -1,4 +1,4 @@
-import {useCallback, useState} from 'react';
+import {useCallback, useRef, useState} from 'react';
 import {toast} from 'react-toastify';
 
 /**
@@ -53,6 +53,9 @@ export const useModalForm = <T extends Record<string, any>>({
   const [formData, setFormData] = useState<T>(initialValues);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // 서버 응답 전 중복 제출을 차단하기 위한 즉시 반영 플래그
+  const isSubmittingRef = useRef(false);
 
   /**
    * 폼 필드 변경 핸들러
@@ -119,6 +122,10 @@ export const useModalForm = <T extends Record<string, any>>({
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // 제출 중 재호출을 막습니다. isSubmitting 상태는 리렌더링 이후에 반영되므로
+    // Enter 연타 등 같은 렌더링 안에서의 중복 제출은 ref로 차단합니다.
+    if (isSubmittingRef.current) return;
+
     // Validation 수행
     if (validate) {
       const validationErrors = validate(formData);
@@ -128,6 +135,7 @@ export const useModalForm = <T extends Record<string, any>>({
       }
     }
 
+    isSubmittingRef.current = true;
     setIsSubmitting(true);
     try {
       const response = await onSubmit(formData);
@@ -155,6 +163,7 @@ export const useModalForm = <T extends Record<string, any>>({
       const errorMessage = error?.response?.data?.message || error?.message || '오류가 발생했습니다.';
       toast.error(errorMessage);
     } finally {
+      isSubmittingRef.current = false;
       setIsSubmitting(false);
     }
   }, [formData, validate, onSubmit, onSuccess, resetOnSuccess, initialValues]);
@@ -165,6 +174,7 @@ export const useModalForm = <T extends Record<string, any>>({
   const resetForm = useCallback(() => {
     setFormData(initialValues);
     setErrors({});
+    isSubmittingRef.current = false;
     setIsSubmitting(false);
   }, [initialValues]);
 
