@@ -14,9 +14,11 @@ import {formatDateTimeShortKo as formatDateTime} from '@/utils/dateUtils';
 import {Poll, PollCategory} from '@/types/poll';
 import {Writer} from '@/types/domain';
 import {getTotalVotes} from '@/utils/display/pollDisplay';
+import useConfirm from '@/hooks/useConfirm';
 
 const PollManagement = () => {
   const [categories, setCategories] = useState<PollCategory[]>([]);
+  const confirm = useConfirm();
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedPoll, setSelectedPoll] = useState<Poll | null>(null);
@@ -112,12 +114,20 @@ const PollManagement = () => {
 
   // 투표 삭제 핸들러
   const handleDeletePoll = async (poll: Poll) => {
-    const confirmed = window.confirm(
-      `정말로 "${poll.content.title}" 투표를 삭제하시겠습니까?\n\n` +
-      `투표 기간: ${formatDateTime(poll.period.startDateTime)} ~ ${formatDateTime(poll.period.endDateTime)}\n` +
-      `현재 참여자: ${getTotalVotes(poll.options)}명\n\n` +
-      `이 작업은 되돌릴 수 없습니다.`
-    );
+    const confirmed = await confirm({
+      title: '투표 삭제',
+      message: `정말로 "${poll.content.title}" 투표를 삭제하시겠습니까?`,
+      details: [
+        {
+          label: '투표 기간',
+          value: `${formatDateTime(poll.period.startDateTime)} ~ ${formatDateTime(poll.period.endDateTime)}`
+        },
+        {label: '현재 참여자', value: `${getTotalVotes(poll.options)}명`}
+      ],
+      confirmLabel: '삭제',
+      variant: 'danger',
+      irreversible: true
+    });
 
     if (!confirmed) return;
 

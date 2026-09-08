@@ -68,7 +68,6 @@ const StoreSearch = () => {
       ...params,
       targetStores: selectedStoreTypes.length > 0 ? selectedStoreTypes : null
     }),
-    resetFunction: null,
     errorMessage: storeSearchAdapter.errorMessage
   });
 

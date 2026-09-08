@@ -10,6 +10,7 @@ import useCursorPagination from "@/hooks/useCursorPagination";
 import {StoreImage} from "@/types/storeImage";
 import {ActivityAuthor} from "@/types/domain";
 import {formatDateTimeShortKo as formatDateTime} from "@/utils/dateUtils";
+import useConfirm from "@/hooks/useConfirm";
 
 interface StoreImageHistoryProps {
   storeId: string;
@@ -37,6 +38,7 @@ const StoreImageHistory = ({storeId, isActive, onAuthorClick}: StoreImageHistory
   const [selectedImage, setSelectedImage] = useState<StoreImage | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const confirm = useConfirm();
 
   const fetchImages = useCallback(
     (cursor: string | null) => storeImageApi.getStoreImages(storeId, cursor, 20),
@@ -70,7 +72,17 @@ const StoreImageHistory = ({storeId, isActive, onAuthorClick}: StoreImageHistory
 
 
   const handleDeleteImage = async () => {
-    const confirmed = window.confirm(`정말로 이 이미지를 삭제하시겠습니까?\n\n등록자: ${selectedImage.writer?.name || '익명 사용자'}\n등록일: ${formatDateTime(selectedImage.createdAt)}\n\n이 작업은 되돌릴 수 없습니다.`);
+    const confirmed = await confirm({
+      title: '이미지 삭제',
+      message: '정말로 이 이미지를 삭제하시겠습니까?',
+      details: [
+        {label: '등록자', value: selectedImage.writer?.name || '익명 사용자'},
+        {label: '등록일', value: formatDateTime(selectedImage.createdAt)}
+      ],
+      confirmLabel: '삭제',
+      variant: 'danger',
+      irreversible: true
+    });
 
     if (!confirmed) return;
 

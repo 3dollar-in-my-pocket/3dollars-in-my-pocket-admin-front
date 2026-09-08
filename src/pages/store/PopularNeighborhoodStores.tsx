@@ -1,13 +1,13 @@
-import {useCallback, useEffect, useRef, useState} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import StoreDetailModal from './StoreDetailModal';
 import UserDetailModal from '@/pages/user/UserDetailModal';
-import useSearch from '@/hooks/useSearch';
+import useCursorPagination from '@/hooks/useCursorPagination';
+import useScrollPagination from '@/hooks/useScrollPagination';
 import SearchResults from '@/components/common/SearchResults';
 import PageHeader from '@/components/common/PageHeader';
 import FilterCard from '@/components/common/FilterCard';
 import StoreCard from '@/components/store/StoreCard';
 import rankingApi, {District, Province, RankingCriteria} from '@/api/rankingApi';
-import {toast} from 'react-toastify';
 
 const RANKING_CRITERIA = {
   MOST_REVIEWS: 'MOST_REVIEWS' as RankingCriteria,
@@ -27,61 +27,40 @@ const PopularNeighborhoodStores = () => {
   const [selectedDistrict, setSelectedDistrict] = useState<string>('');
   const [availableDistricts, setAvailableDistricts] = useState<District[]>([]);
   const [isLoadingProvinces, setIsLoadingProvinces] = useState(false);
-  const isInitialMount = useRef(true);
+
+  const [selectedStore, setSelectedStore] = useState<any>(null);
+
+  const fetchPopularStores = useCallback(
+    (cursor: string | null) => rankingApi.getPopularNeighborhoodStores(
+      selectedCriteria,
+      selectedDistrict,
+      cursor,
+      20
+    ),
+    [selectedCriteria, selectedDistrict]
+  );
 
   const {
-    results: storeList,
-    selectedItem: selectedStore,
+    items: storeList,
+    setItems: setResults,
     isLoading,
     hasMore,
-    scrollContainerRef,
-    handleItemClick: handleStoreClick,
-    handleCloseModal,
-    handleScroll,
-    resetSearch,
-    setResults,
-    handleSearch
-  } = useSearch({
-    validateSearch: () => {
-      if (!selectedDistrict) {
-        return '지역을 선택해주세요.';
-      }
-      return null;
-    },
-    searchFunction: async ({cursor}: any) => {
-      const response = await rankingApi.getPopularNeighborhoodStores(
-        selectedCriteria,
-        selectedDistrict,
-        cursor,
-        20
-      );
-
-      if (!response.ok) {
-        throw new Error('Ranking search failed');
-      }
-
-      const {contents, cursor: responseCursor} = response.data;
-
-      const hasMore = Boolean(
-        responseCursor?.nextCursor &&
-        contents &&
-        contents.length > 0 &&
-        responseCursor.hasMore !== false
-      );
-
-      return {
-        ok: true,
-        data: {
-          results: contents || [],
-          hasMore,
-          nextCursor: hasMore ? responseCursor.nextCursor : null
-        }
-      };
-    },
-    resetFunction: null,
-    errorMessage: '동네 인기 가게 정보를 불러오는 중 오류가 발생했습니다.',
-    autoSearchTypes: []
+    loadMore
+  } = useCursorPagination<any>({
+    fetcher: fetchPopularStores,
+    enabled: Boolean(selectedDistrict),
+    deps: [selectedCriteria, selectedDistrict],
+    errorMessage: '동네 인기 가게 정보를 불러오는 중 오류가 발생했습니다.'
   });
+
+  const {scrollContainerRef, handleScroll} = useScrollPagination({
+    hasMore,
+    isLoading,
+    onLoadMore: loadMore
+  });
+
+  const handleStoreClick = useCallback((store: any) => setSelectedStore(store), []);
+  const handleCloseModal = useCallback(() => setSelectedStore(null), []);
 
   // 지역 목록 조회
   useEffect(() => {
@@ -122,30 +101,6 @@ const PopularNeighborhoodStores = () => {
     }
   }, [selectedProvince, provinces]);
 
-  // 검색 조건 변경 시 검색 실행
-  useEffect(() => {
-    if (selectedDistrict && !isInitialMount.current) {
-      resetSearch();
-      handleSearch(true);
-    }
-
-    if (isInitialMount.current && selectedDistrict) {
-      isInitialMount.current = false;
-      resetSearch();
-      handleSearch(true);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedCriteria, selectedDistrict]);
-
-  // 검색 실행 핸들러
-  const handleSearchSubmit = useCallback(() => {
-    if (!selectedDistrict) {
-      toast.warn('지역을 선택해주세요.');
-      return;
-    }
-    resetSearch();
-    handleSearch(true);
-  }, [selectedDistrict, resetSearch, handleSearch]);
 
   const renderStoreCard = (store: any) => (
     <StoreCard

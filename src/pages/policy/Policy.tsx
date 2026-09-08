@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import {useCallback, useEffect, useState} from "react";
 import policyApi from "@/api/policyApi";
 import enumApi from "@/api/enumApi";
 import PolicyModal from "./PolicyModal";
@@ -12,94 +12,52 @@ import SectionCard from "@/components/common/SectionCard";
 import DataTable from "@/components/common/DataTable";
 import {Policy as PolicyItem, PolicyId} from "@/types/policy";
 import {EnumOption} from "@/types/advertisement";
+import useConfirm from "@/hooks/useConfirm";
+import useCursorPagination from "@/hooks/useCursorPagination";
+
+/** 한 번에 조회하는 정책 수 */
+const PAGE_SIZE = 20;
 
 const Policy = () => {
-  const [policyList, setPolicyList] = useState<PolicyItem[]>([]);
+  const confirm = useConfirm();
   const [selectedPolicy, setSelectedPolicy] = useState<PolicyItem | null>(null);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [cursor, setCursor] = useState(null);
-  const [hasMore, setHasMore] = useState(true);
-  const [hasPrevious, setHasPrevious] = useState(false);
-  const [previousCursors, setPreviousCursors] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [categories, setCategories] = useState<EnumOption[]>([]);
   const [policies, setPolicies] = useState<EnumOption[]>([]);
 
-  const pageSize = 20;
+  const fetchPolicyPage = useCallback(
+    (cursor: string | null) => policyApi.listPolicies({
+      size: PAGE_SIZE,
+      cursor,
+      ...(selectedCategory && {categoryId: selectedCategory}),
+    }),
+    [selectedCategory]
+  );
+
+  const {
+    items: policyList,
+    isLoading,
+    isLoadingMore,
+    hasMore,
+    refresh: fetchPolicies,
+    loadMore
+  } = useCursorPagination<PolicyItem>({
+    fetcher: fetchPolicyPage,
+    deps: [selectedCategory],
+    errorMessage: "정책 목록을 불러오지 못했습니다."
+  });
 
   useEffect(() => {
     // 카테고리 및 정책 타입 목록 조회
     loadEnums();
-    // 초기 정책 목록 조회
-    fetchPolicies();
   }, []);
-
-  useEffect(() => {
-    // 카테고리 필터 변경 시 목록 재조회
-    resetPagination();
-    fetchPolicies();
-  }, [selectedCategory]);
 
   const loadEnums = async () => {
     const enumResponse = await enumApi.getEnum();
     if (enumResponse.data) {
       setCategories([{key: "", description: "전체 카테고리"}, ...enumResponse.data["PolicyCategoryType"] || []]);
       setPolicies(enumResponse.data["PolicyType"] || []);
-    }
-  };
-
-  const resetPagination = () => {
-    setCursor(null);
-    setHasMore(true);
-    setHasPrevious(false);
-    setPreviousCursors([]);
-  };
-
-  const fetchPolicies = async (nextCursor: string | null = null) => {
-    setIsLoading(true);
-    try {
-      const response = await policyApi.listPolicies({
-        size: pageSize,
-        cursor: nextCursor,
-        ...(selectedCategory && {categoryId: selectedCategory}),
-      });
-
-      if (!response.ok) {
-        setPolicyList([]);
-        setHasMore(false);
-        return;
-      }
-
-      const {contents = [], cursor} = response.data;
-      setPolicyList(contents);
-      setHasMore(cursor?.hasMore || false);
-      setCursor(cursor?.nextCursor || null);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleNextPage = () => {
-    if (hasMore && cursor) {
-      setPreviousCursors(prev => [...prev, cursor]);
-      setHasPrevious(true);
-      fetchPolicies(cursor);
-    }
-  };
-
-  const handlePreviousPage = () => {
-    if (hasPrevious && previousCursors.length > 0) {
-      const newPreviousCursors = [...previousCursors];
-      const prevCursor = newPreviousCursors.pop();
-      setPreviousCursors(newPreviousCursors);
-
-      if (newPreviousCursors.length === 0) {
-        setHasPrevious(false);
-        fetchPolicies(null); // 첫 페이지
-      } else {
-        fetchPolicies(prevCursor);
-      }
     }
   };
 
@@ -115,7 +73,14 @@ const Policy = () => {
   };
 
   const handleDeletePolicy = async (policyId: PolicyId) => {
-    if (!window.confirm("정말로 이 정책을 삭제하시겠습니까?")) {
+    const confirmed = await confirm({
+      title: "정책 삭제",
+      message: "정말로 이 정책을 삭제하시겠습니까?",
+      confirmLabel: "삭제",
+      variant: "danger",
+      irreversible: true
+    });
+    if (!confirmed) {
       return;
     }
 
@@ -132,12 +97,10 @@ const Policy = () => {
 
   const handleResetFilter = () => {
     setSelectedCategory("");
-    resetPagination();
-    fetchPolicies();
   };
 
   const renderBody = () => {
-    if (isLoading) {
+    if (isLoading && policyList.length === 0) {
       return (
         <div className="py-5">
           <Loading/>
@@ -286,24 +249,25 @@ const Policy = () => {
         {renderBody()}
       </SectionCard>
 
-      {/* 커서 기반 페이지네이션 - 총 건수를 제공하지 않으므로 이전/다음만 노출 */}
-      {(hasPrevious || hasMore) && (
+      {/* 커서 기반 페이지네이션 - 총 건수를 제공하지 않으므로 더보기만 노출 */}
+      {hasMore && policyList.length > 0 && (
         <div className="page-pager">
           <button
             className="btn btn-sm btn-outline-secondary"
-            onClick={handlePreviousPage}
-            disabled={!hasPrevious || isLoading}
+            onClick={loadMore}
+            disabled={isLoading}
           >
-            <i className="bi bi-chevron-left me-1"/>
-            이전
-          </button>
-          <button
-            className="btn btn-sm btn-outline-secondary"
-            onClick={handleNextPage}
-            disabled={!hasMore || isLoading}
-          >
-            다음
-            <i className="bi bi-chevron-right ms-1"/>
+            {isLoadingMore ? (
+              <>
+                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"/>
+                불러오는 중...
+              </>
+            ) : (
+              <>
+                더보기
+                <i className="bi bi-chevron-down ms-1"/>
+              </>
+            )}
           </button>
         </div>
       )}

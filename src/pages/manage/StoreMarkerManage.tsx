@@ -17,6 +17,7 @@ import BulkMarkerFormModal from '@/components/store/BulkMarkerFormModal';
 import BulkSelectionToolbar from '@/components/common/BulkSelectionToolbar';
 import useBulkSelection from '@/hooks/useBulkSelection';
 import type {BulkSelectHandler} from '@/types/common';
+import useConfirm from '@/hooks/useConfirm';
 
 const toApiDateTime = (value: string): string => {
   if (!value) return value;
@@ -34,6 +35,7 @@ const getMarkerImageSize = (value?: number): number => Number(value || 0);
 const MAX_BULK_SELECTION = 50;
 
 const StoreMarkerManage = () => {
+  const confirm = useConfirm();
   const [filterStartDateTime, setFilterStartDateTime] = useState('');
   const [filterEndDateTime, setFilterEndDateTime] = useState('');
   // 입력 중인 필터 값. 조회 버튼을 눌러야 appliedFilter에 반영된다.
@@ -105,7 +107,13 @@ const StoreMarkerManage = () => {
   const selectedIds = selection.selectedList;
 
   const deleteSelected = async () => {
-    if (!window.confirm(`선택한 마커 ${selectedIds.length}개를 삭제하시겠습니까?`)) return;
+    if (!await confirm({
+      title: '마커 일괄 삭제',
+      message: `선택한 마커 ${selectedIds.length}개를 삭제하시겠습니까?`,
+      confirmLabel: '삭제',
+      variant: 'danger',
+      irreversible: true
+    })) return;
     setIsBulkDeleting(true);
     try {
       const response = await storeMarkerApi.deleteStoreMarkersBulk(selectedIds);

@@ -22,6 +22,7 @@ import {Device} from '@/types/device';
 import {Medal} from '@/types/medal';
 import {User, UserRoleOption, UserSettings} from '@/types/user';
 import {getUserRoleLabel} from '@/utils/display/userDisplay';
+import useConfirm from '@/hooks/useConfirm';
 
 interface UserDetailModalProps {
   show: boolean;
@@ -37,6 +38,7 @@ interface UserDetailModalProps {
 
 const UserDetailModal = ({show, onHide, user, onStoreClick}: UserDetailModalProps) => {
   const [userDetail, setUserDetail] = useState<User | null>(null);
+  const confirm = useConfirm();
   const [devices, setDevices] = useState<Device[]>([]);
   const [settings, setSettings] = useState<UserSettings | null>(null);
   const [representativeMedal, setRepresentativeMedal] = useState<Medal | null>(null);
@@ -119,7 +121,13 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}: UserDetailModalProp
 
   // 디바이스 삭제 핸들러
   const handleDeleteDevice = async (deviceId: string) => {
-    if (!window.confirm('정말로 이 디바이스를 삭제하시겠습니까?')) return;
+    if (!await confirm({
+      title: '디바이스 삭제',
+      message: '정말로 이 디바이스를 삭제하시겠습니까?',
+      confirmLabel: '삭제',
+      variant: 'danger',
+      irreversible: true
+    })) return;
     setIsLoading(true);
     try {
       const response = await deviceApi.deleteDevice(deviceId);
@@ -179,7 +187,12 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}: UserDetailModalProp
   const handleUpdateRole = async () => {
     if (isUpdatingRole || !userDetail?.userId || !selectedRole || selectedRole === userDetail?.role) return;
 
-    if (!window.confirm(`${userDetail.nickname}님의 권한을 ${getUserRoleLabel(selectedRole, userRoleOptions)}(으)로 변경하시겠습니까?`)) {
+    const confirmed = await confirm({
+      title: '권한 변경',
+      message: `${userDetail.nickname}님의 권한을 ${getUserRoleLabel(selectedRole, userRoleOptions)}(으)로 변경하시겠습니까?`,
+      confirmLabel: '변경'
+    });
+    if (!confirmed) {
       return;
     }
 

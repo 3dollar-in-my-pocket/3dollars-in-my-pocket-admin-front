@@ -7,6 +7,7 @@ import ContentInfoStep from "./steps/ContentInfoStep";
 import {useNonce} from "@/hooks/useNonce";
 import {isFieldRequired} from "@/constants/advertisementSpecs";
 import {AdvertisementForm, EnumOption} from "@/types/advertisement";
+import useConfirm from "@/hooks/useConfirm";
 
 interface AdvertisementRegisterModalProps {
   show: boolean;
@@ -22,6 +23,7 @@ const AdvertisementRegisterModal = ({
                                       fetchAdvertisements
                                     }: AdvertisementRegisterModalProps) => {
   const [currentStep, setCurrentStep] = useState(1);
+  const confirm = useConfirm();
   const [formData, setFormData] = useState<AdvertisementForm>(getInitialFormData());
   const {nonce, issueNonce, clearNonce} = useNonce();
 
@@ -41,8 +43,8 @@ const AdvertisementRegisterModal = ({
     }
   }, [show, issueNonce, clearNonce]);
 
-  const resetForm = () => {
-    if (!window.confirm("정말로 초기화 하시겠습니까?")) {
+  const resetForm = async () => {
+    if (!await confirm({title: "초기화", message: "정말로 초기화 하시겠습니까?", confirmLabel: "초기화"})) {
       return
     }
     reset()

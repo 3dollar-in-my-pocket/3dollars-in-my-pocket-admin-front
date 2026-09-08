@@ -1,10 +1,10 @@
 import React, {useState} from "react";
 import {Button, Col, Form, Row} from "react-bootstrap";
 import {toast} from "react-toastify";
-import uploadApi from "@/api/uploadApi";
 import AdPreview from "@/components/advertisement/AdPreview";
 import {isFieldAvailable} from "@/constants/advertisementSpecs";
 import DeepLinkSelector from "@/components/common/DeepLinkSelector";
+import useImageUpload from "@/hooks/useImageUpload";
 import {
   AdvertisementContentForm,
   AdvertisementForm,
@@ -21,7 +21,11 @@ interface ContentInfoStepProps {
 
 const ContentInfoStep = ({formData, onChange}: ContentInfoStepProps) => {
   const content = formData.content;
-  const [isUploading, setIsUploading] = useState(false);
+  const {handleFileChange: handleImageUpload, isUploading} = useImageUpload({
+    imageType: 'ADVERTISEMENT_IMAGE',
+    onUploaded: (url) => handleImageChange("url", url),
+    successMessage: "이미지가 업로드되었습니다!"
+  });
 
   const handleContentChange = <K extends keyof AdvertisementContentForm>(
     field: K,
@@ -68,34 +72,6 @@ const ContentInfoStep = ({formData, onChange}: ContentInfoStepProps) => {
     }));
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // 파일 크기 검증 (10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error("파일 크기는 10MB 이하여야 합니다.");
-      return;
-    }
-
-    // 이미지 파일 타입 검증
-    if (!file.type.startsWith('image/')) {
-      toast.error("이미지 파일만 업로드 가능합니다.");
-      return;
-    }
-
-    setIsUploading(true);
-    try {
-      const response = await uploadApi.uploadImage('ADVERTISEMENT_IMAGE', file);
-
-      if (response.ok && response.data) {
-        handleImageChange('url', response.data);
-        toast.success("이미지가 업로드되었습니다!");
-      }
-    } finally {
-      setIsUploading(false);
-    }
-  };
 
   // 구좌별 필드 표시 여부 확인
   const showTitle = isFieldAvailable(formData.position, 'title');

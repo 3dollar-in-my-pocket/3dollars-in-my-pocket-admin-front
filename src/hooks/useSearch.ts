@@ -1,5 +1,6 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import {useCallback, useRef, useState} from 'react';
 import {toast} from 'react-toastify';
+import useScrollPagination from './useScrollPagination';
 
 /**
  * searchFunction에 전달되는 검색 파라미터
@@ -40,19 +41,19 @@ export interface UseSearchConfig<T, SearchType extends string = string> {
     additionalParams: Record<string, any>
   ) => string | null | undefined;
   searchFunction: (params: SearchFunctionParams<SearchType>) => Promise<SearchFunctionResponse<T>>;
-  /** 검색 초기화 시 호출부에서 추가로 정리할 로직 (없으면 null) */
-  resetFunction?: (() => void) | null;
   errorMessage?: string;
-  /** 선택 시 자동으로 검색을 실행할 searchType 목록 */
-  autoSearchTypes?: SearchType[];
 }
 
+/**
+ * 검색 + 커서 페이지네이션 훅
+ *
+ * 검색어/검색 타입/검증이 필요한 화면에서 사용합니다.
+ * 검색 조건 없이 목록만 조회하는 화면은 `useCursorPagination`을 사용하세요.
+ */
 export const useSearch = <T = any, SearchType extends string = string>({
                                                                          validateSearch,
                                                                          searchFunction,
-                                                                         resetFunction,
-                                                                         errorMessage = '검색 중 오류가 발생했습니다.',
-                                                                         autoSearchTypes = []
+                                                                         errorMessage = '검색 중 오류가 발생했습니다.'
                                                                        }: UseSearchConfig<T, SearchType>) => {
   const [searchQuery, setSearchQuery] = useState('');
   // searchType은 SearchForm 등 공용 컴포넌트가 string으로 다루므로 string으로 유지하고,
@@ -63,24 +64,18 @@ export const useSearch = <T = any, SearchType extends string = string>({
   const [selectedItem, setSelectedItem] = useState<T | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
-  const [nextCursor, setNextCursor] = useState<string | null>(null);
-  const [isSearching, setIsSearching] = useState(false);
-  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
-  const isLoadingMore = useRef(false);
-  const lastScrollTime = useRef(0);
-  const hasAutoSearched = useRef<string | null>(null);
+
+  // 커서와 진행 상태는 콜백 재생성을 막기 위해 ref로 관리합니다.
+  const cursorRef = useRef<string | null>(null);
+  const isFetchingRef = useRef(false);
 
   // 검색 실행
   const handleSearch = useCallback(async (reset = true) => {
-    // 더보기 요청인데 이미 로딩중이면 중복 요청 방지
-    if (!reset && (isLoading || isLoadingMore.current)) {
-      return;
-    }
+    // 중복 호출 방지
+    if (isFetchingRef.current) return;
 
     // 더보기 요청인데 더 이상 데이터가 없으면 요청 차단
-    if (!reset && (!hasMore || !nextCursor)) {
-      return;
-    }
+    if (!reset && !cursorRef.current) return;
 
     // 검증 함수가 있으면 검증 실행
     if (validateSearch) {
@@ -91,10 +86,7 @@ export const useSearch = <T = any, SearchType extends string = string>({
       }
     }
 
-    if (!reset) {
-      isLoadingMore.current = true;
-    }
-    setIsSearching(true);
+    isFetchingRef.current = true;
     setIsLoading(true);
 
     try {
@@ -102,7 +94,7 @@ export const useSearch = <T = any, SearchType extends string = string>({
         searchType: searchType as SearchType,
         searchQuery,
         additionalParams,
-        cursor: reset ? null : nextCursor,
+        cursor: reset ? null : cursorRef.current,
         reset
       });
 
@@ -110,75 +102,34 @@ export const useSearch = <T = any, SearchType extends string = string>({
         throw new Error('Search failed');
       }
 
-      const {results: newResults, hasMore: newHasMore, nextCursor: newNextCursor} = response.data;
+      const {results: newResults, hasMore: newHasMore, nextCursor} = response.data;
 
-      if (reset) {
-        setResults(newResults || []);
-      } else {
-        setResults(prev => [...prev, ...(newResults || [])]);
-      }
-
+      setResults(prev => (reset ? (newResults || []) : [...prev, ...(newResults || [])]));
       setHasMore(Boolean(newHasMore));
-      setNextCursor(newNextCursor || null);
+      cursorRef.current = nextCursor || null;
     } catch (error) {
       toast.error(errorMessage);
       if (reset) {
         setResults([]);
         setHasMore(false);
-        setNextCursor(null);
+        cursorRef.current = null;
       }
     } finally {
+      isFetchingRef.current = false;
       setIsLoading(false);
-      setIsSearching(false);
-      isLoadingMore.current = false;
     }
-  }, [searchType, searchQuery, additionalParams, nextCursor, hasMore, validateSearch, searchFunction, errorMessage]);
+  }, [searchType, searchQuery, additionalParams, validateSearch, searchFunction, errorMessage]);
 
   // 더 보기
   const handleLoadMore = useCallback(() => {
-    if (hasMore && !isLoading) {
-      handleSearch(false);
-    }
-  }, [hasMore, isLoading, handleSearch]);
+    handleSearch(false);
+  }, [handleSearch]);
 
-  // searchType 변경 시 자동 검색 (autoSearchTypes에 포함된 타입인 경우)
-  useEffect(() => {
-    if (searchType && autoSearchTypes.includes(searchType as SearchType)) {
-      // 중복 자동 검색 방지
-      const searchKey = `${searchType}-${autoSearchTypes.join(',')}`;
-      if (!hasAutoSearched.current || hasAutoSearched.current !== searchKey) {
-        hasAutoSearched.current = searchKey;
-        handleSearch(true);
-      }
-    }
-  }, [searchType, autoSearchTypes]); // handleSearch 제거로 무한루프 방지
-
-  // searchType이나 autoSearchTypes가 변경되면 자동검색 플래그 리셋
-  useEffect(() => {
-    hasAutoSearched.current = null;
-  }, [searchType]);
-
-  // 무한 스크롤 핸들러
-  const handleScroll = useCallback((e: React.UIEvent<HTMLElement>) => {
-    const now = Date.now();
-
-    // 디바운싱 - 300ms 이내 중복 호출 방지
-    if (now - lastScrollTime.current < 300) {
-      return;
-    }
-
-    const {scrollTop, scrollHeight, clientHeight} = e.currentTarget;
-
-    // 스크롤이 하단 95% 지점에 도달했을 때 다음 페이지 로드 (더 보수적으로 변경)
-    const scrollPercentage = (scrollTop + clientHeight) / scrollHeight;
-    const shouldLoadMore = scrollPercentage >= 0.95;
-
-    // 더 엄격한 조건 체크
-    if (shouldLoadMore && hasMore && !isLoading && !isLoadingMore.current && nextCursor) {
-      lastScrollTime.current = now;
-      handleSearch(false);
-    }
-  }, [hasMore, isLoading, nextCursor, handleSearch]);
+  const {scrollContainerRef, handleScroll} = useScrollPagination({
+    hasMore,
+    isLoading,
+    onLoadMore: handleLoadMore
+  });
 
   // 아이템 선택
   const handleItemClick = useCallback((item: T) => {
@@ -202,16 +153,9 @@ export const useSearch = <T = any, SearchType extends string = string>({
     setSearchQuery('');
     setResults([]);
     setSelectedItem(null);
-    setIsLoading(false);
     setHasMore(false);
-    setNextCursor(null);
-    setIsSearching(false);
-    isLoadingMore.current = false;
-    lastScrollTime.current = 0;
-    if (resetFunction) {
-      resetFunction();
-    }
-  }, [resetFunction]);
+    cursorRef.current = null;
+  }, []);
 
   return {
     // State
@@ -224,11 +168,10 @@ export const useSearch = <T = any, SearchType extends string = string>({
     results,
     setResults,
     selectedItem,
-    setSelectedItem,
     isLoading,
     hasMore,
-    nextCursor,
-    isSearching,
+    /** @deprecated isLoading과 동일합니다. isLoading을 사용하세요. */
+    isSearching: isLoading,
     scrollContainerRef,
 
     // Actions

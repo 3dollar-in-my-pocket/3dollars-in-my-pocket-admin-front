@@ -23,6 +23,7 @@ import StoreReviewHistory from './detail/StoreReviewHistory';
 import StoreSettings from './detail/StoreSettings';
 import StoreVisitHistory from './detail/StoreVisitHistory';
 import {isImagesSupported, isReportsSupported, isVisitsSupported, StoreDetail} from '@/types/store';
+import useConfirm from '@/hooks/useConfirm';
 
 interface StoreDetailModalProps {
   show: boolean;
@@ -44,6 +45,7 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}: 
   const [activeTab, setActiveTab] = useState('basic');
   const [error, setError] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const confirm = useConfirm();
   const [activitySubTab, setActivitySubTab] = useState<string | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isForceClosing, setIsForceClosing] = useState(false);
@@ -149,7 +151,13 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}: 
   };
 
   const handleDeleteStore = async () => {
-    const confirmed = window.confirm(`정말로 "${store.name}" 가게를 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.`);
+    const confirmed = await confirm({
+      title: '가게 삭제',
+      message: `정말로 "${store.name}" 가게를 삭제하시겠습니까?`,
+      confirmLabel: '삭제',
+      variant: 'danger',
+      irreversible: true
+    });
 
     if (!confirmed) return;
 
@@ -171,7 +179,13 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}: 
   };
 
   const handleForceCloseStore = async () => {
-    const confirmed = window.confirm(`정말로 "${store.name}" 가게의 영업을 강제 종료하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.`);
+    const confirmed = await confirm({
+      title: '영업 강제 종료',
+      message: `정말로 "${store.name}" 가게의 영업을 강제 종료하시겠습니까?`,
+      confirmLabel: '강제 종료',
+      variant: 'danger',
+      irreversible: true
+    });
 
     if (!confirmed) return;
 
