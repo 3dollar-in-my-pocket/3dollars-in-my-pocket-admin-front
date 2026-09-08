@@ -306,6 +306,13 @@ export const usePushForm = () => {
   const confirmSendPush = async () => {
     const validation = validatePushData(formData);
 
+    // 확인 모달을 우회해 호출되는 경우에도 유효하지 않은 데이터가 발송되지 않도록 막습니다.
+    if (!validation.isValid) {
+      setResult("danger", validation.message);
+      setUiState(prev => ({...prev, showConfirm: false}));
+      return false;
+    }
+
     // Nonce 토큰 검증
     if (!nonce) {
       setResult("danger", "Nonce 토큰이 발급되지 않았습니다. 잠시 후 다시 시도해주세요.");
