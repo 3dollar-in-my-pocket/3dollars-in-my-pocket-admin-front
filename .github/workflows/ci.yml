@@ -15,26 +15,25 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '00 23 * * *' # 08:00 KST every day
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   ci:
     runs-on: ubuntu-latest
     name: 'Test and Build'
     steps:
-      - name: checkout@v3
-        uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Use Node.js 22.x
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 22.x
+          cache: 'yarn'
 
-      - name: Cache node_modules 🚀
-        uses: actions/cache@v3
-        with:
-          path: node_modules
-          key: ${{runner.OS}}-build-${{hashFiles('**/yarn.lock')}}
-          restore-keys: |
-            ${{ runner.OS }}-build-${{ runner.OS }}-
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
