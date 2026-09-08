@@ -22,9 +22,9 @@ export const getTimeUntil = (
   const current = currentDate;
   const diffMs = target.getTime() - current.getTime();
 
-  // 이미 지난 시간인 경우
+  // 이미 지난 시간인 경우 (시작 기준이면 "시작됨", 종료 기준이면 "종료됨")
   if (diffMs <= 0) {
-    return "종료됨";
+    return eventType === 'start' ? "시작됨" : "종료됨";
   }
 
   const diffSeconds = Math.floor(diffMs / 1000);
