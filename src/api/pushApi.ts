@@ -26,20 +26,21 @@ const pushApi = {
     pushData: Partial<PushRequest> & { accountIds: string[], accountType: string },
     nonce?: string
   ) => {
-    try {
-      const response = await apiPost<any>(`/v1/push/${pushType}`, pushData, {nonce});
+    // apiPost는 실패를 예외로 던지지 않고 {ok: false, message}로 반환하므로
+    // ok를 그대로 전달해야 발송 실패가 성공으로 처리되지 않습니다.
+    const response = await apiPost<any>(`/v1/push/${pushType}`, pushData, {nonce});
 
-      return {
-        ok: true,
-        data: response.data
-      };
-    } catch (error: any) {
-      console.error("푸시 발송 실패:", error);
+    if (!response.ok) {
       return {
         ok: false,
-        error: error.response?.data?.message || error.message || "푸시 발송 중 오류가 발생했습니다."
+        error: response.message || "푸시 발송 중 오류가 발생했습니다."
       };
     }
+
+    return {
+      ok: true,
+      data: response.data
+    };
   },
 
   /**

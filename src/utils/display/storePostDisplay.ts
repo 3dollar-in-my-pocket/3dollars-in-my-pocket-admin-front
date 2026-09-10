@@ -1,5 +1,6 @@
 import {StorePost, StorePostSection} from '@/types/storePost';
 
+/* deslop-ignore-file 15 스티커 반응은 이모지 자체가 데이터다 */
 /** 스티커 ID별 기본 이모지 (서버가 emoji를 내려주지 않을 때의 폴백) */
 const STICKER_EMOJI: Record<string, string> = {
   LIKE: '👍',

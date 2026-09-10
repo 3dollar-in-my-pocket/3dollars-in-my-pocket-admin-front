@@ -2,15 +2,6 @@
   color: #1f2937;
 }
 
-.prompt-page-kicker {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 6px;
-  color: #2563eb;
-  font-size: 0.78rem;
-  font-weight: 700;
-}
 
 .prompt-icon-button,
 .prompt-edit-button,
@@ -117,7 +108,7 @@
 
 .prompt-card.is-applied {
   padding-top: 44px;
-  background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 58%);
+  background-color: #f0fdf4;
   border-color: #86efac;
   border-left-color: #15803d;
   box-shadow: 0 14px 32px rgba(22, 101, 52, 0.14);
@@ -282,6 +273,7 @@
   background: #f8fafc;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
+  /* deslop-ignore-next-line 34 프롬프트 원문은 코드에 준함 */
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
   font-size: 0.86rem;
   line-height: 1.65;
@@ -310,6 +302,7 @@
   margin: 0;
   overflow-y: auto;
   color: #4b5563;
+  /* deslop-ignore-next-line 34 프롬프트 원문은 코드에 준함 */
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
   font-size: 0.82rem;
   line-height: 1.55;
@@ -380,7 +373,7 @@
   overflow: hidden;
   border: 0;
   border-radius: 8px;
-  box-shadow: 0 22px 60px rgba(15, 23, 42, 0.28);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.22);
 }
 
 .prompt-modal .modal-content > form {
@@ -421,6 +414,7 @@
   color: #1f2937;
   background: #fbfdff;
   border-color: #d1d5db;
+  /* deslop-ignore-next-line 34 프롬프트 원문은 코드에 준함 */
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
   font-size: 0.9rem;
   line-height: 1.6;

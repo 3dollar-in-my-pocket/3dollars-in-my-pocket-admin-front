@@ -22,7 +22,7 @@
   flex-direction: column;
   width: var(--app-sidebar-width);
   height: 100vh;
-  background: linear-gradient(180deg, var(--app-sidebar-bg) 0%, #0f141c 100%);
+  background-color: var(--app-sidebar-bg);
   border-right: 1px solid var(--app-sidebar-border);
   transform: translateX(-100%);
   /* 화면 밖에 있을 때 키보드 포커스가 들어가지 않도록 숨긴다 */
@@ -123,6 +123,7 @@
   height: 20px;
   padding: 0;
   border: 0;
+  /* deslop-ignore-next-line 19 원형 아이콘 버튼 */
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.12);
   color: #fff;
@@ -194,6 +195,7 @@
 .app-sidebar__group-dot {
   width: 6px;
   height: 6px;
+  /* deslop-ignore-next-line 19 6px 상태 점 */
   border-radius: 50%;
   background-color: var(--app-accent);
 }
@@ -292,8 +294,9 @@
   flex: 0 0 auto;
   width: 32px;
   height: 32px;
+  /* deslop-ignore-next-line 19 프로필 아바타 */
   border-radius: 50%;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  background-color: var(--app-accent);
   color: #fff;
   font-size: 0.8125rem;
   font-weight: 700;
@@ -357,6 +360,7 @@
   inset: 0;
   z-index: 1040;
   background-color: rgba(0, 0, 0, 0.5);
+  /* deslop-ignore-next-line 19 모달 백드롭 blur는 기능적 용도 */
   backdrop-filter: blur(2px);
 }
 
@@ -366,6 +370,7 @@
   flex-direction: column;
   min-height: 100vh;
   background-color: #f4f6fa;
+  /* deslop-ignore-next-line 26 사이드바 슬라이드 전환 */
   transition: margin-left 0.25s ease-in-out;
 }
 
@@ -380,6 +385,7 @@
   padding: 0.5rem 0.75rem;
   border-bottom: 1px solid #e5e9f0;
   background-color: rgba(255, 255, 255, 0.92);
+  /* deslop-ignore-next-line 19 sticky 탑바 가독성용 blur */
   backdrop-filter: blur(8px);
 }
 

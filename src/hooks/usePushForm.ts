@@ -306,6 +306,13 @@ export const usePushForm = () => {
   const confirmSendPush = async () => {
     const validation = validatePushData(formData);
 
+    // 확인 모달을 우회해 호출되는 경우에도 유효하지 않은 데이터가 발송되지 않도록 막습니다.
+    if (!validation.isValid) {
+      setResult("danger", validation.message);
+      setUiState(prev => ({...prev, showConfirm: false}));
+      return false;
+    }
+
     // Nonce 토큰 검증
     if (!nonce) {
       setResult("danger", "Nonce 토큰이 발급되지 않았습니다. 잠시 후 다시 시도해주세요.");
@@ -328,17 +335,17 @@ export const usePushForm = () => {
       const response = await pushApi.sendPush(formData.pushType, pushData, nonce);
 
       if (response.ok) {
-        setResult("success", "✅ 푸시 발송 성공!");
+        setResult("success", "푸시 발송 성공");
         resetForm();
         // 새로운 Nonce 토큰 발급
         issueNonce();
         return true;
       } else {
-        setResult("danger", response.error || "❌ 푸시 발송 실패");
+        setResult("danger", response.error || "푸시 발송 실패");
         return false;
       }
     } catch (error) {
-      setResult("danger", "⚠️ 서버 오류 발생");
+      setResult("danger", "서버 오류 발생");
       return false;
     } finally {
       setUiState(prev => ({...prev, loading: false}));

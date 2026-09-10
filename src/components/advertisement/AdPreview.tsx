@@ -303,6 +303,7 @@ const AdPreview: React.FC<AdPreviewProps> = ({
                 className="ad-preview-banner-title"
                 style={{color: titleFontColor}}
               >
+                {/* deslop-ignore-next-line 15 실제 광고 배너 예시 문구 */}
                 {title || '📢 광고문의 📢'}
               </div>
               <div

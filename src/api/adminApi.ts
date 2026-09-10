@@ -5,9 +5,12 @@ import {apiGet, apiPatch, apiPost} from './apiHelpers';
 export default {
   /**
    * 내 관리자 정보 조회
+   *
+   * 인증 확인용으로도 사용되며 미로그인 상태의 401은 정상 흐름이므로,
+   * 공통 에러 토스트를 끄고 호출부(PrivateRouter)가 직접 처리합니다.
    */
   getMyAdmin: async (): Promise<ApiResponse<Admin>> => {
-    return apiGet<Admin>(`/v1/my/admin`);
+    return apiGet<Admin>(`/v1/my/admin`, undefined, {suppressToast: true});
   },
 
   /**

@@ -229,6 +229,7 @@ export const getPushTypeStyles = (pushType: string): PushTypeStyles => {
       return {
         backgroundColor: "#2d1b69",
         borderColor: "#4c3baf",
+        /* deslop-ignore-next-line 15 실제 푸시에 표시되는 문자열 재현 */
         appNameSuffix: " 📈"
       };
     default:

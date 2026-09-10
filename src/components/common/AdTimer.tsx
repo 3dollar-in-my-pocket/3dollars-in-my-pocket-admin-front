@@ -44,14 +44,12 @@ const AdTimer = ({startDateTime, endDateTime, className = "", showStatusBadge = 
 
   const getTimerIcon = () => {
     switch (status.status) {
-      case 'scheduled':
-        return '⏰';
       case 'active':
-        return '🔴';
+        return 'bi-play-fill';
       case 'ended':
-        return '✅';
+        return 'bi-check-lg';
       default:
-        return '⏰';
+        return 'bi-clock';
     }
   };
 
@@ -60,7 +58,7 @@ const AdTimer = ({startDateTime, endDateTime, className = "", showStatusBadge = 
       {showStatusBadge && status.status !== 'active' && (
         <div className="d-flex align-items-center justify-content-center gap-2 mb-2">
           <span className={`badge ${status.badgeClass} d-flex align-items-center gap-1`} style={{fontSize: '0.75rem'}}>
-            <span>{getTimerIcon()}</span>
+            <i className={`bi ${getTimerIcon()}`}/>
             {status.label}
           </span>
         </div>

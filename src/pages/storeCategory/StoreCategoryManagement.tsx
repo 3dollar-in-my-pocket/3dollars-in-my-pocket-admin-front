@@ -282,7 +282,7 @@ const StoreCategoryManagement = () => {
                           }}
                         />
                         {category.isNew && (
-                          <span className="position-absolute top-0 end-0 badge text-bg-danger rounded-pill">
+                          <span /* deslop-ignore 23 isNew는 서버가 내려주는 실제 상태 */ className="position-absolute top-0 end-0 badge text-bg-danger rounded-pill">
                             NEW
                           </span>
                         )}
@@ -378,7 +378,7 @@ const StoreCategoryManagement = () => {
                 <div className="fw-semibold">
                   {selectedCategory.name}
                   {selectedCategory.isNew && (
-                    <span className="badge text-bg-danger rounded-pill ms-2">NEW</span>
+                    <span /* deslop-ignore 23 isNew는 서버가 내려주는 실제 상태 */ className="badge text-bg-danger rounded-pill ms-2">NEW</span>
                   )}
                 </div>
               </div>

@@ -105,7 +105,7 @@ const Advertisement = () => {
       try {
         const response = await cacheToolApi.evictAll('ADVERTISEMENT');
         if (response.ok) {
-          toast.info("✅ 광고 캐시가 성공적으로 갱신되었습니다.");
+          toast.info("광고 캐시가 갱신되었습니다.");
         }
       } catch (error) {
         toast.error("광고 캐시 갱신에 실패했습니다.");

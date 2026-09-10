@@ -129,6 +129,7 @@
   height: 20px;
   padding: 0;
   border: 0;
+  /* deslop-ignore-next-line 19 원형 아이콘 버튼 */
   border-radius: 50%;
   background-color: #e2e8f0;
   color: #475569;

@@ -392,8 +392,8 @@ const ContentInfoStep = ({formData, onChange}: ContentInfoStepProps) => {
               className="shadow-sm"
             >
               <option value="">선택하세요</option>
-              <option value="APP_SCHEME">📱 앱 딥링크</option>
-              <option value="WEB">🌐 웹 링크</option>
+              <option value="APP_SCHEME">앱 딥링크</option>
+              <option value="WEB">웹 링크</option>
             </Form.Select>
           </Form.Group>
 

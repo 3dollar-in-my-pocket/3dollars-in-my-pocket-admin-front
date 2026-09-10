@@ -7,7 +7,7 @@
   justify-content: center;
   min-height: 100vh;
   /* 사이드바와 동일한 다크 톤을 사용해 브랜드 일관성을 유지한다. */
-  background: radial-gradient(120% 120% at 15% 0%, #1e293b 0%, var(--app-sidebar-bg, #141a24) 55%, #0b0f16 100%);
+  background-color: var(--app-sidebar-bg, #141a24);
   padding: 2rem 1rem;
 }
 
@@ -18,7 +18,7 @@
   border-radius: 20px;
   background: #fff;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
   text-align: center;
 }
 

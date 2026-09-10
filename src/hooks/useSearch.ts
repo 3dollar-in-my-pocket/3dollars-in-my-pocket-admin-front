@@ -149,8 +149,11 @@ export const useSearch = <T = any, SearchType extends string = string>({
   }, [handleSearch]);
 
   // 검색 상태 초기화
+  // 검색 조건을 전환할 때 호출되므로, 이전 조건의 추가 파라미터(가게 ID 목록 등)까지
+  // 비워야 다음 검색에 이전 조건이 섞이지 않습니다.
   const resetSearch = useCallback(() => {
     setSearchQuery('');
+    setAdditionalParams({});
     setResults([]);
     setSelectedItem(null);
     setHasMore(false);

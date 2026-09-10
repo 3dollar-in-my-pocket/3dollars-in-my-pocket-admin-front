@@ -118,7 +118,7 @@ const DeepLinkSelector: React.FC<DeepLinkSelectorProps> = ({
         className="border-2 mb-2"
       >
         <option value="">경로를 선택하세요</option>
-        <option value="custom">✏️ 직접 입력</option>
+        <option value="custom">직접 입력</option>
         {schemes.map((scheme, index) => (
           <option key={index} value={scheme.path}>
             {scheme.description}
@@ -162,8 +162,8 @@ const DeepLinkSelector: React.FC<DeepLinkSelectorProps> = ({
                   className="border-2"
                 >
                   <option value="">가게 유형을 선택하세요</option>
-                  <option value="USER_STORE">🏪 유저 가게</option>
-                  <option value="BOSS_STORE">👔 사장님 가게</option>
+                  <option value="USER_STORE">유저 가게</option>
+                  <option value="BOSS_STORE">사장님 가게</option>
                 </Form.Select>
               ) : (
                 <Form.Control

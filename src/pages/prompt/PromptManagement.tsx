@@ -611,15 +611,9 @@ const PromptEditModal = ({
     <Modal show={show} onHide={onHide} size="xl" centered fullscreen="md-down" dialogClassName="prompt-modal">
       <form onSubmit={handleSubmit}>
         <Modal.Header closeButton className="prompt-modal-header">
-          <div>
-            <div className="prompt-page-kicker mb-1">
-              <i className="bi bi-robot"></i>
-              {isEdit ? '프롬프트 편집' : '새 프롬프트'}
-            </div>
-            <Modal.Title className="prompt-modal-title">
-              {isEdit ? selectedPrompt?.description : 'AI 프롬프트 신규 등록'}
-            </Modal.Title>
-          </div>
+          <Modal.Title className="prompt-modal-title">
+            {isEdit ? selectedPrompt?.description : 'AI 프롬프트 신규 등록'}
+          </Modal.Title>
         </Modal.Header>
 
         <Modal.Body className="prompt-modal-body">

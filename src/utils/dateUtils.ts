@@ -46,7 +46,8 @@ export const formatDateTimeKoNoSec = (dateStr: string | null | undefined): strin
  */
 export const formatDateTimeNumeric = (dateStr: string | null | undefined): string => {
   if (!dateStr) return '없음';
-  return new Date(dateStr).toLocaleDateString('ko-KR', {
+  // 날짜와 시간을 함께 포맷하므로 toLocaleString을 사용합니다.
+  return new Date(dateStr).toLocaleString('ko-KR', {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',

@@ -31,12 +31,9 @@ const StoreEditForm = ({storeId, initialName, initialLabels, onSuccess, onCancel
   const fetchEnums = async () => {
     setIsFetchingEnums(true);
     try {
-      console.log('Enum API 호출 시작');
       const response = await enumApi.getEnum();
-      console.log('Enum API 응답:', response);
 
       if (response.ok && response.data?.StoreLabel) {
-        console.log('StoreLabel:', response.data.StoreLabel);
         setAvailableLabels(response.data.StoreLabel);
       } else {
         console.warn('StoreLabel이 없거나 응답이 실패:', response);
