@@ -40,7 +40,7 @@ const Dashboard = () => {
         <img src="/favicon.png" alt="" className="dashboard__hero-logo"/>
         <div className="min-w-0">
           <h2 className="dashboard__title">
-            안녕하세요, {adminAuth?.name || "관리자"}님 👋
+            안녕하세요, {adminAuth?.name || "관리자"}님
           </h2>
           <p className="dashboard__subtitle">
             가슴속 3천원 어드민 콘솔입니다. 접근 가능한 메뉴 {totalMenuCount}개를 아래에서 바로 이동할 수 있습니다.

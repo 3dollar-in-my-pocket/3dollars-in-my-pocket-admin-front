@@ -191,10 +191,7 @@ const StoreBasicInfoTab = ({
                 </span>
               )}
               {category.isNew && (
-                <span className="badge bg-warning-subtle text-warning-emphasis">
-                  <i className="bi bi-sparkles me-1"/>
-                  NEW
-                </span>
+                <span /* deslop-ignore 23 isNew는 서버가 내려주는 실제 상태 */ className="badge bg-warning-subtle text-warning-emphasis">NEW</span>
               )}
             </div>
           </div>

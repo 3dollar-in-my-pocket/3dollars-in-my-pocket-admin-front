@@ -312,8 +312,8 @@ const BasicInfoStep = ({
               className="form-select-lg"
               style={{borderRadius: '8px'}}
             >
-              <option value="RANDOM">🎲 랜덤 노출 - 무작위 순서로 노출</option>
-              <option value="PINNED">📌 특정 순서 고정 - 지정한 순서로 노출</option>
+              <option value="RANDOM">랜덤 노출 - 무작위 순서로 노출</option>
+              <option value="PINNED">특정 순서 고정 - 지정한 순서로 노출</option>
             </Form.Select>
             <Form.Text className="text-muted">
               동일 구좌에 여러 광고가 있을 때의 노출 방식입니다

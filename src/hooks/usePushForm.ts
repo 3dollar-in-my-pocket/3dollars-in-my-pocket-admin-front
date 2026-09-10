@@ -335,17 +335,17 @@ export const usePushForm = () => {
       const response = await pushApi.sendPush(formData.pushType, pushData, nonce);
 
       if (response.ok) {
-        setResult("success", "✅ 푸시 발송 성공!");
+        setResult("success", "푸시 발송 성공");
         resetForm();
         // 새로운 Nonce 토큰 발급
         issueNonce();
         return true;
       } else {
-        setResult("danger", response.error || "❌ 푸시 발송 실패");
+        setResult("danger", response.error || "푸시 발송 실패");
         return false;
       }
     } catch (error) {
-      setResult("danger", "⚠️ 서버 오류 발생");
+      setResult("danger", "서버 오류 발생");
       return false;
     } finally {
       setUiState(prev => ({...prev, loading: false}));

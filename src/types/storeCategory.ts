@@ -14,6 +14,7 @@ export const STORE_CATEGORY_CLASSIFICATIONS: Array<{
   value: StoreCategoryClassificationType;
   label: string;
 }> = [
+  /* deslop-ignore-next-line 15 서버 카테고리 라벨 원문 */
   {value: 'TREND_SNACKS', label: '✨트렌드 간식'},
   {value: 'SNACKS', label: '간식'},
   {value: 'MEAL', label: '식사'},

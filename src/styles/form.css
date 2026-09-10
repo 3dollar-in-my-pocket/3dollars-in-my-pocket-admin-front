@@ -240,6 +240,7 @@
   background: none;
   color: var(--page-text-subtle);
   font-size: 0.75rem;
+  /* deslop-ignore-next-line 09 텍스트 버튼: 밑줄이 클릭 가능함을 나타낸다 */
   text-decoration: underline;
 }
 

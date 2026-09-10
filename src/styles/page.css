@@ -476,6 +476,7 @@ table.data-table .num {
 .ad-status__dot {
   width: 6px;
   height: 6px;
+  /* deslop-ignore-next-line 19 6px 상태 점 */
   border-radius: 50%;
   background-color: currentColor;
 }
@@ -725,6 +726,7 @@ table.data-table .num {
   place-items: center;
   width: 20px;
   height: 20px;
+  /* deslop-ignore-next-line 19 단계 표시 원형 마크 */
   border-radius: 50%;
   background-color: var(--page-border-soft);
   color: var(--page-text-muted);
@@ -1005,6 +1007,7 @@ table.data-table .num {
 .medal-tile__icon {
   width: 48px;
   height: 48px;
+  /* deslop-ignore-next-line 19 메달 아이콘 아바타 */
   border-radius: 50%;
   object-fit: cover;
 }
@@ -1153,6 +1156,7 @@ table.data-table .num {
   height: 100%;
   border-radius: 999px;
   background-color: var(--app-accent, #3b82f6);
+  /* deslop-ignore-next-line 26 미터 채우기 전환 */
   transition: width 0.3s ease;
 }
 
@@ -1334,6 +1338,7 @@ table.data-table .num {
 }
 
 .clickable-author:hover {
+  /* deslop-ignore-next-line 09 링크 hover: 밑줄이 정상 용법 */
   text-decoration: underline;
 }
 
