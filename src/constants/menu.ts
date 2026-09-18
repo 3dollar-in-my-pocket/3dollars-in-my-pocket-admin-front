@@ -116,6 +116,12 @@ export const menuGroups: MenuGroup[] = [
         icon: "bi-grid-3x3-gap",
         allowedRoles: [AdminRole.OPERATOR]
       },
+      {
+        path: "/manage/screen-section-layout",
+        label: "화면 섹션 관리",
+        icon: "bi-layout-text-window",
+        allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]
+      },
     ]
   },
   {

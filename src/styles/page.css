@@ -1711,3 +1711,238 @@ table.data-table .num {
   color: #1d4ed8;
   font-weight: 700;
 }
+
+/* ---------- 화면 섹션 레이아웃: 하단 여백 시각화 ---------- */
+/* 섹션 사이의 실제 marginBottom 크기를 눈으로 가늠할 수 있게 그대로 높이로 그립니다. */
+.section-gap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 0.25rem;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgba(99, 102, 241, 0.12),
+    rgba(99, 102, 241, 0.12) 4px,
+    transparent 4px,
+    transparent 8px
+  );
+}
+
+/* 여백이 0이면 줄무늬 대신 맞닿은 경계선만 얇게 표시합니다. */
+.section-gap--zero {
+  background-image: none;
+}
+
+.section-gap__label {
+  padding: 0 0.375rem;
+  border-radius: 0.625rem;
+  background-color: #fff;
+  box-shadow: 0 0 0 1px var(--page-border);
+  color: var(--page-text-subtle);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.25rem;
+  white-space: nowrap;
+}
+
+/* 여백이 좁아 라벨이 들어가지 않을 때는 숨기고 줄무늬만 남깁니다. */
+.section-gap--tight .section-gap__label {
+  display: none;
+}
+
+/* 미노출 섹션의 여백은 화면 조립에서 제외되므로 색을 빼서 구분합니다. */
+.section-gap--muted {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgba(100, 116, 139, 0.14),
+    rgba(100, 116, 139, 0.14) 4px,
+    transparent 4px,
+    transparent 8px
+  );
+}
+
+.section-gap--muted .section-gap__label {
+  color: var(--page-text-muted);
+}
+
+/* 섹션 순서 드래그 핸들 */
+.section-handle {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 0.25rem;
+  color: var(--page-text-muted);
+  line-height: 1;
+}
+
+.section-handle[role='button'] {
+  cursor: grab;
+}
+
+.section-handle[role='button']:hover {
+  color: var(--page-text-subtle);
+}
+
+.section-handle:focus-visible {
+  outline: 2px solid var(--bs-primary);
+  outline-offset: 2px;
+}
+
+/* ---------- 화면 섹션 레이아웃: 전/후 비교 ---------- */
+.compare-column {
+  height: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--page-border);
+  border-radius: var(--page-radius);
+  background-color: #fff;
+}
+
+/* 저장 시 반영되는 쪽을 강조합니다. */
+.compare-column--after {
+  border-color: #c7d2fe;
+  background-color: #fbfcff;
+}
+
+.compare-column__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--page-border);
+}
+
+.compare-column__title {
+  color: var(--page-text);
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.compare-column__count {
+  color: var(--page-text-muted);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.compare-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.compare-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.5rem;
+  border-left: 3px solid transparent;
+  border-radius: 0.25rem;
+}
+
+.compare-item + .compare-item {
+  margin-top: 0.125rem;
+}
+
+.compare-item__order {
+  flex-shrink: 0;
+  min-width: 1.25rem;
+  color: var(--page-text-muted);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.compare-item__body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.compare-item__name {
+  color: var(--page-text);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.compare-item__id {
+  overflow: hidden;
+  color: var(--page-text-muted);
+  font-size: 0.6875rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.compare-item__meta {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.compare-item__tag,
+.compare-item__moved {
+  padding: 0.0625rem 0.375rem;
+  border-radius: 0.625rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+}
+
+.compare-item__moved {
+  background-color: #e0e7ff;
+  color: #3730a3;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 하단 여백 값 */
+.compare-item__margin {
+  min-width: 1.75rem;
+  color: var(--page-text-muted);
+  font-size: 0.6875rem;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.compare-item--added {
+  border-left-color: #16a34a;
+  background-color: #f0fdf4;
+}
+
+.compare-item--added .compare-item__tag {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+
+.compare-item--removed {
+  border-left-color: #dc2626;
+  background-color: #fef2f2;
+}
+
+.compare-item--removed .compare-item__name {
+  color: var(--page-text-muted);
+  text-decoration: line-through;
+}
+
+.compare-item--removed .compare-item__tag {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+.compare-item--updated {
+  border-left-color: #d97706;
+  background-color: #fffbeb;
+}
+
+.compare-item--updated .compare-item__tag {
+  background-color: #fef3c7;
+  color: #b45309;
+}
+
+.compare-item--moved {
+  border-left-color: #4f46e5;
+  background-color: #eef2ff;
+}
