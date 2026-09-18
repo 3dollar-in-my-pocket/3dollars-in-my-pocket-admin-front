@@ -138,6 +138,12 @@ export const menuGroups: MenuGroup[] = [
     items: [
       {path: "/manage/push-message", label: "푸시 발송", icon: "bi-send-fill", allowedRoles: [AdminRole.OPERATOR]},
       {
+        path: "/manage/push-ab-test",
+        label: "푸시 AB 테스트 관리",
+        icon: "bi-shuffle",
+        allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]
+      },
+      {
         path: "/manage/screen-section-layout",
         label: "화면 관리",
         icon: "bi-layout-text-window",
