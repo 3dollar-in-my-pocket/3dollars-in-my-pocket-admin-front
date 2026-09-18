@@ -116,12 +116,6 @@ export const menuGroups: MenuGroup[] = [
         icon: "bi-grid-3x3-gap",
         allowedRoles: [AdminRole.OPERATOR]
       },
-      {
-        path: "/manage/screen-section-layout",
-        label: "화면 섹션 관리",
-        icon: "bi-layout-text-window",
-        allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]
-      },
     ]
   },
   {
@@ -143,6 +137,12 @@ export const menuGroups: MenuGroup[] = [
     description: "푸시, 정책, 캐시 등 운영 도구를 사용합니다",
     items: [
       {path: "/manage/push-message", label: "푸시 발송", icon: "bi-send-fill", allowedRoles: [AdminRole.OPERATOR]},
+      {
+        path: "/manage/screen-section-layout",
+        label: "화면 관리",
+        icon: "bi-layout-text-window",
+        allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]
+      },
       {path: "/manage/policy", label: "정책 설정", icon: "bi-shield-fill-check", allowedRoles: [AdminRole.OPERATOR]},
       {path: "/manage/prompt", label: "AI 프롬프트 관리", icon: "bi-robot", allowedRoles: [AdminRole.OWNER]},
       {path: "/manage/tool/cache", label: "캐시 툴", icon: "bi-brush-fill"},
