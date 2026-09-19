@@ -7,26 +7,21 @@ import useImageUpload from '@/hooks/useImageUpload';
 import {
   CreateStoreCategoryRequest,
   STORE_CATEGORY_CLASSIFICATIONS,
+  STORE_CATEGORY_MARKER_FIELDS,
+  STORE_CATEGORY_MARKER_GROUPS,
+  SAMPLE_CATEGORY_ID,
   StoreCategory,
   StoreCategoryClassificationType,
+  StoreCategoryMarkerField,
   StoreCategoryMetaType,
   UpdateStoreCategoryRequest
 } from '@/types/storeCategory';
 
-const markerFields = [
-  ['defaultMarkerImageFocusedUrl', '기본 선택 마커'],
-  ['defaultMarkerImageUnfocusedUrl', '기본 미선택 마커'],
-  ['recentlyActivityMarkerImageFocusedUrl', '최근 활동 선택 마커'],
-  ['recentlyActivityMarkerImageUnfocusedUrl', '최근 활동 미선택 마커'],
-  ['hasIssuableCouponMarkerImageFocusedUrl', '쿠폰 선택 마커'],
-  ['hasIssuableCouponMarkerImageUnfocusedUrl', '쿠폰 미선택 마커'],
-  ['verifiedStoreMarkerImageFocusedUrl', '인증 가게 선택 마커'],
-  ['verifiedStoreMarkerImageUnfocusedUrl', '인증 가게 미선택 마커'],
-] as const;
+const markerFields = STORE_CATEGORY_MARKER_FIELDS;
 
 const FORM_ID = 'store-category-form';
 
-type MarkerField = typeof markerFields[number][0];
+type MarkerField = StoreCategoryMarkerField;
 /** 파일 업로드가 가능한 이미지 URL 필드 */
 type ImageField = MarkerField | 'imageUrl' | 'disableImageUrl';
 type FormData = Record<MarkerField, string> & {
@@ -81,6 +76,7 @@ const StoreCategoryFormModal = ({show, category, onHide, onSuccess}: Props) => {
   const [foodTypeOptions, setFoodTypeOptions] = useState<FoodTypeOption[]>([]);
   const [isFoodTypeLoading, setIsFoodTypeLoading] = useState(false);
   const [isCustomFoodType, setIsCustomFoodType] = useState(false);
+  const [sampleCategory, setSampleCategory] = useState<StoreCategory | null>(null);
   const isEdit = !!category;
 
   const {handleFileChange, uploadingField: uploadingFieldRaw} = useImageUpload({
@@ -99,7 +95,21 @@ const StoreCategoryFormModal = ({show, category, onHide, onSuccess}: Props) => {
       setForm(category ? fromCategory(category) : emptyForm());
       setErrors({});
       setIsCustomFoodType(false);
+      setSampleCategory(null);
     }
+  }, [show, category]);
+
+  // 등록 시 각 이미지 필드에 참고용으로 보여줄 기준 카테고리(붕어빵) 에셋을 불러온다.
+  useEffect(() => {
+    if (!show || category) return;
+    let cancelled = false;
+    storeCategoryApi.getAllStoreCategories().then((response) => {
+      if (cancelled || !response?.ok) return;
+      const sample = (response.data?.contents || [])
+        .find((item) => item.categoryId === SAMPLE_CATEGORY_ID);
+      setSampleCategory(sample ?? null);
+    });
+    return () => { cancelled = true; };
   }, [show, category]);
 
   useEffect(() => {
@@ -137,8 +147,8 @@ const StoreCategoryFormModal = ({show, category, onHide, onSuccess}: Props) => {
     if (!form.categoryType.trim()) next.categoryType = 'FoodType enum 이름을 입력해주세요.';
     if (!form.name.trim()) next.name = '카테고리명을 입력해주세요.';
     if (form.name.trim().length > 50) next.name = '카테고리명은 50자 이하여야 합니다.';
-    if (!form.description.trim()) next.description = '설명을 입력해주세요.';
-    if (form.description.trim().length > 100) next.description = '설명은 100자 이하여야 합니다.';
+    if (!form.description.trim()) next.description = '노출 문구를 입력해주세요.';
+    if (form.description.trim().length > 100) next.description = '노출 문구는 100자 이하여야 합니다.';
 
     const urlFields = [
       ['imageUrl', '활성 이미지'], ['disableImageUrl', '비활성 이미지'], ...markerFields
@@ -203,99 +213,158 @@ const StoreCategoryFormModal = ({show, category, onHide, onSuccess}: Props) => {
 
   return (
     <Modal show={show} onHide={() => !isSubmitting && !isUploading && onHide()} size="lg" centered scrollable
-           backdrop={isSubmitting || isUploading ? 'static' : true}>
-      <Modal.Header closeButton><Modal.Title className="fs-6 fw-bold">카테고리 {isEdit ? '수정' : '등록'}</Modal.Title></Modal.Header>
+           className="app-modal" backdrop={isSubmitting || isUploading ? 'static' : true}>
+      <Modal.Header closeButton>
+        <div className="min-w-0">
+          <Modal.Title>
+            <i className="bi bi-grid-3x3-gap"/>
+            카테고리 {isEdit ? '수정' : '등록'}
+          </Modal.Title>
+          {isEdit && <p className="app-modal__subtitle font-monospace">{category?.categoryId}</p>}
+        </div>
+      </Modal.Header>
       <Modal.Body>
         <form id={FORM_ID} onSubmit={handleSubmit}>
-          <div className="row g-3">
-            <Field col="col-md-6" label="카테고리 타입" required error={errors.categoryType}>
-              {isEdit ? (
-                <input className="form-control" value={form.categoryType} disabled/>
-              ) : (
-                <>
-                  <select
-                    className="form-select"
-                    value={isCustomFoodType ? '__CUSTOM__' : form.categoryType}
-                    disabled={isSubmitting || isFoodTypeLoading}
-                    onChange={(e) => {
-                      if (e.target.value === '__CUSTOM__') {
-                        setIsCustomFoodType(true);
-                        setField('categoryType', '');
-                        return;
-                      }
-                      const selected = foodTypeOptions.find((option) => option.key === e.target.value);
-                      setIsCustomFoodType(false);
-                      setForm((current) => ({
-                        ...current,
-                        categoryType: e.target.value,
-                        name: selected?.description || current.name
-                      }));
-                      setErrors((current) => ({...current, categoryType: '', name: ''}));
-                    }}
-                  >
-                    {isFoodTypeLoading && <option value="">불러오는 중...</option>}
-                    {foodTypeOptions.map((option) => (
-                      <option key={option.key} value={option.key}>{option.description}</option>
-                    ))}
-                    <option value="__CUSTOM__">직접 입력</option>
-                  </select>
-                  {isCustomFoodType && (
-                    <input
-                      className={`form-control mt-2 ${errors.categoryType ? 'is-invalid' : ''}`}
-                      value={form.categoryType}
-                      onChange={(e) => setField('categoryType', e.target.value)}
-                      placeholder="FoodType enum 이름 (예: BUNGEOPPANG)"
-                      disabled={isSubmitting}
-                      autoFocus
-                    />
-                  )}
-                  {!isFoodTypeLoading && foodTypeOptions.length === 0 && (
-                    <div className="form-text text-warning">
-                      FoodType 목록을 불러오지 못해 직접 입력으로 전환되었습니다.
-                    </div>
-                  )}
-                </>
-              )}
-            </Field>
-            <Field col="col-md-6" label="카테고리명" required error={errors.name}>
-              <input className={`form-control ${errors.name ? 'is-invalid' : ''}`} value={form.name} maxLength={50}
-                     onChange={(e) => setField('name', e.target.value)} disabled={isSubmitting}/>
-            </Field>
-            <Field label="설명" required error={errors.description}>
-              <textarea className={`form-control ${errors.description ? 'is-invalid' : ''}`} value={form.description} maxLength={100}
-                        onChange={(e) => setField('description', e.target.value)} disabled={isSubmitting}/>
-            </Field>
-            <Field col="col-md-6" label="분류" required>
-              <select className="form-select" value={form.classificationType} onChange={(e) => setField('classificationType', e.target.value)} disabled={isSubmitting}>
-                {STORE_CATEGORY_CLASSIFICATIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-              </select>
-            </Field>
-            <Field col="col-md-3" label="메타 타입" required>
-              <select className="form-select" value={form.metaType} onChange={(e) => setField('metaType', e.target.value)} disabled={isSubmitting}>
-                <option value="DEFAULT">기본</option><option value="NEW">최신 카테고리</option>
-              </select>
-            </Field>
-            <Field col="col-md-3" label="표시 순서" error={errors.displayOrder}>
-              <input type="number" step="any" className={`form-control ${errors.displayOrder ? 'is-invalid' : ''}`} value={form.displayOrder}
-                     onChange={(e) => setField('displayOrder', e.target.value)} placeholder="미노출" disabled={isSubmitting}/>
-            </Field>
-            <ImageUrlField
-              field="imageUrl" label="활성 이미지" error={errors.imageUrl} value={form.imageUrl}
-              onChange={setField} onFileChange={handleFileChange}
-              uploadingField={uploadingField} isSubmitting={isSubmitting}
-            />
-            <ImageUrlField
-              field="disableImageUrl" label="비활성 이미지" error={errors.disableImageUrl} value={form.disableImageUrl}
-              onChange={setField} onFileChange={handleFileChange}
-              uploadingField={uploadingField} isSubmitting={isSubmitting}
-            />
-            <div className="col-12"><hr/><h6 className="fw-bold mb-0">상태별 마커 이미지 <span className="text-danger">*</span></h6></div>
-            {markerFields.map(([key, label]) => (
+          <div className="modal-section">
+            <h3 className="modal-section__title">
+              <i className="bi bi-info-circle"/>
+              기본 정보
+            </h3>
+            <div className="row g-3">
+              <Field col="col-md-6" label="카테고리 타입" required error={errors.categoryType}>
+                {isEdit ? (
+                  <input className="form-control" value={form.categoryType} disabled/>
+                ) : (
+                  <>
+                    <select
+                      className="form-select"
+                      value={isCustomFoodType ? '__CUSTOM__' : form.categoryType}
+                      disabled={isSubmitting || isFoodTypeLoading}
+                      onChange={(e) => {
+                        if (e.target.value === '__CUSTOM__') {
+                          setIsCustomFoodType(true);
+                          setField('categoryType', '');
+                          return;
+                        }
+                        const selected = foodTypeOptions.find((option) => option.key === e.target.value);
+                        setIsCustomFoodType(false);
+                        setForm((current) => ({
+                          ...current,
+                          categoryType: e.target.value,
+                          name: selected?.description || current.name
+                        }));
+                        setErrors((current) => ({...current, categoryType: '', name: ''}));
+                      }}
+                    >
+                      {isFoodTypeLoading && <option value="">불러오는 중...</option>}
+                      {foodTypeOptions.map((option) => (
+                        <option key={option.key} value={option.key}>{option.description}</option>
+                      ))}
+                      <option value="__CUSTOM__">직접 입력</option>
+                    </select>
+                    {isCustomFoodType && (
+                      <input
+                        className={`form-control mt-2 ${errors.categoryType ? 'is-invalid' : ''}`}
+                        value={form.categoryType}
+                        onChange={(e) => setField('categoryType', e.target.value)}
+                        placeholder="FoodType enum 이름 (예: BUNGEOPPANG)"
+                        disabled={isSubmitting}
+                        autoFocus
+                      />
+                    )}
+                    {!isFoodTypeLoading && foodTypeOptions.length === 0 && (
+                      <div className="form-text text-warning">
+                        FoodType 목록을 불러오지 못해 직접 입력으로 전환되었습니다.
+                      </div>
+                    )}
+                  </>
+                )}
+              </Field>
+              <Field col="col-md-6" label="카테고리명" required error={errors.name}>
+                <input className={`form-control ${errors.name ? 'is-invalid' : ''}`} value={form.name} maxLength={50}
+                       onChange={(e) => setField('name', e.target.value)} disabled={isSubmitting}/>
+              </Field>
+              <Field label="노출 문구" required error={errors.description}>
+                <textarea className={`form-control ${errors.description ? 'is-invalid' : ''}`} value={form.description} maxLength={100}
+                          rows={2} placeholder="예: 붕어빵 만나기 30초 전"
+                          onChange={(e) => setField('description', e.target.value)} disabled={isSubmitting}/>
+                <div className="d-flex justify-content-between gap-2">
+                  <span className="form-text">앱에서 사용자에게 보이는 문구입니다.</span>
+                  <span className="form-text flex-shrink-0">{form.description.length}/100</span>
+                </div>
+              </Field>
+              <Field col="col-md-6" label="분류" required>
+                <select className="form-select" value={form.classificationType} onChange={(e) => setField('classificationType', e.target.value)} disabled={isSubmitting}>
+                  {STORE_CATEGORY_CLASSIFICATIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+                </select>
+              </Field>
+              <Field col="col-md-3" label="뱃지 설정" required>
+                <select className="form-select" value={form.metaType} onChange={(e) => setField('metaType', e.target.value)} disabled={isSubmitting}>
+                  <option value="DEFAULT">없음</option><option value="NEW">NEW</option>
+                </select>
+              </Field>
+              <Field col="col-md-3" label="표시 순서" error={errors.displayOrder}>
+                <input type="number" step="any" className={`form-control ${errors.displayOrder ? 'is-invalid' : ''}`} value={form.displayOrder}
+                       onChange={(e) => setField('displayOrder', e.target.value)} placeholder="미노출" disabled={isSubmitting}/>
+              </Field>
+            </div>
+          </div>
+
+          <div className="modal-section">
+            <h3 className="modal-section__title">
+              <i className="bi bi-image"/>
+              카테고리 아이콘
+            </h3>
+            <p className="form-text mt-0 mb-3">앱 필터에 노출되는 아이콘입니다. 선택 상태에 따라 활성/비활성 이미지가 바뀝니다.</p>
+            <div className="row g-3">
               <ImageUrlField
-                key={key} field={key} label={label} error={errors[key]} value={form[key]}
+                field="imageUrl" label="활성 이미지" error={errors.imageUrl} value={form.imageUrl}
                 onChange={setField} onFileChange={handleFileChange}
                 uploadingField={uploadingField} isSubmitting={isSubmitting}
+                sampleUrl={sampleCategory?.imageUrl}
               />
+              <ImageUrlField
+                field="disableImageUrl" label="비활성 이미지" error={errors.disableImageUrl} value={form.disableImageUrl}
+                onChange={setField} onFileChange={handleFileChange}
+                uploadingField={uploadingField} isSubmitting={isSubmitting}
+                sampleUrl={sampleCategory?.disableImageUrl}
+              />
+            </div>
+          </div>
+          <div className="modal-section">
+            <h3 className="modal-section__title">
+              <i className="bi bi-geo-alt"/>
+              상태별 마커 이미지
+            </h3>
+            <p className="form-text mt-0 mb-3">
+              지도에 표시되는 마커입니다. 가게 상태별로 선택/미선택 이미지를 모두 등록해야 합니다.
+              {sampleCategory && <> 흐린 썸네일은 <strong>{sampleCategory.name}</strong> 카테고리의 예시이며 제출값에는 영향을 주지 않습니다.</>}
+            </p>
+
+            {STORE_CATEGORY_MARKER_GROUPS.map((group) => (
+              <div key={group.title} className="marker-group">
+                <div className="marker-group__head">
+                  <span className="marker-group__title">
+                    <i className={`bi ${group.icon}`}/>
+                    {group.title}
+                  </span>
+                  <span className="marker-group__desc">{group.description}</span>
+                </div>
+                <div className="row g-3">
+                  <ImageUrlField
+                    field={group.focused} label="선택" error={errors[group.focused]} value={form[group.focused]}
+                    onChange={setField} onFileChange={handleFileChange}
+                    uploadingField={uploadingField} isSubmitting={isSubmitting}
+                    sampleUrl={sampleCategory?.[group.focused]}
+                  />
+                  <ImageUrlField
+                    field={group.unfocused} label="미선택" error={errors[group.unfocused]} value={form[group.unfocused]}
+                    onChange={setField} onFileChange={handleFileChange}
+                    uploadingField={uploadingField} isSubmitting={isSubmitting}
+                    sampleUrl={sampleCategory?.[group.unfocused]}
+                  />
+                </div>
+              </div>
             ))}
           </div>
         </form>
@@ -326,7 +395,7 @@ const Field = ({label, required, error, col = 'col-12', children}: {
   label: string; required?: boolean; error?: string; col?: string; children: React.ReactNode;
 }) => <div className={col}><label className="form-label fw-semibold">{label}{required && <span className="text-danger ms-1">*</span>}</label>{children}{error && <div className="invalid-feedback d-block">{error}</div>}</div>;
 
-const ImageUrlField = ({field, label, value, error, onChange, onFileChange, uploadingField, isSubmitting}: {
+const ImageUrlField = ({field, label, value, error, onChange, onFileChange, uploadingField, isSubmitting, sampleUrl}: {
   field: ImageField;
   label: string;
   value: string;
@@ -335,9 +404,11 @@ const ImageUrlField = ({field, label, value, error, onChange, onFileChange, uplo
   onFileChange: (event: React.ChangeEvent<HTMLInputElement>, field?: string) => Promise<string | null>;
   uploadingField: ImageField | null;
   isSubmitting: boolean;
+  sampleUrl?: string;
 }) => {
   const isUploadingThis = uploadingField === field;
   const disabled = isSubmitting || uploadingField !== null;
+  const currentValue = value.trim();
 
   return (
     <Field col="col-md-6" label={`${label} URL`} required error={error}>
@@ -352,35 +423,45 @@ const ImageUrlField = ({field, label, value, error, onChange, onFileChange, uplo
                  onChange={(e) => onFileChange(e, field)}/>
         </label>
       </div>
-      {value.trim() && <ImagePreview src={value.trim()} label={label}/>}
+      {(currentValue || sampleUrl) && (
+        <div className="asset-preview">
+          {currentValue && <ImagePreview src={currentValue} label={label} caption="입력값"/>}
+          {sampleUrl && <ImagePreview src={sampleUrl} label={`${label} 예시`} caption="예시" muted/>}
+        </div>
+      )}
     </Field>
   );
 };
 
-const ImagePreview = ({src, label}: {src: string; label: string}) => {
+const ImagePreview = ({src, label, caption, muted}: {
+  src: string;
+  label: string;
+  caption: string;
+  muted?: boolean;
+}) => {
   const [hasError, setHasError] = useState(false);
 
   useEffect(() => setHasError(false), [src]);
 
+  if (hasError) {
+    return (
+      <div className="text-body-secondary small">
+        <i className="bi bi-image me-1"/>이미지를 불러올 수 없습니다.
+      </div>
+    );
+  }
+
   return (
-    <div className="mt-2 p-2 border rounded bg-body-tertiary d-flex align-items-center gap-2">
-      {hasError ? (
-        <div className="text-body-secondary small">
-          <i className="bi bi-image me-1"/>이미지를 불러올 수 없습니다.
-        </div>
-      ) : (
-        <>
-          <img
-            src={src}
-            alt={`${label} 미리보기`}
-            width={56}
-            height={56}
-            style={{objectFit: 'contain'}}
-            onError={() => setHasError(true)}
-          />
-          <span className="text-body-secondary small">미리보기</span>
-        </>
-      )}
+    <div className={`asset-preview__item ${muted ? 'asset-preview__item--sample' : ''}`}>
+      <img
+        className="asset-preview__thumb"
+        src={src}
+        alt={`${label} 미리보기`}
+        width={56}
+        height={56}
+        onError={() => setHasError(true)}
+      />
+      <div className="asset-preview__caption">{caption}</div>
     </div>
   );
 };
