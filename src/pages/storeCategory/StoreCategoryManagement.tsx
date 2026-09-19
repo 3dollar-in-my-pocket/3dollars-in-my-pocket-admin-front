@@ -6,7 +6,13 @@ import EmptyState from '@/components/common/EmptyState';
 import Loading from '@/components/common/Loading';
 import PageHeader from '@/components/common/PageHeader';
 import SectionCard from '@/components/common/SectionCard';
-import {StoreCategory, StoreCategoryMetaType} from '@/types/storeCategory';
+import DetailField from '@/components/common/DetailField';
+import {
+  STORE_CATEGORY_ICON_FIELDS,
+  STORE_CATEGORY_MARKER_GROUPS,
+  StoreCategory,
+  StoreCategoryMetaType
+} from '@/types/storeCategory';
 import {getCategoryClassificationBadgeClass, getCategoryClassificationIcon} from '@/utils/display/storeCategoryDisplay';
 import StoreCategoryFormModal from './StoreCategoryFormModal';
 import {usePermission} from '@/hooks/usePermission';
@@ -168,7 +174,7 @@ const StoreCategoryManagement = () => {
     try {
       const response = await storeCategoryApi.updateStoreCategory(category.categoryId, {metaType});
       if (!response.ok) return;
-      toast.success(`메타 타입이 ${metaType === 'NEW' ? '최신 카테고리' : '기본'}으로 변경되었습니다.`);
+      toast.success(metaType === 'NEW' ? 'NEW 뱃지가 설정되었습니다.' : 'NEW 뱃지가 해제되었습니다.');
       await fetchCategories();
     } finally {
       setUpdatingCategoryId(null);
@@ -225,19 +231,18 @@ const StoreCategoryManagement = () => {
               return (
                 <div key={category.categoryId} className="col-6 col-md-4 col-lg-3 col-xl-2">
                   <div
-                    className={`item-card item-card--clickable ${isHidden ? 'item-card--muted' : ''}`}
-                    style={{
-                      opacity: draggedCategory?.categoryId === category.categoryId ? 0.45 : 1,
-                      boxShadow: dropIndicator?.categoryId === category.categoryId
-                        ? dropIndicator.position === 'before'
-                          ? 'inset 0 5px 0 var(--bs-primary)'
-                          : 'inset 0 -5px 0 var(--bs-primary)'
-                        : undefined,
-                      transform: dropIndicator?.categoryId === category.categoryId ? 'scale(1.02)' : undefined,
-                      transition: 'box-shadow 120ms ease, transform 120ms ease, opacity 120ms ease'
-                    }}
+                    className={[
+                      'item-card', 'item-card--clickable', 'category-card',
+                      isHidden ? 'item-card--muted' : '',
+                      canManage && !updatingCategoryId ? 'category-card--draggable' : '',
+                      draggedCategory?.categoryId === category.categoryId ? 'category-card--dragging' : '',
+                      dropIndicator?.categoryId === category.categoryId
+                        ? `category-card--drop-${dropIndicator.position}` : '',
+                      updatingCategoryId === category.categoryId ? 'category-card--busy' : ''
+                    ].filter(Boolean).join(' ')}
                     role="button"
                     tabIndex={0}
+                    aria-label={`${category.name} 카테고리 상세 보기`}
                     draggable={canManage && !updatingCategoryId}
                     onDragStart={() => setDraggedCategory(category)}
                     onDragEnd={() => {
@@ -267,16 +272,22 @@ const StoreCategoryManagement = () => {
                     }}
                   >
                     <div className="item-card__body text-center">
+                      {canManage && (
+                        <i className="bi bi-grip-vertical category-card__grip" aria-hidden="true"/>
+                      )}
+                      {updatingCategoryId === category.categoryId && (
+                        <span className="spinner-border spinner-border-sm category-card__spinner" role="status">
+                          <span className="visually-hidden">변경 중</span>
+                        </span>
+                      )}
+
                       <div className="position-relative mb-2">
-                        {isHidden && (
-                          <span className="position-absolute top-0 start-0 badge text-bg-secondary rounded-pill">
-                            <i className="bi bi-eye-slash me-1"/>미노출
-                          </span>
-                        )}
                         <img
+                          className="category-card__icon"
                           src={category.imageUrl}
                           alt=""
-                          style={{width: '56px', height: '56px', objectFit: 'contain'}}
+                          width={56}
+                          height={56}
                           onError={(e: any) => {
                             e.target.style.visibility = 'hidden';
                           }}
@@ -288,11 +299,13 @@ const StoreCategoryManagement = () => {
                         )}
                       </div>
 
-                      <p className="item-card__name">{category.name}</p>
+                      <p className="item-card__name text-truncate" title={category.name}>{category.name}</p>
 
                       <div className="mt-1">
                         {isHidden ? (
-                          <span className="badge text-bg-secondary">카테고리 미노출</span>
+                          <span className="badge text-bg-secondary">
+                            <i className="bi bi-eye-slash me-1"/>미노출
+                          </span>
                         ) : (
                           <span className="item-card__desc">순서 {category.displayOrder}</span>
                         )}
@@ -346,79 +359,97 @@ const StoreCategoryManagement = () => {
       </SectionCard>
 
       {/* 카테고리 상세 모달 */}
-      <Modal show={!!selectedCategory} onHide={() => setSelectedCategory(null)} centered>
+      <Modal show={!!selectedCategory} onHide={() => setSelectedCategory(null)} size="lg" centered scrollable
+             className="app-modal">
         <Modal.Header closeButton>
-          <Modal.Title className="fs-6 fw-bold">
-            <i className="bi bi-grid-3x3-gap me-2"/>
-            카테고리 상세
-          </Modal.Title>
+          <div className="min-w-0">
+            <Modal.Title>
+              <i className="bi bi-grid-3x3-gap"/>
+              {selectedCategory?.name ?? '카테고리 상세'}
+            </Modal.Title>
+            <p className="app-modal__subtitle font-monospace">{selectedCategory?.categoryId}</p>
+          </div>
         </Modal.Header>
 
         {selectedCategory && (
           <Modal.Body>
-            <div className="text-center mb-4">
-              <img
-                src={selectedCategory.imageUrl}
-                alt=""
-                style={{width: '96px', height: '96px', objectFit: 'contain'}}
-                onError={(e: any) => {
-                  e.target.style.visibility = 'hidden';
-                }}
-              />
+            <div className="modal-section">
+              <div className="d-flex align-items-center gap-3 mb-3">
+                <img
+                  className="asset-preview__thumb flex-shrink-0"
+                  src={selectedCategory.imageUrl}
+                  alt=""
+                  width={64}
+                  height={64}
+                  onError={(e: any) => {
+                    e.target.style.visibility = 'hidden';
+                  }}
+                />
+                <div className="min-w-0">
+                  <div className="d-flex flex-wrap align-items-center gap-2">
+                    <ClassificationBadge classification={selectedCategory.classification}/>
+                    {selectedCategory.isNew && (
+                      <span /* deslop-ignore 23 isNew는 서버가 내려주는 실제 상태 */ className="badge text-bg-danger rounded-pill">NEW</span>
+                    )}
+                    {selectedCategory.displayOrder == null ? (
+                      <span className="badge text-bg-secondary">
+                        <i className="bi bi-eye-slash me-1"/>미노출
+                      </span>
+                    ) : (
+                      <span className="badge text-bg-light">순서 {selectedCategory.displayOrder}</span>
+                    )}
+                  </div>
+                  <p className="item-card__desc mt-1 mb-0">
+                    {selectedCategory.description || '노출 문구 없음'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="row g-3">
+                <DetailField label="분류 우선순위" className="col-6 col-md-4">
+                  {selectedCategory.classification.priority}
+                </DetailField>
+                <DetailField label="표시 순서" className="col-6 col-md-4" placeholder="미노출">
+                  {selectedCategory.displayOrder ?? null}
+                </DetailField>
+                <DetailField label="뱃지 설정" className="col-6 col-md-4">
+                  {selectedCategory.metaType === 'NEW' ? 'NEW' : '없음'}
+                </DetailField>
+              </div>
             </div>
 
-            <div className="row g-3">
-              <div className="col-12">
-                <span className="item-card__label">카테고리 ID</span>
-                <div className="font-monospace small">{selectedCategory.categoryId}</div>
+            <div className="modal-section">
+              <h3 className="modal-section__title">
+                <i className="bi bi-image"/>
+                카테고리 아이콘
+              </h3>
+              <div className="row g-3">
+                {STORE_CATEGORY_ICON_FIELDS.map(([key, label]) => (
+                  <AssetItem key={key} label={label} url={selectedCategory[key]}/>
+                ))}
               </div>
+            </div>
 
-              <div className="col-12">
-                <span className="item-card__label">카테고리 이름</span>
-                <div className="fw-semibold">
-                  {selectedCategory.name}
-                  {selectedCategory.isNew && (
-                    <span /* deslop-ignore 23 isNew는 서버가 내려주는 실제 상태 */ className="badge text-bg-danger rounded-pill ms-2">NEW</span>
-                  )}
+            <div className="modal-section">
+              <h3 className="modal-section__title">
+                <i className="bi bi-geo-alt"/>
+                상태별 마커 이미지
+              </h3>
+              {STORE_CATEGORY_MARKER_GROUPS.map((group) => (
+                <div key={group.title} className="marker-group">
+                  <div className="marker-group__head">
+                    <span className="marker-group__title">
+                      <i className={`bi ${group.icon}`}/>
+                      {group.title}
+                    </span>
+                    <span className="marker-group__desc">{group.description}</span>
+                  </div>
+                  <div className="row g-3">
+                    <AssetItem label="선택" url={selectedCategory[group.focused]}/>
+                    <AssetItem label="미선택" url={selectedCategory[group.unfocused]}/>
+                  </div>
                 </div>
-              </div>
-
-              <div className="col-12">
-                <span className="item-card__label">설명</span>
-                <div className="item-card__value" style={{whiteSpace: 'pre-wrap'}}>
-                  {selectedCategory.description || '설명 없음'}
-                </div>
-              </div>
-
-              <div className="col-12">
-                <span className="item-card__label">분류</span>
-                <div>
-                  <ClassificationBadge classification={selectedCategory.classification}/>
-                </div>
-              </div>
-
-              <div className="col-6">
-                <span className="item-card__label">우선순위</span>
-                <div className="fw-semibold">{selectedCategory.classification.priority}</div>
-              </div>
-
-              <div className="col-6">
-                <span className="item-card__label">표시 순서</span>
-                <div className="fw-semibold">
-                  {selectedCategory.displayOrder == null ? (
-                    <span className="badge text-bg-secondary">카테고리 미노출</span>
-                  ) : (
-                    selectedCategory.displayOrder
-                  )}
-                </div>
-              </div>
-
-              <div className="col-12">
-                <span className="item-card__label">이미지 URL</span>
-                <div className="small text-body-secondary" style={{wordBreak: 'break-all'}}>
-                  {selectedCategory.imageUrl}
-                </div>
-              </div>
+              ))}
             </div>
           </Modal.Body>
         )}
@@ -506,6 +537,49 @@ const StoreCategoryManagement = () => {
 
 export default StoreCategoryManagement;
 
+/** 카테고리 상세의 에셋(아이콘/마커) 한 건. 미리보기와 URL을 함께 보여준다. */
+const AssetItem = ({label, url}: { label: string; url?: string | null }) => {
+  const [hasError, setHasError] = useState(false);
+
+  useEffect(() => setHasError(false), [url]);
+
+  return (
+    <div className="col-12 col-md-6">
+      <span className="detail-field__label">{label}</span>
+      {!url ? (
+        <div className="text-body-tertiary small">미등록</div>
+      ) : (
+        <div className="asset-preview">
+          {hasError ? (
+            <div className="text-body-secondary small">
+              <i className="bi bi-image me-1"/>불러올 수 없음
+            </div>
+          ) : (
+            <img
+              className="asset-preview__thumb flex-shrink-0"
+              src={url}
+              alt={`${label} 미리보기`}
+              width={48}
+              height={48}
+              onError={() => setHasError(true)}
+            />
+          )}
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="small text-break align-self-center"
+            style={{minWidth: 0}}
+          >
+            {url.split('/').pop()}
+            <i className="bi bi-box-arrow-up-right ms-1"/>
+          </a>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const findAvailableOrder = (previous: number | null, next: number | null, occupied: Set<number>): number => {
   if (previous === null && next === null) return occupied.has(1) ? findEdgeOrder(0, -1, occupied) : 1;
   if (previous === null) return findEdgeOrder(next as number, -1, occupied);
@@ -553,15 +627,15 @@ const CategoryContextMenu = ({category, x, y, disabled, onView, onSelect, onHide
       style={{position: 'fixed', left: x, top: y, zIndex: 1080, minWidth: '180px'}}
       onClick={(event) => event.stopPropagation()}
       role="menu"
-      aria-label={`${category.name} 메타 타입 변경`}
+      aria-label={`${category.name} 뱃지 설정 변경`}
     >
       <button type="button" className="dropdown-item" onClick={onView} role="menuitem">
         <i className="bi bi-pencil-square me-2"/>
         상세 보기 (수정)
       </button>
       <div className="dropdown-divider"/>
-      <h6 className="dropdown-header">메타 타입 변경</h6>
-      {([['DEFAULT', '기본'], ['NEW', '최신 카테고리']] as const).map(([value, label]) => (
+      <h6 className="dropdown-header">뱃지 설정</h6>
+      {([['DEFAULT', '없음'], ['NEW', 'NEW']] as const).map(([value, label]) => (
         <button
           key={value}
           type="button"
