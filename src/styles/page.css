@@ -1711,3 +1711,865 @@ table.data-table .num {
   color: #1d4ed8;
   font-weight: 700;
 }
+
+/* =========================================================
+   화면 섹션 레이아웃 관리
+   ========================================================= */
+
+/* ---------- 미리보기 + 편집 2단 레이아웃 ---------- */
+.screen-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  align-items: start;
+}
+
+/* 넓은 화면에서만 2단으로 나눈다. 좁은 화면에서는 미리보기가 위로 쌓인다. */
+@media (min-width: 992px) {
+  .screen-layout {
+    grid-template-columns: 300px minmax(0, 1fr);
+  }
+
+  /* 목록을 스크롤해도 미리보기가 계속 보이도록 붙여둔다. */
+  .screen-layout__preview {
+    position: sticky;
+    top: 1rem;
+  }
+}
+
+.screen-layout__editor {
+  min-width: 0;
+}
+
+/* 화면 선택 드롭다운 */
+.screen-select {
+  width: auto;
+  min-width: 10rem;
+}
+
+/* ---------- 모바일 미리보기 ---------- */
+.screen-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+/* 앱 화면임을 알 수 있게 단말기 테두리 모양을 흉내낸다. */
+.screen-preview__frame {
+  width: 100%;
+  max-width: 240px;
+  padding: 0.5rem 0.5rem 0.75rem;
+  border: 6px solid #1e293b;
+  border-radius: 1.75rem;
+  background-color: #f8fafc;
+}
+
+.screen-preview__notch {
+  width: 3.5rem;
+  height: 0.25rem;
+  margin: 0 auto 0.5rem;
+  border-radius: 999px;
+  background-color: #cbd5e1;
+}
+
+.screen-preview__bar {
+  margin-bottom: 0.5rem;
+  color: var(--page-text-muted);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.screen-preview__body {
+  display: flex;
+  flex-direction: column;
+  min-height: 12rem;
+  padding: 0.25rem;
+  border-radius: 0.75rem;
+  background-color: #fff;
+}
+
+.screen-preview__empty {
+  margin: auto 0;
+  color: var(--page-text-subtle);
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+/* 섹션 한 블록. 클릭하면 오른쪽 편집 목록의 같은 섹션이 강조된다. */
+.screen-preview__block {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0 0.5rem;
+  border: 1px solid #dbeafe;
+  border-radius: 0.5rem;
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-align: left;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.screen-preview__block:hover {
+  border-color: #93c5fd;
+  background-color: #dbeafe;
+}
+
+.screen-preview__block.is-active {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
+}
+
+.screen-preview__block-order {
+  flex-shrink: 0;
+  min-width: 0.875rem;
+  color: #60a5fa;
+  font-variant-numeric: tabular-nums;
+}
+
+.screen-preview__block-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 섹션 사이 여백. 높이가 marginBottom 값에 비례한다. */
+.screen-preview__gap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.screen-preview__gap-label {
+  color: var(--page-text-subtle);
+  font-size: 0.5625rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.screen-preview__caption {
+  margin: 0;
+  color: var(--page-text-subtle);
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-align: center;
+}
+
+/* ---------- 섹션 편집 행 ---------- */
+.section-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/*
+  핸들 / 본문 / 버튼 3열 그리드.
+  버튼이 5개라 flex로 두면 본문이 밀려 찌그러지므로, 본문에만 남는 폭을 주고
+  양옆은 내용 크기로 고정한다.
+*/
+.section-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 0.625rem;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--page-border);
+  border-radius: var(--page-radius);
+  background-color: #fff;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, opacity 0.12s ease;
+}
+
+.section-row:hover {
+  border-color: #c7d2fe;
+}
+
+/*
+  미리보기에서 선택된 섹션.
+  드롭 위치 표시선이 box-shadow를 쓰므로, 겹쳤을 때 서로 지우지 않도록 outline으로 그린다.
+*/
+.section-row--active {
+  border-color: #2563eb;
+  outline: 2px solid rgba(37, 99, 235, 0.35);
+  outline-offset: -1px;
+}
+
+/* 미노출 섹션은 순서상 자리를 지키되 채도를 낮춰 구분한다. */
+.section-row--hidden {
+  background-color: #f8fafc;
+}
+
+.section-row--hidden .section-row__name {
+  color: var(--page-text-muted);
+}
+
+.section-row--invalid {
+  border-color: #fca5a5;
+}
+
+.section-row--dragging {
+  opacity: 0.45;
+}
+
+/* 드롭 위치 표시선 */
+.section-row--drop-before {
+  box-shadow: inset 0 3px 0 var(--bs-primary);
+}
+
+.section-row--drop-after {
+  box-shadow: inset 0 -3px 0 var(--bs-primary);
+}
+
+.section-row__handle-col {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.375rem;
+  padding-top: 0.125rem;
+}
+
+.section-row__order {
+  min-width: 1.25rem;
+  color: var(--page-text-muted);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.section-row__main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  min-width: 0;
+}
+
+.section-row__title-line {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  flex-wrap: wrap;
+}
+
+.section-row__name {
+  color: var(--page-text);
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+/* sectionId는 평소 접어두고 버튼으로만 보여준다. */
+.section-row__id-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  max-width: 14rem;
+  padding: 0.0625rem 0.375rem;
+  border: 1px dashed var(--page-border);
+  border-radius: 0.375rem;
+  background: none;
+  color: var(--page-text-subtle);
+  font-size: 0.6875rem;
+}
+
+.section-row__id-toggle:hover {
+  border-color: #c7d2fe;
+  color: var(--page-text-muted);
+}
+
+.section-row__id-toggle > .font-monospace {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.section-row__id-edit {
+  max-width: 24rem;
+}
+
+.section-row__controls {
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.section-row__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+/*
+  .item-card__label을 그대로 재사용하므로 자체 margin이 붙어 있다.
+  여기서는 gap으로 간격을 주고 있어 margin을 지워야 줄 간격이 두 번 들어가지 않는다.
+*/
+.section-row__field > .item-card__label,
+.section-row__id-edit > .item-card__label {
+  margin-bottom: 0;
+}
+
+.section-row__field--visible {
+  padding-bottom: 0.125rem;
+}
+
+.section-row__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* ---------- 하단 여백 선택 ---------- */
+/* 자주 쓰는 값은 칩으로 한 번에 고르고, 그 외 값만 직접 입력한다. */
+.margin-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.margin-picker__chip {
+  flex: 0 0 auto;
+  min-width: 1.875rem;
+  padding: 0.125rem 0.375rem;
+  border: 1px solid var(--page-border);
+  border-radius: 0.375rem;
+  background-color: #fff;
+  color: var(--page-text-muted);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+}
+
+.margin-picker__chip:hover:not(:disabled) {
+  border-color: #c7d2fe;
+  color: var(--page-text);
+}
+
+.margin-picker__chip.is-selected {
+  border-color: #2563eb;
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 700;
+}
+
+.margin-picker__chip:disabled {
+  opacity: 0.55;
+}
+
+.margin-picker__input {
+  flex: 0 0 auto;
+  width: 4rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/*
+  숫자 입력의 스피너는 폭이 좁을 때 값을 가린다.
+  칩으로 대부분의 값을 고르므로 스피너 없이 직접 입력만 남긴다.
+*/
+.margin-picker__input::-webkit-outer-spin-button,
+.margin-picker__input::-webkit-inner-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.margin-picker__input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* ---------- 섹션 배지 ---------- */
+.section-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.1875rem;
+  padding: 0.0625rem 0.375rem;
+  border: 1px solid var(--page-border);
+  border-radius: 999px;
+  background-color: var(--page-border-soft);
+  color: var(--page-text-muted);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.section-chip--required {
+  border-color: #bfdbfe;
+  background-color: #eff6ff;
+  color: #1d4ed8;
+}
+
+.section-chip--hidden {
+  border-color: #e2e8f0;
+  background-color: #e2e8f0;
+  color: #475569;
+}
+
+/* ---------- 섹션 순서 드래그 핸들 ---------- */
+.section-handle {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 0.25rem;
+  color: var(--page-text-subtle);
+  font-size: 1.125rem;
+  line-height: 1;
+}
+
+.section-handle[role='button'] {
+  cursor: grab;
+}
+
+.section-handle[role='button']:hover {
+  color: var(--page-text-muted);
+}
+
+.section-handle:focus-visible {
+  outline: 2px solid var(--bs-primary);
+  outline-offset: 2px;
+}
+
+/* ---------- 섹션 추가 패널 ---------- */
+.section-add {
+  margin-top: 0.875rem;
+  padding: 0.75rem;
+  border: 1px dashed var(--page-border);
+  border-radius: var(--page-radius);
+  background-color: #fbfcfd;
+}
+
+.section-add__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.625rem;
+  flex-wrap: wrap;
+}
+
+.section-add__title {
+  color: var(--page-text);
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.section-add__search {
+  width: auto;
+  max-width: 12rem;
+}
+
+.section-add__list {
+  display: flex;
+  gap: 0.375rem;
+  flex-wrap: wrap;
+}
+
+/* 추가 가능한 섹션을 모두 펼쳐 클릭 한 번으로 목록에 붙인다. */
+.section-add__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3125rem;
+  padding: 0.3125rem 0.625rem;
+  border: 1px solid var(--page-border);
+  border-radius: 999px;
+  background-color: #fff;
+  font-size: 0.75rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.section-add__item:hover:not(:disabled) {
+  border-color: #93c5fd;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+}
+
+.section-add__item:disabled {
+  opacity: 0.55;
+}
+
+.section-add__item > .bi-plus-lg {
+  color: #2563eb;
+  font-size: 0.6875rem;
+}
+
+.section-add__item-label {
+  color: var(--page-text);
+  font-weight: 600;
+}
+
+.section-add__item-code {
+  color: var(--page-text-subtle);
+  font-size: 0.6875rem;
+}
+
+.section-add__empty {
+  color: var(--page-text-subtle);
+  font-size: 0.75rem;
+}
+
+/* 순서 이동 / 삭제 버튼 */
+.section-row__move {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 총 개수. 현재 위치가 몇 번째인지 맥락을 준다. */
+.section-row__order-total {
+  color: var(--page-text-subtle);
+  font-size: 0.6875rem;
+}
+
+/* 미리보기를 접었을 때 자리에 남는 요약 */
+.screen-preview__collapsed {
+  color: var(--page-text-subtle);
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+/* =========================================================
+   화면 섹션 레이아웃 - 태블릿 이하 (2단이 1단으로 접히는 구간)
+   ========================================================= */
+@media (max-width: 991.98px) {
+  /* 미리보기가 위로 쌓이므로 폭을 다 쓰지 않고 가운데로 모은다. */
+  .screen-layout__preview .section-card__body {
+    padding-top: 0.75rem;
+  }
+
+  /* 접기 상태에서는 카드가 제목 줄만 남아 목록으로 바로 이어진다. */
+  .screen-preview__frame {
+    max-width: 200px;
+  }
+}
+
+/* =========================================================
+   화면 섹션 레이아웃 - 모바일
+   터치로는 드래그 정렬을 쓸 수 없어, 이동 버튼과 입력 요소의
+   터치 영역을 넓히는 데 초점을 둔다.
+   ========================================================= */
+@media (max-width: 767.98px) {
+  /* ---------- 헤더 ---------- */
+  /* 화면 선택은 모바일에서 가장 먼저 만지는 조작이라 한 줄을 통째로 준다. */
+  .screen-select {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .page-header__meta > .d-flex {
+    width: 100%;
+  }
+
+  /* ---------- 편집 행 ---------- */
+  /*
+    좁은 폭에서 핸들·본문·버튼을 한 줄에 욱여넣으면 본문이 짓눌리므로,
+    본문을 위에 두고 이동/삭제 버튼을 아래 줄로 내린다.
+  */
+  .section-row {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.5rem 0.625rem;
+    padding: 0.75rem;
+  }
+
+  .section-row__handle-col {
+    grid-row: 1;
+    grid-column: 1;
+  }
+
+  .section-row__main {
+    grid-row: 1;
+    grid-column: 2;
+  }
+
+  /* 버튼 줄은 두 칸을 모두 차지해 가로로 넓게 편다. */
+  .section-row__actions {
+    grid-row: 2;
+    grid-column: 1 / -1;
+    justify-content: stretch;
+    gap: 0.375rem;
+    padding-top: 0.5rem;
+    border-top: 1px dashed var(--page-border);
+  }
+
+  /* 손가락으로 누를 수 있는 크기(약 44px)를 확보한다. */
+  .section-row__move {
+    flex: 1 1 0;
+    min-height: 2.5rem;
+  }
+
+  /* 삭제는 이동과 성격이 달라 살짝 떼어놓는다. */
+  .section-row__move--remove {
+    flex: 0 0 3rem;
+    margin-left: auto;
+  }
+
+  /* 터치에서는 드래그 핸들이 동작하지 않아 안내를 지운다. */
+  .section-handle {
+    cursor: default;
+  }
+
+  /* ---------- 하단 여백 선택 ---------- */
+  .section-row__controls {
+    gap: 0.625rem;
+  }
+
+  .section-row__field {
+    width: 100%;
+  }
+
+  /* 칩을 남는 폭에 고르게 펴서 하나씩 누르기 쉽게 만든다. */
+  .margin-picker {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) 3.5rem;
+    gap: 0.25rem;
+    width: 100%;
+  }
+
+  /* grid 아이템이 되므로 데스크톱에서 준 고정 폭을 푼다. */
+  .margin-picker__chip {
+    flex: initial;
+    min-width: 0;
+    min-height: 2.25rem;
+  }
+
+  .margin-picker__input {
+    flex: initial;
+    width: 100%;
+    min-height: 2.25rem;
+  }
+
+  /* 노출 스위치도 눌러야 하므로 라벨까지 포함해 높이를 준다. */
+  .section-row__field--visible .form-check {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    min-height: 2.25rem;
+    padding-left: 2.5em;
+  }
+
+  .section-row__field--visible .form-check-input {
+    width: 2.25em;
+    height: 1.25em;
+    margin-left: -2.5em;
+  }
+
+  /* ---------- sectionId ---------- */
+  .section-row__id-toggle {
+    max-width: 100%;
+    min-height: 1.75rem;
+  }
+
+  .section-row__id-edit {
+    max-width: 100%;
+  }
+
+  /* ---------- 섹션 추가 패널 ---------- */
+  .section-add__head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .section-add__search {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  /* 칩이 줄바꿈으로 흩어지지 않게 2열 그리드로 정렬한다. */
+  .section-add__list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.375rem;
+  }
+
+  .section-add__item {
+    min-height: 2.5rem;
+    border-radius: 0.5rem;
+  }
+
+  .section-add__item-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* 좁은 폭에서 타입 코드까지 넣으면 이름이 잘려 이름만 남긴다. */
+  .section-add__item-code {
+    display: none;
+  }
+
+  /* ---------- 전/후 비교 ---------- */
+  .compare-item__id {
+    display: none;
+  }
+}
+
+/* 아주 좁은 화면 */
+@media (max-width: 575.98px) {
+  /* 섹션 추가 칩을 한 줄에 하나씩 둬서 이름이 잘리지 않게 한다. */
+  .section-add__list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* 여백 칩은 5개를 유지하되 직접 입력은 아래 줄로 내린다. */
+  .margin-picker {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .margin-picker__input {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ---------- 화면 섹션 레이아웃: 전/후 비교 ---------- */
+.compare-column {
+  height: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--page-border);
+  border-radius: var(--page-radius);
+  background-color: #fff;
+}
+
+/* 저장 시 반영되는 쪽을 강조합니다. */
+.compare-column--after {
+  border-color: #c7d2fe;
+  background-color: #fbfcff;
+}
+
+.compare-column__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--page-border);
+}
+
+.compare-column__title {
+  color: var(--page-text);
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.compare-column__count {
+  color: var(--page-text-muted);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.compare-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.compare-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.5rem;
+  border-left: 3px solid transparent;
+  border-radius: 0.25rem;
+}
+
+.compare-item + .compare-item {
+  margin-top: 0.125rem;
+}
+
+.compare-item__order {
+  flex-shrink: 0;
+  min-width: 1.25rem;
+  color: var(--page-text-muted);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.compare-item__body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.compare-item__name {
+  color: var(--page-text);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.compare-item__id {
+  overflow: hidden;
+  color: var(--page-text-muted);
+  font-size: 0.6875rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.compare-item__meta {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.compare-item__tag,
+.compare-item__moved {
+  padding: 0.0625rem 0.375rem;
+  border-radius: 0.625rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+}
+
+.compare-item__moved {
+  background-color: #e0e7ff;
+  color: #3730a3;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 하단 여백 값 */
+.compare-item__margin {
+  min-width: 1.75rem;
+  color: var(--page-text-muted);
+  font-size: 0.6875rem;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.compare-item--added {
+  border-left-color: #16a34a;
+  background-color: #f0fdf4;
+}
+
+.compare-item--added .compare-item__tag {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+
+.compare-item--removed {
+  border-left-color: #dc2626;
+  background-color: #fef2f2;
+}
+
+.compare-item--removed .compare-item__name {
+  color: var(--page-text-muted);
+  text-decoration: line-through;
+}
+
+.compare-item--removed .compare-item__tag {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+.compare-item--updated {
+  border-left-color: #d97706;
+  background-color: #fffbeb;
+}
+
+.compare-item--updated .compare-item__tag {
+  background-color: #fef3c7;
+  color: #b45309;
+}
+
+.compare-item--moved {
+  border-left-color: #4f46e5;
+  background-color: #eef2ff;
+}

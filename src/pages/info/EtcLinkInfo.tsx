@@ -3,6 +3,14 @@ import LinkCardGrid, {ExternalLinkCard} from "@/components/common/LinkCardGrid";
 
 const LINKS: ExternalLinkCard[] = [
   {
+    key: "web-service",
+    icon: "bi-globe2",
+    title: "웹 서비스",
+    description: "가슴속 3천원 웹 서비스를 확인합니다.",
+    href: "https://web.threedollars.co.kr",
+    linkLabel: "웹 서비스 열기",
+  },
+  {
     key: "service",
     icon: "bi-phone",
     title: "서비스 소개서",
