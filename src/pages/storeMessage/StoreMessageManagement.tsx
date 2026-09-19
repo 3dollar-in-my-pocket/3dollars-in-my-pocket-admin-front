@@ -86,7 +86,7 @@ const StoreMessageManagement = () => {
               {messages.map((message) => (
                 <div key={message.messageId} className="col-12 col-lg-6">
                   <div
-                    className="item-card item-card--clickable h-100"
+                    className="item-card item-card--clickable store-message-card h-100"
                     onClick={() => setSelectedMessage(message)}
                     role="button"
                     tabIndex={0}
@@ -96,51 +96,57 @@ const StoreMessageManagement = () => {
                         setSelectedMessage(message);
                       }
                     }}
-                  >
-                    <div className="item-card__body">
-                      <div className="d-flex align-items-start justify-content-between gap-2">
-                        <div className="min-w-0">
-                          <button
-                            type="button"
-                            className="btn btn-link p-0 text-start item-card__name text-decoration-none"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleStoreClick(message.store);
-                            }}
-                          >
-                            <i className="bi bi-shop me-1"/>
-                            {message.store?.name || '가게 이름 없음'}
-                            <i className="bi bi-box-arrow-up-right ms-1 small"/>
-                          </button>
-                          {message.store?.address?.fullAddress && (
-                            <p className="item-card__desc mb-0">
-                              <i className="bi bi-geo-alt me-1"/>
-                              {message.store.address.fullAddress}
-                            </p>
+                    >
+                      <div className="item-card__body">
+                        <div className="store-message-card__notification">
+                          <div className="store-message-card__app-row">
+                            <img src="/favicon.png" alt="" className="store-message-card__app-icon"/>
+                            <span>가슴속 3천원</span>
+                            <span className="store-message-card__time">{formatDateTime(message.createdAt)}</span>
+                          </div>
+                          <div className="store-message-card__header d-flex align-items-start justify-content-between gap-2">
+                            <div className="min-w-0">
+                              <button
+                                type="button"
+                                className="btn btn-link p-0 text-start item-card__name text-decoration-none"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleStoreClick(message.store);
+                                }}
+                              >
+                                <i className="bi bi-shop me-1"/>
+                                {message.store?.name || '가게 이름 없음'}
+                                <i className="bi bi-box-arrow-up-right ms-1 small"/>
+                              </button>
+                              {message.store?.address?.fullAddress && (
+                                <p className="item-card__desc mb-0">
+                                  <i className="bi bi-geo-alt me-1"/>
+                                  {message.store.address.fullAddress}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="form-chips">
+                            {message.store?.storeType && <StoreTypeBadge storeType={message.store.storeType}/>}
+                            {message.store?.categories?.slice(0, VISIBLE_CATEGORIES).map((category: any, idx: number) => (
+                              <span key={idx} className="form-chip">{category.name}</span>
+                            ))}
+                            {message.store?.categories?.length > VISIBLE_CATEGORIES && (
+                              <span className="form-chip">
+                                +{message.store.categories.length - VISIBLE_CATEGORIES}
+                              </span>
+                            )}
+                          </div>
+
+                          {message.body && (
+                            <div className="store-message-card__body text-clamp-3">
+                              {message.body}
+                            </div>
                           )}
                         </div>
-                        <span className="small text-secondary flex-shrink-0">
-                          {formatDateTime(message.createdAt)}
-                        </span>
                       </div>
-
-                      <div className="form-chips">
-                        {message.store?.storeType && <StoreTypeBadge storeType={message.store.storeType}/>}
-                        {message.store?.categories?.slice(0, VISIBLE_CATEGORIES).map((category: any, idx: number) => (
-                          <span key={idx} className="form-chip">{category.name}</span>
-                        ))}
-                        {message.store?.categories?.length > VISIBLE_CATEGORIES && (
-                          <span className="form-chip">
-                            +{message.store.categories.length - VISIBLE_CATEGORIES}
-                          </span>
-                        )}
-                      </div>
-
-                      {message.body && (
-                        <p className="item-card__desc mt-3 mb-0 text-clamp-3">{message.body}</p>
-                      )}
                     </div>
-                  </div>
                 </div>
               ))}
             </div>

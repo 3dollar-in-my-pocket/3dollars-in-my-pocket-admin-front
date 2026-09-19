@@ -3,6 +3,8 @@ import {Form, Modal} from "react-bootstrap";
 import {toast} from "react-toastify";
 import policyApi from "@/api/policyApi";
 import {PolicyType} from "@/types/policy";
+import PolicyValueInput from '@/components/policy/PolicyValueInput';
+import {isValidPolicyValue} from '@/utils/policyValueUtils';
 
 /** enum API(PolicyCategoryType / PolicyType) 응답 항목 */
 interface PolicyEnumOption {
@@ -46,11 +48,11 @@ const PolicyRegisterModal = ({show, onHide, categories, onRefresh}: PolicyRegist
     if (formData.categoryId) {
       loadPolicies(formData.categoryId);
       // 카테고리 변경 시 정책 ID 초기화
-      setFormData(prev => ({...prev, policyId: ""}));
+      setFormData(prev => ({...prev, policyId: "", value: ""}));
     } else {
       // 카테고리가 선택되지 않은 경우 정책 목록 비우기
       setFilteredPolicies([]);
-      setFormData(prev => ({...prev, policyId: ""}));
+      setFormData(prev => ({...prev, policyId: "", value: ""}));
     }
   }, [formData.categoryId]);
 
@@ -69,6 +71,12 @@ const PolicyRegisterModal = ({show, onHide, categories, onRefresh}: PolicyRegist
   };
 
   const handleSubmit = async () => {
+    const selectedPolicy = filteredPolicies.find(policy => policy.policyId === formData.policyId);
+    if (!isValidPolicyValue(formData.value.trim(), selectedPolicy?.valueType)) {
+      toast.error('선택한 정책 값 형식이 올바르지 않습니다.');
+      return;
+    }
+
     setIsLoading(true);
     try {
       const response = await policyApi.createPolicy({
@@ -106,7 +114,9 @@ const PolicyRegisterModal = ({show, onHide, categories, onRefresh}: PolicyRegist
     return "선택한 카테고리에 속한 정책만 표시됩니다.";
   };
 
-  const isSubmittable = formData.categoryId && formData.policyId && formData.value.trim();
+  const selectedPolicy = filteredPolicies.find(policy => policy.policyId === formData.policyId);
+  const isSubmittable = formData.categoryId && formData.policyId
+    && isValidPolicyValue(formData.value.trim(), selectedPolicy?.valueType);
 
   return (
     <Modal
@@ -154,7 +164,7 @@ const PolicyRegisterModal = ({show, onHide, categories, onRefresh}: PolicyRegist
             <Form.Select
               id="new-policy-type"
               value={formData.policyId}
-              onChange={(e) => handleChange("policyId", e.target.value)}
+              onChange={(e) => setFormData(prev => ({...prev, policyId: e.target.value, value: ''}))}
               disabled={isLoading || isLoadingPolicies || !formData.categoryId}
             >
               <option value="">
@@ -167,7 +177,7 @@ const PolicyRegisterModal = ({show, onHide, categories, onRefresh}: PolicyRegist
               </option>
               {filteredPolicies.map((policy) => (
                 <option key={policy.policyId} value={policy.policyId}>
-                  {policy.description}
+                  {policy.description} ({policy.valueType})
                 </option>
               ))}
             </Form.Select>
@@ -178,15 +188,13 @@ const PolicyRegisterModal = ({show, onHide, categories, onRefresh}: PolicyRegist
             <Form.Label htmlFor="new-policy-value">
               값 <span className="text-danger">*</span>
             </Form.Label>
-            <Form.Control
+            <PolicyValueInput
               id="new-policy-value"
-              type="text"
               value={formData.value}
-              onChange={(e) => handleChange("value", e.target.value)}
-              placeholder="정책 값을 입력하세요"
+              valueType={selectedPolicy?.valueType}
+              onChange={(value) => handleChange('value', value)}
               disabled={isLoading}
             />
-            <Form.Text>정책에 적용될 구체적인 값을 입력하세요.</Form.Text>
           </Form.Group>
         </Form>
       </Modal.Body>

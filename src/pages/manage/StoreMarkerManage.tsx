@@ -228,7 +228,7 @@ const StoreMarkerManage = () => {
           ) : (
             <div className="row g-3">
               {markers.map((marker, index) => (
-                <div key={marker.markerId} className="col-12 col-xl-6">
+                <div key={marker.markerId} className="col-12 col-md-6 col-xxl-4">
                   <MarkerCard
                     marker={marker}
                     onClick={setSelectedMarker}
@@ -309,7 +309,7 @@ const MarkerCard = ({marker, onClick, onStoreClick, selected, onSelect, index}: 
       }}
     >
       <div className="item-card__body">
-        <div className="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-start justify-content-between gap-2 mb-3">
+        <div className="marker-card__header d-flex flex-column flex-sm-row align-items-stretch align-items-sm-start justify-content-between gap-2">
           <div className="min-w-0">
             <div className="d-flex align-items-center gap-2 mb-1">
               <span className={`badge ${status.badgeClass}`}>{status.label}</span>
@@ -347,7 +347,7 @@ const MarkerCard = ({marker, onClick, onStoreClick, selected, onSelect, index}: 
           <MarkerImagePreview title="미선택" image={marker.unselectedMarkerImage}/>
         </div>
 
-        <div className="form-summary mt-3">
+        <div className="form-summary marker-card__period">
           <div className="form-summary__row">
             <span className="form-summary__label">시작일</span>
             <span className="form-summary__value">
