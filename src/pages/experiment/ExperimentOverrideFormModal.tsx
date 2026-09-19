@@ -2,14 +2,15 @@ import {FormEvent, useEffect, useState} from 'react';
 import {Modal} from 'react-bootstrap';
 import {toast} from 'react-toastify';
 import experimentApi from '@/api/experimentApi';
+import userApi from '@/api/userApi';
 import {useNonce} from '@/hooks/useNonce';
 import {
-  EXPERIMENT_ACCOUNT_TYPES,
   ExperimentAccountType,
   ExperimentVariantInfo,
   ExperimentVariantOverride,
   UpdateExperimentVariantOverrideRequest,
 } from '@/types/experiment';
+import {SEARCH_TYPES, User} from '@/types/user';
 
 const FORM_ID = 'experiment-override-form';
 
@@ -43,6 +44,7 @@ interface Props {
   override: ExperimentVariantOverride | null;
   /** 4-1 API로 조회한 지정 가능한 실험 목록 */
   experiments: ExperimentVariantInfo[];
+  accountNickname?: string;
   onHide: () => void;
   onSuccess: () => void;
 }
@@ -53,11 +55,17 @@ interface Props {
  * 서버가 experimentKey·variantKey의 존재 여부를 검증하지 않으므로
  * 오타를 막기 위해 두 값 모두 드롭다운으로만 선택하게 합니다.
  */
-const ExperimentOverrideFormModal = ({show, override, experiments, onHide, onSuccess}: Props) => {
+const ExperimentOverrideFormModal = ({
+  show, override, experiments, accountNickname, onHide, onSuccess,
+}: Props) => {
   const {nonce, issueNonce, clearNonce} = useNonce();
   const [form, setForm] = useState<FormData>(emptyForm);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [nicknameQuery, setNicknameQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<User[]>([]);
+  const [selectedNickname, setSelectedNickname] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
   const isEdit = !!override;
 
   // 선택된 실험의 Variant만 노출. 실험에서 제거된 낡은 Variant도 선택지에 남겨 의도치 않은 변경을 막습니다.
@@ -83,7 +91,17 @@ const ExperimentOverrideFormModal = ({show, override, experiments, onHide, onSuc
       });
     }
     setErrors({});
+    setNicknameQuery('');
+    setSearchResults([]);
+    setSelectedNickname(override && override.accountType === 'USER_ACCOUNT' ? accountNickname ?? '' : '');
   }, [show, override, experiments]);
+
+  // 목록의 닉네임 보강이 늦게 끝나더라도 사용자가 수정 중인 다른 필드는 초기화하지 않습니다.
+  useEffect(() => {
+    if (show && override?.accountType === 'USER_ACCOUNT' && accountNickname) {
+      setSelectedNickname(accountNickname);
+    }
+  }, [show, override, accountNickname]);
 
   // 신규 등록 시에만 nonce를 발급합니다. (중복 등록 방지)
   useEffect(() => {
@@ -108,6 +126,29 @@ const ExperimentOverrideFormModal = ({show, override, experiments, onHide, onSuc
       variantKey: experiment?.variantKeys[0] ?? '',
     }));
     setErrors((current) => ({...current, experimentKey: '', variantKey: ''}));
+  };
+
+  const handleUserSearch = async () => {
+    const query = nicknameQuery.trim();
+    if (!query || isSearching) return;
+
+    setIsSearching(true);
+    try {
+      const response = await userApi.searchUsers({type: SEARCH_TYPES.NAME, query, size: 20});
+      if (!response.ok) {
+        setSearchResults([]);
+        return;
+      }
+      setSearchResults(response.data.users.filter((user) => user.userId));
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const selectUser = (user: User) => {
+    if (!user.userId) return;
+    setField('accountId', user.userId);
+    setSelectedNickname(user.nickname || user.name);
   };
 
   const validate = () => {
@@ -161,7 +202,7 @@ const ExperimentOverrideFormModal = ({show, override, experiments, onHide, onSuc
 
         const response = await experimentApi.updateOverride(override.overrideId, update);
         if (!response.ok) return;
-        toast.success('강제 지정이 수정되었습니다.');
+        toast.success('테스트 대상 설정이 수정되었습니다.');
       } else {
         if (!nonce) {
           toast.error('요청 토큰이 발급되지 않았습니다. 잠시 후 다시 시도해주세요.');
@@ -180,7 +221,7 @@ const ExperimentOverrideFormModal = ({show, override, experiments, onHide, onSuc
           nonce
         );
         if (!response.ok) return;
-        toast.success('강제 지정이 등록되었습니다. 반영까지 최대 5분이 걸릴 수 있습니다.');
+        toast.success('테스트 대상이 등록되었습니다. 반영까지 최대 5분이 걸릴 수 있습니다.');
       }
 
       onSuccess();
@@ -190,14 +231,12 @@ const ExperimentOverrideFormModal = ({show, override, experiments, onHide, onSuc
     }
   };
 
-  const accountTypeHint = EXPERIMENT_ACCOUNT_TYPES.find((option) => option.value === form.accountType)?.hint;
-
   return (
     <Modal show={show} onHide={() => !isSubmitting && onHide()} centered>
       <Modal.Header closeButton>
         <Modal.Title className="fs-6 fw-bold">
           <i className="bi bi-shuffle me-2"/>
-          Variant 강제 지정 {isEdit ? '수정' : '등록'}
+          테스트 대상 {isEdit ? '수정' : '등록'}
         </Modal.Title>
       </Modal.Header>
 
@@ -241,35 +280,78 @@ const ExperimentOverrideFormModal = ({show, override, experiments, onHide, onSuc
               </select>
               {isUnknownVariant && (
                 <div className="form-text text-warning">
-                  현재 실험에 없는 Variant입니다. 이 상태로 두면 강제 지정이 무시됩니다.
+                  현재 실험에 없는 Variant입니다. 이 상태로 두면 테스트 대상 설정이 무시됩니다.
                 </div>
               )}
             </Field>
 
-            <Field col="col-md-5" label="계정 타입" required>
-              <select
-                className="form-select"
-                value={form.accountType}
-                onChange={(e) => setField('accountType', e.target.value)}
-                disabled={isSubmitting || isEdit}
-              >
-                {EXPERIMENT_ACCOUNT_TYPES.map((option) => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
-              </select>
-            </Field>
-
-            <Field col="col-md-7" label="계정 ID" required error={errors.accountId}>
-              <input
-                className={`form-control ${errors.accountId ? 'is-invalid' : ''}`}
-                value={form.accountId}
-                maxLength={100}
-                onChange={(e) => setField('accountId', e.target.value)}
-                disabled={isSubmitting || isEdit}
-                placeholder={accountTypeHint}
-              />
-              {!isEdit && accountTypeHint && <div className="form-text">{accountTypeHint}</div>}
-            </Field>
+            {form.accountType === 'USER_ACCOUNT' ? (
+              <Field label="유저" required error={errors.accountId}>
+                {isEdit ? (
+                  <div className="form-control bg-body-secondary">
+                    {selectedNickname || `유저 #${form.accountId}`}
+                    {selectedNickname && <span className="text-body-secondary ms-2">#{form.accountId}</span>}
+                  </div>
+                ) : (
+                  <>
+                    <div className="form-inline-search">
+                      <input
+                        className="form-control"
+                        value={nicknameQuery}
+                        onChange={(e) => setNicknameQuery(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            void handleUserSearch();
+                          }
+                        }}
+                        disabled={isSubmitting}
+                        placeholder="닉네임을 입력하세요"
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-outline-primary"
+                        onClick={() => void handleUserSearch()}
+                        disabled={isSubmitting || isSearching || !nicknameQuery.trim()}
+                      >
+                        {isSearching ? <span className="spinner-border spinner-border-sm"/> : '검색'}
+                      </button>
+                    </div>
+                    {searchResults.length > 0 && (
+                      <div className="form-chips mt-2">
+                        {searchResults.map((user) => (
+                          <button
+                            key={user.userId}
+                            type="button"
+                            className={`form-chip ${form.accountId === user.userId
+                              ? 'form-chip--selected' : 'form-chip--addable'}`}
+                            onClick={() => selectUser(user)}
+                          >
+                            <span>{user.nickname || user.name}</span>
+                            <span className="form-chip__id">{user.userId}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    {selectedNickname && (
+                      <div className="form-text text-success">
+                        <i className="bi bi-check-circle-fill me-1"/>
+                        {selectedNickname} (#{form.accountId}) 선택됨
+                      </div>
+                    )}
+                  </>
+                )}
+              </Field>
+            ) : (
+              // 과거에 등록된 사장님 계정은 Variant와 메모를 수정할 수 있도록 읽기 전용으로 표시합니다.
+              <Field label="기존 사장님 계정" required error={errors.accountId}>
+                <input
+                  className={`form-control ${errors.accountId ? 'is-invalid' : ''}`}
+                  value={form.accountId}
+                  disabled
+                />
+              </Field>
+            )}
 
             <Field label="메모" error={errors.memo}>
               <input

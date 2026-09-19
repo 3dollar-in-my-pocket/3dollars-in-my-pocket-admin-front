@@ -7,7 +7,8 @@ export type ExperimentAccountType = 'USER_ACCOUNT' | 'BOSS_ACCOUNT';
 
 /** 계정 종류 선택지 (드롭다운·배지 표기용) */
 export const EXPERIMENT_ACCOUNT_TYPES: { value: ExperimentAccountType; label: string; hint: string }[] = [
-  {value: 'USER_ACCOUNT', label: '유저', hint: '유저의 userId (숫자)'},
+  {value: 'USER_ACCOUNT', label: '유저', hint: '닉네임으로 검색해 선택'},
+  // 기존 등록 데이터 표시에만 사용합니다. 신규 등록 UI에서는 지원하지 않습니다.
   {value: 'BOSS_ACCOUNT', label: '사장님', hint: '사장님의 bossId (문자열)'},
 ];
 

@@ -1,6 +1,7 @@
-import {useCallback, useEffect, useState} from 'react';
+import {useCallback, useEffect, useMemo, useState} from 'react';
 import {toast} from 'react-toastify';
 import experimentApi from '@/api/experimentApi';
+import userApi from '@/api/userApi';
 import DataTable from '@/components/common/DataTable';
 import EmptyState from '@/components/common/EmptyState';
 import FilterCard from '@/components/common/FilterCard';
@@ -11,6 +12,7 @@ import useCursorPagination from '@/hooks/useCursorPagination';
 import useInfiniteScroll from '@/hooks/useInfiniteScroll';
 import {usePermission} from '@/hooks/usePermission';
 import {AdminRole} from '@/types/admin';
+import {SEARCH_TYPES} from '@/types/user';
 import {
   EXPERIMENT_ACCOUNT_TYPES,
   ExperimentVariantInfo,
@@ -42,6 +44,7 @@ const ExperimentOverrideManagement = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingOverride, setEditingOverride] = useState<ExperimentVariantOverride | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [userNicknames, setUserNicknames] = useState<Record<string, string>>({});
 
   // 실험 목록은 서버 정의를 그대로 내려받습니다. 화면에 하드코딩하지 않습니다.
   useEffect(() => {
@@ -81,7 +84,7 @@ const ExperimentOverrideManagement = () => {
   } = useCursorPagination<ExperimentVariantOverride>({
     fetcher: fetchOverrides,
     deps: [experimentKeyFilter],
-    errorMessage: '강제 지정 목록을 불러오지 못했습니다.',
+    errorMessage: '테스트 대상 목록을 불러오지 못했습니다.',
   });
 
   const {scrollContainerRef, loadMoreRef} = useInfiniteScroll({
@@ -91,6 +94,39 @@ const ExperimentOverrideManagement = () => {
     threshold: 0.1,
     rootMargin: '0px 0px 160px 0px',
   });
+
+  // 강제 지정 API에는 accountId만 포함되므로, 현재 목록의 유저를 한 번에 조회해 닉네임을 보강합니다.
+  useEffect(() => {
+    const userIds = [...new Set(
+      overrides
+        .filter((item) => item.accountType === 'USER_ACCOUNT' && /^\d+$/.test(item.accountId))
+        .map((item) => Number(item.accountId))
+    )];
+    if (userIds.length === 0) return;
+
+    let cancelled = false;
+    const batches = Array.from({length: Math.ceil(userIds.length / 50)}, (_, index) =>
+      userIds.slice(index * 50, (index + 1) * 50)
+    );
+    Promise.all(batches.map((batch) =>
+      userApi.searchUsers({type: SEARCH_TYPES.USER_ID, userIds: batch, size: batch.length})
+    )).then((responses) => {
+      if (cancelled) return;
+      const users = responses.filter((response) => response.ok).flatMap((response) => response.data.users);
+      setUserNicknames((current) => ({
+        ...current,
+        ...Object.fromEntries(
+          users
+            .filter((user) => user.userId)
+            .map((user) => [user.userId!, user.nickname || user.name])
+        ),
+      }));
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [overrides]);
 
   const handleCreate = () => {
     setEditingOverride(null);
@@ -106,8 +142,8 @@ const ExperimentOverrideManagement = () => {
     if (deletingId) return;
 
     const confirmed = await confirm({
-      title: '강제 지정 삭제',
-      message: '이 계정의 Variant 강제 지정을 삭제하시겠습니까?\n삭제하면 해당 계정은 다시 일반 분배 규칙을 따릅니다.',
+      title: '테스트 대상 해제',
+      message: '이 계정을 테스트 대상에서 해제하시겠습니까?\n해제하면 해당 계정은 다시 일반 분배 규칙을 따릅니다.',
       details: [
         {label: '실험', value: getExperimentLabel(experiments, override.experimentKey)},
         {label: '계정', value: `${getAccountTypeLabel(override.accountType)} / ${override.accountId}`},
@@ -123,7 +159,7 @@ const ExperimentOverrideManagement = () => {
     try {
       const response = await experimentApi.deleteOverride(override.overrideId);
       if (!response.ok) return;
-      toast.success('강제 지정이 삭제되었습니다.');
+      toast.success('테스트 대상에서 해제되었습니다.');
       refresh();
     } finally {
       setDeletingId(null);
@@ -134,11 +170,20 @@ const ExperimentOverrideManagement = () => {
   const usageLabel = experimentKeyFilter && !hasMore
     ? `${overrides.length} / ${MAX_OVERRIDE_COUNT_PER_EXPERIMENT}`
     : `${overrides.length.toLocaleString()}${hasMore ? '+' : ''}건`;
+  const groupedOverrides = useMemo(() => {
+    const groups = new Map<string, ExperimentVariantOverride[]>();
+    overrides.forEach((override) => {
+      const group = groups.get(override.experimentKey) ?? [];
+      group.push(override);
+      groups.set(override.experimentKey, group);
+    });
+    return [...groups.entries()];
+  }, [overrides]);
 
   return (
     <div>
       <PageHeader
-        description="푸시 A/B 실험에서 특정 테스트 계정이 받을 Variant를 강제로 고정합니다. 등록된 계정은 정상 분배에서 빠지므로 테스트 계정만 등록해주세요."
+        description="푸시 A/B 테스트를 위해 계정별로 적용할 Variant를 설정합니다."
         actions={
           <div className="d-flex gap-2">
             {canManage && (
@@ -148,7 +193,7 @@ const ExperimentOverrideManagement = () => {
                 disabled={isExperimentsLoading || experiments.length === 0}
               >
                 <i className="bi bi-plus-lg me-1"/>
-                강제 지정 등록
+                테스트 대상 등록
               </button>
             )}
             <button className="btn btn-outline-secondary" onClick={refresh} disabled={isLoading}>
@@ -162,14 +207,6 @@ const ExperimentOverrideManagement = () => {
           </div>
         }
       />
-
-      <div className="alert alert-warning d-flex gap-2 py-2" role="alert">
-        <i className="bi bi-exclamation-triangle-fill"/>
-        <div className="small">
-          서버가 지정 목록을 캐싱하므로 등록·수정·삭제가 반영되기까지 <strong>최대 5분</strong>이 걸릴 수 있습니다.
-          또한 실험에 없는 Variant를 지정하면 오류 없이 무시되고 기존 분배 규칙이 적용됩니다.
-        </div>
-      </div>
 
       <FilterCard title="실험 필터" icon="bi-funnel">
         <div className="filter-chips">
@@ -208,7 +245,7 @@ const ExperimentOverrideManagement = () => {
       )}
 
       <SectionCard
-        title="강제 지정 목록"
+        title="테스트 대상 목록"
         icon="bi-shuffle"
         aside={overrides.length > 0 && <span className="page-count">{usageLabel}</span>}
       >
@@ -216,80 +253,98 @@ const ExperimentOverrideManagement = () => {
           {overrides.length === 0 && !isLoading && !error && (
             <EmptyState
               icon="bi-shuffle"
-              title="등록된 강제 지정이 없습니다"
-              description="테스트 계정에 특정 Variant를 고정하려면 강제 지정을 등록해주세요."
+              title="등록된 테스트 대상이 없습니다"
+              description="특정 Variant를 적용할 테스트 대상을 등록해주세요."
               actionButton={canManage && experiments.length > 0 ? {
-                label: '강제 지정 등록',
+                label: '테스트 대상 등록',
                 onClick: handleCreate,
               } : undefined}
             />
           )}
 
           {overrides.length > 0 && (
-            <DataTable>
-              <thead>
-              <tr>
-                <th>실험</th>
-                <th>계정</th>
-                <th>계정 ID</th>
-                <th>Variant</th>
-                <th>메모</th>
-                <th>등록일</th>
-                {canManage && <th className="text-end">관리</th>}
-              </tr>
-              </thead>
-              <tbody>
-              {overrides.map((override) => (
-                <tr key={override.overrideId}>
-                  <td>
-                    <div>{getExperimentLabel(experiments, override.experimentKey)}</div>
-                    <div className="small text-body-secondary font-monospace">{override.experimentKey}</div>
-                  </td>
-                  <td>
-                    <span className="badge text-bg-secondary">
-                      {getAccountTypeLabel(override.accountType)}
-                    </span>
-                  </td>
-                  <td className="font-monospace">{override.accountId}</td>
-                  <td>
-                    <VariantBadge experiments={experiments} override={override}/>
-                  </td>
-                  <td className="text-body-secondary" style={{wordBreak: 'break-all'}}>
-                    {override.memo || '-'}
-                  </td>
-                  <td className="small text-body-secondary">{formatDateTime(override.createdAt)}</td>
-                  {canManage && (
-                    <td className="text-end text-nowrap">
-                      <button
-                        type="button"
-                        className="btn btn-sm btn-outline-primary me-1"
-                        onClick={() => handleEdit(override)}
-                        disabled={deletingId === override.overrideId}
-                      >
-                        수정
-                      </button>
-                      <button
-                        type="button"
-                        className="btn btn-sm btn-outline-danger"
-                        onClick={() => handleDelete(override)}
-                        disabled={deletingId === override.overrideId}
-                      >
-                        {deletingId === override.overrideId ? (
-                          <span className="spinner-border spinner-border-sm"/>
-                        ) : '삭제'}
-                      </button>
-                    </td>
-                  )}
-                </tr>
+            <div className="d-flex flex-column gap-3">
+              {groupedOverrides.map(([experimentKey, group]) => (
+                <section key={experimentKey} className="border rounded overflow-hidden">
+                  <div className="d-flex align-items-center justify-content-between gap-3 bg-body-tertiary px-3 py-2 border-bottom">
+                    <div className="min-w-0">
+                      <h3 className="fs-6 fw-bold mb-0 text-truncate">
+                        {getExperimentLabel(experiments, experimentKey)}
+                      </h3>
+                      <div className="small text-body-secondary font-monospace text-truncate">{experimentKey}</div>
+                    </div>
+                    <span className="badge text-bg-light border flex-shrink-0">대상 {group.length}명</span>
+                  </div>
+                  <DataTable>
+                    <thead>
+                    <tr>
+                      <th>대상 계정</th>
+                      <th>Variant</th>
+                      <th>메모</th>
+                      <th>등록일</th>
+                      {canManage && <th className="text-end">관리</th>}
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {group.map((override) => (
+                      <tr key={override.overrideId}>
+                        <td>
+                          <div className="d-flex align-items-center gap-2">
+                            <span className="badge text-bg-secondary flex-shrink-0">
+                              {getAccountTypeLabel(override.accountType)}
+                            </span>
+                            <div className="min-w-0">
+                              {override.accountType === 'USER_ACCOUNT' && userNicknames[override.accountId] ? (
+                                <>
+                                  <div>{userNicknames[override.accountId]}</div>
+                                  <div className="small text-body-secondary font-monospace">#{override.accountId}</div>
+                                </>
+                              ) : (
+                                <span className="font-monospace">{override.accountId}</span>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                        <td><VariantBadge experiments={experiments} override={override}/></td>
+                        <td className="text-body-secondary" style={{wordBreak: 'break-all'}}>
+                          {override.memo || '-'}
+                        </td>
+                        <td className="small text-body-secondary">{formatDateTime(override.createdAt)}</td>
+                        {canManage && (
+                          <td className="text-end text-nowrap">
+                            <button
+                              type="button"
+                              className="btn btn-sm btn-outline-primary me-1"
+                              onClick={() => handleEdit(override)}
+                              disabled={deletingId === override.overrideId}
+                            >
+                              수정
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn-sm btn-outline-danger"
+                              onClick={() => handleDelete(override)}
+                              disabled={deletingId === override.overrideId}
+                            >
+                              {deletingId === override.overrideId ? (
+                                <span className="spinner-border spinner-border-sm"/>
+                              ) : '삭제'}
+                            </button>
+                          </td>
+                        )}
+                      </tr>
+                    ))}
+                    </tbody>
+                  </DataTable>
+                </section>
               ))}
-              </tbody>
-            </DataTable>
+            </div>
           )}
 
           {isLoading && overrides.length === 0 && (
             <div className="text-center py-5">
               <div className="spinner-border text-primary" role="status">
-                <span className="visually-hidden">강제 지정 목록 불러오는 중</span>
+                <span className="visually-hidden">테스트 대상 목록 불러오는 중</span>
               </div>
             </div>
           )}
@@ -310,6 +365,7 @@ const ExperimentOverrideManagement = () => {
         show={showForm}
         override={editingOverride}
         experiments={experiments}
+        accountNickname={editingOverride ? userNicknames[editingOverride.accountId] : undefined}
         onHide={() => setShowForm(false)}
         onSuccess={refresh}
       />
@@ -333,7 +389,7 @@ const VariantBadge = ({experiments, override}: {
   return (
     <span
       className={`badge ${isUnknown ? 'text-bg-warning' : 'text-bg-primary'}`}
-      title={isUnknown ? '현재 실험에 없는 Variant입니다. 이 지정은 무시됩니다.' : undefined}
+      title={isUnknown ? '현재 실험에 없는 Variant입니다. 이 테스트 대상 설정은 무시됩니다.' : undefined}
     >
       {isUnknown && <i className="bi bi-exclamation-triangle-fill me-1"/>}
       {override.variantKey}
