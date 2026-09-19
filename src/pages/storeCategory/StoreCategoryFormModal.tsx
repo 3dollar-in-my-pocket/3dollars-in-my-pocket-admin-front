@@ -76,6 +76,10 @@ const StoreCategoryFormModal = ({show, category, onHide, onSuccess}: Props) => {
   const [foodTypeOptions, setFoodTypeOptions] = useState<FoodTypeOption[]>([]);
   const [isFoodTypeLoading, setIsFoodTypeLoading] = useState(false);
   const [isCustomFoodType, setIsCustomFoodType] = useState(false);
+  /** FoodType enum 자체를 불러왔는지 여부 (조회 실패와 '전부 등록됨'을 구분하기 위함) */
+  const [hasFoodTypeOptions, setHasFoodTypeOptions] = useState(false);
+  /** 이미 등록된 카테고리 타입 (직접 입력 시 중복 검증용) */
+  const [registeredTypes, setRegisteredTypes] = useState<Set<string>>(() => new Set());
   const [sampleCategory, setSampleCategory] = useState<StoreCategory | null>(null);
   const isEdit = !!category;
 
@@ -95,43 +99,47 @@ const StoreCategoryFormModal = ({show, category, onHide, onSuccess}: Props) => {
       setForm(category ? fromCategory(category) : emptyForm());
       setErrors({});
       setIsCustomFoodType(false);
+      setHasFoodTypeOptions(false);
+      setFoodTypeOptions([]);
+      setRegisteredTypes(new Set());
       setSampleCategory(null);
     }
   }, [show, category]);
 
-  // 등록 시 각 이미지 필드에 참고용으로 보여줄 기준 카테고리(붕어빵) 에셋을 불러온다.
-  useEffect(() => {
-    if (!show || category) return;
-    let cancelled = false;
-    storeCategoryApi.getAllStoreCategories().then((response) => {
-      if (cancelled || !response?.ok) return;
-      const sample = (response.data?.contents || [])
-        .find((item) => item.categoryId === SAMPLE_CATEGORY_ID);
-      setSampleCategory(sample ?? null);
-    });
-    return () => { cancelled = true; };
-  }, [show, category]);
-
+  // 등록 시 FoodType 목록과 기존 카테고리 목록을 함께 불러온다.
+  // - 이미 카테고리로 등록된 FoodType은 선택지에서 제외한다.
+  // - 기준 카테고리(붕어빵) 에셋은 각 이미지 필드의 참고용 썸네일로 사용한다.
   useEffect(() => {
     if (!show || category) return;
     let cancelled = false;
     setIsFoodTypeLoading(true);
-    enumApi.getEnum().then((response) => {
-      if (cancelled) return;
-      const options = response?.ok && Array.isArray(response.data?.FoodType)
-        ? response.data.FoodType as FoodTypeOption[]
-        : [];
-      setFoodTypeOptions(options);
-      if (options.length === 0) {
-        setIsCustomFoodType(true);
-        return;
+    Promise.all([enumApi.getEnum(), storeCategoryApi.getAllStoreCategories()]).then(
+      ([enumResponse, categoryResponse]) => {
+        if (cancelled) return;
+
+        const registeredCategories = categoryResponse?.ok ? (categoryResponse.data?.contents || []) : [];
+        setSampleCategory(registeredCategories.find((item) => item.categoryId === SAMPLE_CATEGORY_ID) ?? null);
+
+        const allOptions = enumResponse?.ok && Array.isArray(enumResponse.data?.FoodType)
+          ? enumResponse.data.FoodType as FoodTypeOption[]
+          : [];
+        const registered = new Set(registeredCategories.map((item) => item.categoryId));
+        const options = allOptions.filter((option) => !registered.has(option.key));
+        setRegisteredTypes(registered);
+
+        setFoodTypeOptions(options);
+        setHasFoodTypeOptions(allOptions.length > 0);
+        if (options.length === 0) {
+          setIsCustomFoodType(true);
+          return;
+        }
+        setForm((current) => ({
+          ...current,
+          categoryType: current.categoryType || options[0].key,
+          name: current.name || options[0].description
+        }));
       }
-      setForm((current) => ({
-        ...current,
-        categoryType: current.categoryType || options[0].key,
-        name: current.name || options[0].description
-      }));
-    }).finally(() => {
+    ).finally(() => {
       if (!cancelled) setIsFoodTypeLoading(false);
     });
     return () => { cancelled = true; };
@@ -144,7 +152,12 @@ const StoreCategoryFormModal = ({show, category, onHide, onSuccess}: Props) => {
 
   const validate = () => {
     const next: Record<string, string> = {};
-    if (!form.categoryType.trim()) next.categoryType = 'FoodType enum 이름을 입력해주세요.';
+    const categoryType = form.categoryType.trim().toUpperCase();
+    if (!categoryType) {
+      next.categoryType = 'FoodType enum 이름을 입력해주세요.';
+    } else if (!isEdit && registeredTypes.has(categoryType)) {
+      next.categoryType = '이미 등록된 카테고리입니다.';
+    }
     if (!form.name.trim()) next.name = '카테고리명을 입력해주세요.';
     if (form.name.trim().length > 50) next.name = '카테고리명은 50자 이하여야 합니다.';
     if (!form.description.trim()) next.description = '노출 문구를 입력해주세요.';
@@ -274,8 +287,13 @@ const StoreCategoryFormModal = ({show, category, onHide, onSuccess}: Props) => {
                     )}
                     {!isFoodTypeLoading && foodTypeOptions.length === 0 && (
                       <div className="form-text text-warning">
-                        FoodType 목록을 불러오지 못해 직접 입력으로 전환되었습니다.
+                        {hasFoodTypeOptions
+                          ? '등록 가능한 FoodType이 없습니다. 모든 FoodType이 이미 카테고리로 등록되어 있습니다.'
+                          : 'FoodType 목록을 불러오지 못해 직접 입력으로 전환되었습니다.'}
                       </div>
+                    )}
+                    {!isFoodTypeLoading && !isCustomFoodType && foodTypeOptions.length > 0 && (
+                      <div className="form-text">이미 등록된 카테고리는 선택지에서 제외됩니다.</div>
                     )}
                   </>
                 )}
