@@ -3,6 +3,7 @@ import {Modal} from 'react-bootstrap';
 import {toast} from 'react-toastify';
 import storeCategoryApi from '@/api/storeCategoryApi';
 import enumApi from '@/api/enumApi';
+import useImageUpload from '@/hooks/useImageUpload';
 import {
   CreateStoreCategoryRequest,
   STORE_CATEGORY_CLASSIFICATIONS,
@@ -26,6 +27,8 @@ const markerFields = [
 const FORM_ID = 'store-category-form';
 
 type MarkerField = typeof markerFields[number][0];
+/** 파일 업로드가 가능한 이미지 URL 필드 */
+type ImageField = MarkerField | 'imageUrl' | 'disableImageUrl';
 type FormData = Record<MarkerField, string> & {
   categoryType: string;
   name: string;
@@ -79,6 +82,17 @@ const StoreCategoryFormModal = ({show, category, onHide, onSuccess}: Props) => {
   const [isFoodTypeLoading, setIsFoodTypeLoading] = useState(false);
   const [isCustomFoodType, setIsCustomFoodType] = useState(false);
   const isEdit = !!category;
+
+  const {handleFileChange, uploadingField: uploadingFieldRaw} = useImageUpload({
+    imageType: 'STORE_IMAGE',
+    onUploaded: (url, field) => {
+      setForm((current) => ({...current, [field as ImageField]: url}));
+      setErrors((current) => ({...current, [field as ImageField]: ''}));
+    },
+    successMessage: '이미지가 업로드되었습니다.'
+  });
+  const uploadingField = uploadingFieldRaw as ImageField | null;
+  const isUploading = uploadingField !== null;
 
   useEffect(() => {
     if (show) {
@@ -158,7 +172,8 @@ const StoreCategoryFormModal = ({show, category, onHide, onSuccess}: Props) => {
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
-    if (!validate() || isSubmitting) return;
+    if (isSubmitting || isUploading) return;
+    if (!validate()) return;
     setIsSubmitting(true);
     try {
       const values = buildValues();
@@ -187,7 +202,8 @@ const StoreCategoryFormModal = ({show, category, onHide, onSuccess}: Props) => {
   };
 
   return (
-    <Modal show={show} onHide={() => !isSubmitting && onHide()} size="lg" centered scrollable>
+    <Modal show={show} onHide={() => !isSubmitting && !isUploading && onHide()} size="lg" centered scrollable
+           backdrop={isSubmitting || isUploading ? 'static' : true}>
       <Modal.Header closeButton><Modal.Title className="fs-6 fw-bold">카테고리 {isEdit ? '수정' : '등록'}</Modal.Title></Modal.Header>
       <Modal.Body>
         <form id={FORM_ID} onSubmit={handleSubmit}>
@@ -263,37 +279,32 @@ const StoreCategoryFormModal = ({show, category, onHide, onSuccess}: Props) => {
               <input type="number" step="any" className={`form-control ${errors.displayOrder ? 'is-invalid' : ''}`} value={form.displayOrder}
                      onChange={(e) => setField('displayOrder', e.target.value)} placeholder="미노출" disabled={isSubmitting}/>
             </Field>
-            <Field col="col-md-6" label="활성 이미지 URL" required error={errors.imageUrl}>
-              <input type="url" className={`form-control ${errors.imageUrl ? 'is-invalid' : ''}`} value={form.imageUrl} maxLength={300}
-                     onChange={(e) => setField('imageUrl', e.target.value)} disabled={isSubmitting}/>
-              {isEdit && form.imageUrl.trim() && (
-                <ImagePreview src={form.imageUrl.trim()} label="활성 이미지"/>
-              )}
-            </Field>
-            <Field col="col-md-6" label="비활성 이미지 URL" required error={errors.disableImageUrl}>
-              <input type="url" className={`form-control ${errors.disableImageUrl ? 'is-invalid' : ''}`} value={form.disableImageUrl} maxLength={300}
-                     onChange={(e) => setField('disableImageUrl', e.target.value)} disabled={isSubmitting}/>
-              {isEdit && form.disableImageUrl.trim() && (
-                <ImagePreview src={form.disableImageUrl.trim()} label="비활성 이미지"/>
-              )}
-            </Field>
+            <ImageUrlField
+              field="imageUrl" label="활성 이미지" error={errors.imageUrl} value={form.imageUrl}
+              onChange={setField} onFileChange={handleFileChange}
+              uploadingField={uploadingField} isSubmitting={isSubmitting}
+            />
+            <ImageUrlField
+              field="disableImageUrl" label="비활성 이미지" error={errors.disableImageUrl} value={form.disableImageUrl}
+              onChange={setField} onFileChange={handleFileChange}
+              uploadingField={uploadingField} isSubmitting={isSubmitting}
+            />
             <div className="col-12"><hr/><h6 className="fw-bold mb-0">상태별 마커 이미지 <span className="text-danger">*</span></h6></div>
             {markerFields.map(([key, label]) => (
-              <Field key={key} col="col-md-6" label={label} required error={errors[key]}>
-                <input type="url" className={`form-control ${errors[key] ? 'is-invalid' : ''}`} value={form[key]} maxLength={300}
-                       onChange={(e) => setField(key, e.target.value)} disabled={isSubmitting}/>
-                {isEdit && form[key].trim() && (
-                  <ImagePreview src={form[key].trim()} label={label}/>
-                )}
-              </Field>
+              <ImageUrlField
+                key={key} field={key} label={label} error={errors[key]} value={form[key]}
+                onChange={setField} onFileChange={handleFileChange}
+                uploadingField={uploadingField} isSubmitting={isSubmitting}
+              />
             ))}
           </div>
         </form>
       </Modal.Body>
       <Modal.Footer>
-        <button type="button" className="btn btn-secondary" onClick={onHide} disabled={isSubmitting}>취소</button>
-        <button type="submit" form={FORM_ID} className="btn btn-primary" disabled={isSubmitting}>
-          {isSubmitting && <span className="spinner-border spinner-border-sm me-1"/>}{isEdit ? '수정' : '등록'}
+        <button type="button" className="btn btn-secondary" onClick={onHide} disabled={isSubmitting || isUploading}>취소</button>
+        <button type="submit" form={FORM_ID} className="btn btn-primary" disabled={isSubmitting || isUploading}>
+          {isSubmitting && <span className="spinner-border spinner-border-sm me-1"/>}
+          {isUploading ? '업로드 중...' : isEdit ? '수정' : '등록'}
         </button>
       </Modal.Footer>
     </Modal>
@@ -314,6 +325,37 @@ const buildComparable = (category: StoreCategory): Record<string, unknown> => ({
 const Field = ({label, required, error, col = 'col-12', children}: {
   label: string; required?: boolean; error?: string; col?: string; children: React.ReactNode;
 }) => <div className={col}><label className="form-label fw-semibold">{label}{required && <span className="text-danger ms-1">*</span>}</label>{children}{error && <div className="invalid-feedback d-block">{error}</div>}</div>;
+
+const ImageUrlField = ({field, label, value, error, onChange, onFileChange, uploadingField, isSubmitting}: {
+  field: ImageField;
+  label: string;
+  value: string;
+  error?: string;
+  onChange: (name: ImageField, value: string) => void;
+  onFileChange: (event: React.ChangeEvent<HTMLInputElement>, field?: string) => Promise<string | null>;
+  uploadingField: ImageField | null;
+  isSubmitting: boolean;
+}) => {
+  const isUploadingThis = uploadingField === field;
+  const disabled = isSubmitting || uploadingField !== null;
+
+  return (
+    <Field col="col-md-6" label={`${label} URL`} required error={error}>
+      <div className="input-group">
+        <input type="url" className={`form-control ${error ? 'is-invalid' : ''}`} value={value} maxLength={300}
+               onChange={(e) => onChange(field, e.target.value)} disabled={disabled}/>
+        <label className={`btn btn-outline-primary mb-0 ${disabled ? 'disabled' : ''}`}>
+          {isUploadingThis
+            ? <><span className="spinner-border spinner-border-sm me-1"/>업로드 중</>
+            : <><i className="bi bi-upload me-1"/>파일 선택</>}
+          <input type="file" accept="image/*" hidden disabled={disabled}
+                 onChange={(e) => onFileChange(e, field)}/>
+        </label>
+      </div>
+      {value.trim() && <ImagePreview src={value.trim()} label={label}/>}
+    </Field>
+  );
+};
 
 const ImagePreview = ({src, label}: {src: string; label: string}) => {
   const [hasError, setHasError] = useState(false);
