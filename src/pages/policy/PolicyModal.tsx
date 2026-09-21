@@ -5,6 +5,8 @@ import policyApi from "@/api/policyApi";
 import {formatDateTime} from "@/utils/dateUtils";
 import DetailField from "@/components/common/DetailField";
 import {Policy} from "@/types/policy";
+import PolicyValueInput from '@/components/policy/PolicyValueInput';
+import {isValidPolicyValue, POLICY_VALUE_TYPE_LABEL} from '@/utils/policyValueUtils';
 
 /** enum API(PolicyCategoryType / PolicyType) 응답 항목 */
 interface PolicyEnumOption {
@@ -47,8 +49,8 @@ const PolicyModal = ({show, onHide, policy, categories, policies, onRefresh, onD
   };
 
   const handleSave = async () => {
-    if (!formData.value.trim()) {
-      toast.error("값은 필수 항목입니다.");
+    if (!isValidPolicyValue(formData.value.trim(), policy.valueType)) {
+      toast.error("정책 값 형식이 올바르지 않습니다.");
       return;
     }
 
@@ -115,6 +117,9 @@ const PolicyModal = ({show, onHide, policy, categories, policies, onRefresh, onD
             <DetailField label="정책 ID" className="col-12 col-sm-6" monospace>
               {policy.policyId}
             </DetailField>
+            <DetailField label="값 형식" className="col-12 col-sm-6">
+              {POLICY_VALUE_TYPE_LABEL[policy.valueType] || policy.valueType}
+            </DetailField>
             <DetailField label="설명" className="col-12" placeholder="설명 없음">
               {policy.description}
             </DetailField>
@@ -133,16 +138,14 @@ const PolicyModal = ({show, onHide, policy, categories, policies, onRefresh, onD
               <Form.Label htmlFor="policy-value">
                 값 <span className="text-danger">*</span>
               </Form.Label>
-              <Form.Control
+              <PolicyValueInput
                 id="policy-value"
-                type="text"
                 value={formData.value}
-                onChange={(e) => setFormData({value: e.target.value})}
-                placeholder="정책 값을 입력하세요"
+                valueType={policy.valueType}
+                onChange={(value) => setFormData({value})}
                 autoFocus
                 disabled={isLoading}
               />
-              <Form.Text>정책에 적용될 새로운 값을 입력하세요.</Form.Text>
             </Form.Group>
           ) : (
             <div className="detail-value-strong">{policy.value}</div>
