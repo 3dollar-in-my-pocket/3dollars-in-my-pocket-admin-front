@@ -7,7 +7,7 @@ import {
   SectionTypeMeta
 } from '@/types/screenSectionLayout';
 import {buildDefaultSectionId} from '@/utils/validation/screenSectionLayoutValidation';
-import {buildInitialConfig, formatSectionConfig} from '@/utils/sectionConfigUtils';
+import {buildInitialConfig, formatSectionConfig, normalizeConfig} from '@/utils/sectionConfigUtils';
 
 /**
  * 편집 중인 섹션 한 줄.
@@ -31,7 +31,7 @@ const toDraft = (layout: ScreenSectionLayout, key: string): SectionLayoutDraft =
   sectionId: layout.sectionId,
   marginBottom: layout.marginBottom,
   isVisible: layout.isVisible,
-  config: layout.config,
+  config: normalizeConfig(layout.sectionType, layout.config),
 });
 
 /**
@@ -52,7 +52,7 @@ const toFixedDrafts = (
     sectionId: meta.value,
     marginBottom: 0,
     isVisible: saved?.isVisible ?? true,
-    config: saved?.config ?? buildInitialConfig(meta.value),
+    config: normalizeConfig(meta.value, saved?.config) ?? buildInitialConfig(meta.value),
   };
 });
 

@@ -40,6 +40,19 @@ export const buildInitialConfig = (sectionType: SectionType): ScreenSectionLayou
   return first ? buildDefaultConfig(first) : undefined;
 };
 
+/**
+ * 서버에서 받은 설정을 편집용으로 정리합니다.
+ *
+ * EMPTY 설정인데 섹션이 EMPTY를 지원하지 않으면, 첫 번째 설정 타입의 빈 값으로 바꿔 편집할 수 있게 합니다.
+ */
+export const normalizeConfig = (
+  sectionType: SectionType,
+  config?: ScreenSectionLayoutConfig | null
+): ScreenSectionLayoutConfig | null | undefined => {
+  if (config?.type !== 'EMPTY' || findConfigMeta(sectionType, config.type)) return config;
+  return buildInitialConfig(sectionType) ?? config;
+};
+
 const describeRange = (field: SectionConfigFieldMeta): string => {
   const parts: string[] = [];
   if (field.min !== undefined) parts.push(`${field.min} ${field.isMinExclusive ? '초과' : '이상'}`);
