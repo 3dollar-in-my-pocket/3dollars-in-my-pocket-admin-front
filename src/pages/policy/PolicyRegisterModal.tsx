@@ -96,36 +96,7 @@ const PolicyRegisterModal = ({show, onHide, categories, subCategories, onRefresh
   };
 
   const handleSubmit = async () => {
-    // 등록 가능한 정책 타입에 실제로 존재하는 서브 카테고리만 필터 옵션으로 노출
-  const subCategoryOptions = useMemo(() => {
-    const keys = new Set(filteredPolicies.map(policy => policy.subCategory).filter(Boolean));
-    // enum 순서를 유지하고, enum에 없는 값은 key 그대로 뒤에 붙임
-    const known = subCategories.filter(subCategory => keys.has(subCategory.key));
-    const unknown = [...keys]
-      .filter(key => !subCategories.some(subCategory => subCategory.key === key))
-      .map(key => ({key, description: key}));
-    return [...known, ...unknown];
-  }, [filteredPolicies, subCategories]);
-
-  const displayedPolicies = useMemo(
-    () => selectedSubCategory
-      ? filteredPolicies.filter(policy => policy.subCategory === selectedSubCategory)
-      : filteredPolicies,
-    [filteredPolicies, selectedSubCategory]
-  );
-
-  const handleSubCategoryChange = (subCategory: string) => {
-    setSelectedSubCategory(subCategory);
-    // 선택된 정책이 필터 결과에서 빠지면 정책/값 초기화
-    const isStillVisible = !subCategory || filteredPolicies.some(
-      policy => policy.policyId === formData.policyId && policy.subCategory === subCategory
-    );
-    if (!isStillVisible) {
-      setFormData(prev => ({...prev, policyId: "", value: ""}));
-    }
-  };
-
-  const selectedPolicy = filteredPolicies.find(policy => policy.policyId === formData.policyId);
+    const selectedPolicy = filteredPolicies.find(policy => policy.policyId === formData.policyId);
     if (!isValidPolicyValue(formData.value.trim(), selectedPolicy?.valueType)) {
       toast.error('선택한 정책 값 형식이 올바르지 않습니다.');
       return;
