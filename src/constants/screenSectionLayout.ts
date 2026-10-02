@@ -129,10 +129,10 @@ export const SECTION_CONFIGS: Record<SectionType, SectionConfigMeta[]> = {
       type: 'HOME_CURATION',
       label: '큐레이션 설정',
       fields: [
-        positionsField('sectionAdPositions', '섹션 사이 광고 위치'),
-        adHeightField('sectionAdHeight', '섹션 광고 높이'),
         positionsField('carouselAdPositions', '캐러셀 광고 위치'),
-        positiveDecimalField('storeMaxDistanceM', '가게 최대 거리', {unit: 'm'}),
+        adHeightField('carouselAdHeight', '캐러셀 광고 높이'),
+        positionsField('cardAdPositions', '카드 광고 위치'),
+        positiveDecimalField('searchStoreMaxDistanceM', '가게 검색 최대 거리', {unit: 'm'}),
       ],
     },
   ],
