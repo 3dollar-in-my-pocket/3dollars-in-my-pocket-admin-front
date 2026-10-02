@@ -13,9 +13,10 @@ import {
   ScreenSectionLayoutItemRequest,
   ScreenType,
   SECTION_ID_MAX_LENGTH,
-  SectionType
+  SectionType,
+  SectionTypeMeta
 } from '@/types/screenSectionLayout';
-import {findSectionTypeMeta, getSectionTypes} from '@/constants/screenSectionLayout';
+import {findSectionTypeMeta, getConfigField} from '@/constants/screenSectionLayout';
 
 /** 섹션별 검증 오류. key는 섹션 목록의 인덱스입니다. */
 export interface SectionLayoutValidationResult {
@@ -28,12 +29,12 @@ export interface SectionLayoutValidationResult {
 
 export const validateSectionLayouts = (
   screenType: ScreenType,
-  sections: ScreenSectionLayoutItemRequest[]
+  sections: ScreenSectionLayoutItemRequest[],
+  sectionTypes: SectionTypeMeta[]
 ): SectionLayoutValidationResult => {
   const formErrors: string[] = [];
   const itemErrors: Record<number, string> = {};
 
-  const sectionTypes = getSectionTypes(screenType);
   if (sectionTypes.length === 0) {
     formErrors.push('섹션 목록이 정의되지 않은 화면입니다. 레이아웃을 저장할 수 없습니다.');
     return {formErrors, itemErrors, isValid: false};
@@ -58,7 +59,7 @@ export const validateSectionLayouts = (
   });
 
   sections.forEach((section, index) => {
-    const meta = findSectionTypeMeta(screenType, section.sectionType);
+    const meta = findSectionTypeMeta(sectionTypes, section.sectionType);
     const sectionId = section.sectionId.trim();
 
     if (!meta) {
@@ -99,16 +100,24 @@ export const validateSectionLayouts = (
     }
 
     if (section.config !== undefined) {
+      if (section.config.type === 'EMPTY') {
+        return;
+      }
+
       if (section.sectionType !== 'AD_MOB') {
         itemErrors[index] = 'config는 AD_MOB 섹션에서만 지정할 수 있습니다.';
         return;
       }
 
+      const heightField = getConfigField(meta, 'AD_MOB', 'height');
+      const minHeight = heightField?.min ?? AD_MOB_HEIGHT_MIN;
+      const maxHeight = heightField?.max ?? AD_MOB_HEIGHT_MAX;
       if (section.config.type !== 'AD_MOB'
+        || !heightField
         || !Number.isInteger(section.config.height)
-        || section.config.height < AD_MOB_HEIGHT_MIN
-        || section.config.height > AD_MOB_HEIGHT_MAX) {
-        itemErrors[index] = `광고 높이는 ${AD_MOB_HEIGHT_MIN} ~ ${AD_MOB_HEIGHT_MAX} 사이의 정수여야 합니다.`;
+        || section.config.height < minHeight
+        || section.config.height > maxHeight) {
+        itemErrors[index] = `광고 높이는 ${minHeight} ~ ${maxHeight} 사이의 정수여야 합니다.`;
       }
     }
   });

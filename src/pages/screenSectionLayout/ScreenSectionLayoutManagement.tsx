@@ -9,13 +9,12 @@ import {useConfirm} from '@/hooks/useConfirm';
 import useMediaQuery, {MOBILE_QUERY} from '@/hooks/useMediaQuery';
 import {usePermission} from '@/hooks/usePermission';
 import {AdminRole} from '@/types/admin';
-import {ScreenType, SectionType} from '@/types/screenSectionLayout';
+import {ScreenType, SectionType, ScreenTypeMeta, SectionTypeMeta} from '@/types/screenSectionLayout';
 import {
   DEFAULT_SCREEN_TYPE,
   findScreenTypeMeta,
   findSectionTypeMeta,
   getConfigurableSectionTypes,
-  SCREEN_TYPES
 } from '@/constants/screenSectionLayout';
 import {validateSectionLayouts} from '@/utils/validation/screenSectionLayoutValidation';
 import useSectionLayoutDraft from './useSectionLayoutDraft';
@@ -31,6 +30,8 @@ const ScreenSectionLayoutManagement = () => {
   const canManage = hasAccess([AdminRole.OPERATOR]);
 
   const [screenType, setScreenType] = useState<ScreenType>(DEFAULT_SCREEN_TYPE);
+  const [screenTypes, setScreenTypes] = useState<ScreenTypeMeta[]>([]);
+  const [sectionTypes, setSectionTypes] = useState<SectionTypeMeta[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -62,13 +63,13 @@ const ScreenSectionLayoutManagement = () => {
     toRequest
   } = useSectionLayoutDraft();
 
-  const screenMeta = findScreenTypeMeta(screenType);
+  const screenMeta = findScreenTypeMeta(screenTypes, screenType);
   const isScreenConfigurable = screenMeta?.isConfigurable ?? false;
   const editable = canManage && isScreenConfigurable && !isSaving;
 
   const configurableSectionTypes = useMemo(
-    () => getConfigurableSectionTypes(screenType),
-    [screenType]
+    () => getConfigurableSectionTypes(sectionTypes),
+    [sectionTypes]
   );
 
   // 이미 추가된 섹션 중 중복 등록이 불가능한 것은 추가 목록에서 제외합니다.
@@ -78,8 +79,8 @@ const ScreenSectionLayoutManagement = () => {
   }, [configurableSectionTypes, sections]);
 
   const validation = useMemo(
-    () => validateSectionLayouts(screenType, toRequest()),
-    [screenType, toRequest]
+    () => validateSectionLayouts(screenType, toRequest(), sectionTypes),
+    [screenType, sectionTypes, toRequest]
   );
 
   /** 마지막 저장 상태와 현재 편집 상태의 차이 */
@@ -109,10 +110,19 @@ const ScreenSectionLayoutManagement = () => {
     return null;
   }, [canManage, isScreenConfigurable, isLoading, isSaving, isDirty, validation.isValid]);
 
-  const fetchSectionLayouts = useCallback(async (targetScreenType: ScreenType) => {
+  const fetchScreenData = useCallback(async (targetScreenType: ScreenType) => {
     setIsLoading(true);
     setIsLoaded(false);
     try {
+      const metadataResponse = await screenSectionLayoutApi.getSectionTypes('USER', targetScreenType);
+      if (!metadataResponse?.ok) {
+        setSectionTypes([]);
+        return;
+      }
+
+      const nextSectionTypes = metadataResponse.data?.contents ?? [];
+      setSectionTypes(nextSectionTypes);
+
       const response = await screenSectionLayoutApi.getSectionLayouts(targetScreenType);
       if (!response?.ok) {
         return;
@@ -126,8 +136,32 @@ const ScreenSectionLayoutManagement = () => {
   }, [reset]);
 
   useEffect(() => {
-    void fetchSectionLayouts(screenType);
-  }, [screenType, fetchSectionLayouts]);
+    const loadScreens = async () => {
+      setIsLoading(true);
+      const response = await screenSectionLayoutApi.getScreens('USER');
+      if (!response?.ok) {
+        setScreenTypes([]);
+        setIsLoading(false);
+        return;
+      }
+
+      const nextScreenTypes = response.data?.contents ?? [];
+      setScreenTypes(nextScreenTypes);
+      if (nextScreenTypes.length > 0 && !nextScreenTypes.some((screen) => screen.value === screenType)) {
+        setScreenType(nextScreenTypes[0].value);
+      }
+      setIsLoading(false);
+    };
+
+    void loadScreens();
+    // 화면 메타데이터는 페이지 진입 시 한 번 조회합니다.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (screenTypes.length === 0 || !screenTypes.some((screen) => screen.value === screenType)) return;
+    void fetchScreenData(screenType);
+  }, [screenType, screenTypes, fetchScreenData]);
 
   // 편집 중 이탈 시 저장되지 않은 변경이 사라지는 것을 브라우저 차원에서 한 번 더 알립니다.
   useEffect(() => {
@@ -174,17 +208,17 @@ const ScreenSectionLayoutManagement = () => {
     }
 
     setActiveKey(null);
-    await fetchSectionLayouts(screenType);
+    await fetchScreenData(screenType);
   };
 
   const handleAddSection = (sectionType: SectionType) => {
     if (!editable) return;
-    addSection(sectionType);
+    addSection(sectionType, findSectionTypeMeta(sectionTypes, sectionType));
   };
 
   const handleRemoveSection = async (index: number) => {
     const section = sections[index];
-    const label = findSectionTypeMeta(screenType, section.sectionType)?.label ?? section.sectionType;
+    const label = findSectionTypeMeta(sectionTypes, section.sectionType)?.label ?? section.sectionType;
 
     const confirmed = await confirm({
       title: '섹션 제거',
@@ -280,7 +314,7 @@ const ScreenSectionLayoutManagement = () => {
             key={section.key}
             section={section}
             index={index}
-            meta={findSectionTypeMeta(screenType, section.sectionType)}
+            meta={findSectionTypeMeta(sectionTypes, section.sectionType)}
             error={validation.itemErrors[index]}
             editable={editable}
             isActive={activeKey === section.key}
@@ -374,7 +408,7 @@ const ScreenSectionLayoutManagement = () => {
               disabled={isLoading || isSaving}
               onChange={(event) => void handleScreenTypeChange(event.target.value as ScreenType)}
             >
-              {SCREEN_TYPES.map((screen) => (
+              {screenTypes.map((screen) => (
                 <option key={screen.value} value={screen.value}>
                   {screen.label}{screen.isConfigurable ? '' : ' (설정 불가)'}
                 </option>
@@ -463,6 +497,7 @@ const ScreenSectionLayoutManagement = () => {
         <div className="mb-3">
           <SectionLayoutCompare
             screenType={screenType}
+            sectionTypes={sectionTypes}
             before={savedSections}
             after={sections}
             diff={diff}
@@ -496,6 +531,8 @@ const ScreenSectionLayoutManagement = () => {
               ) : (
                 <SectionPreview
                   screenType={screenType}
+                  screenTypes={screenTypes}
+                  sectionTypes={sectionTypes}
                   sections={sections}
                   activeKey={activeKey}
                   onSelect={(key) => {

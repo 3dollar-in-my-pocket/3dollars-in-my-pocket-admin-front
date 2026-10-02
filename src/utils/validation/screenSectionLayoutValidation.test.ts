@@ -1,6 +1,14 @@
 import {describe, expect, it} from 'vitest';
-import {ScreenSectionLayoutItemRequest} from '@/types/screenSectionLayout';
+import {ScreenSectionLayoutItemRequest, SectionTypeMeta} from '@/types/screenSectionLayout';
 import {buildDefaultSectionId, validateSectionLayouts} from './screenSectionLayoutValidation';
+
+const sectionTypes: SectionTypeMeta[] = [
+  {value: 'PREVIEW', label: '가게 미리보기', isRequired: true, isConfigurable: true, allowsMultiple: false, configs: [{type: 'EMPTY', fields: []}]},
+  {value: 'TAB', label: '탭', isRequired: true, isConfigurable: true, allowsMultiple: false, configs: [{type: 'EMPTY', fields: []}]},
+  {value: 'AD_MOB', label: '애드몹 광고', isRequired: false, isConfigurable: true, allowsMultiple: true, configs: [{type: 'EMPTY', fields: []}, {type: 'AD_MOB', fields: [{name: 'height', valueType: 'INTEGER', isRequired: true, min: 50, max: 200}]}]},
+  {value: 'COUPON', label: '쿠폰', isRequired: false, isConfigurable: true, allowsMultiple: false, configs: [{type: 'EMPTY', fields: []}]},
+  {value: 'MARGIN', label: '여백', isRequired: false, isConfigurable: false, allowsMultiple: false, configs: [{type: 'EMPTY', fields: []}]},
+];
 
 /** 필수 섹션만 포함한 최소 유효 목록 */
 const requiredSections = (): ScreenSectionLayoutItemRequest[] => [
@@ -9,7 +17,7 @@ const requiredSections = (): ScreenSectionLayoutItemRequest[] => [
 ];
 
 const validate = (sections: ScreenSectionLayoutItemRequest[]) =>
-  validateSectionLayouts('STORE_DETAIL', sections);
+  validateSectionLayouts('STORE_DETAIL', sections, sectionTypes);
 
 describe('validateSectionLayouts', () => {
   it('필수 섹션이 모두 노출 상태면 통과한다', () => {
@@ -17,7 +25,7 @@ describe('validateSectionLayouts', () => {
   });
 
   it('섹션 목록이 정의되지 않은 화면은 저장할 수 없다', () => {
-    const result = validateSectionLayouts('HOME', requiredSections());
+    const result = validateSectionLayouts('HOME', requiredSections(), []);
 
     expect(result.isValid).toBe(false);
     expect(result.formErrors[0]).toContain('섹션 목록이 정의되지 않은 화면');

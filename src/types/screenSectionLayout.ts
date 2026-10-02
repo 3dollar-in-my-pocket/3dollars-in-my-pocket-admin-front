@@ -5,30 +5,10 @@
  */
 
 /** 레이아웃을 설정할 유저 앱 화면 */
-export type ScreenType =
-  | 'STORE_DETAIL'
-  | 'HOME'
-  | 'HOME_LIST'
-  | 'STORE_BOTTOM_SHEET'
-  | 'STORE_CONTRIBUTORS';
+export type ScreenType = string;
 
 /** 섹션 타입 (STORE_DETAIL 기준) */
-export type SectionType =
-  | 'PREVIEW'
-  | 'TAB'
-  | 'CALLOUT'
-  | 'RELATED_STORES'
-  | 'AD_MOB'
-  | 'EDIT'
-  | 'VISIT'
-  | 'REVIEW'
-  | 'POST'
-  | 'IMAGE'
-  | 'APPEARANCE_DAY'
-  | 'COUPON'
-  | 'INFO'
-  | 'CTA'
-  | 'MARGIN';
+export type SectionType = string;
 
 /** 화면 메타 정보 */
 export interface ScreenTypeMeta {
@@ -36,6 +16,21 @@ export interface ScreenTypeMeta {
   label: string;
   /** 섹션 목록이 정의된 화면인지 여부. false면 교체 시 서버가 400을 반환합니다. */
   isConfigurable: boolean;
+}
+
+export type ConfigValueType = 'INTEGER' | string;
+
+export interface SectionConfigFieldMeta {
+  name: string;
+  valueType: ConfigValueType;
+  isRequired: boolean;
+  min?: number;
+  max?: number;
+}
+
+export interface SectionConfigMeta {
+  type: string;
+  fields: SectionConfigFieldMeta[];
 }
 
 /** 섹션 메타 정보 */
@@ -48,6 +43,8 @@ export interface SectionTypeMeta {
   isConfigurable: boolean;
   /** 동일 섹션을 여러 번 넣을 수 있는지 여부 */
   allowsMultiple: boolean;
+  /** 해당 섹션에서 선택할 수 있는 설정 타입과 입력 필드 정의 */
+  configs: SectionConfigMeta[];
 }
 
 /** AD_MOB 섹션의 타입별 세부 설정 */

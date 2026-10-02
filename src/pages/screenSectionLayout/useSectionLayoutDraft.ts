@@ -5,9 +5,11 @@ import {
   ScreenSectionLayout,
   ScreenSectionLayoutConfig,
   ScreenSectionLayoutItemRequest,
-  SectionType
+  SectionType,
+  SectionTypeMeta
 } from '@/types/screenSectionLayout';
 import {buildDefaultSectionId} from '@/utils/validation/screenSectionLayoutValidation';
+import {getConfigField} from '@/constants/screenSectionLayout';
 
 /**
  * 편집 중인 섹션 한 줄.
@@ -91,7 +93,7 @@ export const useSectionLayoutDraft = () => {
     setSections((prev) => prev.filter((_, i) => i !== index));
   }, []);
 
-  const addSection = useCallback((sectionType: SectionType) => {
+  const addSection = useCallback((sectionType: SectionType, meta?: SectionTypeMeta) => {
     setSections((prev) => {
       const sectionId = buildDefaultSectionId(sectionType, prev.map((section) => section.sectionId.trim()));
       return [...prev, {
@@ -100,7 +102,7 @@ export const useSectionLayoutDraft = () => {
         sectionId,
         marginBottom: 0,
         isVisible: true,
-        config: sectionType === 'AD_MOB'
+        config: getConfigField(meta, 'AD_MOB', 'height')
           ? {type: 'AD_MOB', height: AD_MOB_DEFAULT_HEIGHT}
           : undefined,
       }];

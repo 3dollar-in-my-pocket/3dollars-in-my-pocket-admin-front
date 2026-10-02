@@ -1,10 +1,12 @@
 import React from 'react';
-import {ScreenType} from '@/types/screenSectionLayout';
-import {getScreenTypeLabel, getSectionTypeLabel} from '@/constants/screenSectionLayout';
+import {ScreenType, ScreenTypeMeta, SectionTypeMeta} from '@/types/screenSectionLayout';
+import {findScreenTypeMeta, getSectionTypeLabel} from '@/constants/screenSectionLayout';
 import {SectionLayoutDraft} from './useSectionLayoutDraft';
 
 interface SectionPreviewProps {
   screenType: ScreenType;
+  screenTypes: ScreenTypeMeta[];
+  sectionTypes: SectionTypeMeta[];
   sections: SectionLayoutDraft[];
   /** 편집 목록에서 선택된 섹션. 미리보기에서도 같은 블록을 강조합니다. */
   activeKey: string | null;
@@ -36,14 +38,15 @@ export const toPreviewGapHeight = (marginBottom: number): number => {
  * 숫자 목록만으로는 "위에서 세 번째, 여백 24"가 실제로 어떻게 보이는지 가늠하기 어려워
  * 순서와 여백을 그대로 쌓아 올린 축소도를 함께 제공합니다.
  */
-const SectionPreview: React.FC<SectionPreviewProps> = ({screenType, sections, activeKey, onSelect}) => {
+const SectionPreview: React.FC<SectionPreviewProps> = ({screenType, screenTypes, sectionTypes, sections, activeKey, onSelect}) => {
   const visibleSections = sections.filter((section) => section.isVisible);
+  const screenLabel = findScreenTypeMeta(screenTypes, screenType)?.label ?? screenType;
 
   return (
     <div className="screen-preview">
       <div className="screen-preview__frame">
         <div className="screen-preview__notch" aria-hidden="true"/>
-        <div className="screen-preview__bar">{getScreenTypeLabel(screenType)}</div>
+        <div className="screen-preview__bar">{screenLabel}</div>
 
         <div className="screen-preview__body">
           {visibleSections.length === 0 ? (
@@ -62,11 +65,11 @@ const SectionPreview: React.FC<SectionPreviewProps> = ({screenType, sections, ac
                     className={`screen-preview__block ${activeKey === section.key ? 'is-active' : ''}`}
                     style={{height: BLOCK_HEIGHT}}
                     onClick={() => onSelect(section.key)}
-                    title={`${getSectionTypeLabel(screenType, section.sectionType)} (${section.sectionId})`}
+                    title={`${getSectionTypeLabel(sectionTypes, section.sectionType)} (${section.sectionId})`}
                   >
                     <span className="screen-preview__block-order">{index + 1}</span>
                     <span className="screen-preview__block-name">
-                      {getSectionTypeLabel(screenType, section.sectionType)}
+                      {getSectionTypeLabel(sectionTypes, section.sectionType)}
                     </span>
                   </button>
 
