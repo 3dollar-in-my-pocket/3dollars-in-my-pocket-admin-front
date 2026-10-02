@@ -1,6 +1,9 @@
 import {useCallback, useMemo, useRef, useState} from 'react';
 import {
+  AdMobSectionConfig,
+  AD_MOB_DEFAULT_HEIGHT,
   ScreenSectionLayout,
+  ScreenSectionLayoutConfig,
   ScreenSectionLayoutItemRequest,
   SectionType
 } from '@/types/screenSectionLayout';
@@ -18,6 +21,7 @@ export interface SectionLayoutDraft {
   sectionId: string;
   marginBottom: number;
   isVisible: boolean;
+  config?: ScreenSectionLayoutConfig | null;
 }
 
 /** 서버 응답을 편집용 초안으로 변환합니다. displayOrder는 배열 순서로 대체됩니다. */
@@ -27,15 +31,26 @@ const toDraft = (layout: ScreenSectionLayout, key: string): SectionLayoutDraft =
   sectionId: layout.sectionId,
   marginBottom: layout.marginBottom,
   isVisible: layout.isVisible,
+  config: layout.config,
 });
+
+/** config가 없거나 EMPTY인 광고도 서버 기본 높이로 동일하게 비교합니다. */
+export const getAdMobHeight = (config?: ScreenSectionLayoutConfig | null): number =>
+  config?.type === 'AD_MOB' ? config.height : AD_MOB_DEFAULT_HEIGHT;
+
+const toRequestConfig = (section: SectionLayoutDraft): AdMobSectionConfig | undefined => {
+  if (section.config?.type !== 'AD_MOB') return undefined;
+  return section.config;
+};
 
 /** 저장 여부 비교용 스냅샷. key는 렌더링 전용이라 제외합니다. */
 const toComparable = (sections: SectionLayoutDraft[]): string =>
-  JSON.stringify(sections.map(({sectionType, sectionId, marginBottom, isVisible}) => ({
-    sectionType,
-    sectionId: sectionId.trim(),
-    marginBottom,
-    isVisible,
+  JSON.stringify(sections.map((section) => ({
+    sectionType: section.sectionType,
+    sectionId: section.sectionId.trim(),
+    marginBottom: section.marginBottom,
+    isVisible: section.isVisible,
+    adMobHeight: section.sectionType === 'AD_MOB' ? getAdMobHeight(section.config) : undefined,
   })));
 
 /**
@@ -79,7 +94,16 @@ export const useSectionLayoutDraft = () => {
   const addSection = useCallback((sectionType: SectionType) => {
     setSections((prev) => {
       const sectionId = buildDefaultSectionId(sectionType, prev.map((section) => section.sectionId.trim()));
-      return [...prev, {key: nextKey(), sectionType, sectionId, marginBottom: 0, isVisible: true}];
+      return [...prev, {
+        key: nextKey(),
+        sectionType,
+        sectionId,
+        marginBottom: 0,
+        isVisible: true,
+        config: sectionType === 'AD_MOB'
+          ? {type: 'AD_MOB', height: AD_MOB_DEFAULT_HEIGHT}
+          : undefined,
+      }];
     });
   }, [nextKey]);
 
@@ -116,11 +140,12 @@ export const useSectionLayoutDraft = () => {
 
   /** PUT 요청 본문으로 변환합니다. sectionId 앞뒤 공백은 서버 검증 전에 정리합니다. */
   const toRequest = useCallback((): ScreenSectionLayoutItemRequest[] =>
-    sections.map(({sectionType, sectionId, marginBottom, isVisible}) => ({
-      sectionType,
-      sectionId: sectionId.trim(),
-      marginBottom,
-      isVisible,
+    sections.map((section) => ({
+      sectionType: section.sectionType,
+      sectionId: section.sectionId.trim(),
+      marginBottom: section.marginBottom,
+      isVisible: section.isVisible,
+      ...(toRequestConfig(section) ? {config: toRequestConfig(section)} : {}),
     })), [sections]);
 
   const isDirty = useMemo(

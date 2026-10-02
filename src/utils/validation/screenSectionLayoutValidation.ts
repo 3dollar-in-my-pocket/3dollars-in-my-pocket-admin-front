@@ -8,6 +8,8 @@
 import {
   MARGIN_BOTTOM_MAX,
   MARGIN_BOTTOM_MIN,
+  AD_MOB_HEIGHT_MIN,
+  AD_MOB_HEIGHT_MAX,
   ScreenSectionLayoutItemRequest,
   ScreenType,
   SECTION_ID_MAX_LENGTH,
@@ -93,6 +95,21 @@ export const validateSectionLayouts = (
       || section.marginBottom < MARGIN_BOTTOM_MIN
       || section.marginBottom > MARGIN_BOTTOM_MAX) {
       itemErrors[index] = `하단 여백은 ${MARGIN_BOTTOM_MIN} ~ ${MARGIN_BOTTOM_MAX} 사이의 정수여야 합니다.`;
+      return;
+    }
+
+    if (section.config !== undefined) {
+      if (section.sectionType !== 'AD_MOB') {
+        itemErrors[index] = 'config는 AD_MOB 섹션에서만 지정할 수 있습니다.';
+        return;
+      }
+
+      if (section.config.type !== 'AD_MOB'
+        || !Number.isInteger(section.config.height)
+        || section.config.height < AD_MOB_HEIGHT_MIN
+        || section.config.height > AD_MOB_HEIGHT_MAX) {
+        itemErrors[index] = `광고 높이는 ${AD_MOB_HEIGHT_MIN} ~ ${AD_MOB_HEIGHT_MAX} 사이의 정수여야 합니다.`;
+      }
     }
   });
 

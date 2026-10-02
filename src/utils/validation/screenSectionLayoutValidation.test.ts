@@ -128,6 +128,57 @@ describe('validateSectionLayouts', () => {
     });
   });
 
+  describe('AD_MOB config', () => {
+    it('높이가 50 이상 200 이하인 정수면 통과한다', () => {
+      const result = validate([
+        ...requiredSections(),
+        {
+          sectionType: 'AD_MOB',
+          sectionId: 'AD_MOB',
+          marginBottom: 8,
+          isVisible: true,
+          config: {type: 'AD_MOB', height: 100},
+        },
+      ]);
+
+      expect(result.isValid).toBe(true);
+    });
+
+    it('높이가 50 미만, 200 초과이거나 정수가 아니면 실패한다', () => {
+      const invalidHeights = [49, 201, 100.5];
+
+      invalidHeights.forEach((height) => {
+        const result = validate([
+          ...requiredSections(),
+          {
+            sectionType: 'AD_MOB',
+            sectionId: 'AD_MOB',
+            marginBottom: 8,
+            isVisible: true,
+            config: {type: 'AD_MOB', height},
+          },
+        ]);
+
+        expect(result.itemErrors[2]).toContain('50 ~ 200 사이의 정수');
+      });
+    });
+
+    it('AD_MOB 이외 섹션의 config는 실패한다', () => {
+      const result = validate([
+        ...requiredSections(),
+        {
+          sectionType: 'COUPON',
+          sectionId: 'COUPON',
+          marginBottom: 8,
+          isVisible: true,
+          config: {type: 'AD_MOB', height: 50},
+        },
+      ]);
+
+      expect(result.itemErrors[2]).toContain('AD_MOB 섹션에서만');
+    });
+  });
+
   it('섹션이 하나도 없으면 실패한다', () => {
     const result = validate([]);
 

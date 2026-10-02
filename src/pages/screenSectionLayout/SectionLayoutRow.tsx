@@ -3,9 +3,13 @@ import {
   MARGIN_BOTTOM_MAX,
   MARGIN_BOTTOM_MIN,
   SECTION_ID_MAX_LENGTH,
+  AD_MOB_DEFAULT_HEIGHT,
+  AD_MOB_HEIGHT_MAX,
+  AD_MOB_HEIGHT_MIN,
   SectionTypeMeta
 } from '@/types/screenSectionLayout';
 import {SectionLayoutDraft} from './useSectionLayoutDraft';
+import {getAdMobHeight} from './useSectionLayoutDraft';
 
 /** 빈 입력이나 숫자가 아닌 값은 0으로 처리합니다. 범위 검증은 저장 단계에서 별도로 수행합니다. */
 const parseMarginBottom = (value: string): number => {
@@ -15,6 +19,9 @@ const parseMarginBottom = (value: string): number => {
 
 /** 앱에서 실제로 자주 쓰이는 여백 값. 매번 숫자를 타이핑하지 않도록 칩으로 제공합니다. */
 const MARGIN_PRESETS = [0, 8, 16, 24, 32];
+
+/** 애드몹에서 자주 사용하는 광고 카드 높이 선택지 */
+const AD_MOB_HEIGHT_PRESETS = [50, 100, 150, 200];
 
 /** 미리보기에서 해당 편집 행으로 스크롤할 때 쓰는 DOM id */
 export const sectionRowId = (key: string): string => `section-row-${key}`;
@@ -250,6 +257,49 @@ const SectionLayoutRow: React.FC<SectionLayoutRowProps> = ({
               </label>
             </div>
           </div>
+
+          {section.sectionType === 'AD_MOB' && (
+            <div className="section-row__field">
+              <label className="item-card__label" htmlFor={`ad-mob-height-${section.key}`}>
+                광고 높이
+              </label>
+              <div className="margin-picker" role="group" aria-label={`${label} 광고 카드 높이`}>
+                {AD_MOB_HEIGHT_PRESETS.map((preset) => (
+                  <button
+                    key={preset}
+                    type="button"
+                    className={`margin-picker__chip ${getAdMobHeight(section.config) === preset ? 'is-selected' : ''}`}
+                    disabled={!editable}
+                    aria-pressed={getAdMobHeight(section.config) === preset}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onChange({config: {type: 'AD_MOB', height: preset}});
+                    }}
+                  >
+                    {preset}
+                  </button>
+                ))}
+                <input
+                  id={`ad-mob-height-${section.key}`}
+                  type="number"
+                  className="margin-picker__input form-control form-control-sm"
+                  min={AD_MOB_HEIGHT_MIN}
+                  max={AD_MOB_HEIGHT_MAX}
+                  value={getAdMobHeight(section.config)}
+                  disabled={!editable}
+                  aria-label={`${label} 광고 카드 높이 직접 입력`}
+                  onClick={(event) => event.stopPropagation()}
+                  onChange={(event) => onChange({
+                    config: {type: 'AD_MOB', height: Number(event.target.value) || 0}
+                  })}
+                />
+                <span className="small text-body-secondary align-self-center">dp</span>
+              </div>
+              <span className="form-text">
+                {AD_MOB_HEIGHT_MIN}~{AD_MOB_HEIGHT_MAX}dp 범위에서 설정할 수 있습니다. 기본 높이는 {AD_MOB_DEFAULT_HEIGHT}dp입니다.
+              </span>
+            </div>
+          )}
         </div>
       </div>
 

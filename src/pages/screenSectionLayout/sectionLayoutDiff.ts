@@ -1,4 +1,5 @@
 import {SectionLayoutDraft} from './useSectionLayoutDraft';
+import {getAdMobHeight} from './useSectionLayoutDraft';
 
 export type SectionDiffStatus = 'added' | 'removed' | 'moved' | 'updated' | 'unchanged';
 
@@ -80,6 +81,14 @@ export const diffSectionLayouts = (
         label: '노출 여부',
         before: formatVisible(previous.section.isVisible),
         after: formatVisible(section.isVisible),
+      });
+    }
+    if (section.sectionType === 'AD_MOB'
+      && getAdMobHeight(previous.section.config) !== getAdMobHeight(section.config)) {
+      changes.push({
+        label: '광고 높이',
+        before: String(getAdMobHeight(previous.section.config)),
+        after: String(getAdMobHeight(section.config)),
       });
     }
     // sectionType은 UI에서 바꿀 수 없지만, 같은 sectionId를 다른 타입으로 재사용한 경우를 대비해 비교합니다.

@@ -50,6 +50,19 @@ export interface SectionTypeMeta {
   allowsMultiple: boolean;
 }
 
+/** AD_MOB 섹션의 타입별 세부 설정 */
+export interface AdMobSectionConfig {
+  type: 'AD_MOB';
+  height: number;
+}
+
+/** 서버가 기존 데이터에 내려줄 수 있는 빈 설정 */
+export interface EmptySectionConfig {
+  type: 'EMPTY';
+}
+
+export type ScreenSectionLayoutConfig = AdMobSectionConfig | EmptySectionConfig;
+
 /** 섹션 레이아웃 (서버 응답) */
 export interface ScreenSectionLayout {
   id: number;
@@ -60,6 +73,7 @@ export interface ScreenSectionLayout {
   displayOrder: number;
   marginBottom: number;
   isVisible: boolean;
+  config?: ScreenSectionLayoutConfig | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -70,6 +84,8 @@ export interface ScreenSectionLayoutItemRequest {
   sectionId: string;
   marginBottom: number;
   isVisible: boolean;
+  /** 현재는 AD_MOB만 지원합니다. 생략하면 서버 기본값을 사용합니다. */
+  config?: ScreenSectionLayoutConfig;
 }
 
 /** 섹션 레이아웃 전체 교체 요청 */
@@ -86,6 +102,13 @@ export interface ScreenSectionLayoutListResponse {
 /** marginBottom 허용 범위 */
 export const MARGIN_BOTTOM_MIN = 0;
 export const MARGIN_BOTTOM_MAX = 100;
+
+/** Admin에서 허용하는 AD_MOB 광고 카드 높이 범위 */
+export const AD_MOB_HEIGHT_MIN = 50;
+export const AD_MOB_HEIGHT_MAX = 200;
+
+/** config가 없거나 EMPTY인 구버전 광고의 호환 높이 */
+export const AD_MOB_DEFAULT_HEIGHT = 50;
 
 /** sectionId 최대 길이 */
 export const SECTION_ID_MAX_LENGTH = 100;

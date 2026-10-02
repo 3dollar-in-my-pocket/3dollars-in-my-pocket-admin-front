@@ -1,7 +1,7 @@
 import {act, renderHook} from '@testing-library/react';
 import {describe, expect, it} from 'vitest';
 import {ScreenSectionLayout} from '@/types/screenSectionLayout';
-import useSectionLayoutDraft from './useSectionLayoutDraft';
+import useSectionLayoutDraft, {getAdMobHeight} from './useSectionLayoutDraft';
 
 const layout = (
   id: number,
@@ -186,6 +186,24 @@ describe('useSectionLayoutDraft', () => {
       act(() => result.current.updateSection(0, {sectionId: '  PREVIEW  '}));
 
       expect(result.current.toRequest()[0].sectionId).toBe('PREVIEW');
+    });
+
+    it('AD_MOB 높이를 config로 변환한다', () => {
+      const {result} = renderDraft();
+      act(() => result.current.addSection('AD_MOB'));
+      act(() => result.current.updateSection(3, {config: {type: 'AD_MOB', height: 100}}));
+
+      expect(result.current.toRequest()[3].config).toEqual({type: 'AD_MOB', height: 100});
+    });
+
+    it('config가 없는 AD_MOB은 서버 기본값을 사용하도록 config를 생략한다', () => {
+      const {result} = renderDraft([
+        ...initialLayouts(),
+        {...layout(4, 'AD_MOB', 'AD_MOB', 400), config: undefined},
+      ]);
+
+      expect(getAdMobHeight(result.current.sections[3].config)).toBe(50);
+      expect(result.current.toRequest()[3].config).toBeUndefined();
     });
   });
 
