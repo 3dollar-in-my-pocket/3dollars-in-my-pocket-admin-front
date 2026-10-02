@@ -9,7 +9,6 @@ import {ScreenType, ScreenTypeMeta, SectionType, SectionTypeMeta} from '@/types/
 export const SCREEN_TYPES: ScreenTypeMeta[] = [
   {value: 'STORE_DETAIL', label: '가게 상세', isConfigurable: true},
   {value: 'HOME', label: '홈', isConfigurable: false},
-  {value: 'HOME_LIST', label: '홈 리스트', isConfigurable: false},
   {value: 'STORE_BOTTOM_SHEET', label: '가게 바텀시트', isConfigurable: false},
   {value: 'STORE_CONTRIBUTORS', label: '가게 기여자', isConfigurable: false},
 ];

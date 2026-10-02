@@ -63,19 +63,16 @@ export type StoreSearchType = typeof STORE_SEARCH_TYPES[keyof typeof STORE_SEARC
 
 // Store interfaces
 
-export const isVisitsSupported = (storeType: StoreType): boolean => {
-  const supportedTypes: StoreType[] = [STORE_TYPE.USER_STORE];
-  return supportedTypes.includes(storeType);
+export const isVisitsSupported = (_storeType: StoreType): boolean => {
+  return true;
 };
 
-export const isImagesSupported = (storeType: StoreType): boolean => {
-  const supportedTypes: StoreType[] = [STORE_TYPE.USER_STORE];
-  return supportedTypes.includes(storeType);
+export const isImagesSupported = (_storeType: StoreType): boolean => {
+  return true;
 };
 
-export const isReportsSupported = (storeType: StoreType): boolean => {
-  const supportedTypes: StoreType[] = [STORE_TYPE.USER_STORE];
-  return supportedTypes.includes(storeType);
+export const isReportsSupported = (_storeType: StoreType): boolean => {
+  return true;
 };
 
 /** StoreFoodCategoryResponse */
