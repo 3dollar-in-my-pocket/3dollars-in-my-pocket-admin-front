@@ -3,12 +3,11 @@ import {
   MARGIN_BOTTOM_MAX,
   MARGIN_BOTTOM_MIN,
   SECTION_ID_MAX_LENGTH,
-  AD_MOB_DEFAULT_HEIGHT,
   SectionTypeMeta
 } from '@/types/screenSectionLayout';
+import {SectionConfigError} from '@/utils/sectionConfigUtils';
 import {SectionLayoutDraft} from './useSectionLayoutDraft';
-import {getAdMobHeight} from './useSectionLayoutDraft';
-import {getConfigField} from '@/constants/screenSectionLayout';
+import SectionConfigEditor from './SectionConfigEditor';
 
 /** 빈 입력이나 숫자가 아닌 값은 0으로 처리합니다. 범위 검증은 저장 단계에서 별도로 수행합니다. */
 const parseMarginBottom = (value: string): number => {
@@ -27,8 +26,16 @@ interface SectionLayoutRowProps {
   index: number;
   meta?: SectionTypeMeta;
   error?: string;
+  configError?: SectionConfigError;
   /** 편집 권한이 없으면 드래그/입력을 모두 잠급니다. */
   editable: boolean;
+  /**
+   * 섹션 순서 편집을 지원하지 않는 화면.
+   * 섹션 구성이 고정되어 순서·여백·식별자·삭제 없이 노출 여부와 설정값만 편집합니다.
+   */
+  fixedLayout: boolean;
+  /** 순서 변경 가능 여부. 편집 권한이 있고 고정 화면이 아닐 때만 true입니다. */
+  orderable: boolean;
   isDragging: boolean;
   /** 미리보기에서 선택된 행. 양쪽을 같이 강조해 어느 블록인지 연결해줍니다. */
   isActive: boolean;
@@ -58,7 +65,10 @@ const SectionLayoutRow: React.FC<SectionLayoutRowProps> = ({
                                                              index,
                                                              meta,
                                                              error,
+                                                             configError,
                                                              editable,
+                                                             fixedLayout,
+                                                             orderable,
                                                              isDragging,
                                                              isActive,
                                                              dropPosition,
@@ -80,15 +90,6 @@ const SectionLayoutRow: React.FC<SectionLayoutRowProps> = ({
                                                            }) => {
   const isRequired = meta?.isRequired ?? false;
   const label = meta?.label ?? section.sectionType;
-  const adMobHeightField = getConfigField(meta, 'AD_MOB', 'height');
-  const adMobMinHeight = adMobHeightField?.min ?? AD_MOB_DEFAULT_HEIGHT;
-  const adMobMaxHeight = adMobHeightField?.max ?? 200;
-  const adMobHeightPresets = Array.from(new Set([
-    adMobMinHeight,
-    100,
-    150,
-    adMobMaxHeight
-  ].filter((value) => value >= adMobMinHeight && value <= adMobMaxHeight)));
   const handleRef = useRef<HTMLSpanElement>(null);
   // 방향키로 순서를 바꾸면 행이 통째로 옮겨져 포커스가 사라지므로 직접 되돌려줍니다.
   const shouldRefocusHandle = useRef(false);
@@ -115,14 +116,14 @@ const SectionLayoutRow: React.FC<SectionLayoutRowProps> = ({
     isDragging ? 'section-row--dragging' : '',
     dropPosition === 'before' ? 'section-row--drop-before' : '',
     dropPosition === 'after' ? 'section-row--drop-after' : '',
-    error ? 'section-row--invalid' : ''
+    error || configError ? 'section-row--invalid' : ''
   ].filter(Boolean).join(' ');
 
   return (
     <div
       id={sectionRowId(section.key)}
       className={rowClassName}
-      draggable={editable}
+      draggable={orderable}
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
       onDragOver={onDragOver}
@@ -135,15 +136,15 @@ const SectionLayoutRow: React.FC<SectionLayoutRowProps> = ({
         터치 환경에서는 HTML5 드래그가 동작하지 않아 아래 이동 버튼이 유일한 수단입니다.
       */}
       <div className="section-row__handle-col">
-        <span
+        {orderable && <span
           ref={handleRef}
           className="section-handle"
-          role={editable ? 'button' : undefined}
-          tabIndex={editable ? 0 : -1}
+          role={orderable ? 'button' : undefined}
+          tabIndex={orderable ? 0 : -1}
           aria-label={`${label} 섹션 순서 변경. 위/아래 방향키로 이동합니다. 총 ${totalCount}개 중 ${index + 1}번째`}
-          title={editable ? '드래그하거나 위/아래 방향키로 순서를 바꿉니다' : undefined}
+          title={orderable ? '드래그하거나 위/아래 방향키로 순서를 바꿉니다' : undefined}
           onKeyDown={(event) => {
-            if (!editable) return;
+            if (!orderable) return;
             if (event.key === 'ArrowUp' && canMoveUp) {
               event.preventDefault();
               shouldRefocusHandle.current = true;
@@ -156,7 +157,7 @@ const SectionLayoutRow: React.FC<SectionLayoutRowProps> = ({
           }}
         >
           <i className="bi bi-grip-vertical" aria-hidden="true"/>
-        </span>
+        </span>}
         <span className="section-row__order">
           {index + 1}
           <span className="section-row__order-total">/{totalCount}</span>
@@ -174,7 +175,9 @@ const SectionLayoutRow: React.FC<SectionLayoutRowProps> = ({
             </span>
           )}
 
-          <button
+          {fixedLayout ? (
+            <span className="section-row__id-toggle font-monospace">{section.sectionId}</span>
+          ) : <button
             type="button"
             className="section-row__id-toggle"
             onClick={(event) => {
@@ -186,10 +189,10 @@ const SectionLayoutRow: React.FC<SectionLayoutRowProps> = ({
           >
             <span className="font-monospace">{section.sectionId || '(비어 있음)'}</span>
             <i className={`bi ${isSectionIdOpen ? 'bi-chevron-up' : 'bi-pencil'}`}/>
-          </button>
+          </button>}
         </div>
 
-        {isSectionIdOpen && (
+        {isSectionIdOpen && !fixedLayout && (
           <div className="section-row__id-edit">
             <label className="item-card__label" htmlFor={`section-id-${section.key}`}>
               섹션 식별자 (sectionId)
@@ -208,9 +211,11 @@ const SectionLayoutRow: React.FC<SectionLayoutRowProps> = ({
           </div>
         )}
 
+        {fixedLayout && error && <div className="invalid-feedback d-block">{error}</div>}
+
         <div className="section-row__controls">
-          {/* 하단 여백: 자주 쓰는 값은 칩으로, 그 외 값은 직접 입력으로 다룹니다. */}
-          <div className="section-row__field">
+          {/* 하단 여백: 자주 쓰는 값은 칩으로, 그 외 값은 직접 입력으로 다룹니다. 고정 화면은 서버가 0으로 저장합니다. */}
+          {!fixedLayout && <div className="section-row__field">
             <span className="item-card__label">하단 여백</span>
             <div className="margin-picker" role="group" aria-label={`${label} 섹션 하단 여백`}>
               {MARGIN_PRESETS.map((preset) => (
@@ -240,7 +245,7 @@ const SectionLayoutRow: React.FC<SectionLayoutRowProps> = ({
                 onChange={(event) => onChange({marginBottom: parseMarginBottom(event.target.value)})}
               />
             </div>
-          </div>
+          </div>}
 
           <div className="section-row__field section-row__field--visible">
             <span className="item-card__label">노출</span>
@@ -263,48 +268,15 @@ const SectionLayoutRow: React.FC<SectionLayoutRowProps> = ({
             </div>
           </div>
 
-          {adMobHeightField && (
-            <div className="section-row__field">
-              <label className="item-card__label" htmlFor={`ad-mob-height-${section.key}`}>
-                광고 높이
-              </label>
-              <div className="margin-picker" role="group" aria-label={`${label} 광고 카드 높이`}>
-                {adMobHeightPresets.map((preset) => (
-                  <button
-                    key={preset}
-                    type="button"
-                    className={`margin-picker__chip ${getAdMobHeight(section.config) === preset ? 'is-selected' : ''}`}
-                    disabled={!editable}
-                    aria-pressed={getAdMobHeight(section.config) === preset}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      onChange({config: {type: 'AD_MOB', height: preset}});
-                    }}
-                  >
-                    {preset}
-                  </button>
-                ))}
-                <input
-                  id={`ad-mob-height-${section.key}`}
-                  type="number"
-                  className="margin-picker__input form-control form-control-sm"
-                  min={adMobMinHeight}
-                  max={adMobMaxHeight}
-                  value={getAdMobHeight(section.config)}
-                  disabled={!editable}
-                  aria-label={`${label} 광고 카드 높이 직접 입력`}
-                  onClick={(event) => event.stopPropagation()}
-                  onChange={(event) => onChange({
-                    config: {type: 'AD_MOB', height: Number(event.target.value) || 0}
-                  })}
-                />
-                <span className="small text-body-secondary align-self-center">dp</span>
-              </div>
-              <span className="form-text">
-                {adMobMinHeight}~{adMobMaxHeight}dp 범위에서 설정할 수 있습니다. 기본 높이는 {AD_MOB_DEFAULT_HEIGHT}dp입니다.
-              </span>
-            </div>
-          )}
+          <SectionConfigEditor
+            sectionKey={section.key}
+            sectionType={section.sectionType}
+            label={label}
+            config={section.config}
+            error={configError}
+            editable={editable}
+            onChange={(config) => onChange({config})}
+          />
         </div>
       </div>
 
@@ -313,11 +285,11 @@ const SectionLayoutRow: React.FC<SectionLayoutRowProps> = ({
         터치 환경에서는 드래그를 쓸 수 없어 이 버튼들이 순서 변경의 유일한 수단이므로,
         목록이 길 때를 대비해 맨 위/맨 아래로 한 번에 보내는 버튼도 함께 둡니다.
       */}
-      <div className="section-row__actions">
+      {!fixedLayout && <div className="section-row__actions">
         <button
           type="button"
           className="btn btn-sm btn-outline-secondary section-row__move section-row__move--edge"
-          disabled={!editable || !canMoveUp}
+          disabled={!orderable || !canMoveUp}
           onClick={(event) => {
             event.stopPropagation();
             onMoveToTop();
@@ -330,7 +302,7 @@ const SectionLayoutRow: React.FC<SectionLayoutRowProps> = ({
         <button
           type="button"
           className="btn btn-sm btn-outline-secondary section-row__move"
-          disabled={!editable || !canMoveUp}
+          disabled={!orderable || !canMoveUp}
           onClick={(event) => {
             event.stopPropagation();
             onMoveUp();
@@ -343,7 +315,7 @@ const SectionLayoutRow: React.FC<SectionLayoutRowProps> = ({
         <button
           type="button"
           className="btn btn-sm btn-outline-secondary section-row__move"
-          disabled={!editable || !canMoveDown}
+          disabled={!orderable || !canMoveDown}
           onClick={(event) => {
             event.stopPropagation();
             onMoveDown();
@@ -356,7 +328,7 @@ const SectionLayoutRow: React.FC<SectionLayoutRowProps> = ({
         <button
           type="button"
           className="btn btn-sm btn-outline-secondary section-row__move section-row__move--edge"
-          disabled={!editable || !canMoveDown}
+          disabled={!orderable || !canMoveDown}
           onClick={(event) => {
             event.stopPropagation();
             onMoveToBottom();
@@ -380,7 +352,7 @@ const SectionLayoutRow: React.FC<SectionLayoutRowProps> = ({
         >
           <i className="bi bi-trash"/>
         </button>
-      </div>
+      </div>}
     </div>
   );
 };

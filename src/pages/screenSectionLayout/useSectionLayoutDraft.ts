@@ -1,7 +1,5 @@
 import {useCallback, useMemo, useRef, useState} from 'react';
 import {
-  AdMobSectionConfig,
-  AD_MOB_DEFAULT_HEIGHT,
   ScreenSectionLayout,
   ScreenSectionLayoutConfig,
   ScreenSectionLayoutItemRequest,
@@ -9,7 +7,7 @@ import {
   SectionTypeMeta
 } from '@/types/screenSectionLayout';
 import {buildDefaultSectionId} from '@/utils/validation/screenSectionLayoutValidation';
-import {getConfigField} from '@/constants/screenSectionLayout';
+import {buildInitialConfig, formatSectionConfig} from '@/utils/sectionConfigUtils';
 
 /**
  * 편집 중인 섹션 한 줄.
@@ -36,14 +34,27 @@ const toDraft = (layout: ScreenSectionLayout, key: string): SectionLayoutDraft =
   config: layout.config,
 });
 
-/** config가 없거나 EMPTY인 광고도 서버 기본 높이로 동일하게 비교합니다. */
-export const getAdMobHeight = (config?: ScreenSectionLayoutConfig | null): number =>
-  config?.type === 'AD_MOB' ? config.height : AD_MOB_DEFAULT_HEIGHT;
-
-const toRequestConfig = (section: SectionLayoutDraft): AdMobSectionConfig | undefined => {
-  if (section.config?.type !== 'AD_MOB') return undefined;
-  return section.config;
-};
+/**
+ * 섹션 순서 편집을 지원하지 않는 화면의 편집 목록을 만듭니다.
+ *
+ * 섹션 메타 순서대로 고정 배치하고, sectionId는 섹션 타입과 같게, 하단 여백은 0으로 맞춥니다.
+ * 저장된 레이아웃이 없는 섹션은 메타의 첫 번째 설정 타입으로 채웁니다.
+ */
+const toFixedDrafts = (
+  layouts: ScreenSectionLayout[],
+  sectionTypes: SectionTypeMeta[],
+  nextKey: () => string
+): SectionLayoutDraft[] => sectionTypes.filter((meta) => meta.isConfigurable).map((meta) => {
+  const saved = layouts.find((layout) => layout.sectionType === meta.value);
+  return {
+    key: nextKey(),
+    sectionType: meta.value,
+    sectionId: meta.value,
+    marginBottom: 0,
+    isVisible: saved?.isVisible ?? true,
+    config: saved?.config ?? buildInitialConfig(meta.value),
+  };
+});
 
 /** 저장 여부 비교용 스냅샷. key는 렌더링 전용이라 제외합니다. */
 const toComparable = (sections: SectionLayoutDraft[]): string =>
@@ -52,7 +63,7 @@ const toComparable = (sections: SectionLayoutDraft[]): string =>
     sectionId: section.sectionId.trim(),
     marginBottom: section.marginBottom,
     isVisible: section.isVisible,
-    adMobHeight: section.sectionType === 'AD_MOB' ? getAdMobHeight(section.config) : undefined,
+    config: formatSectionConfig(section.config),
   })));
 
 /**
@@ -71,18 +82,24 @@ export const useSectionLayoutDraft = () => {
     return `section-${keySeq.current}`;
   }, []);
 
-  /** 서버에서 받은 목록으로 편집 상태를 초기화합니다. */
-  const reset = useCallback((layouts: ScreenSectionLayout[]) => {
+  /**
+   * 서버에서 받은 목록으로 편집 상태를 초기화합니다.
+   *
+   * fixedSectionTypes를 넘기면 섹션 순서 편집을 지원하지 않는 화면으로 보고,
+   * 저장된 목록과 무관하게 메타 순서대로 섹션을 고정 배치합니다.
+   */
+  const reset = useCallback((layouts: ScreenSectionLayout[], fixedSectionTypes?: SectionTypeMeta[]) => {
     // 서버가 displayOrder를 계산해 내려주지만 응답 순서를 신뢰하지 않고 명시적으로 정렬합니다.
     const ordered = [...layouts].sort((a, b) => a.displayOrder - b.displayOrder);
     const drafts = ordered.map((layout) => toDraft(layout, nextKey()));
-    setSections(drafts);
     setSavedSections(drafts);
+    // 고정 화면은 아직 저장하지 않은 섹션이 있을 수 있어, 그 경우 저장 전까지 변경 사항으로 표시됩니다.
+    setSections(fixedSectionTypes ? toFixedDrafts(ordered, fixedSectionTypes, nextKey) : drafts);
   }, [nextKey]);
 
   /** 저장 성공 후 현재 상태를 기준선으로 삼습니다. */
-  const markSaved = useCallback((layouts: ScreenSectionLayout[]) => {
-    reset(layouts);
+  const markSaved = useCallback((layouts: ScreenSectionLayout[], fixedSectionTypes?: SectionTypeMeta[]) => {
+    reset(layouts, fixedSectionTypes);
   }, [reset]);
 
   const updateSection = useCallback((index: number, changes: Partial<SectionLayoutDraft>) => {
@@ -93,7 +110,7 @@ export const useSectionLayoutDraft = () => {
     setSections((prev) => prev.filter((_, i) => i !== index));
   }, []);
 
-  const addSection = useCallback((sectionType: SectionType, meta?: SectionTypeMeta) => {
+  const addSection = useCallback((sectionType: SectionType) => {
     setSections((prev) => {
       const sectionId = buildDefaultSectionId(sectionType, prev.map((section) => section.sectionId.trim()));
       return [...prev, {
@@ -102,9 +119,7 @@ export const useSectionLayoutDraft = () => {
         sectionId,
         marginBottom: 0,
         isVisible: true,
-        config: getConfigField(meta, 'AD_MOB', 'height')
-          ? {type: 'AD_MOB', height: AD_MOB_DEFAULT_HEIGHT}
-          : undefined,
+        config: buildInitialConfig(sectionType),
       }];
     });
   }, [nextKey]);
@@ -147,7 +162,7 @@ export const useSectionLayoutDraft = () => {
       sectionId: section.sectionId.trim(),
       marginBottom: section.marginBottom,
       isVisible: section.isVisible,
-      ...(toRequestConfig(section) ? {config: toRequestConfig(section)} : {}),
+      ...(section.config ? {config: section.config} : {}),
     })), [sections]);
 
   const isDirty = useMemo(

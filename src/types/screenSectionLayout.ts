@@ -14,20 +14,29 @@ export type SectionType = string;
 export interface ScreenTypeMeta {
   value: ScreenType;
   label: string;
-  /** 섹션 목록이 정의된 화면인지 여부. false면 교체 시 서버가 400을 반환합니다. */
-  isConfigurable: boolean;
+  /** 섹션 추가·삭제·순서 변경 지원 여부. false면 섹션 구성이 고정되고 섹션별 설정값만 편집합니다. */
+  supportsSectionOrdering: boolean;
 }
 
-export type ConfigValueType = 'INTEGER' | string;
+export type ConfigValueType = 'INTEGER' | 'DECIMAL' | 'BOOLEAN' | 'INTEGER_LIST';
 
+/** 설정 입력 필드 정의 */
 export interface SectionConfigFieldMeta {
   name: string;
   valueType: ConfigValueType;
   isRequired: boolean;
+  /** 최솟값. INTEGER_LIST는 각 원소의 최솟값 */
   min?: number;
+  /** 최댓값(포함). INTEGER_LIST는 각 원소의 최댓값 */
   max?: number;
+  /** INTEGER_LIST의 최대 원소 개수 */
+  maxItems?: number;
+  /** true면 min을 포함하지 않습니다(초과). */
+  isMinExclusive?: boolean;
+  description?: string;
 }
 
+/** 섹션이 지원하는 설정 타입과 입력 필드 스키마. 저장된 설정값이 아닙니다. (constants/screenSectionLayout.ts) */
 export interface SectionConfigMeta {
   type: string;
   fields: SectionConfigFieldMeta[];
@@ -43,22 +52,21 @@ export interface SectionTypeMeta {
   isConfigurable: boolean;
   /** 동일 섹션을 여러 번 넣을 수 있는지 여부 */
   allowsMultiple: boolean;
-  /** 해당 섹션에서 선택할 수 있는 설정 타입과 입력 필드 정의 */
-  configs: SectionConfigMeta[];
 }
 
-/** AD_MOB 섹션의 타입별 세부 설정 */
-export interface AdMobSectionConfig {
-  type: 'AD_MOB';
-  height: number;
-}
+/** 설정 필드 값. 입력 도중에는 숫자 자리에 NaN이 들어갈 수 있으며, 저장 전 검증에서 걸러집니다. */
+export type SectionConfigValue = number | boolean | number[];
 
-/** 서버가 기존 데이터에 내려줄 수 있는 빈 설정 */
-export interface EmptySectionConfig {
-  type: 'EMPTY';
+/**
+ * 섹션 설정값.
+ *
+ * type은 섹션 타입별 설정 정의(SECTION_CONFIGS)의 type 중 하나이고, 나머지 키는 해당 fields의 name입니다.
+ * 예: {type: 'AD_MOB', height: 100}, {type: 'HOME_LIST', pageSize: 20, adPositions: [3, 8], adHeight: 80}
+ */
+export interface ScreenSectionLayoutConfig {
+  type: string;
+  [field: string]: SectionConfigValue | string | undefined;
 }
-
-export type ScreenSectionLayoutConfig = AdMobSectionConfig | EmptySectionConfig;
 
 /** 섹션 레이아웃 (서버 응답) */
 export interface ScreenSectionLayout {
@@ -81,7 +89,7 @@ export interface ScreenSectionLayoutItemRequest {
   sectionId: string;
   marginBottom: number;
   isVisible: boolean;
-  /** 현재는 AD_MOB만 지원합니다. 생략하면 서버 기본값을 사용합니다. */
+  /** 생략하면 서버 기본값을 사용합니다. */
   config?: ScreenSectionLayoutConfig;
 }
 
@@ -99,13 +107,6 @@ export interface ScreenSectionLayoutListResponse {
 /** marginBottom 허용 범위 */
 export const MARGIN_BOTTOM_MIN = 0;
 export const MARGIN_BOTTOM_MAX = 100;
-
-/** Admin에서 허용하는 AD_MOB 광고 카드 높이 범위 */
-export const AD_MOB_HEIGHT_MIN = 50;
-export const AD_MOB_HEIGHT_MAX = 200;
-
-/** config가 없거나 EMPTY인 구버전 광고의 호환 높이 */
-export const AD_MOB_DEFAULT_HEIGHT = 50;
 
 /** sectionId 최대 길이 */
 export const SECTION_ID_MAX_LENGTH = 100;

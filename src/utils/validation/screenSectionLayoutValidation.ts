@@ -8,15 +8,14 @@
 import {
   MARGIN_BOTTOM_MAX,
   MARGIN_BOTTOM_MIN,
-  AD_MOB_HEIGHT_MIN,
-  AD_MOB_HEIGHT_MAX,
   ScreenSectionLayoutItemRequest,
   ScreenType,
   SECTION_ID_MAX_LENGTH,
   SectionType,
   SectionTypeMeta
 } from '@/types/screenSectionLayout';
-import {findSectionTypeMeta, getConfigField} from '@/constants/screenSectionLayout';
+import {findSectionTypeMeta} from '@/constants/screenSectionLayout';
+import {SectionConfigError, validateSectionConfig} from '@/utils/sectionConfigUtils';
 
 /** 섹션별 검증 오류. key는 섹션 목록의 인덱스입니다. */
 export interface SectionLayoutValidationResult {
@@ -24,6 +23,8 @@ export interface SectionLayoutValidationResult {
   formErrors: string[];
   /** 인덱스별 오류 메시지 */
   itemErrors: Record<number, string>;
+  /** 인덱스별 설정(config) 오류. 설정 입력란 아래에 따로 표시합니다. */
+  configErrors: Record<number, SectionConfigError>;
   isValid: boolean;
 }
 
@@ -34,10 +35,11 @@ export const validateSectionLayouts = (
 ): SectionLayoutValidationResult => {
   const formErrors: string[] = [];
   const itemErrors: Record<number, string> = {};
+  const configErrors: Record<number, SectionConfigError> = {};
 
   if (sectionTypes.length === 0) {
     formErrors.push('섹션 목록이 정의되지 않은 화면입니다. 레이아웃을 저장할 수 없습니다.');
-    return {formErrors, itemErrors, isValid: false};
+    return {formErrors, itemErrors, configErrors, isValid: false};
   }
 
   if (sections.length === 0) {
@@ -65,6 +67,11 @@ export const validateSectionLayouts = (
     if (!meta) {
       itemErrors[index] = '이 화면에서 사용할 수 없는 섹션입니다.';
       return;
+    }
+
+    const configError = section.config ? validateSectionConfig(section.config, meta) : undefined;
+    if (configError) {
+      configErrors[index] = configError;
     }
 
     if (!meta.isConfigurable) {
@@ -98,28 +105,6 @@ export const validateSectionLayouts = (
       itemErrors[index] = `하단 여백은 ${MARGIN_BOTTOM_MIN} ~ ${MARGIN_BOTTOM_MAX} 사이의 정수여야 합니다.`;
       return;
     }
-
-    if (section.config !== undefined) {
-      if (section.config.type === 'EMPTY') {
-        return;
-      }
-
-      if (section.sectionType !== 'AD_MOB') {
-        itemErrors[index] = 'config는 AD_MOB 섹션에서만 지정할 수 있습니다.';
-        return;
-      }
-
-      const heightField = getConfigField(meta, 'AD_MOB', 'height');
-      const minHeight = heightField?.min ?? AD_MOB_HEIGHT_MIN;
-      const maxHeight = heightField?.max ?? AD_MOB_HEIGHT_MAX;
-      if (section.config.type !== 'AD_MOB'
-        || !heightField
-        || !Number.isInteger(section.config.height)
-        || section.config.height < minHeight
-        || section.config.height > maxHeight) {
-        itemErrors[index] = `광고 높이는 ${minHeight} ~ ${maxHeight} 사이의 정수여야 합니다.`;
-      }
-    }
   });
 
   // 필수 섹션은 반드시 isVisible=true로 포함되어야 합니다.
@@ -137,7 +122,10 @@ export const validateSectionLayouts = (
   return {
     formErrors,
     itemErrors,
-    isValid: formErrors.length === 0 && Object.keys(itemErrors).length === 0,
+    configErrors,
+    isValid: formErrors.length === 0
+      && Object.keys(itemErrors).length === 0
+      && Object.keys(configErrors).length === 0,
   };
 };
 

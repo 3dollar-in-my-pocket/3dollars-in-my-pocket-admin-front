@@ -64,8 +64,10 @@ const ScreenSectionLayoutManagement = () => {
   } = useSectionLayoutDraft();
 
   const screenMeta = findScreenTypeMeta(screenTypes, screenType);
-  const isScreenConfigurable = screenMeta?.isConfigurable ?? false;
-  const editable = canManage && isScreenConfigurable && !isSaving;
+  const editable = canManage && !isSaving;
+  // 순서 편집을 지원하지 않는 화면은 섹션 구성이 고정되어 섹션별 노출 여부와 설정값만 편집합니다.
+  const fixedLayout = screenMeta?.supportsSectionOrdering === false;
+  const orderable = editable && !fixedLayout;
 
   const configurableSectionTypes = useMemo(
     () => getConfigurableSectionTypes(sectionTypes),
@@ -103,12 +105,11 @@ const ScreenSectionLayoutManagement = () => {
    */
   const saveBlockedReason = useMemo(() => {
     if (!canManage) return '레이아웃 수정은 운영자 이상만 가능합니다. 현재는 읽기 전용입니다.';
-    if (!isScreenConfigurable) return '이 화면은 섹션 목록이 정의되어 있지 않아 저장할 수 없습니다.';
     if (isLoading || isSaving) return null;
     if (!isDirty) return '변경 사항이 없습니다.';
     if (!validation.isValid) return '입력값에 오류가 있어 저장할 수 없습니다. 아래 표시된 항목을 확인해주세요.';
     return null;
-  }, [canManage, isScreenConfigurable, isLoading, isSaving, isDirty, validation.isValid]);
+  }, [canManage, isLoading, isSaving, isDirty, validation.isValid]);
 
   const fetchScreenData = useCallback(async (targetScreenType: ScreenType) => {
     setIsLoading(true);
@@ -117,23 +118,32 @@ const ScreenSectionLayoutManagement = () => {
       const metadataResponse = await screenSectionLayoutApi.getSectionTypes('USER', targetScreenType);
       if (!metadataResponse?.ok) {
         setSectionTypes([]);
+        reset([]);
         return;
       }
 
       const nextSectionTypes = metadataResponse.data?.contents ?? [];
       setSectionTypes(nextSectionTypes);
 
+      // 섹션 타입 목록이 비어 있으면 편집할 수 있는 레이아웃이 없는 화면이라 레이아웃을 조회하지 않습니다.
+      if (nextSectionTypes.length === 0) {
+        reset([]);
+        setIsLoaded(true);
+        return;
+      }
+
       const response = await screenSectionLayoutApi.getSectionLayouts(targetScreenType);
       if (!response?.ok) {
         return;
       }
 
-      reset(response.data?.contents ?? []);
+      const isFixed = findScreenTypeMeta(screenTypes, targetScreenType)?.supportsSectionOrdering === false;
+      reset(response.data?.contents ?? [], isFixed ? nextSectionTypes : undefined);
       setIsLoaded(true);
     } finally {
       setIsLoading(false);
     }
-  }, [reset]);
+  }, [reset, screenTypes]);
 
   useEffect(() => {
     const loadScreens = async () => {
@@ -213,7 +223,7 @@ const ScreenSectionLayoutManagement = () => {
 
   const handleAddSection = (sectionType: SectionType) => {
     if (!editable) return;
-    addSection(sectionType, findSectionTypeMeta(sectionTypes, sectionType));
+    addSection(sectionType);
   };
 
   const handleRemoveSection = async (index: number) => {
@@ -235,7 +245,7 @@ const ScreenSectionLayoutManagement = () => {
   };
 
   const handleDragOver = (event: DragEvent<HTMLDivElement>, index: number) => {
-    if (dragIndex === null) return;
+    if (!orderable || dragIndex === null) return;
     event.preventDefault();
     const rect = event.currentTarget.getBoundingClientRect();
     setDropTarget({
@@ -246,7 +256,7 @@ const ScreenSectionLayoutManagement = () => {
 
   const handleDrop = (event: DragEvent<HTMLDivElement>, index: number) => {
     event.preventDefault();
-    if (dragIndex === null) return;
+    if (!orderable || dragIndex === null) return;
 
     const rect = event.currentTarget.getBoundingClientRect();
     const position = event.clientY > rect.top + rect.height / 2 ? 'after' : 'before';
@@ -287,7 +297,7 @@ const ScreenSectionLayoutManagement = () => {
         return;
       }
 
-      markSaved(response.data?.contents ?? []);
+      markSaved(response.data?.contents ?? [], fixedLayout ? sectionTypes : undefined);
       toast.success('섹션 레이아웃이 저장되었습니다.');
     } finally {
       setIsSaving(false);
@@ -295,6 +305,16 @@ const ScreenSectionLayoutManagement = () => {
   };
 
   const renderSectionList = () => {
+    if (isLoaded && sectionTypes.length === 0) {
+      return (
+        <EmptyState
+          icon="bi-layout-text-window"
+          title="편집할 수 있는 레이아웃이 없습니다"
+          description="이 화면은 서버에 정의된 섹션이 없어 레이아웃을 구성할 수 없습니다."
+        />
+      );
+    }
+
     if (sections.length === 0) {
       return (
         <EmptyState
@@ -316,11 +336,16 @@ const ScreenSectionLayoutManagement = () => {
             index={index}
             meta={findSectionTypeMeta(sectionTypes, section.sectionType)}
             error={validation.itemErrors[index]}
+            configError={validation.configErrors[index]}
             editable={editable}
+            fixedLayout={fixedLayout}
+            orderable={orderable}
             isActive={activeKey === section.key}
             isDragging={dragIndex === index}
             dropPosition={dropTarget?.index === index ? dropTarget.position : undefined}
-            onDragStart={() => setDragIndex(index)}
+            onDragStart={() => {
+              if (orderable) setDragIndex(index);
+            }}
             onDragEnd={() => {
               setDragIndex(null);
               setDropTarget(null);
@@ -332,10 +357,18 @@ const ScreenSectionLayoutManagement = () => {
               }
             }}
             onDrop={(event) => handleDrop(event, index)}
-            onMoveUp={() => moveSection(index, index - 1)}
-            onMoveDown={() => moveSection(index, index + 1)}
-            onMoveToTop={() => moveSection(index, 0)}
-            onMoveToBottom={() => moveSection(index, sections.length - 1)}
+            onMoveUp={() => {
+              if (orderable) moveSection(index, index - 1);
+            }}
+            onMoveDown={() => {
+              if (orderable) moveSection(index, index + 1);
+            }}
+            onMoveToTop={() => {
+              if (orderable) moveSection(index, 0);
+            }}
+            onMoveToBottom={() => {
+              if (orderable) moveSection(index, sections.length - 1);
+            }}
             canMoveUp={index > 0}
             canMoveDown={index < sections.length - 1}
             totalCount={sections.length}
@@ -357,18 +390,15 @@ const ScreenSectionLayoutManagement = () => {
       );
     }
 
-    if (!isScreenConfigurable) {
-      return (
-        <EmptyState
-          icon="bi-slash-circle"
-          title="섹션을 설정할 수 없는 화면입니다"
-          description={`${screenMeta?.label ?? screenType} 화면은 아직 섹션 목록이 정의되지 않았습니다. 현재는 가게 상세 화면만 설정할 수 있습니다.`}
-        />
-      );
-    }
-
     return (
       <>
+        {fixedLayout && (
+          <div className="alert alert-info py-2 small" role="note">
+            <i className="bi bi-lock me-1"/>
+            섹션 구성과 순서가 고정된 화면입니다. 섹션 추가·삭제·순서 변경과 하단 여백 편집 없이 섹션별 설정값만 수정할 수 있습니다.
+          </div>
+        )}
+
         {validation.formErrors.length > 0 && sections.length > 0 && (
           <div className="alert alert-danger py-2" role="alert">
             <ul className="mb-0 ps-3 small">
@@ -381,7 +411,7 @@ const ScreenSectionLayoutManagement = () => {
 
         {renderSectionList()}
 
-        {canManage && (
+        {canManage && !fixedLayout && sectionTypes.length > 0 && (
           <SectionAddPanel
             addableSectionTypes={addableSectionTypes}
             totalConfigurableCount={configurableSectionTypes.length}
@@ -396,7 +426,7 @@ const ScreenSectionLayoutManagement = () => {
   return (
     <div>
       <PageHeader
-        description="유저 앱 화면의 섹션 노출 순서와 하단 여백, 노출 여부를 관리합니다. 왼쪽 미리보기로 결과를 확인하며 편집한 뒤 전체 저장을 눌러 한 번에 반영하세요."
+        description="유저 앱 화면의 섹션 노출 순서와 하단 여백, 노출 여부, 섹션별 설정을 관리합니다. 왼쪽 미리보기로 결과를 확인하며 편집한 뒤 전체 저장을 눌러 한 번에 반영하세요."
         meta={
           <div className="d-flex align-items-center gap-2 flex-wrap">
             {/* 화면 선택은 페이지 전체의 대상을 고르는 조작이라 헤더에 둡니다. */}
@@ -410,12 +440,12 @@ const ScreenSectionLayoutManagement = () => {
             >
               {screenTypes.map((screen) => (
                 <option key={screen.value} value={screen.value}>
-                  {screen.label}{screen.isConfigurable ? '' : ' (설정 불가)'}
+                  {screen.label}
                 </option>
               ))}
             </select>
 
-            {!isLoading && isScreenConfigurable && (
+            {!isLoading && (
               <span className="page-count">
                 노출 {visibleCount}개
                 {hiddenCount > 0 && <> · <span className="text-danger">미노출 {hiddenCount}개</span></>}
@@ -559,8 +589,10 @@ const ScreenSectionLayoutManagement = () => {
           <SectionCard
             title="섹션 목록"
             icon="bi-list-ol"
-            description="위에 있을수록 화면 위쪽에 노출됩니다. 핸들을 드래그하거나 방향키로 순서를 바꿀 수 있습니다."
-            aside={!isLoading && isScreenConfigurable && (
+            description={fixedLayout
+              ? '섹션이 정해진 순서로 고정 배치됩니다. 섹션별 설정값만 수정할 수 있습니다.'
+              : '위에 있을수록 화면 위쪽에 노출됩니다. 핸들을 드래그하거나 방향키로 순서를 바꿀 수 있습니다.'}
+            aside={!isLoading && (
               <span className="page-count">총 {sections.length}개</span>
             )}
           >
