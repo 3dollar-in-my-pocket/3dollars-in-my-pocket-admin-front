@@ -1,4 +1,5 @@
 import {SectionLayoutDraft} from './useSectionLayoutDraft';
+import {formatSectionConfig} from '@/utils/sectionConfigUtils';
 
 export type SectionDiffStatus = 'added' | 'removed' | 'moved' | 'updated' | 'unchanged';
 
@@ -81,6 +82,11 @@ export const diffSectionLayouts = (
         before: formatVisible(previous.section.isVisible),
         after: formatVisible(section.isVisible),
       });
+    }
+    const beforeConfig = formatSectionConfig(previous.section.config);
+    const afterConfig = formatSectionConfig(section.config);
+    if (beforeConfig !== afterConfig) {
+      changes.push({label: '설정', before: beforeConfig, after: afterConfig});
     }
     // sectionType은 UI에서 바꿀 수 없지만, 같은 sectionId를 다른 타입으로 재사용한 경우를 대비해 비교합니다.
     if (previous.section.sectionType !== section.sectionType) {

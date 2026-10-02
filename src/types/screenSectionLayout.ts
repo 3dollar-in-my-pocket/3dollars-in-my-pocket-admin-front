@@ -5,37 +5,50 @@
  */
 
 /** 레이아웃을 설정할 유저 앱 화면 */
-export type ScreenType =
-  | 'STORE_DETAIL'
-  | 'HOME'
-  | 'HOME_LIST'
-  | 'STORE_BOTTOM_SHEET'
-  | 'STORE_CONTRIBUTORS';
+export type ScreenType = string;
 
 /** 섹션 타입 (STORE_DETAIL 기준) */
-export type SectionType =
-  | 'PREVIEW'
-  | 'TAB'
-  | 'CALLOUT'
-  | 'RELATED_STORES'
-  | 'AD_MOB'
-  | 'EDIT'
-  | 'VISIT'
-  | 'REVIEW'
-  | 'POST'
-  | 'IMAGE'
-  | 'APPEARANCE_DAY'
-  | 'COUPON'
-  | 'INFO'
-  | 'CTA'
-  | 'MARGIN';
+export type SectionType = string;
 
 /** 화면 메타 정보 */
 export interface ScreenTypeMeta {
   value: ScreenType;
   label: string;
-  /** 섹션 목록이 정의된 화면인지 여부. false면 교체 시 서버가 400을 반환합니다. */
-  isConfigurable: boolean;
+  /** 섹션 추가·삭제·순서 변경 지원 여부. false면 섹션 구성이 고정되고 섹션별 설정값만 편집합니다. */
+  supportsSectionOrdering: boolean;
+}
+
+export type ConfigValueType = 'INTEGER' | 'DECIMAL' | 'BOOLEAN' | 'INTEGER_LIST';
+
+/** 설정 입력 필드 정의 */
+export interface SectionConfigFieldMeta {
+  /** 서버 요청에 쓰는 키 */
+  name: string;
+  /** 화면과 오류 메시지에 보여줄 이름 */
+  label: string;
+  valueType: ConfigValueType;
+  isRequired: boolean;
+  /** 최솟값. INTEGER_LIST는 각 원소의 최솟값 */
+  min?: number;
+  /** 최댓값(포함). INTEGER_LIST는 각 원소의 최댓값 */
+  max?: number;
+  /** INTEGER_LIST의 최대 원소 개수 */
+  maxItems?: number;
+  /** true면 min을 포함하지 않습니다(초과). */
+  isMinExclusive?: boolean;
+  /** 입력값 뒤에 붙일 단위. 예: dp, m */
+  unit?: string;
+  /** 빠르게 고를 수 있는 추천값. INTEGER/DECIMAL에서만 사용합니다. */
+  presets?: number[];
+  description?: string;
+}
+
+/** 섹션이 지원하는 설정 타입과 입력 필드 스키마. 저장된 설정값이 아닙니다. (constants/screenSectionLayout.ts) */
+export interface SectionConfigMeta {
+  type: string;
+  /** 설정 타입 선택 시 보여줄 이름 */
+  label: string;
+  fields: SectionConfigFieldMeta[];
 }
 
 /** 섹션 메타 정보 */
@@ -50,6 +63,20 @@ export interface SectionTypeMeta {
   allowsMultiple: boolean;
 }
 
+/** 설정 필드 값. 입력 도중에는 숫자 자리에 NaN이 들어갈 수 있으며, 저장 전 검증에서 걸러집니다. */
+export type SectionConfigValue = number | boolean | number[];
+
+/**
+ * 섹션 설정값.
+ *
+ * type은 섹션 타입별 설정 정의(SECTION_CONFIGS)의 type 중 하나이고, 나머지 키는 해당 fields의 name입니다.
+ * 예: {type: 'AD_MOB', height: 100}, {type: 'HOME_LIST', pageSize: 20, adPositions: [3, 8], adHeight: 80}
+ */
+export interface ScreenSectionLayoutConfig {
+  type: string;
+  [field: string]: SectionConfigValue | string | undefined;
+}
+
 /** 섹션 레이아웃 (서버 응답) */
 export interface ScreenSectionLayout {
   id: number;
@@ -60,6 +87,7 @@ export interface ScreenSectionLayout {
   displayOrder: number;
   marginBottom: number;
   isVisible: boolean;
+  config?: ScreenSectionLayoutConfig | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -70,6 +98,8 @@ export interface ScreenSectionLayoutItemRequest {
   sectionId: string;
   marginBottom: number;
   isVisible: boolean;
+  /** 생략하면 서버 기본값을 사용합니다. */
+  config?: ScreenSectionLayoutConfig;
 }
 
 /** 섹션 레이아웃 전체 교체 요청 */

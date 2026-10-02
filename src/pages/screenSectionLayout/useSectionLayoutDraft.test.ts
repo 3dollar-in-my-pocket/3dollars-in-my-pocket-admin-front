@@ -1,6 +1,6 @@
 import {act, renderHook} from '@testing-library/react';
 import {describe, expect, it} from 'vitest';
-import {ScreenSectionLayout} from '@/types/screenSectionLayout';
+import {ScreenSectionLayout, SectionTypeMeta} from '@/types/screenSectionLayout';
 import useSectionLayoutDraft from './useSectionLayoutDraft';
 
 const layout = (
@@ -135,6 +135,13 @@ describe('useSectionLayoutDraft', () => {
       expect(result.current.sections[3].marginBottom).toBe(0);
     });
 
+    it('섹션 타입의 첫 번째 설정 타입으로 초기 설정을 채운다', () => {
+      const {result} = renderDraft();
+      act(() => result.current.addSection('AD_MOB'));
+
+      expect(result.current.sections[3].config).toEqual({type: 'AD_MOB'});
+    });
+
     it('sectionId가 겹치면 일련번호를 붙인다', () => {
       const {result} = renderDraft();
       act(() => result.current.addSection('AD_MOB'));
@@ -186,6 +193,59 @@ describe('useSectionLayoutDraft', () => {
       act(() => result.current.updateSection(0, {sectionId: '  PREVIEW  '}));
 
       expect(result.current.toRequest()[0].sectionId).toBe('PREVIEW');
+    });
+
+    it('AD_MOB 높이를 config로 변환한다', () => {
+      const {result} = renderDraft();
+      act(() => result.current.addSection('AD_MOB'));
+      act(() => result.current.updateSection(3, {config: {type: 'AD_MOB', height: 100}}));
+
+      expect(result.current.toRequest()[3].config).toEqual({type: 'AD_MOB', height: 100});
+    });
+
+    it('config가 없는 AD_MOB은 서버 기본값을 사용하도록 config를 생략한다', () => {
+      const {result} = renderDraft([
+        ...initialLayouts(),
+        {...layout(4, 'AD_MOB', 'AD_MOB', 400), config: undefined},
+      ]);
+
+      expect(result.current.toRequest()[3].config).toBeUndefined();
+    });
+  });
+
+  describe('고정 화면 (supportsSectionOrdering=false)', () => {
+    const homeSectionTypes: SectionTypeMeta[] = ['HOME_FILTER', 'HOME_MAP_CONTROL', 'HOME_LIST', 'HOME_CURATION']
+      .map((value) => ({value, label: value, isRequired: true, isConfigurable: true, allowsMultiple: false}));
+
+    it('저장된 레이아웃이 없으면 메타 순서대로 기본 설정을 채우고 변경 사항으로 표시한다', () => {
+      const {result} = renderHook(() => useSectionLayoutDraft());
+      act(() => result.current.reset([], homeSectionTypes));
+
+      expect(sectionIds(result)).toEqual(['HOME_FILTER', 'HOME_MAP_CONTROL', 'HOME_LIST', 'HOME_CURATION']);
+      expect(result.current.sections[0].config).toEqual({
+        type: 'HOME_FILTER',
+        openStatusDefaultOn: false,
+        recentActivityDefaultOn: false,
+        targetStoresDefaultOn: false,
+        eventFilterVisible: false,
+      });
+      expect(result.current.sections[2].config).toEqual({type: 'HOME_LIST', adPositions: []});
+      expect(result.current.isDirty).toBe(true);
+    });
+
+    it('저장된 설정값을 유지하고 순서는 메타 순서, sectionId는 섹션 타입, 여백은 0으로 맞춘다', () => {
+      const homeList = {
+        ...layout(1, 'HOME_LIST', 'CUSTOM_ID', 100),
+        marginBottom: 16,
+        config: {type: 'HOME_LIST', pageSize: 20, adPositions: [3], adHeight: 80},
+      };
+      const {result} = renderHook(() => useSectionLayoutDraft());
+      act(() => result.current.reset([homeList], homeSectionTypes));
+
+      const section = result.current.sections[2];
+      expect(section.sectionId).toBe('HOME_LIST');
+      expect(section.marginBottom).toBe(0);
+      expect(section.config).toEqual(homeList.config);
     });
   });
 

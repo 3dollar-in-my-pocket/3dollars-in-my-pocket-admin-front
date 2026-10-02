@@ -1,12 +1,29 @@
 import {apiGet, apiPut} from './apiHelpers';
-import {ApiResponse} from '@/types/api';
+import {ApiResponse, ContentListResponse} from '@/types/api';
 import {
   ReplaceScreenSectionLayoutsRequest,
   ScreenSectionLayoutListResponse,
-  ScreenType
+  ScreenType,
+  ScreenTypeMeta,
+  SectionTypeMeta
 } from '@/types/screenSectionLayout';
 
 export default {
+  getScreens: async (application: string): Promise<ApiResponse<ContentListResponse<ScreenTypeMeta>>> => {
+    return apiGet<ContentListResponse<ScreenTypeMeta>>(
+      `/v1/application/${encodeURIComponent(application)}/screens`
+    );
+  },
+
+  getSectionTypes: async (
+    application: string,
+    screenType: ScreenType
+  ): Promise<ApiResponse<ContentListResponse<SectionTypeMeta>>> => {
+    return apiGet<ContentListResponse<SectionTypeMeta>>(
+      `/v1/application/${encodeURIComponent(application)}/screen/${encodeURIComponent(screenType)}/sectionType`
+    );
+  },
+
   /**
    * 화면에 등록된 섹션 레이아웃 전체 조회
    *

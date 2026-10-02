@@ -11,9 +11,11 @@ import {
   ScreenSectionLayoutItemRequest,
   ScreenType,
   SECTION_ID_MAX_LENGTH,
-  SectionType
+  SectionType,
+  SectionTypeMeta
 } from '@/types/screenSectionLayout';
-import {findSectionTypeMeta, getSectionTypes} from '@/constants/screenSectionLayout';
+import {findSectionTypeMeta} from '@/constants/screenSectionLayout';
+import {SectionConfigError, validateSectionConfig} from '@/utils/sectionConfigUtils';
 
 /** 섹션별 검증 오류. key는 섹션 목록의 인덱스입니다. */
 export interface SectionLayoutValidationResult {
@@ -21,20 +23,23 @@ export interface SectionLayoutValidationResult {
   formErrors: string[];
   /** 인덱스별 오류 메시지 */
   itemErrors: Record<number, string>;
+  /** 인덱스별 설정(config) 오류. 설정 입력란 아래에 따로 표시합니다. */
+  configErrors: Record<number, SectionConfigError>;
   isValid: boolean;
 }
 
 export const validateSectionLayouts = (
   screenType: ScreenType,
-  sections: ScreenSectionLayoutItemRequest[]
+  sections: ScreenSectionLayoutItemRequest[],
+  sectionTypes: SectionTypeMeta[]
 ): SectionLayoutValidationResult => {
   const formErrors: string[] = [];
   const itemErrors: Record<number, string> = {};
+  const configErrors: Record<number, SectionConfigError> = {};
 
-  const sectionTypes = getSectionTypes(screenType);
   if (sectionTypes.length === 0) {
     formErrors.push('섹션 목록이 정의되지 않은 화면입니다. 레이아웃을 저장할 수 없습니다.');
-    return {formErrors, itemErrors, isValid: false};
+    return {formErrors, itemErrors, configErrors, isValid: false};
   }
 
   if (sections.length === 0) {
@@ -56,12 +61,17 @@ export const validateSectionLayouts = (
   });
 
   sections.forEach((section, index) => {
-    const meta = findSectionTypeMeta(screenType, section.sectionType);
+    const meta = findSectionTypeMeta(sectionTypes, section.sectionType);
     const sectionId = section.sectionId.trim();
 
     if (!meta) {
       itemErrors[index] = '이 화면에서 사용할 수 없는 섹션입니다.';
       return;
+    }
+
+    const configError = section.config ? validateSectionConfig(section.config, meta) : undefined;
+    if (configError) {
+      configErrors[index] = configError;
     }
 
     if (!meta.isConfigurable) {
@@ -93,6 +103,7 @@ export const validateSectionLayouts = (
       || section.marginBottom < MARGIN_BOTTOM_MIN
       || section.marginBottom > MARGIN_BOTTOM_MAX) {
       itemErrors[index] = `하단 여백은 ${MARGIN_BOTTOM_MIN} ~ ${MARGIN_BOTTOM_MAX} 사이의 정수여야 합니다.`;
+      return;
     }
   });
 
@@ -111,7 +122,10 @@ export const validateSectionLayouts = (
   return {
     formErrors,
     itemErrors,
-    isValid: formErrors.length === 0 && Object.keys(itemErrors).length === 0,
+    configErrors,
+    isValid: formErrors.length === 0
+      && Object.keys(itemErrors).length === 0
+      && Object.keys(configErrors).length === 0,
   };
 };
 

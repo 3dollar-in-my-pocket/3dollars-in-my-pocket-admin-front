@@ -8,7 +8,7 @@ import {Policy} from "@/types/policy";
 import PolicyValueInput from '@/components/policy/PolicyValueInput';
 import {isValidPolicyValue, POLICY_VALUE_TYPE_LABEL} from '@/utils/policyValueUtils';
 
-/** enum API(PolicyCategoryType / PolicyType) 응답 항목 */
+/** enum API(PolicyCategoryType / PolicySubCategoryType / PolicyType) 응답 항목 */
 interface PolicyEnumOption {
   key: string;
   description: string;
@@ -23,12 +23,13 @@ interface PolicyModalProps {
   onHide: () => void;
   policy: Policy | null;
   categories: PolicyEnumOption[];
+  subCategories: PolicyEnumOption[];
   policies: PolicyEnumOption[];
   onRefresh: () => void;
   onDelete: (policyId: string) => void;
 }
 
-const PolicyModal = ({show, onHide, policy, categories, policies, onRefresh, onDelete}: PolicyModalProps) => {
+const PolicyModal = ({show, onHide, policy, categories, subCategories, policies, onRefresh, onDelete}: PolicyModalProps) => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [formData, setFormData] = useState<PolicyFormData>({value: ""});
   const [originalData, setOriginalData] = useState<PolicyFormData | null>(null);
@@ -75,9 +76,11 @@ const PolicyModal = ({show, onHide, policy, categories, policies, onRefresh, onD
 
   if (!policy) return null;
 
-  const getDescriptionFromKey = (key: string, type: "category" | "policy") => {
+  const getDescriptionFromKey = (key: string, type: "category" | "subCategory" | "policy") => {
     if (type === "category") {
       return categories.find((cat) => cat.key === key)?.description || key;
+    } else if (type === "subCategory") {
+      return subCategories.find((sub) => sub.key === key)?.description || key;
     } else if (type === "policy") {
       return policies.find((pol) => pol.key === key)?.description || key;
     }
@@ -113,6 +116,9 @@ const PolicyModal = ({show, onHide, policy, categories, policies, onRefresh, onD
           <div className="row g-3">
             <DetailField label="카테고리" className="col-12 col-sm-6">
               {getDescriptionFromKey(policy.categoryId, "category")}
+            </DetailField>
+            <DetailField label="서브 카테고리" className="col-12 col-sm-6" placeholder="없음">
+              {policy.subCategoryId && getDescriptionFromKey(policy.subCategoryId, "subCategory")}
             </DetailField>
             <DetailField label="정책 ID" className="col-12 col-sm-6" monospace>
               {policy.policyId}

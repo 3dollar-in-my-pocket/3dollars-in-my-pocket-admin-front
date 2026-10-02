@@ -1,11 +1,12 @@
 import React from 'react';
-import {ScreenType} from '@/types/screenSectionLayout';
+import {ScreenType, SectionTypeMeta} from '@/types/screenSectionLayout';
 import {getSectionTypeLabel} from '@/constants/screenSectionLayout';
 import {SectionLayoutDraft} from './useSectionLayoutDraft';
 import {SectionDiffStatus, SectionLayoutDiff} from './sectionLayoutDiff';
 
 interface SectionLayoutCompareProps {
   screenType: ScreenType;
+  sectionTypes: SectionTypeMeta[];
   /** 마지막으로 저장된(서버 기준) 목록 */
   before: SectionLayoutDraft[];
   /** 편집 중인 목록 */
@@ -35,6 +36,7 @@ const STATUS_LABEL: Record<SectionDiffStatus, string> = {
 
 interface ColumnItemProps {
   screenType: ScreenType;
+  sectionTypes: SectionTypeMeta[];
   section: SectionLayoutDraft;
   order: number;
   status: SectionDiffStatus;
@@ -42,8 +44,8 @@ interface ColumnItemProps {
   counterpartOrder: number | null;
 }
 
-const ColumnItem: React.FC<ColumnItemProps> = ({screenType, section, order, status, counterpartOrder}) => {
-  const label = getSectionTypeLabel(screenType, section.sectionType);
+const ColumnItem: React.FC<ColumnItemProps> = ({sectionTypes, section, order, status, counterpartOrder}) => {
+  const label = getSectionTypeLabel(sectionTypes, section.sectionType);
   const moved = status === 'moved' && counterpartOrder !== null && counterpartOrder !== order;
 
   return (
@@ -81,6 +83,7 @@ const ColumnItem: React.FC<ColumnItemProps> = ({screenType, section, order, stat
  */
 const SectionLayoutCompare: React.FC<SectionLayoutCompareProps> = ({
                                                                     screenType,
+                                                                    sectionTypes,
                                                                     before,
                                                                     after,
                                                                     diff
@@ -120,6 +123,7 @@ const SectionLayoutCompare: React.FC<SectionLayoutCompareProps> = ({
           <ColumnItem
             key={section.key}
             screenType={screenType}
+            sectionTypes={sectionTypes}
             section={section}
             order={index + 1}
             status={statusOf(section, side)}

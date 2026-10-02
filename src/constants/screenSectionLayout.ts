@@ -1,82 +1,147 @@
-import {ScreenType, ScreenTypeMeta, SectionType, SectionTypeMeta} from '@/types/screenSectionLayout';
+import {
+  ScreenType,
+  ScreenTypeMeta,
+  SectionConfigFieldMeta,
+  SectionConfigMeta,
+  SectionType,
+  SectionTypeMeta
+} from '@/types/screenSectionLayout';
 
-/**
- * 레이아웃을 설정할 수 있는 유저 앱 화면 목록
- *
- * 현재 섹션 목록이 정의된 화면은 STORE_DETAIL 뿐이며,
- * 나머지 화면으로 교체를 시도하면 서버가 400을 반환합니다.
- */
-export const SCREEN_TYPES: ScreenTypeMeta[] = [
-  {value: 'STORE_DETAIL', label: '가게 상세', isConfigurable: true},
-  {value: 'HOME', label: '홈', isConfigurable: false},
-  {value: 'HOME_LIST', label: '홈 리스트', isConfigurable: false},
-  {value: 'STORE_BOTTOM_SHEET', label: '가게 바텀시트', isConfigurable: false},
-  {value: 'STORE_CONTRIBUTORS', label: '가게 기여자', isConfigurable: false},
-];
-
+/** 메타데이터 조회 전 초기 상태에서 사용하는 화면 코드입니다. */
 export const DEFAULT_SCREEN_TYPE: ScreenType = 'STORE_DETAIL';
 
-/**
- * STORE_DETAIL 화면에서 사용할 수 있는 섹션 목록
- *
- * - isRequired: PREVIEW, TAB은 isVisible=true로 반드시 포함되어야 합니다.
- * - isConfigurable: MARGIN은 서버가 marginBottom을 보고 자동 삽입하므로 어드민에서 다루지 않습니다.
- * - allowsMultiple: AD_MOB만 동일 섹션을 여러 번 넣을 수 있습니다.
- */
-export const STORE_DETAIL_SECTION_TYPES: SectionTypeMeta[] = [
-  {value: 'PREVIEW', label: '가게 미리보기', isRequired: true, isConfigurable: true, allowsMultiple: false},
-  {value: 'TAB', label: '탭', isRequired: true, isConfigurable: true, allowsMultiple: false},
-  {value: 'CALLOUT', label: '인증 가게 안내 배너', isRequired: false, isConfigurable: true, allowsMultiple: false},
-  {value: 'RELATED_STORES', label: '연관 가게 추천', isRequired: false, isConfigurable: true, allowsMultiple: false},
-  {value: 'AD_MOB', label: '애드몹 광고', isRequired: false, isConfigurable: true, allowsMultiple: true},
-  {value: 'EDIT', label: '지도 & 정보 수정', isRequired: false, isConfigurable: true, allowsMultiple: false},
-  {value: 'VISIT', label: '방문 인증', isRequired: false, isConfigurable: true, allowsMultiple: false},
-  {value: 'REVIEW', label: '방문자 리뷰', isRequired: false, isConfigurable: true, allowsMultiple: false},
-  {value: 'POST', label: '가게 소식 (사장님 가게 전용)', isRequired: false, isConfigurable: true, allowsMultiple: false},
-  {value: 'IMAGE', label: '가게 이미지', isRequired: false, isConfigurable: true, allowsMultiple: false},
-  {value: 'APPEARANCE_DAY', label: '영업 일정 (사장님 가게 전용)', isRequired: false, isConfigurable: true, allowsMultiple: false},
-  {value: 'COUPON', label: '쿠폰 (사장님 가게 전용)', isRequired: false, isConfigurable: true, allowsMultiple: false},
-  {value: 'INFO', label: '가게 정보 & 매뉴', isRequired: false, isConfigurable: true, allowsMultiple: false},
-  {value: 'CTA', label: '사장님 앱 홍보 CTA (유저 가게 전용)', isRequired: false, isConfigurable: true, allowsMultiple: false},
-  {value: 'MARGIN', label: '여백', isRequired: false, isConfigurable: false, allowsMultiple: false},
-];
+/** 서버에서 조회한 화면 메타데이터에서 화면을 찾습니다. */
+export const findScreenTypeMeta = (
+  screens: ScreenTypeMeta[],
+  screenType: ScreenType
+): ScreenTypeMeta | undefined => screens.find((screen) => screen.value === screenType);
 
-/** 화면별 섹션 메타 목록. 섹션이 정의되지 않은 화면은 빈 배열입니다. */
-const SECTION_TYPES_BY_SCREEN: Record<ScreenType, SectionTypeMeta[]> = {
-  STORE_DETAIL: STORE_DETAIL_SECTION_TYPES,
-  HOME: [],
-  HOME_LIST: [],
-  STORE_BOTTOM_SHEET: [],
-  STORE_CONTRIBUTORS: [],
+/** 서버에서 조회한 섹션 메타데이터에서 섹션을 찾습니다. */
+export const findSectionTypeMeta = (
+  sectionTypes: SectionTypeMeta[],
+  sectionType: SectionType
+): SectionTypeMeta | undefined => sectionTypes.find((section) => section.value === sectionType);
+
+export const getSectionTypeLabel = (
+  sectionTypes: SectionTypeMeta[],
+  sectionType: SectionType
+): string => findSectionTypeMeta(sectionTypes, sectionType)?.label ?? sectionType;
+
+export const getConfigurableSectionTypes = (sectionTypes: SectionTypeMeta[]): SectionTypeMeta[] =>
+  sectionTypes.filter((section) => section.isConfigurable);
+
+type FieldOptions = Pick<SectionConfigFieldMeta, 'unit' | 'presets' | 'description'>;
+
+const integerField = (
+  name: string,
+  label: string,
+  min: number,
+  max?: number,
+  options: FieldOptions = {}
+): SectionConfigFieldMeta => ({
+  name,
+  label,
+  valueType: 'INTEGER',
+  isRequired: true,
+  min,
+  max,
+  ...options,
+});
+
+const booleanField = (name: string, label: string): SectionConfigFieldMeta => ({
+  name,
+  label,
+  valueType: 'BOOLEAN',
+  isRequired: false,
+});
+
+const positionsField = (name: string, label: string): SectionConfigFieldMeta => ({
+  name,
+  label,
+  valueType: 'INTEGER_LIST',
+  isRequired: false,
+  min: 1,
+  maxItems: 20,
+  description: '비어 있으면 미노출',
+});
+
+const positiveDecimalField = (name: string, label: string, options: FieldOptions = {}): SectionConfigFieldMeta => ({
+  name,
+  label,
+  valueType: 'DECIMAL',
+  isRequired: true,
+  min: 0,
+  isMinExclusive: true,
+  ...options,
+});
+
+/** 광고 높이 필드. 애드몹/리스트/큐레이션 광고 모두 같은 범위와 추천값을 사용합니다. */
+const adHeightField = (name: string, label: string): SectionConfigFieldMeta =>
+  integerField(name, label, 50, 200, {unit: 'dp', presets: [50, 100, 150, 200]});
+
+const EMPTY_CONFIG: SectionConfigMeta = {type: 'EMPTY', label: '추가 설정 없음', fields: []};
+
+/**
+ * 섹션 타입별로 선택할 수 있는 설정 타입과 입력 필드 정의.
+ *
+ * 서버의 섹션 설정 정의와 맞춰 관리합니다. 여기에 없는 섹션 타입은 EMPTY 설정만 사용합니다.
+ */
+export const SECTION_CONFIGS: Record<SectionType, SectionConfigMeta[]> = {
+  AD_MOB: [
+    {
+      type: 'AD_MOB',
+      label: '광고 설정',
+      fields: [adHeightField('height', '광고 높이')],
+    },
+  ],
+  HOME_FILTER: [
+    {
+      type: 'HOME_FILTER',
+      label: '필터 설정',
+      fields: [
+        booleanField('openStatusDefaultOn', '"영업중" 필터 기본 활성 여부'),
+        booleanField('recentActivityDefaultOn', '"최근 활동" 필터 기본 활성 여부'),
+        booleanField('targetStoresDefaultOn', '"사장님 직영점만" 필터 기본 활성 여부'),
+        booleanField('eventFilterVisible', '이벤트용 필터 활성 여부'),
+      ],
+    },
+  ],
+  HOME_MAP_CONTROL: [
+    {
+      type: 'HOME_MAP_CONTROL',
+      label: '지도 설정',
+      fields: [positiveDecimalField('initialMapZoomLevel', '초기 지도 줌 레벨')],
+    },
+  ],
+  HOME_LIST: [
+    {
+      type: 'HOME_LIST',
+      label: '리스트 설정',
+      fields: [
+        integerField('pageSize', '페이지별 가게 갯수', 1, undefined, {unit: '개'}),
+        positionsField('adPositions', '광고 노출 위치'),
+        adHeightField('adHeight', '광고 높이'),
+      ],
+    },
+  ],
+  HOME_CURATION: [
+    {
+      type: 'HOME_CURATION',
+      label: '큐레이션 설정',
+      fields: [
+        positionsField('carouselAdPositions', '캐러셀 광고 위치'),
+        adHeightField('carouselAdHeight', '캐러셀 광고 높이'),
+        positionsField('cardAdPositions', '카드 광고 위치'),
+        positiveDecimalField('searchStoreMaxDistanceM', '가게 검색 최대 거리', {unit: 'm'}),
+      ],
+    },
+  ],
 };
 
-/** 화면에서 사용 가능한 전체 섹션 메타 목록 (MARGIN 등 설정 불가 섹션 포함) */
-export const getSectionTypes = (screenType: ScreenType): SectionTypeMeta[] =>
-  SECTION_TYPES_BY_SCREEN[screenType] ?? [];
+/** 설정 타입으로 설정 정의를 찾습니다. 설정 타입은 섹션 타입 간에 겹치지 않습니다. */
+export const findConfigMetaByType = (configType: string): SectionConfigMeta | undefined =>
+  [EMPTY_CONFIG, ...Object.values(SECTION_CONFIGS).flat()].find((config) => config.type === configType);
 
-/** 어드민에서 추가할 수 있는 섹션 메타 목록 (MARGIN 제외) */
-export const getConfigurableSectionTypes = (screenType: ScreenType): SectionTypeMeta[] =>
-  getSectionTypes(screenType).filter((section) => section.isConfigurable);
-
-/** 섹션 메타 조회. 서버에만 존재하는 섹션일 수 있으므로 undefined를 반환할 수 있습니다. */
-export const findSectionTypeMeta = (
-  screenType: ScreenType,
-  sectionType: SectionType
-): SectionTypeMeta | undefined =>
-  getSectionTypes(screenType).find((section) => section.value === sectionType);
-
-/** 섹션 라벨. 메타에 없는 값이면 원문을 그대로 노출합니다. */
-export const getSectionTypeLabel = (screenType: ScreenType, sectionType: SectionType): string =>
-  findSectionTypeMeta(screenType, sectionType)?.label ?? sectionType;
-
-/** 화면 메타 조회 */
-export const findScreenTypeMeta = (screenType: ScreenType): ScreenTypeMeta | undefined =>
-  SCREEN_TYPES.find((screen) => screen.value === screenType);
-
-/** 화면 라벨 */
-export const getScreenTypeLabel = (screenType: ScreenType): string =>
-  findScreenTypeMeta(screenType)?.label ?? screenType;
-
-/** 필수 섹션 타입 목록 */
-export const getRequiredSectionTypes = (screenType: ScreenType): SectionType[] =>
-  getSectionTypes(screenType).filter((section) => section.isRequired).map((section) => section.value);
+/** 섹션 타입이 지원하는 설정 목록. 첫 번째 항목이 섹션 추가 시 기본 설정 타입입니다. */
+export const getSectionConfigs = (sectionType: SectionType): SectionConfigMeta[] =>
+  SECTION_CONFIGS[sectionType] ?? [EMPTY_CONFIG];

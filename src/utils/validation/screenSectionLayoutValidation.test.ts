@@ -1,6 +1,15 @@
 import {describe, expect, it} from 'vitest';
-import {ScreenSectionLayoutItemRequest} from '@/types/screenSectionLayout';
+import {ScreenSectionLayoutItemRequest, SectionTypeMeta} from '@/types/screenSectionLayout';
 import {buildDefaultSectionId, validateSectionLayouts} from './screenSectionLayoutValidation';
+
+const sectionTypes: SectionTypeMeta[] = [
+  {value: 'PREVIEW', label: '가게 미리보기', isRequired: true, isConfigurable: true, allowsMultiple: false},
+  {value: 'TAB', label: '탭', isRequired: true, isConfigurable: true, allowsMultiple: false},
+  {value: 'AD_MOB', label: '애드몹 광고', isRequired: false, isConfigurable: true, allowsMultiple: true},
+  {value: 'COUPON', label: '쿠폰', isRequired: false, isConfigurable: true, allowsMultiple: false},
+  {value: 'MARGIN', label: '여백', isRequired: false, isConfigurable: false, allowsMultiple: false},
+  {value: 'HOME_LIST', label: '홈 리스트', isRequired: false, isConfigurable: true, allowsMultiple: false},
+];
 
 /** 필수 섹션만 포함한 최소 유효 목록 */
 const requiredSections = (): ScreenSectionLayoutItemRequest[] => [
@@ -9,7 +18,7 @@ const requiredSections = (): ScreenSectionLayoutItemRequest[] => [
 ];
 
 const validate = (sections: ScreenSectionLayoutItemRequest[]) =>
-  validateSectionLayouts('STORE_DETAIL', sections);
+  validateSectionLayouts('STORE_DETAIL', sections, sectionTypes);
 
 describe('validateSectionLayouts', () => {
   it('필수 섹션이 모두 노출 상태면 통과한다', () => {
@@ -17,7 +26,7 @@ describe('validateSectionLayouts', () => {
   });
 
   it('섹션 목록이 정의되지 않은 화면은 저장할 수 없다', () => {
-    const result = validateSectionLayouts('HOME', requiredSections());
+    const result = validateSectionLayouts('HOME', requiredSections(), []);
 
     expect(result.isValid).toBe(false);
     expect(result.formErrors[0]).toContain('섹션 목록이 정의되지 않은 화면');
@@ -125,6 +134,95 @@ describe('validateSectionLayouts', () => {
 
     it('정수가 아니면 실패한다', () => {
       expect(withMargin(8.5).itemErrors[2]).toContain('정수');
+    });
+  });
+
+  describe('AD_MOB config', () => {
+    it('높이가 50 이상 200 이하인 정수면 통과한다', () => {
+      const result = validate([
+        ...requiredSections(),
+        {
+          sectionType: 'AD_MOB',
+          sectionId: 'AD_MOB',
+          marginBottom: 8,
+          isVisible: true,
+          config: {type: 'AD_MOB', height: 100},
+        },
+      ]);
+
+      expect(result.isValid).toBe(true);
+    });
+
+    it('높이가 50 미만, 200 초과이거나 정수가 아니면 실패한다', () => {
+      const invalidHeights = [49, 201, 100.5];
+
+      invalidHeights.forEach((height) => {
+        const result = validate([
+          ...requiredSections(),
+          {
+            sectionType: 'AD_MOB',
+            sectionId: 'AD_MOB',
+            marginBottom: 8,
+            isVisible: true,
+            config: {type: 'AD_MOB', height},
+          },
+        ]);
+
+        expect(result.isValid).toBe(false);
+        expect(result.configErrors[2]?.field).toBe('height');
+      });
+    });
+
+    it('섹션이 지원하지 않는 설정 타입은 실패한다', () => {
+      const result = validate([
+        ...requiredSections(),
+        {
+          sectionType: 'COUPON',
+          sectionId: 'COUPON',
+          marginBottom: 8,
+          isVisible: true,
+          config: {type: 'AD_MOB', height: 50},
+        },
+      ]);
+
+      expect(result.configErrors[2]?.message).toContain('AD_MOB 설정을 지원하지 않습니다');
+    });
+  });
+
+  describe('HOME_LIST config', () => {
+    const withHomeList = (config: Record<string, unknown>) => validate([
+      ...requiredSections(),
+      {
+        sectionType: 'HOME_LIST',
+        sectionId: 'HOME_LIST',
+        marginBottom: 0,
+        isVisible: true,
+        config: {type: 'HOME_LIST', pageSize: 20, adPositions: [3, 8], adHeight: 80, ...config},
+      },
+    ]);
+
+    it('필드가 모두 유효하면 통과한다', () => {
+      expect(withHomeList({}).isValid).toBe(true);
+    });
+
+    it('비필수 INTEGER_LIST는 빈 배열이어도 통과한다', () => {
+      expect(withHomeList({adPositions: []}).isValid).toBe(true);
+    });
+
+    it('필수 INTEGER가 비어 있으면 실패한다', () => {
+      expect(withHomeList({pageSize: undefined}).configErrors[2]?.field).toBe('pageSize');
+    });
+
+    it('광고 높이가 50 미만이거나 200 초과면 실패한다', () => {
+      [49, 201].forEach((adHeight) => {
+        expect(withHomeList({adHeight}).configErrors[2]?.field).toBe('adHeight');
+      });
+    });
+
+    it('INTEGER_LIST의 중복, 범위 미만, 정수가 아닌 값, 최대 개수 초과는 실패한다', () => {
+      [[3, 3], [0], [1.5], [Number.NaN], Array.from({length: 21}, (_, i) => i + 1)].forEach((adPositions) => {
+        expect(withHomeList({adPositions}).configErrors[2]?.field).toBe('adPositions');
+      });
     });
   });
 
