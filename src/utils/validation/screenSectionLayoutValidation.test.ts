@@ -213,6 +213,12 @@ describe('validateSectionLayouts', () => {
       expect(withHomeList({pageSize: undefined}).configErrors[2]?.field).toBe('pageSize');
     });
 
+    it('광고 높이가 50 미만이거나 200 초과면 실패한다', () => {
+      [49, 201].forEach((adHeight) => {
+        expect(withHomeList({adHeight}).configErrors[2]?.field).toBe('adHeight');
+      });
+    });
+
     it('INTEGER_LIST의 중복, 범위 미만, 정수가 아닌 값, 최대 개수 초과는 실패한다', () => {
       [[3, 3], [0], [1.5], [Number.NaN], Array.from({length: 21}, (_, i) => i + 1)].forEach((adPositions) => {
         expect(withHomeList({adPositions}).configErrors[2]?.field).toBe('adPositions');

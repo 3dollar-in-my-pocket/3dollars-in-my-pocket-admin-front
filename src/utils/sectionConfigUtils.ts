@@ -12,7 +12,7 @@ import {
   SectionType,
   SectionTypeMeta
 } from '@/types/screenSectionLayout';
-import {getSectionConfigs} from '@/constants/screenSectionLayout';
+import {findConfigMetaByType, getSectionConfigs} from '@/constants/screenSectionLayout';
 
 export const findConfigMeta = (
   sectionType: SectionType,
@@ -47,20 +47,6 @@ const describeRange = (field: SectionConfigFieldMeta): string => {
   return parts.join(' ');
 };
 
-/** 입력 폼에 보여줄 제약 안내. 예: "1 이상 200 이하", "최대 20개" */
-export const describeFieldConstraint = (field: SectionConfigFieldMeta): string => {
-  const parts: string[] = [];
-  const range = describeRange(field);
-  if (field.valueType === 'INTEGER_LIST') {
-    if (range) parts.push(`각 값 ${range}`);
-    if (field.maxItems !== undefined) parts.push(`최대 ${field.maxItems}개`);
-    parts.push('중복 불가');
-  } else if (range) {
-    parts.push(range);
-  }
-  return parts.join(', ');
-};
-
 const isInRange = (value: number, field: SectionConfigFieldMeta): boolean => {
   if (field.min !== undefined) {
     if (field.isMinExclusive ? value <= field.min : value < field.min) return false;
@@ -76,39 +62,39 @@ const validateField = (field: SectionConfigFieldMeta, value: unknown): string | 
     case 'INTEGER':
     case 'DECIMAL': {
       if (value === undefined || value === null) {
-        return field.isRequired ? `${field.name} 값을 입력해주세요.` : undefined;
+        return field.isRequired ? `${field.label} 값을 입력해주세요.` : undefined;
       }
       const isInteger = field.valueType === 'INTEGER';
       if (typeof value !== 'number' || !Number.isFinite(value) || (isInteger && !Number.isInteger(value))) {
-        return `${field.name} 값은 ${isInteger ? '정수' : '유한한 숫자'}여야 합니다.`;
+        return `${field.label} 값은 ${isInteger ? '정수' : '유한한 숫자'}여야 합니다.`;
       }
       if (!isInRange(value, field)) {
-        return `${field.name} 값은 ${range}이어야 합니다.`;
+        return `${field.label} 값은 ${range}이어야 합니다.`;
       }
       return undefined;
     }
     case 'BOOLEAN':
       if (value === undefined) {
-        return field.isRequired ? `${field.name} 값을 선택해주세요.` : undefined;
+        return field.isRequired ? `${field.label} 값을 선택해주세요.` : undefined;
       }
-      return typeof value === 'boolean' ? undefined : `${field.name} 값이 올바르지 않습니다.`;
+      return typeof value === 'boolean' ? undefined : `${field.label} 값이 올바르지 않습니다.`;
     case 'INTEGER_LIST': {
       if (value === undefined) {
-        return field.isRequired ? `${field.name} 값을 입력해주세요.` : undefined;
+        return field.isRequired ? `${field.label} 값을 입력해주세요.` : undefined;
       }
-      if (!Array.isArray(value)) return `${field.name} 값이 올바르지 않습니다.`;
-      if (field.isRequired && value.length === 0) return `${field.name} 값을 입력해주세요.`;
+      if (!Array.isArray(value)) return `${field.label} 값이 올바르지 않습니다.`;
+      if (field.isRequired && value.length === 0) return `${field.label} 값을 입력해주세요.`;
       if (value.some((item) => typeof item !== 'number' || !Number.isInteger(item))) {
-        return `${field.name}에는 정수만 입력할 수 있습니다.`;
+        return `${field.label}에는 정수만 입력할 수 있습니다.`;
       }
       if (range && value.some((item) => !isInRange(item, field))) {
-        return `${field.name}의 각 값은 ${range}이어야 합니다.`;
+        return `${field.label}의 각 값은 ${range}이어야 합니다.`;
       }
       if (new Set(value).size !== value.length) {
-        return `${field.name}에 중복된 값이 있습니다.`;
+        return `${field.label}에 중복된 값이 있습니다.`;
       }
       if (field.maxItems !== undefined && value.length > field.maxItems) {
-        return `${field.name}은(는) 최대 ${field.maxItems}개까지 입력할 수 있습니다.`;
+        return `${field.label}은(는) 최대 ${field.maxItems}개까지 입력할 수 있습니다.`;
       }
       return undefined;
     }
@@ -146,13 +132,20 @@ const formatValue = (value: SectionConfigValue | string | undefined): string => 
   return String(value);
 };
 
-/** 전/후 비교에 표시할 설정 요약. 예: "AD_MOB (height=100)" */
+/** 전/후 비교에 표시할 설정 요약. 예: "광고 설정 (광고 높이=100dp)" */
 export const formatSectionConfig = (config?: ScreenSectionLayoutConfig | null): string => {
   if (!config) return '기본값';
+  const configMeta = findConfigMetaByType(config.type);
   const fields = Object.keys(config)
     .filter((key) => key !== 'type')
     .sort()
-    .map((key) => `${key}=${formatValue(config[key])}`);
-  return fields.length > 0 ? `${config.type} (${fields.join(', ')})` : config.type;
+    .map((key) => {
+      const field = configMeta?.fields.find((item) => item.name === key);
+      const value = formatValue(config[key]);
+      const unit = field?.unit && value !== '-' && !value.startsWith('[') ? field.unit : '';
+      return `${field?.label ?? key}=${value}${unit}`;
+    });
+  const typeLabel = configMeta?.label ?? config.type;
+  return fields.length > 0 ? `${typeLabel} (${fields.join(', ')})` : typeLabel;
 };
 

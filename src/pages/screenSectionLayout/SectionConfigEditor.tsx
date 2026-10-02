@@ -8,7 +8,6 @@ import {
 import {getSectionConfigs} from '@/constants/screenSectionLayout';
 import {
   buildDefaultConfig,
-  describeFieldConstraint,
   findConfigMeta,
   SectionConfigError
 } from '@/utils/sectionConfigUtils';
@@ -118,16 +117,40 @@ const ConfigFieldInput: React.FC<ConfigFieldInputProps> = ({id, field, value, di
     case 'INTEGER':
     case 'DECIMAL':
       return (
-        <TextValueInput
-          id={id}
-          value={value}
-          parse={parseNumber}
-          format={formatNumber}
-          inputMode={field.valueType === 'INTEGER' ? 'numeric' : 'decimal'}
-          disabled={disabled}
-          invalid={invalid}
-          onChange={onChange}
-        />
+        <div className="section-config__number">
+          <div className="section-config__number-input">
+            <TextValueInput
+              id={id}
+              value={value}
+              parse={parseNumber}
+              format={formatNumber}
+              inputMode={field.valueType === 'INTEGER' ? 'numeric' : 'decimal'}
+              disabled={disabled}
+              invalid={invalid}
+              onChange={onChange}
+            />
+            {field.unit && <span className="small text-body-secondary">{field.unit}</span>}
+          </div>
+          {field.presets && field.presets.length > 0 && (
+            <div className="section-config__presets" role="group" aria-label={`${field.label} 추천값`}>
+              {field.presets.map((preset) => (
+                <button
+                  key={preset}
+                  type="button"
+                  className={`margin-picker__chip ${value === preset ? 'is-selected' : ''}`}
+                  disabled={disabled}
+                  aria-pressed={value === preset}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onChange(preset);
+                  }}
+                >
+                  {preset}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       );
     case 'INTEGER_LIST':
       return (
@@ -205,7 +228,7 @@ const SectionConfigEditor: React.FC<SectionConfigEditorProps> = ({
           {!configMeta && selectedType && <option value={selectedType}>{selectedType}</option>}
           {configs.map((option) => (
             <option key={option.type} value={option.type}>
-              {option.fields.length > 0 ? option.type : `${option.type} (추가 설정 없음)`}
+              {option.label}
             </option>
           ))}
         </select>
@@ -222,11 +245,10 @@ const SectionConfigEditor: React.FC<SectionConfigEditorProps> = ({
         <div className="section-config__fields">
           {configMeta.fields.map((field) => {
             const id = `config-${sectionKey}-${field.name}`;
-            const constraint = describeFieldConstraint(field);
             return (
               <div key={field.name} className="section-config__field">
-                <label className="small font-monospace" htmlFor={id}>
-                  {field.name}
+                <label className="small" htmlFor={id} title={field.name}>
+                  {field.label}
                   {field.isRequired && <span className="text-danger ms-1">*</span>}
                 </label>
                 <ConfigFieldInput
@@ -241,11 +263,7 @@ const SectionConfigEditor: React.FC<SectionConfigEditorProps> = ({
                     [field.name]: value,
                   })}
                 />
-                {(constraint || field.description) && (
-                  <span className="form-text">
-                    {[constraint, field.description].filter(Boolean).join(' · ')}
-                  </span>
-                )}
+                {field.description && <span className="form-text">{field.description}</span>}
               </div>
             );
           })}

@@ -139,7 +139,7 @@ describe('useSectionLayoutDraft', () => {
       const {result} = renderDraft();
       act(() => result.current.addSection('AD_MOB'));
 
-      expect(result.current.sections[3].config).toEqual({type: 'EMPTY'});
+      expect(result.current.sections[3].config).toEqual({type: 'AD_MOB'});
     });
 
     it('sectionId가 겹치면 일련번호를 붙인다', () => {

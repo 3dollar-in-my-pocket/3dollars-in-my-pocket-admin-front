@@ -22,7 +22,10 @@ export type ConfigValueType = 'INTEGER' | 'DECIMAL' | 'BOOLEAN' | 'INTEGER_LIST'
 
 /** 설정 입력 필드 정의 */
 export interface SectionConfigFieldMeta {
+  /** 서버 요청에 쓰는 키 */
   name: string;
+  /** 화면과 오류 메시지에 보여줄 이름 */
+  label: string;
   valueType: ConfigValueType;
   isRequired: boolean;
   /** 최솟값. INTEGER_LIST는 각 원소의 최솟값 */
@@ -33,12 +36,18 @@ export interface SectionConfigFieldMeta {
   maxItems?: number;
   /** true면 min을 포함하지 않습니다(초과). */
   isMinExclusive?: boolean;
+  /** 입력값 뒤에 붙일 단위. 예: dp, m */
+  unit?: string;
+  /** 빠르게 고를 수 있는 추천값. INTEGER/DECIMAL에서만 사용합니다. */
+  presets?: number[];
   description?: string;
 }
 
 /** 섹션이 지원하는 설정 타입과 입력 필드 스키마. 저장된 설정값이 아닙니다. (constants/screenSectionLayout.ts) */
 export interface SectionConfigMeta {
   type: string;
+  /** 설정 타입 선택 시 보여줄 이름 */
+  label: string;
   fields: SectionConfigFieldMeta[];
 }
 

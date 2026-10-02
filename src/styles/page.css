@@ -2265,6 +2265,29 @@ table.data-table .num {
   min-width: 0;
 }
 
+/* 직접 입력을 위에, 추천값 칩을 그 아래 줄에 둔다. */
+.section-config__number {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.section-config__number-input {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.section-config__number-input .form-control {
+  min-width: 0;
+}
+
+.section-config__presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
 .section-row__actions {
   display: flex;
   align-items: center;
