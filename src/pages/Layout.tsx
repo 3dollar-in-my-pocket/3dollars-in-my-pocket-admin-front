@@ -17,6 +17,16 @@ const ENVIRONMENT_WATERMARK: Record<string, string> = {
 };
 const environmentWatermark = ENVIRONMENT ? ENVIRONMENT_WATERMARK[ENVIRONMENT] : undefined;
 
+/** 페이지 지연 로딩 중 표시. 모바일에서도 화면 가운데에 오도록 세로 중앙 정렬합니다. */
+const PageLoading = ({fullHeight = false}: { fullHeight?: boolean }) => (
+  <div
+    className="d-flex align-items-center justify-content-center"
+    style={{minHeight: fullHeight ? "100vh" : "60vh"}}
+  >
+    <Loading/>
+  </div>
+);
+
 const Layout = () => {
   const location = useLocation();
   const confirm = useConfirm();
@@ -91,7 +101,7 @@ const Layout = () => {
     return (
       <>
         <div className="min-vh-100">
-          <Suspense fallback={<Loading/>}>
+          <Suspense fallback={<PageLoading fullHeight/>}>
             <Outlet/>
           </Suspense>
         </div>
@@ -163,7 +173,7 @@ const Layout = () => {
 
         <div className="app-content">
           <div className="app-content__surface">
-            <Suspense fallback={<Loading/>}>
+            <Suspense fallback={<PageLoading/>}>
               <Outlet/>
             </Suspense>
           </div>

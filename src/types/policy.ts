@@ -18,12 +18,20 @@ export type PolicyCategoryId = string;
  */
 export type PolicyId = string;
 
+/**
+ * 정책 서브 카테고리 식별자
+ *
+ * 문서상 enum(PolicySubCategoryType)이지만 카테고리와 동일하게 string으로 둡니다.
+ */
+export type PolicySubCategoryId = string;
+
 /** 정책 값의 저장·검증 방식. 서버의 PolicyValueType enum과 대응합니다. */
 export type PolicyValueType = 'STRING' | 'BOOLEAN' | 'INTEGER' | 'DECIMAL' | 'DURATION';
 
 /** PolicyResponse — 정책 상세 */
 export interface Policy {
   categoryId: PolicyCategoryId;
+  subCategoryId?: PolicySubCategoryId | null;
   policyId: PolicyId;
   valueType: PolicyValueType;
   value: string;
@@ -36,6 +44,7 @@ export interface Policy {
 export interface PolicyType {
   /** 문서상 필드명은 categoryId가 아닌 category입니다. */
   category: PolicyCategoryId;
+  subCategory?: PolicySubCategoryId | null;
   policyId: PolicyId;
   valueType: PolicyValueType;
   description: string;
