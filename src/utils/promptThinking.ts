@@ -11,10 +11,15 @@ export const getThinkingLevels = (model?: string | null): AIThinkingLevel[] => {
 export const ignoresTemperature = (model?: string | null) =>
   ['GEMINI_3_5_FLASH_LITE', 'GEMINI_3_8_FLASH'].includes(model || '');
 
-export const buildPromptPatch = (values: PromptFormRequest, original: PromptResponse): PromptUpdateRequest =>
-  Object.fromEntries(Object.entries(values).filter(([key, value]) =>
+export const buildPromptPatch = (values: PromptFormRequest, original: PromptResponse): PromptUpdateRequest => {
+  const patch: PromptUpdateRequest = Object.fromEntries(Object.entries(values).filter(([key, value]) =>
     value !== undefined && value !== (original[key as keyof PromptResponse] ?? null)
   ));
+  if (ignoresTemperature(values.model === undefined ? original.model : values.model)) {
+    patch.temperature = null;
+  }
+  return patch;
+};
 
 export const validateThinking = (values: PromptFormRequest, original?: PromptResponse | null): string | null => {
   const {model, thinkingBudget: budget, thinkingLevel: level} = values;
