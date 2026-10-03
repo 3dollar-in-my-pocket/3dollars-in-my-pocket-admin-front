@@ -40,9 +40,17 @@ describe('프롬프트 사고 설정', () => {
     const invalid = {...original, thinkingBudget: -2};
     expect(validateThinking({...invalid, description: '수정'}, invalid)).toBeTruthy();
   });
+  it.each(['GEMINI_3_5_FLASH_LITE', 'GEMINI_3_8_FLASH'])('temperature 미지원 모델 %s는 항상 명시적 null을 보낸다', model => {
+    for (const temperature of [0.7, null, undefined]) {
+      const existing = {...original, model, temperature};
+      const patch = buildPromptPatch({...existing, description: '수정'}, existing);
+      expect(patch).toEqual({description: '수정', temperature: null});
+      expect(JSON.parse(JSON.stringify(patch))).toHaveProperty('temperature', null);
+    }
+  });
   it('모델 전환과 기존 옵션 null 제거를 함께 검증한다', () => {
     const values = {...original, model: 'GEMINI_3_8_FLASH', thinkingBudget: null as number | null, thinkingLevel: 'LOW' as const};
     expect(validateThinking(values, original)).toBeNull();
-    expect(buildPromptPatch(values, original)).toEqual({model: 'GEMINI_3_8_FLASH', thinkingBudget: null as number | null, thinkingLevel: 'LOW'});
+    expect(buildPromptPatch(values, original)).toEqual({model: 'GEMINI_3_8_FLASH', temperature: null, thinkingBudget: null as number | null, thinkingLevel: 'LOW'});
   });
 });
