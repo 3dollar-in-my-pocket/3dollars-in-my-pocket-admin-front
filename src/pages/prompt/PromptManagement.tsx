@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useMemo, useState} from 'react';
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {Modal} from 'react-bootstrap';
 import {toast} from 'react-toastify';
 import enumApi from '@/api/enumApi';
@@ -8,8 +8,9 @@ import Loading from '@/components/common/Loading';
 import useCursorPagination from '@/hooks/useCursorPagination';
 import useInfiniteScroll from '@/hooks/useInfiniteScroll';
 import {formatDateTime} from '@/utils/dateUtils';
-import {AIModel, EnumOption, PromptFormRequest, PromptResponse, PromptStatus} from '@/types/prompt';
+import {AIModel, AIThinkingLevel, EnumOption, PromptFormRequest, PromptResponse, PromptStatus} from '@/types/prompt';
 import './PromptManagement.css';
+import {buildPromptPatch, getThinkingLevels, ignoresTemperature, validateThinking} from '@/utils/promptThinking';
 import PageHeader from '@/components/common/PageHeader';
 import useConfirm from '@/hooks/useConfirm';
 
@@ -57,6 +58,7 @@ const PromptManagement = () => {
   const confirm = useConfirm();
   const [promptTypes, setPromptTypes] = useState<EnumOption[]>([]);
   const [promptStatuses, setPromptStatuses] = useState<EnumOption[]>([]);
+  const [thinkingLevels, setThinkingLevels] = useState<EnumOption[]>([]);
   const [aiModels, setAiModels] = useState<EnumOption[]>([]);
   const [selectedPromptType, setSelectedPromptType] = useState('');
   const [selectedPrompt, setSelectedPrompt] = useState<PromptResponse | null>(null);
@@ -95,6 +97,7 @@ const PromptManagement = () => {
         setPromptTypes(types);
         setPromptStatuses(statuses);
         setAiModels(models);
+        setThinkingLevels(response?.data?.AIThinkingLevel || []);
 
         const firstType = types[0] ? getEnumValue(types[0]) : '';
         if (firstType) {
@@ -315,6 +318,7 @@ const PromptManagement = () => {
         promptType={selectedPromptType}
         promptTypeLabel={selectedPromptTypeLabel}
         aiModels={aiModels}
+        thinkingLevels={thinkingLevels}
         selectedPrompt={selectedPrompt}
         onHide={() => handleCloseModal(false)}
         onSuccess={() => handleCloseModal(true)}
@@ -347,7 +351,7 @@ const PromptCard = ({
   const hasTemperature = prompt.temperature !== null && prompt.temperature !== undefined;
   const hasThinkingBudget = prompt.thinkingBudget !== null && prompt.thinkingBudget !== undefined;
   const hasModelOptions = Boolean(
-    prompt.model || hasMaxOutputTokens || hasTemperature || hasThinkingBudget
+    prompt.model || hasMaxOutputTokens || hasTemperature || hasThinkingBudget || prompt.thinkingLevel
   );
 
   return (
@@ -420,10 +424,15 @@ const PromptCard = ({
           <div className="prompt-model-item">
             <span>Temperature</span>
             <strong>{formatOptionalValue(prompt.temperature)}</strong>
+            {ignoresTemperature(prompt.model) && <small>실제 생성에는 적용되지 않음</small>}
           </div>
           <div className="prompt-model-item">
             <span>Thinking Budget</span>
             <strong>{formatOptionalValue(prompt.thinkingBudget)}</strong>
+          </div>
+          <div className="prompt-model-item">
+            <span>사고 수준</span>
+            <strong>{formatOptionalValue(prompt.thinkingLevel)}</strong>
           </div>
         </div>
       )}
@@ -447,6 +456,7 @@ const PromptEditModal = ({
                            promptType,
                            promptTypeLabel,
                            aiModels,
+                           thinkingLevels,
                            selectedPrompt,
                            onHide,
                            onSuccess,
@@ -455,6 +465,7 @@ const PromptEditModal = ({
   promptType: string;
   promptTypeLabel: string;
   aiModels: EnumOption[];
+  thinkingLevels: EnumOption[];
   selectedPrompt: PromptResponse | null;
   onHide: () => void;
   onSuccess: () => void;
@@ -467,11 +478,14 @@ const PromptEditModal = ({
     maxOutputTokens: null,
     temperature: null,
     thinkingBudget: null,
+    thinkingLevel: null,
   });
   const confirm = useConfirm();
   const [errors, setErrors] = useState<PromptFormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isEdit = Boolean(selectedPrompt);
+  const submittingRef = useRef(false);
+  const allowedLevels = getThinkingLevels(formData.model);
 
   useEffect(() => {
     if (!show) return;
@@ -484,6 +498,7 @@ const PromptEditModal = ({
       maxOutputTokens: selectedPrompt?.maxOutputTokens ?? null,
       temperature: selectedPrompt?.temperature ?? null,
       thinkingBudget: selectedPrompt?.thinkingBudget ?? null,
+      thinkingLevel: selectedPrompt?.thinkingLevel ?? null,
     });
     setErrors({});
     setIsSubmitting(false);
@@ -518,13 +533,8 @@ const PromptEditModal = ({
       nextErrors.temperature = 'Temperature는 0 이상이어야 합니다.';
     }
 
-    if (
-      formData.thinkingBudget !== null &&
-      formData.thinkingBudget !== undefined &&
-      (!Number.isFinite(formData.thinkingBudget) || formData.thinkingBudget < 0)
-    ) {
-      nextErrors.thinkingBudget = 'Thinking Budget은 0 이상이어야 합니다.';
-    }
+    const thinkingError = validateThinking(formData, selectedPrompt);
+    if (thinkingError) nextErrors.thinkingBudget = thinkingError;
 
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
@@ -534,7 +544,17 @@ const PromptEditModal = ({
     const {name, value} = event.target;
     const numberFields = ['maxOutputTokens', 'temperature', 'thinkingBudget'];
     const nextValue = numberFields.includes(name) ? (value === '' ? null : Number(value)) : value;
-    setFormData((prev) => ({...prev, [name]: nextValue}));
+    setFormData((prev) => {
+      if (name === 'model') {
+        const levels = getThinkingLevels(value);
+        return {...prev, model: value || null,
+          thinkingBudget: levels.length || (value === 'GEMINI_2_5_FLASH_LITE' &&
+            prev.thinkingBudget > 0 && prev.thinkingBudget < 512) ? null : prev.thinkingBudget,
+          thinkingLevel: levels.includes(prev.thinkingLevel) ? prev.thinkingLevel : null};
+      }
+      if (name === 'thinkingLevel') return {...prev, thinkingLevel: (value || null) as AIThinkingLevel | null, thinkingBudget: null};
+      return {...prev, [name]: nextValue};
+    });
     setErrors((prev) => ({...prev, [name]: undefined}));
   };
 
@@ -546,7 +566,8 @@ const PromptEditModal = ({
   const savePrompt = async (
     statusOnCreate: PromptStatus = PROMPT_STATUS.ACTIVE
   ) => {
-    if (!promptType || !validate() || isSubmitting) return;
+    if (!promptType || submittingRef.current || !validate()) return;
+    submittingRef.current = true;
 
     setIsSubmitting(true);
     try {
@@ -558,10 +579,11 @@ const PromptEditModal = ({
         maxOutputTokens: formData.maxOutputTokens ?? null,
         temperature: formData.temperature ?? null,
         thinkingBudget: formData.thinkingBudget ?? null,
+        thinkingLevel: formData.thinkingLevel ?? null,
       };
 
       const response = selectedPrompt
-        ? await promptApi.updatePrompt(promptType, selectedPrompt.promptId, payload)
+        ? await promptApi.updatePrompt(promptType, selectedPrompt.promptId, buildPromptPatch(payload, selectedPrompt))
         : await promptApi.createPrompt(promptType, {
           ...payload,
           status: statusOnCreate,
@@ -570,10 +592,13 @@ const PromptEditModal = ({
       if (response?.ok) {
         toast.success(selectedPrompt ? '수정되었습니다' : '등록되었습니다');
         onSuccess();
+      } else if (response?.error === 'invalid_ai_thinking_option') {
+        setErrors({thinkingBudget: '모델과 사고 설정의 조합을 확인해주세요. 기존 사고 설정을 초기화한 뒤 다시 저장할 수 있습니다.'});
       }
     } catch (error: any) {
       toast.error(error.message || '처리 중 오류가 발생했습니다.');
     } finally {
+      submittingRef.current = false;
       setIsSubmitting(false);
     }
   };
@@ -584,7 +609,7 @@ const PromptEditModal = ({
   };
 
   const handleDelete = async () => {
-    if (!selectedPrompt || isSubmitting) return;
+    if (!selectedPrompt || submittingRef.current) return;
     if (!await confirm({
       title: '프롬프트 삭제',
       message: '정말 삭제하시겠습니까?',
@@ -593,6 +618,8 @@ const PromptEditModal = ({
       irreversible: true
     })) return;
 
+    if (submittingRef.current) return;
+    submittingRef.current = true;
     setIsSubmitting(true);
     try {
       const response = await promptApi.deletePrompt(promptType, selectedPrompt.promptId);
@@ -603,6 +630,7 @@ const PromptEditModal = ({
     } catch (error: any) {
       toast.error(error.message || '삭제 중 오류가 발생했습니다.');
     } finally {
+      submittingRef.current = false;
       setIsSubmitting(false);
     }
   };
@@ -610,6 +638,7 @@ const PromptEditModal = ({
   return (
     <Modal show={show} onHide={onHide} size="xl" centered fullscreen="md-down" dialogClassName="prompt-modal">
       <form onSubmit={handleSubmit}>
+        <fieldset disabled={isSubmitting}>
         <Modal.Header closeButton className="prompt-modal-header">
           <Modal.Title className="prompt-modal-title">
             {isEdit ? selectedPrompt?.description : 'AI 프롬프트 신규 등록'}
@@ -695,20 +724,43 @@ const PromptEditModal = ({
                 className={`form-control ${errors.temperature ? 'is-invalid' : ''}`}
                 placeholder="예: 0.7"
               />
+              {ignoresTemperature(formData.model) && <small className="text-muted">저장되지만 실제 AI 생성에는 적용되지 않습니다.</small>}
               {errors.temperature && <div className="invalid-feedback d-block">{errors.temperature}</div>}
             </div>
 
             <div className="col-12 col-md-6 col-xl-3">
-              <label className="form-label prompt-label">Thinking Budget</label>
-              <input
-                type="number"
-                name="thinkingBudget"
-                value={formData.thinkingBudget ?? ''}
-                onChange={handleChange}
-                min={0}
-                className={`form-control ${errors.thinkingBudget ? 'is-invalid' : ''}`}
-                placeholder="예: 1024"
-              />
+              {allowedLevels.length ? (
+                <>
+                  <label htmlFor="prompt-thinking-level" className="form-label prompt-label">사고 수준</label>
+                  <select id="prompt-thinking-level" name="thinkingLevel" className="form-select"
+                          value={formData.thinkingLevel ?? ''} onChange={handleChange}>
+                    <option value="">모델 기본 설정</option>
+                    {thinkingLevels.filter(option => allowedLevels.includes(getEnumValue(option) as AIThinkingLevel)).map(option => (
+                      <option key={getEnumValue(option)} value={getEnumValue(option)}>{getEnumLabel(option)}</option>
+                    ))}
+                  </select>
+                  {formData.thinkingBudget != null && <small className="text-muted">
+                    기존 사고 예산 {formData.thinkingBudget}은 실제 생성에서 무시됩니다. 사고 설정을 바꾸려면 초기화해주세요.
+                  </small>}
+                </>
+              ) : (
+                <>
+                  <label htmlFor="prompt-thinking-budget" className="form-label prompt-label">사고 예산</label>
+                  <input id="prompt-thinking-budget" type="number" name="thinkingBudget"
+                         value={formData.thinkingBudget ?? ''} onChange={handleChange} min={-1} max={24576} step={1}
+                         className={`form-control ${errors.thinkingBudget ? 'is-invalid' : ''}`}
+                         placeholder="모델 기본 설정"/>
+                  <small className="text-muted">
+                    {formData.model === 'GEMINI_2_5_FLASH_LITE' ? '-1, 0 또는 512~24576' : '-1~24576 정수'}
+                    {' · -1: 동적 사고, 0: 사고 비활성화'}
+                    {!formData.model && ' · 사고 예산 지정 시 모델 선택을 권장합니다.'}
+                  </small>
+                </>
+              )}
+              <button type="button" className="btn btn-link btn-sm p-0 d-block mt-1" onClick={() => {
+                setFormData(prev => ({...prev, thinkingBudget: null, thinkingLevel: null}));
+                setErrors(prev => ({...prev, thinkingBudget: undefined}));
+              }}>모델 기본 사고 설정으로 초기화</button>
               {errors.thinkingBudget && <div className="invalid-feedback d-block">{errors.thinkingBudget}</div>}
             </div>
 
@@ -801,6 +853,7 @@ const PromptEditModal = ({
             </button>
           </div>
         </Modal.Footer>
+        </fieldset>
       </form>
     </Modal>
   );
