@@ -10,6 +10,7 @@ export interface PromptResponse {
   maxOutputTokens?: number | null;
   temperature?: number | null;
   thinkingBudget?: number | null;
+  thinkingLevel?: AIThinkingLevel | null;
   status: PromptStatus;
   createdAt?: string | null;
   updatedAt?: string | null;
@@ -17,6 +18,7 @@ export interface PromptResponse {
 
 export type PromptStatus = 'DRAFT' | 'ACTIVE' | string;
 export type AIModel = string;
+export type AIThinkingLevel = 'MINIMAL' | 'LOW' | 'MEDIUM' | 'HIGH';
 
 export interface PromptFormRequest {
   description: string;
@@ -26,18 +28,20 @@ export interface PromptFormRequest {
   maxOutputTokens?: number | null;
   temperature?: number | null;
   thinkingBudget?: number | null;
+  thinkingLevel?: AIThinkingLevel | null;
   status?: PromptStatus;
 }
 
 export interface PromptUpdateRequest {
-  description?: string | null;
-  content?: string | null;
+  description?: string;
+  content?: string;
   systemInstruction?: string | null;
   model?: AIModel | null;
   maxOutputTokens?: number | null;
   temperature?: number | null;
   thinkingBudget?: number | null;
-  status?: PromptStatus | null;
+  thinkingLevel?: AIThinkingLevel | null;
+  status?: PromptStatus;
 }
 
 export interface EnumOption {

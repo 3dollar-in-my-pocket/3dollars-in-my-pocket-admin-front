@@ -14,7 +14,8 @@ async function request<T>(run: () => Promise<ApiResponse<T>>): Promise<ApiRespon
     return await run();
   } catch (error) {
     // 호출부가 response.message로 실패 사유를 표시할 수 있도록 메시지를 보존합니다.
-    return {ok: false, data: null as T, message: extractErrorMessage(error)};
+    return {ok: false, data: null as T, message: extractErrorMessage(error),
+      error: isAxiosError(error) ? error.response?.data?.error : undefined};
   }
 }
 
