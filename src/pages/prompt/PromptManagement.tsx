@@ -348,7 +348,7 @@ const PromptCard = ({
   const nextStatus = isActive ? PROMPT_STATUS.DRAFT : PROMPT_STATUS.ACTIVE;
   const hasSystemInstruction = Boolean(prompt.systemInstruction?.trim());
   const hasMaxOutputTokens = prompt.maxOutputTokens !== null && prompt.maxOutputTokens !== undefined;
-  const hasTemperature = prompt.temperature !== null && prompt.temperature !== undefined;
+  const hasTemperature = !ignoresTemperature(prompt.model) && prompt.temperature != null;
   const hasThinkingBudget = prompt.thinkingBudget !== null && prompt.thinkingBudget !== undefined;
   const hasModelOptions = Boolean(
     prompt.model || hasMaxOutputTokens || hasTemperature || hasThinkingBudget || prompt.thinkingLevel
@@ -421,11 +421,12 @@ const PromptCard = ({
             <span>최대 토큰</span>
             <strong>{formatOptionalValue(prompt.maxOutputTokens)}</strong>
           </div>
-          <div className="prompt-model-item">
-            <span>Temperature</span>
-            <strong>{formatOptionalValue(prompt.temperature)}</strong>
-            {ignoresTemperature(prompt.model) && <small>실제 생성에는 적용되지 않음</small>}
-          </div>
+          {!ignoresTemperature(prompt.model) && (
+            <div className="prompt-model-item">
+              <span>Temperature</span>
+              <strong>{formatOptionalValue(prompt.temperature)}</strong>
+            </div>
+          )}
           <div className="prompt-model-item">
             <span>Thinking Budget</span>
             <strong>{formatOptionalValue(prompt.thinkingBudget)}</strong>
@@ -496,8 +497,8 @@ const PromptEditModal = ({
       systemInstruction: selectedPrompt?.systemInstruction || '',
       model: selectedPrompt?.model || null,
       maxOutputTokens: selectedPrompt?.maxOutputTokens ?? null,
-      temperature: selectedPrompt?.temperature ?? null,
-      thinkingBudget: selectedPrompt?.thinkingBudget ?? null,
+      temperature: ignoresTemperature(selectedPrompt?.model) ? null : selectedPrompt?.temperature ?? null,
+      thinkingBudget: getThinkingLevels(selectedPrompt?.model).length ? null : selectedPrompt?.thinkingBudget ?? null,
       thinkingLevel: selectedPrompt?.thinkingLevel ?? null,
     });
     setErrors({});
@@ -526,6 +527,7 @@ const PromptEditModal = ({
     }
 
     if (
+      !ignoresTemperature(formData.model) &&
       formData.temperature !== null &&
       formData.temperature !== undefined &&
       (!Number.isFinite(formData.temperature) || formData.temperature < 0)
@@ -548,10 +550,13 @@ const PromptEditModal = ({
       if (name === 'model') {
         const levels = getThinkingLevels(value);
         return {...prev, model: value || null,
-          thinkingBudget: levels.length || (value === 'GEMINI_2_5_FLASH_LITE' &&
+          temperature: ignoresTemperature(value) ? null : prev.temperature,
+          thinkingBudget: (value && !['GEMINI_2_5_FLASH', 'GEMINI_2_5_FLASH_LITE'].includes(value)) ||
+            (value === 'GEMINI_2_5_FLASH_LITE' &&
             prev.thinkingBudget > 0 && prev.thinkingBudget < 512) ? null : prev.thinkingBudget,
           thinkingLevel: levels.includes(prev.thinkingLevel) ? prev.thinkingLevel : null};
       }
+      if (name === 'thinkingBudget') return {...prev, thinkingBudget: nextValue as number | null, thinkingLevel: null};
       if (name === 'thinkingLevel') return {...prev, thinkingLevel: (value || null) as AIThinkingLevel | null, thinkingBudget: null};
       return {...prev, [name]: nextValue};
     });
@@ -577,7 +582,7 @@ const PromptEditModal = ({
         systemInstruction: normalizeOptionalText(formData.systemInstruction),
         model: formData.model || null,
         maxOutputTokens: formData.maxOutputTokens ?? null,
-        temperature: formData.temperature ?? null,
+        temperature: ignoresTemperature(formData.model) ? null : formData.temperature ?? null,
         thinkingBudget: formData.thinkingBudget ?? null,
         thinkingLevel: formData.thinkingLevel ?? null,
       };
@@ -593,7 +598,7 @@ const PromptEditModal = ({
         toast.success(selectedPrompt ? '수정되었습니다' : '등록되었습니다');
         onSuccess();
       } else if (response?.error === 'invalid_ai_thinking_option') {
-        setErrors({thinkingBudget: '모델과 사고 설정의 조합을 확인해주세요. 기존 사고 설정을 초기화한 뒤 다시 저장할 수 있습니다.'});
+        setErrors({thinkingBudget: '모델과 사고 설정의 조합을 확인해주세요.'});
       }
     } catch (error: any) {
       toast.error(error.message || '처리 중 오류가 발생했습니다.');
@@ -712,21 +717,22 @@ const PromptEditModal = ({
               {errors.maxOutputTokens && <div className="invalid-feedback d-block">{errors.maxOutputTokens}</div>}
             </div>
 
-            <div className="col-12 col-md-6 col-xl-3">
-              <label className="form-label prompt-label">Temperature</label>
-              <input
-                type="number"
-                name="temperature"
-                value={formData.temperature ?? ''}
-                onChange={handleChange}
-                min={0}
-                step={0.1}
-                className={`form-control ${errors.temperature ? 'is-invalid' : ''}`}
-                placeholder="예: 0.7"
-              />
-              {ignoresTemperature(formData.model) && <small className="text-muted">저장되지만 실제 AI 생성에는 적용되지 않습니다.</small>}
-              {errors.temperature && <div className="invalid-feedback d-block">{errors.temperature}</div>}
-            </div>
+            {!ignoresTemperature(formData.model) && (
+              <div className="col-12 col-md-6 col-xl-3">
+                <label className="form-label prompt-label">Temperature</label>
+                <input
+                  type="number"
+                  name="temperature"
+                  value={formData.temperature ?? ''}
+                  onChange={handleChange}
+                  min={0}
+                  step={0.1}
+                  className={`form-control ${errors.temperature ? 'is-invalid' : ''}`}
+                  placeholder="예: 0.7"
+                />
+                {errors.temperature && <div className="invalid-feedback d-block">{errors.temperature}</div>}
+              </div>
+            )}
 
             <div className="col-12 col-md-6 col-xl-3">
               {allowedLevels.length ? (
@@ -739,9 +745,6 @@ const PromptEditModal = ({
                       <option key={getEnumValue(option)} value={getEnumValue(option)}>{getEnumLabel(option)}</option>
                     ))}
                   </select>
-                  {formData.thinkingBudget != null && <small className="text-muted">
-                    기존 사고 예산 {formData.thinkingBudget}은 실제 생성에서 무시됩니다. 사고 설정을 바꾸려면 초기화해주세요.
-                  </small>}
                 </>
               ) : (
                 <>
@@ -751,16 +754,12 @@ const PromptEditModal = ({
                          className={`form-control ${errors.thinkingBudget ? 'is-invalid' : ''}`}
                          placeholder="모델 기본 설정"/>
                   <small className="text-muted">
-                    {formData.model === 'GEMINI_2_5_FLASH_LITE' ? '-1, 0 또는 512~24576' : '-1~24576 정수'}
+                    {formData.model === 'GEMINI_2_5_FLASH_LITE' ? '512~24576' : '1~24576'}
                     {' · -1: 동적 사고, 0: 사고 비활성화'}
                     {!formData.model && ' · 사고 예산 지정 시 모델 선택을 권장합니다.'}
                   </small>
                 </>
               )}
-              <button type="button" className="btn btn-link btn-sm p-0 d-block mt-1" onClick={() => {
-                setFormData(prev => ({...prev, thinkingBudget: null, thinkingLevel: null}));
-                setErrors(prev => ({...prev, thinkingBudget: undefined}));
-              }}>모델 기본 사고 설정으로 초기화</button>
               {errors.thinkingBudget && <div className="invalid-feedback d-block">{errors.thinkingBudget}</div>}
             </div>
 
