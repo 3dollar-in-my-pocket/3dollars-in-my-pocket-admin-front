@@ -91,48 +91,48 @@ export const SECTION_CONFIGS: Record<SectionType, SectionConfigMeta[]> = {
     {
       type: 'AD_MOB',
       label: '광고 설정',
-      fields: [adHeightField('height', '광고 높이')],
+      fields: [adHeightField('height', '광고 영역 높이')],
     },
   ],
   HOME_FILTER: [
     {
       type: 'HOME_FILTER',
-      label: '필터 설정',
+      label: '홈 필터 설정',
       fields: [
-        booleanField('openStatusDefaultOn', '"영업중" 필터 기본 활성 여부'),
-        booleanField('recentActivityDefaultOn', '"최근 활동" 필터 기본 활성 여부'),
-        booleanField('targetStoresDefaultOn', '"사장님 직영점만" 필터 기본 활성 여부'),
-        booleanField('eventFilterVisible', '이벤트용 필터 활성 여부'),
+        booleanField('openStatusDefaultOn', '"영업중" 필터 기본 켜기'),
+        booleanField('recentActivityDefaultOn', '"최근 활동" 필터 기본 켜기'),
+        booleanField('targetStoresDefaultOn', '"사장님 직영점만" 필터 기본 켜기'),
+        booleanField('eventFilterVisible', '이벤트 필터 표시'),
       ],
     },
   ],
   HOME_MAP_CONTROL: [
     {
       type: 'HOME_MAP_CONTROL',
-      label: '지도 설정',
-      fields: [positiveDecimalField('initialMapZoomLevel', '초기 지도 줌 레벨')],
+      label: '홈 지도 설정',
+      fields: [positiveDecimalField('initialMapZoomLevel', '지도 시작 확대 수준')],
     },
   ],
   HOME_LIST: [
     {
       type: 'HOME_LIST',
-      label: '리스트 설정',
+      label: '홈 목록 설정',
       fields: [
-        integerField('pageSize', '페이지별 가게 갯수', 1, undefined, {unit: '개'}),
-        positionsField('adPositions', '광고 노출 위치'),
-        adHeightField('adHeight', '광고 높이'),
+        integerField('pageSize', '한 번에 불러올 가게 수', 1, undefined, {unit: '개'}),
+        positionsField('adPositions', '목록 광고 삽입 위치'),
+        adHeightField('adHeight', '목록 광고 영역 높이'),
       ],
     },
   ],
   HOME_CURATION: [
     {
       type: 'HOME_CURATION',
-      label: '큐레이션 설정',
+      label: '홈 큐레이션 설정',
       fields: [
-        positionsField('carouselAdPositions', '캐러셀 광고 위치'),
-        adHeightField('carouselAdHeight', '캐러셀 광고 높이'),
-        positionsField('cardAdPositions', '카드 광고 위치'),
-        positiveDecimalField('searchStoreMaxDistanceM', '가게 검색 최대 거리', {unit: 'm'}),
+        positionsField('carouselAdPositions', '캐러셀 광고 삽입 위치'),
+        adHeightField('carouselAdHeight', '캐러셀 광고 영역 높이'),
+        positionsField('cardAdPositions', '카드 광고 삽입 위치'),
+        positiveDecimalField('searchStoreMaxDistanceM', '가게 검색 반경', {unit: 'm'}),
       ],
     },
   ],
