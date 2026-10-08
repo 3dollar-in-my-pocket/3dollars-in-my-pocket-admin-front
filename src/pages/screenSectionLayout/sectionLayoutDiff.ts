@@ -1,5 +1,5 @@
 import {SectionLayoutDraft} from './useSectionLayoutDraft';
-import {formatSectionConfig} from '@/utils/sectionConfigUtils';
+import {EnumLabels, formatSectionConfig} from '@/utils/sectionConfigUtils';
 
 export type SectionDiffStatus = 'added' | 'removed' | 'moved' | 'updated' | 'unchanged';
 
@@ -41,10 +41,12 @@ const keyOf = (section: SectionLayoutDraft) => section.sectionId.trim();
  *
  * 서버가 sectionId로 레코드를 매칭해 재사용/삭제하므로 비교도 sectionId 기준으로 합니다.
  * sectionId를 바꾸면 서버에서는 삭제 후 재생성이라, 여기서도 삭제 + 추가로 표시됩니다.
+ * enumLabels는 설정 요약에서 ENUM 값을 표시명으로 보여줄 때만 씁니다.
  */
 export const diffSectionLayouts = (
   before: SectionLayoutDraft[],
-  after: SectionLayoutDraft[]
+  after: SectionLayoutDraft[],
+  enumLabels: EnumLabels = {}
 ): SectionLayoutDiff => {
   const beforeByKey = new Map(before.map((section, index) => [keyOf(section), {section, index}]));
   const afterByKey = new Map(after.map((section, index) => [keyOf(section), {section, index}]));
@@ -83,8 +85,8 @@ export const diffSectionLayouts = (
         after: formatVisible(section.isVisible),
       });
     }
-    const beforeConfig = formatSectionConfig(previous.section.config);
-    const afterConfig = formatSectionConfig(section.config);
+    const beforeConfig = formatSectionConfig(previous.section.config, enumLabels);
+    const afterConfig = formatSectionConfig(section.config, enumLabels);
     if (beforeConfig !== afterConfig) {
       changes.push({label: '설정', before: beforeConfig, after: afterConfig});
     }

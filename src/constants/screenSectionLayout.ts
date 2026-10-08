@@ -75,6 +75,14 @@ const positiveDecimalField = (name: string, label: string, options: FieldOptions
   ...options,
 });
 
+const enumField = (name: string, label: string, enumName: string): SectionConfigFieldMeta => ({
+  name,
+  label,
+  valueType: 'ENUM',
+  isRequired: true,
+  enumName,
+});
+
 /** 광고 높이 필드. 애드몹/리스트/큐레이션 광고 모두 같은 범위와 추천값을 사용합니다. */
 const adHeightField = (name: string, label: string): SectionConfigFieldMeta =>
   integerField(name, label, 50, 200, {unit: 'dp', presets: [50, 100, 150, 200]});
@@ -136,7 +144,22 @@ export const SECTION_CONFIGS: Record<SectionType, SectionConfigMeta[]> = {
       ],
     },
   ],
+  HOME_BOTTOM_SHEET_TAB: [
+    {
+      type: 'HOME_BOTTOM_SHEET_TAB',
+      label: '홈 바텀시트 탭 설정',
+      fields: [enumField('defaultSelectedTab', '기본 선택 탭', 'HomeBottomSheetTab')],
+    },
+  ],
 };
+
+/** 설정 필드가 선택지로 쓰는 서버 enum 이름 목록 */
+export const SECTION_CONFIG_ENUM_NAMES: string[] = Array.from(new Set(
+  Object.values(SECTION_CONFIGS).flat()
+    .flatMap((config) => config.fields)
+    .map((field) => field.enumName)
+    .filter((enumName): enumName is string => Boolean(enumName))
+));
 
 /** 설정 타입으로 설정 정의를 찾습니다. 설정 타입은 섹션 타입 간에 겹치지 않습니다. */
 export const findConfigMetaByType = (configType: string): SectionConfigMeta | undefined =>

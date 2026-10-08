@@ -91,6 +91,11 @@ const validateField = (field: SectionConfigFieldMeta, value: unknown): string | 
         return field.isRequired ? `${field.label} 값을 선택해주세요.` : undefined;
       }
       return typeof value === 'boolean' ? undefined : `${field.label} 값이 올바르지 않습니다.`;
+    case 'ENUM':
+      if (value === undefined || value === '') {
+        return field.isRequired ? `${field.label} 값을 선택해주세요.` : undefined;
+      }
+      return typeof value === 'string' ? undefined : `${field.label} 값이 올바르지 않습니다.`;
     case 'INTEGER_LIST': {
       if (value === undefined) {
         return field.isRequired ? `${field.label} 값을 입력해주세요.` : undefined;
@@ -139,14 +144,24 @@ export const validateSectionConfig = (
   return undefined;
 };
 
-const formatValue = (value: SectionConfigValue | string | undefined): string => {
+const formatValue = (value: SectionConfigValue | undefined): string => {
   if (value === undefined) return '-';
   if (Array.isArray(value)) return value.length > 0 ? `[${value.join(', ')}]` : '[]';
   return String(value);
 };
 
-/** 전/후 비교에 표시할 설정 요약. 예: "광고 설정 (광고 높이=100dp)" */
-export const formatSectionConfig = (config?: ScreenSectionLayoutConfig | null): string => {
+/** enum 이름별 값 → 표시명. 예: {HomeBottomSheetTab: {DEFAULT: '기본'}} */
+export type EnumLabels = Record<string, Record<string, string>>;
+
+/**
+ * 전/후 비교에 표시할 설정 요약. 예: "광고 설정 (광고 높이=100dp)"
+ *
+ * enumLabels를 넘기면 ENUM 필드 값을 "표시명 (값)"으로 보여줍니다. 표시명을 모르는 값은 그대로 둡니다.
+ */
+export const formatSectionConfig = (
+  config?: ScreenSectionLayoutConfig | null,
+  enumLabels: EnumLabels = {}
+): string => {
   if (!config) return '기본값';
   const configMeta = findConfigMetaByType(config.type);
   const fields = Object.keys(config)
@@ -154,7 +169,11 @@ export const formatSectionConfig = (config?: ScreenSectionLayoutConfig | null): 
     .sort()
     .map((key) => {
       const field = configMeta?.fields.find((item) => item.name === key);
-      const value = formatValue(config[key]);
+      const rawValue = config[key];
+      const enumLabel = field?.valueType === 'ENUM' && field.enumName && typeof rawValue === 'string'
+        ? enumLabels[field.enumName]?.[rawValue]
+        : undefined;
+      const value = enumLabel && enumLabel !== rawValue ? `${enumLabel} (${rawValue})` : formatValue(rawValue);
       const unit = field?.unit && value !== '-' && !value.startsWith('[') ? field.unit : '';
       return `${field?.label ?? key}=${value}${unit}`;
     });
