@@ -11,6 +11,7 @@ import {
   findConfigMeta,
   SectionConfigError
 } from '@/utils/sectionConfigUtils';
+import useEnumOptions from '@/hooks/useEnumOptions';
 
 /** 빈 입력은 미입력(undefined)으로, 숫자가 아닌 값은 NaN으로 두어 저장 전 검증에서 걸러지게 합니다. */
 const parseNumber = (text: string): number | undefined => {
@@ -82,6 +83,44 @@ const TextValueInput: React.FC<TextValueInputProps> = ({
         onChange(parse(event.target.value));
       }}
     />
+  );
+};
+
+interface EnumSelectInputProps {
+  id: string;
+  enumName?: string;
+  value: unknown;
+  disabled: boolean;
+  invalid: boolean;
+  onChange: (value: SectionConfigValue | undefined) => void;
+}
+
+/** 서버 enum 선택지로 값을 고르는 입력. 저장된 값이 선택지에 없어도 그대로 보여주고 유지합니다. */
+const EnumSelectInput: React.FC<EnumSelectInputProps> = ({id, enumName, value, disabled, invalid, onChange}) => {
+  const {options, isLoading, isError} = useEnumOptions(enumName);
+  const selected = typeof value === 'string' ? value : '';
+  const isUnknownValue = selected !== '' && !isLoading && !options.some((option) => option.value === selected);
+
+  return (
+    <>
+      <select
+        id={id}
+        className={`form-select form-select-sm ${invalid ? 'is-invalid' : ''}`}
+        value={selected}
+        disabled={disabled || isLoading}
+        onClick={(event) => event.stopPropagation()}
+        onChange={(event) => onChange(event.target.value || undefined)}
+      >
+        <option value="">{isLoading ? '불러오는 중...' : '선택해주세요'}</option>
+        {isUnknownValue && <option value={selected}>{selected}</option>}
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label === option.value ? option.value : `${option.label} (${option.value})`}
+          </option>
+        ))}
+      </select>
+      {isError && <span className="form-text text-danger">선택지를 불러오지 못했습니다.</span>}
+    </>
   );
 };
 
@@ -161,6 +200,17 @@ const ConfigFieldInput: React.FC<ConfigFieldInputProps> = ({id, field, value, di
           format={formatNumberList}
           inputMode="numeric"
           placeholder="예: 3, 8"
+          disabled={disabled}
+          invalid={invalid}
+          onChange={onChange}
+        />
+      );
+    case 'ENUM':
+      return (
+        <EnumSelectInput
+          id={id}
+          enumName={field.enumName}
+          value={value}
           disabled={disabled}
           invalid={invalid}
           onChange={onChange}

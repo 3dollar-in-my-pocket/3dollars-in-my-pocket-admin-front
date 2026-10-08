@@ -18,7 +18,7 @@ export interface ScreenTypeMeta {
   supportsSectionOrdering: boolean;
 }
 
-export type ConfigValueType = 'INTEGER' | 'DECIMAL' | 'BOOLEAN' | 'INTEGER_LIST';
+export type ConfigValueType = 'INTEGER' | 'DECIMAL' | 'BOOLEAN' | 'INTEGER_LIST' | 'ENUM';
 
 /** 설정 입력 필드 정의 */
 export interface SectionConfigFieldMeta {
@@ -40,6 +40,8 @@ export interface SectionConfigFieldMeta {
   unit?: string;
   /** 빠르게 고를 수 있는 추천값. INTEGER/DECIMAL에서만 사용합니다. */
   presets?: number[];
+  /** ENUM 선택지를 조회할 서버 enum 이름 (enumApi 응답의 키). 예: HomeBottomSheetTab */
+  enumName?: string;
   description?: string;
 }
 
@@ -64,7 +66,7 @@ export interface SectionTypeMeta {
 }
 
 /** 설정 필드 값. 입력 도중에는 숫자 자리에 NaN이 들어갈 수 있으며, 저장 전 검증에서 걸러집니다. */
-export type SectionConfigValue = number | boolean | number[];
+export type SectionConfigValue = number | boolean | number[] | string;
 
 /**
  * 섹션 설정값.
@@ -74,7 +76,7 @@ export type SectionConfigValue = number | boolean | number[];
  */
 export interface ScreenSectionLayoutConfig {
   type: string;
-  [field: string]: SectionConfigValue | string | undefined;
+  [field: string]: SectionConfigValue | undefined;
 }
 
 /** 섹션 레이아웃 (서버 응답) */

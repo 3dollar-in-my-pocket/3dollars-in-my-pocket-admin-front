@@ -6,6 +6,7 @@ import Loading from '@/components/common/Loading';
 import PageHeader from '@/components/common/PageHeader';
 import SectionCard from '@/components/common/SectionCard';
 import {useConfirm} from '@/hooks/useConfirm';
+import {useEnumLabels} from '@/hooks/useEnumOptions';
 import useMediaQuery, {MOBILE_QUERY} from '@/hooks/useMediaQuery';
 import {usePermission} from '@/hooks/usePermission';
 import {AdminRole} from '@/types/admin';
@@ -15,6 +16,7 @@ import {
   findScreenTypeMeta,
   findSectionTypeMeta,
   getConfigurableSectionTypes,
+  SECTION_CONFIG_ENUM_NAMES,
 } from '@/constants/screenSectionLayout';
 import {validateSectionLayouts} from '@/utils/validation/screenSectionLayoutValidation';
 import useSectionLayoutDraft from './useSectionLayoutDraft';
@@ -85,10 +87,12 @@ const ScreenSectionLayoutManagement = () => {
     [screenType, sectionTypes, toRequest]
   );
 
+  const enumLabels = useEnumLabels(SECTION_CONFIG_ENUM_NAMES);
+
   /** 마지막 저장 상태와 현재 편집 상태의 차이 */
   const diff = useMemo(
-    () => diffSectionLayouts(savedSections, sections),
-    [savedSections, sections]
+    () => diffSectionLayouts(savedSections, sections, enumLabels),
+    [savedSections, sections, enumLabels]
   );
 
   const visibleCount = useMemo(

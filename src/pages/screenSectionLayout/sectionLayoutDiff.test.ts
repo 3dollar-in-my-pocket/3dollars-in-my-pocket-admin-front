@@ -137,4 +137,20 @@ describe('diffSectionLayouts', () => {
     expect(diff.removedCount).toBe(0);
     expect(diff.hasChanges).toBe(true);
   });
+
+  it('ENUM 설정 값은 표시명과 함께 보여준다', () => {
+    const before = [draft('HOME_BOTTOM_SHEET_TAB', 'HOME_BOTTOM_SHEET_TAB', {
+      config: {type: 'HOME_BOTTOM_SHEET_TAB', defaultSelectedTab: 'DEFAULT'},
+    })];
+    const after = [draft('HOME_BOTTOM_SHEET_TAB', 'HOME_BOTTOM_SHEET_TAB', {
+      config: {type: 'HOME_BOTTOM_SHEET_TAB', defaultSelectedTab: 'CURATION'},
+    })];
+
+    const diff = diffSectionLayouts(before, after, {HomeBottomSheetTab: {DEFAULT: '기본'}});
+    const change = findEntry(diff.entries, 'HOME_BOTTOM_SHEET_TAB')?.changes[0];
+
+    expect(change?.before).toBe('홈 바텀시트 탭 설정 (기본 선택 탭=기본 (DEFAULT))');
+    // 표시명을 모르는 값은 원래 값을 그대로 보여준다
+    expect(change?.after).toBe('홈 바텀시트 탭 설정 (기본 선택 탭=CURATION)');
+  });
 });
