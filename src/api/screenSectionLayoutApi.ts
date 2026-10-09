@@ -30,9 +30,12 @@ export default {
    * 미노출(isVisible=false) 항목도 목록에 포함됩니다.
    * 아직 한 번도 교체하지 않은 화면은 contents가 빈 배열이며, 이 경우 유저 화면은 기본 레이아웃으로 조립됩니다.
    */
-  getSectionLayouts: async (screenType: ScreenType): Promise<ApiResponse<ScreenSectionLayoutListResponse>> => {
+  getSectionLayouts: async (
+    application: string,
+    screenType: ScreenType
+  ): Promise<ApiResponse<ScreenSectionLayoutListResponse>> => {
     return apiGet<ScreenSectionLayoutListResponse>(
-      `/v1/screen/${encodeURIComponent(screenType)}/section-layouts`
+      `/v1/application/${encodeURIComponent(application)}/screen/${encodeURIComponent(screenType)}/section-layouts`
     );
   },
 
@@ -43,11 +46,12 @@ export default {
    * displayOrder는 sections 배열 순서로 서버가 계산하므로 요청에 넣지 않습니다.
    */
   replaceSectionLayouts: async (
+    application: string,
     screenType: ScreenType,
     data: ReplaceScreenSectionLayoutsRequest
   ): Promise<ApiResponse<ScreenSectionLayoutListResponse>> => {
     return apiPut<ScreenSectionLayoutListResponse>(
-      `/v1/screen/${encodeURIComponent(screenType)}/section-layouts`,
+      `/v1/application/${encodeURIComponent(application)}/screen/${encodeURIComponent(screenType)}/section-layouts`,
       data
     );
   },
