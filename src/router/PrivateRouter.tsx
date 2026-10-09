@@ -2,7 +2,7 @@ import {Navigate} from 'react-router-dom';
 import {useAuthStore} from "@/state/authStore";
 import adminApi from "@/api/adminApi";
 import {ReactElement, useEffect, useState} from "react";
-import Loading from "@/components/common/Loading";
+import PageLoading from "@/components/common/PageLoading";
 
 interface PrivateRouterProps {
   children: ReactElement;
@@ -12,6 +12,7 @@ const PrivateRouter = ({children}: PrivateRouterProps) => {
   const setLoggedIn = useAuthStore((state) => state.setLoggedIn);
   const setAdmin = useAuthStore((state) => state.setAdmin);
   const logout = useAuthStore((state) => state.logout);
+  const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -42,7 +43,8 @@ const PrivateRouter = ({children}: PrivateRouterProps) => {
   }, [setLoggedIn, setAdmin, logout]);
 
   if (loading) {
-    return <Loading loading={true}/>
+    // 새로고침 직후에는 아직 로그인 전이라 상단바 없는 화면 전체 기준으로 가운데 정렬합니다.
+    return <PageLoading fullHeight={!isLoggedIn}/>
   }
 
   return isAuthenticated ? children : <Navigate to="/" replace/>;

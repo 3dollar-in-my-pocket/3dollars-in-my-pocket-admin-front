@@ -1970,6 +1970,14 @@ table.data-table .num {
   min-width: 0;
 }
 
+/* 섹션 목록 로딩 */
+.screen-layout__loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 0;
+}
+
 /* 화면 선택 드롭다운 */
 .screen-select {
   width: auto;
@@ -2512,6 +2520,12 @@ table.data-table .num {
   /* 접기 상태에서는 카드가 제목 줄만 남아 목록으로 바로 이어진다. */
   .screen-preview__frame {
     max-width: 200px;
+  }
+
+  /* 1단에서는 목록 카드가 비어 있는 동안 스피너가 카드 맨 위에 붙어 보여, 화면 가운데쯤으로 내린다. */
+  .screen-layout__loading {
+    min-height: 50vh;
+    padding: 0;
   }
 }
 
