@@ -86,23 +86,25 @@ const UserStoreHistory = ({userId, isActive, onStoreClick}: UserStoreHistoryProp
         >
           <div className="item-card__body">
             <div className="d-flex align-items-start justify-content-between gap-2">
-              <div className="min-w-0">
+              <div className="flex-grow-1 min-w-0">
                 <h3 className="item-card__name">{store.name || '이름 없음'}</h3>
                 <div className="d-flex align-items-center flex-wrap gap-2 mt-2">
                   <StoreStatusBadge status={store.status} size="md"/>
                   {getActivitiesStatusBadge(store.activitiesStatus)}
-                  <StoreTypeBadge storeType={store.storeType}/>
                 </div>
               </div>
-              <button
-                className="btn btn-sm btn-outline-success flex-shrink-0"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleStoreClick(store);
-                }}
-              >
-                <i className="bi bi-arrow-right"/>
-              </button>
+              <div className="d-flex flex-column align-items-end gap-2 flex-shrink-0">
+                <StoreTypeBadge storeType={store.storeType}/>
+                <button
+                  className="btn btn-sm btn-outline-success flex-shrink-0"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleStoreClick(store);
+                  }}
+                >
+                  <i className="bi bi-arrow-right"/>
+                </button>
+              </div>
             </div>
 
             <p className="item-card__desc">

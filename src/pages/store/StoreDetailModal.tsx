@@ -22,6 +22,7 @@ import StoreReportHistory from './detail/StoreReportHistory';
 import StoreReviewHistory from './detail/StoreReviewHistory';
 import StoreSettings from './detail/StoreSettings';
 import StoreVisitHistory from './detail/StoreVisitHistory';
+import StoreThreadsPostLinks from './detail/StoreThreadsPostLinks';
 import {isImagesSupported, isReportsSupported, isVisitsSupported, StoreDetail} from '@/types/store';
 import useConfirm from '@/hooks/useConfirm';
 
@@ -217,11 +218,6 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}: 
       <Modal.Header closeButton>
         <div className="detail-modal__avatar">
           <i className="bi bi-shop" aria-hidden="true"/>
-          {storeType && (
-            <span className="detail-modal__avatar-badge">
-              <StoreTypeBadge storeType={storeType} size="sm" bordered/>
-            </span>
-          )}
         </div>
         <div className="flex-grow-1 min-w-0">
           <div className="detail-modal__heading">
@@ -229,6 +225,7 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}: 
               {storeDetail?.name || store.name}
             </Modal.Title>
             <span className="detail-modal__id font-monospace">#{store.storeId}</span>
+            <StoreTypeBadge storeType={storeType} size="sm" bordered className="ms-auto"/>
           </div>
           <div className="detail-modal__meta">
             <StoreStatusBadge status={storeDetail?.status || store.status} withIcon/>
@@ -314,6 +311,15 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}: 
                 storeId={store?.storeId}
                 isActive={activeTab === 'markers'}
               />
+            </Tab>
+
+            <Tab
+              eventKey="threads"
+              title={<DetailModalTabTitle icon="bi-link-45deg" label="Threads"/>}
+            >
+              {activeTab === 'threads' && (
+                <StoreThreadsPostLinks key={store.storeId} storeId={String(store.storeId)}/>
+              )}
             </Tab>
 
             {/* 가게 기여자들 탭 (유저 제보 가게만) */}

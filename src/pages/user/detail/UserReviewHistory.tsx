@@ -172,7 +172,7 @@ const UserReviewHistory = ({userId, isActive, onStoreClick}: UserReviewHistoryPr
           >
             <div className="item-card__body">
               <div className="d-flex align-items-start justify-content-between gap-2">
-                <div className="min-w-0">
+                <div className="flex-grow-1 min-w-0">
                   <div className="d-flex align-items-center flex-wrap gap-2">
                     {review.store && onStoreClick ? (
                       <button
@@ -191,23 +191,25 @@ const UserReviewHistory = ({userId, isActive, onStoreClick}: UserReviewHistoryPr
                     )}
                     {getReviewStatusBadge(review.status)}
                     <StoreStatusBadge status={review.store?.status}/>
-                    {review.store?.storeType && <StoreTypeBadge storeType={review.store.storeType}/>}
                   </div>
                   <p className="item-card__desc">
                     <i className="bi bi-geo-alt me-1"/>
                     {review.store?.address?.fullAddress || '주소 정보 없음'}
                   </p>
                 </div>
-                <button
-                  className="btn btn-sm btn-outline-primary flex-shrink-0"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleReviewClick(review);
-                  }}
-                >
-                  <i className="bi bi-eye me-1"/>
-                  상세보기
-                </button>
+                <div className="d-flex flex-column align-items-end gap-2 flex-shrink-0">
+                  <StoreTypeBadge storeType={review.store?.storeType}/>
+                  <button
+                    className="btn btn-sm btn-outline-primary flex-shrink-0"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleReviewClick(review);
+                    }}
+                  >
+                    <i className="bi bi-eye me-1"/>
+                    상세보기
+                  </button>
+                </div>
               </div>
 
               <div className="d-flex align-items-center flex-wrap gap-2 mt-2">

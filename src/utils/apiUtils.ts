@@ -57,7 +57,10 @@ export function unwrapApiResponse<T>(response: AxiosResponse): ApiResponse<T> {
     };
   }
 
-  throw new Error(response.data.message || 'API 응답 오류');
+  throw Object.assign(new Error(response.data.message || 'API 응답 오류'), {
+    error: response.data.error,
+    errorDetails: response.data.errorDetails,
+  });
 }
 
 /**
