@@ -442,6 +442,22 @@
   padding: 0.875rem;
 }
 
+/* ---------- 페이지 로딩 ---------- */
+/* 상단바와 본문 여백을 뺀 남은 높이를 채워, 스피너가 보이는 화면의 가운데에 오게 한다. */
+.page-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - var(--app-topbar-height) - 5rem);
+  min-height: calc(100dvh - var(--app-topbar-height) - 5rem);
+}
+
+/* 모바일 브라우저는 100vh에 주소창 영역까지 포함되므로 dvh를 우선 쓴다. */
+.page-loading--full {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
 /* ---------- 데스크톱 ---------- */
 @media (min-width: 992px) {
   .app-sidebar {

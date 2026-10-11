@@ -1,6 +1,6 @@
 import React, {Suspense, useEffect, useMemo, useState} from "react";
 import {Outlet, useLocation, useNavigate} from "react-router-dom";
-import Loading from "@/components/common/Loading";
+import PageLoading from "@/components/common/PageLoading";
 import Sidebar from "@/components/layout/Sidebar";
 import {Bounce, toast, ToastContainer} from "react-toastify";
 import {useAuthStore} from "@/state/authStore";
@@ -16,16 +16,6 @@ const ENVIRONMENT_WATERMARK: Record<string, string> = {
   DEV: 'DEVELOPMENT',
 };
 const environmentWatermark = ENVIRONMENT ? ENVIRONMENT_WATERMARK[ENVIRONMENT] : undefined;
-
-/** 페이지 지연 로딩 중 표시. 모바일에서도 화면 가운데에 오도록 세로 중앙 정렬합니다. */
-const PageLoading = ({fullHeight = false}: { fullHeight?: boolean }) => (
-  <div
-    className="d-flex align-items-center justify-content-center"
-    style={{minHeight: fullHeight ? "100vh" : "60vh"}}
-  >
-    <Loading/>
-  </div>
-);
 
 const Layout = () => {
   const location = useLocation();

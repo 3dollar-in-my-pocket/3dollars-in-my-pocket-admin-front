@@ -1,4 +1,5 @@
 import {DragEvent, useCallback, useEffect, useMemo, useState} from 'react';
+import {useSearchParams} from 'react-router-dom';
 import {toast} from 'react-toastify';
 import screenSectionLayoutApi from '@/api/screenSectionLayoutApi';
 import EmptyState from '@/components/common/EmptyState';
@@ -12,10 +13,12 @@ import {usePermission} from '@/hooks/usePermission';
 import {AdminRole} from '@/types/admin';
 import {ScreenType, SectionType, ScreenTypeMeta, SectionTypeMeta} from '@/types/screenSectionLayout';
 import {
+  DEFAULT_SCREEN_APPLICATION,
   DEFAULT_SCREEN_TYPE,
   findScreenTypeMeta,
   findSectionTypeMeta,
   getConfigurableSectionTypes,
+  SCREEN_APPLICATIONS,
   SECTION_CONFIG_ENUM_NAMES,
 } from '@/constants/screenSectionLayout';
 import {validateSectionLayouts} from '@/utils/validation/screenSectionLayoutValidation';
@@ -26,12 +29,26 @@ import SectionPreview from './SectionPreview';
 import SectionAddPanel from './SectionAddPanel';
 import {diffSectionLayouts} from './sectionLayoutDiff';
 
+/** 새로고침해도 보던 앱과 화면이 유지되도록 쿼리 파라미터에 남깁니다. */
+const APPLICATION_PARAM = 'app';
+const SCREEN_PARAM = 'screen';
+
+const resolveInitialApplication = (value: string | null): string =>
+  SCREEN_APPLICATIONS.some((app) => app.value === value && app.enabled) ? value! : DEFAULT_SCREEN_APPLICATION;
+
 const ScreenSectionLayoutManagement = () => {
   const confirm = useConfirm();
   const {hasAccess} = usePermission();
   const canManage = hasAccess([AdminRole.OPERATOR]);
 
-  const [screenType, setScreenType] = useState<ScreenType>(DEFAULT_SCREEN_TYPE);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [application, setApplication] = useState<string>(
+    () => resolveInitialApplication(searchParams.get(APPLICATION_PARAM))
+  );
+  // 존재하지 않는 화면 코드면 화면 목록 조회 후 첫 번째 화면으로 바뀝니다.
+  const [screenType, setScreenType] = useState<ScreenType>(
+    () => searchParams.get(SCREEN_PARAM) || DEFAULT_SCREEN_TYPE
+  );
   const [screenTypes, setScreenTypes] = useState<ScreenTypeMeta[]>([]);
   const [sectionTypes, setSectionTypes] = useState<SectionTypeMeta[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -119,7 +136,7 @@ const ScreenSectionLayoutManagement = () => {
     setIsLoading(true);
     setIsLoaded(false);
     try {
-      const metadataResponse = await screenSectionLayoutApi.getSectionTypes('USER', targetScreenType);
+      const metadataResponse = await screenSectionLayoutApi.getSectionTypes(application, targetScreenType);
       if (!metadataResponse?.ok) {
         setSectionTypes([]);
         reset([]);
@@ -136,7 +153,7 @@ const ScreenSectionLayoutManagement = () => {
         return;
       }
 
-      const response = await screenSectionLayoutApi.getSectionLayouts(targetScreenType);
+      const response = await screenSectionLayoutApi.getSectionLayouts(application, targetScreenType);
       if (!response?.ok) {
         return;
       }
@@ -147,12 +164,12 @@ const ScreenSectionLayoutManagement = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [reset, screenTypes]);
+  }, [application, reset, screenTypes]);
 
   useEffect(() => {
     const loadScreens = async () => {
       setIsLoading(true);
-      const response = await screenSectionLayoutApi.getScreens('USER');
+      const response = await screenSectionLayoutApi.getScreens(application);
       if (!response?.ok) {
         setScreenTypes([]);
         setIsLoading(false);
@@ -168,14 +185,25 @@ const ScreenSectionLayoutManagement = () => {
     };
 
     void loadScreens();
-    // 화면 메타데이터는 페이지 진입 시 한 번 조회합니다.
+    // 화면 메타데이터는 페이지 진입 시와 앱 변경 시에만 조회합니다.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [application]);
 
   useEffect(() => {
     if (screenTypes.length === 0 || !screenTypes.some((screen) => screen.value === screenType)) return;
     void fetchScreenData(screenType);
   }, [screenType, screenTypes, fetchScreenData]);
+
+  useEffect(() => {
+    // 화면 목록을 받기 전에는 아직 유효한 화면인지 모르므로 URL을 건드리지 않습니다.
+    if (screenTypes.length === 0) return;
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set(APPLICATION_PARAM, application);
+      next.set(SCREEN_PARAM, screenType);
+      return next;
+    }, {replace: true});
+  }, [application, screenType, screenTypes, setSearchParams]);
 
   // 편집 중 이탈 시 저장되지 않은 변경이 사라지는 것을 브라우저 차원에서 한 번 더 알립니다.
   useEffect(() => {
@@ -208,6 +236,31 @@ const ScreenSectionLayoutManagement = () => {
     setShowCompare(false);
     setActiveKey(null);
     setScreenType(nextScreenType);
+  };
+
+  const handleApplicationChange = async (nextApplication: string) => {
+    if (nextApplication === application) return;
+
+    if (isDirty) {
+      const confirmed = await confirm({
+        title: '앱 변경',
+        message: '저장하지 않은 변경 사항이 있습니다. 앱을 변경하면 변경 사항이 사라집니다. 계속하시겠습니까?',
+        confirmLabel: '변경',
+        variant: 'danger'
+      });
+      if (!confirmed) return;
+    }
+
+    setDragIndex(null);
+    setDropTarget(null);
+    setShowCompare(false);
+    setActiveKey(null);
+    // 이전 앱의 화면 목록으로 레이아웃을 조회하지 않도록 비운 뒤 새 앱의 화면 목록을 받습니다.
+    setScreenTypes([]);
+    setSectionTypes([]);
+    reset([]);
+    setIsLoaded(false);
+    setApplication(nextApplication);
   };
 
   const handleReload = async () => {
@@ -294,7 +347,7 @@ const ScreenSectionLayoutManagement = () => {
 
     setIsSaving(true);
     try {
-      const response = await screenSectionLayoutApi.replaceSectionLayouts(screenType, {
+      const response = await screenSectionLayoutApi.replaceSectionLayouts(application, screenType, {
         sections: toRequest()
       });
       if (!response?.ok) {
@@ -388,7 +441,7 @@ const ScreenSectionLayoutManagement = () => {
   const renderEditor = () => {
     if (isLoading) {
       return (
-        <div className="py-5">
+        <div className="screen-layout__loading">
           <Loading/>
         </div>
       );
@@ -429,8 +482,28 @@ const ScreenSectionLayoutManagement = () => {
 
   return (
     <div>
+      {/* 앱 → 화면 순으로 대상을 고르므로 앱 탭을 가장 위에 둡니다. */}
+      <ul className="nav nav-tabs mb-3" role="tablist" aria-label="앱 선택">
+        {SCREEN_APPLICATIONS.map((app) => (
+          <li key={app.value} className="nav-item" role="presentation">
+            <button
+              type="button"
+              role="tab"
+              className={`nav-link${app.value === application ? ' active' : ''}`}
+              aria-selected={app.value === application}
+              disabled={!app.enabled || isLoading || isSaving}
+              title={app.enabled ? undefined : '준비 중입니다'}
+              onClick={() => void handleApplicationChange(app.value)}
+            >
+              {app.label}
+              {!app.enabled && <span className="ms-1 small">(준비 중)</span>}
+            </button>
+          </li>
+        ))}
+      </ul>
+
       <PageHeader
-        description="유저 앱 화면의 섹션 노출 순서와 하단 여백, 노출 여부, 섹션별 설정을 관리합니다. 왼쪽 미리보기로 결과를 확인하며 편집한 뒤 전체 저장을 눌러 한 번에 반영하세요."
+        description="앱 화면의 섹션 노출 순서와 하단 여백, 노출 여부, 섹션별 설정을 관리합니다. 왼쪽 미리보기로 결과를 확인하며 편집한 뒤 전체 저장을 눌러 한 번에 반영하세요."
         meta={
           <div className="d-flex align-items-center gap-2 flex-wrap">
             {/* 화면 선택은 페이지 전체의 대상을 고르는 조작이라 헤더에 둡니다. */}

@@ -7,6 +7,21 @@ import {
   SectionTypeMeta
 } from '@/types/screenSectionLayout';
 
+export interface ScreenApplicationOption {
+  value: string;
+  label: string;
+  /** false면 탭은 보이지만 선택할 수 없습니다. */
+  enabled: boolean;
+}
+
+/** UI 구성 관리 대상 앱. 사장님앱은 서버 준비 전까지 비활성 상태로 둡니다. */
+export const SCREEN_APPLICATIONS: ScreenApplicationOption[] = [
+  {value: 'USER', label: '유저앱', enabled: true},
+  {value: 'BOSS', label: '사장님앱', enabled: false},
+];
+
+export const DEFAULT_SCREEN_APPLICATION = 'USER';
+
 /** 메타데이터 조회 전 초기 상태에서 사용하는 화면 코드입니다. */
 export const DEFAULT_SCREEN_TYPE: ScreenType = 'STORE_DETAIL';
 
