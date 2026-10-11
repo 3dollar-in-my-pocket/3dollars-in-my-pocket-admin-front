@@ -141,16 +141,16 @@ export const menuGroups: MenuGroup[] = [
         path: "/manage/screen-section-layout",
         label: "UI 구성 관리",
         icon: "bi-layout-text-window",
-        allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]
+        allowedRoles: [AdminRole.OPERATOR]
       },
       {path: "/manage/policy", label: "정책 설정", icon: "bi-shield-fill-check", allowedRoles: [AdminRole.OPERATOR]},
       {
         path: "/manage/push-ab-test",
         label: "A/B 테스트 대상 관리",
         icon: "bi-shuffle",
-        allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]
+        allowedRoles: [AdminRole.OPERATOR]
       },
-      {path: "/manage/prompt", label: "AI 프롬프트 관리", icon: "bi-robot", allowedRoles: [AdminRole.OWNER]},
+      {path: "/manage/prompt", label: "AI 프롬프트 관리", icon: "bi-robot"},
       {path: "/manage/tool/cache", label: "캐시 툴", icon: "bi-brush-fill"},
       {
         path: "/manage/tool/upload",
@@ -169,7 +169,7 @@ export const menuGroups: MenuGroup[] = [
         path: "/manage/proto/ai-menu-image-extract",
         label: "AI 메뉴 이미지 추출",
         icon: "bi-stars",
-        allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]
+        allowedRoles: [AdminRole.OPERATOR]
       },
     ],
   },
