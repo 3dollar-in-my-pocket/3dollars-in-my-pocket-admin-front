@@ -1,7 +1,9 @@
 import {lazy} from "react";
+import {Navigate} from "react-router-dom";
 import PrivateRouter from "./PrivateRouter";
 import PermissionGuard from "@/components/auth/PermissionGuard";
 import {AdminRole} from "@/types/admin";
+import type {StoreActivityTabKey} from "@/pages/store/StoreActivityManagement";
 
 // 관리 페이지는 라우트 진입 시점에 로드합니다. (Suspense fallback은 Layout에 있음)
 const Dashboard = lazy(() => import("../pages/Dashboard"));
@@ -13,10 +15,7 @@ const Push = lazy(() => import("../pages/push/Push"));
 const UserSearch = lazy(() => import("../pages/user/UserSearch"));
 const StoreSearch = lazy(() => import("../pages/store/StoreSearch"));
 const PopularNeighborhoodStores = lazy(() => import("../pages/store/PopularNeighborhoodStores"));
-const ReviewManagement = lazy(() => import("../pages/review/ReviewManagement"));
-const StoreMessageManagement = lazy(() => import("../pages/storeMessage/StoreMessageManagement"));
 const StoreCategoryManagement = lazy(() => import("../pages/storeCategory/StoreCategoryManagement"));
-const CouponManagement = lazy(() => import("../pages/coupon/CouponManagement"));
 const CacheTool = lazy(() => import("../pages/tool/CacheTool"));
 const FileUploadTool = lazy(() => import("../pages/tool/FileUploadTool"));
 const RandomNameTool = lazy(() => import("../pages/tool/RandomNameTool"));
@@ -24,15 +23,22 @@ const Admin = lazy(() => import("../pages/admin/Admin"));
 const PollManagement = lazy(() => import("../pages/poll/PollManagement"));
 const MedalManagement = lazy(() => import("../pages/medal/MedalManagement"));
 const UserRankingManagement = lazy(() => import("../pages/userRanking/UserRankingManagement"));
-const StoreImageManage = lazy(() => import("../pages/manage/StoreImageManage"));
 const StoreMarkerManage = lazy(() => import("../pages/manage/StoreMarkerManage"));
-const StoreReportManagement = lazy(() => import("../pages/storeReport/StoreReportManagement"));
-const StorePostManagement = lazy(() => import("../pages/storePost/StorePostManagement"));
 const PromptManagement = lazy(() => import("../pages/prompt/PromptManagement"));
 const AiMenuImageExtract = lazy(() => import("../pages/proto/AiMenuImageExtract"));
+const StoreActivityManagement = lazy(() => import("../pages/store/StoreActivityManagement"));
 const StoreFileUpload = lazy(() => import("../pages/store/StoreFileUpload"));
 const ScreenSectionLayoutManagement = lazy(() => import("../pages/screenSectionLayout/ScreenSectionLayoutManagement"));
 const ExperimentOverrideManagement = lazy(() => import("../pages/experiment/ExperimentOverrideManagement"));
+
+const LEGACY_STORE_ACTIVITY_PATHS: [string, StoreActivityTabKey][] = [
+  ['/manage/review', 'review'],
+  ['/manage/store-image', 'image'],
+  ['/manage/store-report', 'report'],
+  ['/manage/store-post', 'post'],
+  ['/manage/coupon', 'coupon'],
+  ['/manage/store-message', 'message'],
+];
 
 const manageRoutes = {
   path: '/manage',
@@ -84,20 +90,17 @@ const manageRoutes = {
       )
     },
     {
+      path: '/manage/store-activity',
+      element: <PrivateRouter><StoreActivityManagement/></PrivateRouter>
+    },
+    // 가게 활동 관리 페이지로 통합되기 전 경로 (북마크 호환)
+    ...LEGACY_STORE_ACTIVITY_PATHS.map(([path, tab]) => ({
+      path,
+      element: <Navigate to={`/manage/store-activity?tab=${tab}`} replace/>
+    })),
+    {
       path: '/manage/popular-neighborhood-stores',
       element: <PrivateRouter><PopularNeighborhoodStores/></PrivateRouter>
-    },
-    {
-      path: '/manage/review',
-      element: <PrivateRouter><ReviewManagement/></PrivateRouter>
-    },
-    {
-      path: '/manage/coupon',
-      element: <PrivateRouter><CouponManagement/></PrivateRouter>
-    },
-    {
-      path: '/manage/store-message',
-      element: <PrivateRouter><StoreMessageManagement/></PrivateRouter>
     },
     {
       path: '/manage/store-category',
@@ -166,20 +169,8 @@ const manageRoutes = {
       element: <PrivateRouter><UserRankingManagement/></PrivateRouter>
     },
     {
-      path: '/manage/store-image',
-      element: <PrivateRouter><StoreImageManage/></PrivateRouter>
-    },
-    {
       path: '/manage/store-marker',
       element: <PrivateRouter><StoreMarkerManage/></PrivateRouter>
-    },
-    {
-      path: '/manage/store-report',
-      element: <PrivateRouter><StoreReportManagement/></PrivateRouter>
-    },
-    {
-      path: '/manage/store-post',
-      element: <PrivateRouter><StorePostManagement/></PrivateRouter>
     },
     {
       path: '/manage/push-ab-test',

@@ -988,6 +988,27 @@ table.data-table .num {
   padding: 0;
 }
 
+/* 페이지 상단 탭: 좁은 화면에서는 가로 스크롤 */
+.page-tabs {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.page-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.page-tabs .nav-item {
+  flex: 0 0 auto;
+}
+
+.page-tabs .nav-link {
+  white-space: nowrap;
+}
+
 /* 탭바 */
 .detail-modal .nav-tabs {
   gap: 0.125rem;
