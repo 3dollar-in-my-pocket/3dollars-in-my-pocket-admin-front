@@ -1,5 +1,4 @@
-import {useState} from "react";
-import ServerStatistics from "./ServerStatistics";
+import PageHeader from "@/components/common/PageHeader";
 import LinkCardGrid, {ExternalLinkCard} from "@/components/common/LinkCardGrid";
 
 /** Firebase Analytics 콘솔 링크 */
@@ -22,46 +21,12 @@ const ANALYTICS_LINKS: ExternalLinkCard[] = [
   },
 ];
 
-const TABS = [
-  {key: "server", label: "서버 통계", icon: "bi-hdd-network"},
-  {key: "firebase", label: "클라이언트 통계 (GA)", icon: "bi-google"},
-] as const;
+/** Firebase Analytics(GA) 기반 클라이언트 통계 */
+const ClientStatInfo = () => (
+  <div>
+    <PageHeader description="Firebase Analytics에서 각 앱의 서비스 사용 통계를 확인합니다. 링크를 클릭하면 해당 앱의 Firebase Console로 이동합니다."/>
+    <LinkCardGrid items={ANALYTICS_LINKS}/>
+  </div>
+);
 
-const ServiceStatInfo = () => {
-  const [activeTab, setActiveTab] = useState<"firebase" | "server">("server");
-
-  return (
-    <div>
-      {/* 탭 */}
-      <div className="page-tabs" role="tablist">
-        {TABS.map((tab) => (
-          <button
-            key={tab.key}
-            type="button"
-            role="tab"
-            aria-selected={activeTab === tab.key}
-            className={`page-tab ${activeTab === tab.key ? "page-tab--active" : ""}`}
-            onClick={() => setActiveTab(tab.key)}
-          >
-            <i className={`bi ${tab.icon}`}/>
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {activeTab === "server" && <ServerStatistics/>}
-
-      {activeTab === "firebase" && (
-        <>
-          <p className="page-header__desc mb-3">
-            Firebase Analytics에서 각 앱의 서비스 사용 통계를 확인할 수 있습니다. 링크를 클릭하면 해당 앱의 Firebase Console로 이동합니다.
-          </p>
-
-          <LinkCardGrid items={ANALYTICS_LINKS}/>
-        </>
-      )}
-    </div>
-  );
-};
-
-export default ServiceStatInfo;
+export default ClientStatInfo;

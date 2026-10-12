@@ -16,25 +16,25 @@ interface PageTabsProps<K extends string> {
 export const getPageTabId = (id: string, key: string) => `${id}-tab-${key}`;
 export const getPageTabPanelId = (id: string, key: string) => `${id}-panel-${key}`;
 
-/** 페이지 상단 탭. 좁은 화면에서는 줄바꿈 대신 가로 스크롤됩니다. */
+/** 페이지 상단 탭. 좁은 화면에서는 가로 스크롤됩니다. (스타일: page.css "페이지 내 탭") */
 const PageTabs = <K extends string>({id, tabs, activeKey, onChange, ariaLabel}: PageTabsProps<K>) => (
-  <ul className="nav nav-tabs page-tabs mb-3" role="tablist" aria-label={ariaLabel}>
+  <div className="page-tabs" role="tablist" aria-label={ariaLabel}>
     {tabs.map(tab => (
-      <li key={tab.key} className="nav-item" role="presentation">
-        <button
-          type="button"
-          role="tab"
-          id={getPageTabId(id, tab.key)}
-          aria-controls={getPageTabPanelId(id, tab.key)}
-          aria-selected={tab.key === activeKey}
-          className={`nav-link${tab.key === activeKey ? ' active' : ''}`}
-          onClick={() => onChange(tab.key)}
-        >
-          {tab.icon && <i className={`bi ${tab.icon} me-1`}/>}{tab.label}
-        </button>
-      </li>
+      <button
+        key={tab.key}
+        type="button"
+        role="tab"
+        id={getPageTabId(id, tab.key)}
+        aria-controls={getPageTabPanelId(id, tab.key)}
+        aria-selected={tab.key === activeKey}
+        className={`page-tab${tab.key === activeKey ? ' page-tab--active' : ''}`}
+        onClick={() => onChange(tab.key)}
+      >
+        {tab.icon && <i className={`bi ${tab.icon}`}/>}
+        {tab.label}
+      </button>
     ))}
-  </ul>
+  </div>
 );
 
 export default PageTabs;
