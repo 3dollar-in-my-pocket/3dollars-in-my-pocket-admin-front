@@ -47,7 +47,7 @@ export const menuGroups: MenuGroup[] = [
     items: [
       {
         path: "/manage/store-file-upload",
-        label: "신규 가게 등록",
+        label: "가게 일괄 등록",
         icon: "bi-file-earmark-arrow-up",
         allowedRoles: [AdminRole.OPERATOR]
       },
