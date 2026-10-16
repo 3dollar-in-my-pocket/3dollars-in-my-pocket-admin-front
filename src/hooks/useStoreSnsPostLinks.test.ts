@@ -1,23 +1,23 @@
 import {act, renderHook, waitFor} from '@testing-library/react';
 import {beforeEach, describe, expect, it, vi} from 'vitest';
-import storeThreadsPostLinkApi from '@/api/storeThreadsPostLinkApi';
-import useStoreThreadsPostLinks from './useStoreThreadsPostLinks';
-import {StoreThreadsPostLinkSort} from '@/types/storeThreadsPostLink';
+import storeSnsPostLinkApi from '@/api/storeSnsPostLinkApi';
+import useStoreSnsPostLinks from './useStoreSnsPostLinks';
+import {StoreSnsPostLinkSort} from '@/types/storeSnsPostLink';
 
-vi.mock('@/api/storeThreadsPostLinkApi', () => ({default: {list: vi.fn()}}));
-const list = vi.mocked(storeThreadsPostLinkApi.list);
+vi.mock('@/api/storeSnsPostLinkApi', () => ({default: {list: vi.fn()}}));
+const list = vi.mocked(storeSnsPostLinkApi.list);
 const page = (postId: string, hasMore = false, nextCursor?: string) => ({
   ok: true,
-  data: {contents: [{postId, createdAt: '2026-10-12T14:30:15'}], cursor: {hasMore, nextCursor}},
+  data: {contents: [{postId, platform: 'THREADS' as const, createdAt: '2026-10-12T14:30:15'}], cursor: {hasMore, nextCursor}},
 });
 
-describe('Threads 커서 목록', () => {
+describe('SNS 포스트 커서 목록', () => {
   beforeEach(() => list.mockReset());
 
   it('서버 커서를 그대로 전달하고 마지막 페이지 이후 요청을 중단한다', async () => {
     list.mockResolvedValueOnce(page('98765', true, 'OTg3NjU='))
       .mockResolvedValueOnce(page('98764', false, '남은 커서는 무시'));
-    const {result} = renderHook(() => useStoreThreadsPostLinks('12345', 'LATEST'));
+    const {result} = renderHook(() => useStoreSnsPostLinks('12345', 'LATEST'));
     await waitFor(() => expect(result.current.hasMore).toBe(true));
     await act(async () => { await result.current.loadMore(); });
     expect(list).toHaveBeenLastCalledWith('12345', 'OTg3NjU=', 'LATEST');
@@ -30,7 +30,7 @@ describe('Threads 커서 목록', () => {
     list.mockResolvedValueOnce(page('old', true, 'broken'))
       .mockResolvedValueOnce({ok: false, data: null, error: 'invalid_cursor'})
       .mockResolvedValueOnce(page('new'));
-    const {result} = renderHook(() => useStoreThreadsPostLinks('12345', 'LATEST'));
+    const {result} = renderHook(() => useStoreSnsPostLinks('12345', 'LATEST'));
     await waitFor(() => expect(result.current.hasMore).toBe(true));
     await act(async () => { await result.current.loadMore(); });
     expect(list).toHaveBeenLastCalledWith('12345', null, 'LATEST');
@@ -41,7 +41,7 @@ describe('Threads 커서 목록', () => {
   it('다른 오류 코드는 커서 복구로 반복 조회하지 않는다', async () => {
     list.mockResolvedValueOnce(page('old', true, 'broken'))
       .mockResolvedValueOnce({ok: false, data: null, error: 'invalid_parameter', message: '잘못된 커서'});
-    const {result} = renderHook(() => useStoreThreadsPostLinks('12345', 'LATEST'));
+    const {result} = renderHook(() => useStoreSnsPostLinks('12345', 'LATEST'));
     await waitFor(() => expect(result.current.hasMore).toBe(true));
     await act(async () => { await result.current.loadMore(); });
     expect(list).toHaveBeenCalledTimes(2);
@@ -53,8 +53,8 @@ describe('Threads 커서 목록', () => {
     list.mockImplementationOnce(() => new Promise(resolve => { resolveOld = resolve; }))
       .mockResolvedValueOnce(page('new'));
     const {result, rerender} = renderHook(
-      ({storeId, sortBy}) => useStoreThreadsPostLinks(storeId, sortBy),
-      {initialProps: {storeId: '1', sortBy: 'LATEST' as StoreThreadsPostLinkSort}}
+      ({storeId, sortBy}) => useStoreSnsPostLinks(storeId, sortBy),
+      {initialProps: {storeId: '1', sortBy: 'LATEST' as StoreSnsPostLinkSort}}
     );
     await act(async () => { await result.current.refresh(); });
     expect(list).toHaveBeenCalledTimes(1);

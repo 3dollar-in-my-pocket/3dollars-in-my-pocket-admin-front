@@ -1,18 +1,44 @@
 import {useEffect, useRef, useState} from 'react';
-import {getThreadsEmbedUrl} from '@/utils/validation/threadsPostLinkValidation';
-import './ThreadsPostEmbed.css';
+import {SnsPlatform} from '@/types/storeSnsPostLink';
+import {getSnsEmbedUrl, getSnsPostPlatform} from '@/utils/validation/snsPostLinkValidation';
+import './SnsPostEmbed.css';
 
-interface ThreadsPostEmbedProps {
+interface SnsPostEmbedProps {
   url: string;
 }
 
-const ThreadsPostEmbedFrame = ({url}: ThreadsPostEmbedProps) => {
+const toNumber = (value: unknown): number | null => {
+  if (typeof value === 'number') return value;
+  if (typeof value === 'string' && /^\d+(\.\d+)?$/.test(value)) return Number(value);
+  return null;
+};
+
+/** 플랫폼별 embed 출처와 iframe이 보내는 높이 메시지 형식 */
+const EMBED_PLATFORMS: Record<SnsPlatform, {label: string; origin: string; parseHeight: (data: unknown) => number | null}> = {
+  // Threads는 포스트 프레임의 높이를 숫자 메시지로 전달한다.
+  THREADS: {label: 'Threads', origin: 'https://www.threads.com', parseHeight: toNumber},
+  // Instagram은 {"type":"MEASURE","details":{"height":N}} JSON 문자열로 전달한다.
+  INSTAGRAM: {
+    label: 'Instagram', origin: 'https://www.instagram.com',
+    parseHeight: data => {
+      try {
+        const message = typeof data === 'string' ? JSON.parse(data) : data;
+        return message?.type === 'MEASURE' ? toNumber(message.details?.height) : null;
+      } catch {
+        return null;
+      }
+    },
+  },
+};
+
+const SnsPostEmbedFrame = ({url}: SnsPostEmbedProps) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [height, setHeight] = useState(460);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
   const [attempt, setAttempt] = useState(0);
-  const embedUrl = getThreadsEmbedUrl(url);
+  const embedUrl = getSnsEmbedUrl(url);
+  const platform = EMBED_PLATFORMS[getSnsPostPlatform(url) ?? 'THREADS'];
 
   useEffect(() => {
     if (!embedUrl) return;
@@ -24,15 +50,12 @@ const ThreadsPostEmbedFrame = ({url}: ThreadsPostEmbedProps) => {
       setError(true);
     }, 15000);
 
-    // Threads는 포스트 프레임의 높이를 숫자 메시지로 전달한다.
     // 현재 iframe과 공식 출처를 모두 확인해 다른 프레임의 메시지를 배제한다.
     const handleMessage = (event: MessageEvent) => {
-      if (event.origin !== 'https://www.threads.com'
+      if (event.origin !== platform.origin
         || !iframeRef.current?.contentWindow || event.source !== iframeRef.current.contentWindow) return;
-      if (typeof event.data !== 'number'
-        && !(typeof event.data === 'string' && /^\d+(\.\d+)?$/.test(event.data))) return;
-      const nextHeight = Number(event.data);
-      if (!Number.isFinite(nextHeight) || nextHeight <= 0 || nextHeight > 10000) return;
+      const nextHeight = platform.parseHeight(event.data);
+      if (nextHeight === null || !Number.isFinite(nextHeight) || nextHeight <= 0 || nextHeight > 10000) return;
       window.clearTimeout(timeout);
       setHeight(Math.ceil(nextHeight));
       setIsLoading(false);
@@ -44,27 +67,27 @@ const ThreadsPostEmbedFrame = ({url}: ThreadsPostEmbedProps) => {
       window.clearTimeout(timeout);
       window.removeEventListener('message', handleMessage);
     };
-  }, [embedUrl, attempt]);
+  }, [embedUrl, platform, attempt]);
 
   return (
-    <div className="threads-post-embed" aria-busy={isLoading && Boolean(embedUrl)}>
+    <div className="sns-post-embed" aria-busy={isLoading && Boolean(embedUrl)}>
       {embedUrl && isLoading && (
-        <div className="threads-post-embed__status" role="status">
+        <div className="sns-post-embed__status" role="status">
           <span className="spinner-border spinner-border-sm" aria-hidden="true"/>
-          Threads 포스트를 불러오는 중...
+          {platform.label} 포스트를 불러오는 중...
         </div>
       )}
       {embedUrl && (
         <iframe
-          key={attempt} ref={iframeRef} src={embedUrl} title="Threads 포스트 미리보기"
-          className="threads-post-embed__frame" height={height} hidden={error}
+          key={attempt} ref={iframeRef} src={embedUrl} title={`${platform.label} 포스트 미리보기`}
+          className="sns-post-embed__frame" height={height} hidden={error}
           sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
           referrerPolicy="strict-origin-when-cross-origin" allowFullScreen
           onError={() => { setIsLoading(false); setError(true); }}
         />
       )}
       {(!embedUrl || error) && (
-        <div className="threads-post-embed__error" role="status">
+        <div className="sns-post-embed__error" role="status">
           <p className="mb-2">포스트 미리보기를 불러오지 못했습니다. 원본 링크에서 확인해주세요.</p>
           {embedUrl && (
             <div className="d-flex flex-wrap gap-2">
@@ -81,7 +104,7 @@ const ThreadsPostEmbedFrame = ({url}: ThreadsPostEmbedProps) => {
   );
 };
 
-const ThreadsPostEmbed = ({url}: ThreadsPostEmbedProps) => {
+const SnsPostEmbed = ({url}: SnsPostEmbedProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
 
@@ -102,12 +125,12 @@ const ThreadsPostEmbed = ({url}: ThreadsPostEmbedProps) => {
   }, []);
 
   return (
-    <div ref={containerRef} className="threads-post-preview">
-      {visible ? <ThreadsPostEmbedFrame key={url} url={url}/> : (
-        <div className="threads-post-preview__placeholder" aria-hidden="true"/>
+    <div ref={containerRef} className="sns-post-preview">
+      {visible ? <SnsPostEmbedFrame key={url} url={url}/> : (
+        <div className="sns-post-preview__placeholder" aria-hidden="true"/>
       )}
     </div>
   );
 };
 
-export default ThreadsPostEmbed;
+export default SnsPostEmbed;

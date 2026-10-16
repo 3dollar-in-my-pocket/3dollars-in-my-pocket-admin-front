@@ -1,5 +1,5 @@
-export type StoreThreadPostImportValidationStatus = 'READY_TO_CREATE' | 'SKIPPED' | 'FAILED';
-export type StoreThreadPostImportSaveStatus = 'SAVED' | 'SKIPPED' | 'FAILED';
+export type StoreSnsPostImportValidationStatus = 'READY_TO_CREATE' | 'SKIPPED' | 'FAILED';
+export type StoreSnsPostImportSaveStatus = 'SAVED' | 'SKIPPED' | 'FAILED';
 
 export interface StoreFileImportError {
   code: string;
@@ -9,29 +9,29 @@ export interface StoreFileImportError {
   message: string;
 }
 
-export interface StoreThreadPostImportValidationResult {
+export interface StoreSnsPostImportValidationResult {
   importKey: string;
   row: number;
-  status: StoreThreadPostImportValidationStatus;
+  status: StoreSnsPostImportValidationStatus;
   storeId: number | null;
   permaLink: string;
   error: string | null;
   errors: StoreFileImportError[];
 }
 
-export interface StoreThreadPostImportValidationResponse {
+export interface StoreSnsPostImportValidationResponse {
   totalCount: number;
   readyCount: number;
   skippedCount: number;
   failedCount: number;
-  results: StoreThreadPostImportValidationResult[];
+  results: StoreSnsPostImportValidationResult[];
   errors: StoreFileImportError[];
 }
 
-export interface StoreThreadPostImportSaveResult {
+export interface StoreSnsPostImportSaveResult {
   importKey: string;
   row: number;
-  status: StoreThreadPostImportSaveStatus;
+  status: StoreSnsPostImportSaveStatus;
   storeId: number | null;
   postId: number | null;
   permaLink: string;
@@ -39,11 +39,11 @@ export interface StoreThreadPostImportSaveResult {
   errors: StoreFileImportError[];
 }
 
-export interface StoreThreadPostImportSaveResponse {
+export interface StoreSnsPostImportSaveResponse {
   totalCount: number;
   savedCount: number;
   skippedCount: number;
   failedCount: number;
-  results: StoreThreadPostImportSaveResult[];
+  results: StoreSnsPostImportSaveResult[];
   errors: StoreFileImportError[];
 }

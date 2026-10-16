@@ -1,13 +1,13 @@
 import PageTabs, {getPageTabId, getPageTabPanelId} from '@/components/common/PageTabs';
 import useTabParam from '@/hooks/useTabParam';
 import StoreImportPanel from './fileUpload/StoreImportPanel';
-import ThreadPostImportPanel from './fileUpload/ThreadPostImportPanel';
+import SnsPostImportPanel from './fileUpload/SnsPostImportPanel';
 
 const PAGE_ID = 'store-file-upload';
 
 const TABS = [
   {key: 'store', label: '가게', icon: 'bi-shop'},
-  {key: 'thread-post', label: 'Threads 포스트', icon: 'bi-threads'},
+  {key: 'sns-post', label: 'SNS 포스트', icon: 'bi-link-45deg'},
 ] as const;
 
 type TabKey = typeof TABS[number]['key'];
@@ -29,7 +29,7 @@ const StoreFileUpload = () => {
           aria-labelledby={getPageTabId(PAGE_ID, tab.key)}
           hidden={tab.key !== activeTab}
         >
-          {tab.key === 'store' ? <StoreImportPanel/> : <ThreadPostImportPanel/>}
+          {tab.key === 'store' ? <StoreImportPanel/> : <SnsPostImportPanel/>}
         </div>
       ))}
     </div>

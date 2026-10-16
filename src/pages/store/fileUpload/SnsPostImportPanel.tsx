@@ -1,33 +1,42 @@
 import {ChangeEvent, useState} from 'react';
 import {toast} from 'react-toastify';
-import storeThreadPostImportApi from '@/api/storeThreadPostImportApi';
+import storeSnsPostImportApi from '@/api/storeSnsPostImportApi';
 import {
   StoreFileImportError,
-  StoreThreadPostImportSaveResponse,
-  StoreThreadPostImportSaveStatus,
-  StoreThreadPostImportValidationResponse,
-  StoreThreadPostImportValidationStatus,
-} from '@/types/storeThreadPostImport';
+  StoreSnsPostImportSaveResponse,
+  StoreSnsPostImportSaveStatus,
+  StoreSnsPostImportValidationResponse,
+  StoreSnsPostImportValidationStatus,
+} from '@/types/storeSnsPostImport';
+import {SNS_PLATFORM_LABELS} from '@/constants/snsPost';
 import PageHeader from '@/components/common/PageHeader';
 import SectionCard from '@/components/common/SectionCard';
 import CsvFilePicker, {isCsvFile} from '@/components/fileImport/CsvFilePicker';
 import ImportResultMetric from '@/components/fileImport/ImportResultMetric';
 import ImportSteps from '@/components/fileImport/ImportSteps';
 import useConfirm from '@/hooks/useConfirm';
+import {getSnsPlatformByHost} from '@/utils/validation/snsPostLinkValidation';
 
-const SAMPLE_FILE_NAME = 'store_thread_posts.csv';
-const SAMPLE_CSV = 'import_key,perma_link\nSTORE-001,https://www.threads.com/@three/post/C1a2B3c4D5e\n';
+const SAMPLE_FILE_NAME = 'store_sns_posts.csv';
+const SAMPLE_CSV = 'import_key,perma_link\n'
+  + 'STORE-001,https://www.threads.com/@three/post/C1a2B3c4D5e\n'
+  + 'STORE-002,https://www.instagram.com/p/C1a2B3c4D5e/\n';
 
-const VALIDATION_STATUS: Record<StoreThreadPostImportValidationStatus, { label: string; badge: string }> = {
+const VALIDATION_STATUS: Record<StoreSnsPostImportValidationStatus, { label: string; badge: string }> = {
   READY_TO_CREATE: {label: '등록 예정', badge: 'text-bg-success'},
   SKIPPED: {label: '건너뜀', badge: 'text-bg-secondary'},
   FAILED: {label: '실패', badge: 'text-bg-danger'},
 };
 
-const SAVE_STATUS: Record<StoreThreadPostImportSaveStatus, { label: string; badge: string }> = {
+const SAVE_STATUS: Record<StoreSnsPostImportSaveStatus, { label: string; badge: string }> = {
   SAVED: {label: '저장 완료', badge: 'text-bg-success'},
   SKIPPED: {label: '건너뜀', badge: 'text-bg-secondary'},
   FAILED: {label: '실패', badge: 'text-bg-danger'},
+};
+
+const getPlatformLabel = (permaLink: string) => {
+  const platform = permaLink ? getSnsPlatformByHost(permaLink) : null;
+  return platform ? SNS_PLATFORM_LABELS[platform] : '-';
 };
 
 const formatImportError = (error: StoreFileImportError) => {
@@ -35,11 +44,11 @@ const formatImportError = (error: StoreFileImportError) => {
   return location ? `[${location}] ${error.message}` : error.message;
 };
 
-const ThreadPostImportPanel = () => {
+const SnsPostImportPanel = () => {
   const confirm = useConfirm();
-  const [threadPostsFile, setThreadPostsFile] = useState<File | null>(null);
-  const [validation, setValidation] = useState<StoreThreadPostImportValidationResponse | null>(null);
-  const [saveResult, setSaveResult] = useState<StoreThreadPostImportSaveResponse | null>(null);
+  const [snsPostsFile, setSnsPostsFile] = useState<File | null>(null);
+  const [validation, setValidation] = useState<StoreSnsPostImportValidationResponse | null>(null);
+  const [saveResult, setSaveResult] = useState<StoreSnsPostImportSaveResponse | null>(null);
   const [isValidating, setIsValidating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -48,9 +57,9 @@ const ThreadPostImportPanel = () => {
     if (file && !isCsvFile(file)) {
       toast.error('CSV 파일만 선택할 수 있습니다.');
       event.target.value = '';
-      setThreadPostsFile(null);
+      setSnsPostsFile(null);
     } else {
-      setThreadPostsFile(file);
+      setSnsPostsFile(file);
     }
     setValidation(null);
     setSaveResult(null);
@@ -68,21 +77,21 @@ const ThreadPostImportPanel = () => {
   };
 
   const handleValidate = async () => {
-    if (!threadPostsFile || isValidating) return;
-    if (threadPostsFile.size === 0) {
+    if (!snsPostsFile || isValidating) return;
+    if (snsPostsFile.size === 0) {
       toast.error('비어 있는 CSV 파일은 검증할 수 없습니다.');
       return;
     }
     setIsValidating(true);
     setSaveResult(null);
     try {
-      const response = await storeThreadPostImportApi.validate(threadPostsFile);
+      const response = await storeSnsPostImportApi.validate(snsPostsFile);
       const data = response.data;
       setValidation(data);
       if (data.failedCount > 0 || data.errors?.length > 0) {
         toast.warning(`등록 가능 ${data.readyCount}건, 검증 실패 ${data.failedCount}건입니다.`);
       } else if (data.readyCount === 0) {
-        toast.info('새로 등록할 쓰레드 포스트가 없습니다.');
+        toast.info('새로 등록할 SNS 포스트가 없습니다.');
       } else {
         toast.success(`${data.readyCount}건 모두 등록할 수 있습니다.`);
       }
@@ -92,19 +101,19 @@ const ThreadPostImportPanel = () => {
   };
 
   const handleSave = async () => {
-    if (!threadPostsFile || !validation || validation.readyCount === 0 || isSaving) return;
+    if (!snsPostsFile || !validation || validation.readyCount === 0 || isSaving) return;
     const failedMessage = validation.failedCount > 0
       ? `\n검증 실패 ${validation.failedCount}건은 저장되지 않습니다.`
       : '';
     if (!await confirm({
-      title: '쓰레드 포스트 일괄 등록',
-      message: `검증을 통과한 쓰레드 포스트 ${validation.readyCount}건을 등록하시겠습니까?${failedMessage}`,
+      title: 'SNS 포스트 일괄 등록',
+      message: `검증을 통과한 SNS 포스트 ${validation.readyCount}건을 등록하시겠습니까?${failedMessage}`,
       confirmLabel: '등록'
     })) return;
 
     setIsSaving(true);
     try {
-      const response = await storeThreadPostImportApi.save(threadPostsFile);
+      const response = await storeSnsPostImportApi.save(snsPostsFile);
       setSaveResult(response.data);
       if (response.data.failedCount > 0) {
         toast.warning(`${response.data.savedCount}건 저장, ${response.data.failedCount}건 실패했습니다.`);
@@ -117,11 +126,11 @@ const ThreadPostImportPanel = () => {
   };
 
   const canSave = !!validation && validation.readyCount > 0 && !saveResult;
-  const currentStep = validation || saveResult ? 3 : threadPostsFile ? 2 : 1;
+  const currentStep = validation || saveResult ? 3 : snsPostsFile ? 2 : 1;
 
   return (
     <div>
-      <PageHeader description="CSV 파일을 검증한 뒤 여러 가게의 Threads 포스트를 한 번에 등록합니다."
+      <PageHeader description="CSV 파일을 검증한 뒤 여러 가게의 Threads·Instagram 포스트를 한 번에 등록합니다."
         actions={<button className="btn btn-outline-primary" onClick={handleSampleDownload}>
           <i className="bi bi-download me-2"/>샘플 CSV 다운로드
         </button>}/>
@@ -132,6 +141,7 @@ const ThreadPostImportPanel = () => {
         <strong><i className="bi bi-info-circle-fill me-2"/>등록 전 확인해주세요</strong>
         <div className="small mt-1">
           <code>import_key</code>, <code>perma_link</code> 컬럼을 UTF-8로 작성합니다.
+          <code>perma_link</code>에는 Threads 또는 Instagram 포스트 링크를 입력하며, Instagram 공유(share) 링크는 등록할 수 없습니다.
           <code>import_key</code>는 가게 탭에서 가게를 등록할 때 사용한 값이며, 이미 등록된 포스트는 건너뜁니다.
         </div>
       </div>
@@ -139,13 +149,13 @@ const ThreadPostImportPanel = () => {
       <SectionCard title="CSV 파일 선택" icon="bi-file-earmark-spreadsheet-fill">
         <div className="row g-3">
           <div className="col-12">
-            <CsvFilePicker id="thread-posts-file" title="쓰레드 포스트 파일" expectedName={SAMPLE_FILE_NAME}
-                           file={threadPostsFile} disabled={isValidating || isSaving} onChange={handleFileChange}/>
+            <CsvFilePicker id="sns-posts-file" title="SNS 포스트 파일" expectedName={SAMPLE_FILE_NAME}
+                           file={snsPostsFile} disabled={isValidating || isSaving} onChange={handleFileChange}/>
           </div>
         </div>
         <div className="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2 mt-4 pt-3 border-top">
           <span className="form-field__hint mb-0">파일을 변경하면 기존 검증 결과가 초기화됩니다.</span>
-          <button className="btn btn-primary" disabled={!threadPostsFile || isValidating || isSaving} onClick={handleValidate}>
+          <button className="btn btn-primary" disabled={!snsPostsFile || isValidating || isSaving} onClick={handleValidate}>
             {isValidating && <span className="spinner-border spinner-border-sm me-2"/>}
             {isValidating ? '데이터 검증 중...' : <><i className="bi bi-shield-check me-1"/>파일 사전 검증</>}
           </button>
@@ -173,9 +183,9 @@ const ThreadPostImportPanel = () => {
         </SectionCard>
       )}
 
-      <SectionCard title="쓰레드 포스트 등록" icon="bi-cloud-arrow-up-fill">
+      <SectionCard title="SNS 포스트 등록" icon="bi-cloud-arrow-up-fill">
         <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-          <div><strong>{validation ? `등록 가능한 쓰레드 포스트 ${validation.readyCount}건` : '사전 검증이 필요합니다'}</strong>
+          <div><strong>{validation ? `등록 가능한 SNS 포스트 ${validation.readyCount}건` : '사전 검증이 필요합니다'}</strong>
             <p className="form-field__hint mb-0">검증한 파일을 변경하지 않고 등록해주세요.</p></div>
           <button className="btn btn-success btn-lg" disabled={!canSave || isSaving} onClick={handleSave}>
             {isSaving && <span className="spinner-border spinner-border-sm me-2"/>}
@@ -234,7 +244,8 @@ const ResultTable = ({rows, showPostId = false}: { rows: ResultRow[]; showPostId
         <th className="text-nowrap">상태</th>
         <th className="text-nowrap">가게 ID</th>
         {showPostId && <th className="text-nowrap">포스트 ID</th>}
-        <th>Threads 링크</th>
+        <th className="text-nowrap">플랫폼</th>
+        <th>포스트 링크</th>
         <th>사유</th>
       </tr>
       </thead>
@@ -246,6 +257,7 @@ const ResultTable = ({rows, showPostId = false}: { rows: ResultRow[]; showPostId
           <td><span className={`badge ${row.badge}`}>{row.label}</span></td>
           <td>{row.storeId ?? '-'}</td>
           {showPostId && <td>{row.postId ?? '-'}</td>}
+          <td className="text-nowrap">{getPlatformLabel(row.permaLink)}</td>
           <td className="text-break">
             {row.permaLink
               ? <a href={row.permaLink} target="_blank" rel="noopener noreferrer">{row.permaLink}</a>
@@ -255,7 +267,7 @@ const ResultTable = ({rows, showPostId = false}: { rows: ResultRow[]; showPostId
         </tr>
       )) : (
         <tr>
-          <td colSpan={showPostId ? 7 : 6} className="text-center text-muted">결과 없음</td>
+          <td colSpan={showPostId ? 8 : 7} className="text-center text-muted">결과 없음</td>
         </tr>
       )}
       </tbody>
@@ -263,4 +275,4 @@ const ResultTable = ({rows, showPostId = false}: { rows: ResultRow[]; showPostId
   </div>
 );
 
-export default ThreadPostImportPanel;
+export default SnsPostImportPanel;

@@ -22,7 +22,7 @@ import StoreReportHistory from './detail/StoreReportHistory';
 import StoreReviewHistory from './detail/StoreReviewHistory';
 import StoreSettings from './detail/StoreSettings';
 import StoreVisitHistory from './detail/StoreVisitHistory';
-import StoreThreadsPostLinks from './detail/StoreThreadsPostLinks';
+import StoreSnsPostLinks from './detail/StoreSnsPostLinks';
 import {isImagesSupported, isReportsSupported, isVisitsSupported, StoreDetail} from '@/types/store';
 import useConfirm from '@/hooks/useConfirm';
 
@@ -314,11 +314,11 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}: 
             </Tab>
 
             <Tab
-              eventKey="threads"
-              title={<DetailModalTabTitle icon="bi-link-45deg" label="Threads"/>}
+              eventKey="sns"
+              title={<DetailModalTabTitle icon="bi-link-45deg" label="SNS"/>}
             >
-              {activeTab === 'threads' && (
-                <StoreThreadsPostLinks key={store.storeId} storeId={String(store.storeId)}/>
+              {activeTab === 'sns' && (
+                <StoreSnsPostLinks key={store.storeId} storeId={String(store.storeId)}/>
               )}
             </Tab>
 
