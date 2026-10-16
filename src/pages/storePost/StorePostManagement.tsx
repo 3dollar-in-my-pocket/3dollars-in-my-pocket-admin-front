@@ -2,12 +2,14 @@ import {useCallback, useState} from 'react';
 import storePostApi from '@/api/storePostApi';
 import StorePostItem from '@/components/StorePostItem';
 import StorePostDetailModal from '@/components/StorePostDetailModal';
+import StoreDetailModal from '@/pages/store/StoreDetailModal';
 import EmptyState from '@/components/common/EmptyState';
 import PageHeader from '@/components/common/PageHeader';
 import FilterCard from '@/components/common/FilterCard';
 import SectionCard from '@/components/common/SectionCard';
 import useInfiniteScroll from '@/hooks/useInfiniteScroll';
 import useCursorPagination from '@/hooks/useCursorPagination';
+import {SimpleStore} from '@/types/store';
 import {STORE_POST_SORT, StorePost, StorePostSort} from '@/types/storePost';
 
 const SORT_OPTIONS: { value: StorePostSort; label: string }[] = [
@@ -18,6 +20,7 @@ const SORT_OPTIONS: { value: StorePostSort; label: string }[] = [
 const StorePostManagement = () => {
   const [sortBy, setSortBy] = useState<StorePostSort>(STORE_POST_SORT.LATEST);
   const [selectedPost, setSelectedPost] = useState<StorePost | null>(null);
+  const [selectedStore, setSelectedStore] = useState<SimpleStore | null>(null);
 
   const fetchPosts = useCallback(
     (cursor: string | null) => storePostApi.getStorePosts(sortBy, cursor),
@@ -101,7 +104,7 @@ const StorePostManagement = () => {
           {posts.length > 0 && (
             <div className="mx-auto" style={{maxWidth: '760px'}}>
               {posts.map(post => (
-                <StorePostItem key={post.postId} post={post} onClick={setSelectedPost}/>
+                <StorePostItem key={post.postId} post={post} onClick={setSelectedPost} onStoreClick={setSelectedStore}/>
               ))}
             </div>
           )}
@@ -130,6 +133,13 @@ const StorePostManagement = () => {
         show={!!selectedPost}
         onHide={() => setSelectedPost(null)}
         post={selectedPost}
+        onStoreClick={setSelectedStore}
+      />
+
+      <StoreDetailModal
+        show={!!selectedStore}
+        onHide={() => setSelectedStore(null)}
+        store={selectedStore}
       />
     </div>
   );

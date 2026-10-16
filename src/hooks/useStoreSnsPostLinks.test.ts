@@ -2,13 +2,18 @@ import {act, renderHook, waitFor} from '@testing-library/react';
 import {beforeEach, describe, expect, it, vi} from 'vitest';
 import storeSnsPostLinkApi from '@/api/storeSnsPostLinkApi';
 import useStoreSnsPostLinks from './useStoreSnsPostLinks';
-import {StoreSnsPostLinkSort} from '@/types/storeSnsPostLink';
+import {SnsPlatform, StoreSnsPostLinkSort} from '@/types/storeSnsPostLink';
+import {StorePost} from '@/types/storePost';
 
 vi.mock('@/api/storeSnsPostLinkApi', () => ({default: {list: vi.fn()}}));
 const list = vi.mocked(storeSnsPostLinkApi.list);
+const post = (postId: string): StorePost => ({
+  postId, body: '', sections: [], isOwner: false, stickers: [],
+  createdAt: '2026-10-12T14:30:15', updatedAt: '2026-10-12T14:30:15',
+});
 const page = (postId: string, hasMore = false, nextCursor?: string) => ({
   ok: true,
-  data: {contents: [{postId, platform: 'THREADS' as const, createdAt: '2026-10-12T14:30:15'}], cursor: {hasMore, nextCursor}},
+  data: {contents: [post(postId)], cursor: {hasMore, nextCursor}},
 });
 
 describe('SNS 포스트 커서 목록', () => {
@@ -17,10 +22,10 @@ describe('SNS 포스트 커서 목록', () => {
   it('서버 커서를 그대로 전달하고 마지막 페이지 이후 요청을 중단한다', async () => {
     list.mockResolvedValueOnce(page('98765', true, 'OTg3NjU='))
       .mockResolvedValueOnce(page('98764', false, '남은 커서는 무시'));
-    const {result} = renderHook(() => useStoreSnsPostLinks('12345', 'LATEST'));
+    const {result} = renderHook(() => useStoreSnsPostLinks('12345', 'LATEST', null));
     await waitFor(() => expect(result.current.hasMore).toBe(true));
     await act(async () => { await result.current.loadMore(); });
-    expect(list).toHaveBeenLastCalledWith('12345', 'OTg3NjU=', 'LATEST');
+    expect(list).toHaveBeenLastCalledWith('12345', 'OTg3NjU=', 'LATEST', []);
     expect(result.current.items.map(post => post.postId)).toEqual(['98765', '98764']);
     await act(async () => { await result.current.loadMore(); });
     expect(list).toHaveBeenCalledTimes(2);
@@ -30,10 +35,10 @@ describe('SNS 포스트 커서 목록', () => {
     list.mockResolvedValueOnce(page('old', true, 'broken'))
       .mockResolvedValueOnce({ok: false, data: null, error: 'invalid_cursor'})
       .mockResolvedValueOnce(page('new'));
-    const {result} = renderHook(() => useStoreSnsPostLinks('12345', 'LATEST'));
+    const {result} = renderHook(() => useStoreSnsPostLinks('12345', 'LATEST', null));
     await waitFor(() => expect(result.current.hasMore).toBe(true));
     await act(async () => { await result.current.loadMore(); });
-    expect(list).toHaveBeenLastCalledWith('12345', null, 'LATEST');
+    expect(list).toHaveBeenLastCalledWith('12345', null, 'LATEST', []);
     expect(result.current.items[0].postId).toBe('new');
     expect(result.current.items).toHaveLength(1);
   });
@@ -41,7 +46,7 @@ describe('SNS 포스트 커서 목록', () => {
   it('다른 오류 코드는 커서 복구로 반복 조회하지 않는다', async () => {
     list.mockResolvedValueOnce(page('old', true, 'broken'))
       .mockResolvedValueOnce({ok: false, data: null, error: 'invalid_parameter', message: '잘못된 커서'});
-    const {result} = renderHook(() => useStoreSnsPostLinks('12345', 'LATEST'));
+    const {result} = renderHook(() => useStoreSnsPostLinks('12345', 'LATEST', null));
     await waitFor(() => expect(result.current.hasMore).toBe(true));
     await act(async () => { await result.current.loadMore(); });
     expect(list).toHaveBeenCalledTimes(2);
@@ -53,7 +58,7 @@ describe('SNS 포스트 커서 목록', () => {
     list.mockImplementationOnce(() => new Promise(resolve => { resolveOld = resolve; }))
       .mockResolvedValueOnce(page('new'));
     const {result, rerender} = renderHook(
-      ({storeId, sortBy}) => useStoreSnsPostLinks(storeId, sortBy),
+      ({storeId, sortBy}) => useStoreSnsPostLinks(storeId, sortBy, null),
       {initialProps: {storeId: '1', sortBy: 'LATEST' as StoreSnsPostLinkSort}}
     );
     await act(async () => { await result.current.refresh(); });
@@ -62,6 +67,17 @@ describe('SNS 포스트 커서 목록', () => {
     await waitFor(() => expect(result.current.items[0]?.postId).toBe('new'));
     await act(async () => { resolveOld(page('old')); });
     expect(result.current.items[0].postId).toBe('new');
-    expect(list).toHaveBeenLastCalledWith('2', null, 'OLDEST');
+    expect(list).toHaveBeenLastCalledWith('2', null, 'OLDEST', []);
+  });
+
+  it('플랫폼을 선택하면 해당 플랫폼만 조회하고 바뀌면 첫 페이지부터 다시 조회한다', async () => {
+    list.mockResolvedValue(page('1'));
+    const {rerender} = renderHook(
+      ({platform}) => useStoreSnsPostLinks('12345', 'LATEST', platform),
+      {initialProps: {platform: null as SnsPlatform | null}}
+    );
+    await waitFor(() => expect(list).toHaveBeenLastCalledWith('12345', null, 'LATEST', []));
+    rerender({platform: 'INSTAGRAM'});
+    await waitFor(() => expect(list).toHaveBeenLastCalledWith('12345', null, 'LATEST', ['INSTAGRAM']));
   });
 });

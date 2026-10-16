@@ -8,6 +8,7 @@ import StoreActivityManagement from './StoreActivityManagement';
 vi.mock('../review/ReviewManagement', () => ({default: () => <div>리뷰 화면</div>}));
 vi.mock('../manage/StoreImageManage', () => ({default: () => <div>이미지 화면</div>}));
 vi.mock('../storePost/StorePostManagement', () => ({default: () => <div>소식 화면</div>}));
+vi.mock('../storeSnsPost/StoreSnsPostManagement', () => ({default: () => <div>SNS 포스트 화면</div>}));
 vi.mock('../coupon/CouponManagement', () => ({default: () => <div>쿠폰 화면</div>}));
 vi.mock('../storeMessage/StoreMessageManagement', () => ({default: () => <div>메시지 화면</div>}));
 vi.mock('../storeReport/StoreReportManagement', () => ({default: () => <div>신고 화면</div>}));
@@ -33,12 +34,12 @@ describe('가게 활동 관리', () => {
 
   it('OWNER는 이미지 탭을 포함한 모든 탭을 본다', () => {
     renderPage(AdminRole.OWNER);
-    expect(tabLabels()).toEqual(['리뷰', '이미지', '신고 이력', '소식', '쿠폰', '메시지']);
+    expect(tabLabels()).toEqual(['리뷰', '이미지', '신고 이력', '소식', 'SNS 포스트', '쿠폰', '메시지']);
   });
 
   it.each([AdminRole.OPERATOR, AdminRole.VIEWER])('%s는 이미지 탭을 보지 못한다', role => {
     renderPage(role);
-    expect(tabLabels()).toEqual(['리뷰', '신고 이력', '소식', '쿠폰', '메시지']);
+    expect(tabLabels()).toEqual(['리뷰', '신고 이력', '소식', 'SNS 포스트', '쿠폰', '메시지']);
   });
 
   it('선택한 탭의 화면만 렌더링하고 URL에 반영한다', async () => {

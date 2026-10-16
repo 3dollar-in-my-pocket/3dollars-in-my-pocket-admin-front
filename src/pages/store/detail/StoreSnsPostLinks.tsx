@@ -1,14 +1,15 @@
 import {FormEvent, useEffect, useRef, useState} from 'react';
-import {Alert, Badge, Button, Form} from 'react-bootstrap';
+import {Alert, Button, Form} from 'react-bootstrap';
 import {toast} from 'react-toastify';
 import storeSnsPostLinkApi from '@/api/storeSnsPostLinkApi';
-import {SNS_PLATFORM_LABELS} from '@/constants/snsPost';
+import {SNS_PLATFORM_LABELS, SNS_PLATFORMS} from '@/constants/snsPost';
 import HistoryPanel from '@/components/common/HistoryPanel';
-import SnsPostEmbed from '@/components/SnsPostEmbed';
+import SnsPostItem from '@/components/SnsPostItem';
 import useConfirm from '@/hooks/useConfirm';
 import {usePermission} from '@/hooks/usePermission';
 import useStoreSnsPostLinks, {SNS_URL_ERROR_CODES, snsErrorMessage} from '@/hooks/useStoreSnsPostLinks';
-import {StoreSnsPostLinkSort} from '@/types/storeSnsPostLink';
+import {SnsPlatform, StoreSnsPostLinkSort} from '@/types/storeSnsPostLink';
+import {getSnsPostLink} from '@/utils/display/storePostDisplay';
 import {getSnsPlatformByHost, getSnsPostPlatform} from '@/utils/validation/snsPostLinkValidation';
 import './StoreSnsPostLinks.css';
 
@@ -28,6 +29,7 @@ const getUrlInputError = (value: string): string | null => {
 
 const StoreSnsPostLinks = ({storeId}: Props) => {
   const [sortBy, setSortBy] = useState<StoreSnsPostLinkSort>('LATEST');
+  const [platform, setPlatform] = useState<SnsPlatform | null>(null);
   const [url, setUrl] = useState('');
   const [urlError, setUrlError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -41,7 +43,7 @@ const StoreSnsPostLinks = ({storeId}: Props) => {
   const {isOwner, isOperator} = usePermission();
   const canWrite = (isOwner() || isOperator()) && !accessDenied;
   const {items, isLoading, isLoadingMore, hasMore, error, refresh, loadMore} =
-    useStoreSnsPostLinks(storeId, sortBy);
+    useStoreSnsPostLinks(storeId, sortBy, platform);
   const busy = isLoading || isSubmitting || deletingId !== null;
 
   useEffect(() => {
@@ -151,46 +153,37 @@ const StoreSnsPostLinks = ({storeId}: Props) => {
         hasMore={hasMore} isLoading={busy} isLoadingMore={isLoadingMore}
         error={error} onRefresh={() => { if (!busy) void refreshList(); }}
         onLoadMore={() => { if (!busy) void loadMore(); }}
-        emptyTitle="등록된 SNS 링크가 없습니다" emptyDescription="가게와 관련된 Threads·Instagram 포스트를 연결해보세요."
+        emptyTitle={platform ? `등록된 ${SNS_PLATFORM_LABELS[platform]} 링크가 없습니다` : '등록된 SNS 링크가 없습니다'} emptyDescription="가게와 관련된 Threads·Instagram 포스트를 연결해보세요."
         aside={(
-          <Form.Select size="sm" aria-label="SNS 포스트 정렬" value={sortBy} disabled={busy}
-            onChange={event => setSortBy(event.target.value as StoreSnsPostLinkSort)}>
-            <option value="LATEST">최신순</option>
-            <option value="OLDEST">오래된순</option>
-          </Form.Select>
+          <div className="d-flex gap-2">
+            <Form.Select size="sm" aria-label="SNS 포스트 플랫폼" value={platform ?? ''} disabled={busy}
+              onChange={event => setPlatform((event.target.value || null) as SnsPlatform | null)}>
+              <option value="">전체 플랫폼</option>
+              {SNS_PLATFORMS.map(option => (
+                <option key={option} value={option}>{SNS_PLATFORM_LABELS[option]}</option>
+              ))}
+            </Form.Select>
+            <Form.Select size="sm" aria-label="SNS 포스트 정렬" value={sortBy} disabled={busy}
+              onChange={event => setSortBy(event.target.value as StoreSnsPostLinkSort)}>
+              <option value="LATEST">최신순</option>
+              <option value="OLDEST">오래된순</option>
+            </Form.Select>
+          </div>
         )}
       >
-        <ul className="list-group list-group-flush">
-          {items.map(post => {
-            const postUrl = post.url && getSnsPostPlatform(post.url) ? post.url : null;
-            const label = SNS_PLATFORM_LABELS[post.platform] ?? 'SNS';
-            return (
-              <li key={post.postId} className="list-group-item px-0 store-sns__post">
-                <div className="store-sns__post-heading">
-                  <div className="flex-grow-1 min-w-0">
-                    <Badge bg="light" text="dark" className="border mb-1 me-1">{label}</Badge>
-                    {postUrl ? (
-                      <a href={postUrl} target="_blank" rel="noopener noreferrer" className="d-block text-break">
-                        {postUrl}<i className="bi bi-box-arrow-up-right ms-1" aria-hidden="true"/>
-                      </a>
-                    ) : <span className="text-muted">링크 정보 없음</span>}
-                    <div className="small text-muted mt-1">
-                      등록 시각: <time dateTime={post.createdAt}>{post.createdAt.replace('T', ' ')}</time>
-                    </div>
-                  </div>
-                  <div className="store-sns__post-actions">
-                    <Button variant="outline-danger" size="sm"
-                      disabled={!canWrite || busy} aria-label={`${label} 포스트 ${post.postId} 삭제`}
-                      onClick={() => handleDelete(post.postId)}>
-                      {deletingId === post.postId ? '삭제 중...' : '삭제'}
-                    </Button>
-                  </div>
-                </div>
-                {postUrl && <SnsPostEmbed url={postUrl}/>}
-              </li>
-            );
-          })}
-        </ul>
+        {items.map(post => {
+          const {platform} = getSnsPostLink(post);
+          const label = platform ? SNS_PLATFORM_LABELS[platform] : 'SNS';
+          return (
+            <SnsPostItem key={post.postId} post={post} actions={(
+              <Button variant="outline-danger" size="sm"
+                disabled={!canWrite || busy} aria-label={`${label} 포스트 ${post.postId} 삭제`}
+                onClick={() => handleDelete(post.postId)}>
+                {deletingId === post.postId ? '삭제 중...' : '삭제'}
+              </Button>
+            )}/>
+          );
+        })}
       </HistoryPanel>
     </div>
   );

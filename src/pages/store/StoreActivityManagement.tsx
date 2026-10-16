@@ -2,7 +2,7 @@ import {lazy} from 'react';
 import RoleTabsPage, {RoleTab} from '@/components/common/RoleTabsPage';
 import {AdminRole} from '@/types/admin';
 
-export type StoreActivityTabKey = 'review' | 'image' | 'report' | 'post' | 'coupon' | 'message';
+export type StoreActivityTabKey = 'review' | 'image' | 'report' | 'post' | 'sns-post' | 'coupon' | 'message';
 
 const VIEWER_ROLES = [AdminRole.OPERATOR, AdminRole.VIEWER];
 
@@ -33,6 +33,13 @@ const TABS: RoleTab<StoreActivityTabKey>[] = [
     icon: 'bi-newspaper',
     allowedRoles: VIEWER_ROLES,
     component: lazy(() => import('../storePost/StorePostManagement')),
+  },
+  {
+    key: 'sns-post',
+    label: 'SNS 포스트',
+    icon: 'bi-link-45deg',
+    allowedRoles: VIEWER_ROLES,
+    component: lazy(() => import('../storeSnsPost/StoreSnsPostManagement')),
   },
   {
     key: 'coupon',

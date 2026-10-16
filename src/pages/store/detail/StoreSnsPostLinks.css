@@ -43,37 +43,7 @@
   white-space: nowrap;
 }
 
-.store-sns .list-group-item a {
-  overflow-wrap: anywhere;
-}
-
-.store-sns__post-heading {
-  display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-}
-
-.store-sns__post-actions {
-  display: flex;
-  flex: 0 0 auto;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.store-sns__post-actions .btn {
-  white-space: nowrap;
-}
-
 @media (max-width: 575.98px) {
-  .store-sns__post-heading {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .store-sns__post-heading > .min-w-0 {
-    width: 100%;
-  }
-
   .store-sns__input-row {
     grid-template-columns: minmax(0, 1fr);
   }

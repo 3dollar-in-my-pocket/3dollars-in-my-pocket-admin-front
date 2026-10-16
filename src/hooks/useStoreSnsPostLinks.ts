@@ -1,7 +1,8 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
 import storeSnsPostLinkApi from '@/api/storeSnsPostLinkApi';
 import {ApiResponse} from '@/types/api';
-import {StoreSnsPostLink, StoreSnsPostLinkSort} from '@/types/storeSnsPostLink';
+import {StorePost} from '@/types/storePost';
+import {SnsPlatform, StoreSnsPostLinkSort} from '@/types/storeSnsPostLink';
 
 /** 등록 URL 자체가 잘못되어 입력 필드에 표시해야 하는 오류 코드 */
 export const SNS_URL_ERROR_CODES = [
@@ -22,8 +23,10 @@ export function snsErrorMessage(response: ApiResponse, fallback: string): string
   return messages[response.error] || response.message || fallback;
 }
 
-export default function useStoreSnsPostLinks(storeId: string, sortBy: StoreSnsPostLinkSort) {
-  const [items, setItems] = useState<StoreSnsPostLink[]>([]);
+export default function useStoreSnsPostLinks(
+  storeId: string, sortBy: StoreSnsPostLinkSort, platform: SnsPlatform | null,
+) {
+  const [items, setItems] = useState<StorePost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(false);
@@ -35,19 +38,20 @@ export default function useStoreSnsPostLinks(storeId: string, sortBy: StoreSnsPo
   const load = useCallback(async (reset = true): Promise<boolean> => {
     if (fetchingRef.current !== null || (!reset && !cursorRef.current)) return false;
     const generation = generationRef.current;
+    const platforms = platform ? [platform] : [];
     fetchingRef.current = generation;
     setIsLoading(true);
     setIsLoadingMore(!reset);
     setError(null);
     try {
-      let response = await storeSnsPostLinkApi.list(storeId, reset ? null : cursorRef.current, sortBy);
+      let response = await storeSnsPostLinkApi.list(storeId, reset ? null : cursorRef.current, sortBy, platforms);
       if (generation !== generationRef.current) return false;
       // 복구는 한 번만 수행한다. 다른 Base64 오류까지 커서 오류로 간주하지 않는다.
       if (!response.ok && response.error === 'invalid_cursor' && !reset) {
         cursorRef.current = null;
         setHasMore(false);
         reset = true;
-        response = await storeSnsPostLinkApi.list(storeId, null, sortBy);
+        response = await storeSnsPostLinkApi.list(storeId, null, sortBy, platforms);
       }
       if (generation !== generationRef.current) return false;
       if (!response.ok || !response.data) {
@@ -70,7 +74,7 @@ export default function useStoreSnsPostLinks(storeId: string, sortBy: StoreSnsPo
         setIsLoadingMore(false);
       }
     }
-  }, [storeId, sortBy]);
+  }, [storeId, sortBy, platform]);
 
   useEffect(() => {
     cursorRef.current = null;

@@ -3,19 +3,24 @@ import {beforeEach, describe, expect, it, vi} from 'vitest';
 import storeSnsPostLinkApi from '@/api/storeSnsPostLinkApi';
 import {useAuthStore} from '@/state/authStore';
 import {AdminRole} from '@/types/admin';
+import {StorePost} from '@/types/storePost';
 import StoreSnsPostLinks from './StoreSnsPostLinks';
 
 const {confirm} = vi.hoisted(() => ({confirm: vi.fn()}));
 vi.mock('@/hooks/useConfirm', () => ({default: () => confirm}));
 vi.mock('@/api/storeSnsPostLinkApi', () => ({
-  default: {list: vi.fn(), create: vi.fn(), delete: vi.fn()},
+  default: {list: vi.fn(), listAll: vi.fn(), create: vi.fn(), delete: vi.fn()},
 }));
 const api = vi.mocked(storeSnsPostLinkApi);
 const url = 'https://www.threads.com/@three/post/C1a2B3c4D5e';
+const snsPost = (postId: string, sectionType: string, postUrl: string): StorePost => ({
+  postId, body: '', sections: [{sectionType, url: postUrl, ratio: 0}], isOwner: false, stickers: [], store: null,
+  createdAt: '2026-10-12T14:30:15', updatedAt: '2026-10-12T14:30:15',
+});
 const page = {ok: true, data: {
   contents: [
-    {postId: '9007199254740993', platform: 'THREADS' as const, url, createdAt: '2026-10-12T14:30:15'},
-    {postId: '2', platform: 'INSTAGRAM' as const, createdAt: '2026-10-12T14:30:15'},
+    snsPost('9007199254740993', 'THREADS_POST_LINK', url),
+    snsPost('2', 'INSTAGRAM_POST_LINK', ''),
   ], cursor: {hasMore: false},
 }};
 const fill = (value = url) => fireEvent.change(screen.getByLabelText('SNS 포스트 링크'), {
@@ -64,7 +69,7 @@ describe('가게 SNS 탭', () => {
     expect(api.create).toHaveBeenCalledWith('12345', `${url}?share=1`);
     resolveCreate({ok: true, data: page.data.contents[0]});
     await waitFor(() => expect(api.list).toHaveBeenCalledTimes(2));
-    expect(api.list).toHaveBeenLastCalledWith('12345', null, 'LATEST');
+    expect(api.list).toHaveBeenLastCalledWith('12345', null, 'LATEST', []);
     await waitFor(() => expect(screen.getByLabelText('SNS 포스트 링크')).toHaveValue(''));
   });
 
@@ -106,8 +111,7 @@ describe('가게 SNS 탭', () => {
   });
   it('플랫폼별로 URL을 검증하고 Instagram 링크를 등록한다', async () => {
     const instagramUrl = 'https://www.instagram.com/p/C1a2B3c4D5e/';
-    api.create.mockResolvedValue({ok: true, data: {postId: '3', platform: 'INSTAGRAM', url: instagramUrl,
-      createdAt: '2026-10-12T14:30:15'}});
+    api.create.mockResolvedValue({ok: true, data: snsPost('3', 'INSTAGRAM_POST_LINK', instagramUrl)});
     render(<StoreSnsPostLinks storeId="12345"/>);
     await ready();
     const submit = () => fireEvent.click(screen.getByRole('button', {name: '링크 등록'}));
@@ -131,5 +135,14 @@ describe('가게 SNS 탭', () => {
     fireEvent.click(screen.getByRole('button', {name: '링크 등록'}));
     await waitFor(() => expect(screen.getByLabelText('SNS 포스트 링크')).toHaveClass('is-invalid'));
     expect(screen.getByText('Threads 또는 Instagram 포스트 URL만 등록할 수 있습니다.')).toBeInTheDocument();
+  });
+
+  it('플랫폼 필터를 바꾸면 선택한 플랫폼으로 다시 조회한다', async () => {
+    render(<StoreSnsPostLinks storeId="12345"/>);
+    await ready();
+    fireEvent.change(screen.getByLabelText('SNS 포스트 플랫폼'), {target: {value: 'INSTAGRAM'}});
+    await waitFor(() => expect(api.list).toHaveBeenLastCalledWith('12345', null, 'LATEST', ['INSTAGRAM']));
+    fireEvent.change(screen.getByLabelText('SNS 포스트 플랫폼'), {target: {value: ''}});
+    await waitFor(() => expect(api.list).toHaveBeenLastCalledWith('12345', null, 'LATEST', []));
   });
 });
