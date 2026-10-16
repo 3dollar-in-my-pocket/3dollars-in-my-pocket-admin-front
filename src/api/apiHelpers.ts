@@ -13,9 +13,10 @@ async function request<T>(run: () => Promise<ApiResponse<T>>): Promise<ApiRespon
   try {
     return await run();
   } catch (error) {
+    const details = isAxiosError(error) ? error.response?.data : error;
     // 호출부가 response.message로 실패 사유를 표시할 수 있도록 메시지를 보존합니다.
     return {ok: false, data: null as T, message: extractErrorMessage(error),
-      error: isAxiosError(error) ? error.response?.data?.error : undefined};
+      error: details?.error, errorDetails: details?.errorDetails};
   }
 }
 
@@ -80,7 +81,7 @@ export async function apiGetBlob(
 export async function apiPost<T>(
   url: string,
   data?: any,
-  options?: { nonce?: string }
+  options?: { nonce?: string; suppressToast?: boolean }
 ): Promise<ApiResponse<T>> {
   return request<T>(async () => {
     const response = await axiosInstance({
@@ -88,7 +89,8 @@ export async function apiPost<T>(
       url,
       data,
       headers: buildNonceHeader(options?.nonce),
-    });
+      suppressToast: options?.suppressToast,
+    } as CustomAxiosRequestConfig);
 
     return unwrapApiResponse<T>(response);
   });
@@ -158,13 +160,16 @@ export async function apiPut<T>(
 /**
  * 타입 안전한 DELETE 요청
  */
-export async function apiDelete<T = void>(url: string, data?: any): Promise<ApiResponse<T>> {
+export async function apiDelete<T = void>(
+  url: string, data?: any, options?: { suppressToast?: boolean }
+): Promise<ApiResponse<T>> {
   return request<T>(async () => {
     const response = await axiosInstance({
       method: 'DELETE',
       url,
       data,
-    });
+      suppressToast: options?.suppressToast,
+    } as CustomAxiosRequestConfig);
 
     return unwrapApiResponse<T>(response);
   });

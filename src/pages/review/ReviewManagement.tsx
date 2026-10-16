@@ -7,6 +7,7 @@ import {Review} from '@/types/review';
 
 import UserDetailModal from '@/pages/user/UserDetailModal';
 import StoreDetailModal from '@/pages/store/StoreDetailModal';
+import StoreCardHeader from '@/components/StoreCardHeader';
 import useInfiniteScroll from '@/hooks/useInfiniteScroll';
 import useCursorPagination from '@/hooks/useCursorPagination';
 import EmptyState from '@/components/common/EmptyState';
@@ -20,8 +21,7 @@ import useBulkSelection from '@/hooks/useBulkSelection';
 import {formatDateTimeShortKo as formatDateTime} from '@/utils/dateUtils';
 import useConfirm from '@/hooks/useConfirm';
 
-/** 카드에 한 번에 노출하는 카테고리 / 이미지 개수 */
-const VISIBLE_CATEGORIES = 2;
+/** 카드에 한 번에 노출하는 이미지 개수 */
 const VISIBLE_IMAGES = 4;
 
 /** 블라인드 일괄 처리 API가 한 번에 받을 수 있는 최대 리뷰 수 */
@@ -245,50 +245,17 @@ const ReviewManagement = () => {
                         {review.status === 'DELETED' ? '선택 불가' : selection.isSelected(review.reviewId) ? '선택됨' : '선택'}
                       </button>
                       {/* 가게 + 평점 */}
-                      <div className="d-flex align-items-start justify-content-between gap-2">
-                        <div className="min-w-0">
-                          {review.store ? (
-                            <button
-                              type="button"
-                              className="btn btn-link p-0 text-start item-card__name text-decoration-none"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleStoreClick(review.store);
-                              }}
-                            >
-                              <i className="bi bi-shop me-1"/>
-                              {review.store.name || '가게 이름 없음'}
-                              <i className="bi bi-box-arrow-up-right ms-1 small"/>
-                            </button>
-                          ) : (
-                            <h3 className="item-card__name mb-0">가게 정보 없음</h3>
-                          )}
-                          {review.store?.address?.fullAddress && (
-                            <p className="item-card__desc mb-0">
-                              <i className="bi bi-geo-alt me-1"/>
-                              {review.store.address.fullAddress}
-                            </p>
-                          )}
-                        </div>
-                        <span className="rating-badge flex-shrink-0">
-                          <i className="bi bi-star-fill"/>
-                          {review.rating?.toFixed(1)}
-                        </span>
-                      </div>
-
-                      {/* 배지 행 */}
-                      <div className="form-chips">
-                        {getStatusBadge(review.status)}
-                        {review.store?.storeType && <StoreTypeBadge storeType={review.store.storeType} size="sm"/>}
-                        {review.store?.categories?.slice(0, VISIBLE_CATEGORIES).map((category: any, idx: number) => (
-                          <span key={idx} className="form-chip">{category.name}</span>
-                        ))}
-                        {review.store?.categories?.length > VISIBLE_CATEGORIES && (
-                          <span className="form-chip">
-                            +{review.store.categories.length - VISIBLE_CATEGORIES}
+                      <StoreCardHeader
+                        store={review.store}
+                        onStoreClick={handleStoreClick}
+                        badges={getStatusBadge(review.status)}
+                        aside={(
+                          <span className="rating-badge flex-shrink-0">
+                            <i className="bi bi-star-fill"/>
+                            {review.rating?.toFixed(1)}
                           </span>
                         )}
-                      </div>
+                      />
 
                       {/* 리뷰 내용 */}
                       {review.contents && (

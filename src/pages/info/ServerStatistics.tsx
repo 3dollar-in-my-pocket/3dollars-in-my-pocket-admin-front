@@ -5,6 +5,7 @@ import enumApi from "@/api/enumApi";
 import RecentActivityStatistics from "./RecentActivityStatistics";
 import DefaultStatistics from "./DefaultStatistics";
 import StoreByCategoryStatistics from "./StoreByCategoryStatistics";
+import GroupedStatistics, {StatisticsGroup} from "./GroupedStatistics";
 import FilterCard from "@/components/common/FilterCard";
 import EmptyState from "@/components/common/EmptyState";
 
@@ -43,6 +44,8 @@ const ServerStatistics = () => {
   const adminAuth = useAuthStore((state) => state.admin);
   const [statisticsTypes, setStatisticsTypes] = useState<{ key: string; description: string }[]>([]);
   const [selectedType, setSelectedType] = useState<string>("");
+  /** EXTERNAL_SNS_POST 통계의 groupId (서버 enum StoreSnsPostPlatform) */
+  const [snsPostPlatforms, setSnsPostPlatforms] = useState<StatisticsGroup[]>([]);
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
   const [dateRangeError, setDateRangeError] = useState<string>("");
@@ -57,6 +60,12 @@ const ServerStatistics = () => {
   const fetchStatisticsTypes = async () => {
     try {
       const response = await enumApi.getEnum();
+      setSnsPostPlatforms(
+        (response?.data?.StoreSnsPostPlatform || []).map((platform: { key: string; description: string }) => ({
+          id: platform.key,
+          name: platform.description,
+        }))
+      );
       if (response?.data?.StatisticsType) {
         let types = response.data.StatisticsType || [];
 
@@ -153,6 +162,21 @@ const ServerStatistics = () => {
       );
     }
 
+    // EXTERNAL_SNS_POST 타입은 SNS 플랫폼별 통계 컴포넌트 사용
+    if (selectedType === "EXTERNAL_SNS_POST") {
+      return (
+        <GroupedStatistics
+          statisticsType={selectedType}
+          startDate={startDate}
+          endDate={endDate}
+          groups={snsPostPlatforms}
+          groupLabel="SNS 플랫폼"
+          unitLabel="포스트 수"
+          onFetch={handleFetch}
+        />
+      );
+    }
+
     // 기본 통계 컴포넌트 사용
     return (
       <DefaultStatistics
@@ -162,7 +186,7 @@ const ServerStatistics = () => {
         onFetch={handleFetch}
       />
     );
-  }, [selectedType, startDate, endDate, handleFetch]);
+  }, [selectedType, startDate, endDate, handleFetch, snsPostPlatforms]);
 
   return (
     <div>

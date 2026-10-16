@@ -124,7 +124,7 @@ const UserVisitHistory = ({userId, isActive, onStoreClick}: UserVisitHistoryProp
           >
             <div className="item-card__body">
               <div className="d-flex align-items-start justify-content-between gap-2">
-                <div className="min-w-0">
+                <div className="flex-grow-1 min-w-0">
                   <div className="d-flex align-items-center flex-wrap gap-2">
                     {visit.store && onStoreClick ? (
                       <button
@@ -152,22 +152,24 @@ const UserVisitHistory = ({userId, isActive, onStoreClick}: UserVisitHistoryProp
                     {visit.store?.address?.fullAddress || '주소 정보 없음'}
                   </p>
                 </div>
-                <button
-                  className="btn btn-sm btn-outline-warning flex-shrink-0"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleVisitClick(visit);
-                  }}
-                >
-                  <i className="bi bi-eye me-1"/>
-                  상세보기
-                </button>
+                <div className="d-flex flex-column align-items-end gap-2 flex-shrink-0">
+                  <StoreTypeBadge storeType={visit.store?.storeType}/>
+                  <button
+                    className="btn btn-sm btn-outline-warning flex-shrink-0"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleVisitClick(visit);
+                    }}
+                  >
+                    <i className="bi bi-eye me-1"/>
+                    상세보기
+                  </button>
+                </div>
               </div>
 
               <div className="d-flex align-items-center flex-wrap gap-2 mt-2">
                 <StoreStatusBadge status={visit.store?.status}/>
                 {getActivitiesStatusBadge(visit.store?.activitiesStatus)}
-                {visit.store?.storeType && <StoreTypeBadge storeType={visit.store.storeType}/>}
                 <span className="rating-badge">
                   <i className="bi bi-star-fill"/>
                   평점: {visit.store?.rating ? visit.store.rating.toFixed(1) : '0.0'}점

@@ -1,5 +1,7 @@
 import {Modal} from 'react-bootstrap';
 import DetailField from '@/components/common/DetailField';
+import StoreInfoSection from '@/components/StoreInfoSection';
+import {SimpleStore} from '@/types/store';
 import {StorePost} from '@/types/storePost';
 import {formatDateTimeKo as formatDateTime} from '@/utils/dateUtils';
 import {
@@ -13,6 +15,8 @@ interface StorePostDetailModalProps {
   show: boolean;
   onHide: () => void;
   post: StorePost | null;
+  /** 가게명 클릭 콜백 (가게 상세 모달 열기). 전체 가게 조회 응답(store 포함)에서만 사용됩니다. */
+  onStoreClick?: (store: SimpleStore) => void;
 }
 
 /**
@@ -20,7 +24,7 @@ interface StorePostDetailModalProps {
  *
  * 소식 단건 조회 API가 없어 목록에서 받은 항목을 그대로 표시합니다.
  */
-const StorePostDetailModal = ({show, onHide, post}: StorePostDetailModalProps) => {
+const StorePostDetailModal = ({show, onHide, post, onStoreClick}: StorePostDetailModalProps) => {
   if (!post) return null;
 
   const imageSections = getPostImageSections(post);
@@ -53,6 +57,17 @@ const StorePostDetailModal = ({show, onHide, post}: StorePostDetailModalProps) =
             </span>
           )}
         </div>
+
+        {/* 가게 정보 (전체 가게 조회 응답에서만 제공) */}
+        {post.store && (
+          <StoreInfoSection
+            store={post.store}
+            onStoreClick={onStoreClick && ((store) => {
+              onStoreClick(store);
+              onHide();
+            })}
+          />
+        )}
 
         {/* 본문 */}
         <div className="modal-section">

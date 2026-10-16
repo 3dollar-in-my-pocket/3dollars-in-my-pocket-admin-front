@@ -22,6 +22,7 @@
   flex-direction: column;
   width: var(--app-sidebar-width);
   height: 100vh;
+  height: 100dvh;
   background-color: var(--app-sidebar-bg);
   border-right: 1px solid var(--app-sidebar-border);
   transform: translateX(-100%);
@@ -274,6 +275,7 @@
 .app-sidebar__footer {
   flex: 0 0 auto;
   padding: 0.75rem;
+  padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid var(--app-sidebar-border);
   background-color: rgba(0, 0, 0, 0.2);
 }

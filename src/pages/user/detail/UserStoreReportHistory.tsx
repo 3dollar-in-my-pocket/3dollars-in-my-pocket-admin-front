@@ -80,7 +80,7 @@ const UserStoreReportHistory = ({userId, isActive, onStoreClick}: UserStoreRepor
         <div key={report.reportId || index} className="item-card mb-3">
           <div className="item-card__body">
             <div className="d-flex align-items-start justify-content-between gap-2">
-              <div className="min-w-0">
+              <div className="flex-grow-1 min-w-0">
                 {report.store && onStoreClick ? (
                   <button
                     type="button"
@@ -98,12 +98,14 @@ const UserStoreReportHistory = ({userId, isActive, onStoreClick}: UserStoreRepor
                 )}
                 <div className="d-flex align-items-center flex-wrap gap-2 mt-2">
                   {getReasonBadge(report.reason)}
-                  {report.store?.storeType && <StoreTypeBadge storeType={report.store.storeType}/>}
                 </div>
               </div>
-              <span className="badge bg-light text-dark border flex-shrink-0">
-                #{report.reportId}
-              </span>
+              <div className="d-flex flex-column align-items-end gap-2 flex-shrink-0">
+                <StoreTypeBadge storeType={report.store?.storeType}/>
+                <span className="badge bg-light text-dark border">
+                  #{report.reportId}
+                </span>
+              </div>
             </div>
 
             {report.store && (

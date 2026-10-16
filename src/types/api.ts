@@ -3,6 +3,7 @@ export interface ApiResponse<T = any> {
   error?: string | null;
   data: T;
   message?: string;
+  errorDetails?: {field: string; reason: string}[];
 }
 
 // 커서 정보

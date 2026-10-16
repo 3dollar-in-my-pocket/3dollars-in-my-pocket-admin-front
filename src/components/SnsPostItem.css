@@ -1,0 +1,31 @@
+.sns-post-item a {
+  overflow-wrap: anywhere;
+}
+
+.sns-post-item__heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.sns-post-item__actions {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.sns-post-item__actions .btn {
+  white-space: nowrap;
+}
+
+@media (max-width: 575.98px) {
+  .sns-post-item__heading {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .sns-post-item__heading > .min-w-0 {
+    width: 100%;
+  }
+}

@@ -159,26 +159,28 @@ const UserStoreImageHistory = ({userId, isActive, onStoreClick}: UserStoreImageH
                   </div>
                 </div>
                 <div className="item-card__body">
-                  {storeImage.store && onStoreClick ? (
-                    <button
-                      type="button"
-                      className="btn btn-link btn-sm p-0 text-decoration-none item-card__name clickable-author text-start"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onStoreClick(storeImage.store);
-                      }}
-                    >
-                      {storeImage.store.name || '가게명 없음'}
-                      <i className="bi bi-box-arrow-up-right ms-1"/>
-                    </button>
-                  ) : (
-                    <h3 className="item-card__name">{storeImage.store?.name || '가게명 없음'}</h3>
-                  )}
+                  <div className="d-flex align-items-start justify-content-between gap-2">
+                    {storeImage.store && onStoreClick ? (
+                      <button
+                        type="button"
+                        className="btn btn-link btn-sm p-0 text-decoration-none item-card__name clickable-author text-start min-w-0"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onStoreClick(storeImage.store);
+                        }}
+                      >
+                        {storeImage.store.name || '가게명 없음'}
+                        <i className="bi bi-box-arrow-up-right ms-1"/>
+                      </button>
+                    ) : (
+                      <h3 className="item-card__name min-w-0">{storeImage.store?.name || '가게명 없음'}</h3>
+                    )}
+                    <StoreTypeBadge storeType={storeImage.store?.storeType}/>
+                  </div>
 
                   <div className="d-flex align-items-center flex-wrap gap-1 mt-2">
                     {getImageStatusBadge(storeImage.status)}
                     {getStoreStatusBadge(storeImage.store?.status)}
-                    {storeImage.store?.storeType && <StoreTypeBadge storeType={storeImage.store.storeType}/>}
                   </div>
 
                   <p className="item-card__desc">

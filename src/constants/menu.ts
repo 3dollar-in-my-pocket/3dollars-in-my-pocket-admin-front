@@ -47,7 +47,7 @@ export const menuGroups: MenuGroup[] = [
     items: [
       {
         path: "/manage/store-file-upload",
-        label: "신규 가게 등록",
+        label: "가게 일괄 등록",
         icon: "bi-file-earmark-arrow-up",
         allowedRoles: [AdminRole.OPERATOR]
       },
@@ -64,34 +64,9 @@ export const menuGroups: MenuGroup[] = [
         allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]
       },
       {
-        path: "/manage/review",
-        label: "가게 리뷰 관리",
-        icon: "bi-chat-square-text",
-        allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]
-      },
-      {path: "/manage/store-image", label: "가게 이미지 관리", icon: "bi-image"},
-      {
-        path: "/manage/store-post",
-        label: "가게 소식",
-        icon: "bi-newspaper",
-        allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]
-      },
-      {
-        path: "/manage/coupon",
-        label: "가게 쿠폰 관리",
-        icon: "bi-ticket-perforated",
-        allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]
-      },
-      {
-        path: "/manage/store-message",
-        label: "가게 메시지 관리",
-        icon: "bi-chat-left-text",
-        allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]
-      },
-      {
-        path: "/manage/store-report",
-        label: "가게 신고 이력",
-        icon: "bi-flag-fill",
+        path: "/manage/store-activity",
+        label: "가게 활동 관리",
+        icon: "bi-collection",
         allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]
       },
       {
@@ -174,26 +149,6 @@ export const menuGroups: MenuGroup[] = [
     ],
   },
   {
-    title: "통계 & 분석",
-    icon: "bi-graph-up",
-    description: "서비스 사용 통계와 광고 성과를 확인합니다",
-    items: [
-      {
-        path: "/info/service-statistics",
-        label: "서비스 통계",
-        icon: "bi-graph-up",
-        allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]
-      },
-      {path: "/info/ad-statistics", label: "광고 통계", icon: "bi-badge-ad", allowedRoles: [AdminRole.OPERATOR]},
-      {
-        path: "/info/push-statistics",
-        label: "푸시 통계",
-        icon: "bi-bar-chart-line-fill",
-        allowedRoles: [AdminRole.OPERATOR]
-      },
-    ],
-  },
-  {
     title: "시스템 설정",
     icon: "bi-gear-fill",
     description: "관리자 계정 및 시스템 설정을 관리합니다",
@@ -204,8 +159,14 @@ export const menuGroups: MenuGroup[] = [
   {
     title: "기타",
     icon: "bi-link-45deg",
-    description: "관련 외부 링크를 모아둔 공간입니다",
+    description: "서비스 통계와 관련 외부 링크를 확인합니다",
     items: [
+      {
+        path: "/info/statistics",
+        label: "통계",
+        icon: "bi-graph-up",
+        allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]
+      },
       {
         path: "/info/etc-link",
         label: "기타 링크",

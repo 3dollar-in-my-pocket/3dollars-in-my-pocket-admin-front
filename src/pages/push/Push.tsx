@@ -82,7 +82,7 @@ const PushManage = () => {
       <PageHeader
         description="발송 대상과 푸시 타입을 지정해 메시지를 발송합니다. 오른쪽 미리보기로 실제 알림 모습을 실시간으로 확인할 수 있습니다."
         actions={
-          <button className="btn btn-outline-primary" onClick={() => navigate("/info/push-statistics")}>
+          <button className="btn btn-outline-primary" onClick={() => navigate("/info/statistics?tab=push")}>
             <i className="bi bi-graph-up me-1"/>
             푸시 통계
           </button>

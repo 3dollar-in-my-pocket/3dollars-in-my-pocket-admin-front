@@ -15,7 +15,7 @@ interface StoreTypeBadgeProps {
 }
 
 const SIZE_CLASS: Record<BadgeSize, string> = {
-  sm: 'px-2 py-1 small',
+  sm: 'store-type-badge--sm',
   md: 'px-3 py-1',
   lg: 'px-3 py-2'
 };
@@ -36,7 +36,7 @@ const StoreTypeBadge = ({
 
   return (
     <span
-      className={`badge ${getStoreTypeBadgeClass(type)} text-white rounded-pill ${SIZE_CLASS[size]}${bordered ? ' border' : ''}${className ? ' ' + className : ''}`}
+      className={`badge store-type-badge ${getStoreTypeBadgeClass(type)} text-white rounded-pill ${SIZE_CLASS[size]}${bordered ? ' border' : ''}${className ? ' ' + className : ''}`}
       style={style}
     >
       <i className={`bi ${getStoreTypeIcon(type)} me-1`}></i>

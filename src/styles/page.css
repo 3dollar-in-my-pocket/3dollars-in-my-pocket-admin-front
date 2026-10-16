@@ -352,6 +352,17 @@ table.data-table .num {
 }
 
 /* ---------- 클릭 가능한 항목 카드 ---------- */
+.store-type-badge {
+  flex-shrink: 0;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.store-type-badge--sm {
+  padding: 0.2rem 0.5rem;
+  font-size: 0.6875rem;
+}
+
 .item-card {
   display: flex;
   flex-direction: column;
@@ -931,12 +942,6 @@ table.data-table .num {
   background-color: #f8fafc;
   color: var(--page-text-muted);
   font-size: 1.125rem;
-}
-
-.detail-modal__avatar-badge {
-  position: absolute;
-  top: -6px;
-  right: -6px;
 }
 
 /* 헤더 제목 줄 (제목 + ID 배지) */
