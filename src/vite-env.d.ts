@@ -5,6 +5,7 @@
 interface ImportMetaEnv {
   readonly REACT_APP_ENV?: 'LOCAL' | 'DEV' | 'STAGE' | 'PROD';
   readonly REACT_APP_API_URI: string;
+  readonly REACT_APP_APP_URI: string;
   readonly REACT_APP_CLIENT_ID: string;
   readonly REACT_APP_CLIENT_SECRET: string;
   readonly REACT_APP_REDIRECT_URI: string;

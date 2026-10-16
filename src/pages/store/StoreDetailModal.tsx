@@ -25,6 +25,7 @@ import StoreVisitHistory from './detail/StoreVisitHistory';
 import StoreSnsPostLinks from './detail/StoreSnsPostLinks';
 import {isImagesSupported, isReportsSupported, isVisitsSupported, StoreDetail} from '@/types/store';
 import useConfirm from '@/hooks/useConfirm';
+import {getStoreAppLink} from '@/constants/appLink';
 
 interface StoreDetailModalProps {
   show: boolean;
@@ -206,6 +207,17 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}: 
 
   if (!show || !store) return null;
 
+  const storeLink = getStoreAppLink(store.storeId);
+
+  const handleCopyStoreLink = async () => {
+    try {
+      await navigator.clipboard.writeText(storeLink);
+      toast.success('가게 링크가 복사되었습니다.');
+    } catch {
+      toast.error('링크 복사에 실패했습니다. 주소를 직접 선택해 복사해주세요.');
+    }
+  };
+
   return (
     <Modal
       show={show}
@@ -238,6 +250,21 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}: 
               {(storeDetail?.address || store.address)?.fullAddress || '주소 정보 없음'}
             </span>
           </p>
+          <div className="detail-modal__link">
+            <i className="bi bi-link-45deg flex-shrink-0" aria-hidden="true"/>
+            <a href={storeLink} target="_blank" rel="noopener noreferrer" className="text-truncate">
+              {storeLink}
+            </a>
+            <button
+              type="button"
+              className="btn btn-link btn-sm p-0 flex-shrink-0"
+              onClick={handleCopyStoreLink}
+              aria-label="가게 링크 복사"
+              title="링크 복사"
+            >
+              <i className="bi bi-clipboard"/>
+            </button>
+          </div>
         </div>
       </Modal.Header>
 
