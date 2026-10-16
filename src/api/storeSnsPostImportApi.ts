@@ -13,13 +13,13 @@ const buildImportFormData = (snsPostsFile: File): FormData => {
 
 const storeSnsPostImportApi = {
   validate: (snsPostsFile: File) => apiPostFormData<StoreSnsPostImportValidationResponse>(
-    '/v1/store-thread-posts/upload/validate',
+    '/v1/store-sns-posts/upload/validate',
     buildImportFormData(snsPostsFile),
     {timeout: 120000}
   ),
 
   save: (snsPostsFile: File) => apiPostFormData<StoreSnsPostImportSaveResponse>(
-    '/v1/store-thread-posts/upload',
+    '/v1/store-sns-posts/upload',
     buildImportFormData(snsPostsFile),
     {timeout: 120000}
   ),
