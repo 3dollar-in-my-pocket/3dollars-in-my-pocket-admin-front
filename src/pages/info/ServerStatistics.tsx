@@ -61,7 +61,7 @@ const ServerStatistics = () => {
     try {
       const response = await enumApi.getEnum();
       setSnsPostPlatforms(
-        (response?.data?.StoreSnsPostPlatform || []).map((platform: { key: string; description: string }) => ({
+        (response?.data?.PostSectionStoreSnsPlatform || []).map((platform: { key: string; description: string }) => ({
           id: platform.key,
           name: platform.description,
         }))
