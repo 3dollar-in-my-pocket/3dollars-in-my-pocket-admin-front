@@ -41,7 +41,7 @@ const StoreSnsPostManagement = () => {
     errorMessage: 'SNS 포스트를 불러오지 못했습니다.'
   });
 
-  const {scrollContainerRef, loadMoreRef} = useInfiniteScroll({
+  const {loadMoreRef} = useInfiniteScroll({
     hasMore,
     isLoading,
     onLoadMore: loadMore,
@@ -109,7 +109,7 @@ const StoreSnsPostManagement = () => {
           <span className="page-count">{posts.length.toLocaleString()}{hasMore ? '+' : ''}건</span>
         )}
       >
-        <div ref={scrollContainerRef} style={{maxHeight: 'calc(100vh - 340px)', overflowY: 'auto'}}>
+        <div>
           {posts.length === 0 && !isLoading && !error && (
             <EmptyState
               icon="bi-link-45deg"

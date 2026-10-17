@@ -59,7 +59,7 @@ const ReviewManagement = () => {
   });
 
   // Infinite Scroll 훅 사용
-  const {scrollContainerRef, loadMoreRef} = useInfiniteScroll({
+  const {loadMoreRef} = useInfiniteScroll({
     hasMore,
     isLoading,
     onLoadMore: loadMore,
@@ -210,7 +210,7 @@ const ReviewManagement = () => {
             max={MAX_BULK_SELECTION}
           />
         )}
-        <div ref={scrollContainerRef} style={{maxHeight: 'calc(100vh - 300px)', overflowY: 'auto'}}>
+        <div>
           {error ? (
             <ErrorState message={error} onRetry={refresh}/>
           ) : reviews.length === 0 && !isLoading ? (

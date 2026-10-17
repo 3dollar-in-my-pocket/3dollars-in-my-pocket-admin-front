@@ -40,7 +40,7 @@ const StoreMessageManagement = () => {
   });
 
   // Infinite Scroll 훅 사용
-  const {scrollContainerRef, loadMoreRef} = useInfiniteScroll({
+  const {loadMoreRef} = useInfiniteScroll({
     hasMore,
     isLoading,
     onLoadMore: loadMore,
@@ -72,7 +72,7 @@ const StoreMessageManagement = () => {
           <span className="page-count">{messages.length.toLocaleString()}{hasMore ? '+' : ''}건</span>
         )}
       >
-        <div ref={scrollContainerRef} style={{maxHeight: 'calc(100vh - 300px)', overflowY: 'auto'}}>
+        <div>
           {error ? (
             <ErrorState message={error} onRetry={refresh}/>
           ) : messages.length === 0 && !isLoading ? (
