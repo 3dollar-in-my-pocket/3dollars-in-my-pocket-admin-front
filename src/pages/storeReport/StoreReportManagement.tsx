@@ -36,7 +36,7 @@ const StoreReportManagement = () => {
     errorMessage: '가게 신고 이력을 불러오는데 실패했습니다.'
   });
 
-  const {scrollContainerRef, loadMoreRef} = useInfiniteScroll({
+  const {loadMoreRef} = useInfiniteScroll({
     hasMore,
     isLoading,
     onLoadMore: loadMore,
@@ -103,7 +103,7 @@ const StoreReportManagement = () => {
           <span className="page-count">{reports.length.toLocaleString()}{hasMore ? '+' : ''}건</span>
         )}
       >
-        <div ref={scrollContainerRef} style={{maxHeight: 'calc(100vh - 300px)', overflowY: 'auto'}}>
+        <div>
           {error ? (
             <ErrorState message={error} onRetry={refresh}/>
           ) : reports.length === 0 && !isLoading ? (

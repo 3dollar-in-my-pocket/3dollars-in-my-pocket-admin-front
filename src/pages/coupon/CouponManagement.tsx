@@ -45,7 +45,7 @@ const CouponManagement = () => {
   });
 
   // Infinite Scroll 훅 사용
-  const {scrollContainerRef, loadMoreRef} = useInfiniteScroll({
+  const {loadMoreRef} = useInfiniteScroll({
     hasMore,
     isLoading,
     onLoadMore: loadMore,
@@ -131,7 +131,7 @@ const CouponManagement = () => {
           <span className="page-count">{coupons.length.toLocaleString()}{hasMore ? '+' : ''}건</span>
         )}
       >
-        <div ref={scrollContainerRef} style={{maxHeight: 'calc(100vh - 340px)', overflowY: 'auto'}}>
+        <div>
           <div className="row g-3">
             {isLoading && coupons.length === 0 ? (
               Array.from({length: skeletonCount}).map((_, idx) => <SkeletonCard key={idx}/>)
