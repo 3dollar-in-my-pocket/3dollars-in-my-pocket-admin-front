@@ -2274,17 +2274,66 @@ table.data-table .num {
   max-width: 16rem;
 }
 
+/* 설정 하나당 한 줄: 왼쪽에 이름, 오른쪽에 입력과 안내 문구. 좁은 화면에서는 위아래로 쌓는다. */
 .section-config__fields {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
-  gap: 0.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.section-config__group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0.5rem 0.75rem 0.625rem;
+  border: 1px solid var(--page-border);
+  border-radius: 0.375rem;
+}
+
+.section-config__group-title {
+  float: none;
+  width: auto;
+  margin: 0;
+  padding: 0 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--page-text);
 }
 
 .section-config__field {
+  display: grid;
+  grid-template-columns: 13rem minmax(0, 1fr);
+  align-items: start;
+  gap: 0.125rem 0.75rem;
+  min-width: 0;
+}
+
+.section-config__field > label {
+  padding-top: 0.25rem;
+}
+
+.section-config__control {
   display: flex;
   flex-direction: column;
   gap: 0.125rem;
   min-width: 0;
+  max-width: 24rem;
+}
+
+@media (max-width: 575.98px) {
+  .section-config__field {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .section-config__field > label {
+    padding-top: 0;
+  }
+
+  .section-config__control {
+    max-width: none;
+  }
 }
 
 /* 직접 입력을 위에, 추천값 칩을 그 아래 줄에 둔다. */

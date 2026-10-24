@@ -18,7 +18,13 @@ export interface ScreenTypeMeta {
   supportsSectionOrdering: boolean;
 }
 
-export type ConfigValueType = 'INTEGER' | 'DECIMAL' | 'BOOLEAN' | 'INTEGER_LIST' | 'ENUM';
+export type ConfigValueType = 'INTEGER' | 'DECIMAL' | 'BOOLEAN' | 'INTEGER_LIST' | 'STRING_LIST' | 'ENUM';
+
+/** 서버가 선택지를 내려주지 않는 필드(STRING_LIST)에서 어드민이 직접 정의하는 선택지 */
+export interface SectionConfigOption {
+  value: string;
+  label: string;
+}
 
 /** 설정 입력 필드 정의 */
 export interface SectionConfigFieldMeta {
@@ -32,7 +38,7 @@ export interface SectionConfigFieldMeta {
   min?: number;
   /** 최댓값(포함). INTEGER_LIST는 각 원소의 최댓값 */
   max?: number;
-  /** INTEGER_LIST의 최대 원소 개수 */
+  /** INTEGER_LIST/STRING_LIST의 최대 원소 개수 */
   maxItems?: number;
   /** true면 min을 포함하지 않습니다(초과). */
   isMinExclusive?: boolean;
@@ -42,6 +48,10 @@ export interface SectionConfigFieldMeta {
   presets?: number[];
   /** ENUM 선택지를 조회할 서버 enum 이름 (enumApi 응답의 키). 예: HomeBottomSheetTab */
   enumName?: string;
+  /** 입력 폼에서 묶어 보여줄 그룹 이름. 예: 애드몹, 자체 광고. 없으면 그룹 없이 표시합니다. */
+  group?: string;
+  /** STRING_LIST 선택지 */
+  options?: SectionConfigOption[];
   description?: string;
 }
 
@@ -66,7 +76,7 @@ export interface SectionTypeMeta {
 }
 
 /** 설정 필드 값. 입력 도중에는 숫자 자리에 NaN이 들어갈 수 있으며, 저장 전 검증에서 걸러집니다. */
-export type SectionConfigValue = number | boolean | number[] | string;
+export type SectionConfigValue = number | boolean | number[] | string[] | string;
 
 /**
  * 섹션 설정값.

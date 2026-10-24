@@ -3,6 +3,7 @@ import {
   ScreenTypeMeta,
   SectionConfigFieldMeta,
   SectionConfigMeta,
+  SectionConfigOption,
   SectionType,
   SectionTypeMeta
 } from '@/types/screenSectionLayout';
@@ -80,6 +81,32 @@ const positionsField = (name: string, label: string): SectionConfigFieldMeta => 
   description: '비어 있으면 미노출',
 });
 
+const stringListField = (
+  name: string,
+  label: string,
+  options: SectionConfigOption[],
+  maxItems: number,
+  description?: string
+): SectionConfigFieldMeta => ({
+  name,
+  label,
+  valueType: 'STRING_LIST',
+  isRequired: false,
+  options,
+  maxItems,
+  description,
+});
+
+/**
+ * 홈 큐레이션 캐러셀 ID. 서버가 목록을 내려주지 않으므로 어드민에서 관리합니다.
+ * 서버에 없는 ID는 경고 로그만 남기고 무시됩니다.
+ */
+export const HOME_CURATION_CAROUSEL_OPTIONS: SectionConfigOption[] = [
+  {value: 'POPULAR_SNACKS', label: '최근 인기 간식'},
+  {value: 'TASTE_SNACKS', label: '입맛별로 찾는 간식'},
+  {value: 'SNS_STORES', label: 'SNS에서 만난 가게'},
+];
+
 const positiveDecimalField = (name: string, label: string, options: FieldOptions = {}): SectionConfigFieldMeta => ({
   name,
   label,
@@ -101,6 +128,19 @@ const enumField = (name: string, label: string, enumName: string): SectionConfig
 /** 광고 높이 필드. 애드몹/리스트/큐레이션 광고 모두 같은 범위와 추천값을 사용합니다. */
 const adHeightField = (name: string, label: string): SectionConfigFieldMeta =>
   integerField(name, label, 50, 200, {unit: 'dp', presets: [50, 100, 150, 200]});
+
+/**
+ * 같은 그룹으로 묶어 표시할 필드 목록.
+ * 그룹 안에서는 label만 보여주므로 label에 그룹 이름을 반복하지 않습니다. (전체 이름: getConfigFieldFullLabel)
+ */
+const inGroup = (group: string, fields: SectionConfigFieldMeta[]): SectionConfigFieldMeta[] =>
+  fields.map((field) => ({...field, group}));
+
+const ADVERTISEMENT_POSITIONS_DESCRIPTION = '첫 페이지에만 적용';
+
+/** 그룹 밖(오류 메시지, 변경 비교 요약)에서 쓰는 필드 이름. 예: "카드 애드몹 삽입 위치" */
+export const getConfigFieldFullLabel = (field: SectionConfigFieldMeta): string =>
+  field.group ? `${field.group} ${field.label}` : field.label;
 
 const EMPTY_CONFIG: SectionConfigMeta = {type: 'EMPTY', label: '추가 설정 없음', fields: []};
 
@@ -142,8 +182,16 @@ export const SECTION_CONFIGS: Record<SectionType, SectionConfigMeta[]> = {
       label: '홈 목록 설정',
       fields: [
         integerField('pageSize', '한 번에 불러올 가게 수', 1, undefined, {unit: '개'}),
-        positionsField('adPositions', '목록 광고 삽입 위치'),
-        adHeightField('adHeight', '목록 광고 영역 높이'),
+        ...inGroup('목록 애드몹', [
+          positionsField('adPositions', '삽입 위치'),
+          adHeightField('adHeight', '영역 높이'),
+        ]),
+        ...inGroup('목록 자체 광고', [
+          {
+            ...positionsField('advertisementPositions', '삽입 위치'),
+            description: ADVERTISEMENT_POSITIONS_DESCRIPTION,
+          },
+        ]),
       ],
     },
   ],
@@ -152,10 +200,27 @@ export const SECTION_CONFIGS: Record<SectionType, SectionConfigMeta[]> = {
       type: 'HOME_CURATION',
       label: '홈 큐레이션 설정',
       fields: [
-        positionsField('carouselAdPositions', '캐러셀 광고 삽입 위치'),
-        adHeightField('carouselAdHeight', '캐러셀 광고 영역 높이'),
-        positionsField('cardAdPositions', '카드 광고 삽입 위치'),
         positiveDecimalField('searchStoreMaxDistanceM', '가게 검색 반경', {unit: 'm'}),
+        ...inGroup('캐러셀 애드몹', [
+          positionsField('carouselAdPositions', '삽입 위치'),
+          adHeightField('carouselAdHeight', '영역 높이'),
+        ]),
+        ...inGroup('카드 애드몹', [
+          positionsField('cardAdPositions', '삽입 위치'),
+        ]),
+        ...inGroup('카드 자체 광고', [
+          {
+            ...positionsField('cardAdvertisementPositions', '삽입 위치'),
+            description: ADVERTISEMENT_POSITIONS_DESCRIPTION,
+          },
+          stringListField(
+            'cardAdvertisementCarouselIds',
+            '적용 캐러셀',
+            HOME_CURATION_CAROUSEL_OPTIONS,
+            10,
+            '선택한 캐러셀에만 자체 광고 노출. 비어 있으면 미노출'
+          ),
+        ]),
       ],
     },
   ],

@@ -229,7 +229,7 @@ describe('useSectionLayoutDraft', () => {
         targetStoresDefaultOn: false,
         eventFilterVisible: false,
       });
-      expect(result.current.sections[2].config).toEqual({type: 'HOME_LIST', adPositions: []});
+      expect(result.current.sections[2].config).toEqual({type: 'HOME_LIST', adPositions: [], advertisementPositions: []});
       expect(result.current.isDirty).toBe(true);
     });
 

@@ -12,7 +12,7 @@ import {
   SectionType,
   SectionTypeMeta
 } from '@/types/screenSectionLayout';
-import {findConfigMetaByType, getSectionConfigs} from '@/constants/screenSectionLayout';
+import {findConfigMetaByType, getConfigFieldFullLabel, getSectionConfigs} from '@/constants/screenSectionLayout';
 
 export const findConfigMeta = (
   sectionType: SectionType,
@@ -22,14 +22,14 @@ export const findConfigMeta = (
 /**
  * 설정 타입을 새로 고를 때의 초기값.
  *
- * 필수가 아닌 필드는 서버 기본값(BOOLEAN: false, INTEGER_LIST: 빈 배열)으로 채우고,
+ * 필수가 아닌 필드는 서버 기본값(BOOLEAN: false, INTEGER_LIST/STRING_LIST: 빈 배열)으로 채우고,
  * 필수 숫자 필드는 비워 둡니다. min을 기본값으로 해석하지 않습니다.
  */
 export const buildDefaultConfig = (configMeta: SectionConfigMeta): ScreenSectionLayoutConfig => {
   const config: ScreenSectionLayoutConfig = {type: configMeta.type};
   configMeta.fields.forEach((field) => {
     if (field.valueType === 'BOOLEAN') config[field.name] = false;
-    if (field.valueType === 'INTEGER_LIST') config[field.name] = [];
+    if (field.valueType === 'INTEGER_LIST' || field.valueType === 'STRING_LIST') config[field.name] = [];
   });
   return config;
 };
@@ -116,6 +116,23 @@ const validateField = (field: SectionConfigFieldMeta, value: unknown): string | 
       }
       return undefined;
     }
+    case 'STRING_LIST': {
+      if (value === undefined) {
+        return field.isRequired ? `${field.label} 값을 선택해주세요.` : undefined;
+      }
+      if (!Array.isArray(value)) return `${field.label} 값이 올바르지 않습니다.`;
+      if (field.isRequired && value.length === 0) return `${field.label} 값을 선택해주세요.`;
+      if (value.some((item) => typeof item !== 'string' || !item.trim())) {
+        return `${field.label}에 빈 값이 있습니다.`;
+      }
+      if (new Set(value).size !== value.length) {
+        return `${field.label}에 중복된 값이 있습니다.`;
+      }
+      if (field.maxItems !== undefined && value.length > field.maxItems) {
+        return `${field.label}은(는) 최대 ${field.maxItems}개까지 선택할 수 있습니다.`;
+      }
+      return undefined;
+    }
     default:
       return undefined;
   }
@@ -138,7 +155,7 @@ export const validateSectionConfig = (
   }
 
   for (const field of configMeta.fields) {
-    const message = validateField(field, config[field.name]);
+    const message = validateField({...field, label: getConfigFieldFullLabel(field)}, config[field.name]);
     if (message) return {field: field.name, message};
   }
   return undefined;
@@ -175,7 +192,7 @@ export const formatSectionConfig = (
         : undefined;
       const value = enumLabel && enumLabel !== rawValue ? `${enumLabel} (${rawValue})` : formatValue(rawValue);
       const unit = field?.unit && value !== '-' && !value.startsWith('[') ? field.unit : '';
-      return `${field?.label ?? key}=${value}${unit}`;
+      return `${field ? getConfigFieldFullLabel(field) : key}=${value}${unit}`;
     });
   const typeLabel = configMeta?.label ?? config.type;
   return fields.length > 0 ? `${typeLabel} (${fields.join(', ')})` : typeLabel;

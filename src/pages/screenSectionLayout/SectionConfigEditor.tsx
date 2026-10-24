@@ -124,6 +124,66 @@ const EnumSelectInput: React.FC<EnumSelectInputProps> = ({id, enumName, value, d
   );
 };
 
+interface StringListToggleInputProps {
+  id: string;
+  field: SectionConfigFieldMeta;
+  value: unknown;
+  disabled: boolean;
+  invalid: boolean;
+  onChange: (value: SectionConfigValue | undefined) => void;
+}
+
+/** 어드민이 정의한 선택지를 토글해 문자열 목록을 고르는 입력. 선택지에 없는 저장값도 보여주고 유지합니다. */
+const StringListToggleInput: React.FC<StringListToggleInputProps> = ({
+                                                                       id,
+                                                                       field,
+                                                                       value,
+                                                                       disabled,
+                                                                       invalid,
+                                                                       onChange
+                                                                     }) => {
+  const selected = Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
+  const options = field.options ?? [];
+  const unknownOptions = selected
+    .filter((item) => !options.some((option) => option.value === item))
+    .map((item) => ({value: item, label: item}));
+
+  const toggle = (optionValue: string) => {
+    onChange(selected.includes(optionValue)
+      ? selected.filter((item) => item !== optionValue)
+      : [...selected, optionValue]);
+  };
+
+  return (
+    <div
+      id={id}
+      className={`section-config__presets ${invalid ? 'is-invalid' : ''}`}
+      role="group"
+      aria-label={field.label}
+    >
+      {[...options, ...unknownOptions].map((option) => {
+        const isSelected = selected.includes(option.value);
+        return (
+          <button
+            key={option.value}
+            type="button"
+            className={`margin-picker__chip ${isSelected ? 'is-selected' : ''}`}
+            title={option.value}
+            disabled={disabled}
+            aria-pressed={isSelected}
+            onClick={(event) => {
+              event.stopPropagation();
+              toggle(option.value);
+            }}
+          >
+            {option.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+};
+
 interface ConfigFieldInputProps {
   id: string;
   field: SectionConfigFieldMeta;
@@ -205,6 +265,17 @@ const ConfigFieldInput: React.FC<ConfigFieldInputProps> = ({id, field, value, di
           onChange={onChange}
         />
       );
+    case 'STRING_LIST':
+      return (
+        <StringListToggleInput
+          id={id}
+          field={field}
+          value={value}
+          disabled={disabled}
+          invalid={invalid}
+          onChange={onChange}
+        />
+      );
     case 'ENUM':
       return (
         <EnumSelectInput
@@ -220,6 +291,23 @@ const ConfigFieldInput: React.FC<ConfigFieldInputProps> = ({id, field, value, di
       return null;
   }
 };
+
+interface FieldGroup {
+  group?: string;
+  fields: SectionConfigFieldMeta[];
+}
+
+/** 같은 group 값을 가진 연속된 필드끼리 묶습니다. 필드 순서는 그대로 유지합니다. */
+const groupFields = (fields: SectionConfigFieldMeta[]): FieldGroup[] =>
+  fields.reduce<FieldGroup[]>((groups, field) => {
+    const last = groups[groups.length - 1];
+    if (last && last.group === field.group) {
+      last.fields.push(field);
+    } else {
+      groups.push({group: field.group, fields: [field]});
+    }
+    return groups;
+  }, []);
 
 interface SectionConfigEditorProps {
   sectionKey: string;
@@ -293,28 +381,40 @@ const SectionConfigEditor: React.FC<SectionConfigEditorProps> = ({
 
       {configMeta && !isUnsupported && hasFields && (
         <div className="section-config__fields">
-          {configMeta.fields.map((field) => {
-            const id = `config-${sectionKey}-${field.name}`;
-            return (
-              <div key={field.name} className="section-config__field">
-                <label className="small" htmlFor={id} title={field.name}>
-                  {field.label}
-                  {field.isRequired && <span className="text-danger ms-1">*</span>}
-                </label>
-                <ConfigFieldInput
-                  id={id}
-                  field={field}
-                  value={config?.[field.name]}
-                  disabled={disabled}
-                  invalid={error?.field === field.name}
-                  onChange={(value) => onChange({
-                    ...(config ?? {type: configMeta.type}),
-                    type: configMeta.type,
-                    [field.name]: value,
-                  })}
-                />
-                {field.description && <span className="form-text">{field.description}</span>}
-              </div>
+          {groupFields(configMeta.fields).map(({group, fields}, index) => {
+            const rows = fields.map((field) => {
+              const id = `config-${sectionKey}-${field.name}`;
+              return (
+                <div key={field.name} className="section-config__field">
+                  <label className="small" htmlFor={id} title={field.name}>
+                    {field.label}
+                    {field.isRequired && <span className="text-danger ms-1">*</span>}
+                  </label>
+                  <div className="section-config__control">
+                    <ConfigFieldInput
+                      id={id}
+                      field={field}
+                      value={config?.[field.name]}
+                      disabled={disabled}
+                      invalid={error?.field === field.name}
+                      onChange={(value) => onChange({
+                        ...(config ?? {type: configMeta.type}),
+                        type: configMeta.type,
+                        [field.name]: value,
+                      })}
+                    />
+                    {field.description && <span className="form-text">{field.description}</span>}
+                  </div>
+                </div>
+              );
+            });
+            return group ? (
+              <fieldset key={`group-${index}`} className="section-config__group">
+                <legend className="section-config__group-title">{group}</legend>
+                {rows}
+              </fieldset>
+            ) : (
+              <React.Fragment key={`group-${index}`}>{rows}</React.Fragment>
             );
           })}
         </div>

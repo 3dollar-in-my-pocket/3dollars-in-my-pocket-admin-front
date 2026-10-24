@@ -9,6 +9,7 @@ const sectionTypes: SectionTypeMeta[] = [
   {value: 'COUPON', label: '쿠폰', isRequired: false, isConfigurable: true, allowsMultiple: false},
   {value: 'MARGIN', label: '여백', isRequired: false, isConfigurable: false, allowsMultiple: false},
   {value: 'HOME_LIST', label: '홈 리스트', isRequired: false, isConfigurable: true, allowsMultiple: false},
+  {value: 'HOME_CURATION', label: '홈 큐레이션', isRequired: false, isConfigurable: true, allowsMultiple: false},
 ];
 
 /** 필수 섹션만 포함한 최소 유효 목록 */
@@ -223,6 +224,51 @@ describe('validateSectionLayouts', () => {
       [[3, 3], [0], [1.5], [Number.NaN], Array.from({length: 21}, (_, i) => i + 1)].forEach((adPositions) => {
         expect(withHomeList({adPositions}).configErrors[2]?.field).toBe('adPositions');
       });
+    });
+
+    it('자체 광고 위치는 애드몹 위치와 겹쳐도 통과하고, 같은 규칙으로 검증한다', () => {
+      expect(withHomeList({advertisementPositions: [3, 5], adPositions: [5, 10]}).isValid).toBe(true);
+      [[3, 3], [0], Array.from({length: 21}, (_, i) => i + 1)].forEach((advertisementPositions) => {
+        expect(withHomeList({advertisementPositions}).configErrors[2]?.field).toBe('advertisementPositions');
+      });
+    });
+  });
+
+  describe('HOME_CURATION config', () => {
+    const withHomeCuration = (config: Record<string, unknown>) => validate([
+      ...requiredSections(),
+      {
+        sectionType: 'HOME_CURATION',
+        sectionId: 'HOME_CURATION',
+        marginBottom: 0,
+        isVisible: true,
+        config: {
+          type: 'HOME_CURATION',
+          carouselAdPositions: [],
+          carouselAdHeight: 100,
+          cardAdPositions: [5, 10],
+          cardAdvertisementPositions: [3, 5],
+          cardAdvertisementCarouselIds: ['POPULAR_SNACKS'],
+          searchStoreMaxDistanceM: 1000,
+          ...config,
+        },
+      },
+    ]);
+
+    it('필드가 모두 유효하면 통과한다', () => {
+      expect(withHomeCuration({}).isValid).toBe(true);
+    });
+
+    it('캐러셀 ID 목록은 비어 있어도 통과한다', () => {
+      expect(withHomeCuration({cardAdvertisementCarouselIds: []}).isValid).toBe(true);
+    });
+
+    it('캐러셀 ID 목록의 공백, 중복, 최대 개수 초과는 실패한다', () => {
+      [[' '], ['SNS_STORES', 'SNS_STORES'], Array.from({length: 11}, (_, i) => `C_${i}`)]
+        .forEach((cardAdvertisementCarouselIds) => {
+          expect(withHomeCuration({cardAdvertisementCarouselIds}).configErrors[2]?.field)
+            .toBe('cardAdvertisementCarouselIds');
+        });
     });
   });
 
