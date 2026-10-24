@@ -211,6 +211,24 @@ describe('useSectionLayoutDraft', () => {
 
       expect(result.current.toRequest()[3].config).toBeUndefined();
     });
+
+    it('노출 조건이 있으면 그대로 보내고, 없으면 생략한다', () => {
+      const condition = {type: 'NOT_EXPOSED' as const, sectionIds: ['COUPON']};
+      const {result} = renderDraft([
+        ...initialLayouts(),
+        {...layout(4, 'AD_MOB', 'AD_MOB_TOP', 400), visibilityCondition: condition},
+      ]);
+
+      expect(result.current.toRequest()[3].visibilityCondition).toEqual(condition);
+      expect(result.current.toRequest()[2]).not.toHaveProperty('visibilityCondition');
+    });
+
+    it('노출 조건을 바꾸면 변경 사항으로 표시한다', () => {
+      const {result} = renderDraft();
+      act(() => result.current.updateSection(2, {visibilityCondition: {type: 'EXPOSED', sectionIds: ['TAB']}}));
+
+      expect(result.current.isDirty).toBe(true);
+    });
   });
 
   describe('고정 화면 (supportsSectionOrdering=false)', () => {

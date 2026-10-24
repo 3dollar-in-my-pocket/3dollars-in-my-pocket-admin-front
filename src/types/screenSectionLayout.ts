@@ -73,6 +73,24 @@ export interface SectionTypeMeta {
   isConfigurable: boolean;
   /** 동일 섹션을 여러 번 넣을 수 있는지 여부 */
   allowsMultiple: boolean;
+  /** 노출 조건(visibilityCondition)을 지정할 수 있는 섹션. 이 값이 true일 때만 조건 입력 UI를 보여줍니다. */
+  supportsVisibilityCondition?: boolean;
+}
+
+/**
+ * 노출 조건 종류. 기준 섹션이 실제로 화면에 내려갔는지를 기준으로 합니다.
+ * (데이터가 없어 빠진 섹션, isVisible=false인 섹션은 노출되지 않은 것으로 봅니다.)
+ *
+ * - EXPOSED: sectionIds 중 하나라도 노출될 때 이 섹션을 노출
+ * - NOT_EXPOSED: sectionIds가 모두 노출되지 않을 때 이 섹션을 노출
+ */
+export type SectionVisibilityConditionType = 'EXPOSED' | 'NOT_EXPOSED';
+
+/** 다른 섹션의 노출 여부에 따른 노출 조건. null이면 조건 없음(항상 노출)입니다. */
+export interface SectionVisibilityCondition {
+  type: SectionVisibilityConditionType;
+  /** 기준 섹션의 sectionId */
+  sectionIds: string[];
 }
 
 /** 설정 필드 값. 입력 도중에는 숫자 자리에 NaN이 들어갈 수 있으며, 저장 전 검증에서 걸러집니다. */
@@ -100,6 +118,7 @@ export interface ScreenSectionLayout {
   marginBottom: number;
   isVisible: boolean;
   config?: ScreenSectionLayoutConfig | null;
+  visibilityCondition?: SectionVisibilityCondition | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -112,6 +131,8 @@ export interface ScreenSectionLayoutItemRequest {
   isVisible: boolean;
   /** 생략하면 서버 기본값을 사용합니다. */
   config?: ScreenSectionLayoutConfig;
+  /** 생략하면 조건 없음(항상 노출)입니다. */
+  visibilityCondition?: SectionVisibilityCondition;
 }
 
 /** 섹션 레이아웃 전체 교체 요청 */

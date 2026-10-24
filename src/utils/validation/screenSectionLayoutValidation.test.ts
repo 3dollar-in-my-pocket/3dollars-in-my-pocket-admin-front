@@ -5,7 +5,15 @@ import {buildDefaultSectionId, validateSectionLayouts} from './screenSectionLayo
 const sectionTypes: SectionTypeMeta[] = [
   {value: 'PREVIEW', label: '가게 미리보기', isRequired: true, isConfigurable: true, allowsMultiple: false},
   {value: 'TAB', label: '탭', isRequired: true, isConfigurable: true, allowsMultiple: false},
-  {value: 'AD_MOB', label: '애드몹 광고', isRequired: false, isConfigurable: true, allowsMultiple: true},
+  {
+    value: 'AD_MOB',
+    label: '애드몹 광고',
+    isRequired: false,
+    isConfigurable: true,
+    allowsMultiple: true,
+    supportsVisibilityCondition: true,
+  },
+  {value: 'AD', label: '광고', isRequired: false, isConfigurable: true, allowsMultiple: false, supportsVisibilityCondition: true},
   {value: 'COUPON', label: '쿠폰', isRequired: false, isConfigurable: true, allowsMultiple: false},
   {value: 'MARGIN', label: '여백', isRequired: false, isConfigurable: false, allowsMultiple: false},
   {value: 'HOME_LIST', label: '홈 리스트', isRequired: false, isConfigurable: true, allowsMultiple: false},
@@ -269,6 +277,38 @@ describe('validateSectionLayouts', () => {
           expect(withHomeCuration({cardAdvertisementCarouselIds}).configErrors[2]?.field)
             .toBe('cardAdvertisementCarouselIds');
         });
+    });
+  });
+
+  describe('visibilityCondition', () => {
+    const withCondition = (
+      visibilityCondition: ScreenSectionLayoutItemRequest['visibilityCondition'],
+      sectionType = 'AD_MOB'
+    ) => validate([
+      ...requiredSections(),
+      {sectionType: 'AD', sectionId: 'AD_1', marginBottom: 8, isVisible: true},
+      {sectionType, sectionId: 'AD_MOB_TOP', marginBottom: 8, isVisible: true, visibilityCondition},
+    ]);
+
+    it('목록에 있는 다른 섹션을 기준으로 하면 통과한다', () => {
+      expect(withCondition({type: 'NOT_EXPOSED', sectionIds: ['AD_1']}).isValid).toBe(true);
+      expect(withCondition({type: 'EXPOSED', sectionIds: ['AD_1', 'TAB']}).isValid).toBe(true);
+    });
+
+    it('조건이 없으면 통과한다', () => {
+      expect(withCondition(undefined).isValid).toBe(true);
+    });
+
+    it('노출 조건을 지원하지 않는 섹션이면 실패한다', () => {
+      const result = withCondition({type: 'EXPOSED', sectionIds: ['AD_1']}, 'COUPON');
+      expect(result.conditionErrors[3]).toContain('노출 조건을 지정할 수 없습니다');
+      expect(result.isValid).toBe(false);
+    });
+
+    it('기준 섹션이 비어 있거나, 자기 자신이거나, 중복이거나, 목록에 없으면 실패한다', () => {
+      [[], ['AD_MOB_TOP'], ['AD_1', 'AD_1'], ['AD_2']].forEach((sectionIds) => {
+        expect(withCondition({type: 'EXPOSED', sectionIds}).conditionErrors[3]).toBeDefined();
+      });
     });
   });
 

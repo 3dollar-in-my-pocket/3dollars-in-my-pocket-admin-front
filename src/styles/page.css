@@ -2264,10 +2264,15 @@ table.data-table .num {
   padding-bottom: 0.125rem;
 }
 
-/* 섹션 설정 폼은 필드 수가 섹션마다 달라 한 줄을 통째로 쓰고, 필드는 폭에 맞춰 여러 열로 배치한다. */
-.section-config {
+/* 섹션 설정 폼과 노출 조건은 한 줄을 통째로 쓴다. 설정 필드는 한 줄에 하나씩 쌓는다. */
+.section-config,
+.section-condition {
   flex-basis: 100%;
   gap: 0.375rem;
+}
+
+.section-condition__type {
+  max-width: 20rem;
 }
 
 .section-config__type {

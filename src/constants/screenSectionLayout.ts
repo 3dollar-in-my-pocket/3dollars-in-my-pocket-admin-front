@@ -5,7 +5,9 @@ import {
   SectionConfigMeta,
   SectionConfigOption,
   SectionType,
-  SectionTypeMeta
+  SectionTypeMeta,
+  SectionVisibilityCondition,
+  SectionVisibilityConditionType
 } from '@/types/screenSectionLayout';
 
 export interface ScreenApplicationOption {
@@ -42,6 +44,22 @@ export const getSectionTypeLabel = (
   sectionTypes: SectionTypeMeta[],
   sectionType: SectionType
 ): string => findSectionTypeMeta(sectionTypes, sectionType)?.label ?? sectionType;
+
+/** 노출 조건 종류별 표시명. 예: "AD_1 노출 시" */
+export const VISIBILITY_CONDITION_TYPE_LABELS: Record<SectionVisibilityConditionType, string> = {
+  EXPOSED: '노출 시',
+  NOT_EXPOSED: '미노출 시',
+};
+
+/** 전/후 비교에 표시할 노출 조건 요약. 예: "AD_1, AD_2 중 하나라도 노출 시" */
+export const formatVisibilityCondition = (condition?: SectionVisibilityCondition | null): string => {
+  if (!condition) return '조건 없음';
+  const ids = condition.sectionIds.length > 0 ? condition.sectionIds.join(', ') : '(기준 섹션 없음)';
+  if (condition.type === 'EXPOSED') {
+    return condition.sectionIds.length > 1 ? `${ids} 중 하나라도 노출 시` : `${ids} 노출 시`;
+  }
+  return condition.sectionIds.length > 1 ? `${ids} 모두 미노출 시` : `${ids} 미노출 시`;
+};
 
 export const getConfigurableSectionTypes = (sectionTypes: SectionTypeMeta[]): SectionTypeMeta[] =>
   sectionTypes.filter((section) => section.isConfigurable);

@@ -12,7 +12,8 @@ import {
   ScreenType,
   SECTION_ID_MAX_LENGTH,
   SectionType,
-  SectionTypeMeta
+  SectionTypeMeta,
+  SectionVisibilityCondition
 } from '@/types/screenSectionLayout';
 import {findSectionTypeMeta} from '@/constants/screenSectionLayout';
 import {SectionConfigError, validateSectionConfig} from '@/utils/sectionConfigUtils';
@@ -25,8 +26,42 @@ export interface SectionLayoutValidationResult {
   itemErrors: Record<number, string>;
   /** 인덱스별 설정(config) 오류. 설정 입력란 아래에 따로 표시합니다. */
   configErrors: Record<number, SectionConfigError>;
+  /** 인덱스별 노출 조건 오류. 노출 조건 입력란 아래에 따로 표시합니다. */
+  conditionErrors: Record<number, string>;
   isValid: boolean;
 }
+
+/**
+ * 노출 조건을 검증합니다.
+ *
+ * 기준 섹션은 같은 화면에 있는 다른 섹션이어야 합니다. sectionId를 바꾸거나 섹션을 지우면
+ * 그 섹션을 기준으로 삼던 조건이 끊어지므로 여기서 걸러 저장 전에 알려줍니다.
+ */
+const validateVisibilityCondition = (
+  condition: SectionVisibilityCondition,
+  meta: SectionTypeMeta,
+  sectionId: string,
+  sectionIds: Set<string>
+): string | undefined => {
+  if (!meta.supportsVisibilityCondition) {
+    return `${meta.label} 섹션은 노출 조건을 지정할 수 없습니다.`;
+  }
+  const targetIds = condition.sectionIds.map((id) => id.trim());
+  if (targetIds.length === 0) {
+    return '노출 조건의 기준 섹션을 1개 이상 선택해주세요.';
+  }
+  if (sectionId && targetIds.includes(sectionId)) {
+    return '자기 자신을 노출 조건의 기준 섹션으로 지정할 수 없습니다.';
+  }
+  if (new Set(targetIds).size !== targetIds.length) {
+    return '노출 조건의 기준 섹션이 중복되었습니다.';
+  }
+  const missing = targetIds.filter((id) => !sectionIds.has(id));
+  if (missing.length > 0) {
+    return `노출 조건의 기준 섹션(${missing.join(', ')})이 목록에 없습니다. 섹션 식별자가 바뀌었거나 삭제되었는지 확인해주세요.`;
+  }
+  return undefined;
+};
 
 export const validateSectionLayouts = (
   screenType: ScreenType,
@@ -36,10 +71,11 @@ export const validateSectionLayouts = (
   const formErrors: string[] = [];
   const itemErrors: Record<number, string> = {};
   const configErrors: Record<number, SectionConfigError> = {};
+  const conditionErrors: Record<number, string> = {};
 
   if (sectionTypes.length === 0) {
     formErrors.push('섹션 목록이 정의되지 않은 화면입니다. 레이아웃을 저장할 수 없습니다.');
-    return {formErrors, itemErrors, configErrors, isValid: false};
+    return {formErrors, itemErrors, configErrors, conditionErrors, isValid: false};
   }
 
   if (sections.length === 0) {
@@ -53,6 +89,8 @@ export const validateSectionLayouts = (
     if (!trimmed) return;
     sectionIdCounts.set(trimmed, (sectionIdCounts.get(trimmed) ?? 0) + 1);
   });
+
+  const sectionIds = new Set(sectionIdCounts.keys());
 
   // 중복 불가 섹션의 다중 등록 검사
   const sectionTypeCounts = new Map<string, number>();
@@ -72,6 +110,13 @@ export const validateSectionLayouts = (
     const configError = section.config ? validateSectionConfig(section.config, meta) : undefined;
     if (configError) {
       configErrors[index] = configError;
+    }
+
+    const conditionError = section.visibilityCondition
+      ? validateVisibilityCondition(section.visibilityCondition, meta, sectionId, sectionIds)
+      : undefined;
+    if (conditionError) {
+      conditionErrors[index] = conditionError;
     }
 
     if (!meta.isConfigurable) {
@@ -123,9 +168,11 @@ export const validateSectionLayouts = (
     formErrors,
     itemErrors,
     configErrors,
+    conditionErrors,
     isValid: formErrors.length === 0
       && Object.keys(itemErrors).length === 0
-      && Object.keys(configErrors).length === 0,
+      && Object.keys(configErrors).length === 0
+      && Object.keys(conditionErrors).length === 0,
   };
 };
 

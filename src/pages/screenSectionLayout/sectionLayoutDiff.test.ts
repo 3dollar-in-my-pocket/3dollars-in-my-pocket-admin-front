@@ -12,6 +12,7 @@ const draft = (
   sectionId,
   marginBottom: 0,
   isVisible: true,
+  visibilityCondition: null,
   ...overrides,
 });
 
@@ -88,6 +89,16 @@ describe('diffSectionLayouts', () => {
       const entry = findEntry(diff.entries, 'COUPON');
 
       expect(entry?.changes).toEqual([{label: '노출 여부', before: '노출', after: '미노출'}]);
+    });
+
+    it('노출 조건 변경을 요약해 표시한다', () => {
+      const after = saved();
+      after[2] = {...after[2], visibilityCondition: {type: 'NOT_EXPOSED', sectionIds: ['AD_1', 'AD_2']}};
+
+      const diff = diffSectionLayouts(saved(), after);
+      const entry = findEntry(diff.entries, 'COUPON');
+
+      expect(entry?.changes).toEqual([{label: '노출 조건', before: '조건 없음', after: 'AD_1, AD_2 모두 미노출 시'}]);
     });
 
     it('여러 필드가 바뀌면 모두 담는다', () => {
