@@ -86,8 +86,9 @@ const AdvertisementContentEditModal = ({
         backgroundColor: formData.backgroundColor || null,
         image: {
           url: formData.imageUrl,
-          width: formData.imageWidth ? Number(formData.imageWidth) : null,
-          height: formData.imageHeight ? Number(formData.imageHeight) : null,
+          // 이미지 크기를 쓰지 않는 구좌는 기존 값이 남아 있어도 보내지 않습니다.
+          width: showImageSize && formData.imageWidth ? Number(formData.imageWidth) : null,
+          height: showImageSize && formData.imageHeight ? Number(formData.imageHeight) : null,
         },
         link: {
           linkType: formData.linkType,
@@ -120,6 +121,7 @@ const AdvertisementContentEditModal = ({
   const showExtraContent = isFieldAvailable(ad?.positionType, 'extraContent');
   const showBackgroundColor = isFieldAvailable(ad?.positionType, 'backgroundColor');
   const showLink = isFieldAvailable(ad?.positionType, 'link');
+  const showImageSize = isFieldAvailable(ad?.positionType, 'imageWidth');
   const isLinkRequired = isFieldRequired(ad?.positionType, 'link');
   const showExposureIndex = ad?.positionType === 'MENU_CATEGORY_ICON' || ad?.positionType === 'POLL_CARD';
 
@@ -210,28 +212,30 @@ const AdvertisementContentEditModal = ({
                   <Form.Text>URL을 직접 입력하거나 파일을 업로드하세요 (최대 10MB).</Form.Text>
                 </Form.Group>
 
-                <div className="row g-3">
-                  <Form.Group className="col-6">
-                    <Form.Label htmlFor="content-image-width">가로 (px)</Form.Label>
-                    <Form.Control
-                      id="content-image-width"
-                      type="number"
-                      value={formData.imageWidth}
-                      onChange={(e) => handleChange("imageWidth", e.target.value)}
-                      placeholder="57"
-                    />
-                  </Form.Group>
-                  <Form.Group className="col-6">
-                    <Form.Label htmlFor="content-image-height">세로 (px)</Form.Label>
-                    <Form.Control
-                      id="content-image-height"
-                      type="number"
-                      value={formData.imageHeight}
-                      onChange={(e) => handleChange("imageHeight", e.target.value)}
-                      placeholder="36"
-                    />
-                  </Form.Group>
-                </div>
+                {showImageSize && (
+                  <div className="row g-3">
+                    <Form.Group className="col-6">
+                      <Form.Label htmlFor="content-image-width">가로 (px)</Form.Label>
+                      <Form.Control
+                        id="content-image-width"
+                        type="number"
+                        value={formData.imageWidth}
+                        onChange={(e) => handleChange("imageWidth", e.target.value)}
+                        placeholder="57"
+                      />
+                    </Form.Group>
+                    <Form.Group className="col-6">
+                      <Form.Label htmlFor="content-image-height">세로 (px)</Form.Label>
+                      <Form.Control
+                        id="content-image-height"
+                        type="number"
+                        value={formData.imageHeight}
+                        onChange={(e) => handleChange("imageHeight", e.target.value)}
+                        placeholder="36"
+                      />
+                    </Form.Group>
+                  </div>
+                )}
               </div>
 
               {/* 텍스트 컨텐츠 (구좌별로 필요한 필드만 표시) */}

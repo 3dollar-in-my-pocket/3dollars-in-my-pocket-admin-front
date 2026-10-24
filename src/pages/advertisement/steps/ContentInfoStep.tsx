@@ -79,6 +79,7 @@ const ContentInfoStep = ({formData, onChange}: ContentInfoStepProps) => {
   const showExtraContent = isFieldAvailable(formData.position, 'extraContent');
   const showBackgroundColor = isFieldAvailable(formData.position, 'backgroundColor');
   const showLink = isFieldAvailable(formData.position, 'link');
+  const showImageSize = isFieldAvailable(formData.position, 'imageWidth');
   const showExposureIndex = formData.position === 'MENU_CATEGORY_ICON' || formData.position === 'POLL_CARD';
 
   return (
@@ -173,40 +174,42 @@ const ContentInfoStep = ({formData, onChange}: ContentInfoStepProps) => {
           </div>
         </Form.Group>
 
-        <Row className="mb-0">
-          <Col md={6}>
-            <Form.Group>
-              <Form.Label className="fw-semibold d-flex align-items-center">
-                <i className="bi bi-arrows-expand text-secondary me-2" style={{fontSize: '0.85rem'}}></i>
-                이미지 가로
-                <span className="badge bg-secondary ms-2" style={{fontSize: '0.65rem'}}>선택</span>
-              </Form.Label>
-              <Form.Control
-                type="number"
-                value={content.image.width ?? ''}
-                onChange={(e) => handleImageChange("width", e.target.value ? Number(e.target.value) : null)}
-                placeholder="ex) 36"
-                className="shadow-sm"
-              />
-            </Form.Group>
-          </Col>
-          <Col md={6}>
-            <Form.Group>
-              <Form.Label className="fw-semibold d-flex align-items-center">
-                <i className="bi bi-arrows-expand text-secondary me-2" style={{fontSize: '0.85rem'}}></i>
-                이미지 세로
-                <span className="badge bg-secondary ms-2" style={{fontSize: '0.65rem'}}>선택</span>
-              </Form.Label>
-              <Form.Control
-                type="number"
-                value={content.image.height ?? ''}
-                onChange={(e) => handleImageChange("height", e.target.value ? Number(e.target.value) : null)}
-                placeholder="ex) 20"
-                className="shadow-sm"
-              />
-            </Form.Group>
-          </Col>
-        </Row>
+        {showImageSize && (
+          <Row className="mb-0">
+            <Col md={6}>
+              <Form.Group>
+                <Form.Label className="fw-semibold d-flex align-items-center">
+                  <i className="bi bi-arrows-expand text-secondary me-2" style={{fontSize: '0.85rem'}}></i>
+                  이미지 가로
+                  <span className="badge bg-secondary ms-2" style={{fontSize: '0.65rem'}}>선택</span>
+                </Form.Label>
+                <Form.Control
+                  type="number"
+                  value={content.image.width ?? ''}
+                  onChange={(e) => handleImageChange("width", e.target.value ? Number(e.target.value) : null)}
+                  placeholder="ex) 36"
+                  className="shadow-sm"
+                />
+              </Form.Group>
+            </Col>
+            <Col md={6}>
+              <Form.Group>
+                <Form.Label className="fw-semibold d-flex align-items-center">
+                  <i className="bi bi-arrows-expand text-secondary me-2" style={{fontSize: '0.85rem'}}></i>
+                  이미지 세로
+                  <span className="badge bg-secondary ms-2" style={{fontSize: '0.65rem'}}>선택</span>
+                </Form.Label>
+                <Form.Control
+                  type="number"
+                  value={content.image.height ?? ''}
+                  onChange={(e) => handleImageChange("height", e.target.value ? Number(e.target.value) : null)}
+                  placeholder="ex) 20"
+                  className="shadow-sm"
+                />
+              </Form.Group>
+            </Col>
+          </Row>
+        )}
       </div>
 
       {showTitle && (

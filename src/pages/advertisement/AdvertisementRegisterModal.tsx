@@ -5,7 +5,7 @@ import advertisementApi from "@/api/advertisementApi";
 import BasicInfoStep from "./steps/BasicInfoStep";
 import ContentInfoStep from "./steps/ContentInfoStep";
 import {useNonce} from "@/hooks/useNonce";
-import {isFieldRequired} from "@/constants/advertisementSpecs";
+import {isFieldAvailable, isFieldRequired} from "@/constants/advertisementSpecs";
 import {AdvertisementForm, EnumOption} from "@/types/advertisement";
 import useConfirm from "@/hooks/useConfirm";
 
@@ -71,14 +71,16 @@ const AdvertisementRegisterModal = ({
     }
 
     const {image, link} = formData.content;
+    // 이미지 크기를 쓰지 않는 구좌는 다른 구좌에서 입력하던 값이 남아 있어도 보내지 않습니다.
+    const usesImageSize = isFieldAvailable(formData.position, 'imageWidth');
 
     const content = {
       ...formData.content,
       // 입력값은 문자열로 들어오므로 서버 스펙(정수)에 맞춰 변환합니다.
       image: {
         ...image,
-        width: image.width ? Number(image.width) : null,
-        height: image.height ? Number(image.height) : null,
+        width: usesImageSize && image.width ? Number(image.width) : null,
+        height: usesImageSize && image.height ? Number(image.height) : null,
       },
       // 링크 유형을 고르지 않으면 link 자체를 보내지 않습니다.
       ...(link.linkType && link.linkUrl ? {link} : {}),

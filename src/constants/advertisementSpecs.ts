@@ -140,6 +140,54 @@ export const AD_POSITION_SPECS: Record<string, AdPositionSpec> = {
       layout: 'poll-card'
     }
   },
+  STORE_DETAIL: {
+    key: 'STORE_DETAIL',
+    name: '가게 상세',
+    description: '가게 상세 화면의 AD 섹션에 표시되는 리스트 형태의 광고',
+    requiredFields: ['image', 'link', 'title', 'subTitle', 'backgroundColor'],
+    optionalFields: ['titleFontColor', 'subTitleFontColor'],
+    // 이미지 크기는 앱 화면 설정(UI 구성 관리)을 따릅니다.
+    excludedFields: ['imageWidth', 'imageHeight', 'extraContent', 'extraContentFontColor'],
+    previewConfig: {
+      containerWidth: 500,
+      containerHeight: 140,
+      imageWidth: 120,
+      imageHeight: 120,
+      layout: 'list'
+    }
+  },
+  HOME_LIST: {
+    key: 'HOME_LIST',
+    name: '홈 리스트',
+    description: '홈 가게 목록 사이에 표시되는 리스트 형태의 광고',
+    requiredFields: ['image', 'link', 'title', 'subTitle', 'backgroundColor'],
+    optionalFields: ['titleFontColor', 'subTitleFontColor'],
+    // 이미지 크기는 앱 화면 설정(UI 구성 관리)을 따릅니다.
+    excludedFields: ['imageWidth', 'imageHeight', 'extraContent', 'extraContentFontColor'],
+    previewConfig: {
+      containerWidth: 500,
+      containerHeight: 140,
+      imageWidth: 120,
+      imageHeight: 120,
+      layout: 'list'
+    }
+  },
+  HOME_CURATION_CAROUSEL: {
+    key: 'HOME_CURATION_CAROUSEL',
+    name: '홈 큐레이션 캐러셀',
+    description: '홈 큐레이션 캐러셀의 카드 사이에 표시되는 카드 형태의 광고',
+    requiredFields: ['image', 'link', 'title', 'subTitle', 'backgroundColor'],
+    optionalFields: ['titleFontColor', 'subTitleFontColor'],
+    // 이미지 크기는 앱 화면 설정(UI 구성 관리)을 따릅니다.
+    excludedFields: ['imageWidth', 'imageHeight', 'extraContent', 'extraContentFontColor'],
+    previewConfig: {
+      containerWidth: 264,
+      containerHeight: 456,
+      imageWidth: 132,
+      imageHeight: 228,
+      layout: 'card'
+    }
+  },
   STORE_MARKER_POPUP: {
     key: 'STORE_MARKER_POPUP',
     name: '가게 마커 팝업',
