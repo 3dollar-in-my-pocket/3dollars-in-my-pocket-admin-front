@@ -8,6 +8,7 @@ import {
 import {SectionConfigError} from '@/utils/sectionConfigUtils';
 import {SectionLayoutDraft} from './useSectionLayoutDraft';
 import SectionConfigEditor from './SectionConfigEditor';
+import SectionVisibilityConditionEditor, {VisibilityConditionCandidate} from './SectionVisibilityConditionEditor';
 
 /** 빈 입력이나 숫자가 아닌 값은 0으로 처리합니다. 범위 검증은 저장 단계에서 별도로 수행합니다. */
 const parseMarginBottom = (value: string): number => {
@@ -27,6 +28,9 @@ interface SectionLayoutRowProps {
   meta?: SectionTypeMeta;
   error?: string;
   configError?: SectionConfigError;
+  conditionError?: string;
+  /** 노출 조건의 기준으로 고를 수 있는 같은 화면의 다른 섹션 */
+  conditionCandidates: VisibilityConditionCandidate[];
   /** 편집 권한이 없으면 드래그/입력을 모두 잠급니다. */
   editable: boolean;
   /**
@@ -66,6 +70,8 @@ const SectionLayoutRow: React.FC<SectionLayoutRowProps> = ({
                                                              meta,
                                                              error,
                                                              configError,
+                                                             conditionError,
+                                                             conditionCandidates,
                                                              editable,
                                                              fixedLayout,
                                                              orderable,
@@ -116,7 +122,7 @@ const SectionLayoutRow: React.FC<SectionLayoutRowProps> = ({
     isDragging ? 'section-row--dragging' : '',
     dropPosition === 'before' ? 'section-row--drop-before' : '',
     dropPosition === 'after' ? 'section-row--drop-after' : '',
-    error || configError ? 'section-row--invalid' : ''
+    error || configError || conditionError ? 'section-row--invalid' : ''
   ].filter(Boolean).join(' ');
 
   return (
@@ -277,6 +283,19 @@ const SectionLayoutRow: React.FC<SectionLayoutRowProps> = ({
             editable={editable}
             onChange={(config) => onChange({config})}
           />
+
+          {/* 지원하지 않는 섹션이라도 저장된 조건이 있으면 지울 수 있도록 보여줍니다. */}
+          {(meta?.supportsVisibilityCondition || section.visibilityCondition) && (
+            <SectionVisibilityConditionEditor
+              sectionKey={section.key}
+              label={label}
+              condition={section.visibilityCondition}
+              candidates={conditionCandidates}
+              error={conditionError}
+              editable={editable}
+              onChange={(visibilityCondition) => onChange({visibilityCondition})}
+            />
+          )}
         </div>
       </div>
 

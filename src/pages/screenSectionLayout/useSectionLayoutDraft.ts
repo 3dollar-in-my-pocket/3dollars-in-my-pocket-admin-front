@@ -4,10 +4,12 @@ import {
   ScreenSectionLayoutConfig,
   ScreenSectionLayoutItemRequest,
   SectionType,
-  SectionTypeMeta
+  SectionTypeMeta,
+  SectionVisibilityCondition
 } from '@/types/screenSectionLayout';
 import {buildDefaultSectionId} from '@/utils/validation/screenSectionLayoutValidation';
 import {buildInitialConfig, formatSectionConfig, normalizeConfig} from '@/utils/sectionConfigUtils';
+import {formatVisibilityCondition} from '@/constants/screenSectionLayout';
 
 /**
  * 편집 중인 섹션 한 줄.
@@ -22,6 +24,8 @@ export interface SectionLayoutDraft {
   marginBottom: number;
   isVisible: boolean;
   config?: ScreenSectionLayoutConfig | null;
+  /** 다른 섹션의 노출 여부에 따른 노출 조건. null이면 조건 없음입니다. */
+  visibilityCondition: SectionVisibilityCondition | null;
 }
 
 /** 서버 응답을 편집용 초안으로 변환합니다. displayOrder는 배열 순서로 대체됩니다. */
@@ -32,6 +36,7 @@ const toDraft = (layout: ScreenSectionLayout, key: string): SectionLayoutDraft =
   marginBottom: layout.marginBottom,
   isVisible: layout.isVisible,
   config: normalizeConfig(layout.sectionType, layout.config),
+  visibilityCondition: layout.visibilityCondition ?? null,
 });
 
 /**
@@ -53,6 +58,7 @@ const toFixedDrafts = (
     marginBottom: 0,
     isVisible: saved?.isVisible ?? true,
     config: normalizeConfig(meta.value, saved?.config) ?? buildInitialConfig(meta.value),
+    visibilityCondition: saved?.visibilityCondition ?? null,
   };
 });
 
@@ -64,6 +70,7 @@ const toComparable = (sections: SectionLayoutDraft[]): string =>
     marginBottom: section.marginBottom,
     isVisible: section.isVisible,
     config: formatSectionConfig(section.config),
+    visibilityCondition: formatVisibilityCondition(section.visibilityCondition),
   })));
 
 /**
@@ -120,6 +127,7 @@ export const useSectionLayoutDraft = () => {
         marginBottom: 0,
         isVisible: true,
         config: buildInitialConfig(sectionType),
+        visibilityCondition: null,
       }];
     });
   }, [nextKey]);
@@ -163,6 +171,7 @@ export const useSectionLayoutDraft = () => {
       marginBottom: section.marginBottom,
       isVisible: section.isVisible,
       ...(section.config ? {config: section.config} : {}),
+      ...(section.visibilityCondition ? {visibilityCondition: section.visibilityCondition} : {}),
     })), [sections]);
 
   const isDirty = useMemo(

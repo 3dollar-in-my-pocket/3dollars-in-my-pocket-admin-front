@@ -18,6 +18,7 @@ import {
   findScreenTypeMeta,
   findSectionTypeMeta,
   getConfigurableSectionTypes,
+  getSectionTypeLabel,
   SCREEN_APPLICATIONS,
   SECTION_CONFIG_ENUM_NAMES,
 } from '@/constants/screenSectionLayout';
@@ -102,6 +103,19 @@ const ScreenSectionLayoutManagement = () => {
   const validation = useMemo(
     () => validateSectionLayouts(screenType, toRequest(), sectionTypes),
     [screenType, sectionTypes, toRequest]
+  );
+
+  /** 노출 조건의 기준으로 고를 수 있는 섹션. 각 행에서는 자기 자신을 뺀 목록을 씁니다. */
+  const conditionCandidates = useMemo(
+    () => sections
+      .filter((section) => section.sectionId.trim())
+      .map((section) => ({
+        key: section.key,
+        sectionId: section.sectionId.trim(),
+        label: getSectionTypeLabel(sectionTypes, section.sectionType),
+        isVisible: section.isVisible,
+      })),
+    [sections, sectionTypes]
   );
 
   const enumLabels = useEnumLabels(SECTION_CONFIG_ENUM_NAMES);
@@ -394,6 +408,8 @@ const ScreenSectionLayoutManagement = () => {
             meta={findSectionTypeMeta(sectionTypes, section.sectionType)}
             error={validation.itemErrors[index]}
             configError={validation.configErrors[index]}
+            conditionError={validation.conditionErrors[index]}
+            conditionCandidates={conditionCandidates.filter((candidate) => candidate.key !== section.key)}
             editable={editable}
             fixedLayout={fixedLayout}
             orderable={orderable}

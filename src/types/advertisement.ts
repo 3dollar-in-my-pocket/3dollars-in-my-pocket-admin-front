@@ -16,7 +16,10 @@ export type AdvertisementPositionType =
   | 'STORE_CATEGORY_LIST'
   | 'STORE_LIST'
   | 'POLL_CARD'
-  | 'LOCAL_NEWS_FEED';
+  | 'LOCAL_NEWS_FEED'
+  | 'STORE_DETAIL'
+  | 'HOME_LIST'
+  | 'HOME_CURATION_CAROUSEL';
 
 /** 광고 노출 플랫폼 */
 export type AdvertisementPlatformType = 'AOS' | 'IOS' | 'ALL';
