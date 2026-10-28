@@ -76,12 +76,12 @@ export async function apiGetBlob(
 }
 
 /**
- * 타입 안전한 POST 요청 (nonce 지원)
+ * 타입 안전한 POST 요청 (nonce/timeout 지원)
  */
 export async function apiPost<T>(
   url: string,
   data?: any,
-  options?: { nonce?: string; suppressToast?: boolean }
+  options?: { nonce?: string; suppressToast?: boolean; timeout?: number }
 ): Promise<ApiResponse<T>> {
   return request<T>(async () => {
     const response = await axiosInstance({
@@ -90,6 +90,7 @@ export async function apiPost<T>(
       data,
       headers: buildNonceHeader(options?.nonce),
       suppressToast: options?.suppressToast,
+      timeout: options?.timeout,
     } as CustomAxiosRequestConfig);
 
     return unwrapApiResponse<T>(response);

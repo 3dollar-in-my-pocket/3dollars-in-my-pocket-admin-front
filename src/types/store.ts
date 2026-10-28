@@ -86,6 +86,16 @@ export interface StoreFoodCategory {
   displayOrder?: number;
 }
 
+/** StoreDataTransferResponse — 이번 호출에서 처리한 건수 (누적값 아님) */
+export interface StoreTransferResult {
+  review: { transferredCount: number };
+  image: { transferredCount: number };
+  /** skippedCount: 대상에 같은 유저·같은 날짜 방문이 있어 원본에 남은 건수 */
+  visit: { transferredCount: number; skippedCount: number };
+  /** skippedCount: 대상을 이미 즐겨찾기한 유저의 원본 즐겨찾기를 삭제한 건수 */
+  favorite: { transferredCount: number; skippedCount: number };
+}
+
 /** StoreSimpleResponse — 목록/이력 응답에 포함되는 가게 요약 정보 */
 export interface SimpleStore {
   storeId: number;
