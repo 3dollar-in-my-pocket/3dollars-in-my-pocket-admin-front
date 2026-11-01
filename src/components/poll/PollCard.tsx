@@ -15,9 +15,10 @@ interface PollCardProps {
   onClick?: ((poll: Poll) => void) | null;
   onAuthorClick?: ((author: ActivityAuthor) => void) | null;
   onDelete?: ((poll: Poll) => void) | null;
+  onPin?: ((poll: Poll) => void) | null;
 }
 
-const PollCard = ({poll, onClick, onAuthorClick, onDelete}: PollCardProps) => {
+const PollCard = ({poll, onClick, onAuthorClick, onDelete, onPin}: PollCardProps) => {
   const pollStatus = getPollStatus(poll);
   const statusConfig = POLL_STATUS_CONFIG[pollStatus];
   const totalVotes = getTotalVotes(poll.options);
@@ -60,10 +61,25 @@ const PollCard = ({poll, onClick, onAuthorClick, onDelete}: PollCardProps) => {
               )}
               <span className="form-chip">{poll.category.title}</span>
             </div>
+            <div className="d-flex gap-1 flex-shrink-0">
+            {onPin && (
+              <button
+                type="button"
+                className="btn btn-sm btn-outline-primary"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onPin(poll);
+                }}
+                title="투표 고정"
+                aria-label="투표 고정"
+              >
+                <i className="bi bi-pin-angle"/>
+              </button>
+            )}
             {onDelete && (
               <button
                 type="button"
-                className="btn btn-sm btn-outline-danger flex-shrink-0"
+                className="btn btn-sm btn-outline-danger"
                 onClick={(e) => {
                   e.stopPropagation();
                   onDelete(poll);
@@ -74,6 +90,7 @@ const PollCard = ({poll, onClick, onAuthorClick, onDelete}: PollCardProps) => {
                 <i className="bi bi-trash"/>
               </button>
             )}
+            </div>
           </div>
 
           {/* 제목 */}

@@ -44,3 +44,28 @@ export interface Poll {
   createdAt?: string;
   updatedAt?: string;
 }
+
+/** PollPinResponse — 인기 투표 목록 고정 노출 설정 */
+export interface PollPin {
+  pollPinId: number;
+  categoryId: string;
+  pollId: number;
+  /** 고정 위치 (1~30) */
+  position: number;
+  startDateTime: string;
+  endDateTime: string;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+}
+
+/** 고정 노출 설정 등록 요청 */
+export interface CreatePollPinRequest {
+  categoryId: string;
+  pollId: number;
+  position: number;
+  startDateTime: string;
+  endDateTime: string;
+}
+
+/** 고정 노출 설정 수정 요청 (partial update — 전달한 필드만 변경) */
+export type UpdatePollPinRequest = Partial<Pick<PollPin, 'position' | 'startDateTime' | 'endDateTime'>>;
