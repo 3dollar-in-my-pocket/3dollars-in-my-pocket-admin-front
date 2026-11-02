@@ -1,9 +1,11 @@
-import {useCallback, useEffect, useRef, useState} from 'react';
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {toast} from 'react-toastify';
 import pollApi from '@/api/pollApi';
 import useCursorPagination from '@/hooks/useCursorPagination';
 import PollCard from '@/components/poll/PollCard';
 import PollDetailModal from '@/components/poll/PollDetailModal';
+import PollPinSection from '@/components/poll/PollPinSection';
+import PollPinFormModal from '@/components/poll/PollPinFormModal';
 import UserDetailModal from '@/pages/user/UserDetailModal';
 import PageHeader from '@/components/common/PageHeader';
 import FilterCard from '@/components/common/FilterCard';
@@ -11,7 +13,7 @@ import SectionCard from '@/components/common/SectionCard';
 import EmptyState from '@/components/common/EmptyState';
 
 import {formatDateTimeShortKo as formatDateTime} from '@/utils/dateUtils';
-import {Poll, PollCategory} from '@/types/poll';
+import {Poll, PollCategory, PollPin} from '@/types/poll';
 import {Writer} from '@/types/domain';
 import {getTotalVotes} from '@/utils/display/pollDisplay';
 import useConfirm from '@/hooks/useConfirm';
@@ -23,6 +25,12 @@ const PollManagement = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedPoll, setSelectedPoll] = useState<Poll | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+
+  // 고정 노출 설정
+  const [pins, setPins] = useState<PollPin[]>([]);
+  const [isPinsLoading, setIsPinsLoading] = useState(false);
+  const [deletingPinId, setDeletingPinId] = useState<number | null>(null);
+  const [pinModal, setPinModal] = useState<{ pin: PollPin | null; poll: Poll | null } | null>(null);
 
   // 카테고리 목록 조회
   useEffect(() => {
@@ -60,6 +68,57 @@ const PollManagement = () => {
     deps: [selectedCategory],
     errorMessage: '투표 목록을 불러오지 못했습니다.'
   });
+
+  // 고정 노출 설정 목록 조회 (카테고리 전환 중 늦게 도착한 응답은 무시)
+  const pinsRequestRef = useRef(0);
+  const fetchPins = useCallback(async () => {
+    if (!selectedCategory) return;
+    const requestId = ++pinsRequestRef.current;
+    setIsPinsLoading(true);
+    try {
+      const response = await pollApi.getPollPins(selectedCategory);
+      if (requestId !== pinsRequestRef.current) return;
+      setPins(response.ok ? response.data?.contents || [] : []);
+    } finally {
+      if (requestId === pinsRequestRef.current) setIsPinsLoading(false);
+    }
+  }, [selectedCategory]);
+
+  useEffect(() => {
+    setPins([]);
+    fetchPins();
+  }, [fetchPins]);
+
+  const pollTitles = useMemo(
+    () => new Map(polls.map(poll => [poll.pollId, poll.content.title])),
+    [polls]
+  );
+
+  const handleDeletePin = async (pin: PollPin) => {
+    if (deletingPinId !== null) return;
+    const confirmed = await confirm({
+      title: '고정 해제',
+      message: `위치 ${pin.position}의 고정 설정을 삭제하시겠습니까?`,
+      details: [
+        {label: '투표', value: pollTitles.get(pin.pollId) ?? `ID ${pin.pollId}`},
+        {label: '노출 기간', value: `${formatDateTime(pin.startDateTime)} ~ ${formatDateTime(pin.endDateTime)}`}
+      ],
+      confirmLabel: '삭제',
+      variant: 'danger'
+    });
+    if (!confirmed) return;
+
+    setDeletingPinId(pin.pollPinId);
+    try {
+      const response = await pollApi.deletePollPin(pin.pollPinId);
+      if (response.ok) {
+        toast.success('고정 설정이 삭제되었습니다.');
+        fetchPins();
+      }
+    } finally {
+      setDeletingPinId(null);
+    }
+  };
 
   // 무한 스크롤 처리 (디바운싱 추가)
   const lastScrollTime = useRef(0);
@@ -141,7 +200,7 @@ const PollManagement = () => {
 
   return (
     <div>
-      <PageHeader description="카테고리별 투표 목록을 조회하고 삭제합니다."/>
+      <PageHeader description="카테고리별 투표 목록을 조회·삭제하고, 인기 투표 목록에 고정할 투표를 설정합니다."/>
 
       <FilterCard title="카테고리" icon="bi-grid-3x3-gap">
         {categories.length === 0 ? (
@@ -174,6 +233,19 @@ const PollManagement = () => {
           </div>
         )}
       </FilterCard>
+
+      {/* 고정 투표 */}
+      {selectedCategory && (
+        <PollPinSection
+          pins={pins}
+          isLoading={isPinsLoading}
+          pollTitles={pollTitles}
+          deletingPinId={deletingPinId}
+          onCreate={() => setPinModal({pin: null, poll: null})}
+          onEdit={(pin) => setPinModal({pin, poll: null})}
+          onDelete={handleDeletePin}
+        />
+      )}
 
       {/* 투표 목록 */}
       {selectedCategory && (
@@ -208,6 +280,7 @@ const PollManagement = () => {
                       onClick={handlePollClick}
                       onAuthorClick={handleAuthorClick}
                       onDelete={handleDeletePoll}
+                      onPin={(target) => setPinModal({pin: null, poll: target})}
                     />
                   ))}
                 </div>
@@ -253,6 +326,16 @@ const PollManagement = () => {
         poll={selectedPoll}
         onAuthorClick={handleAuthorClick}
         onDelete={handleDeletePoll}
+      />
+
+      {/* 투표 고정 등록/수정 모달 */}
+      <PollPinFormModal
+        show={!!pinModal}
+        categoryId={selectedCategory}
+        pin={pinModal?.pin}
+        poll={pinModal?.poll}
+        onHide={() => setPinModal(null)}
+        onSuccess={fetchPins}
       />
 
       {/* 유저 상세 모달 */}

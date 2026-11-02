@@ -1,10 +1,13 @@
-import {SimpleStore, StoreDetail, StorePreference, StoreType} from '@/types/store';
+import {SimpleStore, StoreDetail, StorePreference, StoreTransferResult, StoreType} from '@/types/store';
 import {StoreChangeHistory} from '@/types/storeChangeHistory';
 import {StorePost} from '@/types/storePost';
 import {StoreMessage} from '@/types/storeMessage';
 import {Coupon} from '@/types/coupon';
 import {ApiResponse, PaginatedResponse} from '@/types/api';
-import {apiDelete, apiGet, apiGetPaginated, apiPatch} from './apiHelpers';
+import {apiDelete, apiGet, apiGetPaginated, apiPatch, apiPost} from './apiHelpers';
+
+/** 가게 데이터 이관은 데이터 양에 따라 오래 걸릴 수 있어 기본 타임아웃(5초)보다 길게 둡니다. */
+const STORE_TRANSFER_TIMEOUT_MS = 180_000;
 
 /**
  * targetStores 필터를 쿼리 파라미터로 변환합니다.
@@ -58,9 +61,13 @@ export default {
   /**
    * 가게 상세 정보 조회
    * @param {string} storeId - 가게 ID
+   * @param options.suppressToast - 실패를 화면에서 직접 안내할 때 공통 에러 토스트를 끕니다.
    */
-  getStoreDetail: async (storeId: string): Promise<ApiResponse<StoreDetail>> => {
-    return apiGet<StoreDetail>(`/v1/store/${storeId}`);
+  getStoreDetail: async (
+    storeId: string,
+    options?: { suppressToast?: boolean }
+  ): Promise<ApiResponse<StoreDetail>> => {
+    return apiGet<StoreDetail>(`/v1/store/${storeId}`, undefined, options);
   },
 
   /**
@@ -91,6 +98,26 @@ export default {
    */
   deleteStore: async (storeId: string): Promise<ApiResponse<void>> => {
     return apiDelete(`/v1/store/${storeId}`);
+  },
+
+  /**
+   * 가게 데이터 이관 (중복 유저 가게 합치기)
+   *
+   * 원본 가게의 리뷰·이미지·방문·즐겨찾기를 대상 가게로 옮깁니다. 원본 가게는 삭제하지 않습니다.
+   * 같은 요청을 재호출하면 원본에 남은 데이터를 이어서 이관하므로 nonce를 쓰지 않습니다.
+   * 데이터가 많으면 오래 걸려 타임아웃을 넉넉히 두고, 실패 안내는 호출부에서 error 코드로 처리합니다.
+   * @param {string} sourceStoreId - 원본 가게 ID (데이터를 가져올 가게)
+   * @param {number} targetStoreId - 대상 가게 ID (데이터를 받을 가게)
+   */
+  transferStoreData: async (
+    sourceStoreId: string,
+    targetStoreId: number
+  ): Promise<ApiResponse<StoreTransferResult>> => {
+    return apiPost<StoreTransferResult>(
+      `/v1/store/${sourceStoreId}/transfer`,
+      {targetStoreId},
+      {timeout: STORE_TRANSFER_TIMEOUT_MS, suppressToast: true}
+    );
   },
 
   /**

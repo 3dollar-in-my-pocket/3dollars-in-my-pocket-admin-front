@@ -23,9 +23,12 @@ import StoreReviewHistory from './detail/StoreReviewHistory';
 import StoreSettings from './detail/StoreSettings';
 import StoreVisitHistory from './detail/StoreVisitHistory';
 import StoreSnsPostLinks from './detail/StoreSnsPostLinks';
+import StoreTransferModal from './StoreTransferModal';
 import {isImagesSupported, isReportsSupported, isVisitsSupported, StoreDetail} from '@/types/store';
 import useConfirm from '@/hooks/useConfirm';
 import {getStoreAppLink} from '@/constants/appLink';
+import {usePermission} from '@/hooks/usePermission';
+import {AdminRole} from '@/types/admin';
 
 interface StoreDetailModalProps {
   show: boolean;
@@ -51,6 +54,8 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}: 
   const [activitySubTab, setActivitySubTab] = useState<string | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isForceClosing, setIsForceClosing] = useState(false);
+  const [showTransfer, setShowTransfer] = useState(false);
+  const {hasAccess} = usePermission();
 
   useEffect(() => {
     if (show && store) {
@@ -83,6 +88,7 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}: 
     setActivitySubTab(null);
     setIsEditMode(false);
     setIsForceClosing(false);
+    setShowTransfer(false);
     onHide();
   };
 
@@ -152,10 +158,11 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}: 
     return allTabs;
   };
 
-  const handleDeleteStore = async () => {
+  /** @param warning 삭제 확인 문구에 덧붙일 안내 (예: 이관 후 원본에 남은 데이터) */
+  const handleDeleteStore = async (warning?: string) => {
     const confirmed = await confirm({
       title: '가게 삭제',
-      message: `정말로 "${store.name}" 가게를 삭제하시겠습니까?`,
+      message: `정말로 "${store.name}" 가게를 삭제하시겠습니까?${warning ? `\n${warning}` : ''}`,
       confirmLabel: '삭제',
       variant: 'danger',
       irreversible: true
@@ -439,7 +446,7 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}: 
           {!isBossStore && (
             <button
               className="btn btn-outline-danger"
-              onClick={handleDeleteStore}
+              onClick={() => handleDeleteStore()}
               disabled={isDeleting}
             >
               {isDeleting ? (
@@ -454,6 +461,20 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}: 
                 </>
               )}
             </button>
+          )}
+
+          {/* 중복 유저 가게 합치기 (OPERATOR 이상). 사장님 가게는 이관 API가 지원하지 않아 비활성화 */}
+          {(isUserStore || isBossStore) && hasAccess([AdminRole.OPERATOR]) && (
+            <span title={isBossStore ? '사장님 가게는 다른 가게로 합칠 수 없습니다.' : undefined}>
+              <button
+                className="btn btn-outline-secondary"
+                onClick={() => setShowTransfer(true)}
+                disabled={isBossStore || isDeleting}
+              >
+                <i className="bi bi-box-arrow-in-right me-1"/>
+                다른 가게로 합치기
+              </button>
+            </span>
           )}
 
           {isBossStore && (
@@ -481,6 +502,14 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}: 
           닫기
         </button>
       </Modal.Footer>
+
+      <StoreTransferModal
+        show={showTransfer}
+        onHide={() => setShowTransfer(false)}
+        sourceStore={{storeId: store.storeId, name: storeDetail?.name || store.name}}
+        onTransferred={fetchStoreDetail}
+        onRequestDeleteSource={handleDeleteStore}
+      />
     </Modal>
   );
 };
