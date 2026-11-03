@@ -5,17 +5,15 @@ import storeApi from '@/api/storeApi';
 import StoreStatusBadge from '@/components/common/badges/StoreStatusBadge';
 import StoreTypeBadge from '@/components/common/badges/StoreTypeBadge';
 import useConfirm from '@/hooks/useConfirm';
-import {SimpleStore, STORE_STATUS, STORE_TYPE, StoreDetail, StoreTransferResult} from '@/types/store';
+import {SimpleStore, STORE_STATUS, STORE_TYPE, StoreDetail, StoreTransferItem, StoreTransferResult} from '@/types/store';
 
 interface StoreTransferModalProps {
   show: boolean;
   onHide: () => void;
   /** 데이터를 가져올 원본 가게 (현재 상세 모달의 가게) */
   sourceStore: { storeId: number; name: string };
-  /** 이관 성공 콜백 (원본 가게 상세 갱신용) */
+  /** 이관 성공 콜백. 성공 시 서버가 원본 가게를 이미 삭제했으므로 목록·상세 갱신에 사용합니다. */
   onTransferred: () => void;
-  /** 이관 후 원본 가게 삭제 요청. warning은 삭제 확인 문구에 덧붙일 안내입니다. */
-  onRequestDeleteSource: (warning?: string) => void;
 }
 
 /** 대상을 바꿔야 해결되는 실패. 같은 요청을 다시 보내도 결과가 같으므로 재시도를 제공하지 않습니다. */
@@ -29,6 +27,26 @@ const TRANSFER_ERROR_MESSAGES: Record<string, string> = {
 const RETRYABLE_ERROR_MESSAGE =
   '이관 중 오류가 발생했거나 응답이 지연되었습니다. 일부만 이관되었을 수 있습니다. '
   + '잠시 후 다시 시도하면 원본에 남은 데이터를 이어서 이관합니다.';
+
+const TRANSFER_TYPE_LABELS: Record<string, string> = {
+  REVIEW: '리뷰',
+  IMAGE: '이미지',
+  VISIT: '방문 인증',
+  FAVORITE: '즐겨찾기'
+};
+
+/** skippedCount 의미가 항목마다 달라 문구를 따로 둡니다. 모르는 type은 서버 값을 그대로 표시합니다. */
+const getSkippedNote = ({type, skippedCount}: StoreTransferItem): string | null => {
+  if (skippedCount <= 0) return null;
+  switch (type) {
+    case 'VISIT':
+      return `같은 날 중복으로 원본에 남은 방문 ${skippedCount}건`;
+    case 'FAVORITE':
+      return `중복으로 삭제된 원본 즐겨찾기 ${skippedCount}건`;
+    default:
+      return `이관 제외 ${skippedCount}건`;
+  }
+};
 
 type TargetSearchMode = 'name' | 'id';
 
@@ -48,8 +66,7 @@ const StoreTransferModal = ({
                               show,
                               onHide,
                               sourceStore,
-                              onTransferred,
-                              onRequestDeleteSource
+                              onTransferred
                             }: StoreTransferModalProps) => {
   const confirm = useConfirm();
   const [searchMode, setSearchMode] = useState<TargetSearchMode>('name');
@@ -192,7 +209,7 @@ const StoreTransferModal = ({
     const confirmed = await confirm({
       title: '가게 데이터 이관',
       message: '원본 가게의 리뷰·이미지·방문 인증·즐겨찾기를 대상 가게로 이관합니다.\n'
-        + '원본 가게는 삭제되지 않으며, 필요하면 이관 후 별도로 삭제해주세요.',
+        + '이관이 끝나면 원본 가게는 삭제되며, 되돌릴 수 없습니다.',
       details: [
         {label: '원본 가게', value: `${sourceStore.name} (#${sourceStore.storeId})`},
         {label: '대상 가게', value: `${target.name} (#${target.storeId})`}
@@ -206,22 +223,8 @@ const StoreTransferModal = ({
     await runTransfer();
   };
 
-  const handleDeleteSource = () => {
-    const remainingVisits = result?.visit.skippedCount ?? 0;
-    onRequestDeleteSource(
-      remainingVisits > 0 ? `원본 가게에 이관되지 않은 방문 기록 ${remainingVisits}건이 남아 있습니다.` : undefined
-    );
-  };
-
-  const isEmptyResult = result
-    && [
-      result.review.transferredCount,
-      result.image.transferredCount,
-      result.visit.transferredCount,
-      result.visit.skippedCount,
-      result.favorite.transferredCount,
-      result.favorite.skippedCount
-    ].every(count => count === 0);
+  const isEmptyResult = result?.contents.every(item => item.transferredCount === 0 && item.skippedCount === 0);
+  const remainingVisits = result?.contents.find(item => item.type === 'VISIT')?.skippedCount ?? 0;
 
   return (
     <Modal
@@ -258,37 +261,19 @@ const StoreTransferModal = ({
                 </tr>
                 </thead>
                 <tbody>
-                <tr>
-                  <td>리뷰</td>
-                  <td className="text-end">{result.review.transferredCount}건</td>
-                  <td/>
-                </tr>
-                <tr>
-                  <td>이미지</td>
-                  <td className="text-end">{result.image.transferredCount}건</td>
-                  <td/>
-                </tr>
-                <tr>
-                  <td>방문 인증</td>
-                  <td className="text-end">{result.visit.transferredCount}건</td>
-                  <td className="small">
-                    {result.visit.skippedCount > 0
-                      && `같은 날 중복으로 원본에 남은 방문 ${result.visit.skippedCount}건`}
-                  </td>
-                </tr>
-                <tr>
-                  <td>즐겨찾기</td>
-                  <td className="text-end">{result.favorite.transferredCount}건</td>
-                  <td className="small">
-                    {result.favorite.skippedCount > 0
-                      && `중복으로 삭제된 원본 즐겨찾기 ${result.favorite.skippedCount}건`}
-                  </td>
-                </tr>
+                {result.contents.map(item => (
+                  <tr key={item.type}>
+                    <td>{TRANSFER_TYPE_LABELS[item.type] ?? item.type}</td>
+                    <td className="text-end">{item.transferredCount}건</td>
+                    <td className="small">{getSkippedNote(item)}</td>
+                  </tr>
+                ))}
                 </tbody>
               </table>
             )}
             <p className="small text-body-secondary mb-0">
-              원본 가게는 삭제되지 않았습니다. 정리하려면 원본 가게를 삭제해주세요.
+              원본 가게는 삭제되었습니다.
+              {remainingVisits > 0 && ` 삭제된 원본 가게에 이관되지 않은 방문 기록 ${remainingVisits}건이 남아 있습니다.`}
             </p>
           </>
         ) : (
@@ -407,12 +392,7 @@ const StoreTransferModal = ({
         <button type="button" className="btn btn-outline-secondary" onClick={handleClose} disabled={isTransferring}>
           닫기
         </button>
-        {result ? (
-          <button type="button" className="btn btn-outline-danger" onClick={handleDeleteSource}>
-            <i className="bi bi-trash me-1"/>
-            원본 가게 삭제
-          </button>
-        ) : transferError?.retryable ? (
+        {result ? null : transferError?.retryable ? (
           <button type="button" className="btn btn-danger" onClick={runTransfer} disabled={isTransferring}>
             {isTransferring ? '이관 중...' : '다시 시도'}
           </button>

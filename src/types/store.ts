@@ -86,14 +86,23 @@ export interface StoreFoodCategory {
   displayOrder?: number;
 }
 
-/** StoreDataTransferResponse — 이번 호출에서 처리한 건수 (누적값 아님) */
+/**
+ * StoreDataTransferItem — 항목별 이관 결과 (이번 호출에서 처리한 건수, 누적값 아님)
+ * type은 서버에서 추가될 수 있어 string으로 받습니다. (REVIEW, IMAGE, VISIT, FAVORITE ...)
+ * skippedCount 의미는 type마다 다릅니다.
+ * - VISIT: 대상에 같은 유저·같은 날짜 방문이 있어 원본에 남은 건수
+ * - FAVORITE: 대상을 이미 즐겨찾기한 유저의 원본 즐겨찾기를 삭제한 건수
+ * - REVIEW, IMAGE: 항상 0
+ */
+export interface StoreTransferItem {
+  type: string;
+  transferredCount: number;
+  skippedCount: number;
+}
+
+/** StoreDataTransferResponse — 이관 순서(REVIEW → IMAGE → VISIT → FAVORITE)대로 내려옵니다. */
 export interface StoreTransferResult {
-  review: { transferredCount: number };
-  image: { transferredCount: number };
-  /** skippedCount: 대상에 같은 유저·같은 날짜 방문이 있어 원본에 남은 건수 */
-  visit: { transferredCount: number; skippedCount: number };
-  /** skippedCount: 대상을 이미 즐겨찾기한 유저의 원본 즐겨찾기를 삭제한 건수 */
-  favorite: { transferredCount: number; skippedCount: number };
+  contents: StoreTransferItem[];
 }
 
 /** StoreSimpleResponse — 목록/이력 응답에 포함되는 가게 요약 정보 */
