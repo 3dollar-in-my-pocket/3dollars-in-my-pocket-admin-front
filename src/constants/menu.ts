@@ -146,6 +146,12 @@ export const menuGroups: MenuGroup[] = [
         icon: "bi-stars",
         allowedRoles: [AdminRole.OPERATOR]
       },
+      {
+        path: "/manage/proto/similar-store",
+        label: "유사 가게 찾기",
+        icon: "bi-intersect",
+        allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]
+      },
     ],
   },
   {

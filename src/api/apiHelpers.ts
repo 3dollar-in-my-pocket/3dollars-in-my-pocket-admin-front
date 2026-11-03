@@ -38,7 +38,7 @@ function extractErrorMessage(error: unknown): string | undefined {
 export async function apiGet<T>(
   url: string,
   params?: Record<string, any>,
-  options?: { suppressToast?: boolean }
+  options?: { suppressToast?: boolean; timeout?: number }
 ): Promise<ApiResponse<T>> {
   return request<T>(async () => {
     const response = await axiosInstance({
@@ -47,6 +47,7 @@ export async function apiGet<T>(
       params,
       // 실패를 화면에서 직접 처리하는 호출(예: 인증 확인)은 공통 에러 토스트를 끕니다.
       suppressToast: options?.suppressToast,
+      timeout: options?.timeout,
     } as CustomAxiosRequestConfig);
 
     return unwrapApiResponse<T>(response);

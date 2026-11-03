@@ -1,4 +1,4 @@
-import {SimpleStore, StoreDetail, StorePreference, StoreTransferResult, StoreType} from '@/types/store';
+import {SimilarStore, SimpleStore, StoreDetail, StorePreference, StoreTransferResult, StoreType} from '@/types/store';
 import {StoreChangeHistory} from '@/types/storeChangeHistory';
 import {StorePost} from '@/types/storePost';
 import {StoreMessage} from '@/types/storeMessage';
@@ -8,6 +8,9 @@ import {apiDelete, apiGet, apiGetPaginated, apiPatch, apiPost} from './apiHelper
 
 /** 가게 데이터 이관은 데이터 양에 따라 오래 걸릴 수 있어 기본 타임아웃(5초)보다 길게 둡니다. */
 const STORE_TRANSFER_TIMEOUT_MS = 180_000;
+
+/** 유사 가게 찾기는 주소 좌표 변환과 AI 판정을 거쳐 기본 타임아웃(5초)보다 오래 걸릴 수 있습니다. */
+const SIMILAR_STORE_TIMEOUT_MS = 60_000;
 
 /**
  * targetStores 필터를 쿼리 파라미터로 변환합니다.
@@ -56,6 +59,19 @@ export default {
       {cursor, size},
       buildTargetStoresParam(targetStores)
     );
+  },
+
+  /**
+   * 유사 가게 찾기 (AI 판정, score 내림차순)
+   * 실패 사유(주소 변환 실패 등)를 화면에서 직접 안내하므로 공통 에러 토스트를 끕니다.
+   */
+  getSimilarStores: async (
+    params: { name: string; address: string; radiusMeters: number }
+  ): Promise<ApiResponse<{ contents: SimilarStore[] }>> => {
+    return apiGet<{ contents: SimilarStore[] }>('/v1/stores/similar', params, {
+      suppressToast: true,
+      timeout: SIMILAR_STORE_TIMEOUT_MS,
+    });
   },
 
   /**

@@ -55,6 +55,8 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}: 
   const [isEditMode, setIsEditMode] = useState(false);
   const [isForceClosing, setIsForceClosing] = useState(false);
   const [showTransfer, setShowTransfer] = useState(false);
+  // 이관 성공 시 원본(현재 가게)이 서버에서 삭제되므로, 이관 모달을 닫으면 상세 모달도 닫습니다.
+  const [isTransferred, setIsTransferred] = useState(false);
   const {hasAccess} = usePermission();
 
   useEffect(() => {
@@ -89,6 +91,7 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}: 
     setIsEditMode(false);
     setIsForceClosing(false);
     setShowTransfer(false);
+    setIsTransferred(false);
     onHide();
   };
 
@@ -159,10 +162,10 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}: 
   };
 
   /** @param warning 삭제 확인 문구에 덧붙일 안내 (예: 이관 후 원본에 남은 데이터) */
-  const handleDeleteStore = async (warning?: string) => {
+  const handleDeleteStore = async () => {
     const confirmed = await confirm({
       title: '가게 삭제',
-      message: `정말로 "${store.name}" 가게를 삭제하시겠습니까?${warning ? `\n${warning}` : ''}`,
+      message: `정말로 "${store.name}" 가게를 삭제하시겠습니까?`,
       confirmLabel: '삭제',
       variant: 'danger',
       irreversible: true
@@ -185,6 +188,19 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}: 
     } finally {
       setIsDeleting(false);
     }
+  };
+
+  /**
+   * 이관 성공 시 서버가 원본(현재 가게)을 삭제하므로, 결과 확인 후 상세 모달을 닫고 목록에 삭제를 알립니다.
+   * 일부 호출부는 onStoreDeleted에서 상세 모달을 언마운트하므로 결과 화면이 닫힌 뒤에 알립니다.
+   */
+  const handleTransferModalHide = () => {
+    if (!isTransferred) {
+      setShowTransfer(false);
+      return;
+    }
+    handleClose();
+    onStoreDeleted?.(store.storeId);
   };
 
   const handleForceCloseStore = async () => {
@@ -446,7 +462,7 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}: 
           {!isBossStore && (
             <button
               className="btn btn-outline-danger"
-              onClick={() => handleDeleteStore()}
+              onClick={handleDeleteStore}
               disabled={isDeleting}
             >
               {isDeleting ? (
@@ -505,10 +521,9 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}: 
 
       <StoreTransferModal
         show={showTransfer}
-        onHide={() => setShowTransfer(false)}
+        onHide={handleTransferModalHide}
         sourceStore={{storeId: store.storeId, name: storeDetail?.name || store.name}}
-        onTransferred={fetchStoreDetail}
-        onRequestDeleteSource={handleDeleteStore}
+        onTransferred={() => setIsTransferred(true)}
       />
     </Modal>
   );
