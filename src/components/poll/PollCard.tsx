@@ -1,4 +1,4 @@
-import {Poll} from '@/types/poll';
+import {Poll, PollPin} from '@/types/poll';
 import {ActivityAuthor} from '@/types/domain';
 import {formatDateTimeShortKo as formatDateTime} from '@/utils/dateUtils';
 import {getWriterTypeDisplayName, getWriterTypeIcon} from '@/utils/display/writerDisplay';
@@ -16,9 +16,13 @@ interface PollCardProps {
   onAuthorClick?: ((author: ActivityAuthor) => void) | null;
   onDelete?: ((poll: Poll) => void) | null;
   onPin?: ((poll: Poll) => void) | null;
+  /** 이 투표에 설정된 고정 노출 (없으면 null) */
+  pin?: PollPin | null;
+  onUnpin?: ((pin: PollPin) => void) | null;
+  isUnpinning?: boolean;
 }
 
-const PollCard = ({poll, onClick, onAuthorClick, onDelete, onPin}: PollCardProps) => {
+const PollCard = ({poll, onClick, onAuthorClick, onDelete, onPin, pin, onUnpin, isUnpinning}: PollCardProps) => {
   const pollStatus = getPollStatus(poll);
   const statusConfig = POLL_STATUS_CONFIG[pollStatus];
   const totalVotes = getTotalVotes(poll.options);
@@ -60,9 +64,29 @@ const PollCard = ({poll, onClick, onAuthorClick, onDelete, onPin}: PollCardProps
                 </span>
               )}
               <span className="form-chip">{poll.category.title}</span>
+              {pin && (
+                <span className="badge bg-primary">
+                  <i className="bi bi-pin-angle-fill me-1"/>
+                  고정 {pin.position}
+                </span>
+              )}
             </div>
             <div className="d-flex gap-1 flex-shrink-0">
-            {onPin && (
+            {pin && onUnpin ? (
+              <button
+                type="button"
+                className="btn btn-sm btn-primary"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onUnpin(pin);
+                }}
+                disabled={isUnpinning}
+                title="고정 해제"
+                aria-label="고정 해제"
+              >
+                <i className="bi bi-pin-angle-fill"/>
+              </button>
+            ) : onPin && (
               <button
                 type="button"
                 className="btn btn-sm btn-outline-primary"

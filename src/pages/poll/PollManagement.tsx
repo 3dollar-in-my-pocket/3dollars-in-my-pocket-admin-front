@@ -6,6 +6,7 @@ import PollCard from '@/components/poll/PollCard';
 import PollDetailModal from '@/components/poll/PollDetailModal';
 import PollPinSection from '@/components/poll/PollPinSection';
 import PollPinFormModal from '@/components/poll/PollPinFormModal';
+import PollSearchBox from '@/components/poll/PollSearchBox';
 import UserDetailModal from '@/pages/user/UserDetailModal';
 import PageHeader from '@/components/common/PageHeader';
 import FilterCard from '@/components/common/FilterCard';
@@ -13,10 +14,16 @@ import SectionCard from '@/components/common/SectionCard';
 import EmptyState from '@/components/common/EmptyState';
 
 import {formatDateTimeShortKo as formatDateTime} from '@/utils/dateUtils';
-import {Poll, PollCategory, PollPin} from '@/types/poll';
+import {Poll, PollCategory, PollPin, PollSortType} from '@/types/poll';
 import {Writer} from '@/types/domain';
-import {getTotalVotes} from '@/utils/display/pollDisplay';
+import {getPollPinStatus, getTotalVotes} from '@/utils/display/pollDisplay';
 import useConfirm from '@/hooks/useConfirm';
+
+const SORT_OPTIONS: { value: PollSortType; label: string }[] = [
+  {value: 'LATEST', label: '최신순'},
+  {value: 'POPULAR', label: '인기순'},
+  {value: 'OLDEST', label: '오래된순'}
+];
 
 const PollManagement = () => {
   const [categories, setCategories] = useState<PollCategory[]>([]);
@@ -24,6 +31,9 @@ const PollManagement = () => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedPoll, setSelectedPoll] = useState<Poll | null>(null);
+  const [sortType, setSortType] = useState<PollSortType>('LATEST');
+  /** 제목 검색어. 있으면 카테고리·정렬과 무관하게 전체 검색 결과(최신순)를 보여준다. */
+  const [searchKeyword, setSearchKeyword] = useState('');
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
   // 고정 노출 설정
@@ -49,10 +59,12 @@ const PollManagement = () => {
     fetchCategories();
   }, []);
 
-  // 투표 목록 조회
+  // 투표 목록 조회 (조건이 바뀌면 커서를 비우고 첫 페이지부터 조회)
   const fetchPollPage = useCallback(
-    (cursor: string | null) => pollApi.getPolls(selectedCategory, 30, cursor),
-    [selectedCategory]
+    (cursor: string | null) => searchKeyword
+      ? pollApi.searchPolls(searchKeyword, 30, cursor)
+      : pollApi.getPolls(selectedCategory, 30, cursor, sortType),
+    [selectedCategory, sortType, searchKeyword]
   );
 
   const {
@@ -65,7 +77,7 @@ const PollManagement = () => {
   } = useCursorPagination<Poll>({
     fetcher: fetchPollPage,
     enabled: Boolean(selectedCategory),
-    deps: [selectedCategory],
+    deps: [selectedCategory, sortType, searchKeyword],
     errorMessage: '투표 목록을 불러오지 못했습니다.'
   });
 
@@ -89,10 +101,18 @@ const PollManagement = () => {
     fetchPins();
   }, [fetchPins]);
 
-  const pollTitles = useMemo(
-    () => new Map(polls.map(poll => [poll.pollId, poll.content.title])),
-    [polls]
-  );
+  // pollId → 종료되지 않은 고정 설정 (같은 투표에 여러 건이면 가장 앞 위치)
+  const pinByPollId = useMemo(() => {
+    const map = new Map<number, PollPin>();
+    const now = new Date();
+    [...pins]
+      .filter(pin => getPollPinStatus(pin, now) !== 'ended')
+      .sort((a, b) => a.position - b.position)
+      .forEach(pin => {
+        if (!map.has(pin.pollId)) map.set(pin.pollId, pin);
+      });
+    return map;
+  }, [pins]);
 
   const handleDeletePin = async (pin: PollPin) => {
     if (deletingPinId !== null) return;
@@ -100,7 +120,7 @@ const PollManagement = () => {
       title: '고정 해제',
       message: `위치 ${pin.position}의 고정 설정을 삭제하시겠습니까?`,
       details: [
-        {label: '투표', value: pollTitles.get(pin.pollId) ?? `ID ${pin.pollId}`},
+        {label: '투표', value: pin.poll ? pin.poll.content.title : `삭제된 투표 (ID ${pin.pollId})`},
         {label: '노출 기간', value: `${formatDateTime(pin.startDateTime)} ~ ${formatDateTime(pin.endDateTime)}`}
       ],
       confirmLabel: '삭제',
@@ -217,7 +237,10 @@ const PollManagement = () => {
                   className={`form-option w-100 h-100 ${
                     selectedCategory === category.categoryId ? 'form-option--active' : ''
                   }`}
-                  onClick={() => setSelectedCategory(category.categoryId)}
+                  onClick={() => {
+                    setSelectedCategory(category.categoryId);
+                    setSearchKeyword('');
+                  }}
                   aria-pressed={selectedCategory === category.categoryId}
                 >
                   <i className="bi bi-bar-chart-fill form-option__icon"/>
@@ -239,7 +262,6 @@ const PollManagement = () => {
         <PollPinSection
           pins={pins}
           isLoading={isPinsLoading}
-          pollTitles={pollTitles}
           deletingPinId={deletingPinId}
           onCreate={() => setPinModal({pin: null, poll: null})}
           onEdit={(pin) => setPinModal({pin, poll: null})}
@@ -250,12 +272,34 @@ const PollManagement = () => {
       {/* 투표 목록 */}
       {selectedCategory && (
         <SectionCard
-          title="투표 목록"
-          icon="bi-list-task"
-          aside={polls.length > 0 && (
-            <span className="page-count">{polls.length.toLocaleString()}{hasMore ? '+' : ''}건</span>
-          )}
+          title={searchKeyword ? `"${searchKeyword}" 검색 결과` : '투표 목록'}
+          icon={searchKeyword ? 'bi-search' : 'bi-list-task'}
+          aside={
+            <div className="d-flex align-items-center gap-2">
+              {polls.length > 0 && (
+                <span className="page-count">{polls.length.toLocaleString()}{hasMore ? '+' : ''}건</span>
+              )}
+              <select
+                className="form-select form-select-sm w-auto"
+                aria-label="정렬"
+                value={searchKeyword ? 'LATEST' : sortType}
+                onChange={e => setSortType(e.target.value as PollSortType)}
+                disabled={Boolean(searchKeyword)}
+                title={searchKeyword ? '검색 결과는 최신순으로 고정됩니다.' : undefined}
+              >
+                {SORT_OPTIONS.map(option => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
+              </select>
+            </div>
+          }
         >
+          <div className="mb-3">
+            <PollSearchBox keyword={searchKeyword} onSearch={setSearchKeyword} onClear={() => setSearchKeyword('')}/>
+            {!searchKeyword && sortType === 'POPULAR' && (
+              <div className="form-text">인기순은 현재 랭킹 기준 한 페이지만 조회됩니다.</div>
+            )}
+          </div>
           <div ref={scrollContainerRef} style={{maxHeight: 'calc(100vh - 380px)', overflowY: 'auto'}}>
             {isLoading && polls.length === 0 ? (
               <div className="text-center py-5">
@@ -267,8 +311,12 @@ const PollManagement = () => {
             ) : polls.length === 0 ? (
               <EmptyState
                 icon="bi-bar-chart"
-                title="투표가 없습니다"
-                description="선택한 카테고리에 등록된 투표가 없습니다."
+                title={searchKeyword ? '검색 결과가 없습니다' : '투표가 없습니다'}
+                description={searchKeyword
+                  ? '다른 검색어로 다시 시도해주세요.'
+                  : sortType === 'POPULAR'
+                    ? '현재 인기 랭킹에 포함된 투표가 없습니다.'
+                    : '선택한 카테고리에 등록된 투표가 없습니다.'}
               />
             ) : (
               <>
@@ -280,7 +328,12 @@ const PollManagement = () => {
                       onClick={handlePollClick}
                       onAuthorClick={handleAuthorClick}
                       onDelete={handleDeletePoll}
-                      onPin={(target) => setPinModal({pin: null, poll: target})}
+                      onPin={poll.category.categoryId === selectedCategory
+                        ? (target) => setPinModal({pin: null, poll: target})
+                        : null}
+                      pin={pinByPollId.get(poll.pollId) ?? null}
+                      onUnpin={handleDeletePin}
+                      isUnpinning={deletingPinId === pinByPollId.get(poll.pollId)?.pollPinId}
                     />
                   ))}
                 </div>

@@ -1,4 +1,4 @@
-import {Poll, PollOption} from '@/types/poll';
+import {Poll, PollOption, PollPin} from '@/types/poll';
 
 export type PollStatus = 'upcoming' | 'active' | 'ended';
 
@@ -15,12 +15,30 @@ export const POLL_STATUS_CONFIG: Record<PollStatus, PollStatusConfig> = {
 };
 
 /** 투표 기간을 기준으로 진행 상태를 판단합니다. */
-export const getPollStatus = (poll: Poll, now: Date = new Date()): PollStatus => {
+export const getPollStatus = (poll: Pick<Poll, 'period'>, now: Date = new Date()): PollStatus => {
   const startDate = new Date(poll.period.startDateTime);
   const endDate = new Date(poll.period.endDateTime);
 
   if (now < startDate) return 'upcoming';
   if (now < endDate) return 'active';
+  return 'ended';
+};
+
+export type PollPinStatus = 'upcoming' | 'active' | 'ended';
+
+export const POLL_PIN_STATUS_CONFIG: Record<PollPinStatus, { badgeClass: string; text: string }> = {
+  upcoming: {badgeClass: 'bg-warning-subtle text-warning-emphasis', text: '예정'},
+  active: {badgeClass: 'bg-success', text: '노출 중'},
+  ended: {badgeClass: 'bg-secondary', text: '종료'}
+};
+
+/** 고정 노출 기간(시작·종료 시각 모두 포함)을 기준으로 현재 상태를 판단합니다. */
+export const getPollPinStatus = (
+  pin: Pick<PollPin, 'startDateTime' | 'endDateTime'>,
+  now: Date = new Date()
+): PollPinStatus => {
+  if (now < new Date(pin.startDateTime)) return 'upcoming';
+  if (now <= new Date(pin.endDateTime)) return 'active';
   return 'ended';
 };
 

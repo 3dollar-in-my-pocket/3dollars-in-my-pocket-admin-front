@@ -66,6 +66,9 @@ const PollDetailModal = ({show, onHide, poll, onAuthorClick, onDelete}: PollDeta
         </div>
 
         <h3 className="h6 fw-bold mb-3">{poll.content.title}</h3>
+        {poll.content.content && (
+          <p className="small text-body-secondary mb-3" style={{whiteSpace: 'pre-line'}}>{poll.content.content}</p>
+        )}
 
         {/* 투표 결과 */}
         <div className="modal-section">
