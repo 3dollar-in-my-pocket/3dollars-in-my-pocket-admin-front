@@ -112,6 +112,20 @@ export interface SimpleStore {
   updatedAt?: string;
 }
 
+/** SimilarStoreResponse — 유사 가게 찾기 결과 (score 내림차순) */
+export interface SimilarStore {
+  storeId: number;
+  storeType: StoreType;
+  name: string;
+  address: string | null;
+  distanceMeters: number;
+  categories: StoreFoodCategory[];
+  /** 유사도 점수 (0~100, 높을수록 같은 가게일 가능성이 높음) */
+  score: number;
+  /** AI 판정 근거 */
+  reason: string;
+}
+
 /** StoreSalesTypeResponse */
 export interface StoreSalesType {
   type: SalesType;
