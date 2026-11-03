@@ -42,7 +42,7 @@ export interface CursorPaginationResult<T> {
  * 서버 공통 응답 모델(`{ contents, cursor: { hasMore, nextCursor, totalCount } }`)을
  * 전제로 목록/로딩/커서 상태를 일괄 관리합니다.
  *
- * 동시 호출 방지와 최신 커서 참조를 ref로 처리하므로,
+ * 더보기 중복 호출 방지, 최신 요청 응답만 반영, 최신 커서 참조를 ref로 처리하므로,
  * 반환된 refresh/loadMore는 렌더링 간 참조가 안정적입니다.
  */
 export function useCursorPagination<T>({
@@ -61,6 +61,7 @@ export function useCursorPagination<T>({
   // 렌더링 간 최신 값을 참조하기 위한 ref (콜백 재생성 방지)
   const cursorRef = useRef<string | null>(null);
   const isFetchingRef = useRef(false);
+  const requestIdRef = useRef(0);
   const fetcherRef = useRef(fetcher);
   const errorMessageRef = useRef(errorMessage);
 
@@ -73,11 +74,12 @@ export function useCursorPagination<T>({
   }, [errorMessage]);
 
   const load = useCallback(async (reset: boolean) => {
-    // 중복 호출 방지
-    if (isFetchingRef.current) return;
-    // 더보기인데 남은 페이지가 없으면 차단
-    if (!reset && !cursorRef.current) return;
+    // 더보기는 진행 중인 요청이 있거나 남은 페이지가 없으면 차단.
+    // 첫 페이지 재조회(reset)는 조건 변경(정렬·검색어 등)일 수 있으므로 진행 중인 요청을 대체한다.
+    if (!reset && (isFetchingRef.current || !cursorRef.current)) return;
 
+    const requestId = ++requestIdRef.current;
+    const isLatest = () => requestId === requestIdRef.current;
     isFetchingRef.current = true;
     setIsLoading(true);
     if (!reset) setIsLoadingMore(true);
@@ -85,6 +87,8 @@ export function useCursorPagination<T>({
 
     try {
       const response = await fetcherRef.current(reset ? null : cursorRef.current);
+      // 이후에 시작된 요청이 있으면 늦게 도착한 응답은 무시
+      if (!isLatest()) return;
 
       if (!response?.ok) {
         setError(errorMessageRef.current);
@@ -99,11 +103,13 @@ export function useCursorPagination<T>({
       setTotalCount(cursor?.totalCount || 0);
       cursorRef.current = nextCursor;
     } catch (e) {
-      setError(errorMessageRef.current);
+      if (isLatest()) setError(errorMessageRef.current);
     } finally {
-      isFetchingRef.current = false;
-      setIsLoading(false);
-      setIsLoadingMore(false);
+      if (isLatest()) {
+        isFetchingRef.current = false;
+        setIsLoading(false);
+        setIsLoadingMore(false);
+      }
     }
   }, []);
 

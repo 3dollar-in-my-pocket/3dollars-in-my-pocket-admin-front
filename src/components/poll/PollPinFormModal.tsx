@@ -2,7 +2,8 @@ import {FormEvent, useEffect, useState} from 'react';
 import {Modal} from 'react-bootstrap';
 import {toast} from 'react-toastify';
 import pollApi from '@/api/pollApi';
-import {Poll, PollPin, UpdatePollPinRequest} from '@/types/poll';
+import PollPicker from '@/components/poll/PollPicker';
+import {Poll, PollPin, PollPinPoll, UpdatePollPinRequest} from '@/types/poll';
 
 export const POLL_PIN_MIN_POSITION = 1;
 export const POLL_PIN_MAX_POSITION = 30;
@@ -19,13 +20,12 @@ interface PollPinFormModalProps {
 }
 
 interface PinForm {
-  pollId: string;
   position: string;
   startDateTime: string;
   endDateTime: string;
 }
 
-const emptyForm: PinForm = {pollId: '', position: '', startDateTime: '', endDateTime: ''};
+const emptyForm: PinForm = {position: '', startDateTime: '', endDateTime: ''};
 
 /** API 일시(yyyy-MM-ddTHH:mm:ss) → datetime-local 입력값 */
 const toLocal = (value?: string | null) => (value ? value.slice(0, 19) : '');
@@ -35,24 +35,38 @@ const toApi = (value: string) => (value.length === 16 ? `${value}:00` : value);
 const PollPinFormModal = ({show, categoryId, pin, poll, onHide, onSuccess}: PollPinFormModalProps) => {
   const isEdit = Boolean(pin);
   const [form, setForm] = useState<PinForm>(emptyForm);
+  /** 신규 등록 시 선택된 투표 */
+  const [selectedPoll, setSelectedPoll] = useState<Poll | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (!show) return;
+    setSelectedPoll(pin ? null : poll ?? null);
     setForm(pin ? {
-      pollId: String(pin.pollId),
       position: String(pin.position),
       startDateTime: toLocal(pin.startDateTime),
       endDateTime: toLocal(pin.endDateTime)
     } : {
       ...emptyForm,
-      pollId: poll ? String(poll.pollId) : '',
       startDateTime: toLocal(poll?.period?.startDateTime),
       endDateTime: toLocal(poll?.period?.endDateTime)
     });
   }, [show, pin, poll]);
 
   const change = (key: keyof PinForm, value: string) => setForm(prev => ({...prev, [key]: value}));
+
+  /** 투표 선택 시 비어 있는 노출 기간은 투표 기간으로 채운다. */
+  const selectPoll = (target: Poll) => {
+    setSelectedPoll(target);
+    setForm(prev => ({
+      ...prev,
+      startDateTime: prev.startDateTime || toLocal(target.period.startDateTime),
+      endDateTime: prev.endDateTime || toLocal(target.period.endDateTime)
+    }));
+  };
+
+  /** 화면에 표시할 대상 투표 (수정: 고정 설정의 투표, 등록: 선택한 투표) */
+  const targetPoll: Poll | PollPinPoll | null = isEdit ? pin?.poll ?? null : selectedPoll;
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -86,12 +100,16 @@ const PollPinFormModal = ({show, categoryId, pin, poll, onHide, onSuccess}: Poll
         if (!response.ok) return;
         toast.success('고정 설정이 수정되었습니다.');
       } else {
-        const pollId = Number(form.pollId);
-        if (!Number.isInteger(pollId) || pollId < 1) {
-          toast.warning('고정할 투표 ID를 입력해주세요.');
+        if (!selectedPoll) {
+          toast.warning('고정할 투표를 선택해주세요.');
           return;
         }
-        const response = await pollApi.createPollPin({categoryId, pollId, position, startDateTime, endDateTime});
+        const response = await pollApi.createPollPin({
+          categoryId,
+          pollId: selectedPoll.pollId,
+          position,           startDateTime,
+          endDateTime
+        });
         if (!response.ok) return;
         toast.success('투표가 고정되었습니다.');
       }
@@ -108,6 +126,7 @@ const PollPinFormModal = ({show, categoryId, pin, poll, onHide, onSuccess}: Poll
       onHide={submitting ? undefined : onHide}
       backdrop={submitting ? 'static' : true}
       centered
+      size="lg"
       className="app-modal"
     >
       <form onSubmit={submit}>
@@ -115,27 +134,41 @@ const PollPinFormModal = ({show, categoryId, pin, poll, onHide, onSuccess}: Poll
           <Modal.Title>{isEdit ? '투표 고정 수정' : '투표 고정 등록'}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          {!isEdit && poll && (
-            <div className="alert alert-light border py-2 small">
-              <i className="bi bi-bar-chart-fill me-1"/>
-              {poll.content.title}
-            </div>
-          )}
+          <div className="mb-3">
+            <div className="form-label">투표</div>
+            {targetPoll ? (
+              <div className="alert alert-light border py-2 mb-0 d-flex align-items-start gap-2">
+                <div className="min-w-0 flex-grow-1">
+                  <div className="fw-semibold text-truncate">
+                    <i className="bi bi-bar-chart-fill me-1"/>
+                    {targetPoll.content.title}
+                  </div>
+                  <div className="small text-muted text-truncate">
+                    ID {targetPoll.pollId} · {targetPoll.options.map(option => option.name).join(' vs ')}
+                  </div>
+                </div>
+                {!isEdit && !poll && (
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-outline-secondary flex-shrink-0"
+                    onClick={() => setSelectedPoll(null)}
+                    disabled={submitting}
+                  >
+                    변경
+                  </button>
+                )}
+              </div>
+            ) : isEdit ? (
+              <div className="alert alert-warning py-2 mb-0 small">
+                <i className="bi bi-exclamation-triangle me-1"/>
+                삭제된 투표입니다. (ID {pin?.pollId})
+              </div>
+            ) : (
+              <PollPicker categoryId={categoryId} onSelect={selectPoll}/>
+            )}
+            {isEdit && <div className="form-text">투표는 수정할 수 없습니다. 삭제 후 다시 등록해주세요.</div>}
+          </div>
           <div className="row g-3">
-            <div className="col-12 col-md-6">
-              <label className="form-label" htmlFor="poll-pin-poll-id">투표 ID</label>
-              <input
-                id="poll-pin-poll-id"
-                type="number"
-                min={1}
-                className="form-control"
-                required
-                disabled={isEdit || Boolean(poll)}
-                value={form.pollId}
-                onChange={e => change('pollId', e.target.value)}
-              />
-              {isEdit && <div className="form-text">투표는 수정할 수 없습니다. 삭제 후 다시 등록해주세요.</div>}
-            </div>
             <div className="col-12 col-md-6">
               <label className="form-label" htmlFor="poll-pin-position">
                 고정 위치 ({POLL_PIN_MIN_POSITION}~{POLL_PIN_MAX_POSITION})

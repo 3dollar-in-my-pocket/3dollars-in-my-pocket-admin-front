@@ -522,7 +522,11 @@ const StoreDetailModal = ({show, onHide, store, onAuthorClick, onStoreDeleted}: 
       <StoreTransferModal
         show={showTransfer}
         onHide={handleTransferModalHide}
-        sourceStore={{storeId: store.storeId, name: storeDetail?.name || store.name}}
+        sourceStores={[{
+          storeId: store.storeId,
+          name: storeDetail?.name || store.name,
+          location: storeDetail?.location ?? store.location
+        }]}
         onTransferred={() => setIsTransferred(true)}
       />
     </Modal>

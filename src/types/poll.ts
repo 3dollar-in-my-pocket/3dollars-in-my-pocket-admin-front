@@ -16,6 +16,8 @@ export interface PollCategory {
 /** PollContentResponse */
 export interface PollContent {
   title: string;
+  /** 투표 본문 (없으면 null) */
+  content?: string | null;
 }
 
 /** PollOptionResponse */
@@ -45,6 +47,18 @@ export interface Poll {
   updatedAt?: string;
 }
 
+/** 투표 목록 정렬 */
+export type PollSortType = 'LATEST' | 'POPULAR' | 'OLDEST';
+
+/** PollPinPollResponse — 고정 설정에 포함된 투표 자체 데이터 (득표·작성자·댓글 수 없음) */
+export interface PollPinPoll {
+  pollId: number;
+  category: PollCategory;
+  content: PollContent;
+  options: Pick<PollOption, 'optionId' | 'name'>[];
+  period: DateTimeInterval;
+}
+
 /** PollPinResponse — 인기 투표 목록 고정 노출 설정 */
 export interface PollPin {
   pollPinId: number;
@@ -54,6 +68,8 @@ export interface PollPin {
   position: number;
   startDateTime: string;
   endDateTime: string;
+  /** 고정된 투표. 삭제된 투표면 null */
+  poll?: PollPinPoll | null;
   createdAt?: string | null;
   updatedAt?: string | null;
 }

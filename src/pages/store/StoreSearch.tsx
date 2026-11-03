@@ -5,6 +5,9 @@ import storeApi from '@/api/storeApi';
 import BulkMarkerFormModal from '@/components/store/BulkMarkerFormModal';
 import type {ActivityAuthor} from '@/types/domain';
 import StoreDetailModal from './StoreDetailModal';
+import StoreTransferModal, {TransferSourceStore} from './StoreTransferModal';
+import {usePermission} from '@/hooks/usePermission';
+import {AdminRole} from '@/types/admin';
 import UserDetailModal from '@/pages/user/UserDetailModal';
 import {SimpleStore, STORE_SEARCH_TYPES, STORE_TYPE, StoreType} from '@/types/store';
 import useSearch from '@/hooks/useSearch';
@@ -44,6 +47,10 @@ const StoreSearch = () => {
   const [availableLabels, setAvailableLabels] = useState<{key: string; description: string}[]>([]);
   const [isFetchingEnums, setIsFetchingEnums] = useState(false);
   const [isBulkSubmitting, setIsBulkSubmitting] = useState(false);
+  /** 합치기 모달을 연 시점의 선택 가게. 이관 도중 선택이 바뀌어도 대상이 흔들리지 않도록 고정합니다. */
+  const [transferSources, setTransferSources] = useState<TransferSourceStore[]>([]);
+  const [showTransfer, setShowTransfer] = useState(false);
+  const {hasAccess} = usePermission();
 
   const {
     searchQuery,
@@ -81,6 +88,9 @@ const StoreSearch = () => {
     resetDeps: [searchType, searchQuery, selectedStoreTypes]
   });
   const selectedIds = selection.selectedList;
+  const selectedStores = storeList.filter(store => selection.isSelected(store.storeId));
+  // 이관 API는 사장님 가게를 제거할 가게로 지원하지 않습니다.
+  const hasBossStoreSelected = selectedStores.some(store => store.storeType === STORE_TYPE.BOSS_STORE);
 
   // 기본 검색 조건은 가게 이름입니다.
   useEffect(() => {
@@ -176,6 +186,13 @@ const StoreSearch = () => {
     // setResults를 사용하여 상태 업데이트
     setResults(updatedResults);
   }, [storeList, setResults]);
+
+  /** 이관된 가게는 서버에서 삭제되었으므로 목록에 삭제 상태로 표시하고 선택에서 뺍니다. */
+  const handleStoresTransferred = useCallback((transferredIds: number[]) => {
+    const ids = new Set(transferredIds);
+    setResults(prev => prev.map(store => (ids.has(store.storeId) ? {...store, isDeleted: true} : store)));
+    selection.clear();
+  }, [setResults, selection.clear]);
 
   const submitLabels = async (event: FormEvent) => {
     event.preventDefault();
@@ -336,6 +353,20 @@ const StoreSearch = () => {
         <strong>{selectedIds.length}개 가게 선택됨</strong><div className="bulk-action-bar__actions">
         <button className="btn btn-sm btn-primary" onClick={() => { setLabels([]); setCustomLabelInput(''); setShowLabels(true); }}>라벨 일괄 변경</button>
         <button className="btn btn-sm btn-primary" onClick={() => setShowMarker(true)}>마커 일괄 생성</button>
+        {hasAccess([AdminRole.OPERATOR]) && (
+          <span title={hasBossStoreSelected ? '사장님 가게는 다른 가게로 합칠 수 없습니다. 선택에서 빼주세요.' : undefined}>
+            <button
+              className="btn btn-sm btn-outline-danger"
+              disabled={hasBossStoreSelected}
+              onClick={() => {
+                setTransferSources(selectedStores.map(({storeId, name, location}) => ({storeId, name, location})));
+                setShowTransfer(true);
+              }}
+            >
+              다른 가게로 합치기
+            </button>
+          </span>
+        )}
         <button className="btn btn-sm btn-outline-secondary" onClick={selection.clear}>선택 해제</button></div>
       </div>}
 
@@ -355,6 +386,13 @@ const StoreSearch = () => {
       </form></Modal>
       <BulkMarkerFormModal show={showMarker} mode="create" targetIds={selectedIds} onHide={() => setShowMarker(false)}
                             onSuccess={() => { selection.clear(); handleSearch(true); }}/>
+
+      <StoreTransferModal
+        show={showTransfer}
+        onHide={() => setShowTransfer(false)}
+        sourceStores={transferSources}
+        onTransferred={handleStoresTransferred}
+      />
 
       <StoreDetailModal
         show={!!selectedStore}

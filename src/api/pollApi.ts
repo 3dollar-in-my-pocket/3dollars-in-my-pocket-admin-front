@@ -1,6 +1,13 @@
 import {apiDelete, apiGet, apiGetPaginated, apiPatch, apiPost} from './apiHelpers';
 import {ContentListResponse} from '@/types/api';
-import {CreatePollPinRequest, Poll, PollCategory, PollPin, UpdatePollPinRequest} from '@/types/poll';
+import {
+  CreatePollPinRequest,
+  Poll,
+  PollCategory,
+  PollPin,
+  PollSortType,
+  UpdatePollPinRequest
+} from '@/types/poll';
 
 const pollApi = {
   // 투표 카테고리 목록 조회
@@ -8,9 +15,14 @@ const pollApi = {
     return apiGet<ContentListResponse<PollCategory>>('/v1/poll-categories');
   },
 
-  // 카테고리별 투표 목록 조회
-  getPolls: async (category: string, size = 30, cursor: string | null = null) => {
-    return apiGetPaginated<Poll>('/v1/polls', {cursor, size}, {category});
+  // 카테고리별 투표 목록 조회 (POPULAR는 커서 없이 한 페이지만 반환)
+  getPolls: async (category: string, size = 30, cursor: string | null = null, sortType: PollSortType = 'LATEST') => {
+    return apiGetPaginated<Poll>('/v1/polls', {cursor, size}, {category, sortType});
+  },
+
+  // 투표 제목 부분 일치 검색 (전체 카테고리, 최신순)
+  searchPolls: async (title: string, size = 20, cursor: string | null = null) => {
+    return apiGetPaginated<Poll>('/v1/search/polls', {cursor, size}, {title});
   },
 
   // 투표 삭제
@@ -18,7 +30,7 @@ const pollApi = {
     return apiDelete(`/v1/poll/${pollId}`);
   },
 
-  // 고정 노출 설정 목록 조회 (종료되지 않은 설정만, position 오름차순)
+  // 고정 노출 설정 목록 조회 (예정·노출 중·종료 설정 모두 포함)
   getPollPins: async (categoryId: string) => {
     return apiGet<ContentListResponse<PollPin>>('/v1/poll-pins', {categoryId});
   },
