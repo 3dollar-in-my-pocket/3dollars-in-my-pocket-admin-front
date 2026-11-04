@@ -323,9 +323,13 @@ const StoreDuplicateCandidateManagement = () => {
           candidateStore?.store.storeId === source.storeId
             ? {...candidateStore, store: {...candidateStore.store, status: STORE_STATUS.DELETED}}
             : candidateStore;
-        setItems(prev => prev
-          .filter(item => item.candidateId !== candidate.candidateId)
-          .map(item => ({...item, firstStore: markDeleted(item.firstStore), secondStore: markDeleted(item.secondStore)})));
+        // 처리 결과를 확인할 수 있도록 목록에서 빼지 않고 상태만 바꿉니다. (새로고침하면 검토 대기 목록에서 빠집니다)
+        setItems(prev => prev.map(item => ({
+          ...item,
+          status: item.candidateId === candidate.candidateId ? STORE_DUPLICATE_CANDIDATE_STATUS.MERGED : item.status,
+          firstStore: markDeleted(item.firstStore),
+          secondStore: markDeleted(item.secondStore)
+        })));
         return;
       }
       if (handleCommonError(response)) return;
@@ -396,7 +400,7 @@ const StoreDuplicateCandidateManagement = () => {
             ))}
           </div>
           <div className="dup-candidate__aside">
-            {!isPending && statusOption && <span className={`badge ${statusOption.badgeClass}`}>{statusOption.label}</span>}
+            {candidate.status !== STORE_DUPLICATE_CANDIDATE_STATUS.PENDING && statusOption &&<span className={`badge ${statusOption.badgeClass}`}>{statusOption.label}</span>}
             <span>후보 생성 {formatDateTimeShortKo(candidate.createdAt)}</span>
           </div>
         </div>
