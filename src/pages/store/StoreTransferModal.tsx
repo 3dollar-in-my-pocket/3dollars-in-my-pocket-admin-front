@@ -7,7 +7,8 @@ import StoreTypeBadge from '@/components/common/badges/StoreTypeBadge';
 import useConfirm from '@/hooks/useConfirm';
 import {Location} from '@/types/domain';
 import {formatDistance, formatDistanceBetween, getDistanceMeters} from '@/utils/geoUtils';
-import {SimpleStore, STORE_STATUS, StoreDetail, StoreTransferItem, StoreTransferResult} from '@/types/store';
+import {SimpleStore, STORE_STATUS, StoreDetail, StoreTransferResult} from '@/types/store';
+import StoreTransferResultSummary from './StoreTransferResultSummary';
 import {ApiResponse} from '@/types/api';
 
 interface StoreTransferModalProps {
@@ -50,26 +51,6 @@ const toFailure = (response: ApiResponse<unknown>): TransferOutcome => {
       : TRANSFER_ERROR_MESSAGES[response.error] || response.message || '이관에 실패했습니다.',
     retryable
   };
-};
-
-const TRANSFER_TYPE_LABELS: Record<string, string> = {
-  REVIEW: '리뷰',
-  IMAGE: '이미지',
-  VISIT: '방문 인증',
-  FAVORITE: '즐겨찾기'
-};
-
-/** skippedCount 의미가 항목마다 달라 문구를 따로 둡니다. 모르는 type은 서버 값을 그대로 표시합니다. */
-const getSkippedNote = ({type, skippedCount}: StoreTransferItem): string | null => {
-  if (skippedCount <= 0) return null;
-  switch (type) {
-    case 'VISIT':
-      return `같은 날 중복으로 제거한 가게에 남은 방문 ${skippedCount}건`;
-    case 'FAVORITE':
-      return `중복으로 삭제된 제거한 가게의 즐겨찾기 ${skippedCount}건`;
-    default:
-      return `이관 제외 ${skippedCount}건`;
-  }
 };
 
 type TargetSearchMode = 'name' | 'id';
@@ -172,20 +153,6 @@ const TargetCandidateList = ({stores, sources, selectedId, disabled, onSelect}: 
     ))}
   </div>
 );
-
-const TransferResultSummary = ({result}: { result: StoreTransferResult }) => {
-  const items = result.contents;
-  if (items.every(item => item.transferredCount === 0 && item.skippedCount === 0)) {
-    return <div className="small text-body-secondary">더 이관할 데이터가 없었습니다.</div>;
-  }
-  const notes = items.map(getSkippedNote).filter(Boolean);
-  return (
-    <div className="small text-body-secondary">
-      {items.map(item => `${TRANSFER_TYPE_LABELS[item.type] ?? item.type} ${item.transferredCount}건`).join(' · ')}
-      {notes.length > 0 && <div>{notes.join(', ')}</div>}
-    </div>
-  );
-};
 
 const OUTCOME_BADGES = {
   success: {className: 'text-bg-success', label: '완료'},
@@ -496,7 +463,7 @@ const StoreTransferModal = ({
                       )}
                     </span>
                   </div>
-                  {outcome?.status === 'success' && <TransferResultSummary result={outcome.result}/>}
+                  {outcome?.status === 'success' && <StoreTransferResultSummary result={outcome.result}/>}
                   {outcome?.status === 'failed' && <div className="small text-danger">{outcome.message}</div>}
                 </li>
               );
