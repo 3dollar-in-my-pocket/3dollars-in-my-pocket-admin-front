@@ -16,7 +16,7 @@ import useConfirm from '@/hooks/useConfirm';
 import {usePermission} from '@/hooks/usePermission';
 import {AdminRole} from '@/types/admin';
 import {ApiResponse} from '@/types/api';
-import {SimpleStore, STORE_STATUS, STORE_TYPE, StoreMenu} from '@/types/store';
+import {ActivitiesStatus, SimpleStore, STORE_STATUS, STORE_TYPE, StoreMenu} from '@/types/store';
 import {
   CandidateStore,
   STORE_DUPLICATE_CANDIDATE_STATUS,
@@ -24,6 +24,7 @@ import {
   StoreDuplicateCandidateStatus
 } from '@/types/storeDuplicateCandidate';
 import {formatDateTimeShortKo} from '@/utils/dateUtils';
+import {getActivitiesStatusBadgeClass, getActivitiesStatusDisplayName} from '@/utils/display/storeDisplay';
 import StoreDetailModal from './StoreDetailModal';
 import StoreTransferResultSummary from './StoreTransferResultSummary';
 
@@ -144,6 +145,17 @@ const MenuList = ({menus}: { menus: StoreMenu[] }) => {
   );
 };
 
+/** 최근 활동 여부. 활동이 없는 쪽이 제거 후보로 판단하기 쉽도록 표시합니다. */
+const ActivitiesStatusBadge = ({activitiesStatus}: { activitiesStatus: ActivitiesStatus }) => {
+  // getActivitiesStatusBadgeClass는 'bg-primary' 형태라 subtle 배지 클래스로 변환합니다.
+  const color = getActivitiesStatusBadgeClass(activitiesStatus).replace('bg-', '');
+  return (
+    <span className={`badge bg-${color}-subtle text-${color}-emphasis`}>
+      <i className="bi bi-activity me-1" aria-hidden="true"/>{getActivitiesStatusDisplayName(activitiesStatus)}
+    </span>
+  );
+};
+
 interface StorePanelProps {
   candidateStore: CandidateStore | null;
   other: CandidateStore | null;
@@ -173,6 +185,7 @@ const StorePanel = ({candidateStore, other, actionable, disabled, onOpenDetail, 
         <div className="d-flex flex-wrap align-items-center gap-1">
           <StoreTypeBadge storeType={store.storeType}/>
           {!isActive(store) && <StoreStatusBadge status={store.status}/>}
+          {store.activitiesStatus && <ActivitiesStatusBadge activitiesStatus={store.activitiesStatus}/>}
           <span className="dup-panel__id">#{store.storeId}</span>
         </div>
         <button
@@ -188,6 +201,7 @@ const StorePanel = ({candidateStore, other, actionable, disabled, onOpenDetail, 
           <span className="d-flex flex-wrap align-items-center gap-2">
             <span className="rating-badge"><i className="bi bi-star-fill"/>{store.rating.toFixed(1)}</span>
             {store.createdAt && <span>등록 {formatDateTimeShortKo(store.createdAt)}</span>}
+            {store.updatedAt && <span>마지막 수정 {formatDateTimeShortKo(store.updatedAt)}</span>}
           </span>
           {store.categories.length > 0 && (
             <span><i className="bi bi-tag me-1"/>{store.categories.map(category => category.name).join(', ')}</span>
