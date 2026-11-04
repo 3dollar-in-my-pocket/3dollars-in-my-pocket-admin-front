@@ -16,6 +16,7 @@ const UserSearch = lazy(() => import("../pages/user/UserSearch"));
 const StoreSearch = lazy(() => import("../pages/store/StoreSearch"));
 const PopularNeighborhoodStores = lazy(() => import("../pages/store/PopularNeighborhoodStores"));
 const SimilarStoreSearch = lazy(() => import("../pages/store/SimilarStoreSearch"));
+const StoreDuplicateCandidateManagement = lazy(() => import("../pages/store/StoreDuplicateCandidateManagement"));
 const StoreCategoryManagement = lazy(() => import("../pages/storeCategory/StoreCategoryManagement"));
 const CacheTool = lazy(() => import("../pages/tool/CacheTool"));
 const FileUploadTool = lazy(() => import("../pages/tool/FileUploadTool"));
@@ -102,6 +103,10 @@ const manageRoutes = {
     {
       path: '/manage/popular-neighborhood-stores',
       element: <PrivateRouter><PopularNeighborhoodStores/></PrivateRouter>
+    },
+    {
+      path: '/manage/store-duplicate-candidate',
+      element: <PrivateRouter><StoreDuplicateCandidateManagement/></PrivateRouter>
     },
     {
       path: '/manage/proto/similar-store',
