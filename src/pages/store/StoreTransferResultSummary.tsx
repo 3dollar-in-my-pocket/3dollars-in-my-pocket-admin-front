@@ -15,9 +15,9 @@ const getSkippedNote = ({type, skippedCount}: StoreTransferItem): string | null 
   if (skippedCount <= 0) return null;
   switch (type) {
     case 'VISIT':
-      return `같은 날 중복으로 제거한 가게에 남은 방문 ${skippedCount}건`;
+      return `유지할 가게에 같은 날 방문 인증이 있어 제외 ${skippedCount}건`;
     case 'FAVORITE':
-      return `중복으로 삭제된 제거한 가게의 즐겨찾기 ${skippedCount}건`;
+      return `유지할 가게를 이미 즐겨찾기해 제외 ${skippedCount}건`;
     default:
       return `${TRANSFER_TYPE_LABELS[type] ?? type} 이관 제외 ${skippedCount}건`;
   }

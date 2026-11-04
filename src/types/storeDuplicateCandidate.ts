@@ -1,4 +1,4 @@
-import {SimpleStore, StoreFoodCategory} from './store';
+import {SimpleStore, StoreFoodCategory, StoreMenu} from './store';
 
 export const STORE_DUPLICATE_CANDIDATE_STATUS = {
   PENDING: 'PENDING',
@@ -22,6 +22,8 @@ export interface CandidateStoreImage {
  */
 export interface CandidateStore {
   store: SimpleStore;
+  /** 가게 메뉴 전체 (등록 순서). 비활성 카테고리의 메뉴는 제외 */
+  menus: StoreMenu[];
   reviewCount: number;
   subscriberCount: number;
   /** 전체 이미지 수. recentImages는 활성 이미지만 담아 이 값이 0보다 커도 비어 있을 수 있음 */

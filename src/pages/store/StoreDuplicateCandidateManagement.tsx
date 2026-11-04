@@ -16,7 +16,7 @@ import useConfirm from '@/hooks/useConfirm';
 import {usePermission} from '@/hooks/usePermission';
 import {AdminRole} from '@/types/admin';
 import {ApiResponse} from '@/types/api';
-import {SimpleStore, STORE_STATUS, STORE_TYPE} from '@/types/store';
+import {SimpleStore, STORE_STATUS, STORE_TYPE, StoreMenu} from '@/types/store';
 import {
   CandidateStore,
   STORE_DUPLICATE_CANDIDATE_STATUS,
@@ -41,7 +41,7 @@ const STALE_CANDIDATE_ERRORS = ['already_processed_store_duplicate_candidate', '
 const MERGE_ERROR_MESSAGES: Record<string, string> = {
   store_not_in_duplicate_candidate: '후보에 포함되지 않은 가게입니다. 후보의 가게 중에서 선택해주세요.',
   // 서버 메시지는 '삭제된 가게입니다'로 고정이라 사유를 함께 안내합니다.
-  not_exists_store: '원본은 유저 제보 가게, 대상은 활성 가게여야 합니다. 후보는 검토 대기 상태로 복구되었습니다.',
+  not_exists_store: '제거할 가게는 유저 제보 가게, 유지할 가게는 활성 가게여야 합니다. 후보는 검토 대기 상태로 복구되었습니다.',
 };
 
 const MERGE_RETRYABLE_MESSAGE =
@@ -50,20 +50,103 @@ const MERGE_RETRYABLE_MESSAGE =
 
 const isActive = (store: SimpleStore) => store.status === STORE_STATUS.ACTIVE;
 
-/** 이 가게를 원본(삭제될 가게)으로 머지할 수 없는 이유. 서버 404가 사유를 구분하지 않아 미리 막습니다. */
+/** 이 가게를 제거할 가게(source)로 머지할 수 없는 이유. 서버 404가 사유를 구분하지 않아 미리 막습니다. */
 const getMergeBlockedReason = (source: SimpleStore | null, target: SimpleStore | null): string | null => {
   if (!source || !target) return '가게 정보를 불러오지 못해 머지할 수 없습니다. 무시만 가능합니다.';
-  if (source.storeType !== STORE_TYPE.USER_STORE) return '사장님 가게는 원본으로 선택할 수 없습니다.';
-  if (!isActive(source)) return '이미 삭제된 가게입니다.';
-  if (!isActive(target)) return '상대 가게가 활성 상태가 아니라 데이터를 받을 수 없습니다.';
+  if (source.storeType !== STORE_TYPE.USER_STORE) return '사장님 가게는 제거할 수 없습니다. 상대 가게 쪽에서 머지해주세요.';
+  if (!isActive(source)) return '이미 삭제된 가게라 제거할 가게로 선택할 수 없습니다.';
+  if (!isActive(target)) return '상대 가게가 활성 상태가 아니라 유지할 가게가 될 수 없습니다.';
   return null;
 };
 
 const formatSimilarity = (similarity: number) => `${Math.round(similarity * 100)}%`;
 
+/** 유사도 구간별 색. 높을수록 중복 가능성이 큽니다. */
+const getSimilarityTone = (similarity: number) => {
+  if (similarity >= 0.9) return 'high';
+  if (similarity >= 0.6) return 'mid';
+  return 'low';
+};
+
+/** 예: "3개 2,000원", "9,000원". 가격 정보가 없으면 null */
+const formatMenuPrice = ({price, count}: StoreMenu): string | null => {
+  if (price == null) return null;
+  return `${count && count > 1 ? `${count}개 ` : ''}${price.toLocaleString()}원`;
+};
+
+interface StatTileProps {
+  icon: string;
+  label: string;
+  value: number;
+  /** 상대 가게 값. 더 많은 쪽을 강조해 남길 가게 판단을 돕습니다. */
+  otherValue: number | null;
+}
+
+const StatTile = ({icon, label, value, otherValue}: StatTileProps) => {
+  const isMore = otherValue != null && value > otherValue;
+  return (
+    <div className={`dup-stat ${isMore ? 'dup-stat--more' : ''}`}>
+      <span className="dup-stat__label"><i className={`bi ${icon}`} aria-hidden="true"/>{label}</span>
+      <span className="dup-stat__value">
+        {value.toLocaleString()}
+        {isMore && <i className="bi bi-caret-up-fill ms-1" aria-label="상대 가게보다 많음"/>}
+      </span>
+    </div>
+  );
+};
+
+const RECENT_IMAGE_SLOTS = 3;
+
+const RecentImages = ({store, images, imageCount}: {
+  store: SimpleStore;
+  images: CandidateStore['recentImages'];
+  imageCount: number;
+}) => {
+  if (images.length === 0) {
+    return (
+      <div className="dup-panel__empty">
+        <i className="bi bi-image me-1"/>{imageCount > 0 ? '활성 이미지가 없습니다' : '등록된 이미지가 없습니다'}
+      </div>
+    );
+  }
+  const restCount = imageCount - images.length;
+  return (
+    <div className="d-flex gap-2">
+      {images.slice(0, RECENT_IMAGE_SLOTS).map((image, index) => (
+        <a key={image.imageId} href={image.url} target="_blank" rel="noopener noreferrer" className="review-thumb"
+           title={`${formatDateTimeShortKo(image.createdAt)} 등록`}>
+          <img src={image.url} alt={`${store.name} 최근 이미지`} loading="lazy"/>
+          {index === images.length - 1 && restCount > 0 && <span className="review-thumb__more">+{restCount}</span>}
+        </a>
+      ))}
+    </div>
+  );
+};
+
+/** 두 가게의 메뉴를 나란히 비교할 수 있도록 간단한 목록으로 보여줍니다. 메뉴가 많으면 영역 안에서 스크롤합니다. */
+const MenuList = ({menus}: { menus: StoreMenu[] }) => {
+  if (menus.length === 0) return <div className="dup-panel__empty"><i className="bi bi-list-ul me-1"/>등록된 메뉴가 없습니다</div>;
+  return (
+    <ul className="dup-menu">
+      {menus.map((menu, index) => {
+        const price = formatMenuPrice(menu);
+        return (
+          <li key={index} className="dup-menu__item">
+            <span className="dup-menu__name">
+              {menu.name || menu.category?.name || '메뉴명 없음'}
+              {menu.category && menu.name && <span className="dup-menu__category">{menu.category.name}</span>}
+            </span>
+            {price && <span className="dup-menu__price">{price}</span>}
+          </li>
+        );
+      })}
+    </ul>
+  );
+};
+
 interface StorePanelProps {
   candidateStore: CandidateStore | null;
-  other: SimpleStore | null;
+  other: CandidateStore | null;
   /** 머지 버튼 노출 여부 (검토 대기 + 운영자 권한) */
   actionable: boolean;
   disabled: boolean;
@@ -71,91 +154,77 @@ interface StorePanelProps {
   onMerge: (source: SimpleStore, target: SimpleStore) => void;
 }
 
-/** 어느 쪽을 남길지 판단할 때 보는 데이터 규모 */
-const CountStat = ({icon, label, value}: { icon: string; label: string; value: number }) => (
-  <span className="d-inline-flex align-items-center gap-1">
-    <i className={`bi ${icon} text-muted`} aria-hidden="true"/>
-    <span className="text-muted">{label}</span>
-    <strong>{value.toLocaleString()}</strong>
-  </span>
-);
-
-const THUMBNAIL_SIZE = 64;
-
 const StorePanel = ({candidateStore, other, actionable, disabled, onOpenDetail, onMerge}: StorePanelProps) => {
   if (!candidateStore) {
     return (
-      <div className="border rounded p-3 h-100 text-muted small d-flex align-items-center justify-content-center">
-        <i className="bi bi-question-circle me-1"/>가게 정보를 조회할 수 없습니다
+      <div className="dup-panel dup-panel--missing">
+        <i className="bi bi-question-circle fs-4"/>
+        <span>가게 정보를 조회할 수 없습니다</span>
       </div>
     );
   }
-  const {store, reviewCount, subscriberCount, imageCount, recentImages} = candidateStore;
-  const blockedReason = getMergeBlockedReason(store, other);
+  const {store, menus, reviewCount, subscriberCount, imageCount, recentImages} = candidateStore;
+  const otherStore = other?.store ?? null;
+  const blockedReason = getMergeBlockedReason(store, otherStore);
 
   return (
-    <div className="border rounded p-3 h-100 d-flex flex-column gap-1">
-      <div className="d-flex flex-wrap align-items-center gap-2">
-        <StoreTypeBadge storeType={store.storeType}/>
-        {!isActive(store) && <StoreStatusBadge status={store.status}/>}
-        <span className="font-monospace small text-muted ms-auto">#{store.storeId}</span>
-      </div>
-      <button
-        type="button"
-        className="btn btn-link p-0 text-start fw-semibold text-break"
-        onClick={() => onOpenDetail(store)}
-        aria-label={`${store.name} 상세 보기`}
-      >
-        {store.name}
-      </button>
-      <div className="small text-muted">
-        <i className="bi bi-geo-alt me-1"/>{store.address?.fullAddress || '주소 정보 없음'}
-      </div>
-      {store.categories.length > 0 && (
-        <div className="small text-muted">
-          <i className="bi bi-tag me-1"/>{store.categories.map(category => category.name).join(', ')}
+    <div className={`dup-panel ${isActive(store) ? '' : 'dup-panel--inactive'}`}>
+      <div className="dup-panel__head">
+        <div className="d-flex flex-wrap align-items-center gap-1">
+          <StoreTypeBadge storeType={store.storeType}/>
+          {!isActive(store) && <StoreStatusBadge status={store.status}/>}
+          <span className="dup-panel__id">#{store.storeId}</span>
         </div>
-      )}
-      <div className="small text-muted">
-        <i className="bi bi-star me-1"/>{store.rating.toFixed(1)}
-        {store.createdAt && <span className="ms-2">등록 {formatDateTimeShortKo(store.createdAt)}</span>}
-      </div>
-      <div className="d-flex flex-wrap gap-3 small mt-1">
-        <CountStat icon="bi-chat-square-text" label="리뷰" value={reviewCount}/>
-        <CountStat icon="bi-heart" label="즐겨찾기" value={subscriberCount}/>
-        <CountStat icon="bi-image" label="이미지" value={imageCount}/>
-      </div>
-      {recentImages.length > 0 ? (
-        <div className="d-flex gap-2 mt-1">
-          {recentImages.map(image => (
-            <a key={image.imageId} href={image.url} target="_blank" rel="noopener noreferrer"
-               title={`${formatDateTimeShortKo(image.createdAt)} 등록`}>
-              <img
-                src={image.url}
-                alt={`${store.name} 최근 이미지`}
-                loading="lazy"
-                width={THUMBNAIL_SIZE}
-                height={THUMBNAIL_SIZE}
-                className="rounded border"
-                style={{objectFit: 'cover'}}
-              />
-            </a>
-          ))}
+        <button
+          type="button"
+          className="dup-panel__name"
+          onClick={() => onOpenDetail(store)}
+          aria-label={`${store.name} 상세 보기`}
+        >
+          {store.name}<i className="bi bi-box-arrow-up-right ms-1" aria-hidden="true"/>
+        </button>
+        <div className="dup-panel__meta">
+          <span><i className="bi bi-geo-alt me-1"/>{store.address?.fullAddress || '주소 정보 없음'}</span>
+          <span className="d-flex flex-wrap align-items-center gap-2">
+            <span className="rating-badge"><i className="bi bi-star-fill"/>{store.rating.toFixed(1)}</span>
+            {store.createdAt && <span>등록 {formatDateTimeShortKo(store.createdAt)}</span>}
+          </span>
+          {store.categories.length > 0 && (
+            <span><i className="bi bi-tag me-1"/>{store.categories.map(category => category.name).join(', ')}</span>
+          )}
         </div>
-      ) : (
-        imageCount > 0 && <div className="small text-muted">활성 이미지가 없습니다</div>
-      )}
+      </div>
+
+      <div className="dup-stats">
+        <StatTile icon="bi-chat-square-text" label="리뷰" value={reviewCount} otherValue={other?.reviewCount ?? null}/>
+        <StatTile icon="bi-heart" label="즐겨찾기" value={subscriberCount}
+                  otherValue={other?.subscriberCount ?? null}/>
+        <StatTile icon="bi-image" label="이미지" value={imageCount} otherValue={other?.imageCount ?? null}/>
+      </div>
+
+      <div className="dup-panel__section">
+        <span className="dup-panel__label">최근 이미지</span>
+        <RecentImages store={store} images={recentImages} imageCount={imageCount}/>
+      </div>
+
+      <div className="dup-panel__section">
+        <span className="dup-panel__label">메뉴 {menus.length > 0 && <span className="page-count">{menus.length}</span>}</span>
+        <MenuList menus={menus}/>
+      </div>
+
       {actionable && (
-        <div className="mt-auto pt-2">
+        <div className="dup-panel__action">
           <button
             type="button"
             className="btn btn-sm btn-outline-danger w-100"
-            onClick={() => onMerge(store, other)}
+            onClick={() => onMerge(store, otherStore)}
             disabled={disabled || !!blockedReason}
           >
-            <i className="bi bi-arrow-right-circle me-1"/>이 가게를 삭제하고 상대 가게로 머지
+            <i className="bi bi-arrow-right-circle me-1"/>이 가게 제거 (상대 가게로 머지)
           </button>
-          {blockedReason && <div className="form-text">{blockedReason}</div>}
+          <div className="form-text">
+            {blockedReason ?? '이 가게의 데이터를 상대 가게로 옮기고 이 가게는 삭제합니다.'}
+          </div>
         </div>
       )}
     </div>
@@ -213,10 +282,11 @@ const StoreDuplicateCandidateManagement = () => {
     if (processingId) return;
     const confirmed = await confirm({
       title: '중복 가게 머지',
-      message: '원본 가게의 리뷰·이미지·방문 등 데이터를 대상 가게로 이관하고, 원본 가게를 삭제합니다.',
+      message: '제거할 가게의 리뷰·이미지·방문 인증·즐겨찾기를 유지할 가게로 이관합니다.\n'
+        + '이관이 끝나면 제거할 가게는 삭제되며, 되돌릴 수 없습니다.',
       details: [
-        {label: '삭제될 원본', value: `${source.name} (#${source.storeId})`},
-        {label: '데이터를 받을 대상', value: `${target.name} (#${target.storeId})`},
+        {label: '제거할 가게 (삭제됨)', value: `${source.name} (#${source.storeId})`},
+        {label: '유지할 가게 (데이터 받음)', value: `${target.name} (#${target.storeId})`},
       ],
       irreversible: true,
       confirmLabel: '머지',
@@ -294,44 +364,48 @@ const StoreDuplicateCandidateManagement = () => {
     const actionable = canProcess && candidate.status === STORE_DUPLICATE_CANDIDATE_STATUS.PENDING;
 
     return (
-      <li key={candidate.candidateId} className="list-group-item p-3">
-        <div className="d-flex flex-wrap align-items-center gap-2 mb-3">
-          <span className="badge text-bg-primary fs-6" title="이름 유사도 (후보 생성 시점)">
-            유사도 {formatSimilarity(candidate.nameSimilarity)}
-          </span>
-          <span className="badge text-bg-light border" title="두 가게 사이 거리 (후보 생성 시점)">
-            <i className="bi bi-arrows me-1"/>{candidate.distanceMeters.toLocaleString()}m
-          </span>
-          {candidate.overlappingCategories.length > 0 && (
-            <span className="small text-muted">
-              공통 카테고리: {candidate.overlappingCategories.map(category => category.name).join(', ')}
+      <li key={candidate.candidateId} className={`dup-candidate ${isProcessing ? 'dup-candidate--processing' : ''}`}>
+        <div className="dup-candidate__head">
+          <div className={`dup-similarity dup-similarity--${getSimilarityTone(candidate.nameSimilarity)}`}
+               title="이름 유사도 (후보 생성 시점)">
+            <span className="dup-similarity__label">이름 유사도</span>
+            <strong className="dup-similarity__value">{formatSimilarity(candidate.nameSimilarity)}</strong>
+          </div>
+          <div className="dup-candidate__facts">
+            <span className="dup-fact" title="두 가게 사이 거리 (후보 생성 시점)">
+              <i className="bi bi-signpost-split"/>{candidate.distanceMeters.toLocaleString()}m
             </span>
-          )}
-          <span className="ms-auto d-flex align-items-center gap-2">
+            {candidate.overlappingCategories.map(category => (
+              <span key={category.categoryId} className="dup-fact dup-fact--category" title="공통 카테고리">
+                <i className="bi bi-tag"/>{category.name}
+              </span>
+            ))}
+          </div>
+          <div className="dup-candidate__aside">
             {!isPending && statusOption && <span className={`badge ${statusOption.badgeClass}`}>{statusOption.label}</span>}
-            <span className="small text-muted">{formatDateTimeShortKo(candidate.createdAt)}</span>
-          </span>
+            <span>후보 생성 {formatDateTimeShortKo(candidate.createdAt)}</span>
+          </div>
         </div>
 
-        <div className="row g-2">
+        <div className="dup-candidate__pair">
           {[[firstStore, secondStore], [secondStore, firstStore]].map(([candidateStore, other], index) => (
-            <div key={candidateStore?.store.storeId ?? `empty-${index}`} className="col-12 col-md-6">
-              <StorePanel
-                candidateStore={candidateStore}
-                other={other?.store ?? null}
-                actionable={actionable}
-                disabled={!!processingId}
-                onOpenDetail={setSelectedStore}
-                onMerge={(source, target) => handleMerge(candidate, source, target)}
-              />
-            </div>
+            <StorePanel
+              key={candidateStore?.store.storeId ?? `empty-${index}`}
+              candidateStore={candidateStore}
+              other={other}
+              actionable={actionable}
+              disabled={!!processingId}
+              onOpenDetail={setSelectedStore}
+              onMerge={(source, target) => handleMerge(candidate, source, target)}
+            />
           ))}
+          <span className="dup-candidate__vs" aria-hidden="true"><i className="bi bi-arrow-left-right"/></span>
         </div>
 
         {actionable && (
-          <div className="d-flex justify-content-end align-items-center gap-2 mt-3">
+          <div className="dup-candidate__foot">
             {isProcessing && (
-              <span className="small text-muted">
+              <span className="small text-muted me-auto">
                 <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"/>
                 처리 중입니다. 데이터가 많으면 시간이 걸릴 수 있습니다.
               </span>
@@ -368,7 +442,7 @@ const StoreDuplicateCandidateManagement = () => {
     }
     return (
       <>
-        <ul className="list-group">{candidates.map(renderCandidate)}</ul>
+        <ul className="dup-candidate-list">{candidates.map(renderCandidate)}</ul>
         <div ref={loadMoreRef} className="text-center py-3" style={{display: hasMore ? 'block' : 'none'}}>
           {isLoading && <Loading/>}
         </div>
@@ -379,7 +453,7 @@ const StoreDuplicateCandidateManagement = () => {
   return (
     <div>
       <PageHeader
-        description="배치가 찾아낸 중복 의심 가게 쌍을 검토해 머지(원본 데이터 이관 후 삭제)하거나 무시합니다."
+        description="배치가 찾아낸 중복 의심 가게 쌍을 검토해 머지(제거할 가게 → 유지할 가게로 데이터 이관 후 제거할 가게 삭제)하거나 무시합니다."
         actions={
           <button className="btn btn-outline-primary" onClick={refresh} disabled={isLoading}>
             <i className="bi bi-arrow-clockwise me-1"/>새로고침
@@ -403,7 +477,7 @@ const StoreDuplicateCandidateManagement = () => {
           ))}
         </div>
         <p className="form-field__hint mb-0 mt-2">
-          이름 유사도가 높은 순으로 표시합니다. 머지 원본은 유저 제보 가게만 선택할 수 있고, 원본 가게는 삭제됩니다.
+          이름 유사도가 높은 순으로 표시합니다. 머지 버튼을 누른 가게가 제거할 가게가 되어 삭제되고, 상대 가게가 유지할 가게로 남습니다. 제거할 가게는 유저 제보 가게만 선택할 수 있습니다.
           {!canProcess && ' 머지·무시는 운영자 이상만 처리할 수 있습니다.'}
         </p>
       </FilterCard>
