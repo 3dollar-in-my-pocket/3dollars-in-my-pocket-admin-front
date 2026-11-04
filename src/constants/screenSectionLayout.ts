@@ -143,6 +143,40 @@ const enumField = (name: string, label: string, enumName: string): SectionConfig
   enumName,
 });
 
+/** 서버 enum 값 중에서 골라 순서대로 나열하는 필드. 빈 배열도 유효한 값입니다. */
+const orderedEnumListField = (
+  name: string,
+  label: string,
+  enumName: string,
+  defaultValue: string[]
+): SectionConfigFieldMeta => ({
+  name,
+  label,
+  valueType: 'ORDERED_STRING_LIST',
+  isRequired: true,
+  enumName,
+  defaultValue,
+});
+
+/**
+ * 홈 필터 바(HomeFilterBarType) 전체의 기존 고정 노출 순서.
+ * 선택지와 표시명은 서버 enum에서 조회하고, 이 값은 기본 구성과 구버전 설정 변환에만 사용합니다.
+ */
+export const HOME_FILTER_BAR_ORDER = [
+  'CATEGORY',
+  'EVENT',
+  'SNS_POST',
+  'OPEN_STATUS',
+  'RECENT_ACTIVITY',
+  'TARGET_STORES',
+  'MIN_REVIEW_RATING',
+  'TEST',
+  'SORT_TYPE',
+];
+
+/** 새 HOME_FILTER 설정의 기본 바 구성. 서버와 같이 EVENT를 제외한 전체 바를 기존 순서로 둡니다. */
+export const HOME_FILTER_DEFAULT_BARS = HOME_FILTER_BAR_ORDER.filter((bar) => bar !== 'EVENT');
+
 /** 광고 높이 필드. 애드몹/리스트/큐레이션 광고 모두 같은 범위와 추천값을 사용합니다. */
 const adHeightField = (name: string, label: string): SectionConfigFieldMeta =>
   integerField(name, label, 50, 200, {unit: 'dp', presets: [50, 100, 150, 200]});
@@ -183,7 +217,12 @@ export const SECTION_CONFIGS: Record<SectionType, SectionConfigMeta[]> = {
         booleanField('openStatusDefaultOn', '"영업중" 필터 기본 켜기'),
         booleanField('recentActivityDefaultOn', '"최근 활동" 필터 기본 켜기'),
         booleanField('targetStoresDefaultOn', '"사장님 직영점만" 필터 기본 켜기'),
-        booleanField('eventFilterVisible', '이벤트 필터 표시'),
+        orderedEnumListField(
+          'bars',
+          '노출 필터 바',
+          'HomeFilterBarType',
+          HOME_FILTER_DEFAULT_BARS
+        ),
       ],
     },
   ],

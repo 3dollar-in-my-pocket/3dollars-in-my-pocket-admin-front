@@ -245,7 +245,10 @@ describe('useSectionLayoutDraft', () => {
         openStatusDefaultOn: false,
         recentActivityDefaultOn: false,
         targetStoresDefaultOn: false,
-        eventFilterVisible: false,
+        bars: [
+          'CATEGORY', 'SNS_POST', 'OPEN_STATUS', 'RECENT_ACTIVITY',
+          'TARGET_STORES', 'MIN_REVIEW_RATING', 'TEST', 'SORT_TYPE',
+        ],
       });
       expect(result.current.sections[2].config).toEqual({type: 'HOME_LIST', adPositions: [], advertisementPositions: []});
       expect(result.current.isDirty).toBe(true);
@@ -264,6 +267,56 @@ describe('useSectionLayoutDraft', () => {
       expect(section.sectionId).toBe('HOME_LIST');
       expect(section.marginBottom).toBe(0);
       expect(section.config).toEqual(homeList.config);
+    });
+  });
+
+  describe('HOME_FILTER bars 전환', () => {
+    const homeFilter = (config: Record<string, unknown>): ScreenSectionLayout => ({
+      ...layout(1, 'HOME_FILTER', 'HOME_FILTER', 100),
+      config: {type: 'HOME_FILTER', ...config} as ScreenSectionLayout['config'],
+    });
+
+    it('bars가 없는 구버전 설정은 eventFilterVisible=true면 EVENT를 포함한 기존 순서로 채운다', () => {
+      const {result} = renderDraft([homeFilter({eventFilterVisible: true})]);
+
+      expect(result.current.sections[0].config).toEqual({
+        type: 'HOME_FILTER',
+        bars: [
+          'CATEGORY', 'EVENT', 'SNS_POST', 'OPEN_STATUS', 'RECENT_ACTIVITY',
+          'TARGET_STORES', 'MIN_REVIEW_RATING', 'TEST', 'SORT_TYPE',
+        ],
+      });
+      expect(result.current.isDirty).toBe(false);
+    });
+
+    it('bars가 없는 구버전 설정은 eventFilterVisible=false면 EVENT를 제외한다', () => {
+      const {result} = renderDraft([homeFilter({eventFilterVisible: false})]);
+
+      expect(result.current.sections[0].config?.bars).not.toContain('EVENT');
+    });
+
+    it('저장된 bars는 순서와 빈 배열을 그대로 유지한다', () => {
+      const {result} = renderDraft([homeFilter({bars: []}), {
+        ...homeFilter({bars: ['SORT_TYPE', 'CATEGORY']}),
+        id: 2,
+        sectionId: 'HOME_FILTER_2',
+        displayOrder: 200,
+      }]);
+
+      expect(result.current.sections[0].config?.bars).toEqual([]);
+      expect(result.current.sections[1].config?.bars).toEqual(['SORT_TYPE', 'CATEGORY']);
+    });
+
+    it('구버전 백엔드 호환을 위해 요청에 bars와 eventFilterVisible을 함께 보낸다', () => {
+      const {result} = renderDraft([homeFilter({bars: ['CATEGORY', 'EVENT']})]);
+      expect(result.current.toRequest()[0].config).toEqual({
+        type: 'HOME_FILTER',
+        bars: ['CATEGORY', 'EVENT'],
+        eventFilterVisible: true,
+      });
+
+      act(() => result.current.updateSection(0, {config: {type: 'HOME_FILTER', bars: ['CATEGORY']}}));
+      expect(result.current.toRequest()[0].config?.eventFilterVisible).toBe(false);
     });
   });
 

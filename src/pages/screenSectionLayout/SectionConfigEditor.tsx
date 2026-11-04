@@ -184,6 +184,117 @@ const StringListToggleInput: React.FC<StringListToggleInputProps> = ({
   );
 };
 
+interface OrderedListInputProps {
+  id: string;
+  field: SectionConfigFieldMeta;
+  value: unknown;
+  disabled: boolean;
+  invalid: boolean;
+  onChange: (value: SectionConfigValue | undefined) => void;
+}
+
+/**
+ * 서버 enum 선택지를 골라 순서를 정하는 입력. 선택한 순서가 곧 저장 순서입니다.
+ * 선택지에 없는 저장값도 보여주고 유지하되, 서버가 거절할 수 있어 경고합니다.
+ */
+const OrderedListInput: React.FC<OrderedListInputProps> = ({
+                                                                     id,
+                                                                     field,
+                                                                     value,
+                                                                     disabled,
+                                                                     invalid,
+                                                                     onChange
+                                                                   }) => {
+  const {options, isLoading, isError, isMissing} = useEnumOptions(field.enumName);
+  const selected = Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
+  const labelOf = (item: string) => options.find((option) => option.value === item)?.label ?? item;
+  // 선택지를 확인할 수 없을 때(조회 중/실패/서버 미제공)는 값을 지원하지 않는다고 단정하지 않습니다.
+  const isKnown = (item: string) =>
+    isLoading || isError || isMissing || options.some((option) => option.value === item);
+  const unselected = options.filter((option) => !selected.includes(option.value));
+
+  const move = (from: number, to: number) => {
+    const next = [...selected];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+    onChange(next);
+  };
+
+  return (
+    <div id={id} className={`section-config__ordered ${invalid ? 'is-invalid' : ''}`}>
+      {selected.length === 0 ? (
+        <div className="small text-warning-emphasis">
+          <i className="bi bi-eye-slash me-1"/>
+          선택한 항목이 없어 모두 숨겨집니다.
+        </div>
+      ) : (
+        <ol className="section-config__ordered-list" aria-label={`${field.label} 순서`}>
+          {selected.map((item, index) => {
+            const label = labelOf(item);
+            return (
+              <li key={item} className="section-config__ordered-item">
+                <span className="section-config__ordered-index">{index + 1}</span>
+                <span className="section-config__ordered-label" title={item}>
+                  {label}
+                  {!isKnown(item) && <span className="text-danger ms-1">(지원하지 않는 값: {item})</span>}
+                </span>
+                <button
+                  type="button"
+                  className="btn btn-sm btn-link p-0"
+                  disabled={disabled || index === 0}
+                  aria-label={`${label} 위로 이동`}
+                  onClick={() => move(index, index - 1)}
+                >
+                  <i className="bi bi-chevron-up"/>
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-sm btn-link p-0"
+                  disabled={disabled || index === selected.length - 1}
+                  aria-label={`${label} 아래로 이동`}
+                  onClick={() => move(index, index + 1)}
+                >
+                  <i className="bi bi-chevron-down"/>
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-sm btn-link p-0 text-danger"
+                  disabled={disabled}
+                  aria-label={`${label} 빼기`}
+                  onClick={() => onChange(selected.filter((_, i) => i !== index))}
+                >
+                  <i className="bi bi-x-lg"/>
+                </button>
+              </li>
+            );
+          })}
+        </ol>
+      )}
+
+      {isLoading && <span className="form-text">선택지를 불러오는 중...</span>}
+      {isError && <span className="form-text text-danger">선택지를 불러오지 못했습니다.</span>}
+      {isMissing && <span className="form-text text-warning-emphasis">서버에서 선택지를 제공하지 않습니다.</span>}
+      {unselected.length > 0 && (
+        <div className="section-config__presets" role="group" aria-label={`${field.label} 추가`}>
+          {unselected.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              className="margin-picker__chip"
+              title={option.value}
+              disabled={disabled}
+              onClick={() => onChange([...selected, option.value])}
+            >
+              <i className="bi bi-plus me-1"/>
+              {option.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 interface ConfigFieldInputProps {
   id: string;
   field: SectionConfigFieldMeta;
@@ -268,6 +379,17 @@ const ConfigFieldInput: React.FC<ConfigFieldInputProps> = ({id, field, value, di
     case 'STRING_LIST':
       return (
         <StringListToggleInput
+          id={id}
+          field={field}
+          value={value}
+          disabled={disabled}
+          invalid={invalid}
+          onChange={onChange}
+        />
+      );
+    case 'ORDERED_STRING_LIST':
+      return (
+        <OrderedListInput
           id={id}
           field={field}
           value={value}

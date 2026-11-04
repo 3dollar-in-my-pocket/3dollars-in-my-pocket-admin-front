@@ -12,7 +12,13 @@ import {
   SectionType,
   SectionTypeMeta
 } from '@/types/screenSectionLayout';
-import {findConfigMetaByType, getConfigFieldFullLabel, getSectionConfigs} from '@/constants/screenSectionLayout';
+import {
+  findConfigMetaByType,
+  getConfigFieldFullLabel,
+  getSectionConfigs,
+  HOME_FILTER_BAR_ORDER,
+  HOME_FILTER_DEFAULT_BARS
+} from '@/constants/screenSectionLayout';
 
 export const findConfigMeta = (
   sectionType: SectionType,
@@ -22,12 +28,17 @@ export const findConfigMeta = (
 /**
  * 설정 타입을 새로 고를 때의 초기값.
  *
- * 필수가 아닌 필드는 서버 기본값(BOOLEAN: false, INTEGER_LIST/STRING_LIST: 빈 배열)으로 채우고,
- * 필수 숫자 필드는 비워 둡니다. min을 기본값으로 해석하지 않습니다.
+ * defaultValue가 있는 필드는 그 값으로, 필수가 아닌 필드는 서버 기본값(BOOLEAN: false, INTEGER_LIST/STRING_LIST: 빈 배열)으로
+ * 채우고, 필수 숫자 필드는 비워 둡니다. min을 기본값으로 해석하지 않습니다.
  */
 export const buildDefaultConfig = (configMeta: SectionConfigMeta): ScreenSectionLayoutConfig => {
   const config: ScreenSectionLayoutConfig = {type: configMeta.type};
   configMeta.fields.forEach((field) => {
+    if (field.defaultValue !== undefined) {
+      config[field.name] = Array.isArray(field.defaultValue) ? [...field.defaultValue] as SectionConfigValue
+        : field.defaultValue;
+      return;
+    }
     if (field.valueType === 'BOOLEAN') config[field.name] = false;
     if (field.valueType === 'INTEGER_LIST' || field.valueType === 'STRING_LIST') config[field.name] = [];
   });
@@ -41,6 +52,18 @@ export const buildInitialConfig = (sectionType: SectionType): ScreenSectionLayou
 };
 
 /**
+ * 구버전 HOME_FILTER 설정(eventFilterVisible)을 bars로 바꿉니다. 서버의 기존 데이터 변환 규칙과 같습니다.
+ * TODO: 백엔드 bars 배포가 끝나면 제거합니다. (서버가 항상 bars를 내려줌)
+ */
+const migrateLegacyHomeFilter = (config: ScreenSectionLayoutConfig): ScreenSectionLayoutConfig => {
+  if (config.type !== 'HOME_FILTER' || !('eventFilterVisible' in config)) return config;
+  const {eventFilterVisible, ...rest} = config;
+  if (Array.isArray(rest.bars)) return rest;
+  const bars = eventFilterVisible === true ? [...HOME_FILTER_BAR_ORDER] : [...HOME_FILTER_DEFAULT_BARS];
+  return {...rest, bars};
+};
+
+/**
  * 서버에서 받은 설정을 편집용으로 정리합니다.
  *
  * EMPTY 설정인데 섹션이 EMPTY를 지원하지 않으면, 첫 번째 설정 타입의 빈 값으로 바꿔 편집할 수 있게 합니다.
@@ -49,8 +72,18 @@ export const normalizeConfig = (
   sectionType: SectionType,
   config?: ScreenSectionLayoutConfig | null
 ): ScreenSectionLayoutConfig | null | undefined => {
-  if (config?.type !== 'EMPTY' || findConfigMeta(sectionType, config.type)) return config;
+  if (!config) return config;
+  if (config.type !== 'EMPTY' || findConfigMeta(sectionType, config.type)) return migrateLegacyHomeFilter(config);
   return buildInitialConfig(sectionType) ?? config;
+};
+
+/**
+ * 저장 요청에 보낼 설정. 구버전 백엔드가 bars를 무시하므로 eventFilterVisible을 함께 보냅니다.
+ * TODO: 백엔드 bars 배포가 끝나면 제거합니다. (배포 순서 3단계: eventFilterVisible 전송 제거)
+ */
+export const toRequestConfig = (config: ScreenSectionLayoutConfig): ScreenSectionLayoutConfig => {
+  if (config.type !== 'HOME_FILTER' || !Array.isArray(config.bars)) return config;
+  return {...config, eventFilterVisible: (config.bars as string[]).includes('EVENT')};
 };
 
 const describeRange = (field: SectionConfigFieldMeta): string => {
@@ -96,6 +129,19 @@ const validateField = (field: SectionConfigFieldMeta, value: unknown): string | 
         return field.isRequired ? `${field.label} 값을 선택해주세요.` : undefined;
       }
       return typeof value === 'string' ? undefined : `${field.label} 값이 올바르지 않습니다.`;
+    case 'ORDERED_STRING_LIST': {
+      // 빈 배열은 "모두 숨김"처럼 유효한 값이므로 isRequired는 값이 있는지만 확인합니다.
+      if (value === undefined) {
+        return field.isRequired ? `${field.label} 값을 선택해주세요.` : undefined;
+      }
+      if (!Array.isArray(value) || value.some((item) => typeof item !== 'string' || !item)) {
+        return `${field.label} 값이 올바르지 않습니다.`;
+      }
+      if (new Set(value).size !== value.length) {
+        return `${field.label}에 중복된 값이 있습니다.`;
+      }
+      return undefined;
+    }
     case 'INTEGER_LIST': {
       if (value === undefined) {
         return field.isRequired ? `${field.label} 값을 입력해주세요.` : undefined;
@@ -187,10 +233,19 @@ export const formatSectionConfig = (
     .map((key) => {
       const field = configMeta?.fields.find((item) => item.name === key);
       const rawValue = config[key];
-      const enumLabel = field?.valueType === 'ENUM' && field.enumName && typeof rawValue === 'string'
-        ? enumLabels[field.enumName]?.[rawValue]
-        : undefined;
-      const value = enumLabel && enumLabel !== rawValue ? `${enumLabel} (${rawValue})` : formatValue(rawValue);
+      const labels = field?.enumName ? enumLabels[field.enumName] : undefined;
+      const withLabel = (item: string) => {
+        const label = labels?.[item];
+        return label && label !== item ? `${label} (${item})` : item;
+      };
+      let value: string;
+      if (field?.valueType === 'ENUM' && typeof rawValue === 'string') {
+        value = withLabel(rawValue);
+      } else if (field?.valueType === 'ORDERED_STRING_LIST' && Array.isArray(rawValue)) {
+        value = `[${(rawValue as string[]).map(withLabel).join(', ')}]`;
+      } else {
+        value = formatValue(rawValue);
+      }
       const unit = field?.unit && value !== '-' && !value.startsWith('[') ? field.unit : '';
       return `${field ? getConfigFieldFullLabel(field) : key}=${value}${unit}`;
     });
