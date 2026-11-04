@@ -3,7 +3,7 @@ import {StoreChangeHistory} from '@/types/storeChangeHistory';
 import {StorePost} from '@/types/storePost';
 import {StoreMessage} from '@/types/storeMessage';
 import {Coupon} from '@/types/coupon';
-import {ApiResponse, PaginatedResponse} from '@/types/api';
+import {ApiResponse, ContentListResponse, PaginatedResponse} from '@/types/api';
 import {apiDelete, apiGet, apiGetPaginated, apiPatch, apiPost} from './apiHelpers';
 
 /** 가게 데이터 이관은 데이터 양에 따라 오래 걸릴 수 있어 기본 타임아웃(5초)보다 길게 둡니다. */
@@ -59,6 +59,17 @@ export default {
       {cursor, size},
       buildTargetStoresParam(targetStores)
     );
+  },
+
+  /**
+   * 위치 기준 주변 활성 가게 조회 (거리 오름차순, 페이지네이션 없음)
+   * radiusMeters 10~1000, size 1~50. 범위를 벗어나면 400을 반환합니다.
+   * 보조 정보로 쓰는 곳이 많아 실패 안내는 호출부에서 처리합니다.
+   */
+  getAroundStores: async (
+    params: { latitude: number; longitude: number; radiusMeters?: number; size?: number }
+  ): Promise<ApiResponse<ContentListResponse<SimpleStore>>> => {
+    return apiGet<ContentListResponse<SimpleStore>>('/v1/stores/around', params, {suppressToast: true});
   },
 
   /**

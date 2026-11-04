@@ -117,6 +117,8 @@ export interface SimpleStore {
   labels: StoreLabel[];
   activitiesStatus: ActivitiesStatus;
   location?: Location;
+  /** 요청 위치로부터의 거리(m). 주변 가게 조회에서만 채워지고, 그 외 API에서는 항상 null입니다. */
+  distanceMeters?: number | null;
   createdAt?: string;
   updatedAt?: string;
 }

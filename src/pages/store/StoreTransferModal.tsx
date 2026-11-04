@@ -1,4 +1,4 @@
-import {FormEvent, useState} from 'react';
+import {FormEvent, useEffect, useState} from 'react';
 import {Modal} from 'react-bootstrap';
 import {toast} from 'react-toastify';
 import storeApi from '@/api/storeApi';
@@ -75,6 +75,23 @@ const getSkippedNote = ({type, skippedCount}: StoreTransferItem): string | null 
 type TargetSearchMode = 'name' | 'id';
 
 const SEARCH_PAGE_SIZE = 20;
+/** 유지할 가게 후보로 먼저 보여줄 주변 가게 조회 범위. 중복 제보 가게는 대부분 이 안에 있습니다. */
+const DEFAULT_AROUND_RADIUS_METERS = 300;
+/** 서버 허용 범위(10~1000m) 안에서 고를 수 있는 반경 */
+const AROUND_RADIUS_OPTIONS = [100, 300, 500, 1000];
+const MIN_AROUND_RADIUS_METERS = 10;
+const MAX_AROUND_RADIUS_METERS = 1000;
+const CUSTOM_RADIUS_OPTION = 'custom';
+
+/** 직접 입력한 반경을 검증합니다. 서버는 범위를 벗어나면 보정 없이 400을 내리므로 미리 막습니다. */
+const getRadiusInputError = (value: string): string | null => {
+  const radius = Number(value);
+  if (!value || !Number.isInteger(radius)) return '반경을 숫자로 입력해주세요.';
+  if (radius < MIN_AROUND_RADIUS_METERS) return `조회 반경은 ${MIN_AROUND_RADIUS_METERS}m 이상이어야 합니다.`;
+  if (radius > MAX_AROUND_RADIUS_METERS) return `조회 반경은 최대 ${MAX_AROUND_RADIUS_METERS}m까지 입력할 수 있습니다.`;
+  return null;
+};
+const AROUND_SIZE = 30;
 /** 확인 창에 나열할 제거할 가게 ID 최대 개수 */
 const CONFIRM_ID_PREVIEW_COUNT = 10;
 
@@ -85,6 +102,16 @@ const isDeletedStatus = (status: string) =>
 const getTargetInvalidReason = (target: StoreDetail): string | null => {
   if (isDeletedStatus(target.status)) return '삭제된 가게는 유지할 가게로 선택할 수 없습니다.';
   return null;
+};
+
+/** 주변 가게 조회 기준점. 제거할 가게가 여러 개면 좌표가 있는 가게들의 중심을 씁니다. */
+const getAroundCenter = (sources: TransferSourceStore[]): Location | null => {
+  const locations = sources.map(source => source.location).filter(Boolean);
+  if (locations.length === 0) return null;
+  return {
+    latitude: locations.reduce((sum, {latitude}) => sum + latitude, 0) / locations.length,
+    longitude: locations.reduce((sum, {longitude}) => sum + longitude, 0) / locations.length
+  };
 };
 
 /**
@@ -111,6 +138,40 @@ const SourceDistanceText = ({sources, to}: { sources: TransferSourceStore[]; to?
     </span>
   );
 };
+
+interface TargetCandidateListProps {
+  stores: SimpleStore[];
+  sources: TransferSourceStore[];
+  selectedId?: number;
+  disabled: boolean;
+  onSelect: (storeId: number) => void;
+}
+
+/** 유지할 가게 후보 목록. 주변 가게와 이름 검색 결과가 같이 씁니다. */
+const TargetCandidateList = ({stores, sources, selectedId, disabled, onSelect}: TargetCandidateListProps) => (
+  <div className="list-group">
+    {stores.map(store => (
+      <button
+        key={store.storeId}
+        type="button"
+        className={`list-group-item list-group-item-action py-2${selectedId === store.storeId ? ' active' : ''}`}
+        aria-current={selectedId === store.storeId}
+        onClick={() => onSelect(store.storeId)}
+        disabled={disabled}
+      >
+        <div className="d-flex align-items-center gap-2">
+          <StoreTypeBadge storeType={store.storeType} size="sm" bordered/>
+          <span className="text-truncate">{store.name}</span>
+          <span className="font-monospace small opacity-75 ms-auto">#{store.storeId}</span>
+        </div>
+        <div className="d-flex gap-2 small opacity-75">
+          <span className="text-truncate">{store.address?.fullAddress || '주소 정보 없음'}</span>
+          <SourceDistanceText sources={sources} to={store.location}/>
+        </div>
+      </button>
+    ))}
+  </div>
+);
 
 const TransferResultSummary = ({result}: { result: StoreTransferResult }) => {
   const items = result.contents;
@@ -150,6 +211,47 @@ const StoreTransferModal = ({
   /** 현재 이관 중인 제거할 가게 ID */
   const [transferringId, setTransferringId] = useState<number | null>(null);
   const [outcomes, setOutcomes] = useState<Record<number, TransferOutcome>>({});
+  const [aroundStores, setAroundStores] = useState<SimpleStore[] | null>(null);
+  const [aroundError, setAroundError] = useState<string | null>(null);
+  const [isLoadingAround, setIsLoadingAround] = useState(false);
+  const [aroundRadius, setAroundRadius] = useState(DEFAULT_AROUND_RADIUS_METERS);
+  /** 직접 입력 모드에서 아직 적용하지 않은 반경 입력값. null이면 목록에서 고르는 모드입니다. */
+  const [customRadiusInput, setCustomRadiusInput] = useState<string | null>(null);
+  const [customRadiusError, setCustomRadiusError] = useState<string | null>(null);
+
+  // 부모가 렌더마다 새 배열을 넘기므로 좌표 값으로 의존성을 잡아 중복 호출을 막습니다.
+  const aroundCenter = getAroundCenter(sourceStores);
+  const aroundLatitude = aroundCenter?.latitude;
+  const aroundLongitude = aroundCenter?.longitude;
+
+  /** 모달이 열리면 제거할 가게 주변 가게를 유지할 가게 후보로 먼저 보여줍니다. */
+  useEffect(() => {
+    setAroundStores(null);
+    setAroundError(null);
+    if (!show || aroundLatitude === undefined || aroundLongitude === undefined) return;
+
+    let ignore = false;
+    setIsLoadingAround(true);
+    storeApi.getAroundStores({
+      latitude: aroundLatitude,
+      longitude: aroundLongitude,
+      radiusMeters: aroundRadius,
+      size: AROUND_SIZE
+    }).then(response => {
+      if (ignore) return;
+      if (response.ok && response.data) {
+        setAroundStores(response.data.contents ?? []);
+      } else {
+        setAroundError(response.message || '주변 가게를 불러오지 못했습니다.');
+      }
+    }).finally(() => {
+      if (!ignore) setIsLoadingAround(false);
+    });
+    return () => {
+      ignore = true;
+      setIsLoadingAround(false);
+    };
+  }, [show, aroundLatitude, aroundLongitude, aroundRadius]);
 
   const sourceIds = new Set(sourceStores.map(source => source.storeId));
   const targetInvalidReason = target ? getTargetInvalidReason(target) : null;
@@ -165,9 +267,29 @@ const StoreTransferModal = ({
   });
   const hasOutcomes = Object.keys(outcomes).length > 0;
 
+  const handleRadiusOptionChange = (value: string) => {
+    setCustomRadiusError(null);
+    if (value === CUSTOM_RADIUS_OPTION) {
+      setCustomRadiusInput(String(aroundRadius));
+      return;
+    }
+    setCustomRadiusInput(null);
+    setAroundRadius(Number(value));
+  };
+
+  const applyCustomRadius = () => {
+    if (customRadiusInput === null) return;
+    const error = getRadiusInputError(customRadiusInput);
+    setCustomRadiusError(error);
+    if (!error) setAroundRadius(Number(customRadiusInput));
+  };
+
   const handleClose = () => {
     if (isTransferring) return;
     setSearchMode('name');
+    setAroundRadius(DEFAULT_AROUND_RADIUS_METERS);
+    setCustomRadiusInput(null);
+    setCustomRadiusError(null);
     resetSearch('');
     setOutcomes({});
     onHide();
@@ -256,6 +378,8 @@ const StoreTransferModal = ({
 
   // 제거할 가게는 유지할 가게가 될 수 없으므로 검색 결과에서 제외합니다.
   const visibleSearchResults = searchResults?.filter(store => !sourceIds.has(store.storeId)) ?? null;
+  const visibleAroundStores = aroundStores?.filter(store => !sourceIds.has(store.storeId)) ?? null;
+  const isShowingSearchResults = searchMode === 'name' && visibleSearchResults !== null;
   const isBusy = isLookingUp || isSearching || isTransferring;
 
   /** 서버 API가 단건이라 한 건씩 차례로 호출합니다. 한 건이 실패해도 나머지는 계속 진행합니다. */
@@ -429,34 +553,18 @@ const StoreTransferModal = ({
                 </div>
               </form>
 
-              {searchMode === 'name' && visibleSearchResults && (
+              {isShowingSearchResults ? (
                 visibleSearchResults.length === 0 ? (
                   <div className="small text-body-secondary mt-2">검색 결과가 없습니다.</div>
                 ) : (
                   <div className="mt-2" style={{maxHeight: 240, overflowY: 'auto'}}>
-                    <div className="list-group">
-                      {visibleSearchResults.map(store => (
-                        <button
-                          key={store.storeId}
-                          type="button"
-                          className={`list-group-item list-group-item-action py-2${
-                            target?.storeId === store.storeId ? ' active' : ''}`}
-                          aria-current={target?.storeId === store.storeId}
-                          onClick={() => selectTarget(store.storeId)}
-                          disabled={isBusy}
-                        >
-                          <div className="d-flex align-items-center gap-2">
-                            <StoreTypeBadge storeType={store.storeType} size="sm" bordered/>
-                            <span className="text-truncate">{store.name}</span>
-                            <span className="font-monospace small opacity-75 ms-auto">#{store.storeId}</span>
-                          </div>
-                          <div className="d-flex gap-2 small opacity-75">
-                            <span className="text-truncate">{store.address?.fullAddress || '주소 정보 없음'}</span>
-                            <SourceDistanceText sources={sourceStores} to={store.location}/>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
+                    <TargetCandidateList
+                      stores={visibleSearchResults}
+                      sources={sourceStores}
+                      selectedId={target?.storeId}
+                      disabled={isBusy}
+                      onSelect={selectTarget}
+                    />
                     {searchCursor && (
                       <button
                         type="button"
@@ -469,8 +577,80 @@ const StoreTransferModal = ({
                     )}
                   </div>
                 )
+              ) : aroundCenter && (
+                <div className="mt-2">
+                  <div className="d-flex flex-wrap align-items-center gap-2 small text-body-secondary mb-1">
+                    <span>주변 가게</span>
+                    <select
+                      className="form-select form-select-sm w-auto py-0"
+                      aria-label="주변 가게 조회 반경"
+                      value={customRadiusInput === null ? aroundRadius : CUSTOM_RADIUS_OPTION}
+                      onChange={e => handleRadiusOptionChange(e.target.value)}
+                      disabled={isBusy || isLoadingAround}
+                    >
+                      {AROUND_RADIUS_OPTIONS.map(radius => (
+                        <option key={radius} value={radius}>{formatDistance(radius)}</option>
+                      ))}
+                      <option value={CUSTOM_RADIUS_OPTION}>직접 입력</option>
+                    </select>
+                    {customRadiusInput !== null && (
+                      <div className="input-group input-group-sm w-auto">
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          className={`form-control py-0${customRadiusError ? ' is-invalid' : ''}`}
+                          style={{width: 72}}
+                          aria-label={`조회 반경(m), ${MIN_AROUND_RADIUS_METERS}~${MAX_AROUND_RADIUS_METERS}`}
+                          placeholder={`${MIN_AROUND_RADIUS_METERS}~${MAX_AROUND_RADIUS_METERS}`}
+                          value={customRadiusInput}
+                          onChange={e => {
+                            setCustomRadiusInput(e.target.value.replace(/\D/g, ''));
+                            setCustomRadiusError(null);
+                          }}
+                          onKeyDown={e => {
+                            if (e.key !== 'Enter') return;
+                            e.preventDefault();
+                            applyCustomRadius();
+                          }}
+                          disabled={isBusy || isLoadingAround}
+                        />
+                        <span className="input-group-text py-0">m</span>
+                        <button
+                          type="button"
+                          className="btn btn-outline-secondary py-0"
+                          onClick={applyCustomRadius}
+                          disabled={isBusy || isLoadingAround || customRadiusInput === String(aroundRadius)}
+                        >
+                          적용
+                        </button>
+                      </div>
+                    )}
+                    <span className="opacity-75">이내 가까운 순</span>
+                  </div>
+                  {customRadiusError && <div className="small text-danger mb-1" role="alert">{customRadiusError}</div>}
+                  {isLoadingAround ? (
+                    <div className="small text-body-secondary" role="status">
+                      <span className="spinner-border spinner-border-sm me-2"/>주변 가게를 불러오는 중...
+                    </div>
+                  ) : aroundError ? (
+                    <div className="small text-danger">{aroundError}</div>
+                  ) : visibleAroundStores?.length === 0 ? (
+                    <div className="small text-body-secondary">
+                      주변에 다른 가게가 없습니다. 이름이나 ID로 검색해주세요.
+                    </div>
+                  ) : visibleAroundStores && (
+                    <div style={{maxHeight: 240, overflowY: 'auto'}}>
+                      <TargetCandidateList
+                        stores={visibleAroundStores}
+                        sources={sourceStores}
+                        selectedId={target?.storeId}
+                        disabled={isBusy}
+                        onSelect={selectTarget}
+                      />
+                    </div>
+                  )}
+                </div>
               )}
-
               </>
             )}
 
