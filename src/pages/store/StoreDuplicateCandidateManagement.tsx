@@ -111,7 +111,7 @@ const RecentImages = ({store, images, imageCount}: {
   }
   const restCount = imageCount - images.length;
   return (
-    <div className="d-flex gap-2">
+    <div className="dup-images">
       {images.slice(0, RECENT_IMAGE_SLOTS).map((image, index) => (
         <a key={image.imageId} href={image.url} target="_blank" rel="noopener noreferrer" className="review-thumb"
            title={`${formatDateTimeShortKo(image.createdAt)} 등록`}>
