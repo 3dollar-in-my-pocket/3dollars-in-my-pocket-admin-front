@@ -18,9 +18,14 @@ export interface ScreenTypeMeta {
   supportsSectionOrdering: boolean;
 }
 
-export type ConfigValueType = 'INTEGER' | 'DECIMAL' | 'BOOLEAN' | 'INTEGER_LIST' | 'STRING_LIST' | 'ENUM';
+/**
+ * 설정 값 타입.
+ * - ORDERED_STRING_LIST: 선택지(enumName 또는 options) 중에서 고른 문자열 목록. 배열 순서가 의미를 가지며(예: 노출 순서), 빈 배열도 유효합니다.
+ */
+export type ConfigValueType =
+  'INTEGER' | 'DECIMAL' | 'BOOLEAN' | 'INTEGER_LIST' | 'STRING_LIST' | 'ORDERED_STRING_LIST' | 'ENUM';
 
-/** 서버가 선택지를 내려주지 않는 필드(STRING_LIST)에서 어드민이 직접 정의하는 선택지 */
+/** 서버가 선택지를 내려주지 않는 필드(STRING_LIST/ORDERED_STRING_LIST)에서 어드민이 직접 정의하는 선택지 */
 export interface SectionConfigOption {
   value: string;
   label: string;
@@ -46,12 +51,14 @@ export interface SectionConfigFieldMeta {
   unit?: string;
   /** 빠르게 고를 수 있는 추천값. INTEGER/DECIMAL에서만 사용합니다. */
   presets?: number[];
-  /** ENUM 선택지를 조회할 서버 enum 이름 (enumApi 응답의 키). 예: HomeBottomSheetTab */
+  /** ENUM/ORDERED_STRING_LIST 선택지를 조회할 서버 enum 이름 (enumApi 응답의 키). 예: HomeBottomSheetTab */
   enumName?: string;
   /** 입력 폼에서 묶어 보여줄 그룹 이름. 예: 애드몹, 자체 광고. 없으면 그룹 없이 표시합니다. */
   group?: string;
-  /** STRING_LIST 선택지 */
+  /** STRING_LIST/ORDERED_STRING_LIST 선택지 */
   options?: SectionConfigOption[];
+  /** 설정 타입을 새로 고를 때의 초기값. 없으면 값 타입별 기본값(buildDefaultConfig)을 사용합니다. */
+  defaultValue?: SectionConfigValue;
   description?: string;
 }
 

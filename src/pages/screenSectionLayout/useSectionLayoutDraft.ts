@@ -8,7 +8,7 @@ import {
   SectionVisibilityCondition
 } from '@/types/screenSectionLayout';
 import {buildDefaultSectionId} from '@/utils/validation/screenSectionLayoutValidation';
-import {buildInitialConfig, formatSectionConfig, normalizeConfig} from '@/utils/sectionConfigUtils';
+import {buildInitialConfig, formatSectionConfig, normalizeConfig, toRequestConfig} from '@/utils/sectionConfigUtils';
 import {formatVisibilityCondition} from '@/constants/screenSectionLayout';
 
 /**
@@ -170,7 +170,7 @@ export const useSectionLayoutDraft = () => {
       sectionId: section.sectionId.trim(),
       marginBottom: section.marginBottom,
       isVisible: section.isVisible,
-      ...(section.config ? {config: section.config} : {}),
+      ...(section.config ? {config: toRequestConfig(section.config)} : {}),
       ...(section.visibilityCondition ? {visibilityCondition: section.visibilityCondition} : {}),
     })), [sections]);
 

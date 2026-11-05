@@ -37,6 +37,8 @@ const useEnumOptions = (enumName?: string) => {
   const [options, setOptions] = useState<EnumSelectOption[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
+  // 서버 enum 응답에 enumName 키가 없는 경우(예: 해당 enum을 아직 배포하지 않은 서버). 빈 선택지와 구분합니다.
+  const [isMissing, setIsMissing] = useState(false);
 
   useEffect(() => {
     if (!enumName) return;
@@ -45,7 +47,9 @@ const useEnumOptions = (enumName?: string) => {
     setIsError(false);
     loadEnums()
       .then((enums) => {
-        if (!cancelled) setOptions((enums[enumName] ?? []).map(toSelectOption));
+        if (cancelled) return;
+        setIsMissing(!(enumName in enums));
+        setOptions((enums[enumName] ?? []).map(toSelectOption));
       })
       .catch(() => {
         if (!cancelled) setIsError(true);
@@ -58,7 +62,7 @@ const useEnumOptions = (enumName?: string) => {
     };
   }, [enumName]);
 
-  return {options, isLoading, isError};
+  return {options, isLoading, isError, isMissing};
 };
 
 /** 여러 enum의 값 → 표시명 맵을 조회합니다. 조회 전이나 실패 시에는 빈 맵입니다. */

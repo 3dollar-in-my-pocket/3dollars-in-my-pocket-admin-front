@@ -2364,6 +2364,45 @@ table.data-table .num {
   gap: 0.25rem;
 }
 
+/* 순서가 있는 선택 목록 (예: 홈 필터 바) */
+.section-config__ordered {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.section-config__ordered-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.section-config__ordered-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--page-border);
+  border-radius: 0.375rem;
+  background-color: #fff;
+  font-size: 0.8125rem;
+}
+
+.section-config__ordered-index {
+  min-width: 1.25rem;
+  color: var(--page-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.section-config__ordered-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
 .section-row__actions {
   display: flex;
   align-items: center;
