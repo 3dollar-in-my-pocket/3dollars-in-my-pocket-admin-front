@@ -3277,10 +3277,22 @@ table.data-table .num {
   border-top: 1px solid var(--page-border-soft);
 }
 
-.dup-menu__name {
+.dup-menu__content {
   min-width: 0;
+}
+
+.dup-menu__name {
+  display: block;
   color: #334155;
   word-break: break-all;
+}
+
+.dup-menu__description {
+  display: block;
+  margin-top: 0.125rem;
+  color: var(--page-text-muted);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .dup-menu__category {
