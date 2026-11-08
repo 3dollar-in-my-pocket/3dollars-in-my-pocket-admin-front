@@ -112,6 +112,53 @@ describe('useCursorPagination', () => {
     expect(result.current.items).toEqual([]);
   });
 
+  it('더보기 진행 중 refresh와 loadMore를 호출해도 요청과 커서를 유지한다', async () => {
+    let resolveMore!: (value: ApiResponse<PaginatedResponse<Row>>) => void;
+    const fetcher = vi.fn()
+      .mockResolvedValueOnce(page([1], {hasMore: true, nextCursor: 'c1'}))
+      .mockImplementationOnce(() => new Promise(resolve => { resolveMore = resolve; }))
+      .mockResolvedValueOnce(page([3]));
+    const {result} = renderHook(() => useCursorPagination<Row>({fetcher}));
+
+    await waitFor(() => expect(result.current.items).toEqual([{id: 1}]));
+    act(() => {
+      result.current.loadMore();
+      result.current.refresh();
+      result.current.loadMore();
+    });
+    expect(fetcher).toHaveBeenCalledTimes(2);
+
+    await act(async () => { resolveMore(page([2], {hasMore: true, nextCursor: 'c2'})); });
+    expect(result.current.items).toEqual([{id: 1}, {id: 2}]);
+    await act(async () => { result.current.loadMore(); });
+    expect(fetcher).toHaveBeenLastCalledWith('c2');
+    expect(result.current.items).toEqual([{id: 1}, {id: 2}, {id: 3}]);
+  });
+
+  it('요청 중 deps가 바뀌면 다시 조회하고 이전 응답은 무시한다', async () => {
+    let resolveFirst!: (value: ApiResponse<PaginatedResponse<Row>>) => void;
+    let resolveLatest!: (value: ApiResponse<PaginatedResponse<Row>>) => void;
+    const fetcher = vi.fn()
+      .mockImplementationOnce(() => new Promise(resolve => { resolveFirst = resolve; }))
+      .mockImplementationOnce(() => new Promise(resolve => { resolveLatest = resolve; }));
+    const {result, rerender} = renderHook(
+      ({tab}) => useCursorPagination<Row>({fetcher, deps: [tab]}),
+      {initialProps: {tab: 'a'}}
+    );
+
+    rerender({tab: 'b'});
+    expect(fetcher).toHaveBeenCalledTimes(2);
+    expect(fetcher).toHaveBeenLastCalledWith(null);
+
+    await act(async () => { resolveFirst(page([1])); });
+    expect(result.current.items).toEqual([]);
+    expect(result.current.isLoading).toBe(true);
+
+    await act(async () => { resolveLatest(page([9])); });
+    expect(result.current.items).toEqual([{id: 9}]);
+    expect(result.current.isLoading).toBe(false);
+  });
+
   it('deps가 바뀌면 첫 페이지부터 다시 조회한다', async () => {
     const fetcher = vi.fn()
       .mockResolvedValueOnce(page([1], {hasMore: true, nextCursor: 'c1'}))
