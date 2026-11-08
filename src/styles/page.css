@@ -3303,6 +3303,7 @@ table.data-table .num {
 .dup-menu__price {
   flex-shrink: 0;
   margin-left: auto;
-  color: var(--page-text-muted);
+  color: #1d4ed8;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
 }

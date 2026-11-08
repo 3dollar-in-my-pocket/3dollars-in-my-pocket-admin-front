@@ -75,7 +75,7 @@ export function useCursorPagination<T>({
 
   const load = useCallback(async (reset: boolean) => {
     // 더보기는 진행 중인 요청이 있거나 남은 페이지가 없으면 차단.
-    // 첫 페이지 재조회(reset)는 조건 변경(정렬·검색어 등)일 수 있으므로 진행 중인 요청을 대체한다.
+    // 조건 변경에 따른 첫 페이지 재조회는 진행 중인 요청을 대체한다.
     if (!reset && (isFetchingRef.current || !cursorRef.current)) return;
 
     const requestId = ++requestIdRef.current;
@@ -114,6 +114,7 @@ export function useCursorPagination<T>({
   }, []);
 
   const refresh = useCallback(() => {
+    if (isFetchingRef.current) return;
     cursorRef.current = null;
     load(true);
   }, [load]);

@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {Badge, Form} from 'react-bootstrap';
 import applicationApi, {AppScheme} from '@/api/applicationApi';
 
@@ -26,23 +26,35 @@ const DeepLinkSelector: React.FC<DeepLinkSelectorProps> = ({
   const [schemes, setSchemes] = useState<AppScheme[]>([]);
   const [selectedScheme, setSelectedScheme] = useState<string>('');
   const [schemeParams, setSchemeParams] = useState<Record<string, string>>({});
-  const [isCustomPath, setIsCustomPath] = useState<boolean>(false);
+  const [isCustomPath, setIsCustomPath] = useState<boolean>(Boolean(value));
+  const lastValueRef = useRef(value);
+
+  const emitChange = (nextValue: string) => {
+    lastValueRef.current = nextValue;
+    onChange(nextValue);
+  };
+
+  // 저장된 주소는 직접 편집할 수 있도록 복원한다. 사용자 입력 중인 파라미터는 유지한다.
+  useEffect(() => {
+    if (value === lastValueRef.current) return;
+    lastValueRef.current = value;
+    setSelectedScheme('');
+    setSchemeParams({});
+    setIsCustomPath(Boolean(value));
+  }, [value]);
 
   // 스킴 목록 로드
   useEffect(() => {
+    let active = true;
     const loadSchemes = async () => {
       const response = await applicationApi.getSchemes(applicationType);
-      if (response.ok) {
-        setSchemes(response.data.contents);
+      if (active) {
+        setSchemes(response.ok ? response.data.contents : []);
       }
     };
     loadSchemes();
 
-    // applicationType이 변경되면 선택된 스킴 초기화
-    setSelectedScheme('');
-    setSchemeParams({});
-    setIsCustomPath(false);
-    onChange('');
+    return () => { active = false; };
   }, [applicationType]);
 
   // 선택된 스킴에서 플레이스홀더 추출
@@ -59,12 +71,12 @@ const DeepLinkSelector: React.FC<DeepLinkSelectorProps> = ({
       setIsCustomPath(true);
       setSelectedScheme('');
       setSchemeParams({});
-      onChange('');
+      emitChange('');
     } else if (schemeValue === '') {
       setIsCustomPath(false);
       setSelectedScheme('');
       setSchemeParams({});
-      onChange('');
+      emitChange('');
     } else {
       setIsCustomPath(false);
       setSelectedScheme(schemeValue);
@@ -75,9 +87,9 @@ const DeepLinkSelector: React.FC<DeepLinkSelectorProps> = ({
 
       // 플레이스홀더가 없으면 바로 경로 설정
       if (placeholders.length === 0) {
-        onChange(schemeValue);
+        emitChange(schemeValue);
       } else {
-        onChange('');
+        emitChange('');
       }
     }
   };
@@ -95,9 +107,9 @@ const DeepLinkSelector: React.FC<DeepLinkSelectorProps> = ({
       Object.entries(newParams).forEach(([key, val]) => {
         finalPath = finalPath.replace(`{{${key}}}`, val);
       });
-      onChange(finalPath);
+      emitChange(finalPath);
     } else {
-      onChange('');
+      emitChange('');
     }
   };
 
@@ -185,7 +197,7 @@ const DeepLinkSelector: React.FC<DeepLinkSelectorProps> = ({
           type="text"
           placeholder={placeholder}
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => emitChange(e.target.value)}
           className="border-2 mb-2"
         />
       )}
