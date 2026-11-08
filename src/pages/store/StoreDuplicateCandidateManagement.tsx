@@ -138,7 +138,7 @@ const MenuList = ({menus}: { menus: StoreMenu[] }) => {
                 {menu.name || menu.category?.name || '메뉴명 없음'}
                 {menu.category && menu.name && <span className="dup-menu__category">{menu.category.name}</span>}
               </span>
-              {menu.description && <span className="dup-menu__description">{menu.description}</span>}
+              {!price && menu.description && <span className="dup-menu__description">{menu.description}</span>}
             </div>
             {price && <span className="dup-menu__price">{price}</span>}
           </li>
