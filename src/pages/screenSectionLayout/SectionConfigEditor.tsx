@@ -133,7 +133,7 @@ interface StringListToggleInputProps {
   onChange: (value: SectionConfigValue | undefined) => void;
 }
 
-/** 어드민이 정의한 선택지를 토글해 문자열 목록을 고르는 입력. 선택지에 없는 저장값도 보여주고 유지합니다. */
+/** 서버 enum 또는 필드 선택지를 토글하는 입력. 선택지에 없는 저장값도 보여주고 유지합니다. */
 const StringListToggleInput: React.FC<StringListToggleInputProps> = ({
                                                                        id,
                                                                        field,
@@ -142,8 +142,9 @@ const StringListToggleInput: React.FC<StringListToggleInputProps> = ({
                                                                        invalid,
                                                                        onChange
                                                                      }) => {
+  const {options: enumOptions, isLoading, isError, isMissing} = useEnumOptions(field.enumName);
   const selected = Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
-  const options = field.options ?? [];
+  const options = field.enumName ? enumOptions : field.options ?? [];
   const unknownOptions = selected
     .filter((item) => !options.some((option) => option.value === item))
     .map((item) => ({value: item, label: item}));
@@ -161,6 +162,9 @@ const StringListToggleInput: React.FC<StringListToggleInputProps> = ({
       role="group"
       aria-label={field.label}
     >
+      {isLoading && <span className="form-text">선택지를 불러오는 중...</span>}
+      {isError && <span className="form-text text-danger">선택지를 불러오지 못했습니다.</span>}
+      {isMissing && <span className="form-text text-warning-emphasis">서버에서 선택지를 제공하지 않습니다.</span>}
       {[...options, ...unknownOptions].map((option) => {
         const isSelected = selected.includes(option.value);
         return (

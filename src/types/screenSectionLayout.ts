@@ -51,7 +51,7 @@ export interface SectionConfigFieldMeta {
   unit?: string;
   /** 빠르게 고를 수 있는 추천값. INTEGER/DECIMAL에서만 사용합니다. */
   presets?: number[];
-  /** ENUM/ORDERED_STRING_LIST 선택지를 조회할 서버 enum 이름 (enumApi 응답의 키). 예: HomeBottomSheetTab */
+  /** ENUM/STRING_LIST/ORDERED_STRING_LIST 선택지를 조회할 서버 enum 이름 (enumApi 응답의 키). */
   enumName?: string;
   /** 입력 폼에서 묶어 보여줄 그룹 이름. 예: 애드몹, 자체 광고. 없으면 그룹 없이 표시합니다. */
   group?: string;
