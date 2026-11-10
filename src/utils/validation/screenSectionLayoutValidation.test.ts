@@ -257,7 +257,6 @@ describe('validateSectionLayouts', () => {
           cardAdPositions: [5, 10],
           cardAdvertisementPositions: [3, 5],
           cardAdvertisementCarouselIds: ['POPULAR_SNACKS'],
-          searchStoreMaxDistanceM: 1000,
           ...config,
         },
       },

@@ -3,7 +3,6 @@ import {
   ScreenTypeMeta,
   SectionConfigFieldMeta,
   SectionConfigMeta,
-  SectionConfigOption,
   SectionType,
   SectionTypeMeta,
   SectionVisibilityCondition,
@@ -102,7 +101,7 @@ const positionsField = (name: string, label: string): SectionConfigFieldMeta => 
 const stringListField = (
   name: string,
   label: string,
-  options: SectionConfigOption[],
+  enumName: string,
   maxItems: number,
   description?: string
 ): SectionConfigFieldMeta => ({
@@ -110,20 +109,10 @@ const stringListField = (
   label,
   valueType: 'STRING_LIST',
   isRequired: false,
-  options,
+  enumName,
   maxItems,
   description,
 });
-
-/**
- * 홈 큐레이션 캐러셀 ID. 서버가 목록을 내려주지 않으므로 어드민에서 관리합니다.
- * 서버에 없는 ID는 경고 로그만 남기고 무시됩니다.
- */
-export const HOME_CURATION_CAROUSEL_OPTIONS: SectionConfigOption[] = [
-  {value: 'POPULAR_SNACKS', label: '최근 인기 간식'},
-  {value: 'TASTE_SNACKS', label: '입맛별로 찾는 간식'},
-  {value: 'SNS_STORES', label: 'SNS에서 만난 가게'},
-];
 
 const positiveDecimalField = (name: string, label: string, options: FieldOptions = {}): SectionConfigFieldMeta => ({
   name,
@@ -257,7 +246,6 @@ export const SECTION_CONFIGS: Record<SectionType, SectionConfigMeta[]> = {
       type: 'HOME_CURATION',
       label: '홈 큐레이션 설정',
       fields: [
-        positiveDecimalField('searchStoreMaxDistanceM', '가게 검색 반경', {unit: 'm'}),
         ...inGroup('캐러셀 애드몹', [
           positionsField('carouselAdPositions', '삽입 위치'),
           adHeightField('carouselAdHeight', '영역 높이'),
@@ -273,7 +261,7 @@ export const SECTION_CONFIGS: Record<SectionType, SectionConfigMeta[]> = {
           stringListField(
             'cardAdvertisementCarouselIds',
             '적용 캐러셀',
-            HOME_CURATION_CAROUSEL_OPTIONS,
+            'HomeCurationCarouselType',
             10,
             '선택한 캐러셀에만 자체 광고 노출. 비어 있으면 미노출'
           ),

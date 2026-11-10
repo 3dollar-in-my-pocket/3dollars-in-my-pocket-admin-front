@@ -241,7 +241,8 @@ export const formatSectionConfig = (
       let value: string;
       if (field?.valueType === 'ENUM' && typeof rawValue === 'string') {
         value = withLabel(rawValue);
-      } else if (field?.valueType === 'ORDERED_STRING_LIST' && Array.isArray(rawValue)) {
+      } else if ((field?.valueType === 'ORDERED_STRING_LIST' || field?.valueType === 'STRING_LIST')
+        && Array.isArray(rawValue)) {
         value = `[${(rawValue as string[]).map(withLabel).join(', ')}]`;
       } else {
         value = formatValue(rawValue);
