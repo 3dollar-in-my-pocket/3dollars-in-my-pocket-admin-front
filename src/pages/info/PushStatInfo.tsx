@@ -1,5 +1,7 @@
 import PageHeader from "@/components/common/PageHeader";
+import SectionCard from "@/components/common/SectionCard";
 import LinkCardGrid, {ExternalLinkCard} from "@/components/common/LinkCardGrid";
+import PushStatistics from "./PushStatistics";
 
 const LINKS: ExternalLinkCard[] = [
   {
@@ -22,8 +24,17 @@ const LINKS: ExternalLinkCard[] = [
 
 const PushStatsInfo = () => (
   <div>
-    <PageHeader description="Firebase Messaging으로 발송된 푸시 메시지의 통계를 확인합니다. 링크를 클릭하면 해당 앱의 Firebase Console 리포트로 이동합니다."/>
-    <LinkCardGrid items={LINKS}/>
+    <PageHeader description="유저 앱 푸시 타입별 발송 · 노출 · 클릭 수와 클릭률을 확인합니다."/>
+    <PushStatistics/>
+
+    <SectionCard
+      title="Firebase Console 리포트"
+      icon="bi-box-arrow-up-right"
+      description="Firebase Messaging 리포트로 이동합니다. 사장님 앱 푸시 통계는 이곳에서 확인합니다."
+      className="mt-3"
+    >
+      <LinkCardGrid items={LINKS}/>
+    </SectionCard>
   </div>
 );
 

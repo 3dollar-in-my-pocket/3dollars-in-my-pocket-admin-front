@@ -11,20 +11,12 @@ const LINKS: ExternalLinkCard[] = [
     linkLabel: "Google Analytics 열기",
   },
   {
-    key: "admob-ios",
-    icon: "bi-apple",
-    title: "유저 앱 AdMob (iOS)",
-    description: "iOS 유저 앱의 AdMob 광고 수익 및 성과를 확인합니다.",
-    href: "https://admob.google.com/v2/apps/1242588198/overview?sac=true&authuser=1",
-    linkLabel: "AdMob iOS 열기",
-  },
-  {
-    key: "admob-android",
-    icon: "bi-android2",
-    title: "유저 앱 AdMob (Android)",
-    description: "Android 유저 앱의 AdMob 광고 수익 및 성과를 확인합니다.",
+    key: "admob",
+    icon: "bi-badge-ad",
+    title: "유저 앱 AdMob",
+    description: "유저 앱(iOS · Android)의 AdMob 광고 수익 및 성과를 확인합니다.",
     href: "https://admob.google.com/v2/apps/6340312334/overview?sac=true&authuser=2",
-    linkLabel: "AdMob Android 열기",
+    linkLabel: "AdMob 열기",
   },
 ];
 
