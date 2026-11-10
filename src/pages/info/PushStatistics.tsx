@@ -40,6 +40,15 @@ const QUICK_RANGES = [
 
 const ALL_PUSH_TYPES = "";
 
+const SORT_COLUMNS = [
+  {key: "pushType", label: "푸시 타입"},
+  {key: "sentCount", label: "발송 수"},
+  {key: "impressionCount", label: "노출 수"},
+  {key: "clickCount", label: "클릭 수"},
+  {key: "clickRate", label: "클릭률"},
+] as const;
+type SortKey = typeof SORT_COLUMNS[number]["key"];
+
 const toDateString = (date: Date): string => {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -76,9 +85,26 @@ const PushStatistics = () => {
   const [data, setData] = useState<PushStatisticsData>({total: [], daily: []});
   const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState("");
+  const [searchRange, setSearchRange] = useState<{startDate: string; endDate: string} | null>(null);
+  const [sort, setSort] = useState<{key: SortKey; direction: "ascending" | "descending"} | null>(null);
 
   const pushTypeLabels = useEnumLabels(["PushType"]).PushType ?? {};
   const pushTypeLabel = (pushType: string) => pushTypeLabels[pushType] ?? pushType;
+
+  const sortedTotal = useMemo(() => {
+    if (!sort) return data.total;
+    return [...data.total].sort((a, b) => {
+      const aValue = sort.key === "pushType" ? (pushTypeLabels[a.pushType] ?? a.pushType) : a[sort.key];
+      const bValue = sort.key === "pushType" ? (pushTypeLabels[b.pushType] ?? b.pushType) : b[sort.key];
+      // 집계되지 않은 클릭률은 정렬 방향과 관계없이 마지막에 표시한다.
+      if (aValue == null) return bValue == null ? 0 : 1;
+      if (bValue == null) return -1;
+      const comparison = typeof aValue === "string" && typeof bValue === "string"
+        ? aValue.localeCompare(bValue, "ko")
+        : Number(aValue) - Number(bValue);
+      return sort.direction === "ascending" ? comparison : -comparison;
+    });
+  }, [data.total, sort, pushTypeLabels]);
 
   const dateRangeError = useMemo(() => {
     if (!startDate || !endDate) return "조회 기간을 선택해주세요.";
@@ -90,9 +116,10 @@ const PushStatistics = () => {
   }, [startDate, endDate, minDate, maxDate]);
 
   useEffect(() => {
-    if (dateRangeError) return;
+    if (!searchRange) return;
+    const {startDate, endDate} = searchRange;
 
-    // 기간을 빠르게 바꿀 때 이전 응답이 늦게 도착해 덮어쓰지 않도록 무시한다
+    // 페이지를 벗어나면 이전 응답을 무시한다
     let cancelled = false;
     setLoading(true);
     setFetchError("");
@@ -110,6 +137,10 @@ const PushStatistics = () => {
         total: totalResponse.data?.contents ?? [],
         daily: dailyResponse.data?.contents ?? [],
       });
+    }).catch(() => {
+      if (cancelled) return;
+      setData({total: [], daily: []});
+      setFetchError("푸시 통계를 불러오지 못했습니다.");
     }).finally(() => {
       if (!cancelled) setLoading(false);
     });
@@ -117,7 +148,12 @@ const PushStatistics = () => {
     return () => {
       cancelled = true;
     };
-  }, [startDate, endDate, dateRangeError]);
+  }, [searchRange]);
+
+  const handleSearch = () => {
+    if (loading || dateRangeError) return;
+    setSearchRange({startDate, endDate});
+  };
 
   const summary = useMemo(() => {
     const sentCount = data.total.reduce((sum, row) => sum + row.sentCount, 0);
@@ -128,6 +164,8 @@ const PushStatistics = () => {
 
   /** DAILY 행을 일자별로 합산 (선택한 푸시 타입만). 데이터 없는 날짜는 행이 없으므로 0으로 채운다 */
   const chartData = useMemo(() => {
+    if (!searchRange) return [];
+    const {startDate, endDate} = searchRange;
     const byDate = new Map<string, { sent: number; impression: number; click: number }>();
     for (let date = new Date(`${startDate}T00:00:00`); toDateString(date) <= endDate; date.setDate(date.getDate() + 1)) {
       byDate.set(toDateString(date), {sent: 0, impression: 0, click: 0});
@@ -147,7 +185,7 @@ const PushStatistics = () => {
       "노출": counts.impression,
       "클릭": counts.click,
     }));
-  }, [data.daily, chartPushType, startDate, endDate]);
+  }, [data.daily, chartPushType, searchRange]);
 
   const setQuickDateRange = (days: number) => {
     setStartDate(daysAgo(days));
@@ -156,8 +194,14 @@ const PushStatistics = () => {
   };
 
   const renderContent = () => {
-    if (dateRangeError) {
-      return <EmptyState icon="bi-exclamation-triangle" title="조회 조건을 확인해주세요" description={dateRangeError}/>;
+    if (!searchRange) {
+      return (
+        <EmptyState
+          icon="bi-search"
+          title="조회 기간을 선택해주세요"
+          description="기간을 선택한 후 검색 버튼을 눌러 푸시 통계를 조회하세요."
+        />
+      );
     }
     if (loading) {
       return <div className="py-5"><Loading/></div>;
@@ -196,21 +240,42 @@ const PushStatistics = () => {
         <SectionCard
           title="푸시 타입별 합계"
           icon="bi-table"
-          description={`${startDate} ~ ${endDate} 기간 합계입니다.`}
+          description={`${searchRange.startDate} ~ ${searchRange.endDate} 기간 합계입니다.`}
           flush
         >
           <DataTable maxHeight="440px">
             <thead>
             <tr>
-              <th>푸시 타입</th>
-              <th className="num">발송 수</th>
-              <th className="num">노출 수</th>
-              <th className="num">클릭 수</th>
-              <th className="num">클릭률</th>
+              {SORT_COLUMNS.map(({key, label}) => (
+                <th
+                  key={key}
+                  scope="col"
+                  className={key === "pushType" ? undefined : "num"}
+                  aria-sort={sort?.key === key ? sort.direction : "none"}
+                >
+                  <button
+                    type="button"
+                    className="btn btn-link p-0 text-reset text-decoration-none fw-semibold"
+                    onClick={() => setSort((previous) => ({
+                      key,
+                      direction: previous?.key === key && previous.direction === "ascending"
+                        ? "descending" : "ascending",
+                    }))}
+                  >
+                    {label}{" "}
+                    <i
+                      aria-hidden="true"
+                      className={`bi bi-${sort?.key === key
+                        ? sort.direction === "ascending" ? "sort-up" : "sort-down"
+                        : "arrow-down-up"}`}
+                    />
+                  </button>
+                </th>
+              ))}
             </tr>
             </thead>
             <tbody>
-            {data.total.map((row) => (
+            {sortedTotal.map((row) => (
               <tr key={row.pushType}>
                 <td>
                   <div>{pushTypeLabel(row.pushType)}</div>
@@ -262,7 +327,16 @@ const PushStatistics = () => {
 
   return (
     <div>
-      <FilterCard>
+      <FilterCard aside={
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={handleSearch}
+          disabled={loading || !!dateRangeError}
+        >
+          {loading ? "조회 중..." : "검색"}
+        </button>
+      }>
         <div className="row g-3">
           <div className="col-6 col-lg-3">
             <label className="form-label" htmlFor="push-stat-start-date">시작일</label>
@@ -310,6 +384,7 @@ const PushStatistics = () => {
             </div>
           </div>
         </div>
+        {dateRangeError && <div className="text-danger mt-2" role="alert">{dateRangeError}</div>}
       </FilterCard>
 
       {renderContent()}
