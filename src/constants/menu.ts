@@ -86,10 +86,16 @@ export const menuGroups: MenuGroup[] = [
   {
     title: "콘텐츠",
     icon: "bi-megaphone-fill",
-    description: "광고, 메달, FAQ 등 콘텐츠를 관리합니다",
+    description: "광고, 메달, 미션, FAQ 등 콘텐츠를 관리합니다",
     items: [
       {path: "/manage/advertisement", label: "광고 관리", icon: "bi-bullseye", allowedRoles: [AdminRole.OPERATOR]},
       {path: "/manage/medal", label: "메달 관리", icon: "bi-award-fill", allowedRoles: [AdminRole.OPERATOR]},
+      {
+        path: "/manage/mission",
+        label: "미션 관리",
+        icon: "bi-flag-fill",
+        allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]
+      },
       {path: "/manage/faq", label: "FAQ 관리", icon: "bi-question-circle-fill", allowedRoles: [AdminRole.OPERATOR]},
       {
         path: "/manage/store-category",

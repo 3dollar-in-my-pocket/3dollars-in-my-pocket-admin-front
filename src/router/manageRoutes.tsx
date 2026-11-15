@@ -24,6 +24,7 @@ const RandomNameTool = lazy(() => import("../pages/tool/RandomNameTool"));
 const Admin = lazy(() => import("../pages/admin/Admin"));
 const PollManagement = lazy(() => import("../pages/poll/PollManagement"));
 const MedalManagement = lazy(() => import("../pages/medal/MedalManagement"));
+const MissionManagement = lazy(() => import("../pages/mission/MissionManagement"));
 const UserRankingManagement = lazy(() => import("../pages/userRanking/UserRankingManagement"));
 const StoreMarkerManage = lazy(() => import("../pages/manage/StoreMarkerManage"));
 const PromptManagement = lazy(() => import("../pages/prompt/PromptManagement"));
@@ -64,6 +65,10 @@ const manageRoutes = {
     {
       path: '/manage/medal',
       element: <PrivateRouter><MedalManagement/></PrivateRouter>
+    },
+    {
+      path: '/manage/mission',
+      element: <PrivateRouter><MissionManagement/></PrivateRouter>
     },
     {
       path: '/manage/policy',
