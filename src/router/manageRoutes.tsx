@@ -192,12 +192,12 @@ const manageRoutes = {
       element: (
         <PrivateRouter>
           <PermissionGuard
-            allowedRoles={[AdminRole.OPERATOR, AdminRole.VIEWER]}
+            allowedRoles={[AdminRole.OWNER]}
             fallback={
               <div className="container-fluid py-5 text-center text-muted">
                 <i className="bi bi-lock-fill fs-1 d-block mb-3"></i>
                 <h4 className="fw-bold">접근 권한이 없습니다</h4>
-                <p className="mb-0">A/B 테스트 대상 관리는 뷰어 이상만 접근할 수 있습니다.</p>
+                <p className="mb-0">A/B 테스트 대상 관리는 오너만 접근할 수 있습니다.</p>
               </div>
             }
           >

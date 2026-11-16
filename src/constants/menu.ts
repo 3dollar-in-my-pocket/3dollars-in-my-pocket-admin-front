@@ -135,7 +135,6 @@ export const menuGroups: MenuGroup[] = [
         path: "/manage/push-ab-test",
         label: "A/B 테스트 대상 관리",
         icon: "bi-shuffle",
-        allowedRoles: [AdminRole.OPERATOR]
       },
       {path: "/manage/prompt", label: "AI 프롬프트 관리", icon: "bi-robot"},
       {path: "/manage/tool/cache", label: "캐시 툴", icon: "bi-brush-fill"},
@@ -157,12 +156,6 @@ export const menuGroups: MenuGroup[] = [
         label: "AI 메뉴 이미지 추출",
         icon: "bi-stars",
         allowedRoles: [AdminRole.OPERATOR]
-      },
-      {
-        path: "/manage/proto/similar-store",
-        label: "유사 가게 찾기",
-        icon: "bi-intersect",
-        allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]
       },
     ],
   },
