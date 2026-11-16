@@ -18,7 +18,7 @@ import MissionGroupFormModal from './MissionGroupFormModal';
  * 미션 관리
  *
  * 미션은 미션 그룹 단위로 관리합니다. 선택한 그룹 code는 URL(?group=)에 유지합니다.
- * 등록·수정은 OPERATOR 이상, 조회는 모든 어드민이 가능합니다.
+ * 조회·등록·수정 모두 OPERATOR 이상만 가능합니다.
  * 삭제 기능은 없으며, 미션을 내리려면 비노출로 수정합니다.
  */
 const MISSION_ENUM_NAME_LIST = [...Object.values(MISSION_ENUM_NAMES), POINT_TICKET_ENUM_NAME];

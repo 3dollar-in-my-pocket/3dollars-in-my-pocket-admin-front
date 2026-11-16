@@ -68,7 +68,13 @@ const manageRoutes = {
     },
     {
       path: '/manage/mission',
-      element: <PrivateRouter><MissionManagement/></PrivateRouter>
+      element: (
+        <PrivateRouter>
+          <PermissionGuard allowedRoles={[AdminRole.OPERATOR]}>
+            <MissionManagement/>
+          </PermissionGuard>
+        </PrivateRouter>
+      )
     },
     {
       path: '/manage/policy',
@@ -111,7 +117,13 @@ const manageRoutes = {
     },
     {
       path: '/manage/store-duplicate-candidate',
-      element: <PrivateRouter><StoreDuplicateCandidateManagement/></PrivateRouter>
+      element: (
+        <PrivateRouter>
+          <PermissionGuard allowedRoles={[AdminRole.OPERATOR]}>
+            <StoreDuplicateCandidateManagement/>
+          </PermissionGuard>
+        </PrivateRouter>
+      )
     },
     {
       path: '/manage/proto/similar-store',
@@ -185,7 +197,13 @@ const manageRoutes = {
     },
     {
       path: '/manage/store-marker',
-      element: <PrivateRouter><StoreMarkerManage/></PrivateRouter>
+      element: (
+        <PrivateRouter>
+          <PermissionGuard allowedRoles={[AdminRole.OPERATOR]}>
+            <StoreMarkerManage/>
+          </PermissionGuard>
+        </PrivateRouter>
+      )
     },
     {
       path: '/manage/push-ab-test',

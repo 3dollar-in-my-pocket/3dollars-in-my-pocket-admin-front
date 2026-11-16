@@ -73,13 +73,13 @@ export const menuGroups: MenuGroup[] = [
         path: "/manage/store-duplicate-candidate",
         label: "중복 가게 관리",
         icon: "bi-files",
-        allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]
+        allowedRoles: [AdminRole.OPERATOR]
       },
       {
         path: "/manage/store-marker",
         label: "가게 지도 핀 관리",
         icon: "bi-geo-alt-fill",
-        allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]
+        allowedRoles: [AdminRole.OPERATOR]
       },
     ],
   },
@@ -94,7 +94,7 @@ export const menuGroups: MenuGroup[] = [
         path: "/manage/mission",
         label: "미션 관리",
         icon: "bi-flag-fill",
-        allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]
+        allowedRoles: [AdminRole.OPERATOR]
       },
       {path: "/manage/faq", label: "FAQ 관리", icon: "bi-question-circle-fill", allowedRoles: [AdminRole.OPERATOR]},
       {
