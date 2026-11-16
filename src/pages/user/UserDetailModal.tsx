@@ -17,6 +17,8 @@ import UserVisitHistory from './detail/UserVisitHistory';
 import UserBasicInfoTab from './detail/UserBasicInfoTab';
 import UserDeviceTab from './detail/UserDeviceTab';
 import UserMedalTab from './detail/UserMedalTab';
+import UserPointTab from './detail/UserPointTab';
+import UserMissionCompletionHistory from './detail/UserMissionCompletionHistory';
 import PushSendModal from '@/components/push/PushSendModal';
 import {Device} from '@/types/device';
 import {Medal} from '@/types/medal';
@@ -308,6 +310,14 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}: UserDetailModalProp
               />
             </Tab>
 
+            {/* 포인트 탭 */}
+            <Tab
+              eventKey="point"
+              title={<DetailModalTabTitle icon="bi-coin" label="포인트"/>}
+            >
+              <UserPointTab userId={user.userId} isActive={activeTab === 'point'}/>
+            </Tab>
+
             {/* 활동 이력 탭 */}
             <Tab
               eventKey="activity"
@@ -357,6 +367,12 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}: UserDetailModalProp
                     component: UserStoreReportHistory,
                     spinnerColor: 'text-danger',
                     loadingText: '신고 이력을 불러오는 중...'
+                  },
+                  {
+                    key: 'missions',
+                    title: '미션 완료 이력',
+                    icon: 'bi-flag',
+                    component: UserMissionCompletionHistory
                   }
                 ]}
               />

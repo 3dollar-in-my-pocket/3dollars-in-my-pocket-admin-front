@@ -86,10 +86,16 @@ export const menuGroups: MenuGroup[] = [
   {
     title: "콘텐츠",
     icon: "bi-megaphone-fill",
-    description: "광고, 메달, FAQ 등 콘텐츠를 관리합니다",
+    description: "광고, 메달, 미션, FAQ 등 콘텐츠를 관리합니다",
     items: [
       {path: "/manage/advertisement", label: "광고 관리", icon: "bi-bullseye", allowedRoles: [AdminRole.OPERATOR]},
       {path: "/manage/medal", label: "메달 관리", icon: "bi-award-fill", allowedRoles: [AdminRole.OPERATOR]},
+      {
+        path: "/manage/mission",
+        label: "미션 관리",
+        icon: "bi-flag-fill",
+        allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]
+      },
       {path: "/manage/faq", label: "FAQ 관리", icon: "bi-question-circle-fill", allowedRoles: [AdminRole.OPERATOR]},
       {
         path: "/manage/store-category",
@@ -129,7 +135,6 @@ export const menuGroups: MenuGroup[] = [
         path: "/manage/push-ab-test",
         label: "A/B 테스트 대상 관리",
         icon: "bi-shuffle",
-        allowedRoles: [AdminRole.OPERATOR]
       },
       {path: "/manage/prompt", label: "AI 프롬프트 관리", icon: "bi-robot"},
       {path: "/manage/tool/cache", label: "캐시 툴", icon: "bi-brush-fill"},
@@ -151,12 +156,6 @@ export const menuGroups: MenuGroup[] = [
         label: "AI 메뉴 이미지 추출",
         icon: "bi-stars",
         allowedRoles: [AdminRole.OPERATOR]
-      },
-      {
-        path: "/manage/proto/similar-store",
-        label: "유사 가게 찾기",
-        icon: "bi-intersect",
-        allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]
       },
     ],
   },
