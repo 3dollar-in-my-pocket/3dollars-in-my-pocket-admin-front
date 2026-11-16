@@ -12,6 +12,7 @@ import {
   POINT_REWARD_TYPE,
   UpdateMissionRequest,
 } from '@/types/mission';
+import {POINT_TICKET_ENUM_NAME} from '@/types/point';
 
 const FORM_ID = 'mission-form';
 
@@ -23,6 +24,8 @@ interface ConditionRow {
 
 interface RewardRow {
   type: string;
+  /** 포인트 티켓 (type=POINT에서만 사용) */
+  ticket: string;
   amount: string;
 }
 
@@ -41,13 +44,14 @@ const emptyForm = (
   periodOptions: EnumSelectOption[],
   activityOptions: EnumSelectOption[],
   rewardOptions: EnumSelectOption[],
+  ticketOptions: EnumSelectOption[],
   displayOrder: number,
 ): FormData => ({
   title: '',
   periodType: periodOptions[0]?.value ?? '',
   maxCompletionCount: '1',
   conditions: activityOptions[0] ? [{activityType: activityOptions[0].value, targetCount: '1'}] : [],
-  rewards: rewardOptions[0] ? [{type: rewardOptions[0].value, amount: ''}] : [],
+  rewards: rewardOptions[0] ? [{type: rewardOptions[0].value, ticket: ticketOptions[0]?.value ?? '', amount: ''}] : [],
   isVisible: true,
   displayOrder: String(displayOrder),
 });
@@ -60,7 +64,12 @@ const fromMission = (mission: Mission): FormData => ({
     activityType: condition.activityType,
     targetCount: String(condition.targetCount),
   })),
-  rewards: mission.rewards.map((reward) => ({type: reward.type, amount: String(reward.amount ?? '')})),
+  // 수정(PUT)은 rewards를 통째로 다시 보내므로 조회한 ticket을 그대로 채워야 합니다. (비우면 400)
+  rewards: mission.rewards.map((reward) => ({
+    type: reward.type,
+    ticket: reward.ticket ?? '',
+    amount: String(reward.amount ?? ''),
+  })),
   isVisible: mission.isVisible,
   displayOrder: String(mission.displayOrder),
 });
@@ -96,14 +105,16 @@ const MissionFormModal = ({show, groupCode, missionId, defaultDisplayOrder, onHi
   const periodEnum = useEnumOptions(MISSION_ENUM_NAMES.periodType);
   const activityEnum = useEnumOptions(MISSION_ENUM_NAMES.activityType);
   const rewardEnum = useEnumOptions(MISSION_ENUM_NAMES.rewardType);
+  const ticketEnum = useEnumOptions(POINT_TICKET_ENUM_NAME);
   const periodOptions = periodEnum.options;
   const activityOptions = activityEnum.options;
   const rewardOptions = rewardEnum.options;
-  const isEnumLoading = periodEnum.isLoading || activityEnum.isLoading || rewardEnum.isLoading;
-  const isEnumUnavailable = [periodEnum, activityEnum, rewardEnum]
+  const ticketOptions = ticketEnum.options;
+  const isEnumLoading = periodEnum.isLoading || activityEnum.isLoading || rewardEnum.isLoading || ticketEnum.isLoading;
+  const isEnumUnavailable = [periodEnum, activityEnum, rewardEnum, ticketEnum]
     .some((item) => item.isError || item.isMissing || (!item.isLoading && item.options.length === 0));
 
-  const [form, setForm] = useState<FormData>(() => emptyForm([], [], [], defaultDisplayOrder));
+  const [form, setForm] = useState<FormData>(() => emptyForm([], [], [], [], defaultDisplayOrder));
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [loadFailed, setLoadFailed] = useState(false);
@@ -118,8 +129,9 @@ const MissionFormModal = ({show, groupCode, missionId, defaultDisplayOrder, onHi
     if (!show || missionId || isEnumLoading) return;
     setErrors({});
     setLoadFailed(false);
-    setForm(emptyForm(periodOptions, activityOptions, rewardOptions, defaultDisplayOrder));
-  }, [show, missionId, isEnumLoading, periodOptions, activityOptions, rewardOptions, defaultDisplayOrder]);
+    setForm(emptyForm(periodOptions, activityOptions, rewardOptions, ticketOptions, defaultDisplayOrder));
+  }, [show, missionId, isEnumLoading, periodOptions, activityOptions, rewardOptions, ticketOptions,
+    defaultDisplayOrder]);
 
   // 수정: 열 때마다 단건 조회로 최신 값을 채웁니다.
   useEffect(() => {
@@ -184,7 +196,7 @@ const MissionFormModal = ({show, groupCode, missionId, defaultDisplayOrder, onHi
   const addReward = () => {
     const type = firstUnused(rewardOptions, form.rewards.map((row) => row.type));
     if (!type) return;
-    setField('rewards', [...form.rewards, {type, amount: ''}]);
+    setField('rewards', [...form.rewards, {type, ticket: ticketOptions[0]?.value ?? '', amount: ''}]);
   };
 
   const removeReward = (index: number) => {
@@ -224,7 +236,8 @@ const MissionFormModal = ({show, groupCode, missionId, defaultDisplayOrder, onHi
     if (form.rewards.length === 0) next.rewards = '미션 리워드를 1개 이상 입력해주세요.';
     form.rewards.forEach((row, index) => {
       if (row.type !== POINT_REWARD_TYPE) return;
-      if (!row.amount.trim()) next[`rewards.${index}`] = '지급 포인트를 입력해주세요.';
+      if (!row.ticket) next[`rewards.${index}`] = '적립할 포인트 티켓을 선택해주세요.';
+      else if (!row.amount.trim()) next[`rewards.${index}`] = '지급 포인트를 입력해주세요.';
       else if (!isPositiveInteger(row.amount)) {
         next[`rewards.${index}`] = '지급 포인트는 0보다 큰 정수여야 합니다.';
       }
@@ -247,7 +260,9 @@ const MissionFormModal = ({show, groupCode, missionId, defaultDisplayOrder, onHi
       targetCount: Number(row.targetCount),
     })),
     rewards: form.rewards.map((row) => (
-      row.type === POINT_REWARD_TYPE ? {type: row.type, amount: Number(row.amount)} : {type: row.type}
+      row.type === POINT_REWARD_TYPE
+        ? {type: row.type, ticket: row.ticket, amount: Number(row.amount)}
+        : {type: row.type}
     )),
     isVisible: form.isVisible,
     displayOrder: Number(form.displayOrder),
@@ -293,7 +308,7 @@ const MissionFormModal = ({show, groupCode, missionId, defaultDisplayOrder, onHi
       <Modal.Body>
         {isEnumUnavailable && !isEnumLoading && (
           <div className="alert alert-warning py-2 small">
-            서버에서 미션 타입 목록(MissionActivityType·MissionPeriodType·MissionRewardType)을 불러오지 못했습니다.
+            서버에서 미션 타입 목록(MissionActivityType·MissionPeriodType·MissionRewardType·PointTicket)을 불러오지 못했습니다.
             {isEdit ? ' 기존 값은 유지되지만 다른 타입은 선택할 수 없습니다.' : ' 잠시 후 다시 시도해주세요.'}
           </div>
         )}
@@ -478,6 +493,20 @@ const MissionFormModal = ({show, groupCode, missionId, defaultDisplayOrder, onHi
                             </option>
                           ))}
                         </select>
+                        {row.type === POINT_REWARD_TYPE && (
+                          <select
+                            className={`form-select ${errors[`rewards.${index}`] && !row.ticket ? 'is-invalid' : ''}`}
+                            aria-label={`리워드 ${index + 1} 포인트 티켓`}
+                            value={row.ticket}
+                            onChange={(e) => updateReward(index, {ticket: e.target.value})}
+                            disabled={isSubmitting}
+                          >
+                            <option value="">포인트 티켓 선택</option>
+                            {withCurrent(ticketOptions, row.ticket).map((option) => (
+                              <option key={option.value} value={option.value}>{option.label} ({option.value})</option>
+                            ))}
+                          </select>
+                        )}
                         {row.type === POINT_REWARD_TYPE && (
                           <div className="input-group" style={{maxWidth: 200}}>
                             <input

@@ -2,8 +2,17 @@ import {useCallback, useEffect, useState} from 'react';
 import pointApi from '@/api/pointApi';
 import HistoryPanel from '@/components/common/HistoryPanel';
 import useCursorPagination from '@/hooks/useCursorPagination';
-import useEnumOptions from '@/hooks/useEnumOptions';
-import {POINT_TICKET_ENUM_NAME, PointHistory} from '@/types/point';
+import useEnumOptions, {useEnumLabels} from '@/hooks/useEnumOptions';
+import ItemCard from '@/components/common/ItemCard';
+import {MISSION_ENUM_NAMES} from '@/types/mission';
+import MissionCompletionMeta from './MissionCompletionMeta';
+import {
+  MissionCompletedPointSource,
+  POINT_TICKET_ENUM_NAME,
+  PointHistory,
+  PointHistorySortBy,
+  PointHistorySource,
+} from '@/types/point';
 import {formatDateTimeKo} from '@/utils/dateUtils';
 
 interface UserPointTabProps {
@@ -13,6 +22,7 @@ interface UserPointTabProps {
 }
 
 const PAGE_SIZE = 20;
+const PERIOD_ENUM_NAMES = [MISSION_ENUM_NAMES.periodType];
 
 /** 알 수 없는 type은 원문 그대로 표시합니다. */
 const getTypeBadge = (type: string) => {
@@ -23,11 +33,14 @@ const getTypeBadge = (type: string) => {
 
 const formatAmount = (amount: number) => `${amount > 0 ? '+' : ''}${amount.toLocaleString()}P`;
 
+const isMissionCompletedSource = (source?: PointHistorySource | null): source is MissionCompletedPointSource =>
+  source?.reason === 'MISSION_COMPLETED';
+
 /**
  * 유저 상세 모달의 포인트 탭 (티켓별 잔액 + 적립/회수 내역)
  *
  * 포인트는 티켓(PointTicket)별로 분리 관리되며, 티켓 목록은 서버 enum에서 받아옵니다.
- * 잔액과 내역은 별도 요청이라 조회 시점 차이로 잔액과 최신 내역의 balanceAfter가 일시적으로 다를 수 있습니다.
+ * 내역 정렬(sortBy)을 바꾸면 커서를 버리고 첫 페이지부터 다시 조회합니다.
  */
 const UserPointTab = ({userId, isActive}: UserPointTabProps) => {
   const ticketEnum = useEnumOptions(POINT_TICKET_ENUM_NAME);
@@ -38,7 +51,10 @@ const UserPointTab = ({userId, isActive}: UserPointTabProps) => {
     ? selectedTicket
     : ticketOptions[0]?.value ?? null;
   const ticketLabelOf = (value: string) => ticketOptions.find((option) => option.value === value)?.label ?? value;
+  const enumLabels = useEnumLabels(PERIOD_ENUM_NAMES);
+  const periodLabelOf = (value: string) => enumLabels[MISSION_ENUM_NAMES.periodType]?.[value] ?? value;
   const isTicketUnavailable = !ticketEnum.isLoading && !ticket;
+  const [sortBy, setSortBy] = useState<PointHistorySortBy>('LATEST');
 
   const [balance, setBalance] = useState<number | null>(null);
   const [isBalanceLoading, setIsBalanceLoading] = useState(false);
@@ -55,8 +71,9 @@ const UserPointTab = ({userId, isActive}: UserPointTabProps) => {
   }, [userId, ticket]);
 
   const fetchHistories = useCallback(
-    (cursor: string | null) => (ticket ? pointApi.getUserPointHistories(userId, ticket, cursor, PAGE_SIZE) : null),
-    [userId, ticket]
+    (cursor: string | null) =>
+      ticket ? pointApi.getUserPointHistories(userId, ticket, cursor, PAGE_SIZE, sortBy) : null,
+    [userId, ticket, sortBy]
   );
 
   const enabled = Boolean(userId && isActive && ticket);
@@ -72,7 +89,7 @@ const UserPointTab = ({userId, isActive}: UserPointTabProps) => {
   } = useCursorPagination<PointHistory>({
     fetcher: fetchHistories,
     enabled,
-    deps: [userId, ticket],
+    deps: [userId, ticket, sortBy],
     errorMessage: '포인트 내역을 불러오지 못했습니다.'
   });
 
@@ -96,19 +113,30 @@ const UserPointTab = ({userId, isActive}: UserPointTabProps) => {
   return (
     <>
       {ticketOptions.length > 1 && (
-        <select
-          className="form-select mb-3"
-          aria-label="포인트 티켓 선택"
-          value={ticket ?? ''}
-          onChange={(e) => {
-            setBalance(null);
-            setSelectedTicket(e.target.value);
-          }}
-        >
-          {ticketOptions.map((option) => (
-            <option key={option.value} value={option.value}>{option.label} ({option.value})</option>
-          ))}
-        </select>
+        // 상세 모달 탭 안에 중첩되므로 pills로 구분하고, 티켓이 늘어나도 줄바꿈 대신 가로 스크롤합니다.
+        <ul className="nav nav-pills flex-nowrap overflow-x-auto mb-3 pb-1" role="tablist" aria-label="포인트 티켓">
+          {ticketOptions.map((option) => {
+            const isSelected = option.value === ticket;
+            return (
+              <li key={option.value} className="nav-item flex-shrink-0" role="presentation">
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={isSelected}
+                  title={option.value}
+                  className={`nav-link py-1 px-3 text-nowrap${isSelected ? ' active' : ''}`}
+                  onClick={() => {
+                    if (isSelected) return;
+                    setBalance(null);
+                    setSelectedTicket(option.value);
+                  }}
+                >
+                  {option.label}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
       )}
 
       <div className="item-card mb-3">
@@ -138,39 +166,54 @@ const UserPointTab = ({userId, isActive}: UserPointTabProps) => {
         onLoadMore={loadMore}
         emptyTitle="포인트 내역이 없습니다"
         emptyDescription="아직 적립되거나 회수된 포인트가 없습니다."
+        aside={(
+          <select
+            className="form-select form-select-sm w-auto"
+            aria-label="포인트 내역 정렬"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as PointHistorySortBy)}
+            disabled={isLoading}
+          >
+            <option value="LATEST">최신순</option>
+            <option value="OLDEST">오래된순</option>
+          </select>
+        )}
       >
-        {histories.map((history) => (
-          <div key={history.pointHistoryId} className="item-card mb-3">
-            <div className="item-card__body">
-              <div className="d-flex align-items-start justify-content-between gap-2">
+        {histories.map((history) => {
+          // 알 수 없는 reason이나 source가 null(미션 삭제 등)이면 description만 표시합니다.
+          const missionSource = isMissionCompletedSource(history.source) ? history.source : null;
+          const isRevoke = history.amount < 0;
+          return (
+            <ItemCard key={history.pointHistoryId} item={history} className="mb-2">
+              <div className="d-flex align-items-start gap-3">
                 <div className="flex-grow-1 min-w-0">
-                  <div className="d-flex align-items-center flex-wrap gap-2">
+                  <div className="d-flex align-items-center gap-2 min-w-0">
                     {getTypeBadge(history.type)}
-                    <h3 className="item-card__name">{history.description || history.reason}</h3>
+                    <h3 className="item-card__name text-truncate">
+                      {missionSource?.mission.title ?? (history.description || history.reason)}
+                    </h3>
                   </div>
+                  {missionSource && (
+                    <MissionCompletionMeta
+                      missionGroup={missionSource.missionGroup}
+                      periodLabel={periodLabelOf(missionSource.mission.periodType)}
+                      periodKey={missionSource.periodKey}
+                      sequence={missionSource.sequence}
+                      maxCompletionCount={missionSource.mission.maxCompletionCount}
+                    />
+                  )}
                   <p className="item-card__desc">
-                    <i className="bi bi-calendar3 me-1" aria-hidden="true"/>
                     {formatDateTimeKo(history.occurredAt)}
-                  </p>
-                  <p className="item-card__desc text-break">
-                    <span className="font-monospace">#{history.pointHistoryId}</span>
-                    {' · '}{ticketLabelOf(history.ticket)}
-                    {' · '}<span className="font-monospace">{history.idempotencyKey}</span>
-                    {history.relatedHistoryId && (
-                      <> · 원본 적립 <span className="font-monospace">#{history.relatedHistoryId}</span></>
-                    )}
+                    {missionSource && history.description && <> · {history.description}</>}
                   </p>
                 </div>
-                <div className="text-end flex-shrink-0">
-                  <div className={`fw-bold ${history.amount < 0 ? 'text-danger' : 'text-success'}`}>
-                    {formatAmount(history.amount)}
-                  </div>
-                  <div className="small text-body-secondary">잔액 {history.balanceAfter.toLocaleString()}P</div>
+                <div className={`flex-shrink-0 fs-6 fw-bold text-nowrap ${isRevoke ? 'text-danger' : 'text-success'}`}>
+                  {formatAmount(history.amount)}
                 </div>
               </div>
-            </div>
-          </div>
-        ))}
+            </ItemCard>
+          );
+        })}
       </HistoryPanel>
     </>
   );

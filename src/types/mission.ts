@@ -10,7 +10,7 @@ export const MISSION_ENUM_NAMES = {
   rewardType: 'MissionRewardType',
 } as const;
 
-/** 지급 포인트(amount)가 필요한 리워드 타입 */
+/** 포인트 티켓(ticket)·지급 포인트(amount)가 필요한 리워드 타입 */
 export const POINT_REWARD_TYPE = 'POINT';
 
 export const MISSION_TITLE_MAX_LENGTH = 100;
@@ -55,9 +55,11 @@ export interface MissionCondition {
   targetCount: number;
 }
 
-/** 리워드는 type으로 구분되는 다형성 구조입니다. type=POINT이면 amount가 필수입니다. */
+/** 리워드는 type으로 구분되는 다형성 구조입니다. type=POINT이면 ticket(PointTicket)과 amount가 필수입니다. */
 export interface MissionReward {
   type: string;
+  /** 적립할 포인트 티켓 (PointTicket). 수정(PUT) 시에도 반드시 다시 보내야 하며 누락 시 400 */
+  ticket?: string | null;
   amount?: number | null;
 }
 
@@ -94,13 +96,14 @@ export interface CreateMissionRequest extends UpdateMissionRequest {
 
 /**
  * 유저 미션 완료 이력 (GET /v1/user/{userId}/mission-completions)
- * 미션을 찾을 수 없으면(삭제 등) missionTitle, periodType이 null입니다.
+ * 미션을 찾지 못하면 mission·missionGroup 모두 null, 그룹만 찾지 못하면 missionGroup만 null입니다.
+ * missionId는 항상 있습니다.
  */
 export interface MissionCompletion {
   missionCompletionId: string;
   missionId: string;
-  missionTitle?: string | null;
-  periodType?: string | null;
+  missionGroup: MissionGroup | null;
+  mission: Mission | null;
   /** 완료한 기간 키. DAILY는 완료 일자(KST) yyyy-MM-dd */
   periodKey: string;
   /** 기간 안에서 완료한 회차 (1부터) */

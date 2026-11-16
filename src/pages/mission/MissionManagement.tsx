@@ -9,6 +9,7 @@ import {useEnumLabels} from '@/hooks/useEnumOptions';
 import {usePermission} from '@/hooks/usePermission';
 import {AdminRole} from '@/types/admin';
 import {Mission, MISSION_ENUM_NAMES, MissionGroup, POINT_REWARD_TYPE} from '@/types/mission';
+import {POINT_TICKET_ENUM_NAME} from '@/types/point';
 import {formatDateTime} from '@/utils/dateUtils';
 import MissionFormModal from './MissionFormModal';
 import MissionGroupFormModal from './MissionGroupFormModal';
@@ -20,7 +21,7 @@ import MissionGroupFormModal from './MissionGroupFormModal';
  * 등록·수정은 OPERATOR 이상, 조회는 모든 어드민이 가능합니다.
  * 삭제 기능은 없으며, 미션을 내리려면 비노출로 수정합니다.
  */
-const MISSION_ENUM_NAME_LIST = Object.values(MISSION_ENUM_NAMES);
+const MISSION_ENUM_NAME_LIST = [...Object.values(MISSION_ENUM_NAMES), POINT_TICKET_ENUM_NAME];
 
 /** 유효 기간 상태 (시작 포함, 종료 미포함) */
 const getGroupStatus = (group: MissionGroup) => {
@@ -309,6 +310,9 @@ const MissionManagement = () => {
                     <div key={reward.type} className="text-nowrap">
                       {labelOf(MISSION_ENUM_NAMES.rewardType, reward.type)}
                       {reward.type === POINT_REWARD_TYPE && ` ${reward.amount?.toLocaleString()}P`}
+                      {reward.ticket && (
+                        <div className="small text-body-secondary">{labelOf(POINT_TICKET_ENUM_NAME, reward.ticket)}</div>
+                      )}
                     </div>
                   ))}
                 </td>
