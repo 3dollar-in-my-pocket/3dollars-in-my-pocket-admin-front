@@ -6,6 +6,8 @@ import useEnumOptions, {EnumSelectOption} from '@/hooks/useEnumOptions';
 import {
   Mission,
   MISSION_ENUM_NAMES,
+  MISSION_MAX_COMPLETION_COUNT_MAX,
+  MISSION_MAX_COMPLETION_COUNT_MIN,
   MISSION_TITLE_MAX_LENGTH,
   POINT_REWARD_TYPE,
   UpdateMissionRequest,
@@ -27,6 +29,7 @@ interface RewardRow {
 interface FormData {
   title: string;
   periodType: string;
+  maxCompletionCount: string;
   conditions: ConditionRow[];
   rewards: RewardRow[];
   isVisible: boolean;
@@ -42,6 +45,7 @@ const emptyForm = (
 ): FormData => ({
   title: '',
   periodType: periodOptions[0]?.value ?? '',
+  maxCompletionCount: '1',
   conditions: activityOptions[0] ? [{activityType: activityOptions[0].value, targetCount: '1'}] : [],
   rewards: rewardOptions[0] ? [{type: rewardOptions[0].value, amount: ''}] : [],
   isVisible: true,
@@ -51,6 +55,7 @@ const emptyForm = (
 const fromMission = (mission: Mission): FormData => ({
   title: mission.title,
   periodType: mission.periodType,
+  maxCompletionCount: String(mission.maxCompletionCount),
   conditions: mission.conditions.map((condition) => ({
     activityType: condition.activityType,
     targetCount: String(condition.targetCount),
@@ -72,6 +77,8 @@ const withCurrent = (options: EnumSelectOption[], value: string): EnumSelectOpti
 
 interface Props {
   show: boolean;
+  /** 미션이 속한 그룹 코드 */
+  groupCode: string;
   /** 수정 대상 미션 ID. null이면 신규 등록 */
   missionId: string | null;
   /** 신규 등록 시 기본 노출 순서 */
@@ -85,7 +92,7 @@ interface Props {
  *
  * 수정은 전체 교체(PUT)이므로, 다른 관리자의 변경을 덮어쓰지 않도록 열 때마다 단건 조회로 최신 값을 채웁니다.
  */
-const MissionFormModal = ({show, missionId, defaultDisplayOrder, onHide, onSuccess}: Props) => {
+const MissionFormModal = ({show, groupCode, missionId, defaultDisplayOrder, onHide, onSuccess}: Props) => {
   const periodEnum = useEnumOptions(MISSION_ENUM_NAMES.periodType);
   const activityEnum = useEnumOptions(MISSION_ENUM_NAMES.activityType);
   const rewardEnum = useEnumOptions(MISSION_ENUM_NAMES.rewardType);
@@ -123,7 +130,7 @@ const MissionFormModal = ({show, missionId, defaultDisplayOrder, onHide, onSucce
 
     let cancelled = false;
     setIsLoading(true);
-    missionApi.getMission(missionId)
+    missionApi.getMission(groupCode, missionId)
       .then((response) => {
         if (cancelled) return;
         if (!response.ok) {
@@ -139,7 +146,7 @@ const MissionFormModal = ({show, missionId, defaultDisplayOrder, onHide, onSucce
     return () => {
       cancelled = true;
     };
-  }, [show, missionId]);
+  }, [show, groupCode, missionId]);
 
   const clearError = (key: string) => setErrors((current) => ({...current, [key]: ''}));
 
@@ -204,6 +211,14 @@ const MissionFormModal = ({show, missionId, defaultDisplayOrder, onHide, onSucce
       next.conditions = '같은 활동 타입을 중복으로 등록할 수 없습니다.';
     }
 
+    const maxCompletionCount = Number(form.maxCompletionCount);
+    if (!isPositiveInteger(form.maxCompletionCount)
+      || maxCompletionCount < MISSION_MAX_COMPLETION_COUNT_MIN
+      || maxCompletionCount > MISSION_MAX_COMPLETION_COUNT_MAX) {
+      next.maxCompletionCount =
+        `최대 완료 횟수는 ${MISSION_MAX_COMPLETION_COUNT_MIN}~${MISSION_MAX_COMPLETION_COUNT_MAX} 사이의 정수여야 합니다.`;
+    }
+
     if (!form.periodType) next.periodType = '기간 타입을 선택해주세요.';
 
     if (form.rewards.length === 0) next.rewards = '미션 리워드를 1개 이상 입력해주세요.';
@@ -226,6 +241,7 @@ const MissionFormModal = ({show, missionId, defaultDisplayOrder, onHide, onSucce
 
   const buildRequest = (): UpdateMissionRequest => ({
     title: form.title.trim(),
+    maxCompletionCount: Number(form.maxCompletionCount),
     conditions: form.conditions.map((row) => ({
       activityType: row.activityType,
       targetCount: Number(row.targetCount),
@@ -245,8 +261,8 @@ const MissionFormModal = ({show, missionId, defaultDisplayOrder, onHide, onSucce
     try {
       const request = buildRequest();
       const response = missionId
-        ? await missionApi.updateMission(missionId, request)
-        : await missionApi.createMission({...request, periodType: form.periodType});
+        ? await missionApi.updateMission(groupCode, missionId, request)
+        : await missionApi.createMission(groupCode, {...request, periodType: form.periodType});
       // 실패 메시지는 공통 인터셉터가 서버 message 그대로 토스트로 노출합니다.
       if (!response.ok) return;
 
@@ -270,6 +286,7 @@ const MissionFormModal = ({show, missionId, defaultDisplayOrder, onHide, onSucce
         <Modal.Title className="fs-6 fw-bold">
           <i className="bi bi-flag-fill me-2"/>
           미션 {isEdit ? '수정' : '등록'}
+          <span className="ms-2 small text-body-secondary font-monospace fw-normal">{groupCode}</span>
         </Modal.Title>
       </Modal.Header>
 
@@ -324,6 +341,28 @@ const MissionFormModal = ({show, missionId, defaultDisplayOrder, onHide, onSucce
                 </div>
               </Field>
 
+              <Field label="최대 완료 횟수" required col="col-12 col-md-6" error={errors.maxCompletionCount}
+                     htmlFor="mission-max-completion-count">
+                <div className="input-group">
+                  <input
+                    id="mission-max-completion-count"
+                    type="number"
+                    min={MISSION_MAX_COMPLETION_COUNT_MIN}
+                    max={MISSION_MAX_COMPLETION_COUNT_MAX}
+                    step={1}
+                    className={`form-control ${errors.maxCompletionCount ? 'is-invalid' : ''}`}
+                    value={form.maxCompletionCount}
+                    onChange={(e) => setField('maxCompletionCount', e.target.value)}
+                    disabled={isSubmitting}
+                  />
+                  <span className="input-group-text">회</span>
+                </div>
+                <div className="form-text">
+                  기간 내 완료 가능한 회차 수({MISSION_MAX_COMPLETION_COUNT_MIN}~{MISSION_MAX_COMPLETION_COUNT_MAX}).
+                  조건을 목표 횟수만큼 채울 때마다 1회차가 완료되어 리워드가 지급됩니다.
+                </div>
+              </Field>
+
               <Field label="노출 순서" required col="col-6 col-md-3" error={errors.displayOrder}
                      htmlFor="mission-display-order">
                 <input
@@ -356,7 +395,7 @@ const MissionFormModal = ({show, missionId, defaultDisplayOrder, onHide, onSucce
               </Field>
 
               <Field label="완료 조건" required error={errors.conditions}>
-                <div className="form-text mt-0 mb-2">모든 조건을 충족해야 미션이 완료됩니다.</div>
+                <div className="form-text mt-0 mb-2">모든 조건을 충족해야 한 회차가 완료됩니다.</div>
                 <div className="d-flex flex-column gap-2">
                   {form.conditions.map((row, index) => (
                     <div key={index}>
