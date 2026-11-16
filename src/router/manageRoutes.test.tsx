@@ -1,4 +1,5 @@
 import {Suspense} from 'react';
+import type {ReactElement} from 'react';
 import {render, screen} from '@testing-library/react';
 import {describe, expect, it, vi} from 'vitest';
 import {menuGroups} from '@/constants/menu';
@@ -7,7 +8,7 @@ import {AdminRole} from '@/types/admin';
 import {hasMenuAccess} from '@/utils/roleUtils';
 import manageRoutes from './manageRoutes';
 
-vi.mock('./PrivateRouter', () => ({default: ({children}) => children}));
+vi.mock('./PrivateRouter', () => ({default: ({children}: {children: ReactElement}) => children}));
 vi.mock('../pages/experiment/ExperimentOverrideManagement', () => ({
   default: () => <div>A/B 테스트 관리 화면</div>,
 }));
