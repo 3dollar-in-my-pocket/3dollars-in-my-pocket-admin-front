@@ -240,6 +240,29 @@ describe('validateSectionLayouts', () => {
         expect(withHomeList({advertisementPositions}).configErrors[2]?.field).toBe('advertisementPositions');
       });
     });
+    it('캐러셀 배치는 생략하거나 비어 있어도 통과한다', () => {
+      expect(withHomeList({carouselPlacements: []}).isValid).toBe(true);
+      expect(withHomeList({
+        carouselPlacements: [
+          {position: 3, carouselId: 'STORE_RANKING'},
+          {position: 8, carouselId: 'NATIONWIDE_STORE_RANKING'},
+        ],
+      }).isValid).toBe(true);
+    });
+
+    it('캐러셀 배치의 위치 오류, 캐러셀 미선택, 위치/캐러셀 중복, null 요소는 실패한다', () => {
+      [
+        [{position: 0, carouselId: 'STORE_RANKING'}],
+        [{position: 1.5, carouselId: 'STORE_RANKING'}],
+        [{position: undefined, carouselId: 'STORE_RANKING'}],
+        [{position: 3, carouselId: ''}],
+        [{position: 3, carouselId: 'STORE_RANKING'}, {position: 3, carouselId: 'SNS_STORES'}],
+        [{position: 3, carouselId: 'STORE_RANKING'}, {position: 5, carouselId: 'STORE_RANKING'}],
+        [null],
+      ].forEach((carouselPlacements) => {
+        expect(withHomeList({carouselPlacements}).configErrors[2]?.field).toBe('carouselPlacements');
+      });
+    });
   });
 
   describe('HOME_CURATION config', () => {

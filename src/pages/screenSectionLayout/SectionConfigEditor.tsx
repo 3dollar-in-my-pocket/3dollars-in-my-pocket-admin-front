@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {
+  CarouselPlacement,
   ScreenSectionLayoutConfig,
   SectionConfigFieldMeta,
   SectionConfigValue,
@@ -299,6 +300,108 @@ const OrderedListInput: React.FC<OrderedListInputProps> = ({
   );
 };
 
+interface CarouselPlacementListInputProps {
+  id: string;
+  field: SectionConfigFieldMeta;
+  value: unknown;
+  disabled: boolean;
+  invalid: boolean;
+  onChange: (value: SectionConfigValue | undefined) => void;
+}
+
+/**
+ * 목록 위치마다 노출할 캐러셀을 지정하는 입력. 캐러셀 선택지는 서버 enum(field.enumName)에서 조회합니다.
+ * 한 캐러셀은 한 위치에만 둘 수 있어, 다른 행에서 고른 캐러셀은 선택지에서 뺍니다. 선택지에 없는 저장값은 그대로 유지합니다.
+ */
+const CarouselPlacementListInput: React.FC<CarouselPlacementListInputProps> = ({
+                                                                                 id,
+                                                                                 field,
+                                                                                 value,
+                                                                                 disabled,
+                                                                                 invalid,
+                                                                                 onChange
+                                                                               }) => {
+  const {options, isLoading, isError, isMissing} = useEnumOptions(field.enumName);
+  const placements: CarouselPlacement[] = Array.isArray(value) ? value as CarouselPlacement[] : [];
+  const usedIds = placements.map((placement) => placement.carouselId);
+  const canAdd = !disabled && (isLoading || isError || isMissing || usedIds.length < options.length);
+
+  const update = (index: number, patch: Partial<CarouselPlacement>) =>
+    onChange(placements.map((placement, i) => (i === index ? {...placement, ...patch} : placement)));
+
+  return (
+    <div id={id} className={`section-config__ordered ${invalid ? 'is-invalid' : ''}`}>
+      {placements.length > 0 && (
+        <ul className="section-config__ordered-list" aria-label={field.label}>
+          {placements.map((placement, index) => {
+            const rowLabel = `${field.label} ${index + 1}번째`;
+            const isUnknown = placement.carouselId !== ''
+              && !options.some((option) => option.value === placement.carouselId);
+            const available = options.filter((option) =>
+              option.value === placement.carouselId || !usedIds.includes(option.value));
+            return (
+              <li key={index} className="section-config__ordered-item">
+                <div className="section-config__number-input section-config__placement-position">
+                  <TextValueInput
+                    id={`${id}-${index}-position`}
+                    value={placement.position}
+                    parse={parseNumber}
+                    format={formatNumber}
+                    inputMode="numeric"
+                    placeholder="위치"
+                    disabled={disabled}
+                    invalid={invalid}
+                    onChange={(position) => update(index, {position: position as number | undefined})}
+                  />
+                  <span className="small text-body-secondary">번째</span>
+                </div>
+                <select
+                  className={`form-select form-select-sm ${invalid ? 'is-invalid' : ''}`}
+                  value={placement.carouselId}
+                  disabled={disabled || isLoading}
+                  aria-label={`${rowLabel} 캐러셀`}
+                  onChange={(event) => update(index, {carouselId: event.target.value})}
+                >
+                  <option value="">{isLoading ? '불러오는 중...' : '캐러셀 선택'}</option>
+                  {isUnknown && !isLoading && <option value={placement.carouselId}>{placement.carouselId}</option>}
+                  {available.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label === option.value ? option.value : `${option.label} (${option.value})`}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  className="btn btn-sm btn-link p-0 text-danger"
+                  disabled={disabled}
+                  aria-label={`${rowLabel} 빼기`}
+                  onClick={() => onChange(placements.filter((_, i) => i !== index))}
+                >
+                  <i className="bi bi-x-lg"/>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+
+      {isError && <span className="form-text text-danger">선택지를 불러오지 못했습니다.</span>}
+      {isMissing && <span className="form-text text-warning-emphasis">서버에서 선택지를 제공하지 않습니다.</span>}
+      <div>
+        <button
+          type="button"
+          className="margin-picker__chip"
+          disabled={!canAdd}
+          onClick={() => onChange([...placements, {position: undefined, carouselId: ''}])}
+        >
+          <i className="bi bi-plus me-1"/>
+          캐러셀 추가
+        </button>
+      </div>
+    </div>
+  );
+};
+
 interface ConfigFieldInputProps {
   id: string;
   field: SectionConfigFieldMeta;
@@ -394,6 +497,17 @@ const ConfigFieldInput: React.FC<ConfigFieldInputProps> = ({id, field, value, di
     case 'ORDERED_STRING_LIST':
       return (
         <OrderedListInput
+          id={id}
+          field={field}
+          value={value}
+          disabled={disabled}
+          invalid={invalid}
+          onChange={onChange}
+        />
+      );
+    case 'CAROUSEL_PLACEMENT_LIST':
+      return (
+        <CarouselPlacementListInput
           id={id}
           field={field}
           value={value}

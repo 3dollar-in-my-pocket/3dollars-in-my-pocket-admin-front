@@ -250,7 +250,12 @@ describe('useSectionLayoutDraft', () => {
           'TARGET_STORES', 'MIN_REVIEW_RATING', 'TEST', 'SORT_TYPE',
         ],
       });
-      expect(result.current.sections[2].config).toEqual({type: 'HOME_LIST', adPositions: [], advertisementPositions: []});
+      expect(result.current.sections[2].config).toEqual({
+        type: 'HOME_LIST',
+        adPositions: [],
+        advertisementPositions: [],
+        carouselPlacements: [],
+      });
       expect(result.current.isDirty).toBe(true);
     });
 

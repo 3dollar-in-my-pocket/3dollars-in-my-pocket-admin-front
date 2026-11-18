@@ -21,9 +21,11 @@ export interface ScreenTypeMeta {
 /**
  * 설정 값 타입.
  * - ORDERED_STRING_LIST: 선택지(enumName 또는 options) 중에서 고른 문자열 목록. 배열 순서가 의미를 가지며(예: 노출 순서), 빈 배열도 유효합니다.
+ * - CAROUSEL_PLACEMENT_LIST: 목록 위치(position)와 enumName 선택지(carouselId)의 쌍 목록. 위치와 ID 모두 중복할 수 없습니다.
  */
 export type ConfigValueType =
-  'INTEGER' | 'DECIMAL' | 'BOOLEAN' | 'INTEGER_LIST' | 'STRING_LIST' | 'ORDERED_STRING_LIST' | 'ENUM';
+  'INTEGER' | 'DECIMAL' | 'BOOLEAN' | 'INTEGER_LIST' | 'STRING_LIST' | 'ORDERED_STRING_LIST' | 'ENUM'
+  | 'CAROUSEL_PLACEMENT_LIST';
 
 /** 서버가 선택지를 내려주지 않는 필드(STRING_LIST/ORDERED_STRING_LIST)에서 어드민이 직접 정의하는 선택지 */
 export interface SectionConfigOption {
@@ -100,14 +102,24 @@ export interface SectionVisibilityCondition {
   sectionIds: string[];
 }
 
+/**
+ * 홈 목록 사이에 넣을 캐러셀 하나. position은 광고를 포함한 최종 목록 기준 위치(1부터)입니다.
+ * 입력 도중에는 position이 undefined/NaN, carouselId가 빈 문자열일 수 있으며 저장 전 검증에서 걸러집니다.
+ */
+export interface CarouselPlacement {
+  position?: number;
+  carouselId: string;
+}
+
 /** 설정 필드 값. 입력 도중에는 숫자 자리에 NaN이 들어갈 수 있으며, 저장 전 검증에서 걸러집니다. */
-export type SectionConfigValue = number | boolean | number[] | string[] | string;
+export type SectionConfigValue = number | boolean | number[] | string[] | string | CarouselPlacement[];
 
 /**
  * 섹션 설정값.
  *
  * type은 섹션 타입별 설정 정의(SECTION_CONFIGS)의 type 중 하나이고, 나머지 키는 해당 fields의 name입니다.
- * 예: {type: 'AD_MOB', height: 100}, {type: 'HOME_LIST', pageSize: 20, adPositions: [3, 8], adHeight: 80}
+ * 예: {type: 'AD_MOB', height: 100},
+ *     {type: 'HOME_LIST', pageSize: 20, adPositions: [3, 8], adHeight: 80, carouselPlacements: [{position: 3, carouselId: 'STORE_RANKING'}]}
  */
 export interface ScreenSectionLayoutConfig {
   type: string;

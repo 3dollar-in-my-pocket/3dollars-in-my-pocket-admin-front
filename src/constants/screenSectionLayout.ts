@@ -238,6 +238,18 @@ export const SECTION_CONFIGS: Record<SectionType, SectionConfigMeta[]> = {
             description: ADVERTISEMENT_POSITIONS_DESCRIPTION,
           },
         ]),
+        ...inGroup('목록 캐러셀', [
+          {
+            name: 'carouselPlacements',
+            label: '배치',
+            valueType: 'CAROUSEL_PLACEMENT_LIST',
+            isRequired: false,
+            min: 1,
+            enumName: 'HomeCurationCarouselType',
+            description: '첫 페이지에만 적용. 위치는 광고를 포함한 최종 목록 기준이며, '
+              + '캐러셀이 광고보다 앞에 오면 광고가 한 칸씩 밀립니다. 비어 있으면 미노출',
+          },
+        ]),
       ],
     },
   ],
