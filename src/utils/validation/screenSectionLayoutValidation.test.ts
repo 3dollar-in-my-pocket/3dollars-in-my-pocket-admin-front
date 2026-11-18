@@ -280,6 +280,7 @@ describe('validateSectionLayouts', () => {
           cardAdPositions: [5, 10],
           cardAdvertisementPositions: [3, 5],
           cardAdvertisementCarouselIds: ['POPULAR_SNACKS'],
+          carouselIds: ['STORE_RANKING', 'NATIONWIDE_STORE_RANKING'],
           ...config,
         },
       },
@@ -287,6 +288,14 @@ describe('validateSectionLayouts', () => {
 
     it('필드가 모두 유효하면 통과한다', () => {
       expect(withHomeCuration({}).isValid).toBe(true);
+    });
+
+    it('노출 캐러셀은 1~10개, 중복 없이 입력해야 한다', () => {
+      expect(withHomeCuration({carouselIds: ['NEW_BOSS_STORES']}).isValid).toBe(true);
+      [[], ['STORE_RANKING', 'STORE_RANKING'], Array.from({length: 11}, (_, i) => `C_${i}`), [null], undefined]
+        .forEach((carouselIds) => {
+          expect(withHomeCuration({carouselIds}).configErrors[2]?.field).toBe('carouselIds');
+        });
     });
 
     it('캐러셀 ID 목록은 비어 있어도 통과한다', () => {

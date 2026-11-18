@@ -217,6 +217,7 @@ const OrderedListInput: React.FC<OrderedListInputProps> = ({
   const isKnown = (item: string) =>
     isLoading || isError || isMissing || options.some((option) => option.value === item);
   const unselected = options.filter((option) => !selected.includes(option.value));
+  const isFull = field.maxItems !== undefined && selected.length >= field.maxItems;
 
   const move = (from: number, to: number) => {
     const next = [...selected];
@@ -230,7 +231,7 @@ const OrderedListInput: React.FC<OrderedListInputProps> = ({
       {selected.length === 0 ? (
         <div className="small text-warning-emphasis">
           <i className="bi bi-eye-slash me-1"/>
-          선택한 항목이 없어 모두 숨겨집니다.
+          {field.minItems ? `${field.minItems}개 이상 선택해야 합니다.` : '선택한 항목이 없어 모두 숨겨집니다.'}
         </div>
       ) : (
         <ol className="section-config__ordered-list" aria-label={`${field.label} 순서`}>
@@ -287,7 +288,7 @@ const OrderedListInput: React.FC<OrderedListInputProps> = ({
               type="button"
               className="margin-picker__chip"
               title={option.value}
-              disabled={disabled}
+              disabled={disabled || isFull}
               onClick={() => onChange([...selected, option.value])}
             >
               <i className="bi bi-plus me-1"/>

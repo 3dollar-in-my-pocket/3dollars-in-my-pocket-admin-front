@@ -24,8 +24,17 @@ export const SCREEN_APPLICATIONS: ScreenApplicationOption[] = [
 
 export const DEFAULT_SCREEN_APPLICATION = 'USER';
 
-/** 메타데이터 조회 전 초기 상태에서 사용하는 화면 코드입니다. */
-export const DEFAULT_SCREEN_TYPE: ScreenType = 'STORE_DETAIL';
+/** 메타데이터 조회 전 초기 상태에서 사용하는 화면 코드입니다. 탭 목록에서도 맨 앞에 둡니다. */
+export const DEFAULT_SCREEN_TYPE: ScreenType = 'HOME';
+
+/** 미리보기를 보여주지 않는 화면. HOME은 지도·바텀시트 구조라 세로 블록 미리보기가 실제 화면과 맞지 않습니다. */
+export const SCREENS_WITHOUT_PREVIEW: ScreenType[] = ['HOME'];
+
+/** 화면 탭 순서. 기본 화면(HOME)을 맨 앞에 두고 나머지는 서버 응답 순서를 유지합니다. */
+export const orderScreenTypes = (screens: ScreenTypeMeta[]): ScreenTypeMeta[] => [
+  ...screens.filter((screen) => screen.value === DEFAULT_SCREEN_TYPE),
+  ...screens.filter((screen) => screen.value !== DEFAULT_SCREEN_TYPE),
+];
 
 /** 서버에서 조회한 화면 메타데이터에서 화면을 찾습니다. */
 export const findScreenTypeMeta = (
@@ -132,12 +141,13 @@ const enumField = (name: string, label: string, enumName: string): SectionConfig
   enumName,
 });
 
-/** 서버 enum 값 중에서 골라 순서대로 나열하는 필드. 빈 배열도 유효한 값입니다. */
+/** 서버 enum 값 중에서 골라 순서대로 나열하는 필드. minItems가 없으면 빈 배열도 유효한 값입니다. */
 const orderedEnumListField = (
   name: string,
   label: string,
   enumName: string,
-  defaultValue: string[]
+  defaultValue: string[],
+  options: Pick<SectionConfigFieldMeta, 'minItems' | 'maxItems' | 'description'> = {}
 ): SectionConfigFieldMeta => ({
   name,
   label,
@@ -145,6 +155,7 @@ const orderedEnumListField = (
   isRequired: true,
   enumName,
   defaultValue,
+  ...options,
 });
 
 /**
@@ -165,6 +176,9 @@ export const HOME_FILTER_BAR_ORDER = [
 
 /** 새 HOME_FILTER 설정의 기본 바 구성. 서버와 같이 EVENT를 제외한 전체 바를 기존 순서로 둡니다. */
 export const HOME_FILTER_DEFAULT_BARS = HOME_FILTER_BAR_ORDER.filter((bar) => bar !== 'EVENT');
+
+/** 요즘 뜨는 탭 캐러셀 기본 구성. 서버가 carouselIds 생략 시 적용하는 기본값과 같습니다. */
+export const HOME_CURATION_DEFAULT_CAROUSEL_IDS = ['STORE_RANKING', 'NATIONWIDE_STORE_RANKING'];
 
 /** 광고 높이 필드. 애드몹/리스트/큐레이션 광고 모두 같은 범위와 추천값을 사용합니다. */
 const adHeightField = (name: string, label: string): SectionConfigFieldMeta =>
@@ -258,6 +272,18 @@ export const SECTION_CONFIGS: Record<SectionType, SectionConfigMeta[]> = {
       type: 'HOME_CURATION',
       label: '홈 큐레이션 설정',
       fields: [
+        orderedEnumListField(
+          'carouselIds',
+          '노출 캐러셀',
+          'HomeCurationCarouselType',
+          HOME_CURATION_DEFAULT_CAROUSEL_IDS,
+          {
+            minItems: 1,
+            maxItems: 10,
+            description: '요즘 뜨는 탭에 선택한 순서대로 노출. 앱 버전 미지원 또는 조회 결과가 없는 캐러셀은 '
+              + '노출되지 않을 수 있습니다',
+          }
+        ),
         ...inGroup('캐러셀 애드몹', [
           positionsField('carouselAdPositions', '삽입 위치'),
           adHeightField('carouselAdHeight', '영역 높이'),

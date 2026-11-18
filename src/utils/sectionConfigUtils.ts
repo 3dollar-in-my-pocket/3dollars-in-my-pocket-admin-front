@@ -68,16 +68,34 @@ const migrateLegacyHomeFilter = (config: ScreenSectionLayoutConfig): ScreenSecti
 };
 
 /**
+ * 값이 없는 필드를 defaultValue로 채웁니다. 서버가 생략된 필드에 기본값을 적용하는 것과 같게 맞춰,
+ * 해당 필드가 없던 저장값도 편집·저장할 수 있게 합니다. (예: HOME_CURATION carouselIds)
+ */
+const fillDefaultValues = (
+  sectionType: SectionType,
+  config: ScreenSectionLayoutConfig
+): ScreenSectionLayoutConfig => {
+  const missing = (findConfigMeta(sectionType, config.type)?.fields ?? [])
+    .filter((field) => field.defaultValue !== undefined && config[field.name] === undefined);
+  if (missing.length === 0) return config;
+  const defaults = buildDefaultConfig({type: config.type, label: '', fields: missing});
+  return {...defaults, ...config, type: config.type};
+};
+
+/**
  * 서버에서 받은 설정을 편집용으로 정리합니다.
  *
  * EMPTY 설정인데 섹션이 EMPTY를 지원하지 않으면, 첫 번째 설정 타입의 빈 값으로 바꿔 편집할 수 있게 합니다.
+ * 값이 없는 필드는 defaultValue로 채웁니다.
  */
 export const normalizeConfig = (
   sectionType: SectionType,
   config?: ScreenSectionLayoutConfig | null
 ): ScreenSectionLayoutConfig | null | undefined => {
   if (!config) return config;
-  if (config.type !== 'EMPTY' || findConfigMeta(sectionType, config.type)) return migrateLegacyHomeFilter(config);
+  if (config.type !== 'EMPTY' || findConfigMeta(sectionType, config.type)) {
+    return fillDefaultValues(sectionType, migrateLegacyHomeFilter(config));
+  }
   return buildInitialConfig(sectionType) ?? config;
 };
 
@@ -134,7 +152,7 @@ const validateField = (field: SectionConfigFieldMeta, value: unknown): string | 
       }
       return typeof value === 'string' ? undefined : `${field.label} 값이 올바르지 않습니다.`;
     case 'ORDERED_STRING_LIST': {
-      // 빈 배열은 "모두 숨김"처럼 유효한 값이므로 isRequired는 값이 있는지만 확인합니다.
+      // minItems가 없으면 빈 배열은 "모두 숨김"처럼 유효한 값이므로 isRequired는 값이 있는지만 확인합니다.
       if (value === undefined) {
         return field.isRequired ? `${field.label} 값을 선택해주세요.` : undefined;
       }
@@ -143,6 +161,12 @@ const validateField = (field: SectionConfigFieldMeta, value: unknown): string | 
       }
       if (new Set(value).size !== value.length) {
         return `${field.label}에 중복된 값이 있습니다.`;
+      }
+      if (field.minItems !== undefined && value.length < field.minItems) {
+        return `${field.label}은(는) ${field.minItems}개 이상 선택해야 합니다.`;
+      }
+      if (field.maxItems !== undefined && value.length > field.maxItems) {
+        return `${field.label}은(는) 최대 ${field.maxItems}개까지 선택할 수 있습니다.`;
       }
       return undefined;
     }

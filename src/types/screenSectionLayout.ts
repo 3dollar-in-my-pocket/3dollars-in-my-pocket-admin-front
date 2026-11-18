@@ -20,7 +20,8 @@ export interface ScreenTypeMeta {
 
 /**
  * 설정 값 타입.
- * - ORDERED_STRING_LIST: 선택지(enumName 또는 options) 중에서 고른 문자열 목록. 배열 순서가 의미를 가지며(예: 노출 순서), 빈 배열도 유효합니다.
+ * - ORDERED_STRING_LIST: 선택지(enumName 또는 options) 중에서 고른 문자열 목록. 배열 순서가 의미를 가지며(예: 노출 순서),
+ *   minItems가 없으면 빈 배열도 유효합니다.
  * - CAROUSEL_PLACEMENT_LIST: 목록 위치(position)와 enumName 선택지(carouselId)의 쌍 목록. 위치와 ID 모두 중복할 수 없습니다.
  */
 export type ConfigValueType =
@@ -45,7 +46,9 @@ export interface SectionConfigFieldMeta {
   min?: number;
   /** 최댓값(포함). INTEGER_LIST는 각 원소의 최댓값 */
   max?: number;
-  /** INTEGER_LIST/STRING_LIST의 최대 원소 개수 */
+  /** 목록 값의 최소 원소 개수. 현재 ORDERED_STRING_LIST에서만 사용합니다. */
+  minItems?: number;
+  /** 목록 값의 최대 원소 개수 */
   maxItems?: number;
   /** true면 min을 포함하지 않습니다(초과). */
   isMinExclusive?: boolean;
