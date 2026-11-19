@@ -240,6 +240,29 @@ describe('validateSectionLayouts', () => {
         expect(withHomeList({advertisementPositions}).configErrors[2]?.field).toBe('advertisementPositions');
       });
     });
+    it('캐러셀 배치는 생략하거나 비어 있어도 통과한다', () => {
+      expect(withHomeList({carouselPlacements: []}).isValid).toBe(true);
+      expect(withHomeList({
+        carouselPlacements: [
+          {position: 3, carouselId: 'STORE_RANKING'},
+          {position: 8, carouselId: 'NATIONWIDE_STORE_RANKING'},
+        ],
+      }).isValid).toBe(true);
+    });
+
+    it('캐러셀 배치의 위치 오류, 캐러셀 미선택, 위치/캐러셀 중복, null 요소는 실패한다', () => {
+      [
+        [{position: 0, carouselId: 'STORE_RANKING'}],
+        [{position: 1.5, carouselId: 'STORE_RANKING'}],
+        [{position: undefined, carouselId: 'STORE_RANKING'}],
+        [{position: 3, carouselId: ''}],
+        [{position: 3, carouselId: 'STORE_RANKING'}, {position: 3, carouselId: 'SNS_STORES'}],
+        [{position: 3, carouselId: 'STORE_RANKING'}, {position: 5, carouselId: 'STORE_RANKING'}],
+        [null],
+      ].forEach((carouselPlacements) => {
+        expect(withHomeList({carouselPlacements}).configErrors[2]?.field).toBe('carouselPlacements');
+      });
+    });
   });
 
   describe('HOME_CURATION config', () => {
@@ -257,6 +280,7 @@ describe('validateSectionLayouts', () => {
           cardAdPositions: [5, 10],
           cardAdvertisementPositions: [3, 5],
           cardAdvertisementCarouselIds: ['POPULAR_SNACKS'],
+          carouselIds: ['STORE_RANKING', 'NATIONWIDE_STORE_RANKING'],
           ...config,
         },
       },
@@ -264,6 +288,14 @@ describe('validateSectionLayouts', () => {
 
     it('필드가 모두 유효하면 통과한다', () => {
       expect(withHomeCuration({}).isValid).toBe(true);
+    });
+
+    it('노출 캐러셀은 1~10개, 중복 없이 입력해야 한다', () => {
+      expect(withHomeCuration({carouselIds: ['NEW_BOSS_STORES']}).isValid).toBe(true);
+      [[], ['STORE_RANKING', 'STORE_RANKING'], Array.from({length: 11}, (_, i) => `C_${i}`), [null], undefined]
+        .forEach((carouselIds) => {
+          expect(withHomeCuration({carouselIds}).configErrors[2]?.field).toBe('carouselIds');
+        });
     });
 
     it('캐러셀 ID 목록은 비어 있어도 통과한다', () => {

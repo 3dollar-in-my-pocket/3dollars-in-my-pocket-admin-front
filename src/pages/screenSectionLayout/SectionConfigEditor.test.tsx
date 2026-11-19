@@ -1,5 +1,5 @@
 import React from 'react';
-import {fireEvent, render, screen} from '@testing-library/react';
+import {fireEvent, render, screen, within} from '@testing-library/react';
 import {expect, it, vi} from 'vitest';
 import enumApi from '@/api/enumApi';
 import SectionConfigEditor from './SectionConfigEditor';
@@ -24,9 +24,11 @@ it('적용 캐러셀은 서버 enum의 표시명으로 보여주고 선택한 �
   };
   const {rerender} = render(<SectionConfigEditor {...props}/>);
 
-  const option = await screen.findByRole('button', {name: '서버의 새 캐러셀'});
-  expect(screen.queryByRole('button', {name: '최근 인기 간식'})).not.toBeInTheDocument();
-  expect(screen.getByRole('button', {name: 'LEGACY_CAROUSEL'})).toHaveAttribute('aria-pressed', 'true');
+  const group = () => within(screen.getByRole('group', {name: '적용 캐러셀'}));
+  await screen.findAllByRole('button', {name: /서버의 새 캐러셀/});
+  const option = group().getByRole('button', {name: '서버의 새 캐러셀'});
+  expect(screen.queryByRole('button', {name: /최근 인기 간식/})).not.toBeInTheDocument();
+  expect(group().getByRole('button', {name: 'LEGACY_CAROUSEL'})).toHaveAttribute('aria-pressed', 'true');
   fireEvent.click(option);
   expect(onChange).toHaveBeenCalledWith({
     ...props.config,
@@ -35,5 +37,5 @@ it('적용 캐러셀은 서버 enum의 표시명으로 보여주고 선택한 �
   expect(enumApi.getEnum).toHaveBeenCalledTimes(1);
 
   rerender(<SectionConfigEditor {...props} editable={false}/>);
-  expect(screen.getByRole('button', {name: '서버의 새 캐러셀'})).toBeDisabled();
+  expect(group().getByRole('button', {name: '서버의 새 캐러셀'})).toBeDisabled();
 });

@@ -250,7 +250,12 @@ describe('useSectionLayoutDraft', () => {
           'TARGET_STORES', 'MIN_REVIEW_RATING', 'TEST', 'SORT_TYPE',
         ],
       });
-      expect(result.current.sections[2].config).toEqual({type: 'HOME_LIST', adPositions: [], advertisementPositions: []});
+      expect(result.current.sections[2].config).toEqual({
+        type: 'HOME_LIST',
+        adPositions: [],
+        advertisementPositions: [],
+        carouselPlacements: [],
+      });
       expect(result.current.isDirty).toBe(true);
     });
 
@@ -317,6 +322,31 @@ describe('useSectionLayoutDraft', () => {
 
       act(() => result.current.updateSection(0, {config: {type: 'HOME_FILTER', bars: ['CATEGORY']}}));
       expect(result.current.toRequest()[0].config?.eventFilterVisible).toBe(false);
+    });
+  });
+
+  describe('HOME_CURATION carouselIds', () => {
+    const homeCuration = (config: Record<string, unknown>): ScreenSectionLayout => ({
+      ...layout(1, 'HOME_CURATION', 'HOME_CURATION', 100),
+      config: {type: 'HOME_CURATION', ...config} as ScreenSectionLayout['config'],
+    });
+
+    it('carouselIds가 없는 저장값은 서버 기본값으로 채우고 변경으로 보지 않는다', () => {
+      const {result} = renderDraft([homeCuration({cardAdPositions: [3]})]);
+
+      expect(result.current.sections[0].config).toEqual({
+        type: 'HOME_CURATION',
+        cardAdPositions: [3],
+        carouselIds: ['STORE_RANKING', 'NATIONWIDE_STORE_RANKING'],
+      });
+      expect(result.current.isDirty).toBe(false);
+    });
+
+    it('저장된 carouselIds는 순서를 그대로 유지해 요청에 보낸다', () => {
+      const carouselIds = ['NEW_BOSS_STORES', 'STORE_RANKING'];
+      const {result} = renderDraft([homeCuration({carouselIds})]);
+
+      expect(result.current.toRequest()[0].config?.carouselIds).toEqual(carouselIds);
     });
   });
 

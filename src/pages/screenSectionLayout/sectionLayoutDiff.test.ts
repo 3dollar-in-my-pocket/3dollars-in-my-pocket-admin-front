@@ -164,4 +164,28 @@ describe('diffSectionLayouts', () => {
     // 표시명을 모르는 값은 원래 값을 그대로 보여준다
     expect(change?.after).toBe('홈 바텀시트 탭 설정 (기본 선택 탭=CURATION)');
   });
+
+  it('캐러셀 배치는 위치 순으로 표시명과 함께 보여주고, 순서만 바뀐 경우는 변경으로 보지 않는다', () => {
+    const placements = [
+      {position: 8, carouselId: 'NATIONWIDE_STORE_RANKING'},
+      {position: 3, carouselId: 'STORE_RANKING'},
+    ];
+    const before = [draft('HOME_LIST', 'HOME_LIST', {
+      config: {type: 'HOME_LIST', carouselPlacements: placements},
+    })];
+    const reordered = [draft('HOME_LIST', 'HOME_LIST', {
+      config: {type: 'HOME_LIST', carouselPlacements: [...placements].reverse()},
+    })];
+    const after = [draft('HOME_LIST', 'HOME_LIST', {
+      config: {type: 'HOME_LIST', carouselPlacements: []},
+    })];
+    const labels = {HomeCurationCarouselType: {STORE_RANKING: '주변 인기 TOP 10'}};
+
+    expect(diffSectionLayouts(before, reordered, labels).hasChanges).toBe(false);
+    const change = findEntry(diffSectionLayouts(before, after, labels).entries, 'HOME_LIST')?.changes[0];
+    expect(change?.before).toBe(
+      '홈 목록 설정 (목록 캐러셀 배치=[3: 주변 인기 TOP 10 (STORE_RANKING), 8: NATIONWIDE_STORE_RANKING])'
+    );
+    expect(change?.after).toBe('홈 목록 설정 (목록 캐러셀 배치=[])');
+  });
 });

@@ -5,6 +5,7 @@
  */
 
 import {
+  CarouselPlacement,
   ScreenSectionLayoutConfig,
   SectionConfigFieldMeta,
   SectionConfigMeta,
@@ -28,7 +29,7 @@ export const findConfigMeta = (
 /**
  * 설정 타입을 새로 고를 때의 초기값.
  *
- * defaultValue가 있는 필드는 그 값으로, 필수가 아닌 필드는 서버 기본값(BOOLEAN: false, INTEGER_LIST/STRING_LIST: 빈 배열)으로
+ * defaultValue가 있는 필드는 그 값으로, 필수가 아닌 필드는 서버 기본값(BOOLEAN: false, 목록: 빈 배열)으로
  * 채우고, 필수 숫자 필드는 비워 둡니다. min을 기본값으로 해석하지 않습니다.
  */
 export const buildDefaultConfig = (configMeta: SectionConfigMeta): ScreenSectionLayoutConfig => {
@@ -40,7 +41,10 @@ export const buildDefaultConfig = (configMeta: SectionConfigMeta): ScreenSection
       return;
     }
     if (field.valueType === 'BOOLEAN') config[field.name] = false;
-    if (field.valueType === 'INTEGER_LIST' || field.valueType === 'STRING_LIST') config[field.name] = [];
+    if (field.valueType === 'INTEGER_LIST' || field.valueType === 'STRING_LIST'
+      || field.valueType === 'CAROUSEL_PLACEMENT_LIST') {
+      config[field.name] = [];
+    }
   });
   return config;
 };
@@ -64,16 +68,34 @@ const migrateLegacyHomeFilter = (config: ScreenSectionLayoutConfig): ScreenSecti
 };
 
 /**
+ * 값이 없는 필드를 defaultValue로 채웁니다. 서버가 생략된 필드에 기본값을 적용하는 것과 같게 맞춰,
+ * 해당 필드가 없던 저장값도 편집·저장할 수 있게 합니다. (예: HOME_CURATION carouselIds)
+ */
+const fillDefaultValues = (
+  sectionType: SectionType,
+  config: ScreenSectionLayoutConfig
+): ScreenSectionLayoutConfig => {
+  const missing = (findConfigMeta(sectionType, config.type)?.fields ?? [])
+    .filter((field) => field.defaultValue !== undefined && config[field.name] === undefined);
+  if (missing.length === 0) return config;
+  const defaults = buildDefaultConfig({type: config.type, label: '', fields: missing});
+  return {...defaults, ...config, type: config.type};
+};
+
+/**
  * 서버에서 받은 설정을 편집용으로 정리합니다.
  *
  * EMPTY 설정인데 섹션이 EMPTY를 지원하지 않으면, 첫 번째 설정 타입의 빈 값으로 바꿔 편집할 수 있게 합니다.
+ * 값이 없는 필드는 defaultValue로 채웁니다.
  */
 export const normalizeConfig = (
   sectionType: SectionType,
   config?: ScreenSectionLayoutConfig | null
 ): ScreenSectionLayoutConfig | null | undefined => {
   if (!config) return config;
-  if (config.type !== 'EMPTY' || findConfigMeta(sectionType, config.type)) return migrateLegacyHomeFilter(config);
+  if (config.type !== 'EMPTY' || findConfigMeta(sectionType, config.type)) {
+    return fillDefaultValues(sectionType, migrateLegacyHomeFilter(config));
+  }
   return buildInitialConfig(sectionType) ?? config;
 };
 
@@ -130,7 +152,7 @@ const validateField = (field: SectionConfigFieldMeta, value: unknown): string | 
       }
       return typeof value === 'string' ? undefined : `${field.label} 값이 올바르지 않습니다.`;
     case 'ORDERED_STRING_LIST': {
-      // 빈 배열은 "모두 숨김"처럼 유효한 값이므로 isRequired는 값이 있는지만 확인합니다.
+      // minItems가 없으면 빈 배열은 "모두 숨김"처럼 유효한 값이므로 isRequired는 값이 있는지만 확인합니다.
       if (value === undefined) {
         return field.isRequired ? `${field.label} 값을 선택해주세요.` : undefined;
       }
@@ -139,6 +161,12 @@ const validateField = (field: SectionConfigFieldMeta, value: unknown): string | 
       }
       if (new Set(value).size !== value.length) {
         return `${field.label}에 중복된 값이 있습니다.`;
+      }
+      if (field.minItems !== undefined && value.length < field.minItems) {
+        return `${field.label}은(는) ${field.minItems}개 이상 선택해야 합니다.`;
+      }
+      if (field.maxItems !== undefined && value.length > field.maxItems) {
+        return `${field.label}은(는) 최대 ${field.maxItems}개까지 선택할 수 있습니다.`;
       }
       return undefined;
     }
@@ -176,6 +204,32 @@ const validateField = (field: SectionConfigFieldMeta, value: unknown): string | 
       }
       if (field.maxItems !== undefined && value.length > field.maxItems) {
         return `${field.label}은(는) 최대 ${field.maxItems}개까지 선택할 수 있습니다.`;
+      }
+      return undefined;
+    }
+    case 'CAROUSEL_PLACEMENT_LIST': {
+      if (value === undefined) {
+        return field.isRequired ? `${field.label} 값을 입력해주세요.` : undefined;
+      }
+      if (!Array.isArray(value) || value.some((item) => !item || typeof item !== 'object')) {
+        return `${field.label} 값이 올바르지 않습니다.`;
+      }
+      const placements = value as CarouselPlacement[];
+      if (field.isRequired && placements.length === 0) return `${field.label} 값을 입력해주세요.`;
+      if (placements.some(({position}) =>
+        typeof position !== 'number' || !Number.isInteger(position) || !isInRange(position, field))) {
+        return `${field.label}의 위치는 ${range ? `${range}인 ` : ''}정수여야 합니다.`;
+      }
+      if (placements.some(({carouselId}) => typeof carouselId !== 'string' || !carouselId.trim())) {
+        return `${field.label}의 캐러셀을 선택해주세요.`;
+      }
+      const positions = placements.map(({position}) => position);
+      const carouselIds = placements.map(({carouselId}) => carouselId);
+      if (new Set(positions).size !== positions.length || new Set(carouselIds).size !== carouselIds.length) {
+        return `${field.label}의 위치와 캐러셀은 중복 없이 지정해야 합니다.`;
+      }
+      if (field.maxItems !== undefined && placements.length > field.maxItems) {
+        return `${field.label}은(는) 최대 ${field.maxItems}개까지 입력할 수 있습니다.`;
       }
       return undefined;
     }
@@ -244,6 +298,12 @@ export const formatSectionConfig = (
       } else if ((field?.valueType === 'ORDERED_STRING_LIST' || field?.valueType === 'STRING_LIST')
         && Array.isArray(rawValue)) {
         value = `[${(rawValue as string[]).map(withLabel).join(', ')}]`;
+      } else if (field?.valueType === 'CAROUSEL_PLACEMENT_LIST' && Array.isArray(rawValue)) {
+        // 저장 순서와 무관하게 위치 순으로 보여줘, 순서만 바뀐 경우를 변경으로 표시하지 않습니다.
+        const placements = [...(rawValue as CarouselPlacement[])]
+          .sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
+        const items = placements.map(({position, carouselId}) => `${position ?? '-'}: ${withLabel(carouselId)}`);
+        value = `[${items.join(', ')}]`;
       } else {
         value = formatValue(rawValue);
       }

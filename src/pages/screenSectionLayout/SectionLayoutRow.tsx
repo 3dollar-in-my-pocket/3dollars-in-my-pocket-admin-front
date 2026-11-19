@@ -253,7 +253,8 @@ const SectionLayoutRow: React.FC<SectionLayoutRowProps> = ({
             </div>
           </div>}
 
-          <div className="section-row__field section-row__field--visible">
+          {/* 필수 섹션은 항상 노출이라 잠긴 토글 대신 "필수" 표시만 둡니다. 저장값이 미노출이면 고칠 수 있게 보여줍니다. */}
+          {!(isRequired && section.isVisible) && <div className="section-row__field section-row__field--visible">
             <span className="item-card__label">노출</span>
             <div className="form-check form-switch mb-0">
               <input
@@ -262,9 +263,9 @@ const SectionLayoutRow: React.FC<SectionLayoutRowProps> = ({
                 type="checkbox"
                 role="switch"
                 checked={section.isVisible}
-                /* 필수 섹션은 미노출로 보내면 서버가 400을 반환하므로 토글을 잠급니다. */
-                disabled={!editable || isRequired}
-                title={isRequired ? '필수 섹션은 항상 노출됩니다.' : undefined}
+                /* 필수 섹션은 이 토글이 미노출 상태일 때만 보이므로, 다시 노출로 켤 수 있게 열어 둡니다. */
+                disabled={!editable}
+                title={isRequired ? '필수 섹션은 노출로 저장해야 합니다.' : undefined}
                 onClick={(event) => event.stopPropagation()}
                 onChange={(event) => onChange({isVisible: event.target.checked})}
               />
@@ -272,7 +273,7 @@ const SectionLayoutRow: React.FC<SectionLayoutRowProps> = ({
                 {section.isVisible ? '노출' : '미노출'}
               </label>
             </div>
-          </div>
+          </div>}
 
           <SectionConfigEditor
             sectionKey={section.key}

@@ -15,6 +15,8 @@ import {ScreenType, SectionType, ScreenTypeMeta, SectionTypeMeta} from '@/types/
 import {
   DEFAULT_SCREEN_APPLICATION,
   DEFAULT_SCREEN_TYPE,
+  orderScreenTypes,
+  SCREENS_WITHOUT_PREVIEW,
   findScreenTypeMeta,
   findSectionTypeMeta,
   getConfigurableSectionTypes,
@@ -28,6 +30,7 @@ import SectionLayoutRow, {sectionRowId} from './SectionLayoutRow';
 import SectionLayoutCompare from './SectionLayoutCompare';
 import SectionPreview from './SectionPreview';
 import SectionAddPanel from './SectionAddPanel';
+import SectionNav, {SectionNavItem} from './SectionNav';
 import {diffSectionLayouts} from './sectionLayoutDiff';
 
 /** 새로고침해도 보던 앱과 화면이 유지되도록 쿼리 파라미터에 남깁니다. */
@@ -68,6 +71,7 @@ const ScreenSectionLayoutManagement = () => {
   const isMobile = useMediaQuery(MOBILE_QUERY);
   const [showPreviewOnMobile, setShowPreviewOnMobile] = useState(false);
   const isPreviewOpen = !isMobile || showPreviewOnMobile;
+  const hasPreview = !SCREENS_WITHOUT_PREVIEW.includes(screenType);
 
   const {
     sections,
@@ -125,6 +129,21 @@ const ScreenSectionLayoutManagement = () => {
     () => diffSectionLayouts(savedSections, sections, enumLabels),
     [savedSections, sections, enumLabels]
   );
+
+  /** 미리보기가 없는 화면에서 보여줄 섹션 바로가기 */
+  const navItems = useMemo<SectionNavItem[]>(() => {
+    const changedIds = new Set(diff.entries
+      .filter((entry) => entry.status !== 'unchanged' && entry.status !== 'removed')
+      .map((entry) => entry.sectionId));
+    return sections.map((section, index) => ({
+      key: section.key,
+      label: getSectionTypeLabel(sectionTypes, section.sectionType),
+      isVisible: section.isVisible,
+      hasError: Boolean(validation.itemErrors[index] || validation.configErrors[index]
+        || validation.conditionErrors[index]),
+      isChanged: changedIds.has(section.sectionId.trim()),
+    }));
+  }, [diff, sections, sectionTypes, validation]);
 
   const visibleCount = useMemo(
     () => sections.filter((section) => section.isVisible).length,
@@ -190,7 +209,7 @@ const ScreenSectionLayoutManagement = () => {
         return;
       }
 
-      const nextScreenTypes = response.data?.contents ?? [];
+      const nextScreenTypes = orderScreenTypes(response.data?.contents ?? []);
       setScreenTypes(nextScreenTypes);
       if (nextScreenTypes.length > 0 && !nextScreenTypes.some((screen) => screen.value === screenType)) {
         setScreenType(nextScreenTypes[0].value);
@@ -375,6 +394,26 @@ const ScreenSectionLayoutManagement = () => {
     }
   };
 
+  const renderSaveButton = (className = '') => (
+    <button
+      type="button"
+      className={`btn btn-primary ${className}`}
+      onClick={() => void handleSave()}
+      disabled={!editable || !isDirty || !validation.isValid || isLoading}
+    >
+      {isSaving ? (
+        <>
+          <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"/>
+          저장 중...
+        </>
+      ) : (
+        <>
+          <i className="bi bi-save me-1"/>전체 저장
+        </>
+      )}
+    </button>
+  );
+
   const renderSectionList = () => {
     if (isLoaded && sectionTypes.length === 0) {
       return (
@@ -518,26 +557,31 @@ const ScreenSectionLayoutManagement = () => {
         ))}
       </ul>
 
+      {/* 화면 수가 많지 않아 선택지를 모두 펼쳐 보여줍니다. 좁은 화면에서는 가로로 스크롤합니다. */}
+      {screenTypes.length > 0 && (
+        <div className="screen-tabs mb-3" role="tablist" aria-label="화면 선택">
+          {screenTypes.map((screen) => (
+            <button
+              key={screen.value}
+              type="button"
+              role="tab"
+              className={`screen-tabs__item${screen.value === screenType ? ' is-active' : ''}`}
+              aria-selected={screen.value === screenType}
+              disabled={isLoading || isSaving}
+              title={screen.value}
+              onClick={() => void handleScreenTypeChange(screen.value)}
+            >
+              {screen.label}
+            </button>
+          ))}
+        </div>
+      )}
+
       <PageHeader
-        description="앱 화면의 섹션 노출 순서와 하단 여백, 노출 여부, 섹션별 설정을 관리합니다. 왼쪽 미리보기로 결과를 확인하며 편집한 뒤 전체 저장을 눌러 한 번에 반영하세요."
+        description={`앱 화면의 섹션 노출 순서와 하단 여백, 노출 여부, 섹션별 설정을 관리합니다. ${hasPreview
+          ? '미리보기로 결과를 확인하며 편집한 뒤 ' : '편집한 뒤 '}전체 저장을 눌러 한 번에 반영하세요.`}
         meta={
           <div className="d-flex align-items-center gap-2 flex-wrap">
-            {/* 화면 선택은 페이지 전체의 대상을 고르는 조작이라 헤더에 둡니다. */}
-            <label className="visually-hidden" htmlFor="screen-type">화면 선택</label>
-            <select
-              id="screen-type"
-              className="form-select form-select-sm screen-select"
-              value={screenType}
-              disabled={isLoading || isSaving}
-              onChange={(event) => void handleScreenTypeChange(event.target.value as ScreenType)}
-            >
-              {screenTypes.map((screen) => (
-                <option key={screen.value} value={screen.value}>
-                  {screen.label}
-                </option>
-              ))}
-            </select>
-
             {!isLoading && (
               <span className="page-count">
                 노출 {visibleCount}개
@@ -567,25 +611,7 @@ const ScreenSectionLayoutManagement = () => {
               )}
               새로고침
             </button>
-            {canManage && (
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={() => void handleSave()}
-                disabled={!editable || !isDirty || !validation.isValid || isLoading}
-              >
-                {isSaving ? (
-                  <>
-                    <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"/>
-                    저장 중...
-                  </>
-                ) : (
-                  <>
-                    <i className="bi bi-save me-1"/>전체 저장
-                  </>
-                )}
-              </button>
-            )}
+            {canManage && renderSaveButton()}
           </div>
         }
       />
@@ -628,55 +654,70 @@ const ScreenSectionLayoutManagement = () => {
         </div>
       )}
 
-      <div className="screen-layout">
+      <div className={`screen-layout${hasPreview || (sections.length > 0 && !isLoading) ? '' : ' screen-layout--single'}`}>
         {/* 미리보기는 스크롤해도 따라오도록 sticky 처리합니다. */}
-        <aside className="screen-layout__preview">
-          <SectionCard
-            title="미리보기"
-            icon="bi-phone"
-            aside={isMobile && (
-              /* 모바일에서만 접기/펼치기를 제공합니다. 넓은 화면에서는 항상 보입니다. */
-              <button
-                type="button"
-                className="btn btn-sm btn-outline-secondary"
-                onClick={() => setShowPreviewOnMobile((prev) => !prev)}
-                aria-expanded={showPreviewOnMobile}
-                aria-controls="screen-preview-body"
-              >
-                <i className={`bi ${showPreviewOnMobile ? 'bi-chevron-up' : 'bi-chevron-down'} me-1`}/>
-                {showPreviewOnMobile ? '접기' : '펼치기'}
-              </button>
-            )}
-          >
-            <div id="screen-preview-body" hidden={!isPreviewOpen}>
-              {isLoading ? (
-                <Loading/>
-              ) : (
-                <SectionPreview
-                  screenType={screenType}
-                  screenTypes={screenTypes}
-                  sectionTypes={sectionTypes}
-                  sections={sections}
-                  activeKey={activeKey}
-                  onSelect={(key) => {
-                    setActiveKey(key);
-                    // 모바일에서는 미리보기와 해당 편집 행이 멀리 떨어져 있어 직접 스크롤해줍니다.
-                    if (isMobile) {
-                      scrollToSectionRow(key);
-                    }
-                  }}
-                />
+        {hasPreview && (
+          <aside className="screen-layout__preview">
+            <SectionCard
+              title="미리보기"
+              icon="bi-phone"
+              aside={isMobile && (
+                /* 모바일에서만 접기/펼치기를 제공합니다. 넓은 화면에서는 항상 보입니다. */
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-secondary"
+                  onClick={() => setShowPreviewOnMobile((prev) => !prev)}
+                  aria-expanded={showPreviewOnMobile}
+                  aria-controls="screen-preview-body"
+                >
+                  <i className={`bi ${showPreviewOnMobile ? 'bi-chevron-up' : 'bi-chevron-down'} me-1`}/>
+                  {showPreviewOnMobile ? '접기' : '펼치기'}
+                </button>
               )}
-            </div>
+            >
+              <div id="screen-preview-body" hidden={!isPreviewOpen}>
+                {isLoading ? (
+                  <Loading/>
+                ) : (
+                  <SectionPreview
+                    screenType={screenType}
+                    screenTypes={screenTypes}
+                    sectionTypes={sectionTypes}
+                    sections={sections}
+                    activeKey={activeKey}
+                    onSelect={(key) => {
+                      setActiveKey(key);
+                      // 목록이 길면 데스크톱에서도 해당 행이 화면 밖에 있으므로 항상 스크롤해줍니다.
+                      scrollToSectionRow(key);
+                    }}
+                  />
+                )}
+              </div>
 
-            {/* 접혀 있을 때도 현재 구성을 가늠할 수 있게 요약만 남깁니다. */}
-            {!isPreviewOpen && !isLoading && (
-              <p className="screen-preview__collapsed mb-0">
-                노출 {visibleCount}개 섹션이 순서대로 표시됩니다.
-              </p>
-            )}
-          </SectionCard>
-        </aside>
+              {/* 접혀 있을 때도 현재 구성을 가늠할 수 있게 요약만 남깁니다. */}
+              {!isPreviewOpen && !isLoading && (
+                <p className="screen-preview__collapsed mb-0">
+                  노출 {visibleCount}개 섹션이 순서대로 표시됩니다.
+                </p>
+              )}
+            </SectionCard>
+          </aside>
+        )}
+        {/* 미리보기가 없는 화면은 같은 자리에 섹션 바로가기를 둡니다. 좁은 화면에서는 목록이 바로 이어지므로 생략합니다. */}
+        {!hasPreview && !isMobile && sections.length > 0 && !isLoading && (
+          <aside className="screen-layout__preview">
+            <SectionCard title="섹션 바로가기" icon="bi-signpost-split">
+              <SectionNav
+                items={navItems}
+                activeKey={activeKey}
+                onSelect={(key) => {
+                  setActiveKey(key);
+                  scrollToSectionRow(key);
+                }}
+              />
+            </SectionCard>
+          </aside>
+        )}
 
         <div className="screen-layout__editor">
           <SectionCard
@@ -693,6 +734,17 @@ const ScreenSectionLayoutManagement = () => {
           </SectionCard>
         </div>
       </div>
+
+      {/* 목록이 길어 헤더의 저장 버튼이 보이지 않을 때도 변경 사항을 바로 저장할 수 있게 하단에 고정합니다. */}
+      {canManage && isDirty && (
+        <div className="screen-savebar" role="region" aria-label="저장되지 않은 변경 사항">
+          <span className="screen-savebar__summary">
+            <i className={`bi ${validation.isValid ? 'bi-pencil-square' : 'bi-exclamation-circle text-danger'} me-1`}/>
+            {validation.isValid ? describeDiff(diff) : '입력값 오류를 수정해야 저장할 수 있습니다.'}
+          </span>
+          {renderSaveButton('btn-sm')}
+        </div>
+      )}
     </div>
   );
 };
@@ -705,7 +757,8 @@ const ScreenSectionLayoutManagement = () => {
  */
 const scrollToSectionRow = (key: string) => {
   const row = document.getElementById(sectionRowId(key));
-  row?.scrollIntoView({behavior: 'smooth', block: 'center'});
+  // 설정이 긴 섹션은 가운데 정렬하면 제목이 화면 밖으로 밀려나므로 위쪽에 맞춥니다.
+  row?.scrollIntoView({behavior: 'smooth', block: 'start'});
 };
 
 /** 확인 모달에 넣을 한 줄 변경 요약 */
