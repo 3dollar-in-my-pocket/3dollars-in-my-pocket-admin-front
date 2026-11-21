@@ -58,7 +58,7 @@ const RaffleManagement = () => {
   const isTicketUnavailable = !ticketEnum.isLoading && !ticket;
 
   const [showForm, setShowForm] = useState(false);
-  const [editingRaffleCode, setEditingRaffleCode] = useState<string | null>(null);
+  const [editingRaffleId, setEditingRaffleId] = useState<string | null>(null);
 
   const selectTicket = (value: string) => {
     setSearchParams((params) => {
@@ -89,12 +89,12 @@ const RaffleManagement = () => {
   });
 
   const openCreate = () => {
-    setEditingRaffleCode(null);
+    setEditingRaffleId(null);
     setShowForm(true);
   };
 
-  const openEdit = (raffleCode: string) => {
-    setEditingRaffleCode(raffleCode);
+  const openEdit = (raffleId: string) => {
+    setEditingRaffleId(raffleId);
     setShowForm(true);
   };
 
@@ -197,8 +197,19 @@ const RaffleManagement = () => {
             {raffles.map((raffle) => (
               <tr key={raffle.raffleId}>
                 <td>
-                  <div className="fw-semibold">{raffle.title}</div>
-                  <div className="small text-body-secondary font-monospace">{raffle.code}</div>
+                  <div className="d-flex align-items-center gap-2">
+                    {raffle.image?.imageUrl && (
+                      <img src={raffle.image.imageUrl} alt="" width={40} height={40} loading="lazy"
+                           className="rounded border flex-shrink-0" style={{objectFit: 'cover'}}/>
+                    )}
+                    <div>
+                      <div className="fw-semibold">{raffle.title}</div>
+                      <div className="small text-body-secondary">
+                        추첨 {raffle.winnerCount != null ? `${raffle.winnerCount.toLocaleString()}명` : '인원 미정'}
+                        <span className="font-monospace ms-2">#{raffle.raffleId}</span>
+                      </div>
+                    </div>
+                  </div>
                 </td>
                 <td className="text-nowrap">
                   {raffle.cost?.type === POINT_RAFFLE_COST_TYPE ? (
@@ -231,7 +242,7 @@ const RaffleManagement = () => {
                     <button
                       type="button"
                       className="btn btn-sm btn-outline-primary"
-                      onClick={() => openEdit(raffle.code)}
+                      onClick={() => openEdit(raffle.raffleId)}
                     >
                       수정
                     </button>
@@ -263,7 +274,7 @@ const RaffleManagement = () => {
           show={showForm}
           ticket={ticket}
           ticketLabel={ticketLabel}
-          raffleCode={editingRaffleCode}
+          raffleId={editingRaffleId}
           onHide={() => setShowForm(false)}
           onSuccess={refresh}
         />

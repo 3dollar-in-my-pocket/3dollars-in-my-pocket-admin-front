@@ -52,9 +52,9 @@ export interface MissionCompletedPointSource {
 export interface RaffleEnteredPointSource {
   reason: 'RAFFLE_ENTERED';
   raffle: {
+    /** 응모 대상 ID (단건 조회의 raffleId) */
     raffleId: string;
-    /** 응모 대상 코드 (단건 조회의 raffleCode) */
-    code: string;
+    /** 응모 대상 현재 제목 */
     title: string;
   };
 }

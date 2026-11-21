@@ -1,3 +1,5 @@
+import {Image} from './domain';
+
 /**
  * 응모 enum 값과 표시명은 서버 enum API(/v1/enums)에서 내려받습니다.
  * - RaffleTicket: 응모 티켓 (GOODS_PROMOTION_2026 등). 응모 대상은 티켓별로 분리 관리됩니다.
@@ -15,10 +17,7 @@ export const RAFFLE_ENUM_NAMES = {
 export const POINT_RAFFLE_COST_TYPE = 'POINT';
 
 export const RAFFLE_TITLE_MAX_LENGTH = 100;
-
-/** 응모 대상 코드. 티켓 안에서 유일하며 등록 후 수정할 수 없습니다. */
-export const RAFFLE_CODE_MAX_LENGTH = 50;
-export const RAFFLE_CODE_PATTERN = /^[a-z0-9_-]+$/;
+export const RAFFLE_DESCRIPTION_MAX_LENGTH = 500;
 
 /** 포인트 차감 비용. pointTicket은 PointTicket enum 값입니다. */
 export interface PointRaffleEntryCost {
@@ -30,16 +29,27 @@ export interface PointRaffleEntryCost {
 
 export type RaffleEntryCost = PointRaffleEntryCost;
 
+/** 어드민 공용 ImageRequest. width·height는 선택이며 값이 있으면 양수입니다. */
+export interface RaffleImageRequest {
+  url: string;
+  width?: number | null;
+  height?: number | null;
+}
+
 /**
- * RaffleResponse — 단건 조회·수정은 code로 식별합니다. raffleId는 내부 ID(문자열)입니다.
+ * RaffleResponse — 단건 조회·수정은 raffleId(문자열, 숫자로 변환 금지)로 식별합니다.
  * 응모 기간은 startDateTime 포함, endDateTime 미포함입니다.
  */
 export interface Raffle {
   raffleId: string;
-  code: string;
   /** 응모 티켓 (RaffleTicket) */
   ticket: string;
   title: string;
+  description: string | null;
+  /** ImageResponse. ratio는 항상 null이므로 width·height로 계산합니다. */
+  image: Image | null;
+  /** 추첨 인원. null이면 미정 */
+  winnerCount: number | null;
   cost: RaffleEntryCost;
   startDateTime: string;
   endDateTime: string;
@@ -53,17 +63,18 @@ export interface Raffle {
 
 interface RaffleRequestBase {
   title: string;
+  description: string | null;
+  image: RaffleImageRequest | null;
+  winnerCount: number | null;
   cost: RaffleEntryCost;
   startDateTime: string;
   endDateTime: string;
 }
 
 /** 등록 직후 상태는 항상 ACTIVE입니다. */
-export interface CreateRaffleRequest extends RaffleRequestBase {
-  code: string;
-}
+export type CreateRaffleRequest = RaffleRequestBase;
 
-/** 수정은 전체 교체(PUT)이며 마지막 저장이 이깁니다. code는 경로로만 지정합니다. */
+/** 수정은 전체 교체(PUT)이며 마지막 저장이 이깁니다. 선택 필드를 생략하면 null로 지워지므로 항상 모두 보냅니다. */
 export interface UpdateRaffleRequest extends RaffleRequestBase {
   status: string;
 }

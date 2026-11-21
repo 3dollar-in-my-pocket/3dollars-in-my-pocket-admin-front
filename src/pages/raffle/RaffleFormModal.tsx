@@ -3,12 +3,12 @@ import {Modal} from 'react-bootstrap';
 import {toast} from 'react-toastify';
 import raffleApi from '@/api/raffleApi';
 import useEnumOptions, {EnumSelectOption} from '@/hooks/useEnumOptions';
+import useImageUpload from '@/hooks/useImageUpload';
 import {POINT_TICKET_ENUM_NAME} from '@/types/point';
 import {
   POINT_RAFFLE_COST_TYPE,
   Raffle,
-  RAFFLE_CODE_MAX_LENGTH,
-  RAFFLE_CODE_PATTERN,
+  RAFFLE_DESCRIPTION_MAX_LENGTH,
   RAFFLE_ENUM_NAMES,
   RAFFLE_TITLE_MAX_LENGTH,
   UpdateRaffleRequest,
@@ -18,9 +18,14 @@ const FORM_ID = 'raffle-form';
 
 /** 숫자 입력은 빈 값을 표현하기 위해 문자열로 보관하고 제출 시 변환합니다. */
 interface FormData {
-  /** 등록 시에만 입력. 수정에서는 읽기 전용 */
-  code: string;
   title: string;
+  description: string;
+  /** 비우면 이미지 없음(image = null) */
+  imageUrl: string;
+  imageWidth: string;
+  imageHeight: string;
+  /** 비우면 추첨 인원 미정(winnerCount = null) */
+  winnerCount: string;
   /** 비용 타입 (RaffleEntryCostType) */
   costType: string;
   /** 포인트 티켓 (costType=POINT에서만 사용) */
@@ -37,6 +42,23 @@ const toLocal = (value?: string | null) => (value ? value.slice(0, 19) : '');
 const toApi = (value: string) => (value.length === 16 ? `${value}:00` : value);
 
 const isPositiveInteger = (value: string) => /^\d+$/.test(value.trim()) && Number(value) > 0;
+const isHttpUrl = (value: string) => {
+  try {
+    return ['http:', 'https:'].includes(new URL(value).protocol);
+  } catch {
+    return false;
+  }
+};
+/** 빈 값은 null, 그 외는 숫자로 변환합니다. (선택 숫자 필드) */
+const toOptionalNumber = (value: string) => (value.trim() ? Number(value) : null);
+
+/** 업로드한 이미지의 원본 크기를 읽습니다. 실패하면 null */
+const readImageSize = (url: string) => new Promise<{ width: number; height: number } | null>((resolve) => {
+  const image = new Image();
+  image.onload = () => resolve({width: image.naturalWidth, height: image.naturalHeight});
+  image.onerror = () => resolve(null);
+  image.src = url;
+});
 
 /** 서버 enum에서 빠진 값이라도 기존 값은 선택지에 남겨 의도치 않게 바뀌지 않도록 합니다. */
 const withCurrent = (options: EnumSelectOption[], value: string): EnumSelectOption[] =>
@@ -44,8 +66,12 @@ const withCurrent = (options: EnumSelectOption[], value: string): EnumSelectOpti
 
 /** 신규 등록 기본값. 각 enum의 첫 번째 값을 기본 선택하되, 비용 타입은 POINT가 있으면 POINT를 고릅니다. */
 const emptyForm = (costTypeOptions: EnumSelectOption[], ticketOptions: EnumSelectOption[]): FormData => ({
-  code: '',
   title: '',
+  description: '',
+  imageUrl: '',
+  imageWidth: '',
+  imageHeight: '',
+  winnerCount: '',
   costType: costTypeOptions.find((option) => option.value === POINT_RAFFLE_COST_TYPE)?.value
     ?? costTypeOptions[0]?.value ?? '',
   pointTicket: ticketOptions[0]?.value ?? '',
@@ -57,8 +83,13 @@ const emptyForm = (costTypeOptions: EnumSelectOption[], ticketOptions: EnumSelec
 });
 
 const fromRaffle = (raffle: Raffle): FormData => ({
-  code: raffle.code,
   title: raffle.title,
+  // PUT은 전체 교체라 선택 필드를 비워 보내면 지워집니다. 조회한 값을 그대로 채워 유지합니다.
+  description: raffle.description ?? '',
+  imageUrl: raffle.image?.imageUrl ?? '',
+  imageWidth: raffle.image?.width != null ? String(raffle.image.width) : '',
+  imageHeight: raffle.image?.height != null ? String(raffle.image.height) : '',
+  winnerCount: raffle.winnerCount != null ? String(raffle.winnerCount) : '',
   // 수정(PUT)은 cost를 통째로 다시 보내므로 조회한 값을 그대로 채웁니다.
   costType: raffle.cost?.type ?? '',
   pointTicket: raffle.cost?.pointTicket ?? '',
@@ -73,8 +104,8 @@ interface Props {
   /** 응모 티켓 (RaffleTicket) */
   ticket: string;
   ticketLabel: string;
-  /** 수정 대상 응모 코드. null이면 신규 등록 */
-  raffleCode: string | null;
+  /** 수정 대상 응모 ID (문자열 그대로 사용). null이면 신규 등록 */
+  raffleId: string | null;
   onHide: () => void;
   onSuccess: () => void;
 }
@@ -83,10 +114,9 @@ interface Props {
  * 응모 대상 등록·수정 모달
  *
  * 등록 직후 상태는 ACTIVE(기간 안이면 즉시 노출·응모 가능)이며, 상태 변경은 수정에서만 할 수 있습니다.
- * code는 등록 후 바꿀 수 없어 수정에서는 읽기 전용으로 보여줍니다.
  * 수정은 전체 교체(PUT)이므로 다른 관리자의 변경을 덮어쓰지 않도록 열 때마다 단건 조회로 최신 값을 채웁니다.
  */
-const RaffleFormModal = ({show, ticket, ticketLabel, raffleCode, onHide, onSuccess}: Props) => {
+const RaffleFormModal = ({show, ticket, ticketLabel, raffleId, onHide, onSuccess}: Props) => {
   const costTypeEnum = useEnumOptions(RAFFLE_ENUM_NAMES.costType);
   const pointTicketEnum = useEnumOptions(POINT_TICKET_ENUM_NAME);
   const statusEnum = useEnumOptions(RAFFLE_ENUM_NAMES.status);
@@ -102,27 +132,40 @@ const RaffleFormModal = ({show, ticket, ticketLabel, raffleCode, onHide, onSucce
   const [isLoading, setIsLoading] = useState(false);
   const [loadFailed, setLoadFailed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const isEdit = !!raffleCode;
-  const isBusy = isSubmitting || isLoading || isEnumLoading;
+  const isEdit = !!raffleId;
+
+  const {handleFileChange, isUploading} = useImageUpload({
+    imageType: 'ADVERTISEMENT_IMAGE',
+    onUploaded: async (url) => {
+      setField('imageUrl', url);
+      const size = await readImageSize(url);
+      if (size) {
+        setField('imageWidth', String(size.width));
+        setField('imageHeight', String(size.height));
+      }
+    },
+  });
+
+  const isBusy = isSubmitting || isLoading || isEnumLoading || isUploading;
   // 신규 등록은 포인트 티켓 선택지가 있어야 합니다. 수정은 기존 값을 유지하므로 막지 않습니다.
   const isCreateBlocked = !isEdit && isEnumUnavailable;
 
   useEffect(() => {
-    if (!show || raffleCode || isEnumLoading) return;
+    if (!show || raffleId || isEnumLoading) return;
     setErrors({});
     setLoadFailed(false);
     setForm(emptyForm(costTypeOptions, pointTicketOptions));
-  }, [show, raffleCode, isEnumLoading, costTypeOptions, pointTicketOptions]);
+  }, [show, raffleId, isEnumLoading, costTypeOptions, pointTicketOptions]);
 
   useEffect(() => {
-    if (!show || !raffleCode) return;
+    if (!show || !raffleId) return;
 
     setErrors({});
     setLoadFailed(false);
 
     let cancelled = false;
     setIsLoading(true);
-    raffleApi.getRaffle(ticket, raffleCode)
+    raffleApi.getRaffle(ticket, raffleId)
       .then((response) => {
         if (cancelled) return;
         if (!response.ok) {
@@ -138,7 +181,7 @@ const RaffleFormModal = ({show, ticket, ticketLabel, raffleCode, onHide, onSucce
     return () => {
       cancelled = true;
     };
-  }, [show, ticket, raffleCode]);
+  }, [show, ticket, raffleId]);
 
   const setField = <K extends keyof FormData>(name: K, value: FormData[K]) => {
     setForm((current) => ({...current, [name]: value}));
@@ -150,17 +193,30 @@ const RaffleFormModal = ({show, ticket, ticketLabel, raffleCode, onHide, onSucce
     const next: Record<string, string> = {};
     const title = form.title.trim();
 
-    if (!isEdit) {
-      const code = form.code.trim();
-      if (!code) next.code = '응모 코드를 입력해주세요.';
-      else if (code.length > RAFFLE_CODE_MAX_LENGTH) {
-        next.code = `응모 코드는 최대 ${RAFFLE_CODE_MAX_LENGTH}자까지 입력할 수 있습니다.`;
-      } else if (!RAFFLE_CODE_PATTERN.test(code)) next.code = '응모 코드는 영소문자·숫자·-·_로만 입력해주세요.';
-    }
-
     if (!title) next.title = '응모 제목을 입력해주세요.';
     else if (title.length > RAFFLE_TITLE_MAX_LENGTH) {
       next.title = `응모 제목은 최대 ${RAFFLE_TITLE_MAX_LENGTH}자까지 입력할 수 있습니다.`;
+    }
+
+    if (form.description.trim().length > RAFFLE_DESCRIPTION_MAX_LENGTH) {
+      next.description = `응모 설명은 최대 ${RAFFLE_DESCRIPTION_MAX_LENGTH}자까지 입력할 수 있습니다.`;
+    }
+
+    const imageUrl = form.imageUrl.trim();
+    if (imageUrl) {
+      if (!isHttpUrl(imageUrl)) next.imageUrl = '이미지 URL 형식이 올바르지 않습니다.';
+      if (form.imageWidth.trim() && !isPositiveInteger(form.imageWidth)) {
+        next.imageWidth = '이미지 너비는 0보다 큰 정수여야 합니다.';
+      }
+      if (form.imageHeight.trim() && !isPositiveInteger(form.imageHeight)) {
+        next.imageHeight = '이미지 높이는 0보다 큰 정수여야 합니다.';
+      }
+    } else if (form.imageWidth.trim() || form.imageHeight.trim()) {
+      next.imageUrl = '이미지 크기를 입력하려면 이미지 URL을 입력해주세요.';
+    }
+
+    if (form.winnerCount.trim() && !isPositiveInteger(form.winnerCount)) {
+      next.winnerCount = '추첨 인원은 0보다 큰 정수여야 합니다.';
     }
 
     if (!form.costType) next.costType = '응모 비용 타입을 선택해주세요.';
@@ -192,15 +248,23 @@ const RaffleFormModal = ({show, ticket, ticketLabel, raffleCode, onHide, onSucce
 
     setIsSubmitting(true);
     try {
+      const imageUrl = form.imageUrl.trim();
+      const description = form.description.trim();
+      // 선택 필드도 항상 명시적으로 보냅니다. (PUT에서 생략하면 null로 지워짐)
       const request: Omit<UpdateRaffleRequest, 'status'> = {
         title: form.title.trim(),
+        description: description || null,
+        image: imageUrl
+          ? {url: imageUrl, width: toOptionalNumber(form.imageWidth), height: toOptionalNumber(form.imageHeight)}
+          : null,
+        winnerCount: toOptionalNumber(form.winnerCount),
         cost: {type: POINT_RAFFLE_COST_TYPE, pointTicket: form.pointTicket, amount: Number(form.amount)},
         startDateTime: toApi(form.startDateTime),
         endDateTime: toApi(form.endDateTime),
       };
-      const response = raffleCode
-        ? await raffleApi.updateRaffle(ticket, raffleCode, {...request, status: form.status})
-        : await raffleApi.createRaffle(ticket, {...request, code: form.code.trim()});
+      const response = raffleId
+        ? await raffleApi.updateRaffle(ticket, raffleId, {...request, status: form.status})
+        : await raffleApi.createRaffle(ticket, request);
       // 실패 메시지는 공통 인터셉터가 서버 message 그대로 토스트로 노출합니다.
       if (!response.ok) return;
 
@@ -242,25 +306,6 @@ const RaffleFormModal = ({show, ticket, ticketLabel, raffleCode, onHide, onSucce
         ) : (
           <form id={FORM_ID} onSubmit={handleSubmit} noValidate>
             <div className="row g-3">
-              <Field label="응모 코드" required={!isEdit} error={errors.code} htmlFor="raffle-code">
-                <input
-                  id="raffle-code"
-                  className={`form-control font-monospace ${errors.code ? 'is-invalid' : ''}`}
-                  value={form.code}
-                  maxLength={RAFFLE_CODE_MAX_LENGTH}
-                  onChange={(e) => setField('code', e.target.value)}
-                  // code는 등록 후 수정할 수 없습니다.
-                  disabled={isSubmitting || isEdit}
-                  placeholder="예: goods-a-set"
-                  autoComplete="off"
-                />
-                <div className="form-text">
-                  {isEdit
-                    ? '응모 코드는 변경할 수 없습니다.'
-                    : `영소문자·숫자·-·_ 최대 ${RAFFLE_CODE_MAX_LENGTH}자. 티켓 안에서 유일해야 하며 등록 후에는 변경할 수 없습니다.`}
-                </div>
-              </Field>
-
               <Field label="응모 제목" required error={errors.title} htmlFor="raffle-title">
                 <input
                   id="raffle-title"
@@ -272,6 +317,98 @@ const RaffleFormModal = ({show, ticket, ticketLabel, raffleCode, onHide, onSucce
                   placeholder="예: 가슴속 3천원 키링"
                 />
                 <div className="form-text text-end">{form.title.length} / {RAFFLE_TITLE_MAX_LENGTH}</div>
+              </Field>
+
+              <Field label="응모 설명" error={errors.description} htmlFor="raffle-description">
+                <textarea
+                  id="raffle-description"
+                  rows={3}
+                  className={`form-control ${errors.description ? 'is-invalid' : ''}`}
+                  value={form.description}
+                  maxLength={RAFFLE_DESCRIPTION_MAX_LENGTH}
+                  onChange={(e) => setField('description', e.target.value)}
+                  disabled={isSubmitting}
+                  placeholder="비우면 설명 없음"
+                />
+                <div className="form-text text-end">
+                  {form.description.length} / {RAFFLE_DESCRIPTION_MAX_LENGTH}
+                </div>
+              </Field>
+
+              <Field label="대표 이미지 URL" error={errors.imageUrl} htmlFor="raffle-image-url">
+                <div className="input-group">
+                  <input
+                    id="raffle-image-url"
+                    type="url"
+                    className={`form-control ${errors.imageUrl ? 'is-invalid' : ''}`}
+                    value={form.imageUrl}
+                    onChange={(e) => setField('imageUrl', e.target.value)}
+                    disabled={isSubmitting || isUploading}
+                    placeholder="비우면 이미지 없음"
+                  />
+                  <label className={`btn btn-outline-primary mb-0 ${isSubmitting || isUploading ? 'disabled' : ''}`}>
+                    {isUploading
+                      ? <><span className="spinner-border spinner-border-sm me-1"/>업로드 중</>
+                      : <><i className="bi bi-upload me-1"/>파일 선택</>}
+                    <input type="file" accept="image/*" hidden disabled={isSubmitting || isUploading}
+                           onChange={(e) => handleFileChange(e)}/>
+                  </label>
+                </div>
+                {form.imageUrl.trim() && isHttpUrl(form.imageUrl.trim()) && (
+                  <img src={form.imageUrl.trim()} alt="대표 이미지 미리보기" className="rounded border mt-2"
+                       style={{maxWidth: 160, maxHeight: 120, objectFit: 'contain'}}/>
+                )}
+              </Field>
+
+              <Field label="이미지 너비" col="col-6 col-md-4" error={errors.imageWidth} htmlFor="raffle-image-width">
+                <div className="input-group">
+                  <input
+                    id="raffle-image-width"
+                    type="number"
+                    min={1}
+                    step={1}
+                    className={`form-control ${errors.imageWidth ? 'is-invalid' : ''}`}
+                    value={form.imageWidth}
+                    onChange={(e) => setField('imageWidth', e.target.value)}
+                    disabled={isSubmitting || isUploading}
+                    placeholder="선택"
+                  />
+                  <span className="input-group-text">px</span>
+                </div>
+              </Field>
+
+              <Field label="이미지 높이" col="col-6 col-md-4" error={errors.imageHeight} htmlFor="raffle-image-height">
+                <div className="input-group">
+                  <input
+                    id="raffle-image-height"
+                    type="number"
+                    min={1}
+                    step={1}
+                    className={`form-control ${errors.imageHeight ? 'is-invalid' : ''}`}
+                    value={form.imageHeight}
+                    onChange={(e) => setField('imageHeight', e.target.value)}
+                    disabled={isSubmitting || isUploading}
+                    placeholder="선택"
+                  />
+                  <span className="input-group-text">px</span>
+                </div>
+              </Field>
+
+              <Field label="추첨 인원" col="col-12 col-md-4" error={errors.winnerCount} htmlFor="raffle-winner-count">
+                <div className="input-group">
+                  <input
+                    id="raffle-winner-count"
+                    type="number"
+                    min={1}
+                    step={1}
+                    className={`form-control ${errors.winnerCount ? 'is-invalid' : ''}`}
+                    value={form.winnerCount}
+                    onChange={(e) => setField('winnerCount', e.target.value)}
+                    disabled={isSubmitting}
+                    placeholder="비우면 미정"
+                  />
+                  <span className="input-group-text">명</span>
+                </div>
               </Field>
 
               <Field label="응모 비용 타입" required error={errors.costType} htmlFor="raffle-cost-type">
