@@ -66,13 +66,17 @@ const missionApi = {
     return apiPut<Mission>(`${groupPath(groupCode)}/missions/${missionId}`, data);
   },
 
-  /** 유저 미션 완료 이력 조회 (최신순, size 1~30) */
+  /** 유저의 그룹별 미션 완료 이력 조회 (최신순, size 1~30). 없는 그룹 코드는 404 not_exists_mission_group */
   getUserMissionCompletions: async (
+    groupCode: string,
     userId: string,
     cursor: string | null = null,
     size?: number
   ): Promise<ApiResponse<PaginatedResponse<MissionCompletion>>> => {
-    return apiGetPaginated<MissionCompletion>(`/v1/user/${userId}/mission-completions`, {cursor, size});
+    return apiGetPaginated<MissionCompletion>(
+      `${groupPath(groupCode)}/users/${userId}/mission-completions`,
+      {cursor, size}
+    );
   },
 };
 

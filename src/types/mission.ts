@@ -95,14 +95,13 @@ export interface CreateMissionRequest extends UpdateMissionRequest {
 }
 
 /**
- * 유저 미션 완료 이력 (GET /v1/user/{userId}/mission-completions)
- * 미션을 찾지 못하면 mission·missionGroup 모두 null, 그룹만 찾지 못하면 missionGroup만 null입니다.
- * missionId는 항상 있습니다.
+ * 유저 미션 완료 이력 (GET /v1/mission-groups/{missionGroupCode}/users/{userId}/mission-completions)
+ * 지정한 그룹의 이력만 조회하므로 missionGroup은 항상 있습니다. 미션을 찾지 못하면 mission만 null이며 missionId는 항상 있습니다.
  */
 export interface MissionCompletion {
   missionCompletionId: string;
   missionId: string;
-  missionGroup: MissionGroup | null;
+  missionGroup: MissionGroup;
   mission: Mission | null;
   /** 완료한 기간 키. DAILY는 완료 일자(KST) yyyy-MM-dd */
   periodKey: string;

@@ -43,24 +43,12 @@ export const menuGroups: MenuGroup[] = [
   {
     title: "가게 관리",
     icon: "bi-shop",
-    description: "등록된 가게 정보와 리뷰·쿠폰·신고를 관리합니다",
+    description: "등록된 가게 정보와 카테고리·리뷰·쿠폰·신고를 관리합니다",
     items: [
-      {
-        path: "/manage/store-file-upload",
-        label: "가게 일괄 등록",
-        icon: "bi-file-earmark-arrow-up",
-        allowedRoles: [AdminRole.OPERATOR]
-      },
       {
         path: "/manage/store-search",
         label: "가게 검색",
         icon: "bi-shop",
-        allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]
-      },
-      {
-        path: "/manage/popular-neighborhood-stores",
-        label: "인기 가게",
-        icon: "bi-star-fill",
         allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]
       },
       {
@@ -81,29 +69,54 @@ export const menuGroups: MenuGroup[] = [
         icon: "bi-geo-alt-fill",
         allowedRoles: [AdminRole.OPERATOR]
       },
-    ],
-  },
-  {
-    title: "콘텐츠",
-    icon: "bi-megaphone-fill",
-    description: "광고, 메달, 미션, FAQ 등 콘텐츠를 관리합니다",
-    items: [
-      {path: "/manage/advertisement", label: "광고 관리", icon: "bi-bullseye", allowedRoles: [AdminRole.OPERATOR]},
-      {path: "/manage/medal", label: "메달 관리", icon: "bi-award-fill", allowedRoles: [AdminRole.OPERATOR]},
       {
-        path: "/manage/mission",
-        label: "미션 관리",
-        icon: "bi-flag-fill",
+        path: "/manage/store-file-upload",
+        label: "가게 일괄 등록",
+        icon: "bi-file-earmark-arrow-up",
         allowedRoles: [AdminRole.OPERATOR]
       },
-      {path: "/manage/faq", label: "FAQ 관리", icon: "bi-question-circle-fill", allowedRoles: [AdminRole.OPERATOR]},
       {
         path: "/manage/store-category",
         label: "가게 카테고리 관리",
         icon: "bi-grid-3x3-gap",
         allowedRoles: [AdminRole.OPERATOR]
       },
+    ],
+  },
+  {
+    title: "콘텐츠",
+    icon: "bi-megaphone-fill",
+    description: "광고, 메달, FAQ 등 콘텐츠를 관리합니다",
+    items: [
+      {path: "/manage/advertisement", label: "광고 관리", icon: "bi-bullseye", allowedRoles: [AdminRole.OPERATOR]},
+      {path: "/manage/medal", label: "메달 관리", icon: "bi-award-fill", allowedRoles: [AdminRole.OPERATOR]},
+      {path: "/manage/faq", label: "FAQ 관리", icon: "bi-question-circle-fill", allowedRoles: [AdminRole.OPERATOR]},
     ]
+  },
+  {
+    title: "프로모션 & 이벤트",
+    icon: "bi-gift-fill",
+    description: "미션, 포인트 응모·잔액 등 프로모션·이벤트를 관리합니다",
+    items: [
+      {
+        path: "/manage/mission",
+        label: "미션 관리",
+        icon: "bi-flag-fill",
+        allowedRoles: [AdminRole.OPERATOR]
+      },
+      {
+        path: "/manage/raffle",
+        label: "응모 관리",
+        icon: "bi-ticket-perforated-fill",
+        allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]
+      },
+      {
+        path: "/manage/point-balance",
+        label: "포인트 잔액 조회",
+        icon: "bi-coin",
+        allowedRoles: [AdminRole.OPERATOR, AdminRole.VIEWER]
+      },
+    ],
   },
   {
     title: "커뮤니티 관리",
