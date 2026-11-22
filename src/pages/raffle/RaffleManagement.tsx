@@ -1,5 +1,5 @@
 import {useCallback, useState} from 'react';
-import {useSearchParams} from 'react-router-dom';
+import {useSearchParams} from 'react-router';
 import raffleApi from '@/api/raffleApi';
 import DataTable from '@/components/common/DataTable';
 import EmptyState from '@/components/common/EmptyState';

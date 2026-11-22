@@ -1,5 +1,5 @@
 import {lazy} from "react";
-import {Navigate} from "react-router-dom";
+import {Navigate} from "react-router";
 import PrivateRouter from "./PrivateRouter";
 import type {StatisticsTabKey} from "@/pages/info/Statistics";
 

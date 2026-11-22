@@ -1,5 +1,5 @@
 import React, {Suspense, useEffect, useMemo, useState} from "react";
-import {Outlet, useLocation, useNavigate} from "react-router-dom";
+import {Outlet, useLocation, useNavigate} from "react-router";
 import PageLoading from "@/components/common/PageLoading";
 import Sidebar from "@/components/layout/Sidebar";
 import {Bounce, toast, ToastContainer} from "react-toastify";

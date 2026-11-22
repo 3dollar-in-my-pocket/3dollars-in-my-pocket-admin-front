@@ -1,5 +1,5 @@
 import {FormEvent, ReactNode, useState} from 'react';
-import {useNavigate} from 'react-router-dom';
+import {useNavigate} from 'react-router';
 import {toast} from 'react-toastify';
 import storeApi from '@/api/storeApi';
 import PageHeader from '@/components/common/PageHeader';

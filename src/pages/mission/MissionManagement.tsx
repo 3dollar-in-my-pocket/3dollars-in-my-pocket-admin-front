@@ -1,5 +1,5 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
-import {useSearchParams} from 'react-router-dom';
+import {useSearchParams} from 'react-router';
 import missionApi from '@/api/missionApi';
 import DataTable from '@/components/common/DataTable';
 import EmptyState from '@/components/common/EmptyState';

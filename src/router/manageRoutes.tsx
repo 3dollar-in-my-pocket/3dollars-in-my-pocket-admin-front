@@ -1,5 +1,5 @@
 import {lazy} from "react";
-import {Navigate} from "react-router-dom";
+import {Navigate} from "react-router";
 import PrivateRouter from "./PrivateRouter";
 import PermissionGuard from "@/components/auth/PermissionGuard";
 import {AdminRole} from "@/types/admin";
