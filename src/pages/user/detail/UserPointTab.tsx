@@ -12,6 +12,7 @@ import {
   PointHistory,
   PointHistorySortBy,
   PointHistorySource,
+  RaffleEnteredPointSource,
 } from '@/types/point';
 import {formatDateTimeKo} from '@/utils/dateUtils';
 
@@ -28,6 +29,7 @@ const PERIOD_ENUM_NAMES = [MISSION_ENUM_NAMES.periodType];
 const getTypeBadge = (type: string) => {
   if (type === 'EARN') return <span className="badge bg-success-subtle text-success-emphasis">적립</span>;
   if (type === 'REVOKE') return <span className="badge bg-danger-subtle text-danger-emphasis">회수</span>;
+  if (type === 'USE') return <span className="badge bg-primary-subtle text-primary-emphasis">사용</span>;
   return <span className="badge bg-secondary-subtle text-secondary-emphasis">{type}</span>;
 };
 
@@ -36,8 +38,11 @@ const formatAmount = (amount: number) => `${amount > 0 ? '+' : ''}${amount.toLoc
 const isMissionCompletedSource = (source?: PointHistorySource | null): source is MissionCompletedPointSource =>
   source?.reason === 'MISSION_COMPLETED';
 
+const isRaffleEnteredSource = (source?: PointHistorySource | null): source is RaffleEnteredPointSource =>
+  source?.reason === 'RAFFLE_ENTERED';
+
 /**
- * 유저 상세 모달의 포인트 탭 (티켓별 잔액 + 적립/회수 내역)
+ * 유저 상세 모달의 포인트 탭 (티켓별 잔액 + 적립/회수/사용 내역)
  *
  * 포인트는 티켓(PointTicket)별로 분리 관리되며, 티켓 목록은 서버 enum에서 받아옵니다.
  * 내역 정렬(sortBy)을 바꾸면 커서를 버리고 첫 페이지부터 다시 조회합니다.
@@ -165,7 +170,7 @@ const UserPointTab = ({userId, isActive}: UserPointTabProps) => {
         onRefresh={handleRefresh}
         onLoadMore={loadMore}
         emptyTitle="포인트 내역이 없습니다"
-        emptyDescription="아직 적립되거나 회수된 포인트가 없습니다."
+        emptyDescription="아직 적립·회수·사용된 포인트가 없습니다."
         aside={(
           <select
             className="form-select form-select-sm w-auto"
@@ -180,9 +185,11 @@ const UserPointTab = ({userId, isActive}: UserPointTabProps) => {
         )}
       >
         {histories.map((history) => {
-          // 알 수 없는 reason이나 source가 null(미션 삭제 등)이면 description만 표시합니다.
+          // 알 수 없는 reason이나 source가 null(미션·응모 대상 삭제 등)이면 description만 표시합니다.
           const missionSource = isMissionCompletedSource(history.source) ? history.source : null;
-          const isRevoke = history.amount < 0;
+          const raffleSource = isRaffleEnteredSource(history.source) ? history.source : null;
+          const sourceTitle = missionSource?.mission.title ?? raffleSource?.raffle.title;
+          const isDeduction = history.amount < 0;
           return (
             <ItemCard key={history.pointHistoryId} item={history} className="mb-2">
               <div className="d-flex align-items-start gap-3">
@@ -190,7 +197,7 @@ const UserPointTab = ({userId, isActive}: UserPointTabProps) => {
                   <div className="d-flex align-items-center gap-2 min-w-0">
                     {getTypeBadge(history.type)}
                     <h3 className="item-card__name text-truncate">
-                      {missionSource?.mission.title ?? (history.description || history.reason)}
+                      {sourceTitle ?? (history.description || history.reason)}
                     </h3>
                   </div>
                   {missionSource && (
@@ -204,10 +211,10 @@ const UserPointTab = ({userId, isActive}: UserPointTabProps) => {
                   )}
                   <p className="item-card__desc">
                     {formatDateTimeKo(history.occurredAt)}
-                    {missionSource && history.description && <> · {history.description}</>}
+                    {sourceTitle && history.description && <> · {history.description}</>}
                   </p>
                 </div>
-                <div className={`flex-shrink-0 fs-6 fw-bold text-nowrap ${isRevoke ? 'text-danger' : 'text-success'}`}>
+                <div className={`flex-shrink-0 fs-6 fw-bold text-nowrap ${isDeduction ? 'text-danger' : 'text-success'}`}>
                   {formatAmount(history.amount)}
                 </div>
               </div>

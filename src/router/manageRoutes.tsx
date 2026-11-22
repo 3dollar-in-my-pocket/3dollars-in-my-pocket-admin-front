@@ -13,8 +13,7 @@ const FaqManagement = lazy(() => import("../pages/faq/Faq"));
 const Policy = lazy(() => import("../pages/policy/Policy"));
 const Push = lazy(() => import("../pages/push/Push"));
 const UserSearch = lazy(() => import("../pages/user/UserSearch"));
-const StoreSearch = lazy(() => import("../pages/store/StoreSearch"));
-const PopularNeighborhoodStores = lazy(() => import("../pages/store/PopularNeighborhoodStores"));
+const StoreSearchManagement = lazy(() => import("../pages/store/StoreSearchManagement"));
 const SimilarStoreSearch = lazy(() => import("../pages/store/SimilarStoreSearch"));
 const StoreDuplicateCandidateManagement = lazy(() => import("../pages/store/StoreDuplicateCandidateManagement"));
 const StoreCategoryManagement = lazy(() => import("../pages/storeCategory/StoreCategoryManagement"));
@@ -25,6 +24,8 @@ const Admin = lazy(() => import("../pages/admin/Admin"));
 const PollManagement = lazy(() => import("../pages/poll/PollManagement"));
 const MedalManagement = lazy(() => import("../pages/medal/MedalManagement"));
 const MissionManagement = lazy(() => import("../pages/mission/MissionManagement"));
+const RaffleManagement = lazy(() => import("../pages/raffle/RaffleManagement"));
+const PointBalanceManagement = lazy(() => import("../pages/point/PointBalanceManagement"));
 const UserRankingManagement = lazy(() => import("../pages/userRanking/UserRankingManagement"));
 const StoreMarkerManage = lazy(() => import("../pages/manage/StoreMarkerManage"));
 const PromptManagement = lazy(() => import("../pages/prompt/PromptManagement"));
@@ -77,6 +78,14 @@ const manageRoutes = {
       )
     },
     {
+      path: '/manage/raffle',
+      element: <PrivateRouter><RaffleManagement/></PrivateRouter>
+    },
+    {
+      path: '/manage/point-balance',
+      element: <PrivateRouter><PointBalanceManagement/></PrivateRouter>
+    },
+    {
       path: '/manage/policy',
       element: <PrivateRouter><Policy/></PrivateRouter>
     },
@@ -90,7 +99,7 @@ const manageRoutes = {
     },
     {
       path: '/manage/store-search',
-      element: <PrivateRouter><StoreSearch/></PrivateRouter>
+      element: <PrivateRouter><StoreSearchManagement/></PrivateRouter>
     },
     {
       path: '/manage/store-file-upload',
@@ -111,9 +120,10 @@ const manageRoutes = {
       path,
       element: <Navigate to={`/manage/store-activity?tab=${tab}`} replace/>
     })),
+    // 가게 검색 페이지의 탭으로 통합되기 전 경로 (북마크 호환)
     {
       path: '/manage/popular-neighborhood-stores',
-      element: <PrivateRouter><PopularNeighborhoodStores/></PrivateRouter>
+      element: <Navigate to="/manage/store-search?tab=popular" replace/>
     },
     {
       path: '/manage/store-duplicate-candidate',

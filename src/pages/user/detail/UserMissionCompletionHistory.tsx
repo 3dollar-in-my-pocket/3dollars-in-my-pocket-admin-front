@@ -1,10 +1,10 @@
-import {useCallback} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import missionApi from '@/api/missionApi';
 import HistoryPanel from '@/components/common/HistoryPanel';
 import useCursorPagination from '@/hooks/useCursorPagination';
 import {useEnumLabels} from '@/hooks/useEnumOptions';
 import ItemCard from '@/components/common/ItemCard';
-import {MISSION_ENUM_NAMES, MissionCompletion, POINT_REWARD_TYPE} from '@/types/mission';
+import {MISSION_ENUM_NAMES, MissionCompletion, MissionGroup, POINT_REWARD_TYPE} from '@/types/mission';
 import {POINT_TICKET_ENUM_NAME} from '@/types/point';
 import MissionCompletionMeta from './MissionCompletionMeta';
 import {formatDateTimeKo} from '@/utils/dateUtils';
@@ -26,17 +26,41 @@ const ENUM_NAMES = [
 /**
  * 유저 미션 완료 이력 (활동 이력 하위 탭)
  *
- * 미션 제목·그룹·기간·완료 조건·리워드를 보여줍니다.
+ * 이력은 미션 그룹 단위로 조회합니다. 그룹을 고르면 그 그룹의 완료 이력만 보여줍니다. (기본: 최신 그룹)
+ * 미션 제목·기간·완료 조건·리워드를 보여줍니다.
  * 삭제 등으로 미션을 찾지 못한 이력은 mission이 null이라 missionId로만 식별할 수 있어 ID를 대체 표시합니다.
- * 미션은 있으나 그룹만 찾지 못하면 그룹 정보만 생략합니다.
  */
 const UserMissionCompletionHistory = ({userId, isActive}: UserMissionCompletionHistoryProps) => {
   const enumLabels = useEnumLabels(ENUM_NAMES);
   const labelOf = (enumName: string, value: string) => enumLabels[enumName]?.[value] ?? value;
 
+  const [groups, setGroups] = useState<MissionGroup[] | null>(null);
+  const [groupsError, setGroupsError] = useState(false);
+  const [selectedGroupCode, setSelectedGroupCode] = useState<string | null>(null);
+  // 선택한 그룹이 없거나 목록에 없으면 최신 그룹(목록 첫 번째)을 사용합니다.
+  const groupCode = groups?.some((group) => group.code === selectedGroupCode)
+    ? selectedGroupCode
+    : groups?.[0]?.code ?? null;
+
+  // 그룹 목록은 탭을 처음 열 때 한 번만 조회합니다. 실패하면 새로고침으로 다시 조회합니다.
+  const fetchGroups = useCallback(async () => {
+    setGroupsError(false);
+    const response = await missionApi.getMissionGroups();
+    if (!response.ok) {
+      setGroupsError(true);
+      return;
+    }
+    setGroups(response.data?.contents ?? []);
+  }, []);
+
+  useEffect(() => {
+    if (isActive && groups === null && !groupsError) void fetchGroups();
+  }, [isActive, groups, groupsError, fetchGroups]);
+
   const fetchCompletions = useCallback(
-    (cursor: string | null) => missionApi.getUserMissionCompletions(userId, cursor, PAGE_SIZE),
-    [userId]
+    (cursor: string | null) =>
+      groupCode ? missionApi.getUserMissionCompletions(groupCode, userId, cursor, PAGE_SIZE) : null,
+    [groupCode, userId]
   );
 
   const {
@@ -49,26 +73,42 @@ const UserMissionCompletionHistory = ({userId, isActive}: UserMissionCompletionH
     loadMore
   } = useCursorPagination<MissionCompletion>({
     fetcher: fetchCompletions,
-    enabled: Boolean(userId && isActive),
-    deps: [userId],
+    enabled: Boolean(userId && isActive && groupCode),
+    deps: [userId, groupCode],
     errorMessage: '미션 완료 이력을 불러오지 못했습니다.'
   });
+
+  const isGroupEmpty = groups !== null && groups.length === 0;
 
   return (
     <HistoryPanel
       title="미션 완료 이력"
       icon="bi-flag"
-      count={completions.length}
-      hasMore={hasMore}
-      isLoading={isLoading}
+      count={groupCode ? completions.length : 0}
+      hasMore={Boolean(groupCode) && hasMore}
+      isLoading={isLoading || (isActive && groups === null && !groupsError)}
       isLoadingMore={isLoadingMore}
-      error={error}
-      onRefresh={refresh}
+      error={groupsError ? '미션 그룹 목록을 불러오지 못했습니다.' : error}
+      onRefresh={groupsError ? () => void fetchGroups() : refresh}
       onLoadMore={loadMore}
-      emptyTitle="미션 완료 이력이 없습니다"
-      emptyDescription="아직 완료한 미션이 없습니다."
+      emptyTitle={isGroupEmpty ? '등록된 미션 그룹이 없습니다' : '미션 완료 이력이 없습니다'}
+      emptyDescription={isGroupEmpty ? '미션 그룹이 있어야 완료 이력을 조회할 수 있습니다.' : '이 그룹에서 완료한 미션이 없습니다.'}
+      aside={groups && groups.length > 0 && (
+        <select
+          className="form-select form-select-sm w-auto"
+          style={{maxWidth: 240}}
+          aria-label="미션 그룹 선택"
+          value={groupCode ?? ''}
+          onChange={(e) => setSelectedGroupCode(e.target.value)}
+          disabled={isLoading}
+        >
+          {groups.map((group) => (
+            <option key={group.missionGroupId} value={group.code}>{group.name} ({group.code})</option>
+          ))}
+        </select>
+      )}
     >
-      {completions.map(({missionCompletionId, missionId, mission, missionGroup, periodKey, sequence, completedAt}) => (
+      {groupCode && completions.map(({missionCompletionId, missionId, mission, missionGroup, periodKey, sequence, completedAt}) => (
         <ItemCard key={missionCompletionId} item={missionId} muted={!mission} className="mb-2">
           <div className="d-flex align-items-start justify-content-between gap-3">
             <div className="flex-grow-1 min-w-0">
