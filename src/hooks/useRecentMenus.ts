@@ -1,5 +1,5 @@
 import {useEffect, useMemo, useState} from "react";
-import {useLocation} from "react-router-dom";
+import {useLocation} from "react-router";
 import {MenuGroup, MenuItem} from "@/constants/menu";
 
 const STORAGE_KEY = "admin.recentMenuPaths";

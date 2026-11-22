@@ -1,5 +1,5 @@
 import React, {useEffect, useMemo, useState} from "react";
-import {Link, useLocation} from "react-router-dom";
+import {Link, useLocation} from "react-router";
 import {MenuGroup, MenuItem} from "@/constants/menu";
 import {Admin} from "@/types/admin";
 

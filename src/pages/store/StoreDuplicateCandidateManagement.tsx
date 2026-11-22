@@ -1,5 +1,5 @@
 import {useCallback, useState} from 'react';
-import {useNavigate} from 'react-router-dom';
+import {useNavigate} from 'react-router';
 import {toast} from 'react-toastify';
 import storeDuplicateCandidateApi from '@/api/storeDuplicateCandidateApi';
 import PageHeader from '@/components/common/PageHeader';

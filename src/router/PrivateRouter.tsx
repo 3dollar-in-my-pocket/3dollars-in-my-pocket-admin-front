@@ -1,4 +1,4 @@
-import {Navigate} from 'react-router-dom';
+import {Navigate} from 'react-router';
 import {useAuthStore} from "@/state/authStore";
 import adminApi from "@/api/adminApi";
 import {ReactElement, useEffect, useState} from "react";

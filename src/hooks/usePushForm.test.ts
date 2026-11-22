@@ -4,7 +4,7 @@ import {beforeEach, describe, expect, it, vi} from 'vitest';
 /** useLocation이 반환할 값. 케이스마다 state를 바꿔 끼웁니다. */
 const mockLocation: {state: unknown} = {state: null};
 
-vi.mock('react-router-dom', () => ({
+vi.mock('react-router', () => ({
   useLocation: () => mockLocation,
 }));
 

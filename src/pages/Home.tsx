@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import {Navigate} from "react-router-dom";
+import {Navigate} from "react-router";
 import {GOOGLE_AUTH_URL} from "@/constants/google";
 import {LocalStorageService} from "@/service/LocalStorageService";
 import {useAuthStore} from "@/state/authStore";

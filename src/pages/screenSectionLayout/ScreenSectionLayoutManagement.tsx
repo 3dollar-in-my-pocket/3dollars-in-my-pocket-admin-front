@@ -1,5 +1,5 @@
 import {DragEvent, useCallback, useEffect, useMemo, useState} from 'react';
-import {useSearchParams} from 'react-router-dom';
+import {useSearchParams} from 'react-router';
 import {toast} from 'react-toastify';
 import screenSectionLayoutApi from '@/api/screenSectionLayoutApi';
 import EmptyState from '@/components/common/EmptyState';

@@ -1,5 +1,5 @@
 import {useMemo, useState} from "react";
-import {Link} from "react-router-dom";
+import {Link} from "react-router";
 import {useAuthStore} from "@/state/authStore";
 import useMenuGroups from "@/hooks/useMenuGroups";
 import useRecentMenus from "@/hooks/useRecentMenus";
