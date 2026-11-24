@@ -1,14 +1,16 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
+import {toast} from 'react-toastify';
 import {useSearchParams} from 'react-router';
 import missionApi from '@/api/missionApi';
 import DataTable from '@/components/common/DataTable';
 import EmptyState from '@/components/common/EmptyState';
 import PageHeader from '@/components/common/PageHeader';
 import SectionCard from '@/components/common/SectionCard';
+import useConfirm from '@/hooks/useConfirm';
 import {useEnumLabels} from '@/hooks/useEnumOptions';
 import {usePermission} from '@/hooks/usePermission';
 import {AdminRole} from '@/types/admin';
-import {Mission, MISSION_ENUM_NAMES, MissionGroup, POINT_REWARD_TYPE} from '@/types/mission';
+import {Mission, MISSION_ENUM_NAMES, MissionGroup, POINT_REWARD_TYPE, UpdateMissionRequest} from '@/types/mission';
 import {POINT_TICKET_ENUM_NAME} from '@/types/point';
 import {formatDateTime} from '@/utils/dateUtils';
 import MissionFormModal from './MissionFormModal';
@@ -30,6 +32,20 @@ const getGroupStatus = (group: MissionGroup) => {
   if (now >= new Date(group.endDateTime).getTime()) return {label: '종료', className: 'text-bg-secondary'};
   return {label: '진행 중', className: 'text-bg-success'};
 };
+
+/** 수정 API는 전체 교체이므로 현재 값을 그대로 담고 노출 여부만 바꿉니다. (MissionFormModal과 같은 바디 형태) */
+const buildVisibilityRequest = (mission: Mission, isVisible: boolean): UpdateMissionRequest => ({
+  title: mission.title,
+  maxCompletionCount: mission.maxCompletionCount,
+  conditions: mission.conditions.map(({activityType, targetCount}) => ({activityType, targetCount})),
+  rewards: mission.rewards.map((reward) => (
+    reward.type === POINT_REWARD_TYPE
+      ? {type: reward.type, ticket: reward.ticket, amount: reward.amount}
+      : {type: reward.type}
+  )),
+  isVisible,
+  displayOrder: mission.displayOrder,
+});
 
 const MissionManagement = () => {
   // 표시명은 서버 enum에서 받아오며, 조회 전이나 실패 시에는 원래 값을 그대로 보여줍니다.
@@ -53,6 +69,8 @@ const MissionManagement = () => {
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [editingMissionId, setEditingMissionId] = useState<string | null>(null);
+  const confirm = useConfirm();
+  const [togglingMissionId, setTogglingMissionId] = useState<string | null>(null);
 
   const selectedGroup = groups.find((group) => group.code === groupCode) ?? null;
 
@@ -132,6 +150,39 @@ const MissionManagement = () => {
     selectGroup(saved.code);
   };
 
+  const handleToggleVisible = async (mission: Mission) => {
+    if (!groupCode || togglingMissionId) return;
+    const nextVisible = !mission.isVisible;
+    if (!await confirm({
+      title: nextVisible ? '미션 노출' : '미션 비노출',
+      message: nextVisible
+        ? '이 미션을 앱에 다시 노출하시겠습니까?'
+        : '이 미션을 앱에서 내리시겠습니까?\n언제든 다시 노출로 바꿀 수 있습니다.',
+      details: [{label: '미션', value: mission.title}],
+      confirmLabel: nextVisible ? '노출' : '비노출',
+      variant: nextVisible ? 'primary' : 'warning',
+    })) return;
+
+    setTogglingMissionId(mission.missionId);
+    try {
+      // 목록을 띄운 뒤 다른 관리자가 수정했을 수 있어, 최신 값을 받아 노출 여부만 바꿔 저장합니다.
+      const latest = await missionApi.getMission(groupCode, mission.missionId);
+      if (!latest.ok) return;
+      const response = await missionApi.updateMission(
+        groupCode,
+        mission.missionId,
+        buildVisibilityRequest(latest.data, nextVisible)
+      );
+      // 실패 메시지는 공통 인터셉터가 토스트로 노출합니다.
+      if (!response.ok) return;
+
+      setMissions((prev) => prev.map((item) => (item.missionId === mission.missionId ? response.data : item)));
+      toast.success(`미션이 ${nextVisible ? '노출' : '비노출'}로 변경되었습니다. 앱에는 캐시로 인해 최대 수 분 늦게 반영될 수 있습니다.`);
+    } finally {
+      setTogglingMissionId(null);
+    }
+  };
+
   const openCreate = () => {
     setEditingMissionId(null);
     setShowForm(true);
@@ -151,7 +202,7 @@ const MissionManagement = () => {
   return (
     <div>
       <PageHeader
-        description="미션 그룹별로 앱에 노출되는 미션의 완료 조건과 리워드를 관리합니다. 미션을 내리려면 비노출로 수정해주세요."
+        description="미션 그룹별로 앱에 노출되는 미션의 완료 조건과 리워드를 관리합니다. 미션을 내리려면 목록의 비노출 버튼을 눌러주세요."
         actions={
           <div className="d-flex gap-2">
             {canManage && (
@@ -324,13 +375,27 @@ const MissionManagement = () => {
                 <td className="small text-body-secondary text-nowrap">{formatDateTime(mission.updatedAt)}</td>
                 {canManage && (
                   <td className="text-end">
-                    <button
-                      type="button"
-                      className="btn btn-sm btn-outline-primary"
-                      onClick={() => openEdit(mission.missionId)}
-                    >
-                      수정
-                    </button>
+                    <div className="d-inline-flex gap-1">
+                      <button
+                        type="button"
+                        className={`btn btn-sm text-nowrap ${mission.isVisible ? 'btn-outline-warning' : 'btn-outline-success'}`}
+                        onClick={() => handleToggleVisible(mission)}
+                        disabled={Boolean(togglingMissionId)}
+                        aria-label={`${mission.title} ${mission.isVisible ? '비노출' : '노출'}로 변경`}
+                      >
+                        {togglingMissionId === mission.missionId ? (
+                          <span className="spinner-border spinner-border-sm" role="status" aria-label="변경 중"/>
+                        ) : mission.isVisible ? '비노출' : '노출'}
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-outline-primary text-nowrap"
+                        onClick={() => openEdit(mission.missionId)}
+                        disabled={togglingMissionId === mission.missionId}
+                      >
+                        수정
+                      </button>
+                    </div>
                   </td>
                 )}
               </tr>
