@@ -18,6 +18,7 @@ import UserBasicInfoTab from './detail/UserBasicInfoTab';
 import UserDeviceTab from './detail/UserDeviceTab';
 import UserMedalTab from './detail/UserMedalTab';
 import UserPointTab from './detail/UserPointTab';
+import {PointHistory} from '@/types/point';
 import UserMissionCompletionHistory from './detail/UserMissionCompletionHistory';
 import PushSendModal from '@/components/push/PushSendModal';
 import {Device} from '@/types/device';
@@ -36,9 +37,11 @@ interface UserDetailModalProps {
   user: any;
   /** 제보 가게 클릭 콜백. 호출부에 따라 null/undefined가 전달됩니다. */
   onStoreClick?: ((store: any) => void) | null;
+  /** 포인트 탭에서 적립 내역을 회수했을 때 호출됩니다. */
+  onPointRevoked?: (revoked: PointHistory) => void;
 }
 
-const UserDetailModal = ({show, onHide, user, onStoreClick}: UserDetailModalProps) => {
+const UserDetailModal = ({show, onHide, user, onStoreClick, onPointRevoked}: UserDetailModalProps) => {
   const [userDetail, setUserDetail] = useState<User | null>(null);
   const confirm = useConfirm();
   const [devices, setDevices] = useState<Device[]>([]);
@@ -315,7 +318,11 @@ const UserDetailModal = ({show, onHide, user, onStoreClick}: UserDetailModalProp
               eventKey="point"
               title={<DetailModalTabTitle icon="bi-coin" label="포인트"/>}
             >
-              <UserPointTab userId={user.userId} isActive={activeTab === 'point'}/>
+              <UserPointTab
+                userId={user.userId}
+                isActive={activeTab === 'point'}
+                onPointRevoked={onPointRevoked}
+              />
             </Tab>
 
             {/* 활동 이력 탭 */}

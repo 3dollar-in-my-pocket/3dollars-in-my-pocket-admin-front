@@ -1,7 +1,9 @@
-import {useCallback, useEffect, useState} from 'react';
+import {useCallback, useEffect, useMemo, useState} from 'react';
+import {toast} from 'react-toastify';
 import pointApi from '@/api/pointApi';
 import HistoryPanel from '@/components/common/HistoryPanel';
 import useCursorPagination from '@/hooks/useCursorPagination';
+import useConfirm from '@/hooks/useConfirm';
 import useEnumOptions, {useEnumLabels} from '@/hooks/useEnumOptions';
 import ItemCard from '@/components/common/ItemCard';
 import {MISSION_ENUM_NAMES} from '@/types/mission';
@@ -20,6 +22,8 @@ interface UserPointTabProps {
   userId: string;
   /** 탭이 활성 상태일 때만 조회합니다. */
   isActive?: boolean;
+  /** 적립 내역 회수 성공 시 새로 생긴 회수(REVOKE) 내역을 전달합니다. */
+  onPointRevoked?: (revoked: PointHistory) => void;
 }
 
 const PAGE_SIZE = 20;
@@ -47,7 +51,7 @@ const isRaffleEnteredSource = (source?: PointHistorySource | null): source is Ra
  * 포인트는 티켓(PointTicket)별로 분리 관리되며, 티켓 목록은 서버 enum에서 받아옵니다.
  * 내역 정렬(sortBy)을 바꾸면 커서를 버리고 첫 페이지부터 다시 조회합니다.
  */
-const UserPointTab = ({userId, isActive}: UserPointTabProps) => {
+const UserPointTab = ({userId, isActive, onPointRevoked}: UserPointTabProps) => {
   const ticketEnum = useEnumOptions(POINT_TICKET_ENUM_NAME);
   const ticketOptions = ticketEnum.options;
   const [selectedTicket, setSelectedTicket] = useState<string | null>(null);
@@ -63,6 +67,8 @@ const UserPointTab = ({userId, isActive}: UserPointTabProps) => {
 
   const [balance, setBalance] = useState<number | null>(null);
   const [isBalanceLoading, setIsBalanceLoading] = useState(false);
+  const confirm = useConfirm();
+  const [revokingId, setRevokingId] = useState<string | null>(null);
 
   const fetchBalance = useCallback(async () => {
     if (!ticket) return;
@@ -105,6 +111,48 @@ const UserPointTab = ({userId, isActive}: UserPointTabProps) => {
   const handleRefresh = () => {
     fetchBalance();
     refresh();
+  };
+
+  // 불러온 REVOKE 내역 기준으로 이미 회수된 적립 내역을 표시합니다.
+  // 아직 불러오지 않은 페이지의 회수 여부는 서버가 409(already_revoked_point)로 막습니다.
+  const revokedHistoryIds = useMemo(
+    () => new Set(
+      histories
+        .filter((history) => history.type === 'REVOKE' && history.relatedHistoryId)
+        .map((history) => history.relatedHistoryId as string)
+    ),
+    [histories]
+  );
+
+  const handleRevoke = async (history: PointHistory) => {
+    if (!ticket || revokingId) return;
+    if (!await confirm({
+      title: '포인트 회수',
+      message: '이 적립 내역의 포인트를 회수하시겠습니까?\n한 적립 내역은 한 번만 회수할 수 있습니다.',
+      details: [
+        {label: '티켓', value: ticketLabelOf(ticket)},
+        {label: '내역', value: history.description || history.reason},
+        {label: '적립일', value: formatDateTimeKo(history.occurredAt)},
+        {label: '회수 금액', value: formatAmount(-history.amount)},
+      ],
+      confirmLabel: '회수',
+      variant: 'danger',
+      irreversible: true
+    })) return;
+
+    setRevokingId(history.pointHistoryId);
+    try {
+      const response = await pointApi.revokeUserPointHistory(userId, ticket, history.pointHistoryId);
+      // 실패 토스트는 공통 인터셉터가 표시합니다. 이미 회수된 경우에는 목록을 최신 상태로 맞춥니다.
+      if (!response.ok && response.error !== 'already_revoked_point') return;
+      if (response.ok) {
+        toast.success(`${formatAmount(response.data.amount)}가 회수되었습니다.`);
+        onPointRevoked?.(response.data);
+      }
+      handleRefresh();
+    } finally {
+      setRevokingId(null);
+    }
   };
 
   if (isTicketUnavailable && isActive) {
@@ -214,8 +262,27 @@ const UserPointTab = ({userId, isActive}: UserPointTabProps) => {
                     {sourceTitle && history.description && <> · {history.description}</>}
                   </p>
                 </div>
-                <div className={`flex-shrink-0 fs-6 fw-bold text-nowrap ${isDeduction ? 'text-danger' : 'text-success'}`}>
-                  {formatAmount(history.amount)}
+                <div className="flex-shrink-0 d-flex flex-column align-items-end gap-1">
+                  <div className={`fs-6 fw-bold text-nowrap ${isDeduction ? 'text-danger' : 'text-success'}`}>
+                    {formatAmount(history.amount)}
+                  </div>
+                  {history.type === 'EARN' && (
+                    revokedHistoryIds.has(history.pointHistoryId) ? (
+                      <span className="badge bg-secondary-subtle text-secondary-emphasis">회수됨</span>
+                    ) : (
+                      <button
+                        type="button"
+                        className="btn btn-outline-danger btn-sm py-0 text-nowrap"
+                        onClick={() => handleRevoke(history)}
+                        disabled={Boolean(revokingId) || isLoading}
+                        aria-label={`${formatAmount(history.amount)} 적립 내역 회수`}
+                      >
+                        {revokingId === history.pointHistoryId ? (
+                          <span className="spinner-border spinner-border-sm" role="status" aria-label="회수 중"/>
+                        ) : '회수'}
+                      </button>
+                    )
+                  )}
                 </div>
               </div>
             </ItemCard>

@@ -9,7 +9,13 @@ import useCursorPagination from '@/hooks/useCursorPagination';
 import useEnumOptions from '@/hooks/useEnumOptions';
 import StoreDetailModal from '@/pages/store/StoreDetailModal';
 import UserDetailModal from '@/pages/user/UserDetailModal';
-import {POINT_TICKET_ENUM_NAME, PointBalanceSortBy, PointBalanceUser, UserPointBalanceItem} from '@/types/point';
+import {
+  POINT_TICKET_ENUM_NAME,
+  PointBalanceSortBy,
+  PointBalanceUser,
+  PointHistory,
+  UserPointBalanceItem,
+} from '@/types/point';
 import {formatDateTime} from '@/utils/dateUtils';
 
 const PAGE_SIZE = 20;
@@ -65,6 +71,7 @@ const PointBalanceManagement = () => {
 
   const {
     items: balances,
+    setItems: setBalances,
     isLoading,
     isLoadingMore,
     hasMore,
@@ -79,6 +86,21 @@ const PointBalanceManagement = () => {
   });
 
   const isInitialLoading = isLoading && !isLoadingMore;
+
+  /**
+   * 상세 모달에서 회수하면 해당 유저의 잔액만 제자리에서 갱신합니다.
+   * 다시 조회하면 불러온 페이지와 스크롤 위치를 잃으므로, 정렬 순서는 새로고침 시 반영됩니다.
+   * 모달에서 다른 티켓을 회수한 경우는 이 목록과 무관하므로 무시합니다.
+   */
+  const handlePointRevoked = useCallback((revoked: PointHistory) => {
+    if (revoked.ticket !== ticket || !selectedUser || !hasUserId(selectedUser)) return;
+    const userId = String(selectedUser.userId);
+    setBalances((prev) => prev.map((item) => (
+      hasUserId(item.user) && String(item.user.userId) === userId
+        ? {...item, balance: item.balance + revoked.amount}
+        : item
+    )));
+  }, [ticket, selectedUser, setBalances]);
 
   return (
     <div>
@@ -229,6 +251,7 @@ const PointBalanceManagement = () => {
         onHide={() => setSelectedUser(null)}
         user={selectedUser}
         onStoreClick={(store) => store?.storeId && setSelectedStore(store)}
+        onPointRevoked={handlePointRevoked}
       />
 
       <StoreDetailModal

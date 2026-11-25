@@ -1,4 +1,4 @@
-import {apiGet, apiGetPaginated} from './apiHelpers';
+import {apiGet, apiGetPaginated, apiPost} from './apiHelpers';
 import {ApiResponse, PaginatedResponse} from '@/types/api';
 import {
   PointBalanceSortBy,
@@ -44,6 +44,21 @@ const pointApi = {
       `/v1/user/${userId}/points/${encodeURIComponent(ticket)}/histories`,
       {cursor, size},
       {sortBy}
+    );
+  },
+
+  /**
+   * 유저의 적립(EARN) 내역 1건 회수. 새로 생긴 회수(REVOKE) 내역을 반환합니다.
+   * 한 적립 내역은 한 번만 회수할 수 있으며(409 already_revoked_point), 되돌리는 API는 없습니다.
+   * 잔액이 회수 금액보다 적으면 400 insufficient_point_to_revoke입니다.
+   */
+  revokeUserPointHistory: async (
+    userId: string,
+    ticket: string,
+    pointHistoryId: string
+  ): Promise<ApiResponse<PointHistory>> => {
+    return apiPost<PointHistory>(
+      `/v1/user/${userId}/points/${encodeURIComponent(ticket)}/histories/${encodeURIComponent(pointHistoryId)}/revoke`
     );
   },
 };
