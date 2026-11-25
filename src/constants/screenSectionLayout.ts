@@ -72,7 +72,7 @@ export const formatVisibilityCondition = (condition?: SectionVisibilityCondition
 export const getConfigurableSectionTypes = (sectionTypes: SectionTypeMeta[]): SectionTypeMeta[] =>
   sectionTypes.filter((section) => section.isConfigurable);
 
-type FieldOptions = Pick<SectionConfigFieldMeta, 'unit' | 'presets' | 'description'>;
+type FieldOptions = Pick<SectionConfigFieldMeta, 'unit' | 'presets' | 'description' | 'defaultValue'>;
 
 const integerField = (
   name: string,
@@ -303,6 +303,24 @@ export const SECTION_CONFIGS: Record<SectionType, SectionConfigMeta[]> = {
             10,
             '선택한 캐러셀에만 자체 광고 노출. 비어 있으면 미노출'
           ),
+        ]),
+      ],
+    },
+  ],
+  HOME_NEWS: [
+    {
+      type: 'HOME_NEWS',
+      label: '홈 소식 설정',
+      fields: [
+        integerField('pageSize', '한 번에 불러올 피드 수', 1, 30, {unit: '개', defaultValue: 20}),
+        ...inGroup('피드 애드몹', [
+          {
+            ...positionsField('adPositions', '삽입 위치'),
+            defaultValue: [4],
+            description: '첫 페이지에만 적용. 위치는 광고를 포함한 최종 목록 기준이며, '
+              + '피드 수가 부족하면 노출되지 않을 수 있습니다. 비어 있으면 미노출',
+          },
+          integerField('adHeight', '영역 높이', 1, 200, {unit: 'pt', presets: [50, 100, 150, 200], defaultValue: 50}),
         ]),
       ],
     },
