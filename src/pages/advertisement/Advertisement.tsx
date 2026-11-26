@@ -13,6 +13,7 @@ import PageHeader from "@/components/common/PageHeader";
 import FilterCard from "@/components/common/FilterCard";
 import SectionCard from "@/components/common/SectionCard";
 import AdTimer from "@/components/common/AdTimer";
+import {formatDisplayWindow} from "@/utils/display/advertisementDisplay";
 import AdPreview from "@/components/advertisement/AdPreview";
 import {getAdStatus} from "@/utils/timeUtils";
 
@@ -334,6 +335,12 @@ const Advertisement = () => {
                             <span className="badge text-bg-light">
                               <i className="bi bi-apple me-1"/>
                               iOS
+                            </span>
+                          )}
+                          {info.displayWindow && (
+                            <span className="badge text-bg-light">
+                              <i className="bi bi-calendar-week me-1"/>
+                              {formatDisplayWindow(info.displayWindow)}
                             </span>
                           )}
                           {(info.positionType === 'MENU_CATEGORY_ICON' || info.positionType === 'POLL_CARD') && (

@@ -8,6 +8,7 @@ import {useNonce} from "@/hooks/useNonce";
 import {isFieldAvailable, isFieldRequired} from "@/constants/advertisementSpecs";
 import {AdvertisementForm, EnumOption} from "@/types/advertisement";
 import useConfirm from "@/hooks/useConfirm";
+import {validateDisplayWindow} from "@/utils/validation/advertisementValidation";
 
 interface AdvertisementRegisterModalProps {
   show: boolean;
@@ -55,7 +56,7 @@ const AdvertisementRegisterModal = ({
     setCurrentStep(1);
   }
 
-  const handleChange = (field: string, value: string) => {
+  const handleChange = (field: string, value: unknown) => {
     setFormData((prev) => ({...prev, [field]: value}));
   };
 
@@ -131,7 +132,8 @@ const AdvertisementRegisterModal = ({
     && formData.startDateTime
     && formData.endDateTime
     && formData.platform
-    && formData.orderType;
+    && formData.orderType
+    && !validateDisplayWindow(formData.displayWindow);
 
   return (
     <Modal show={show} onHide={onHide} size="lg" centered className="app-modal">
@@ -211,6 +213,7 @@ function getInitialFormData(): AdvertisementForm {
     platform: "ALL",
     startDateTime: null,
     endDateTime: null,
+    displayWindow: null,
     contentType: "STATIC",
     content: {
       title: null,

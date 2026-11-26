@@ -1,11 +1,12 @@
 import React from "react";
 import {Col, Form, Row} from "react-bootstrap";
 import {AdvertisementBasicInfoForm, EnumOption} from "@/types/advertisement";
+import DisplayWindowSection from "./DisplayWindowSection";
 
 interface BasicInfoStepProps {
   /** 등록(AdvertisementForm) / 수정(AdvertisementBasicInfoForm) 양쪽에서 공유하므로 기본 정보 필드만 사용합니다. */
   formData: AdvertisementBasicInfoForm;
-  onChange: (field: string, value: string) => void;
+  onChange: (field: string, value: unknown) => void;
   positions: EnumOption[];
   platforms: EnumOption[];
   disablePosition?: boolean;
@@ -289,6 +290,14 @@ const BasicInfoStep = ({
             </Col>
           </Row>
         </div>
+      </div>
+
+      {/* 요일·시간대 노출 제한 */}
+      <div className="col-12">
+        <DisplayWindowSection
+          value={formData.displayWindow ?? null}
+          onChange={(value) => onChange('displayWindow', value)}
+        />
       </div>
 
       {/* 노출 순서 설정 */}

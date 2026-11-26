@@ -5,6 +5,7 @@ import advertisementApi from "@/api/advertisementApi";
 import BasicInfoStep from "./steps/BasicInfoStep";
 import AdTimer from "@/components/common/AdTimer";
 import {Advertisement, AdvertisementBasicInfoForm, EnumOption} from "@/types/advertisement";
+import {validateDisplayWindow} from "@/utils/validation/advertisementValidation";
 
 interface AdvertisementEditModalProps {
   show: boolean;
@@ -39,22 +40,29 @@ const AdvertisementEditModal = ({
         platform: ad.platformType,
         startDateTime: ad.startDateTime?.slice(0, 16) || "",
         endDateTime: ad.endDateTime?.slice(0, 16) || "",
+        displayWindow: ad.displayWindow ?? null,
         sortNumber: ad.sortNumber,
         orderType: ad.orderType,
       });
     }
   }, [ad]);
 
-  const handleChange = (field: string, value: string) => {
+  const handleChange = (field: string, value: unknown) => {
     setFormData((prev) => ({...prev, [field]: value}));
   };
 
   const handleSubmit = async () => {
+    // displayWindow 는 PATCH 시 전체 교체입니다. 바꾸지 않았으면 생략해 기존 설정을 유지하고,
+    // 바꿨다면 객체 전체(또는 해제 시 null)를 보냅니다.
+    const {displayWindow, ...basicInfo} = formData;
+    const isDisplayWindowChanged = JSON.stringify(displayWindow ?? null) !== JSON.stringify(ad.displayWindow ?? null);
+
     const res = await advertisementApi.updateAd({
       application: "USER",
       advertisementId: ad.advertisementId,
       adData: {
-        ...formData,
+        ...basicInfo,
+        ...(isDisplayWindowChanged && {displayWindow}),
         startDateTime: `${formData.startDateTime}:00`,
         endDateTime: `${formData.endDateTime}:00`,
         sortNumber: formData.orderType === "RANDOM" ? null : formData.sortNumber,
@@ -74,7 +82,8 @@ const AdvertisementEditModal = ({
     && formData.startDateTime
     && formData.endDateTime
     && formData.platform
-    && formData.orderType;
+    && formData.orderType
+    && !validateDisplayWindow(formData.displayWindow);
 
   return (
     <Modal show={show} onHide={onHide} size="lg" centered className="app-modal">
@@ -99,7 +108,7 @@ const AdvertisementEditModal = ({
         <div className="page-note mt-3">
           <i className="bi bi-info-circle"/>
           <span>
-            캠페인 ID, 노출 일정, 플랫폼, 노출 순서를 변경할 수 있습니다.
+            캠페인 ID, 노출 일정, 요일·시간대, 플랫폼, 노출 순서를 변경할 수 있습니다.
             이미지·제목·링크 등 콘텐츠는 <strong>콘텐츠 수정</strong>에서 변경해주세요.
           </span>
         </div>
