@@ -65,14 +65,10 @@
 .ad-preview-image {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease;
+  /* 이미지를 자르지 않고 원본 비율 그대로 영역 안에 맞춰 보여줍니다. */
+  object-fit: contain;
   max-width: 100%;
   display: block;
-}
-
-.ad-preview-image:hover {
-  transform: scale(1.05);
 }
 
 /* 플레이스홀더 */

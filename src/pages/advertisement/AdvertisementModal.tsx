@@ -5,6 +5,7 @@ import {toast} from "react-toastify";
 import AdvertisementEditModal from "./AdvertisementEditModal";
 import AdvertisementContentEditModal from "./AdvertisementContentEditModal";
 import AdTimer from "@/components/common/AdTimer";
+import {formatDisplayWindow} from "@/utils/display/advertisementDisplay";
 import AdPreview from "@/components/advertisement/AdPreview";
 import DetailField from "@/components/common/DetailField";
 import {Advertisement, EnumOption} from "@/types/advertisement";
@@ -131,6 +132,9 @@ const AdvertisementModal = ({
               <DetailField label="종료일시" className="col-6">
                 {formatDateTime(ad.endDateTime)}
               </DetailField>
+              <DetailField label="요일·시간대" className="col-12">
+                {formatDisplayWindow(ad.displayWindow)}
+              </DetailField>
               {ad.description && (
                 <DetailField label="설명" className="col-12">
                   {ad.description}
@@ -149,6 +153,8 @@ const AdvertisementModal = ({
               <AdPreview
                 positionType={ad.positionType}
                 imageUrl={ad.imageUrl}
+                imageWidth={ad.imageWidth}
+                imageHeight={ad.imageHeight}
                 title={ad.title}
                 subTitle={ad.subTitle}
                 extraContent={ad.extraContent}

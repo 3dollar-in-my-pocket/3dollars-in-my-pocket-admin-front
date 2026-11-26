@@ -150,6 +150,8 @@ const AdvertisementContentEditModal = ({
                 <AdPreview
                   positionType={ad.positionType}
                   imageUrl={formData.imageUrl}
+                  imageWidth={Number(formData.imageWidth) || undefined}
+                  imageHeight={Number(formData.imageHeight) || undefined}
                   title={formData.title}
                   subTitle={formData.subTitle}
                   extraContent={formData.extraContent}

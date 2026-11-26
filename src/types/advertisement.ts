@@ -33,6 +33,29 @@ export type AdvertisementContentType = 'STATIC' | 'NEAR_YOUNG_COFFEE_STORE';
 /** 광고 링크 타입 */
 export type AdvertisementLinkType = 'WEB' | 'APP_SCHEME';
 
+/** 노출 요일 (서버 DayOfTheWeek) */
+export type DayOfTheWeek =
+  | 'MONDAY'
+  | 'TUESDAY'
+  | 'WEDNESDAY'
+  | 'THURSDAY'
+  | 'FRIDAY'
+  | 'SATURDAY'
+  | 'SUNDAY';
+
+/**
+ * 요일·시간대 노출 제한 (startDateTime ~ endDateTime 과 AND 조건, 서버 시각 KST 기준)
+ *
+ * - startTime/endTime 은 HH:mm. 둘 다 null 이면 선택한 요일 종일 노출
+ * - 범위는 [startTime, endTime). endTime < startTime 이면 자정을 넘는 구간이며 요일은 시작일 기준
+ * - PATCH 시 부분 병합이 아닌 전체 교체이므로 항상 객체 전체를 보냅니다.
+ */
+export interface AdvertisementDisplayWindow {
+  daysOfWeek: DayOfTheWeek[];
+  startTime: string | null;
+  endTime: string | null;
+}
+
 /** 셀렉트 박스 등에서 사용하는 enum 옵션 (서버 enum API 응답 형태) */
 export interface EnumOption {
   key: string;
@@ -73,6 +96,8 @@ export interface Advertisement {
   exposureIndex?: number | null;
   startDateTime: string;
   endDateTime: string;
+  /** 노출 제한이 없으면 null. daysOfWeek 는 항상 월~일 순서로 내려옵니다. */
+  displayWindow?: AdvertisementDisplayWindow | null;
   orderType: AdvertisementOrderType;
   sortNumber?: number | null;
   createdAt?: string;
@@ -114,6 +139,7 @@ export interface AdvertisementForm {
   platform: AdvertisementPlatformType | null;
   startDateTime: string | null;
   endDateTime: string | null;
+  displayWindow: AdvertisementDisplayWindow | null;
   contentType: AdvertisementContentType;
   content: AdvertisementContentForm;
   sortNumber: number | null;
@@ -131,6 +157,7 @@ export interface AdvertisementBasicInfoForm {
   platform?: AdvertisementPlatformType | null;
   startDateTime?: string | null;
   endDateTime?: string | null;
+  displayWindow?: AdvertisementDisplayWindow | null;
   sortNumber?: number | null;
   orderType?: AdvertisementOrderType | null;
 }
